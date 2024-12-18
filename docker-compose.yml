@@ -10,16 +10,16 @@ services:
 
     redis:
         container_name: hafas-db
-        build:
-            context: ./redis
-            dockerfile: Dockerfile
+        image: redis:latest
         restart: always
         ports:
             - "6379:6379"
         volumes:
+            - ./redis:/usr/local/etc/redis
             - redis-data:/data
         networks:
             - hafas-network
+        command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
 
 networks:
     hafas-network:
@@ -28,3 +28,4 @@ networks:
 volumes:
     redis-data:
         driver: local
+~                                                                                                                                                                                                                                           ~                               
