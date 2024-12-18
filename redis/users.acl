@@ -1,2 +1,4 @@
 user default off
-user hafas on your-password ~* +@all
+
+# paste your password after ">"
+user hafas on >your-password ~* +@all
