@@ -1,0 +1,31 @@
+services:
+    hafas-frontend:
+        container_name: hafas-frontend
+        image: schmolldechsee/hafas-frontend:latest
+        restart: always
+        ports:
+            - "4000:3000"
+        networks:
+            - hafas-network
+
+    redis:
+        container_name: redis_db
+        image: redis:latest
+        restart: always
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis-data:/data
+            - ./redis/redis.conf:/usr/local/etc/redis/redis.conf
+            - ./redis/users.acl:/usr/local/etc/redis/users.acl
+        command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+        networks:
+            - hafas-network
+
+networks:
+    hafas-network:
+        external: true
+
+volumes:
+    redis-data:
+        driver: local
