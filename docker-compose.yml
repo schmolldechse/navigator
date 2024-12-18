@@ -9,7 +9,7 @@ services:
             - hafas-network
 
     redis:
-        container_name: redis_db
+        container_name: hafas-db
         build:
             context: ./redis
             dockerfile: Dockerfile
