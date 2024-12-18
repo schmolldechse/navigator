@@ -22,18 +22,10 @@ jobs:
             username: ${{ secrets.DOCKER_USERNAME }}
             password: ${{ secrets.DOCKER_PASSWORD }}
 
-        - name: push Hafas-Rest image
-          uses: docker/build-push-action@v6
-          with:
-            context: backend
-            platforms: linux/amd64,linux/arm64
-            push: true
-            tags: ${{ secrets.DOCKER_USERNAME }}/hafas-rest:latest
-
         - name: push Hafas-Frontend image
           uses: docker/build-push-action@v6
           with:
-            context: frontend
+            context: src
             platforms: linux/amd64,linux/arm64
             push: true
             tags: ${{ secrets.DOCKER_USERNAME }}/hafas-frontend:latest
