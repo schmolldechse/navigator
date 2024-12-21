@@ -27,10 +27,10 @@ export default function Home() {
     }
 
     return (
-        <>
-            <div className="backdrop-blur bg-transparent flex-col">
-                <div className="flex">
-                    <Image width={75} height={75} src={"search.svg"} alt={"Search icon"}/>
+        <div className="flex justify-center mt-[12.5%]">
+            <div className="flex-col bg-[#000] p-4 rounded-xl text-white w-[90%] max-w-[600px]">
+                <div className="flex space-x-4">
+                    <Image width={40} height={40} src={"search.svg"} alt={"Search icon"}/>
                     <input type="text" placeholder={"Search your station"}
                            onChange={(e) => {
                                const value: string = e.target.value;
@@ -41,19 +41,21 @@ export default function Home() {
 
                                handleSearch(value);
                            }}
-                           className={ "bg-[#000]" }
+                           className={ "bg-[#000] text-xl p-3 w-full border rounded-lg border-slate-500 placeholder-slate-400 focus:outline-none" }
                     />
                 </div>
-                <div className="flex-row">
+                <div className={ `flex-row ${results.length > 0 ? 'mt-4' : ''}` }>
                     {results.length > 0 ? (
                         results.map((location) => (
-                            <p key={location.id} className="text-white">{location.name}</p>
+                            <p key={location.id}
+                               className="text-white py-0.5 px-2 hover:bg-gray-700 hover:cursor-pointer rounded-md"
+                            >
+                                {location.name}
+                            </p>
                         ))
-                    ) : (
-                        <p>No results found</p>
-                    )}
+                    ) : ( <></> )}
                 </div>
             </div>
-        </>
+        </div>
     );
 }
