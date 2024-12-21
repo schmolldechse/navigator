@@ -36,7 +36,7 @@ export default function Departures() {
             if (!data?.departures) return;
             if (!Array.isArray(data.departures)) return;
 
-            const filtered: Scheduled[] = data.departures
+            const scheduledItems: Scheduled[] = data.departures
                 .filter((departure: any) => departure.tripId)
                 .map((departure: any) => ({
                     tripId: departure.tripId,
@@ -49,6 +49,10 @@ export default function Departures() {
                     directionId: departure.destination.id,
                     line: departure.line
                 }));
+
+            const filtered = Array.from(
+                new Map(scheduledItems.map((scheduled: Scheduled) => [scheduled.tripId, scheduled])).values()
+            );
             setScheduled(filtered);
         }
 
@@ -70,7 +74,7 @@ export default function Departures() {
                     <p key={scheduled.tripId}
                        className="py-0.5 px-2 hover:bg-gray-700 hover:cursor-pointer rounded-md"
                     >
-                        {scheduled.line.name}
+                        {scheduled.line?.name} : {scheduled.tripId}
                     </p>
                 ))
             ) : (<></>)}
