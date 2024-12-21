@@ -43,20 +43,27 @@ export default function Home() {
 
                                handleSearch(value);
                            }}
-                           className={ "bg-[#000] text-xl p-3 w-full border rounded-lg border-slate-500 placeholder-slate-400 focus:outline-none" }
+                           className={"bg-[#000] text-xl p-3 w-full border rounded-lg border-slate-500 placeholder-slate-400 focus:outline-none"}
                     />
                 </div>
-                <div className={ `flex-row ${results.length > 0 ? 'mt-4' : ''}` }>
+                <div className={`flex-row ${results.length > 0 ? 'mt-4' : ''}`}>
                     {results.length > 0 ? (
                         results.map((location) => (
                             <p key={location.id}
                                className="text-white py-0.5 px-2 hover:bg-gray-700 hover:cursor-pointer rounded-md"
-                               onClick={(e) => router.push(`/${location.id}/departures`)}
+                               onClick={() => {
+                                   fetch("/api/v1/search/", {
+                                       method: 'POST',
+                                       headers: {'Content-Type': 'application/json'},
+                                       body: JSON.stringify({id: location.id})
+                                   });
+                                   router.push(`/${location.id}/departures`);
+                               }}
                             >
                                 {location.name}
                             </p>
                         ))
-                    ) : ( <></> )}
+                    ) : (<></>)}
                 </div>
             </div>
         </div>
