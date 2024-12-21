@@ -7,23 +7,34 @@ interface ClockProps {
 }
 
 const Clock: React.FC<ClockProps> = ({ className }) => {
-    const [currentTime, setCurrentTime] = useState<string>("00:00");
+    const [hours, setHours] = useState<string>("00");
+    const [minutes, setMinutes] = useState<string>("00");
+
     const [showColon, setShowColon] = useState<boolean>(true);
 
     useEffect(() => {
-        const timer = setInterval(() => {
+        const updateTime = () => {
             const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            setCurrentTime(`${hours}${showColon ? ':' : ' '}${minutes}`);
+            setHours(String(now.getHours()).padStart(2, '0'));
+            setMinutes(String(now.getMinutes()).padStart(2, '0'));
+        }
+
+        updateTime();
+
+        const timer = setInterval(() => {
+            updateTime();
             setShowColon((prev) => !prev);
         }, 1000);
 
-        return () => clearInterval(timer); // Cleanup interval on unmount
-    }, [showColon]);
+        return () => clearInterval(timer);
+    }, []);
 
     return (
-        <span className={className}>{currentTime}</span>
+        <span className={className}>
+            {hours}
+            <span className={`${showColon ? '' : 'invisible'}`}>:</span>
+            {minutes}
+        </span>
     );
 }
 
