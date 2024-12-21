@@ -7,16 +7,28 @@ import Navbar from "@/app/components/navbar";
 
 export default function Departures() {
     const params = useParams();
-    const id = params.id;
+    const [station, setStation] = useState<{ id: string; name?: string }>({
+        id: params.id,
+        name: undefined
+    });
 
     const [scheduled, setScheduled] = useState<Scheduled[]>([]);
 
     useEffect(() => {
         const currentDate = new Date().toISOString();
 
+        // fetch station name from HAFAS
+        const fetchStationName = async () => {
+            const response = await fetch(`https://v6.db.transport.rest/stations/${station.id}`, {method: 'GET'});
+            if (!response.ok) return;
+
+            const data = await response.json();
+            setStation((prev) => ({...prev, name: data.name}));
+        }
+
         // fetch departures from HAFAS
         const fetchDepartures = async () => {
-            const response = await fetch(`https://hafas.voldechse.wtf/stops/${id}/departures?when=${currentDate}&duration=60&results=1000`, {method: 'GET'});
+            const response = await fetch(`https://hafas.voldechse.wtf/stops/${station.id}/departures?when=${currentDate}&duration=60&results=1000`, {method: 'GET'});
             if (!response.ok) return;
 
             const data = await response.json();
@@ -38,19 +50,18 @@ export default function Departures() {
                 }));
             setScheduled(filtered);
         }
-        
+
+        fetchStationName();
         fetchDepartures();
     }, []);
 
     return (
         <div className="text-white">
-            <Navbar id={id}/>
+            <Navbar id={station.id}/>
 
             <div className="container mx-auto">
                 <p>Hey!</p>
             </div>
-
-            <h1 className="text-2xl font-semibold mt-4 px-4">Abfahrten für {id}</h1>
 
             {scheduled.length > 0 ? (
                 scheduled.map((scheduled: Scheduled) => (
