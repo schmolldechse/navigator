@@ -4,6 +4,7 @@ import {useParams} from "next/navigation";
 import {useEffect, useState} from "react";
 import {Scheduled} from "@/app/lib/schedule";
 import Navbar from "@/app/components/navbar";
+import Clock from "@/app/components/clock";
 
 export default function Departures() {
     const params = useParams();
@@ -59,8 +60,9 @@ export default function Departures() {
         <div className="text-white">
             <Navbar id={station.id}/>
 
-            <div className="container mx-auto">
-                <p>Hey!</p>
+            <div className="container mx-auto flex justify-between items-center mt-4 px-4">
+                <span className="text-4xl font-semibold mt-4 px-4">{station.name}</span>
+                <Clock className="text-4xl font-semibold mt-4 px-4"/>
             </div>
 
             {scheduled.length > 0 ? (
