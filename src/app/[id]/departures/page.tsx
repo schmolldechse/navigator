@@ -3,6 +3,7 @@
 import {useParams} from "next/navigation";
 import {useEffect, useState} from "react";
 import {Scheduled} from "@/app/lib/schedule";
+import Navbar from "@/app/components/navbar";
 
 export default function Departures() {
     const params = useParams();
@@ -43,6 +44,8 @@ export default function Departures() {
 
     return (
         <>
+            <Navbar id={id} />
+
             {scheduled.length > 0 ? (
                 scheduled.map((scheduled: Scheduled) => (
                     <p key={scheduled.tripId}
