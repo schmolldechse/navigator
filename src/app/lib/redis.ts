@@ -3,7 +3,7 @@ import {createClient, RedisClientType} from "redis";
 const host = process.env.REDIS_HOST || "localhost";
 const port = process.env.REDIS_PORT || 6379;
 const user = process.env.REDIS_USER || "";
-const password = process.env.REDIS_PASSWORD | "";
+const password = process.env.REDIS_PASSWORD || "";
 
 let client: RedisClientType | null = null;
 

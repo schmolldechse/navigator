@@ -11,12 +11,12 @@ export default function Departures() {
 
     const [scheduled, setScheduled] = useState<Scheduled[]>([]);
 
-    // fetch departures from HAFAS
     useEffect(() => {
-        const currentUnix = new Date().toISOString();
+        const currentDate = new Date().toISOString();
 
+        // fetch departures from HAFAS
         const fetchDepartures = async () => {
-            const response = await fetch(`https://hafas.voldechse.wtf/stops/${id}/departures?when=${currentUnix}&duration=60&results=1000`, {method: 'GET'});
+            const response = await fetch(`https://hafas.voldechse.wtf/stops/${id}/departures?when=${currentDate}&duration=60&results=1000`, {method: 'GET'});
             if (!response.ok) return;
 
             const data = await response.json();
@@ -38,23 +38,29 @@ export default function Departures() {
                 }));
             setScheduled(filtered);
         }
-
+        
         fetchDepartures();
     }, []);
 
     return (
-        <>
-            <Navbar id={id} />
+        <div className="text-white">
+            <Navbar id={id}/>
+
+            <div className="container mx-auto">
+                <p>Hey!</p>
+            </div>
+
+            <h1 className="text-2xl font-semibold mt-4 px-4">Abfahrten für {id}</h1>
 
             {scheduled.length > 0 ? (
                 scheduled.map((scheduled: Scheduled) => (
                     <p key={scheduled.tripId}
-                       className="text-white py-0.5 px-2 hover:bg-gray-700 hover:cursor-pointer rounded-md"
+                       className="py-0.5 px-2 hover:bg-gray-700 hover:cursor-pointer rounded-md"
                     >
                         {scheduled.line.name}
                     </p>
                 ))
-            ) : ( <></> )}
-        </>
+            ) : (<></>)}
+        </div>
     )
 }
