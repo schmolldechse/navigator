@@ -1,6 +1,6 @@
 FROM node:18-alpine
 
-WORKDIR /usr/src/hafas-frontend
+WORKDIR /app
 
 COPY . .
 RUN npm install

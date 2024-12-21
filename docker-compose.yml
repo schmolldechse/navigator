@@ -7,6 +7,8 @@ services:
             - "4000:3000"
         networks:
             - hafas-network
+        volumes:
+            - .env:/app/.env
 
     redis:
         container_name: hafas-db
