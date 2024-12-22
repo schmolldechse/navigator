@@ -10,8 +10,8 @@ import ScheduledHeader from "@/app/components/scheduled-header";
 
 export default function Departures() {
     const params = useParams();
-    const [station, setStation] = useState<{ id: string; name?: string }>({
-        id: params.id,
+    const [station, setStation] = useState<{ id: string; name?: string | undefined }>({
+        id: Array.isArray(params.id) ? params.id[0] : params.id || "",
         name: undefined
     });
 
