@@ -70,7 +70,6 @@ export default function Departures() {
                 const colorData = await colorRequest.json();
                 return { ...item, color: colorData };
             }));
-            console.log(updatedScheduled);
             setScheduled(updatedScheduled);
         }
 
