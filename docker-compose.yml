@@ -9,6 +9,7 @@ services:
             - hafas-network
         volumes:
             - .env:/app/.env
+        command: [ "npm", "start" ]
 
     redis:
         container_name: hafas-db
