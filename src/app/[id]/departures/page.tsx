@@ -47,7 +47,11 @@ export default function Departures() {
                     actualPlatform: departure.platform,
                     directionName: departure.destination.name,
                     directionId: departure.destination.id,
-                    line: departure.line
+                    line: {
+                        id: departure.line.id,
+                        name: departure.line.name,
+                        operator: departure.line.operator
+                    }
                 }));
 
             const filtered = Array.from(
