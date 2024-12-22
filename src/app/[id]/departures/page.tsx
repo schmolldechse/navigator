@@ -5,6 +5,7 @@ import {useEffect, useState} from "react";
 import {ScheduledLine} from "@/app/lib/schedule";
 import Navbar from "@/app/components/navbar";
 import Clock from "@/app/components/clock";
+import ScheduledComponent from "@/app/components/scheduled";
 
 export default function Departures() {
     const params = useParams();
@@ -65,23 +66,25 @@ export default function Departures() {
     }, []);
 
     return (
-        <div className="text-white">
+        <div className="text-white h-screen flex flex-col overflow-hidden space-y-4">
             <Navbar id={station.id}/>
 
-            <div className="container mx-auto flex justify-between items-center mt-4 px-4">
+            <div className="container mx-auto flex justify-between items-center px-4">
                 <span className="text-4xl font-semibold mt-4 px-4">{station.name}</span>
                 <Clock className="text-4xl font-semibold mt-4 px-4"/>
             </div>
 
-            {scheduled.length > 0 ? (
-                scheduled.map((scheduled: Scheduled) => (
-                    <p key={scheduled.tripId}
-                       className="py-0.5 px-2 hover:bg-gray-700 hover:cursor-pointer rounded-md"
-                    >
-                        {scheduled.line?.name} : {scheduled.tripId}
-                    </p>
-                ))
-            ) : (<></>)}
+            <div className="container mx-auto flex-grow overflow-y-auto">
+                {scheduled.length > 0 ? (
+                        scheduled.map((item, index) => (
+                            <ScheduledComponent
+                                key={item.tripId}
+                                scheduled={item}
+                                isEven={index % 2 === 0}
+                            />
+                        ))
+                    ) : <></>}
+            </div>
         </div>
     )
 }
