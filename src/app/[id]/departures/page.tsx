@@ -59,7 +59,19 @@ export default function Departures() {
             const filtered = Array.from(
                 new Map(scheduledItems.map((scheduled: ScheduledLine) => [scheduled.tripId, scheduled])).values()
             );
-            setScheduled(filtered);
+
+            // fetch color for items
+            const updatedScheduled = await Promise.all(filtered.map(async (item) => {
+                if (item.color) return item;
+
+                const colorRequest = await fetch(`/api/v1/color?name=${item.line.name}`, { method: 'GET' });
+                if (!colorRequest.ok) return item;
+
+                const colorData = await colorRequest.json();
+                return { ...item, color: colorData };
+            }));
+            console.log(updatedScheduled);
+            setScheduled(updatedScheduled);
         }
 
         fetchStationName();
