@@ -5,8 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "publish": "npm install && next build && next start"
   },
   "dependencies": {
     "next": "15.1.1",
