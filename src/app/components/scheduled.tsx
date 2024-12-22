@@ -17,7 +17,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
     }
 
     return (
-        <div className="container mx-auto flex justify-between space-x-4 text-white text-base font-bold border-gray-400"
+        <div className="container mx-auto flex justify-between space-x-4 text-white text-base font-bold border-gray-400 pb-4"
              style={{backgroundColor}}
         >
             {/* First col */}

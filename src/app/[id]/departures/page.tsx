@@ -88,7 +88,7 @@ export default function Departures() {
             </div>
 
             <ScheduledHeader />
-            <div className="container mx-auto flex-grow overflow-y-auto space-y-4">
+            <div className="container mx-auto flex-grow overflow-y-auto">
                 {scheduled.length > 0 ? (
                         scheduled.map((item, index) => (
                             <ScheduledComponent
