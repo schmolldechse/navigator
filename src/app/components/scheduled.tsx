@@ -1,4 +1,5 @@
 import {ScheduledLine} from "@/app/lib/schedule";
+import {useEffect, useState} from "react";
 
 interface ScheduledProps {
     scheduled: ScheduledLine,
@@ -6,7 +7,20 @@ interface ScheduledProps {
 }
 
 const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
+    const [color, setColor] = useState<any>();
     const backgroundColor = isEven ? "#0a0a0a" : "#1a1a1a";
+
+    useEffect(() => {
+        const fetchColor = async () => {
+            const colorRequest = await fetch(`/api/v1/color?name=${scheduled.line.name}`, {method: 'GET'});
+            if (!colorRequest.ok) return;
+
+            const colorData = await colorRequest.json();
+            setColor(colorData);
+        }
+
+        fetchColor();
+    }, []);
 
     const isDelayed = () => {
         const planned = new Date(scheduled.plannedWhen);
@@ -21,8 +35,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
             {/* First col */}
             <div className={`flex-[1] text-right mr-8 border-t pt-4 px-2 space-y-4`}>
                 {/* Line */}
-                <span className={`${scheduled.color ? 'p-2 rounded-md' : ''} text-base`}
-                      style={{backgroundColor: scheduled.color?.backgroundColor || 'inherit'}}
+                <span className={`${color ? 'p-2 rounded-md' : ''} text-base`}
+                      style={{backgroundColor: color?.backgroundColor || 'inherit'}}
                 >
                         {scheduled.line.name}
                 </span>
