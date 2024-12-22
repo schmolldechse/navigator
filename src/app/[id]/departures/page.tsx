@@ -6,6 +6,7 @@ import {ScheduledLine} from "@/app/lib/schedule";
 import Navbar from "@/app/components/navbar";
 import Clock from "@/app/components/clock";
 import ScheduledComponent from "@/app/components/scheduled";
+import ScheduledHeader from "@/app/components/scheduled-header";
 
 export default function Departures() {
     const params = useParams();
@@ -74,6 +75,7 @@ export default function Departures() {
                 <Clock className="text-4xl font-semibold mt-4 px-4"/>
             </div>
 
+            <ScheduledHeader />
             <div className="container mx-auto flex-grow overflow-y-auto">
                 {scheduled.length > 0 ? (
                         scheduled.map((item, index) => (
