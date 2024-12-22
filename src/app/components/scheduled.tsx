@@ -51,11 +51,11 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
             </div>
 
             {/* Third col */}
-            <div className="flex-[1] flex justify-end items-end text-right border-t pt-4 px-2">
+            <div className="flex-[1] flex justify-end items-end text-right border-t pt-4 text-3xl">
                 {scheduled.plannedPlatform === scheduled.actualPlatform ? (
                     <span>{scheduled.plannedPlatform}</span>
                 ) : (
-                    <span className="bg-red-500 w-full px-6 py-2">{scheduled.actualPlatform}</span>
+                    <span className="bg-red-500 w-full p-2">{scheduled.actualPlatform}</span>
                 )}
             </div>
         </div>
