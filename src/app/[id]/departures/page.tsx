@@ -2,7 +2,7 @@
 
 import {useParams} from "next/navigation";
 import {useEffect, useState} from "react";
-import {Scheduled} from "@/app/lib/schedule";
+import {ScheduledLine} from "@/app/lib/schedule";
 import Navbar from "@/app/components/navbar";
 import Clock from "@/app/components/clock";
 
@@ -13,7 +13,7 @@ export default function Departures() {
         name: undefined
     });
 
-    const [scheduled, setScheduled] = useState<Scheduled[]>([]);
+    const [scheduled, setScheduled] = useState<ScheduledLine[]>([]);
 
     useEffect(() => {
         const currentDate = new Date().toISOString();
@@ -36,7 +36,7 @@ export default function Departures() {
             if (!data?.departures) return;
             if (!Array.isArray(data.departures)) return;
 
-            const scheduledItems: Scheduled[] = data.departures
+            const scheduledItems: ScheduledLine[] = data.departures
                 .filter((departure: any) => departure.tripId)
                 .map((departure: any) => ({
                     tripId: departure.tripId,
@@ -55,7 +55,7 @@ export default function Departures() {
                 }));
 
             const filtered = Array.from(
-                new Map(scheduledItems.map((scheduled: Scheduled) => [scheduled.tripId, scheduled])).values()
+                new Map(scheduledItems.map((scheduled: ScheduledLine) => [scheduled.tripId, scheduled])).values()
             );
             setScheduled(filtered);
         }

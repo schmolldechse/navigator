@@ -1,4 +1,4 @@
-export type Scheduled = {
+export type ScheduledLine = {
     tripId: string,
     plannedWhen: string,
     actualWhen: string,
