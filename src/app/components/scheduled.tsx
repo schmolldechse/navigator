@@ -21,7 +21,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
             {/* First col */}
             <div className={`flex-[1] text-right mr-8 border-t pt-4 px-2 space-y-4`}>
                 {/* Line */}
-                <span className={`${scheduled.color ? 'p-2 rounded-md' : ''}`}
+                <span className={`${scheduled.color ? 'p-2 rounded-md' : ''} text-base`}
                       style={{backgroundColor: scheduled.color?.backgroundColor || 'inherit'}}
                 >
                         {scheduled.line.name}
