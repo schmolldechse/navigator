@@ -29,11 +29,15 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
 
                 {/* Departure time */}
                 <div className="flex flex-row items-center justify-end space-x-4">
-                    <span className={`${isDelayed() ? 'line-through text-red-500 text-xl' : ''}`}>
+                    <span
+                        className={`${isDelayed() ? 'line-through text-red-500' : ''} flex items-center justify-center`}
+                        style={{height: '2.5rem', padding: '0'}}
+                    >
                         {new Date(scheduled.plannedWhen).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                     </span>
                     {isDelayed() ? (
-                        <span className="bg-red-500 p-1">
+                        <span className="bg-red-500 text-white flex items-center justify-center rounded text-xl"
+                              style={{height: '2.5rem', padding: '0 0.5rem'}}>
                             {new Date(scheduled.actualWhen).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                         </span>
                     ) : (<></>)}
