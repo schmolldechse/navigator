@@ -8,7 +8,7 @@ const ScheduledHeader: React.FC = () => {
             </div>
 
             {/* Second col */}
-            <div className="flex-[3] text-left">
+            <div className="flex-[4] text-left">
                 <p>Über</p>
                 <p>Ziel</p>
             </div>
