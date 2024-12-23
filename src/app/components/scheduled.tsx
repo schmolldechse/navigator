@@ -60,9 +60,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
             </div>
 
             {/* Second col */}
-            <div className="flex-[4] text-left border-t pt-4 px-2">
-                <p>Über</p>
-                <p>Ziel</p>
+            <div className="flex-[4] flex items-end text-left border-t pt-4 space-y-4">
+                <span>{scheduled.directionName}</span>
             </div>
 
             {/* Third col */}
