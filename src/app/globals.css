@@ -2,6 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './css/scrollbar.css';
+
 :root {
     --background: #ffffff;
     --foreground: #171717;
