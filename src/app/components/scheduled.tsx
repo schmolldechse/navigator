@@ -45,7 +45,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
                 <div className="flex flex-row items-center justify-end space-x-2">
                     <span
                         className={`${isDelayed() ? '' : ''} flex items-center justify-center`}
-                        style={{height: '2.5rem', padding: '0'}}
+                        style={{height: '2rem'}}
                     >
                         {new Date(scheduled.plannedWhen).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                     </span>
