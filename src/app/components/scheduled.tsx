@@ -42,16 +42,17 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
                 </span>
 
                 {/* Departure time */}
-                <div className="flex flex-row items-center justify-end space-x-4">
+                <div className="flex flex-row items-center justify-end space-x-2">
                     <span
-                        className={`${isDelayed() ? 'line-through text-red-500' : ''} flex items-center justify-center`}
+                        className={`${isDelayed() ? '' : ''} flex items-center justify-center`}
                         style={{height: '2.5rem', padding: '0'}}
                     >
                         {new Date(scheduled.plannedWhen).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                     </span>
                     {isDelayed() ? (
-                        <span className="bg-red-500 text-white flex items-center justify-center rounded text-xl"
-                              style={{height: '2.5rem', padding: '0 0.5rem'}}>
+                        <span className="bg-[#ededed] text-[#0a0a0a] flex items-center justify-center text-[20px]"
+                              style={{height: '1.75rem', padding: '0 0.5rem'}}
+                        >
                             {new Date(scheduled.actualWhen).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                         </span>
                     ) : (<></>)}
@@ -69,7 +70,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
                 {scheduled.plannedPlatform === scheduled.actualPlatform ? (
                     <span>{scheduled.plannedPlatform}</span>
                 ) : (
-                    <span className="bg-red-500 w-full p-2">{scheduled.actualPlatform}</span>
+                    <span className="bg-[#ededed] text-[#0a0a0a] w-full p-2">{scheduled.actualPlatform}</span>
                 )}
             </div>
         </div>
