@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import './css/scrollbar.css';
+@import './css/montserrat-font.css';
 
 :root {
     --background: #ffffff;

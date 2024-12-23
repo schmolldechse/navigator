@@ -67,12 +67,12 @@ export default function Departures() {
     }, []);
 
     return (
-        <div className="text-white h-screen flex flex-col overflow-hidden space-y-4">
+        <div className="h-screen flex flex-col overflow-hidden space-y-4">
             <Navbar id={station.id}/>
 
             <div className="container mx-auto flex justify-between items-center px-4">
                 <span className="text-4xl font-semibold mt-4 px-4">{station.name}</span>
-                <Clock className="text-4xl font-semibold mt-4 px-4"/>
+                <Clock className="text-4xl font-medium mt-4 px-4"/>
             </div>
 
             <ScheduledHeader />

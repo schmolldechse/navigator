@@ -19,7 +19,7 @@ const Navbar: React.FC<NavbarProps> = ({id}) => {
     const handleNavigation = (path: string) => router.push(`/${id}${path}`);
 
     return (
-        <nav className="text-white text-2xl font-bold p-4 w-full">
+        <nav className="text-2xl p-4 w-full">
             <div className="container mx-auto flex justify-between items-center">
                 <div className="flex space-x-5">
                     {navbarItems.map(({label, path}) => (
