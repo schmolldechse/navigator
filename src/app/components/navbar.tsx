@@ -21,6 +21,12 @@ const Navbar: React.FC<NavbarProps> = ({id}) => {
     return (
         <nav className="text-2xl p-4 w-full">
             <div className="container mx-auto flex justify-between items-center">
+                <div
+                    className="hover:text-gray-400 pb-2 border-white"
+                    onClick={(e) => router.push("/")}
+                >
+                    Home
+                </div>
                 <div className="flex space-x-5">
                     {navbarItems.map(({label, path}) => (
                         <span
