@@ -25,7 +25,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
     const isDelayed = () => {
         const planned = new Date(scheduled.plannedWhen);
         const actual = new Date(scheduled.actualWhen);
-        return actual > planned;
+        return actual.getMinutes() > planned.getMinutes();
     }
 
     return (
