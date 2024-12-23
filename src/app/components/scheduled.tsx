@@ -29,13 +29,13 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
     }
 
     return (
-        <div className="container mx-auto flex justify-between space-x-4 text-[28px] border-gray-400 pb-4"
+        <div className="container mx-auto flex justify-between space-x-4 text-[28px] font-medium border-gray-400 pb-4"
              style={{backgroundColor}}
         >
             {/* First col */}
             <div className={`flex-[1] text-right mr-8 border-t pt-4 space-y-4`}>
                 {/* Line */}
-                <span className={`${color ? 'p-2 rounded-2xl px-4' : ''} text-xl`}
+                <span className={`${color ? 'p-2 rounded-2xl px-4 font-bold' : ''} text-xl`}
                       style={{backgroundColor: color?.backgroundColor || 'inherit'}}
                 >
                         {scheduled.line.name}
@@ -50,8 +50,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
                         {new Date(scheduled.plannedWhen).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                     </span>
                     {isDelayed() ? (
-                        <span className="bg-[#ededed] text-[#0a0a0a] flex items-center justify-center text-[20px]"
-                              style={{height: '1.75rem', padding: '0 0.5rem'}}
+                        <span className={`${isDelayed() ? 'font-bold' : ''} bg-[#ededed] text-[#0a0a0a] flex items-center justify-center text-[20px]`}
+                              style={{height: '1.5rem', padding: '0 0.4rem'}}
                         >
                             {new Date(scheduled.actualWhen).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
                         </span>
