@@ -38,5 +38,6 @@ export type Trip = {
     },
     stopovers?: [],
     remarks?: [],
-    cancelled?: boolean
+    cancelled?: boolean,
+    loadFactor?: string
 }
