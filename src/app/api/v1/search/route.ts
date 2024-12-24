@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     if (result) return NextResponse.json({ success: true, station: result });
 
-    const request = await fetch(`https://v6.db.transport.rest/stops/${id}`);
+    const request = await fetch(`https://hafas-v1.voldechse.wtf/stops/${id}`);
     if (!request.ok) return NextResponse.json({ success: false, error: 'HTTP Request error occurred' }, { status: 400 });
 
     const data = await request.json();
