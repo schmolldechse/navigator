@@ -7,6 +7,7 @@ import Clock from "@/app/components/clock";
 import ScheduledComponent from "@/app/components/scheduled";
 import ScheduledHeader from "@/app/components/scheduled-header";
 import {Trip} from "@/app/lib/trip";
+import {resolveAppleWebApp} from "next/dist/lib/metadata/resolvers/resolve-basics";
 
 export default function Departures() {
     const params = useParams();
@@ -31,102 +32,78 @@ export default function Departures() {
         if (!response.ok) return;
 
         const data = await response.json();
-        if (!data?.departures) return;
-        if (!Array.isArray(data.departures)) return;
+        if (!data?.departures || !Array.isArray(data.departures)) return;
 
-        return data.departures.filter((departure: any) => departure.tripId)
-            .map((departure: any) => {
-                const trip: Trip = {
-                    tripId: departure.tripId,
-                    destination: {
-                        id: departure.destination.id,
-                        name: departure.destination.name,
-                    },
-                    departure: {
-                        plannedTime: departure.plannedWhen,
-                        actualTime: departure.when,
-                        delay: departure.delay,
-                        plannedPlatform: departure.plannedPlatform,
-                        actualPlatform: departure.platform
-                    },
-                    lineInformation: {
-                        productName: departure.line.productName,
-                        fullName: departure.line.name,
-                        id: departure.line.id,
-                        fahrtNr: departure.line.fahrtNr,
-                        operator: {
-                            id: departure.line.operator.id,
-                            name: departure.line.operator.name,
-                        },
-                    },
-                };
+        const map = new Map<string, Trip>();
+        data.departures.forEach((departure: any) => {
+            const tripId = departure.tripId;
+            if (!tripId || map.has(tripId)) return;
 
-                return trip;
-            });
+            const trip: Trip = {
+                tripId,
+                destination: {
+                    id: departure.destination.id,
+                    name: departure.destination.name
+                },
+                departure: {
+                    plannedTime: departure.plannedWhen,
+                    actualTime: departure.when,                     // nullable
+                    delay: departure.delay,                         // nullable
+                    plannedPlatform: departure.plannedPlatform,     // nullable
+                    actualPlatform: departure.platform
+                },
+                lineInformation: {
+                    productName: departure.line.productName,
+                    fullName: departure.line.name,
+                    id: departure.line.id,
+                    fahrtNr: departure.line.fahrtNr,
+                    operator: {
+                        id: departure.line.operator?.id || '',
+                        name: departure.line.operator?.name || ''
+                    }
+                },
+                remarks: departure.remarks
+            }
+
+            map.set(tripId, trip);
+        });
+
+        return Array.from(map.values());
     }
 
-    const departuresV2 = async (date: Date): Promise<Trip[]> => {
+    const departuresV2 = async (date: Date, trips: Trip[]): Promise<Trip[]> => {
         const response = await fetch(`https://hafas-v2.voldechse.wtf/stops/${station.id}/departures?when=${date.toISOString()}&duration=${calculateDuration()}&results=1000`, {method: 'GET'});
         if (!response.ok) return;
 
         const data = await response.json();
-        if (!data?.departures) return;
-        if (!Array.isArray(data.departures)) return;
+        if (!data?.departures || !Array.isArray(data.departures)) return;
 
-        return data.departures.filter((departure: any) => departure.tripId)
-            .map((departure: any) => {
-                const trip: Trip = {
-                    tripId: departure.tripId,
-                    lineInformation: {
-                        productName: departure.line.productName,
-                        fullName: departure.line.name,
-                        id: departure.line.id,
-                        fahrtNr: departure.line.fahrtNr
-                    },
-                    departure: {
-                        plannedTime: departure.plannedWhen,
-                        actualTime: departure.when,
-                        delay: `${departure.delay || 0}`,
-                        plannedPlatform: departure.plannedPlatform || '',
-                        actualPlatform: departure.platform || '',
-                    },
-                };
-
-                return trip;
+        const updatedTrips = trips.map((trip: Trip) => {
+            const matchingDeparture = data.departures.find((departure: any) => {
+                return (
+                    departure.plannedWhen === trip.departure.plannedTime &&
+                    departure.line?.fahrtNr === trip.lineInformation?.fahrtNr
+                );
             });
-    }
 
-    const updateTrips = async (date: Date): Promise<Trip[]> => {
-        const tripsV1 = await departuresV1(date);
-        const tripsV2 = await departuresV2(date);
-
-        if (!tripsV1 || !tripsV2) return [];
-
-        const tripsV2Map = new Map<string, Trip>(
-            tripsV2.map((v2Trip) => [
-                `${v2Trip.departure?.plannedTime}-${v2Trip.lineInformation?.fahrtNr}`,
-                v2Trip,
-            ])
-        );
-
-        return tripsV1.map((v1Trip: Trip) => {
-            const key = `${v1Trip.departure?.plannedTime}-${v1Trip.lineInformation?.fahrtNr}`;
-            const matchingV2Trip = tripsV2Map.get(key);
-
-            if (matchingV2Trip) {
-                // Aktualisiere die departure-Daten
-                v1Trip.departure = {
-                    ...v1Trip.departure,
-                    plannedTime: matchingV2Trip.departure?.plannedTime || v1Trip.departure?.plannedTime,
-                    actualTime: matchingV2Trip.departure?.actualTime || '',
-                    delay: matchingV2Trip.departure?.delay || '0',
-                    plannedPlatform: matchingV2Trip.departure?.plannedPlatform || '',
-                    actualPlatform: matchingV2Trip.departure?.actualPlatform || '',
+            if (matchingDeparture) {
+                return {
+                    ...trip,
+                    departure: {
+                        ...trip.departure,
+                        plannedTime: matchingDeparture.plannedWhen,
+                        actualTime: matchingDeparture.when,
+                        delay: matchingDeparture.delay,
+                        plannedPlatform: matchingDeparture.plannedPlatform,
+                        actualPlatform: matchingDeparture.platform
+                    }
                 };
             }
 
-            return v1Trip;
+            return trip;
         });
+
+        return updatedTrips;
     }
 
     useEffect(() => {
@@ -149,11 +126,13 @@ export default function Departures() {
 
         // fetch trips
         const fetchTrips = async () => {
-            const trips = await updateTrips(startDate);
-            if (!trips) return;
+            const v1Trips = await departuresV1(startDate);
+            if (!v1Trips) return;
 
-            const newTrips = trips.filter((newTrip: Trip) => !scheduled.some((existingTrip: Trip) => existingTrip.tripId === newTrip.tripId));
-            setScheduled((prev) => [...prev, ...newTrips]);
+            const updatedTrips = await departuresV2(startDate, v1Trips);
+            if (!updatedTrips) return;
+
+            setScheduled(updatedTrips);
         }
         fetchTrips();
     }, []);
