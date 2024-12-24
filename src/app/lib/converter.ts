@@ -24,7 +24,7 @@ const keys = [
 
 const normalize = (value: string): string => value.toLowerCase().replace("/[\s-]/g", "");
 
-export const fromHafasLineId = async (inputLine: string, inputOperatorName: string): Promise<any | null> => {
+export const fromHafasLineId = async (inputLine: string): Promise<any | null> => {
     const data = await parse(path);
 
     const matching = data.find((line) => {
@@ -32,10 +32,7 @@ export const fromHafasLineId = async (inputLine: string, inputOperatorName: stri
         const hafasLineId = normalize(line[3] || "");
         const normalizedInputLine = normalize(inputLine);
 
-        const normalizedOperator = normalize(line[2] || "");
-        const normalizedInputOperator = normalize(inputOperatorName);
-
-        return ((hafasLineId === normalizedInputLine || lineName === normalizedInputLine) && normalizedOperator === normalizedInputOperator);
+        return (hafasLineId === normalizedInputLine || lineName === normalizedInputLine);
     });
     if (!matching) return null;
 

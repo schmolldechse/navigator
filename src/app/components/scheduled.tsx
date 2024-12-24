@@ -15,7 +15,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
 
     useEffect(() => {
         const fetchColor = async () => {
-            const colorRequest = await fetch(`/api/v1/color?name=${trip.lineInformation.fullName}&operator=${trip.lineInformation.operator.id}`, {method: 'GET'});
+            const colorRequest = await fetch(`/api/v1/color?id=${trip.lineInformation.id}`, {method: 'GET'});
             if (!colorRequest.ok) return;
 
             const colorData = await colorRequest.json();
