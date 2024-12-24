@@ -14,7 +14,7 @@ export default function Home() {
     const [results, setResults] = useState<LocationResult[]>([]);
 
     const handleSearch = async (query: string) => {
-        const response = await fetch(`https://hafas.voldechse.wtf/locations/?query=${query}&addresses=false&results=5`, {method: 'GET'});
+        const response = await fetch(`https://hafas-v1.voldechse.wtf/locations/?query=${query}&addresses=false&results=5`, {method: 'GET'});
         if (!response.ok) return;
 
         const data = await response.json();

@@ -1,18 +1,21 @@
-import {ScheduledLine} from "@/app/lib/schedule";
 import {useEffect, useState} from "react";
+import {Trip} from "@/app/lib/trip";
 
 interface ScheduledProps {
-    scheduled: ScheduledLine,
+    trip: Trip,
+    isDeparture: boolean,
     isEven: boolean
 }
 
-const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
+const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven}) => {
     const [color, setColor] = useState<any>();
     const backgroundColor = isEven ? "#0a0a0a" : "#1a1a1a";
 
+    console.log(trip);
+
     useEffect(() => {
         const fetchColor = async () => {
-            const colorRequest = await fetch(`/api/v1/color?name=${scheduled.line.name}`, {method: 'GET'});
+            const colorRequest = await fetch(`/api/v1/color?name=${trip.lineInformation.fullName}&operator=${trip.lineInformation.operator.id}`, {method: 'GET'});
             if (!colorRequest.ok) return;
 
             const colorData = await colorRequest.json();
@@ -23,11 +26,35 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
     }, []);
 
     const isDelayed = () => {
-        const planned = new Date(scheduled.plannedWhen);
-        const actual = new Date(scheduled.actualWhen);
+        const planned = new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime);
+        const actual = new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime);
 
         const difference = (actual.getTime() - planned.getTime()) / 60000; // in min
         return difference >= 1;
+    }
+
+    const showPlatform = () => {
+        return (
+            <>
+                {isDeparture ? (
+                    <>
+                        {trip.departure.plannedPlatform === trip.departure.actualPlatform ? (
+                            <span>{trip.departure.plannedPlatform}</span>
+                        ) : (
+                            <span className="bg-[#ededed] text-[#0a0a0a] w-full p-2">{trip.departure.actualPlatform}</span>
+                        )}
+                    </>
+                ) : (
+                    <>
+                        {trip.arrival.plannedPlatform === trip.arrival.actualPlatform ? (
+                            <span>{trip.arrival.plannedPlatform}</span>
+                        ) : (
+                            <span className="bg-[#ededed] text-[#0a0a0a] w-full p-2">{trip.arrival.actualPlatform}</span>
+                        )}
+                    </>
+                )}
+            </>
+        )
     }
 
     return (
@@ -40,7 +67,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
                 <span className={`${color ? 'p-2 rounded-2xl px-4 font-bold' : ''} text-xl`}
                       style={{backgroundColor: color?.backgroundColor || 'inherit'}}
                 >
-                        {scheduled.line.name}
+                        {trip.lineInformation.fullName}
                 </span>
 
                 {/* Departure time */}
@@ -49,13 +76,20 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
                         className={`${isDelayed() ? '' : ''} flex items-center justify-center`}
                         style={{height: '2rem'}}
                     >
-                        {new Date(scheduled.plannedWhen).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                        {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
                     </span>
                     {isDelayed() ? (
-                        <span className={`${isDelayed() ? 'font-bold' : ''} bg-[#ededed] text-[#0a0a0a] flex items-center justify-center text-[20px]`}
-                              style={{height: '1.5rem', padding: '0 0.4rem'}}
+                        <span
+                            className={`${isDelayed() ? 'font-bold' : ''} bg-[#ededed] text-[#0a0a0a] flex items-center justify-center text-[20px]`}
+                            style={{height: '1.5rem', padding: '0 0.4rem'}}
                         >
-                            {new Date(scheduled.actualWhen).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                            {new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
                         </span>
                     ) : (<></>)}
                 </div>
@@ -63,16 +97,12 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({scheduled, isEven}) => {
 
             {/* Second col */}
             <div className="flex-[4] flex items-end text-left border-t pt-4 space-y-4">
-                <span>{scheduled.directionName}</span>
+                <span>{trip.destination.name}</span>
             </div>
 
             {/* Third col */}
             <div className="flex-[1] flex justify-end items-end text-right border-t pt-4 pr-1 text-3xl">
-                {scheduled.plannedPlatform === scheduled.actualPlatform ? (
-                    <span>{scheduled.plannedPlatform}</span>
-                ) : (
-                    <span className="bg-[#ededed] text-[#0a0a0a] w-full p-2">{scheduled.actualPlatform}</span>
-                )}
+                {showPlatform()}
             </div>
         </div>
     );
