@@ -133,7 +133,8 @@ export default function Departures() {
             const updatedTrips = await departuresV2(startDate, v1Trips);
             if (!updatedTrips) return;
 
-            setScheduled(updatedTrips);
+            const sorted = updatedTrips.sort((a, b) => new Date(a.departure.actualTime || a.departure.plannedTime).getTime() - new Date(b.departure.actualTime || b.departure.actualTime).getTime());
+            setScheduled(sorted);
         }
         fetchTrips();
     }, []);
