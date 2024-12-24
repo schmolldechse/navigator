@@ -62,7 +62,8 @@ export default function Departures() {
                         name: departure.line.operator?.name || ''
                     }
                 },
-                remarks: departure.remarks
+                remarks: departure.remarks,
+                cancelled: departure.cancelled || false
             }
 
             map.set(tripId, trip);

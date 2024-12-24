@@ -58,8 +58,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
     }
 
     return (
-        <div className="container mx-auto flex justify-between space-x-4 text-[28px] font-medium border-gray-400 pb-4"
-             style={{backgroundColor}}
+        <div className={`container mx-auto flex justify-between space-x-4 text-[28px] font-medium ${trip.cancelled ? 'border-[#0a0a0a] text-black' : 'border-gray-400' } pb-4`}
+             style={{ backgroundColor: trip.cancelled ? '#ededed' : backgroundColor }}
         >
             {/* First col */}
             <div className={`flex-[1] text-right mr-8 border-t pt-4 space-y-4`}>
