@@ -1,4 +1,8 @@
-const ScheduledHeader: React.FC = () => {
+interface HeaderProps {
+    isDeparture: boolean
+}
+
+const ScheduledHeader: React.FC<HeaderProps> = ({ isDeparture }) => {
     return (
         <div className="container mx-auto flex justify-between space-x-4 text-white text-base">
             {/* First col */}
@@ -10,7 +14,7 @@ const ScheduledHeader: React.FC = () => {
             {/* Second col */}
             <div className="flex-[4] text-left">
                 <p>Über</p>
-                <p>Ziel</p>
+                <p>{isDeparture ? 'Ziel' : 'Herkunft'}</p>
             </div>
 
             {/* Third col */}

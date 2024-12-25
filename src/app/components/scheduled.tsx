@@ -11,8 +11,6 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
     const [color, setColor] = useState<any>();
     const backgroundColor = isEven ? "#0a0a0a" : "#1a1a1a";
 
-    console.log(trip);
-
     useEffect(() => {
         const fetchColor = async () => {
             const colorRequest = await fetch(`/api/v1/color?id=${trip.lineInformation.id}`, {method: 'GET'});
@@ -96,8 +94,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
             </div>
 
             {/* Second col */}
-            <div className="flex-[4] flex items-end text-left border-t pt-4 space-y-4">
-                <span>{trip.destination.name}</span>
+            <div className="flex-[4] flex items-end text-left border-t pt-4">
+                <span>{isDeparture ? trip.destination.name : trip.origin.name}</span>
             </div>
 
             {/* Third col */}
