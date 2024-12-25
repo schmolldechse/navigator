@@ -101,7 +101,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
             </div>
 
             {/* Third col */}
-            <div className="flex-[1] flex justify-end items-end text-right border-t pt-4 pr-1 text-3xl">
+            <div className="flex-[1] flex justify-end items-end text-right border-t pt-4 text-3xl">
                 {showPlatform()}
             </div>
         </div>
