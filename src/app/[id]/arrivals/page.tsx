@@ -40,6 +40,10 @@ export default function Arrivals() {
 
             const trip: Trip = {
                 tripId,
+                origin: {
+                    id: arrival.origin.id,
+                    name: arrival.origin.name
+                },
                 arrival: {
                     plannedTime: arrival.plannedWhen,
                     actualTime: arrival.when,                     // nullable
