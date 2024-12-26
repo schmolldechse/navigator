@@ -51,14 +51,7 @@ export default function Home() {
                         results.map((location) => (
                             <p key={location.id}
                                className="text-white py-0.5 px-2 hover:bg-gray-700 hover:cursor-pointer rounded-md"
-                               onClick={() => {
-                                   fetch("/api/v1/search/", {
-                                       method: 'POST',
-                                       headers: {'Content-Type': 'application/json'},
-                                       body: JSON.stringify({id: location.id})
-                                   });
-                                   router.push(`/${location.id}/departures`);
-                               }}
+                               onClick={() => router.push(`/${location.id}/departures`)}
                             >
                                 {location.name}
                             </p>
