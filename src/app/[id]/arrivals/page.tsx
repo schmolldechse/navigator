@@ -102,20 +102,32 @@ export default function Arrivals() {
 
             return trip;
         });
-
-        return updatedTrips;
     }
 
-    // fetch trips
-    const fetchTrips = async () => {
-        const v1Trips = await arrivalsV1(startDate);
-        if (!v1Trips) return;
+    const updateScheduledTrips = (newTrips: Trip[]) => {
+        setScheduled((currentTrips) => {
+            const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
+            newTrips.forEach((newTrip) => {
+                if (tripMap.has(newTrip.tripId))
+                    tripMap.set(newTrip.tripId, {...tripMap.get(newTrip.tripId), ...newTrip});
+                else tripMap.set(newTrip.tripId, newTrip);
+            });
 
-        const updatedTrips = await arrivalsV2(startDate, v1Trips);
+            return Array.from(tripMap.values()).sort((a, b) =>
+                new Date(a.departure.actualTime || a.departure.plannedTime).getTime() -
+                new Date(b.departure.actualTime || b.departure.plannedTime).getTime()
+            );
+        });
+    }
+
+    const fetchTrips = async () => {
+        const v2Trips = await arrivalsV1(startDate);
+        if (!v2Trips) return;
+
+        const updatedTrips = await arrivalsV2(startDate, v2Trips);
         if (!updatedTrips) return;
 
-        const sorted = updatedTrips.sort((a, b) => new Date(a.arrival.actualTime || a.arrival.plannedTime).getTime() - new Date(b.arrival.actualTime || b.arrival.actualTime).getTime());
-        setScheduled(sorted);
+        updateScheduledTrips(updatedTrips);
     }
 
     useEffect(() => {
@@ -135,15 +147,11 @@ export default function Arrivals() {
             setStation((prev) => ({...prev, name: data.name}));
         }
         fetchStationName();
-    }, []);
 
-    useEffect(() => {
+        // fetch trips from HAFAS once & update them every 15s
         fetchTrips();
 
-        const intervalId = setInterval(() => {
-            fetchTrips();
-        }, 20 * 1000);
-
+        const intervalId = setInterval(fetchTrips, 15 * 1000);
         return () => clearInterval(intervalId);
     }, []);
 

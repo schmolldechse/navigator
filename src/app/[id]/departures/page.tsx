@@ -102,8 +102,32 @@ export default function Departures() {
 
             return trip;
         });
+    }
 
-        return updatedTrips;
+    const updateScheduledTrips = (newTrips: Trip[]) => {
+        setScheduled((currentTrips) => {
+            const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
+            newTrips.forEach((newTrip) => {
+                if (tripMap.has(newTrip.tripId))
+                    tripMap.set(newTrip.tripId, {...tripMap.get(newTrip.tripId), ...newTrip});
+                else tripMap.set(newTrip.tripId, newTrip);
+            });
+
+            return Array.from(tripMap.values()).sort((a, b) =>
+                new Date(a.departure.actualTime || a.departure.plannedTime).getTime() -
+                new Date(b.departure.actualTime || b.departure.plannedTime).getTime()
+            );
+        });
+    }
+
+    const fetchTrips = async () => {
+        const v1Trips = await departuresV1(startDate);
+        if (!v1Trips) return;
+
+        const updatedTrips = await departuresV2(startDate, v1Trips);
+        if (!updatedTrips) return;
+
+        updateScheduledTrips(updatedTrips);
     }
 
     useEffect(() => {
@@ -124,18 +148,11 @@ export default function Departures() {
         }
         fetchStationName();
 
-        // fetch trips
-        const fetchTrips = async () => {
-            const v1Trips = await departuresV1(startDate);
-            if (!v1Trips) return;
-
-            const updatedTrips = await departuresV2(startDate, v1Trips);
-            if (!updatedTrips) return;
-
-            const sorted = updatedTrips.sort((a, b) => new Date(a.departure.actualTime || a.departure.plannedTime).getTime() - new Date(b.departure.actualTime || b.departure.actualTime).getTime());
-            setScheduled(sorted);
-        }
+        // fetch trips from HAFAS once & update them every 15s
         fetchTrips();
+
+        const intervalId = setInterval(fetchTrips, 15 * 1000);
+        return () => clearInterval(intervalId);
     }, []);
 
     return (
