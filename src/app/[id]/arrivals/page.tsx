@@ -114,8 +114,8 @@ export default function Arrivals() {
             });
 
             return Array.from(tripMap.values()).sort((a, b) =>
-                new Date(a.departure.actualTime || a.departure.plannedTime).getTime() -
-                new Date(b.departure.actualTime || b.departure.plannedTime).getTime()
+                new Date(a.arrival.actualTime || a.arrival.plannedTime).getTime() -
+                new Date(b.arrival.actualTime || b.arrival.plannedTime).getTime()
             );
         });
     }
