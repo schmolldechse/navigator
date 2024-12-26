@@ -28,10 +28,10 @@ export default function Departures() {
     // fetch departures from HAFAS-v1
     const departuresV1 = async (date: Date): Promise<Trip[]> => {
         const response = await fetch(`https://hafas-v1.voldechse.wtf/stops/${station.id}/departures?when=${date.toISOString()}&duration=${calculateDuration()}&results=1000`, {method: 'GET'});
-        if (!response.ok) return;
+        if (!response.ok) return [];
 
         const data = await response.json();
-        if (!data?.departures || !Array.isArray(data.departures)) return;
+        if (!data?.departures || !Array.isArray(data.departures)) return [];
 
         const map = new Map<string, Trip>();
         data.departures.forEach((departure: any) => {
@@ -73,12 +73,12 @@ export default function Departures() {
 
     const departuresV2 = async (date: Date, trips: Trip[]): Promise<Trip[]> => {
         const response = await fetch(`https://hafas-v2.voldechse.wtf/stops/${station.id}/departures?when=${date.toISOString()}&duration=${calculateDuration()}&results=1000`, {method: 'GET'});
-        if (!response.ok) return;
+        if (!response.ok) return trips;
 
         const data = await response.json();
-        if (!data?.departures || !Array.isArray(data.departures)) return;
+        if (!data?.departures || !Array.isArray(data.departures)) return trips;
 
-        const updatedTrips = trips.map((trip: Trip) => {
+        return trips.map((trip: Trip) => {
             const matchingDeparture = data.departures.find((departure: any) => {
                 return (
                     departure.plannedWhen === trip.departure.plannedTime &&
