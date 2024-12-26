@@ -164,8 +164,8 @@ export default function Departures() {
             <Navbar id={station.id}/>
 
             <div className="container mx-auto flex justify-between items-center px-4">
-                <span className="text-4xl font-semibold mt-4 px-4">{station.name}</span>
-                <Clock className="text-4xl font-medium mt-4 px-4"/>
+                <span className="text-xl md:text-4xl font-semibold mt-4 px-2 md:px-4">{station.name}</span>
+                <Clock className="text-2xl md:text-4xl font-medium mt-4 px-2 md:px-4"/>
             </div>
 
             <ScheduledHeader isDeparture={true}/>
