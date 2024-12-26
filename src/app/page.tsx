@@ -32,7 +32,7 @@ export default function Home() {
         <div className="flex justify-center mt-[12.5%]">
             <div className="flex-col bg-[#000] p-4 rounded-xl w-[90%] max-w-[600px]">
                 <div className="flex space-x-4">
-                    <Image width={40} height={40} src={"search.svg"} alt={"Search icon"}/>
+                    <Image width={40} height={40} src={"/search.svg"} alt={"Search icon"}/>
                     <input type="text" placeholder={"Search your station"}
                            onChange={(e) => {
                                const value: string = e.target.value;

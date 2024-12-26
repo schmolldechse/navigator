@@ -23,7 +23,7 @@ const Navbar: React.FC<NavbarProps> = ({id}) => {
             <div className="container mx-auto flex justify-between items-center cursor-pointer">
                 <div
                     className="hover:text-gray-400 pb-2 border-white "
-                    onClick={(e) => router.push("/")}
+                    onClick={() => router.push("/")}
                 >
                     Home
                 </div>
