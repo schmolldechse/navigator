@@ -160,7 +160,7 @@ export default function Departures() {
     }, []);
 
     return (
-        <div className="h-screen flex flex-col overflow-hidden space-y-4">
+        <div className="h-screen flex flex-col overflow-hidden md:space-y-4">
             <Navbar id={station.id}/>
 
             <div className="container mx-auto flex justify-between items-center px-4">
