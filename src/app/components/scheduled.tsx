@@ -76,7 +76,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
                         className={`text-base flex items-center justify-center text-[1.6rem]`}
                         style={{ height: '1.5rem' }}
                     >
-                        {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString([], {
+                        {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString("de-DE", {
                             hour: '2-digit',
                             minute: '2-digit'
                         })}
@@ -86,7 +86,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
                             className={`${isDelayed() ? '' : ''} bg-[#ededed] text-[#0a0a0a] font-semibold flex items-center justify-center`}
                             style={{ height: '1.5rem', padding: '0 0.4rem' }}
                         >
-                            {new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime).toLocaleTimeString([], {
+                            {new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime).toLocaleTimeString("de-DE", {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
@@ -122,7 +122,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
                         className={`${isDelayed() ? '' : ''} flex items-center justify-center`}
                         style={{ height: '2rem' }}
                     >
-                        {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString([], {
+                        {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString("de-DE", {
                             hour: '2-digit',
                             minute: '2-digit'
                         })}
@@ -132,7 +132,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
                             className={`${isDelayed() ? 'font-bold' : ''} bg-[#ededed] text-[#0a0a0a] flex items-center justify-center text-[20px]`}
                             style={{ height: '1.5rem', padding: '0 0.4rem' }}
                         >
-                            {new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime).toLocaleTimeString([], {
+                            {new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime).toLocaleTimeString("de-DE", {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
