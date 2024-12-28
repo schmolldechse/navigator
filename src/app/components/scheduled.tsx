@@ -71,7 +71,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
             {/* second line */}
             <div className="flex flex-row items-center space-x-2">
                 <span
-                    className={`text-base flex items-center justify-center`}
+                    className={`text-base flex items-center justify-center text-[1.2rem]`}
                     style={{height: '1.5rem'}}
                 >
                     {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString([], {
@@ -81,7 +81,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
                 </span>
                 {isDelayed() ? (
                     <span
-                        className={`${isDelayed() ? '' : ''} bg-[#ededed] text-[#0a0a0a] flex items-center justify-center`}
+                        className={`${isDelayed() ? '' : ''} bg-[#ededed] text-[#0a0a0a] font-semibold flex items-center justify-center`}
                         style={{height: '1.5rem', padding: '0 0.4rem'}}
                     >
                         {new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime).toLocaleTimeString([], {
