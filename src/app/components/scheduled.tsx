@@ -39,7 +39,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
                         {trip.departure.plannedPlatform === trip.departure.actualPlatform ? (
                             <span>{trip.departure.plannedPlatform}</span>
                         ) : (
-                            <span className="bg-[#ededed] text-[#0a0a0a] w-full p-2">{trip.departure.actualPlatform}</span>
+                            <span className="bg-[#ededed] text-[#0a0a0a]">{trip.departure.actualPlatform}</span>
                         )}
                     </>
                 ) : (
@@ -47,7 +47,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
                         {trip.arrival.plannedPlatform === trip.arrival.actualPlatform ? (
                             <span>{trip.arrival.plannedPlatform}</span>
                         ) : (
-                            <span className="bg-[#ededed] text-[#0a0a0a] w-full p-2">{trip.arrival.actualPlatform}</span>
+                            <span className="bg-[#ededed] text-[#0a0a0a]">{trip.arrival.actualPlatform}</span>
                         )}
                     </>
                 )}
@@ -58,11 +58,11 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
     return (<>
         {/* layout for smaller screens (under md) */}
         <div
-            className={`mx-2 py-4 text-sm md:hidden border-t space-y-3 text-[20px]`}
+            className={`p-2 text-xl md:hidden border-t space-y-2 font-medium`}
             style={{ backgroundColor: trip.cancelled ? '#ededed' : backgroundColor }}
         >
             {/* first line */}
-            <span className={`${color ? 'py-2 px-3 rounded-2xl font-bold' : ''} text-sm`}
+            <span className={`${color.backgroundColor ? 'py-[0.3rem] px-[0.7rem] rounded-xl' : ''} text-lg`}
                 style={{ backgroundColor: color?.backgroundColor || 'inherit' }}
             >
                 {trip.lineInformation.fullName}
@@ -73,7 +73,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
                 {/* scheduled time */}
                 <div className="flex-[1] flex flex-row space-x-2">
                     <span
-                        className={`text-base flex items-center justify-center text-[1.2rem]`}
+                        className={`text-base flex items-center justify-center text-[1.6rem]`}
                         style={{ height: '1.5rem' }}
                     >
                         {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString([], {
@@ -99,7 +99,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
             </div>
 
             {/* third line */}
-            <span className="">{isDeparture ? trip.destination.name : trip.origin.name}</span>
+            <span>{isDeparture ? trip.destination.name : trip.origin.name}</span>
         </div>
 
         {/* layout for greater screens (above md) */}
