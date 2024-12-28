@@ -62,8 +62,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
             style={{ backgroundColor: trip.cancelled ? '#ededed' : backgroundColor }}
         >
             {/* first line */}
-            <span className={`${color.backgroundColor ? 'py-[0.3rem] px-[0.7rem] rounded-xl' : ''} text-lg`}
-                style={{ backgroundColor: color?.backgroundColor || 'inherit' }}
+            <span className={`${color ? 'py-[0.3rem] px-[0.7rem] rounded-xl' : ''} text-lg`}
+                style={{ backgroundColor: color ? `${color.backgroundColor}` : '' }}
             >
                 {trip.lineInformation.fullName}
             </span>
