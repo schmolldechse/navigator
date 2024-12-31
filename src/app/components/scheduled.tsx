@@ -58,7 +58,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
     return (<>
         {/* layout for smaller screens (under md) */}
         <div
-            className={`p-2 text-xl md:hidden border-t space-y-2 font-medium`}
+            className={`p-2 md:hidden border-t space-y-2 font-medium`}
             style={{ backgroundColor: trip.cancelled ? '#ededed' : backgroundColor }}
         >
             {/* first line */}
