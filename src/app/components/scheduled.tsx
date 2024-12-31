@@ -69,37 +69,33 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({ trip, isDeparture, isEve
             </span>
 
             {/* second line */}
-            <div className="flex flex-row items-center">
+            <div className="flex flex-row items-center font-semibold">
                 {/* scheduled time */}
-                <div className="flex-[1] flex flex-row space-x-2">
-                    <span
-                        className={`text-base flex items-center justify-center text-[1.6rem]`}
-                        style={{ height: '1.5rem' }}
-                    >
+                <div className="flex-[1] flex flex-row items-center space-x-2 text-2xl">
+                    <span>
                         {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString("de-DE", {
                             hour: '2-digit',
                             minute: '2-digit'
                         })}
                     </span>
-                    {isDelayed() ? (
+                    {isDelayed() && (
                         <span
-                            className={`${isDelayed() ? '' : ''} bg-[#ededed] text-[#0a0a0a] font-semibold flex items-center justify-center`}
-                            style={{ height: '1.5rem', padding: '0 0.4rem' }}
+                            className={`bg-[#ededed] text-[#0a0a0a] text-sm h-full px-[0.3rem] py-[0.05rem]`}
                         >
                             {new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime).toLocaleTimeString("de-DE", {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
                         </span>
-                    ) : (<></>)}
+                    )}
                 </div>
 
                 {/* track */}
-                <span className="flex-[1] text-right">{showPlatform()}</span>
+                <span className="text-right text-2xl">{showPlatform()}</span>
             </div>
 
             {/* third line */}
-            <span>{isDeparture ? trip.destination.name : trip.origin.name}</span>
+            <span className="text-2xl">{isDeparture ? trip.destination.name : trip.origin.name}</span>
         </div>
 
         {/* layout for greater screens (above md) */}
