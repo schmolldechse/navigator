@@ -140,7 +140,7 @@ export default function Departures() {
 
         // fetch station name from HAFAS
         const fetchStationName = async () => {
-            const response = await fetch(`/api/v1/search/`, {
+            const response = await fetch(`/api/v1/station/`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({id: station.id})

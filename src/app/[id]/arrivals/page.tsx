@@ -144,11 +144,15 @@ export default function Arrivals() {
 
         // fetch station name from HAFAS
         const fetchStationName = async () => {
-            const response = await fetch(`https://v6.db.transport.rest/stations/${station.id}`, {method: 'GET'});
+            const response = await fetch(`/api/v1/station/`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({id: station.id})
+            });
             if (!response.ok) return;
 
             const data = await response.json();
-            setStation((prev) => ({...prev, name: data.name}));
+            setStation((prev) => ({...prev, name: data.station}));
         }
         fetchStationName();
 
