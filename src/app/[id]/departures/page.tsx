@@ -25,109 +25,24 @@ export default function Departures() {
         return (endDate.getTime() - startDate.getTime()) / 60000;
     }
 
-    // fetch departures from HAFAS-v1
-    const departuresV1 = async (date: Date): Promise<Trip[]> => {
-        const response = await fetch(`https://hafas-v1.voldechse.wtf/stops/${station.id}/departures?when=${date.toISOString()}&duration=${calculateDuration()}&results=1000`, {method: 'GET'});
-        if (!response.ok) return [];
-
-        const data = await response.json();
-        if (!data?.departures || !Array.isArray(data.departures)) return [];
-
-        const map = new Map<string, Trip>();
-        data.departures.forEach((departure: any) => {
-            const tripId = departure.tripId;
-            if (!tripId || map.has(tripId)) return;
-
-            const trip: Trip = {
-                tripId,
-                destination: {
-                    id: departure.destination.id,
-                    name: departure.destination.name
-                },
-                departure: {
-                    plannedTime: departure.plannedWhen,
-                    actualTime: departure.when,                     // nullable
-                    delay: departure.delay,                         // nullable
-                    plannedPlatform: departure.plannedPlatform,     // nullable
-                    actualPlatform: departure.platform
-                },
-                lineInformation: {
-                    productName: departure.line.productName,
-                    fullName: departure.line.name,
-                    id: departure.line.id,
-                    fahrtNr: departure.line.fahrtNr,
-                    operator: {
-                        id: departure.line.operator?.id || '',
-                        name: departure.line.operator?.name || ''
-                    }
-                },
-                remarks: departure.remarks,
-                cancelled: departure.cancelled || false
-            }
-
-            map.set(tripId, trip);
-        });
-
-        return Array.from(map.values());
-    }
-
-    const departuresV2 = async (date: Date, trips: Trip[]): Promise<Trip[]> => {
-        const response = await fetch(`https://hafas-v2.voldechse.wtf/stops/${station.id}/departures?when=${date.toISOString()}&duration=${calculateDuration()}&results=1000`, {method: 'GET'});
-        if (!response.ok) return trips;
-
-        const data = await response.json();
-        if (!data?.departures || !Array.isArray(data.departures)) return trips;
-
-        return trips.map((trip: Trip) => {
-            const matchingDeparture = data.departures.find((departure: any) => {
-                return (
-                    departure.plannedWhen === trip.departure.plannedTime &&
-                    departure.line?.fahrtNr === trip.lineInformation?.fahrtNr
-                );
-            });
-
-            if (matchingDeparture) {
-                return {
-                    ...trip,
-                    departure: {
-                        ...trip.departure,
-                        plannedTime: matchingDeparture.plannedWhen,
-                        actualTime: matchingDeparture.when,
-                        delay: matchingDeparture.delay,
-                        plannedPlatform: matchingDeparture.plannedPlatform,
-                        actualPlatform: matchingDeparture.platform
-                    }
-                };
-            }
-
-            return trip;
-        });
-    }
-
-    const updateScheduledTrips = (newTrips: Trip[]) => {
-        setScheduled((currentTrips) => {
-            const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
-            newTrips.forEach((newTrip) => {
-                if (tripMap.has(newTrip.tripId))
-                    tripMap.set(newTrip.tripId, {...tripMap.get(newTrip.tripId), ...newTrip});
-                else tripMap.set(newTrip.tripId, newTrip);
-            });
-
-            return Array.from(tripMap.values()).sort((a, b) =>
-                new Date(a.departure.actualTime || a.departure.plannedTime).getTime() -
-                new Date(b.departure.actualTime || b.departure.plannedTime).getTime()
-            );
-        });
-    }
-
     const fetchTrips = async () => {
-        const v1Trips = await departuresV1(startDate);
-        if (!v1Trips) return;
+        const request = await fetch(`/api/v1/station/departures?id=${station.id}&when=${startDate.toISOString()}&duration=${calculateDuration()}&results=1000`);
+        if (!request.ok) return;
 
-        const updatedTrips = await departuresV2(startDate, v1Trips);
-        if (!updatedTrips) return;
+        const response = await request.json();
+        if (!response.success || !Array.isArray(response.entries)) return;
 
-        updateScheduledTrips(updatedTrips);
+        const trips: Trip[] = response.entries as Trip[];
+        setScheduled((currentTrips: Trip[]) => {
+            const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
+            trips.forEach((incomingTrip) => {
+                if (tripMap.has(incomingTrip.tripId))
+                    tripMap.set(incomingTrip.tripId, {...tripMap.get(incomingTrip.tripId), ...incomingTrip});
+                else tripMap.set(incomingTrip.tripId, incomingTrip);
+            });
+
+            return Array.from(tripMap.values());
+        });
     }
 
     useEffect(() => {
@@ -170,16 +85,14 @@ export default function Departures() {
 
             <ScheduledHeader isDeparture={true}/>
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">
-                {scheduled.length > 0 ? (
-                    scheduled.map((item: Trip, index: number) => (
-                        <ScheduledComponent
-                            key={item.tripId}
-                            trip={item}
-                            isDeparture={true}
-                            isEven={index % 2 === 0}
-                        />
-                    ))
-                ) : <></>}
+                {scheduled.length > 0 && scheduled.map((item: Trip, index: number) => (
+                    <ScheduledComponent
+                        key={item.tripId}
+                        trip={item}
+                        isDeparture={true}
+                        isEven={index % 2 === 0}
+                    />
+                ))}
             </div>
         </div>
     )

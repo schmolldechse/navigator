@@ -8,6 +8,7 @@ export type Trip = {
         id: string,
         name: string
     },
+    ueber?: string[],               // the stops where the train stops
     departure?: {
         plannedTime: string,        // the time when the train should have departed
         actualTime: string,         // the time when the train actually departed
