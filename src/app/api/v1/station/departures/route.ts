@@ -14,11 +14,9 @@ export async function GET(req: NextRequest) {
     const trips = await v1(id, when, duration, results);
     if (!trips) return NextResponse.json({success: true, entries: []}, {status: 200});
 
-    const tripsV2 = await v2(trips, id, when, duration, results);
+    const updatedTrips = await v2(trips, id, when, duration, results);
 
-    const tripsVias = await vias(tripsV2, id, when);
-
-    const sorted = Array.from(tripsVias.values()).sort((a, b) =>
+    const sorted = Array.from(updatedTrips.values()).sort((a, b) =>
         new Date(a.departure.actualTime || a.departure.plannedTime).getTime() -
         new Date(b.departure.actualTime || b.departure.plannedTime).getTime()
     );
@@ -97,35 +95,6 @@ const v2 = async (trips: Trip[], id: string, when: string, duration: number, res
                     plannedPlatform: matchingDeparture.plannedPlatform,
                     actualPlatform: matchingDeparture.platform
                 }
-            };
-        }
-
-        return trip;
-    });
-}
-
-const vias = async (trips: Trip[], id: string, when: string): Promise<Trip[]> => {
-    const pad = (num: number): string => num.toString().padStart(2, '0');
-
-    const date: Date = new Date(when);
-    const formattedDate = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-    const formattedTime = `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getHours())}`;
-
-    const response = await fetch(`https://www.bahn.de/web/api/reiseloesung/abfahrten?datum=${formattedDate}&zeit=${formattedTime}&ortExtId=${id}&mitVias=true`)
-    if (!response.ok) return trips;
-
-    const data = await response.json();
-    if (!data.entries || data.entries.length === 0) return trips;
-
-    return trips.map((trip: Trip) => {
-        const matchingDeparture = data.entries.find((departure: any) => departure.journeyId === trip.tripId);
-
-        if (matchingDeparture) {
-            const vias = matchingDeparture.ueber ? matchingDeparture.ueber.slice(1, -1) : [];
-
-            return {
-                ...trip,
-                vias
             };
         }
 
