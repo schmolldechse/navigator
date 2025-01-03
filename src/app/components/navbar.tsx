@@ -36,7 +36,7 @@ const Navbar: React.FC<NavbarProps> = ({id}) => {
                     {navbarItems.map(({ label, path }) => (
                         <span
                             key={path}
-                            className={`hover:text-gray-400 pb-2 ${pathname?.includes(path) ? 'border-b-2 border-white' : ''}`}
+                            className={`hover:text-gray-400 pb-2 cursor-pointer ${pathname?.includes(path) ? 'border-b-2 border-white' : ''}`}
                             onClick={() => handleNavigation(path)}
                         >
                             {label}
