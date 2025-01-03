@@ -25,113 +25,24 @@ export default function Arrivals() {
         return (endDate.getTime() - startDate.getTime()) / 60000;
     }
 
-    // fetch departures from HAFAS-v1
-    const arrivalsV1 = async (date: Date): Promise<Trip[]> => {
-        const response = await fetch(`https://hafas-v1.voldechse.wtf/stops/${station.id}/arrivals?when=${date.toISOString()}&duration=${calculateDuration()}&results=1000`, {method: 'GET'});
-        if (!response.ok) return [];
-
-        const data = await response.json();
-        if (!data?.arrivals || !Array.isArray(data.arrivals)) return [];
-
-        const map = new Map<string, Trip>();
-        data.arrivals.forEach((arrival: any) => {
-            const tripId = arrival.tripId;
-            if (!tripId || map.has(tripId)) return;
-
-            const trip: Trip = {
-                tripId,
-                origin: {
-                    id: arrival.origin.id,
-                    name: arrival.origin.name
-                },
-                arrival: {
-                    plannedTime: arrival.plannedWhen,
-                    actualTime: arrival.when,                     // nullable
-                    delay: arrival.delay,                         // nullable
-                    plannedPlatform: arrival.plannedPlatform,     // nullable
-                    actualPlatform: arrival.platform
-                },
-                lineInformation: {
-                    productName: arrival.line.productName,
-                    fullName: arrival.line.name,
-                    id: arrival.line.id,
-                    fahrtNr: arrival.line.fahrtNr,
-                    operator: {
-                        id: arrival.line.operator?.id || '',
-                        name: arrival.line.operator?.name || ''
-                    }
-                },
-                remarks: arrival.remarks,
-                cancelled: arrival.cancelled || false
-            }
-
-            map.set(tripId, trip);
-        });
-
-        return Array.from(map.values());
-    }
-
-    const arrivalsV2 = async (date: Date, trips: Trip[]): Promise<Trip[]> => {
-        const response = await fetch(`https://hafas-v2.voldechse.wtf/stops/${station.id}/arrivals?when=${date.toISOString()}&duration=${calculateDuration()}&results=1000`, {method: 'GET'});
-        if (!response.ok) return trips;
-
-        const data = await response.json();
-        if (!data?.arrivals || !Array.isArray(data.arrivals)) return trips;
-
-        return trips.map((trip: Trip) => {
-            const matchingArrival = data.arrivals.find((arrival: any) => {
-                return (
-                    arrival.plannedWhen === trip.arrival.plannedTime &&
-                    arrival.line?.fahrtNr === trip.lineInformation?.fahrtNr
-                );
-            });
-
-            if (matchingArrival) {
-                return {
-                    ...trip,
-                    origin: {
-                        id: matchingArrival.origin.id,
-                        name: matchingArrival.origin.name
-                    },
-                    arrival: {
-                        ...trip.arrival,
-                        plannedTime: matchingArrival.plannedWhen,
-                        actualTime: matchingArrival.when,
-                        delay: matchingArrival.delay,
-                        plannedPlatform: matchingArrival.plannedPlatform,
-                        actualPlatform: matchingArrival.platform
-                    }
-                };
-            }
-
-            return trip;
-        });
-    }
-
-    const updateScheduledTrips = (newTrips: Trip[]) => {
-        setScheduled((currentTrips) => {
-            const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
-            newTrips.forEach((newTrip) => {
-                if (tripMap.has(newTrip.tripId))
-                    tripMap.set(newTrip.tripId, {...tripMap.get(newTrip.tripId), ...newTrip});
-                else tripMap.set(newTrip.tripId, newTrip);
-            });
-
-            return Array.from(tripMap.values()).sort((a, b) =>
-                new Date(a.arrival.actualTime || a.arrival.plannedTime).getTime() -
-                new Date(b.arrival.actualTime || b.arrival.plannedTime).getTime()
-            );
-        });
-    }
-
     const fetchTrips = async () => {
-        const v2Trips = await arrivalsV1(startDate);
-        if (!v2Trips) return;
+        const request = await fetch(`/api/v1/station/arrivals?id=${station.id}&when=${startDate.toISOString()}&duration=${calculateDuration()}&results=1000`);
+        if (!request.ok) return;
 
-        const updatedTrips = await arrivalsV2(startDate, v2Trips);
-        if (!updatedTrips) return;
+        const response = await request.json();
+        if (!response.success || !Array.isArray(response.entries)) return;
 
-        updateScheduledTrips(updatedTrips);
+        const trips: Trip[] = response.entries as Trip[];
+        setScheduled((currentTrips: Trip[]) => {
+            const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
+            trips.forEach((incomingTrip) => {
+                if (tripMap.has(incomingTrip.tripId))
+                    tripMap.set(incomingTrip.tripId, {...tripMap.get(incomingTrip.tripId), ...incomingTrip});
+                else tripMap.set(incomingTrip.tripId, incomingTrip);
+            });
+
+            return Array.from(tripMap.values());
+        });
     }
 
     useEffect(() => {
