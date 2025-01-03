@@ -75,26 +75,24 @@ export default function Arrivals() {
     }, []);
 
     return (
-        <div className="h-screen flex flex-col overflow-hidden space-y-4">
+        <div className="h-screen flex flex-col overflow-hidden md:space-y-4">
             <Navbar id={station.id}/>
 
             <div className="container mx-auto flex justify-between items-center px-4">
-                <span className="text-4xl font-semibold mt-4 px-4">{station.name}</span>
-                <Clock className="text-4xl font-medium mt-4 px-4"/>
+                <span className="text-xl md:text-4xl font-semibold mt-4 px-2 md:px-4">{station.name}</span>
+                <Clock className="text-2xl md:text-4xl font-medium mt-4 px-2 md:px-4"/>
             </div>
 
             <ScheduledHeader isDeparture={false}/>
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">
-                {scheduled.length > 0 ? (
-                    scheduled.map((item: Trip, index: number) => (
-                        <ScheduledComponent
-                            key={item.tripId}
-                            trip={item}
-                            isDeparture={false}
-                            isEven={index % 2 === 0}
-                        />
-                    ))
-                ) : <></>}
+                {scheduled.length > 0 && scheduled.map((item: Trip, index: number) => (
+                    <ScheduledComponent
+                        key={item.tripId}
+                        trip={item}
+                        isDeparture={false}
+                        isEven={index % 2 === 0}
+                    />
+                ))}
             </div>
         </div>
     )
