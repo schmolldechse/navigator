@@ -17,7 +17,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
             if (!colorRequest.ok) return;
 
             const colorData = await colorRequest.json();
-            setColor(colorData);
+            if (!colorData.success) return;
+            setColor(colorData.entry);
         }
 
         fetchColor();
