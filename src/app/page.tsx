@@ -36,6 +36,7 @@ export default function Home() {
 
         switch (e.key) {
             case 'ArrowDown':
+            case 'Tab':
                 e.preventDefault();
                 setFocusedIndex((prev) => (prev === null || prev === results.length - 1 ? 0 : prev + 1));
                 break;
