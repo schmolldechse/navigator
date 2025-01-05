@@ -6,7 +6,7 @@ import Navbar from "@/app/components/navbar";
 import Clock from "@/app/components/clock";
 import ScheduledComponent from "@/app/components/scheduled";
 import ScheduledHeader from "@/app/components/scheduled-header";
-import {Trip} from "@/app/lib/trip";
+import {Connection, Journey} from "@/app/lib/objects";
 
 export default function Departures() {
     const params = useParams();
@@ -15,7 +15,8 @@ export default function Departures() {
         name: undefined
     });
 
-    const [scheduled, setScheduled] = useState<Trip[]>([]);
+    const [journeys, setJourneys] = useState<Journey[]>([]);
+    const [scheduled, setScheduled] = useState<Connection[]>([]);
 
     const [startDate, setStartDate] = useState<Date>(new Date());
     const [endDate, setEndDate] = useState<Date>();
@@ -25,15 +26,28 @@ export default function Departures() {
         return (endDate.getTime() - startDate.getTime()) / 60000;
     }
 
-    const fetchTrips = async () => {
-        const request = await fetch(`/api/v1/station/departures?id=${station.id}&when=${startDate.toISOString()}&duration=${calculateDuration()}&results=1000`);
-        if (!request.ok) return;
+    // obtain language for results
+    const browserLanguage = (): string => {
+        const supported = ['en', 'de'];
+        const language = navigator.language.split("-")[0];
+        return supported.includes(language) ? language : 'en';
+    }
 
-        const response = await request.json();
+    // fetch once
+    const fetchTrips = async () => {
+        const request = await fetch(`/api/v1/bahnhof-proxy?id=${station.id}&type=departures&duration=60&locale=${browserLanguage()}`);
+        if (!request.ok) return;
+    }
+
+    const updateTrips = async () => {
+        const requestHAFAS = await fetch(`/api/v1/station/departures?id=${station.id}&when=${startDate.toISOString()}&duration=${calculateDuration()}&results=1000`);
+        if (!requestHAFAS.ok) return;
+
+        const response = await requestHAFAS.json();
         if (!response.success || !Array.isArray(response.entries)) return;
 
-        const trips: Trip[] = response.entries as Trip[];
-        setScheduled((currentTrips: Trip[]) => {
+        const trips: Connection[] = response.entries as Connection[];
+        setScheduled((currentTrips: Connection[]) => {
             const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
             trips.forEach((incomingTrip) => {
                 if (tripMap.has(incomingTrip.tripId))
@@ -67,10 +81,12 @@ export default function Departures() {
         }
         fetchStationName();
 
-        // fetch trips from HAFAS once & update them every 15s
         fetchTrips();
 
-        const intervalId = setInterval(fetchTrips, 15 * 1000);
+        // fetch trips from HAFAS once & update them every 15s
+        updateTrips();
+
+        const intervalId = setInterval(updateTrips, 15 * 1000);
         return () => clearInterval(intervalId);
     }, []);
 
@@ -85,10 +101,10 @@ export default function Departures() {
 
             <ScheduledHeader isDeparture={true}/>
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">
-                {scheduled.length > 0 && scheduled.map((item: Trip, index: number) => (
+                {scheduled.length > 0 && scheduled.map((item: Connection, index: number) => (
                     <ScheduledComponent
                         key={item.tripId}
-                        trip={item}
+                        connection={item}
                         isDeparture={true}
                         isEven={index % 2 === 0}
                     />

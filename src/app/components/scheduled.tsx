@@ -1,19 +1,19 @@
 import {useEffect, useState} from "react";
-import {Trip} from "@/app/lib/trip";
+import {Connection} from "@/app/lib/objects";
 
 interface ScheduledProps {
-    trip: Trip,
+    connection: Connection,
     isDeparture: boolean,
     isEven: boolean
 }
 
-const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven}) => {
+const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, isEven}) => {
     const [color, setColor] = useState<any>();
     const backgroundColor = isEven ? "#0a0a0a" : "#1a1a1a";
 
     useEffect(() => {
         const fetchColor = async () => {
-            const colorRequest = await fetch(`/api/v1/color?id=${trip.lineInformation.id}`, {method: 'GET'});
+            const colorRequest = await fetch(`/api/v1/color?id=${connection.lineInformation.id}`, {method: 'GET'});
             if (!colorRequest.ok) return;
 
             const colorData = await colorRequest.json();
@@ -25,8 +25,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
     }, []);
 
     const isDelayed = () => {
-        const planned = new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime);
-        const actual = new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime);
+        const planned = new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime);
+        const actual = new Date(isDeparture ? connection.departure.actualTime : connection.arrival.actualTime);
 
         const difference = (actual.getTime() - planned.getTime()) / 60000; // in min
         return difference >= 1;
@@ -35,16 +35,16 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
     const showPlatform = () => {
         return (<>
             {isDeparture ? (<>
-                {trip.departure.plannedPlatform === trip.departure.actualPlatform ? (
-                    <span>{trip.departure.plannedPlatform}</span>
+                {connection.departure.plannedPlatform === connection.departure.actualPlatform ? (
+                    <span>{connection.departure.plannedPlatform}</span>
                 ) : (
-                    <span className="bg-[#ededed] text-[#0a0a0a] md:w-full">{trip.departure.actualPlatform}</span>
+                    <span className="bg-[#ededed] text-[#0a0a0a] md:w-full">{connection.departure.actualPlatform}</span>
                 )}
             </>) : (<>
-                {trip.arrival.plannedPlatform === trip.arrival.actualPlatform ? (
-                    <span>{trip.arrival.plannedPlatform}</span>
+                {connection.arrival.plannedPlatform === connection.arrival.actualPlatform ? (
+                    <span>{connection.arrival.plannedPlatform}</span>
                 ) : (
-                    <span className="bg-[#ededed] text-[#0a0a0a] md:w-full">{trip.arrival.actualPlatform}</span>
+                    <span className="bg-[#ededed] text-[#0a0a0a] md:w-full">{connection.arrival.actualPlatform}</span>
                 )}
             </>)}
         </>)
@@ -53,7 +53,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
     return (
         <div
             className={`border-gray-40`}
-            style={{ backgroundColor: trip.cancelled ? "#ededed" : backgroundColor }}
+            style={{ backgroundColor: connection.cancelled ? "#ededed" : backgroundColor }}
         >
             {/* layout for smaller screens (under md) */}
             <div
@@ -63,7 +63,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
                 <span className={`${color ? 'py-[0.2rem] px-[0.8rem] rounded-xl' : ''} text-lg font-bold`}
                       style={{backgroundColor: color ? `${color.backgroundColor}` : ''}}
                 >
-                {trip.lineInformation.fullName}
+                {connection.lineInformation.fullName}
             </span>
 
                 {/* second line */}
@@ -71,7 +71,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
                     {/* scheduled time */}
                     <div className="flex-[1] flex flex-row items-center space-x-2 text-2xl">
                     <span>
-                        {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString("de-DE", {
+                        {new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime).toLocaleTimeString("de-DE", {
                             hour: '2-digit',
                             minute: '2-digit'
                         })}
@@ -80,7 +80,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
                             <span
                                 className={`bg-[#ededed] text-[#0a0a0a] text-sm h-full px-[0.3rem] py-[0.05rem]`}
                             >
-                            {new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime).toLocaleTimeString("de-DE", {
+                            {new Date(isDeparture ? connection.departure.actualTime : connection.arrival.actualTime).toLocaleTimeString("de-DE", {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
@@ -93,12 +93,12 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
                 </div>
 
                 {/* third line */}
-                <span className="text-2xl">{isDeparture ? trip.destination.name : trip.origin.name}</span>
+                <span className="text-2xl">{isDeparture ? connection.destination.name : connection.origin.name}</span>
             </div>
 
             {/* layout for greater screens (above md) */}
             <div
-                className={`container mx-auto hidden md:flex justify-between space-x-4 text-[28px] font-medium ${trip.cancelled ? 'text-black' : ''} pb-4`}
+                className={`container mx-auto hidden md:flex justify-between space-x-4 text-[28px] font-medium ${connection.cancelled ? 'text-black' : ''} pb-4`}
             >
                 {/* First col */}
                 <div className={`flex-[1] text-right mr-8 border-t pt-4 space-y-4`}>
@@ -106,7 +106,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
                     <span className={`${color ? 'p-2 rounded-2xl px-4 font-bold' : ''} text-xl`}
                           style={{backgroundColor: color?.backgroundColor || 'inherit'}}
                     >
-                    {trip.lineInformation.fullName}
+                    {connection.lineInformation.fullName}
                 </span>
 
                     {/* Departure time */}
@@ -115,7 +115,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
                         className={`${isDelayed() ? '' : ''} flex items-center justify-center`}
                         style={{height: '2rem'}}
                     >
-                        {new Date(isDeparture ? trip.departure.plannedTime : trip.arrival.plannedTime).toLocaleTimeString("de-DE", {
+                        {new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime).toLocaleTimeString("de-DE", {
                             hour: '2-digit',
                             minute: '2-digit'
                         })}
@@ -125,7 +125,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
                                 className={`${isDelayed() ? 'font-bold' : ''} bg-[#ededed] text-[#0a0a0a] flex items-center justify-center text-[20px]`}
                                 style={{height: '1.5rem', padding: '0 0.4rem'}}
                             >
-                            {new Date(isDeparture ? trip.departure.actualTime : trip.arrival.actualTime).toLocaleTimeString("de-DE", {
+                            {new Date(isDeparture ? connection.departure.actualTime : connection.arrival.actualTime).toLocaleTimeString("de-DE", {
                                 hour: '2-digit',
                                 minute: '2-digit'
                             })}
@@ -136,7 +136,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({trip, isDeparture, isEven
 
                 {/* Second col */}
                 <div className="flex-[4] flex items-end text-left border-t pt-4">
-                    <span>{isDeparture ? trip.destination.name : trip.origin.name}</span>
+                    <span>{isDeparture ? connection.destination.name : connection.origin.name}</span>
                 </div>
 
                 {/* Third col */}
