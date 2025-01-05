@@ -17,14 +17,14 @@ export type Connection = {
     departure?: {
         plannedTime: string,        // the time when the train should have departed
         actualTime: string,         // the time when the train actually departed
-        delay: string,              // the delay of departure in sec
+        delay: number,              // the delay of departure in sec
         plannedPlatform: string,
         actualPlatform: string
     }
     arrival?: {
         plannedTime: string,        // the time when the train should have been at the end station
         actualTime: string,         // the time when the train reaches his end station in reality
-        delay: string,              // the delay of arrival in sec
+        delay: number,              // the delay of arrival in sec
         plannedPlatform: string,
         actualPlatform: string
     },
