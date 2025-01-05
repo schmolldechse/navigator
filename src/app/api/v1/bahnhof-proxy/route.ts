@@ -36,7 +36,7 @@ export async function GET(req: NextRequest) {
         journeys.push(journey);
     });
 
-    return NextResponse.json({success: true, entries: journeys });
+    return NextResponse.json({ entries: journeys });
 }
 
 const mapConnection = (entry: any): Connection => {

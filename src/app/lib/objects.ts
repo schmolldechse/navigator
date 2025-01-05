@@ -1,16 +1,16 @@
 export type Connection = {
     ris_journeyId?: string,          // RIS identifier   (DB RIS internal, HAFAS v2)
     hafas_journeyId?: string,        // HAFAS identifier (HAFAS v1)
-    tripId: string,
+    tripId?: string,
     origin?: {
         id: string,
         name: string,
-        cancelled: boolean,
+        cancelled?: boolean,
     },
     destination?: {
         id: string,
         name: string,
-        cancelled: boolean
+        cancelled?: boolean
     },
     ueber?: string[],               // the stops where the train stops
     viaStops?: string[],               // the stops where the train stops
@@ -43,9 +43,9 @@ export type Connection = {
         latitude: number,
         longitude: number
     },
-    canceledStopsAfterActualDestination: any[],
-    additionalStops: any[],
-    canceledStops: any[],
+    canceledStopsAfterActualDestination?: any[],
+    additionalStops?: any[],
+    canceledStops?: any[],
     stopovers?: [],
     remarks?: [],
     messages?: any,

@@ -34,9 +34,14 @@ export default function Departures() {
     }
 
     // fetch once
-    const fetchTrips = async () => {
+    const journeysFromDB = async (): Promise<Journey[]> => {
         const request = await fetch(`/api/v1/bahnhof-proxy?id=${station.id}&type=departures&duration=60&locale=${browserLanguage()}`);
         if (!request.ok) return;
+
+        const response = await request.json();
+        if (!response.entries || !Array.isArray(response.entries)) return;
+
+        return response.entries as Journey[];
     }
 
     const updateTrips = async () => {
@@ -44,7 +49,7 @@ export default function Departures() {
         if (!requestHAFAS.ok) return;
 
         const response = await requestHAFAS.json();
-        if (!response.success || !Array.isArray(response.entries)) return;
+        if (!Array.isArray(response.entries)) return;
 
         const trips: Connection[] = response.entries as Connection[];
         setScheduled((currentTrips: Connection[]) => {
@@ -81,7 +86,11 @@ export default function Departures() {
         }
         fetchStationName();
 
-        fetchTrips();
+        const initJourneys = async () => {
+            const fetchedJourneys: Journey[] = await journeysFromDB();
+            if (fetchedJourneys.length === 0) return;
+        }
+        initJourneys();
 
         // fetch trips from HAFAS once & update them every 15s
         updateTrips();
