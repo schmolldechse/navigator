@@ -6,7 +6,7 @@ import Navbar from "@/app/components/navbar";
 import Clock from "@/app/components/clock";
 import ScheduledComponent from "@/app/components/scheduled";
 import ScheduledHeader from "@/app/components/scheduled-header";
-import {Trip} from "@/app/lib/trip";
+import {Connection} from "@/app/lib/objects";
 
 export default function Arrivals() {
     const params = useParams();
@@ -15,7 +15,7 @@ export default function Arrivals() {
         name: undefined
     });
 
-    const [scheduled, setScheduled] = useState<Trip[]>([]);
+    const [scheduled, setScheduled] = useState<Connection[]>([]);
 
     const [startDate, setStartDate] = useState<Date>(new Date());
     const [endDate, setEndDate] = useState<Date>();
@@ -32,7 +32,7 @@ export default function Arrivals() {
         const response = await request.json();
         if (!response.success || !Array.isArray(response.entries)) return;
 
-        const trips: Trip[] = response.entries as Trip[];
+        const trips: Connection[] = response.entries as Connection[];
         setScheduled((currentTrips: Trip[]) => {
             const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
             trips.forEach((incomingTrip) => {
@@ -85,10 +85,10 @@ export default function Arrivals() {
 
             <ScheduledHeader isDeparture={false}/>
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">
-                {scheduled.length > 0 && scheduled.map((item: Trip, index: number) => (
+                {scheduled.length > 0 && scheduled.map((item: Connection, index: number) => (
                     <ScheduledComponent
                         key={item.tripId}
-                        trip={item}
+                        connection={item}
                         isDeparture={false}
                         isEven={index % 2 === 0}
                     />
