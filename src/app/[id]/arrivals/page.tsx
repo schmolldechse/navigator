@@ -33,7 +33,7 @@ export default function Arrivals() {
         if (!response.success || !Array.isArray(response.entries)) return;
 
         const trips: Connection[] = response.entries as Connection[];
-        setScheduled((currentTrips: Trip[]) => {
+        setScheduled((currentTrips: Connection[]) => {
             const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
             trips.forEach((incomingTrip) => {
                 if (tripMap.has(incomingTrip.tripId))
