@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 }
 
 const v1 = async (id: string, when: string, duration: number, results: number): Promise<Connection[]> => {
-    const response = await fetch(`https://hafas-v1.voldechse.wtf/stops/${id}/arrival?when=${when}&duration=${duration}&results=${results}`, {method: 'GET'});
+    const response = await fetch(`https://hafas-v1.voldechse.wtf/stops/${id}/arrivals?when=${when}&duration=${duration}&results=${results}`, {method: 'GET'});
     if (!response.ok) return [];
 
     const data = await response.json();
@@ -81,7 +81,7 @@ const v2 = async (id: string, when: string, duration: number, results: number): 
         if (!tripId || map.has(tripId)) return;
 
         const connection: Connection = {
-            ris_journeyId: departure.tripId,
+            ris_journeyId: arrival.tripId,
             arrival: {
                 plannedTime: arrival.plannedWhen,
                 actualTime: arrival.when,                     // nullable
