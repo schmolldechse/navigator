@@ -1,7 +1,7 @@
 'use client';
 
 import {useParams} from "next/navigation";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import Navbar from "@/app/components/navbar";
 import Clock from "@/app/components/clock";
 import ScheduledComponent from "@/app/components/scheduled";
@@ -17,6 +17,8 @@ export default function Departures() {
     });
 
     const [journeys, setJourneys] = useState<Journey[]>([]);
+    const journeysRef = useRef<Journey[]>([]);
+
     const [scheduled, setScheduled] = useState<Connection[]>([]);
 
     const [startDate, setStartDate] = useState<Date>(() => {
@@ -49,7 +51,7 @@ export default function Departures() {
         return response.entries as Journey[];
     }
 
-    const updateJourneys = async (prevJourneys: Journey[]) => {
+    const updateJourneys = async () => {
         const request = await fetch(`/api/v1/station/departures?id=${station.id}&when=${startDate.toISOString()}&duration=${calculateDuration()}&results=1000`);
         if (!request.ok) return;
 
@@ -58,10 +60,13 @@ export default function Departures() {
 
         const connections: Connection[] = response.entries as Connection[];
 
+        const prevJourneys = journeysRef.current;
+
         const mappedJourneys = mapConnections(prevJourneys, connections);
         const sorted = sort(mappedJourneys);
 
         setJourneys(sorted);
+        journeysRef.current = sorted;
 
         // TODO: remove scheduled
         setScheduled((currentTrips: Connection[]) => {
@@ -103,11 +108,13 @@ export default function Departures() {
             const fetchedJourneys: Journey[] = await journeysFromDB();
             if (fetchedJourneys.length === 0) return;
 
+            journeysRef.current = fetchedJourneys;
+
             updateJourneys(fetchedJourneys);
         }
         initJourneys();
 
-        const intervalId = setInterval(updateJourneys, 15 * 1000, journeys);
+        const intervalId = setInterval(updateJourneys, 15 * 1000);
         return () => clearInterval(intervalId);
     }, []);
 
