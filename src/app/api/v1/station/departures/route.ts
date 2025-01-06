@@ -82,10 +82,6 @@ const v2 = async (id: string, when: string, duration: number, results: number): 
 
         const connection: Connection = {
             ris_journeyId: departure.tripId,
-            destination: {
-                id: departure.destination.id,
-                name: departure.destination.name
-            },
             departure: {
                 plannedTime: departure.plannedWhen,
                 actualTime: departure.when,                     // nullable
