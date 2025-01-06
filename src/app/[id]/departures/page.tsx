@@ -18,7 +18,11 @@ export default function Departures() {
     const [journeys, setJourneys] = useState<Journey[]>([]);
     const [scheduled, setScheduled] = useState<Connection[]>([]);
 
-    const [startDate, setStartDate] = useState<Date>(new Date());
+    const [startDate, setStartDate] = useState<Date>(() => {
+        const date: Date = new Date();
+        date.setSeconds(0);
+        return date;
+    });
     const [endDate, setEndDate] = useState<Date>();
 
     const calculateDuration = (): number => {

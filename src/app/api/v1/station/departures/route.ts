@@ -81,8 +81,11 @@ const v2 = async (id: string, when: string, duration: number, results: number): 
         if (!tripId || map.has(tripId)) return;
 
         const connection: Connection = {
-            tripId: departure.tripId,
             ris_journeyId: departure.tripId,
+            destination: {
+                id: departure.destination.id,
+                name: departure.destination.name
+            },
             departure: {
                 plannedTime: departure.plannedWhen,
                 actualTime: departure.when,                     // nullable
@@ -103,8 +106,10 @@ const v2 = async (id: string, when: string, duration: number, results: number): 
 
 const mapConnections = (mapV1: Connection[], mapV2: Connection[]): Connection[] => {
     return mapV1.map((connectionV1: Connection) => {
-        const matching = mapV2.find((connectionV2: Connection) => connectionV1.departure.plannedTime === connectionV2.departure.plannedTime &&
-            connectionV1.lineInformation?.fahrtNr === connectionV2.lineInformation?.fahrtNr);
+        const matching = mapV2.find((connectionV2) =>
+            connectionV1.departure.plannedTime === connectionV2.departure.plannedTime &&
+            connectionV1.lineInformation?.fahrtNr === connectionV2.lineInformation?.fahrtNr
+        );
 
         if (matching) {
             return {
