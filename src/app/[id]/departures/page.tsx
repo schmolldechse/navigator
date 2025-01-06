@@ -7,6 +7,7 @@ import Clock from "@/app/components/clock";
 import ScheduledComponent from "@/app/components/scheduled";
 import ScheduledHeader from "@/app/components/scheduled-header";
 import {Connection, Journey} from "@/app/lib/objects";
+import {mapConnections, sort} from "@/app/lib/mapper";
 
 export default function Departures() {
     const params = useParams();
@@ -48,17 +49,24 @@ export default function Departures() {
         return response.entries as Journey[];
     }
 
-    const updateTrips = async () => {
-        const requestHAFAS = await fetch(`/api/v1/station/departures?id=${station.id}&when=${startDate.toISOString()}&duration=${calculateDuration()}&results=1000`);
-        if (!requestHAFAS.ok) return;
+    const updateJourneys = async (prevJourneys: Journey[]) => {
+        const request = await fetch(`/api/v1/station/departures?id=${station.id}&when=${startDate.toISOString()}&duration=${calculateDuration()}&results=1000`);
+        if (!request.ok) return;
 
-        const response = await requestHAFAS.json();
+        const response = await request.json();
         if (!Array.isArray(response.entries)) return;
 
-        const trips: Connection[] = response.entries as Connection[];
+        const connections: Connection[] = response.entries as Connection[];
+
+        const mappedJourneys = mapConnections(prevJourneys, connections);
+        const sorted = sort(mappedJourneys);
+
+        setJourneys(sorted);
+
+        // TODO: remove scheduled
         setScheduled((currentTrips: Connection[]) => {
             const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
-            trips.forEach((incomingTrip) => {
+            connections.forEach((incomingTrip) => {
                 if (tripMap.has(incomingTrip.tripId))
                     tripMap.set(incomingTrip.tripId, {...tripMap.get(incomingTrip.tripId), ...incomingTrip});
                 else tripMap.set(incomingTrip.tripId, incomingTrip);
@@ -90,16 +98,16 @@ export default function Departures() {
         }
         fetchStationName();
 
+        // fetch journeys once from Bahnhof API and update them every 15s
         const initJourneys = async () => {
             const fetchedJourneys: Journey[] = await journeysFromDB();
             if (fetchedJourneys.length === 0) return;
+
+            updateJourneys(fetchedJourneys);
         }
         initJourneys();
 
-        // fetch trips from HAFAS once & update them every 15s
-        updateTrips();
-
-        const intervalId = setInterval(updateTrips, 15 * 1000);
+        const intervalId = setInterval(updateJourneys, 15 * 1000, journeys);
         return () => clearInterval(intervalId);
     }, []);
 
