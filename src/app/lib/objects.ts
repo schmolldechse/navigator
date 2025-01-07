@@ -30,6 +30,7 @@ export type Connection = {
     },
     lineInformation?: {
         kind?: string,              // the type of train service operating (from DB RIS)
+        additionalLineName: string, // an additional name of the train line in operation (e.g. IC 387 is running simultaneously as RE 87)
         productName?: string,       // the type of train service operarting (e.g., RB, RE, IRE)
         fullName?: string,          // the name of the train line in operation (e.g. RE 7)
         id?: string,                // the line number, often the same as fullName but with hypens ("-") instead of spaces
