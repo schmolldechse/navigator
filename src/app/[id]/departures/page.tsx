@@ -63,7 +63,7 @@ export default function Departures() {
         const prevJourneys = journeysRef.current;
 
         const mappedJourneys = mapConnections(prevJourneys, connections);
-        const sorted = sort(mappedJourneys);
+        const sorted = sort(mappedJourneys.journeys);
 
         setJourneys(sorted);
         journeysRef.current = sorted;

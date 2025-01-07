@@ -61,6 +61,7 @@ const mapConnection = (entry: any): Connection => {
         },
         lineInformation: {
             kind: entry.kind,
+            additionalLineName: entry.additionalLineName	
         },
         viaStops: entry.viaStops,
         canceledStopsAfterActualDestination: entry.canceledStopsAfterActualDestination,

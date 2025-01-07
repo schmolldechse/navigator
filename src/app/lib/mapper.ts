@@ -1,6 +1,6 @@
 import {Connection, Journey} from "@/app/lib/objects";
 
-const mapConnections = (journeys: Journey[], connections: Connection[]): Journey[] => {
+const mapConnections = (journeys: Journey[], connections: Connection[]): { journeys: Journey[], faulty: Connection[] } => {
     const matched = new Set<string>();
 
     const updatedJourneys = journeys.map((journey: Journey) => ({
@@ -24,11 +24,18 @@ const mapConnections = (journeys: Journey[], connections: Connection[]): Journey
         })
     }));
 
+    // sort out the connections that do not have an assigned journey
+    // this may happen if, for example, a train is running with an "lineInformation.additionalLineName" and no second id can be found
+    const faulty = connections.filter(conn => !matched.has(conn.ris_journeyId ?? '') && !matched.has(conn.hafas_journeyId ?? ''));
+    return { journeys: updatedJourneys, faulty: faulty };
+
+    /**
     // handle Connection's which have no Journey
     const newJourneys = connections.filter(conn => !matched.has(conn.ris_journeyId ?? '') && !matched.has(conn.hafas_journeyId ?? ''))
         .map(conn => ({connections: [conn]}));
 
     return [...updatedJourneys, ...newJourneys];
+    */
 }
 
 const sort = (journeys: Journey[]): Journey[] => {
