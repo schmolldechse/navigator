@@ -5,8 +5,8 @@ const mapConnections = (journeys: Journey[], connections: Connection[]): { journ
 
     const updatedJourneys = journeys.map((journey: Journey) => ({
         ...journey,
-        connections: journey.connections.map(connection => {
-            const matching = connections.find(conn => conn.ris_journeyId === connection.ris_journeyId || conn.hafas_journeyId === connection.hafas_journeyId);
+        connections: journey.connections.map((connection: Connection) => {
+            const matching = connections.find((conn: Connection) => conn.ris_journeyId === connection.ris_journeyId);
             if (!matching) return connection;
 
             if (matching.ris_journeyId) matched.add(matching.ris_journeyId);
@@ -27,15 +27,15 @@ const mapConnections = (journeys: Journey[], connections: Connection[]): { journ
     // sort out the connections that do not have an assigned journey
     // this may happen if, for example, a train is running with an "lineInformation.additionalLineName" and no second id can be found
     const faulty = connections.filter(conn => !matched.has(conn.ris_journeyId ?? '') && !matched.has(conn.hafas_journeyId ?? ''));
-    return { journeys: updatedJourneys, faulty: faulty };
+    return {journeys: updatedJourneys, faulty: faulty};
 
     /**
-    // handle Connection's which have no Journey
-    const newJourneys = connections.filter(conn => !matched.has(conn.ris_journeyId ?? '') && !matched.has(conn.hafas_journeyId ?? ''))
-        .map(conn => ({connections: [conn]}));
+     // handle Connection's which have no Journey
+     const newJourneys = connections.filter(conn => !matched.has(conn.ris_journeyId ?? '') && !matched.has(conn.hafas_journeyId ?? ''))
+     .map(conn => ({connections: [conn]}));
 
-    return [...updatedJourneys, ...newJourneys];
-    */
+     return [...updatedJourneys, ...newJourneys];
+     */
 }
 
 const sort = (journeys: Journey[]): Journey[] => {
