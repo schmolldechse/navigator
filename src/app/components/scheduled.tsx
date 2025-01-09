@@ -11,6 +11,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
     const [color, setColor] = useState<any>();
     const backgroundColor = isEven ? "#0a0a0a" : "#1a1a1a";
 
+    // TODO: not possible to find out at the moment
+    /**
     useEffect(() => {
         const fetchColor = async () => {
             const colorRequest = await fetch(`/api/v1/color?id=${connection.lineInformation.id}`, {method: 'GET'});
@@ -23,6 +25,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
 
         fetchColor();
     }, []);
+    */
 
     const isDelayed = () => {
         const planned = new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime);
