@@ -52,7 +52,7 @@ const vendoDB = async (id: string, when: string, duration: number, results: numb
                 productName: departure.line.productName,
                 id: departure.line.id,
                 fahrtNr: departure.line.fahrtNr,
-                name: departure.line.name,
+                fullName: departure.line.name,
                 operator: {
                     id: departure.line.operator?.id || '',
                     name: departure.line.operator?.name || ''
@@ -89,7 +89,7 @@ const vendoDBNav = async (id: string, when: string, duration: number, results: n
             },
             lineInformation: {
                 id: departure.line.id,
-                name: departure.line.name
+                fullName: departure.line.name
             }
         }
 
@@ -104,7 +104,6 @@ const mapConnections = (mapV1: Connection[], mapV2: Connection[]): Connection[] 
         const matching = mapV2.find((connectionV2: Connection) =>
             connectionV1.departure.plannedTime === connectionV2.departure.plannedTime &&
             connectionV1.departure.plannedPlatform === connectionV2.departure.plannedPlatform &&
-            connectionV1.lineInformation?.name === connectionV2.lineInformation?.name &&
             connectionV1.lineInformation?.id.includes(connectionV2.lineInformation?.id)
         );
 
