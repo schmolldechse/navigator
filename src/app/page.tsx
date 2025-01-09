@@ -16,7 +16,7 @@ export default function Home() {
     const [focusedIndex, setFocusedIndex] = useState<number | undefined>(null);
 
     const handleSearch = async (query: string) => {
-        const response = await fetch(`https://hafas-v1.voldechse.wtf/locations/?query=${query}&addresses=false&results=5`, {method: 'GET'});
+        const response = await fetch(`https://navigator-rest.voldechse.wtf/locations/?query=${query}&addresses=false&results=5`, {method: 'GET'});
         if (!response.ok) return;
 
         const data = await response.json();
