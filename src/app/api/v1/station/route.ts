@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     if (result) return NextResponse.json({ success: true, station: result });
 
-    const request = await fetch(`https://navigator-rest.voldechse.wtf/stops/${id}`);
+    const request = await fetch(`https://vendo-prof-dbnav.voldechse.wtf/stops/${id}`);
     if (!request.ok) return NextResponse.json({ success: false, error: 'HTTP Request error occurred' }, { status: 400 });
 
     const data = await request.json();
