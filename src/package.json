@@ -18,7 +18,8 @@
         "react-dom": "^19.0.0",
         "redis": "^4.7.0",
         "tailwind-merge": "^2.6.0",
-        "tailwindcss-animate": "^1.0.7"
+        "tailwindcss-animate": "^1.0.7",
+        "uuid": "^11.0.5"
     },
     "devDependencies": {
         "@types/node": "^20",

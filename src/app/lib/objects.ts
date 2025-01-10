@@ -58,3 +58,14 @@ export type Connection = {
 export type Journey = {
     connections: Connection[]
 }
+
+export type Station = {
+    name: string,
+    locationId: string,
+    evaNr: number,
+    coordinates: {
+        latitude: number,
+        longitude: number
+    },
+    products: any[]
+}

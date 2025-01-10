@@ -1,22 +1,66 @@
-import { getRedisClient } from "@/app/lib/redis";
+import {getRedisClient} from "@/app/lib/redis";
 import {NextRequest, NextResponse} from "next/server.js";
+import {v4} from "uuid";
+import {Station} from "@/app/lib/objects";
 
 export async function POST(req: NextRequest) {
     const body = await req.json();
-    const { id } = body;
+    const {query} = body;
 
-    if (!id) return NextResponse.json({ success: false, error: 'Station id is required' }, { status: 400 });
+    if (!query) return NextResponse.json({error: 'Either a evaNr or station name is missing'}, {status: 400});
 
-    const redis = await getRedisClient();
-    const result = await redis.get(id);
+    const fetchStation = async (searchTerm: string | number): Promise<Station[]> => {
+        const request = await fetch("https://app.vendo.noncd.db.de/mob/location/search", {
+            method: 'POST',
+            headers: {
+                "Accept": "application/x.db.vendo.mob.location.v3+json",
+                "Content-Type": "application/x.db.vendo.mob.location.v3+json",
+                "X-Correlation-ID": v4() + "_" + v4()
+            },
+            body: JSON.stringify({locationTypes: ["ALL"], searchTerm: searchTerm})
+        });
+        if (!request.ok) throw new Error("HTTP Request error occurred");
 
-    if (result) return NextResponse.json({ success: true, station: result });
+        const response = await request.json();
+        if (!response || !Array.isArray(response)) throw new Error("Invalid response format");
 
-    const request = await fetch(`https://vendo-prof-dbnav.voldechse.wtf/stops/${id}`);
-    if (!request.ok) return NextResponse.json({ success: false, error: 'HTTP Request error occurred' }, { status: 400 });
+        return response.map((data: any) => ({
+            name: data.name,
+            locationId: data.locationId,
+            evaNr: parseInt(data.evaNr),
+            coordinates: {
+                latitude: data.coordinates.latitude,
+                longitude: data.coordinates.longitude
+            },
+            products: data.products
+        }))
+    }
 
-    const data = await request.json();
-    await redis.set(id, data.name);
+    if (typeof query === "number") {
+        const redis = await getRedisClient();
+        const cached = await redis.get(query.toString());
+        if (cached) return NextResponse.json({station: JSON.parse(cached)}, {status: 200});
 
-    return NextResponse.json({ success: true, station: data.name }, { status: 200 });
+        try {
+            const data = await fetchStation(query);
+
+            const station = data[0];
+            await redis.set(data.toString(), JSON.stringify(station));
+
+            return NextResponse.json(station, {status: 200});
+        } catch (error) {
+            return NextResponse.json({error: error.message}, {status: 400});
+        }
+    }
+
+    if (typeof query === "string") {
+        try {
+            const data = await fetchStation(query);
+            return NextResponse.json({entries: data}, {status: 200});
+        } catch (error) {
+            return NextResponse.json({error: error.message}, {status: 400});
+        }
+    }
+
+    return NextResponse.json({error: "'query' must be either a string or a number"}, {status: 400});
 }
