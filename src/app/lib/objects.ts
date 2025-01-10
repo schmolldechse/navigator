@@ -62,7 +62,7 @@ export type Journey = {
 export type Station = {
     name: string,
     locationId: string,
-    evaNr: number,
+    evaNr: string,
     coordinates: {
         latitude: number,
         longitude: number
