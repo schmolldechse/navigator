@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
 
     if (!query) return NextResponse.json({error: 'Either a evaNr or station name is missing'}, {status: 400});
 
-    const fetchStation = async (searchTerm: string | number): Promise<Station[]> => {
+    const fetchStation = async (searchTerm: string): Promise<Station[]> => {
         const request = await fetch("https://app.vendo.noncd.db.de/mob/location/search", {
             method: 'POST',
             headers: {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
         return response.map((data: any) => ({
             name: data.name,
             locationId: data.locationId,
-            evaNr: parseInt(data.evaNr),
+            evaNr: data.evaNr,
             coordinates: {
                 latitude: data.coordinates.latitude,
                 longitude: data.coordinates.longitude
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
         if (cached) return NextResponse.json({station: JSON.parse(cached)}, {status: 200});
 
         try {
-            const data = await fetchStation(query);
+            const data = await fetchStation(String(query));
 
             const station = data[0];
             await redis.set(data.toString(), JSON.stringify(station));
