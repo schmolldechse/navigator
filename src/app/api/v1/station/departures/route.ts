@@ -104,6 +104,7 @@ const mapConnections = (mapV1: Connection[], mapV2: Connection[]): Connection[] 
         const matching = mapV2.find((connectionV2: Connection) =>
             connectionV1.departure.plannedTime === connectionV2.departure.plannedTime &&
             connectionV1.departure.plannedPlatform === connectionV2.departure.plannedPlatform &&
+            connectionV1.lineInformation?.fullName === connectionV2.lineInformation?.fullName &&
             connectionV1.lineInformation?.id.includes(connectionV2.lineInformation?.id)
         );
 
