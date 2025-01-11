@@ -11,11 +11,10 @@ export async function GET(req: NextRequest) {
     const duration = parseInt(searchParams.get("duration")) || 60;
     const results = parseInt(searchParams.get("results")) || 1000;
 
-    const connectionsDB = await vendoDB(id, when, duration, results);
-    if (!connectionsDB) return NextResponse.json({entries: []}, {status: 200});
+    const connections = await vendo(id, when, duration, results);
+    if (!connections) return NextResponse.json({entries: []}, {status: 200});
 
-    const connectionsDBNav = await vendoDBNav(id, when, duration, results);
-    const sorted = Array.from(mapConnections(connectionsDB, connectionsDBNav)).sort((a, b) =>
+    const sorted = Array.from(connections).sort((a, b) =>
         new Date(a.departure.actualTime || a.departure.plannedTime).getTime() -
         new Date(b.departure.actualTime || b.departure.plannedTime).getTime()
     );
@@ -23,8 +22,8 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({entries: sorted}, {status: 200});
 }
 
-const vendoDB = async (id: string, when: string, duration: number, results: number): Promise<Connection[]> => {
-    const response = await fetch(`https://vendo-prof-db.voldechse.wtf/stops/${id}/departures?when=${when}&duration=${duration}&results=${results}`, {method: 'GET'});
+const vendo = async (id: string, when: string, duration: number, results: number): Promise<Connection[]> => {
+    const response = await fetch(`https://vendo-prof-dbnav.voldechse.wtf/stops/${id}/departures?when=${when}&duration=${duration}&results=${results}`, {method: 'GET'});
     if (!response.ok) return [];
 
     const data = await response.json();
@@ -38,10 +37,6 @@ const vendoDB = async (id: string, when: string, duration: number, results: numb
         const connection: Connection = {
             ris_journeyId: departure.tripId,
             direction: departure.direction,
-            destination: {
-                id: departure.destination.id,
-                name: departure.destination.name
-            },
             departure: {
                 plannedTime: departure.plannedWhen,
                 actualTime: departure.when,                     // nullable
@@ -50,14 +45,10 @@ const vendoDB = async (id: string, when: string, duration: number, results: numb
                 actualPlatform: departure.platform
             },
             lineInformation: {
-                productName: departure.line.productName,
                 id: departure.line.id,
                 fahrtNr: departure.line.fahrtNr,
                 fullName: departure.line.name,
-                operator: {
-                    id: departure.line.operator?.id || '',
-                    name: departure.line.operator?.name || ''
-                }
+                productName: departure.line.productName,
             }
         }
 
@@ -65,67 +56,4 @@ const vendoDB = async (id: string, when: string, duration: number, results: numb
     });
 
     return Array.from(map.values());
-}
-
-const vendoDBNav = async (id: string, when: string, duration: number, results: number): Promise<Connection[]> => {
-    const response = await fetch(`https://vendo-prof-dbnav.voldechse.wtf/stops/${id}/departures?when=${when}&duration=${duration}&results=${results}`, {method: 'GET'});
-    if (!response.ok) return [];
-
-    const data = await response.json();
-    if (!data?.departures || !Array.isArray(data.departures)) return [];
-
-    const map = new Map<string, Connection>();
-    data.departures.forEach((departure: any) => {
-        const tripId = departure.tripId;
-        if (!tripId || map.has(tripId)) return;
-
-        const connection: Connection = {
-            hafas_journeyId: departure.tripId,
-            direction: departure.direction,
-            departure: {
-                plannedTime: departure.plannedWhen,
-                actualTime: departure.when,                     // nullable
-                delay: departure.delay,                         // nullable
-                plannedPlatform: departure.plannedPlatform,     // nullable
-                actualPlatform: departure.platform
-            },
-            lineInformation: {
-                id: departure.line.id,
-                fullName: departure.line.name
-            }
-        }
-
-        map.set(tripId, connection);
-    });
-
-    return Array.from(map.values());
-}
-
-const mapConnections = (mapV1: Connection[], mapV2: Connection[]): Connection[] => {
-    return mapV1.map((connectionV1: Connection) => {
-        const matching = mapV2.find((connectionV2: Connection) =>
-            connectionV1.departure.plannedTime === connectionV2.departure.plannedTime &&
-            connectionV1.departure.plannedPlatform === connectionV2.departure.plannedPlatform &&
-            connectionV1.lineInformation?.fullName === connectionV2.lineInformation?.fullName &&
-            connectionV1.lineInformation?.id.includes(connectionV2.lineInformation?.id)
-        );
-
-        if (matching) {
-            return {
-                ...connectionV1,
-                hafas_journeyId: matching.hafas_journeyId,
-                departure: {
-                    ...connectionV1.departure,
-                    plannedTime: matching.departure.plannedTime,
-                    actualTime: matching.departure.actualTime,
-                    delay: matching.departure.delay,
-                    plannedPlatform: matching.departure.plannedPlatform,
-                    actualPlatform: matching.departure.actualPlatform
-                }
-            };
-        }
-
-        return connectionV1;
-    });
-
 }
