@@ -7,7 +7,7 @@ export type Connection = {
     actualDestination?: Stop,
     walking?: boolean,
     direction?: string,                 // the stop where the line is going
-    provenance: string,                 // the stop where the line comes from
+    provenance?: string,                 // the stop where the line comes from
     viaStops?: Stop[],                  // the stops where the line stops
     departure?: {
         plannedTime: string,        // the time when the train should have departed
