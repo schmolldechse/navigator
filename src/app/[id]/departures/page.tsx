@@ -8,6 +8,7 @@ import ScheduledComponent from "@/app/components/scheduled";
 import ScheduledHeader from "@/app/components/scheduled-header";
 import {Connection, Journey, Station} from "@/app/lib/objects";
 import {mapConnections, sort} from "@/app/lib/mapper";
+import {browserLanguage} from "@/app/lib/utils";
 
 export default function Departures() {
     const params = useParams();
@@ -33,11 +34,6 @@ export default function Departures() {
         fetchStation();
     }, []);
 
-    const [journeys, setJourneys] = useState<Journey[]>([]);
-    const journeysRef = useRef<Journey[]>([]);
-
-    const [scheduled, setScheduled] = useState<Connection[]>([]);
-
     const [startDate, setStartDate] = useState<Date>(() => {
         const date: Date = new Date();
         date.setSeconds(0);
@@ -45,12 +41,35 @@ export default function Departures() {
     });
     const [endDate, setEndDate] = useState<Date>();
 
+    // update end date
+    useEffect(() => setEndDate(() => {
+        const date = new Date();
+        date.setHours(startDate.getHours() + 1);
+        return date;
+    }), []);
+
     const calculateDuration = (): number => {
         if (!endDate) return 60;
         return (endDate.getTime() - startDate.getTime()) / 60000;
     }
 
+    const [journeys, setJourneys] = useState<Journey[]>([]);
+    const journeysRef = useRef<Journey[]>([]);
+
+    const [scheduled, setScheduled] = useState<Connection[]>([]);
+
+    const journeysFromDB = async (): Promise<Journey[]> => {
+        const request = await fetch(`/api/v1/bahnhof-proxy?id=${station?.evaNr}&type=departures&duration=60&locale=${browserLanguage()}`);
+        if (!request.ok) return [];
+
+        const response = await request.json();
+        if (!response.entries || !Array.isArray(response.entries)) return [];
+
+        return response.entries as Journey[];
+    }
+
     const updateJourneys = async () => {
+        const prevJourneys = journeysRef.current;
         const request = await fetch(`/api/v1/station/departures?id=${station?.evaNr}&when=${startDate.toISOString()}&duration=${calculateDuration()}&results=1000`);
         if (!request.ok) return;
 
@@ -59,38 +78,30 @@ export default function Departures() {
 
         const connections: Connection[] = response.entries as Connection[];
 
-        const prevJourneys = journeysRef.current;
-
         const mappedJourneys = mapConnections(prevJourneys, connections);
         const sorted = sort(mappedJourneys.journeys);
 
         setJourneys(sorted);
         journeysRef.current = sorted;
-
-        // TODO: remove scheduled
-        setScheduled((currentTrips: Connection[]) => {
-            const tripMap = new Map(currentTrips.map(trip => [trip.tripId, trip]));
-            connections.forEach((incomingTrip) => {
-                if (tripMap.has(incomingTrip.tripId))
-                    tripMap.set(incomingTrip.tripId, {...tripMap.get(incomingTrip.tripId), ...incomingTrip});
-                else tripMap.set(incomingTrip.tripId, incomingTrip);
-            });
-
-            return Array.from(tripMap.values());
-        });
     }
 
     useEffect(() => {
-        // update end date
-        setEndDate((_) => {
-            const date = new Date();
-            date.setHours(startDate.getHours() + 1);
-            return date;
-        });
+        if (station === undefined || !station?.evaNr) return;
+        setJourneys([]);
+        journeysRef.current = [];
+
+        const initJourneys = async () => {
+            const fetchedJourneys: Journey[] = await journeysFromDB();
+            if (fetchedJourneys.length === 0) return;
+
+            journeysRef.current = fetchedJourneys;
+            setJourneys(fetchedJourneys);
+        }
+        initJourneys();
 
         const intervalId = setInterval(updateJourneys, 15 * 1000);
         return () => clearInterval(intervalId);
-    }, []);
+    }, [station?.evaNr]);
 
     return (
         <div className="h-screen flex flex-col overflow-hidden md:space-y-4">
@@ -103,7 +114,15 @@ export default function Departures() {
 
             <ScheduledHeader isDeparture={true}/>
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">
-                {scheduled.length > 0 && scheduled.map((item: Connection, index: number) => (
+                {journeys.length > 0 && journeys.map((journey: Journey, index: number) => (<div key={index}>
+                    {journey.connections.length === 1 ? (
+                        <ScheduledComponent connection={journey.connections[0]} isDeparture={true} isEven={index % 2 === 0}/>
+                    ) : (
+                        <div>{journey.connections.length}</div> // wing train
+                    )}
+                </div>))}
+                {/*
+                {scheduled.length > 0 && scheduled.map((item: Scheduled, index: number) => (
                     <ScheduledComponent
                         key={item.tripId}
                         connection={item}
@@ -111,6 +130,7 @@ export default function Departures() {
                         isEven={index % 2 === 0}
                     />
                 ))}
+                */}
             </div>
         </div>
     )

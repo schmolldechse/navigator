@@ -47,11 +47,7 @@ const mapConnection = (entry: any): Connection => {
 
     return {
         ris_journeyId: entry.journeyID,
-        destination: {
-            id: entry.destination.evaNumber,
-            name: entry.destination.name,
-            cancelled: entry.destination.cancelled
-        },
+        destination: mapStops(entry.destination)[0],
         departure: {
             plannedTime: entry.timeSchedule,
             actualTime: entry.timeDelayed,
@@ -64,10 +60,10 @@ const mapConnection = (entry: any): Connection => {
             additionalLineName: entry.additionalLineName,
             fullName: entry.lineName,
         },
-        viaStops: entry.viaStops,
-        canceledStopsAfterActualDestination: entry.canceledStopsAfterActualDestination,
-        additionalStops: entry.additionalStops,
-        canceledStops: entry.canceledStops,
+        viaStops: mapStops(entry.viaStops),
+        canceledStopsAfterActualDestination: mapStops(entry.canceledStopsAfterActualDestination),
+        additionalStops: mapStops(entry.additionalStops),
+        canceledStops: mapStops(entry.canceledStops),
         messages: entry.messages,
         cancelled: entry.canceled,
     }
