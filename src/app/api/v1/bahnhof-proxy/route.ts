@@ -49,6 +49,7 @@ const mapConnection = (entry: any): Connection => {
     return {
         ris_journeyId: entry.journeyID,
         destination: mapStops(entry.destination)[0],
+        actualDestination: entry.actualDestination ? mapStops(entry.actualDestination)[0] : undefined, 
         departure: {
             plannedTime: entry.timeSchedule,
             actualTime: entry.timeDelayed,
