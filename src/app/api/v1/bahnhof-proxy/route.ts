@@ -1,5 +1,6 @@
 import {NextRequest, NextResponse} from "next/server.js";
 import {Connection, Journey} from "@/app/lib/objects";
+import {mapStops} from "@/app/lib/utils";
 
 export async function GET(req: NextRequest) {
     const {searchParams} = new URL(req.url);
