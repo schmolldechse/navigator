@@ -37,6 +37,7 @@ const vendoDB = async (id: string, when: string, duration: number, results: numb
 
         const connection: Connection = {
             ris_journeyId: departure.tripId,
+            direction: departure.direction,
             destination: {
                 id: departure.destination.id,
                 name: departure.destination.name
@@ -80,6 +81,7 @@ const vendoDBNav = async (id: string, when: string, duration: number, results: n
 
         const connection: Connection = {
             hafas_journeyId: departure.tripId,
+            direction: departure.direction,
             departure: {
                 plannedTime: departure.plannedWhen,
                 actualTime: departure.when,                     // nullable

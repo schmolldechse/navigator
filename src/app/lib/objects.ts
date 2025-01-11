@@ -2,18 +2,11 @@ export type Connection = {
     ris_journeyId?: string,          // RIS identifier   (DB RIS internal, HAFAS v2)
     hafas_journeyId?: string,        // HAFAS identifier (HAFAS v1)
     tripId?: string,
-    origin?: {
-        id: string,
-        name: string,
-        cancelled?: boolean,
-    },
-    destination?: {
-        id: string,
-        name: string,
-        cancelled?: boolean
-    },
-    ueber?: string[],               // the stops where the train stops
-    viaStops?: string[],               // the stops where the train stops
+    origin?: Stop,
+    destination?: Stop,
+    walking?: boolean,
+    direction?: string,
+    viaStops?: Stop[],            // the stops where the train stops
     departure?: {
         plannedTime: string,        // the time when the train should have departed
         actualTime: string,         // the time when the train actually departed
@@ -44,14 +37,28 @@ export type Connection = {
         latitude: number,
         longitude: number
     },
-    canceledStopsAfterActualDestination?: any[],
-    additionalStops?: any[],
-    canceledStops?: any[],
+    canceledStopsAfterActualDestination?: Stop[],
+    additionalStops?: Stop[],
+    canceledStops?: Stop[],
     stopovers?: [],
     remarks?: [],
     messages?: any,
     cancelled?: boolean,
     loadFactor?: string
+}
+
+export type Stop = {
+    id: string,
+    name: string,
+    cancelled: boolean,
+    additional?: boolean,
+    separation?: boolean,
+    nameParts?: NamePart[]
+}
+
+export type NamePart = {
+    type: string,
+    value: string
 }
 
 // a journey can hold multiple connections, e.g. if the train parts are separated later
