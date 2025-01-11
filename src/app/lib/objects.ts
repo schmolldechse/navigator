@@ -4,6 +4,7 @@ export type Connection = {
     tripId?: string,
     origin?: Stop,
     destination?: Stop,
+    actualDestination?: Stop,
     walking?: boolean,
     direction?: string,
     viaStops?: Stop[],                  // the stops where the train stops
