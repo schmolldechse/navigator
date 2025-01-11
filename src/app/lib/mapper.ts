@@ -1,12 +1,34 @@
 import {Connection, Journey} from "@/app/lib/objects";
 
+const normalize = (name?: string): string | undefined => {
+    return name?.replace(/\s+/g, '').toLowerCase();
+}
+
 const mapConnections = (journeys: Journey[], connections: Connection[]): { journeys: Journey[], faulty: Connection[] } => {
     const matched = new Set<string>();
 
     const updatedJourneys = journeys.map((journey: Journey) => ({
         ...journey,
         connections: journey.connections.map((connection: Connection) => {
-            const matching = connections.find((conn: Connection) => conn.ris_journeyId === connection.ris_journeyId);
+            // connection   - from RIS
+            // conn         - from HAFAS
+            const matching = connections.find((conn: Connection) => {
+                if (connection.hafas_journeyId && (connection.hafas_journeyId === conn.hafas_journeyId)) return true;
+
+                const connectionFullName = normalize(connection.lineInformation?.fullName);
+                const connFullName = normalize(conn.lineInformation?.fullName);
+
+                const platformMatch = connection.departure?.plannedPlatform && conn.departure?.plannedPlatform
+                    ? connection.departure?.plannedPlatform === conn.departure?.plannedPlatform
+                    : true;
+
+                return (
+                    platformMatch &&
+                    connection.departure?.plannedTime === conn.departure?.plannedTime &&
+                    (connectionFullName === connFullName || connFullName?.includes(connectionFullName ?? '') || connectionFullName?.includes(connFullName ?? '')) &&
+                    connection.destination?.name === conn.direction
+                );
+            });
             if (!matching) return connection;
 
             if (matching.ris_journeyId) matched.add(matching.ris_journeyId);
@@ -14,12 +36,7 @@ const mapConnections = (journeys: Journey[], connections: Connection[]): { journ
 
             return {
                 ...connection,
-                ...matching,
-                lineInformation: {
-                    ...connection.lineInformation,
-                    ...matching.lineInformation,
-                    kind: connection.lineInformation?.kind ?? matching.lineInformation?.kind
-                }
+                ...matching
             };
         })
     }));
