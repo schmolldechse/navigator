@@ -56,8 +56,6 @@ export default function Departures() {
     const [journeys, setJourneys] = useState<Journey[]>([]);
     const journeysRef = useRef<Journey[]>([]);
 
-    const [scheduled, setScheduled] = useState<Connection[]>([]);
-
     const journeysFromDB = async (): Promise<Journey[]> => {
         const request = await fetch(`/api/v1/bahnhof-proxy?id=${station?.evaNr}&type=departures&duration=60&locale=${browserLanguage()}`);
         if (!request.ok) return [];
@@ -78,8 +76,8 @@ export default function Departures() {
 
         const connections: Connection[] = response.entries as Connection[];
 
-        const mappedJourneys = mapConnections(prevJourneys, connections);
-        const sorted = sort(mappedJourneys.journeys);
+        const mappedJourneys = mapConnections(prevJourneys, connections, "departures");
+        const sorted = sort(mappedJourneys.journeys, "departures");
 
         setJourneys(sorted);
         journeysRef.current = sorted;
@@ -114,23 +112,16 @@ export default function Departures() {
 
             <ScheduledHeader isDeparture={true}/>
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">
-                {journeys.length > 0 && journeys.map((journey: Journey, index: number) => (<div key={index}>
-                    {journey.connections.length === 1 ? (
-                        <ScheduledComponent connection={journey.connections[0]} isDeparture={true} isEven={index % 2 === 0}/>
-                    ) : (
-                        <div>{journey.connections.length}</div> // wing train
-                    )}
-                </div>))}
-                {/*
-                {scheduled.length > 0 && scheduled.map((item: Scheduled, index: number) => (
-                    <ScheduledComponent
-                        key={item.tripId}
-                        connection={item}
-                        isDeparture={true}
-                        isEven={index % 2 === 0}
-                    />
+                {journeys.length > 0 && journeys.map((journey: Journey, index: number) => (
+                    <div key={index}>
+                        {journey.connections.length === 1 ? (
+                            <ScheduledComponent connection={journey.connections[0]} isDeparture={true}
+                                                isEven={index % 2 === 0}/>
+                        ) : (
+                            <div>{journey.connections.length}</div> // wing train
+                        )}
+                    </div>
                 ))}
-                */}
             </div>
         </div>
     )

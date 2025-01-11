@@ -4,7 +4,10 @@ const normalize = (name?: string): string | undefined => {
     return name?.replace(/\s+/g, '').toLowerCase();
 }
 
-const mapConnections = (journeys: Journey[], connections: Connection[]): { journeys: Journey[], faulty: Connection[] } => {
+const mapConnections = (journeys: Journey[], connections: Connection[], type: "departures" | "arrivals"): {
+    journeys: Journey[],
+    faulty: Connection[]
+} => {
     const matched = new Set<string>();
 
     const updatedJourneys = journeys.map((journey: Journey) => ({
@@ -18,15 +21,27 @@ const mapConnections = (journeys: Journey[], connections: Connection[]): { journ
                 const connectionFullName = normalize(connection.lineInformation?.fullName);
                 const connFullName = normalize(conn.lineInformation?.fullName);
 
-                const platformMatch = connection.departure?.plannedPlatform && conn.departure?.plannedPlatform
-                    ? connection.departure?.plannedPlatform === conn.departure?.plannedPlatform
-                    : true;
+                const platformMatch = type === "departures"
+                    ? connection.departure?.plannedPlatform && conn.departure?.plannedPlatform
+                        ? connection.departure?.plannedPlatform === conn.departure?.plannedPlatform
+                        : true
+                    : connection.arrival?.plannedPlatform && conn.arrival?.plannedPlatform
+                        ? connection.arrival?.plannedPlatform === conn.arrival?.plannedPlatform
+                        : true;
+
+                const timeMatch = type === "departures"
+                    ? connection.departure?.plannedTime === conn.departure?.plannedTime
+                    : connection.arrival?.plannedTime === conn.arrival?.plannedTime;
+
+                const directionMatch = type === "departures"
+                    ? connection.destination?.name === conn.direction
+                    : connection.origin?.name === conn.provenance;
 
                 return (
                     platformMatch &&
-                    connection.departure?.plannedTime === conn.departure?.plannedTime &&
+                    timeMatch &&
                     (connectionFullName === connFullName || connFullName?.includes(connectionFullName ?? '') || connectionFullName?.includes(connFullName ?? '')) &&
-                    connection.destination?.name === conn.direction
+                    directionMatch
                 );
             });
             if (!matching) return connection;
@@ -55,12 +70,13 @@ const mapConnections = (journeys: Journey[], connections: Connection[]): { journ
      */
 }
 
-const sort = (journeys: Journey[]): Journey[] => {
+const sort = (journeys: Journey[], type: "departures" | "arrivals"): Journey[] => {
     return journeys.sort((a, b) => {
         const earliest = (journey: Journey): string => {
             const times = journey.connections
-                .map(conn => conn.departure?.actualTime || conn.departure?.plannedTime)
-                .filter((time): time is string => !!time);
+                .map(conn => type === "departures"
+                    ? conn.departure?.actualTime || conn.departure?.plannedTime
+                    : conn.arrival?.actualTime || conn.arrival?.plannedTime)
             return times.length > 0 ? times.sort()[0] : "9999-12-31T23:59:59";
         };
 
