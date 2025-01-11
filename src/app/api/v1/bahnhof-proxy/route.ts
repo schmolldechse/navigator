@@ -31,39 +31,49 @@ export async function GET(req: NextRequest) {
             const journeyId = connectionRaw.journeyID;         // RIS journeyId
             if (!journeyId) return;
 
-            const connection: Connection = mapConnection(connectionRaw);
+            const connection: Connection = mapConnection(connectionRaw, type);
             if (!journey.connections.some(existing => existing.ris_journeyId === connection.ris_journeyId)) journey.connections.push(connection);
         });
         journeys.push(journey);
     });
 
-    return NextResponse.json({ entries: journeys });
+    return NextResponse.json({entries: journeys});
 }
 
-const mapConnection = (entry: any): Connection => {
+const mapConnection = (entry: any, type: string): Connection => {
     const timeSchedule = new Date(entry.timeSchedule).getTime();
     const timeDelayed = new Date(entry.timeDelayed).getTime();
 
     const delay: number = Math.abs(timeDelayed - timeSchedule) / 1000; // in s
 
+    const isDeparture = type === "departures";
+
     return {
         ris_journeyId: entry.journeyID,
-        destination: mapStops(entry.destination)[0],
-        actualDestination: entry.actualDestination ? mapStops(entry.actualDestination)[0] : undefined,
-        departure: {
+        destination: isDeparture ? mapStops(entry.destination)[0] : undefined,
+        actualDestination: entry.actualDestination ? mapStops(entry.actualDestination)[0] : undefined, // TODO: lookup on arrivals
+        origin: !isDeparture ? mapStops(entry.origin)[0] : undefined,
+        departure: isDeparture ? {
             plannedTime: entry.timeSchedule,
             actualTime: entry.timeDelayed,
             delay: delay,
             plannedPlatform: entry.platformSchedule,
             actualPlatform: entry.platform
-        },
+        } : undefined,
+        arrival: !isDeparture ? {
+            plannedTime: entry.timeSchedule,
+            actualTime: entry.timeDelayed,
+            delay: delay,
+            plannedPlatform: entry.platformSchedule,
+            actualPlatform: entry.platform
+        } : undefined,
         lineInformation: {
             kind: entry.kind,
             additionalLineName: entry.additionalLineName,
             fullName: entry.lineName,
         },
         viaStops: mapStops(entry.viaStops),
-        canceledStopsAfterActualDestination: mapStops(entry.canceledStopsAfterActualDestination),
+        canceledStopsAfterActualDestination: mapStops(entry.canceledStopsAfterActualDestination), // TODO: lookup on arrivals
         additionalStops: mapStops(entry.additionalStops),
         canceledStops: mapStops(entry.canceledStops),
         messages: entry.messages,
