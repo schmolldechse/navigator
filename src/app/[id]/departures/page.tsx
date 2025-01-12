@@ -102,7 +102,7 @@ export default function Departures() {
     }, [station?.evaNr]);
 
     return (
-        <div className="h-screen flex flex-col overflow-hidden md:space-y-4">
+        <div className="h-screen flex flex-col overflow-hidden md:space-y-4 text-white">
             <Navbar id={station?.evaNr ?? ""}/>
 
             <div className="container mx-auto flex justify-between items-center px-4">
