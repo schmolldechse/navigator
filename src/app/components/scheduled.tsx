@@ -41,13 +41,13 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
                 {connection.departure.plannedPlatform === connection.departure.actualPlatform ? (
                     <span>{connection.departure.plannedPlatform}</span>
                 ) : (
-                    <span className="bg-[#ededed] text-[#0a0a0a] md:w-full">{connection.departure.actualPlatform}</span>
+                    <span className="bg-[#ededed] md:w-full">{connection.departure.actualPlatform}</span>
                 )}
             </>) : (<>
                 {connection.arrival.plannedPlatform === connection.arrival.actualPlatform ? (
                     <span>{connection.arrival.plannedPlatform}</span>
                 ) : (
-                    <span className="bg-[#ededed] text-[#0a0a0a] md:w-full">{connection.arrival.actualPlatform}</span>
+                    <span className="bg-[#ededed] md:w-full">{connection.arrival.actualPlatform}</span>
                 )}
             </>)}
         </>)
@@ -55,7 +55,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
 
     return (
         <div
-            className={`border-gray-40`}
+            className={`border-gray-40 ${!connection?.cancelled ? '' : 'text-[#0a0a0a]' }`}
             style={{ backgroundColor: connection.cancelled ? "#ededed" : backgroundColor }}
         >
             {/* layout for smaller screens (under md) */}
