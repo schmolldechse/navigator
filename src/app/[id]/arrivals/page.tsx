@@ -61,7 +61,7 @@ export default function Arrivals() {
         if (!request.ok) return [];
 
         const response = await request.json();
-        if (!response.success || !Array.isArray(response.entries)) return [];
+        if (!response.entries || !Array.isArray(response.entries)) return [];
 
         return response.entries as Journey[];
     }
