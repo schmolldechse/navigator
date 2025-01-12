@@ -1,7 +1,7 @@
 import {Connection, Journey, Stop} from "@/app/lib/objects";
 
 const normalize = (name?: string): string | undefined => {
-    return name?.replace(/\s+/g, '').toLowerCase();
+    return name?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 }
 
 const mapConnections = (journeys: Journey[], connections: Connection[], type: "departures" | "arrivals"): {
