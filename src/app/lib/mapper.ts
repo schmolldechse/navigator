@@ -1,4 +1,4 @@
-import {Connection, Journey} from "@/app/lib/objects";
+import {Connection, Journey, Stop} from "@/app/lib/objects";
 
 const normalize = (name?: string): string | undefined => {
     return name?.replace(/\s+/g, '').toLowerCase();
@@ -70,6 +70,25 @@ const mapConnections = (journeys: Journey[], connections: Connection[], type: "d
      */
 }
 
+const mapStops = (rawData: any): Stop[] => {
+    if (!Array.isArray(rawData)) rawData = [rawData];
+
+    return rawData.map((rawStop: any) => {
+        const {evaNumber, name, canceled, additional, separation, nameParts} = rawStop;
+        return {
+            id: evaNumber,
+            name: name,
+            cancelled: canceled,
+            additional: additional || false,
+            separation: separation || false,
+            nameParts: nameParts ? nameParts.map((part: any) => ({
+                type: part.type,
+                value: part.value
+            })) : [{type: "default", value: name}]
+        };
+    });
+}
+
 const sort = (journeys: Journey[], type: "departures" | "arrivals"): Journey[] => {
     return journeys.sort((a, b) => {
         const earliest = (journey: Journey): string => {
@@ -87,4 +106,4 @@ const sort = (journeys: Journey[], type: "departures" | "arrivals"): Journey[] =
     })
 }
 
-export {mapConnections, sort};
+export {mapConnections, mapStops, sort};

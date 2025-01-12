@@ -8,7 +8,7 @@ import ScheduledComponent from "@/app/components/scheduled";
 import ScheduledHeader from "@/app/components/scheduled-header";
 import {Connection, Journey, Station} from "@/app/lib/objects";
 import {mapConnections, sort} from "@/app/lib/mapper";
-import {browserLanguage} from "@/app/lib/utils";
+import {browserLanguage} from "@/app/lib/methods";
 
 export default function Departures() {
     const params = useParams();
