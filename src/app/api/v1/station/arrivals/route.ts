@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
 }
 
 const vendo = async (id: string, when: string, duration: number, results: number): Promise<Connection[]> => {
+    // `dbnav` profile, as `db` does not provide cancelled connections
     const response = await fetch(`https://vendo-prof-dbnav.voldechse.wtf/stops/${id}/arrivals?when=${when}&duration=${duration}&results=${results}`, {method: 'GET'});
     if (!response.ok) return [];
 
@@ -35,7 +36,7 @@ const vendo = async (id: string, when: string, duration: number, results: number
         if (!tripId || map.has(tripId)) return;
 
         const connection: Connection = {
-            ris_journeyId: arrival.tripId,
+            hafas_journeyId: arrival.tripId,
             provenance: arrival.provenance,
             arrival: {
                 plannedTime: arrival.plannedWhen,
