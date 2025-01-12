@@ -38,14 +38,14 @@ export async function POST(req: NextRequest) {
 
     if (typeof query === "number") {
         const redis = await getRedisClient();
-        const cached = await redis.get(query.toString());
+        const cached = await redis.get(String(query));
         if (cached) return NextResponse.json({station: JSON.parse(cached)}, {status: 200});
 
         try {
             const data = await fetchStation(String(query));
 
             const station = data[0];
-            await redis.set(data.toString(), JSON.stringify(station));
+            await redis.set(String(query), JSON.stringify(station));
 
             return NextResponse.json(station, {status: 200});
         } catch (error) {
