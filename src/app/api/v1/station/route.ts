@@ -39,7 +39,7 @@ export async function POST(req: NextRequest) {
     if (typeof query === "number") {
         const redis = await getRedisClient();
         const cached = await redis.get(String(query));
-        if (cached) return NextResponse.json({station: JSON.parse(cached)}, {status: 200});
+        if (cached) return NextResponse.json(JSON.parse(cached), {status: 200});
 
         try {
             const data = await fetchStation(String(query));
