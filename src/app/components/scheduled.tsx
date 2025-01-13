@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import {Connection} from "@/app/lib/objects";
 
 interface ScheduledProps {
@@ -90,53 +90,43 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
             </div>
 
             {/* layout for greater screens (above md) */}
-            <div
-                className={`container mx-auto hidden md:flex justify-between space-x-4 text-[28px] font-medium ${connection.cancelled ? 'text-black' : ''} pb-4`}
-            >
-                {/* First col */}
-                <div className={`flex-[1] text-right mr-8 border-t pt-4 space-y-4`}>
-                    {/* Line */}
-                    <span className={`${color ? 'p-2 rounded-2xl px-4 font-bold' : ''} text-xl`}
-                          style={{backgroundColor: color?.backgroundColor || 'inherit'}}
-                    >
-                        {connection.lineInformation?.fullName}
+            <span
+                className={`mx-auto hidden md:flex justify-between text-[30px] font-medium ${connection?.cancelled ? 'bg-[#ededed] text-black' : ''}`}>
+                {/* first col */}
+                <span className="flex-[1] flex flex-col items-end mr-8 border-t">
+                    {/* line nr*/}
+                    <span
+                        className={`text-xl ${!color ? 'font-semibold' : 'p-2 rounded-2xl px-4 font-bold'}`}>{connection?.lineInformation!!.fullName}
                     </span>
 
-                    {/* Departure time */}
-                    <div className="flex flex-row items-center justify-end space-x-2">
-                        <span
-                            className={`${isDelayed() ? '' : ''} flex items-center justify-center`}
-                            style={{height: '2rem'}}
-                        >
-                            {new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime).toLocaleTimeString("de-DE", {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
+                    {/* time information */}
+                    <div className={"flex items-center space-x-2"}>
+                        <span>{new Date(isDeparture ? connection?.departure!!.plannedTime : connection?.arrival.plannedTime!!).toLocaleTimeString("de-DE", {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                        })}
                         </span>
                         {isDelayed() && (
                             <span
-                                className={`${isDelayed() ? 'font-bold' : ''} bg-[#ededed] text-[#0a0a0a] flex items-center justify-center text-[20px]`}
-                                style={{height: '1.5rem', padding: '0 0.4rem'}}
-                            >
-                                {new Date(isDeparture ? connection.departure.actualTime : connection.arrival.actualTime).toLocaleTimeString("de-DE", {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
+                                className={"text-[20px] px-[0.4rem] font-bold bg-[#ededed] text-[#0a0a0a]"}>{new Date(isDeparture ? connection?.departure!!.actualTime : connection?.arrival.actualTime!!).toLocaleTimeString("de-DE", {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })}
                             </span>
                         )}
                     </div>
-                </div>
+                </span>
 
-                {/* Second col */}
-                <div className="flex-[4] flex items-end text-left border-t pt-4">
-                    <span>{isDeparture ? connection.destination.name : connection.origin.name}</span>
-                </div>
+                {/* second col */}
+                <span className="flex-[4] flex items-end mr-4 border-t">
+                    {isDeparture ? connection?.destination!.name : connection?.origin!.name}
+                </span>
 
-                {/* Third col */}
-                <div className="flex-[1] flex justify-end items-end text-right border-t pt-4 text-3xl">
+                {/* third col */}
+                <span className="flex-[1] flex justify-end items-end text-right border-t">
                     {showPlatform()}
-                </div>
-            </div>
+                </span>
+            </span>
         </div>
     );
 }
