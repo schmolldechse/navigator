@@ -10,6 +10,10 @@ interface ScheduledProps {
 const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture}) => {
 	const [color, setColor] = useState<any>();
 
+	const [expandVia, setExpandVia] = useState(false);
+	const displayedViaStops = expandVia ? connection?.viaStops : connection?.viaStops.slice(0, 3);
+	const viaStops = displayedViaStops.map(writeName).join(" – ");
+
 	// TODO: not possible to find out at the moment
 	/**
 	 useEffect(() => {
@@ -86,7 +90,13 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 					<span className="text-right text-2xl">{showPlatform()}</span>
 				</div>
 
-				{/* third line */}
+				{!connection?.cancelled && (<>
+					{/* third line */}
+					<span className={"text-base"}>{viaStops}</span>
+					<br/>
+				</>)}
+
+				{/* fourth line */}
 				<span className="text-2xl">{writeName(isDeparture ? connection?.destination : connection?.origin)}</span>
 			</div>
 
@@ -123,9 +133,13 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
                 </span>
 
 				{/* second col */}
-				<span className="flex-[4] flex items-end mr-4 border-t">
-                    {writeName(isDeparture ? connection?.destination : connection?.origin)}
-                </span>
+				<div className="flex-[4] flex flex-col mr-4 border-t">
+                    {/* via stops */}
+					<span className={"text-lg"}>{viaStops}</span>
+
+					{/* destination/ origin */}
+					<span>{writeName(isDeparture ? connection?.destination : connection?.origin)}</span>
+                </div>
 
 				{/* third col */}
 				<span className="flex-[1] flex justify-end items-end text-right border-t">
