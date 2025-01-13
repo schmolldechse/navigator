@@ -10,21 +10,9 @@ interface ScheduledProps {
 const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture}) => {
     const [color, setColor] = useState<any>();
 
-    // TODO: not possible to find out at the moment
-    /**
-    useEffect(() => {
-        const fetchColor = async () => {
-            const colorRequest = await fetch(`/api/v1/color?id=${connection.lineInformation.id}`, {method: 'GET'});
-            if (!colorRequest.ok) return;
-
-            const colorData = await colorRequest.json();
-            if (!colorData.success) return;
-            setColor(colorData.entry);
-        }
-
-        fetchColor();
-    }, []);
-    */
+	const [expandVia, setExpandVia] = useState(false);
+	const displayedViaStops = expandVia ? connection?.viaStops : connection?.viaStops.slice(0, 3);
+	const viaStops = displayedViaStops.map(writeName).join(" – ");
 
     const isDelayed = () => {
         const planned = new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime);
