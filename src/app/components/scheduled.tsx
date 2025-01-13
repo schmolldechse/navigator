@@ -117,7 +117,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
                 </span>
 
 				{/* second col */}
-				<div className="flex-[4] flex flex-col mr-4 border-t">
+				<div className="flex-[4] flex flex-col justify-end mr-4 border-t">
                     {/* via stops */}
 					<span className={"text-lg"}>{viaStops}</span>
 
