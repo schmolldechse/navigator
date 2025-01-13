@@ -8,42 +8,38 @@ interface ScheduledProps {
 }
 
 const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture}) => {
-	const [color, setColor] = useState<any>();
+    const [color, setColor] = useState<any>();
 
-	const [expandVia, setExpandVia] = useState(false);
-	const displayedViaStops = expandVia ? connection?.viaStops : connection?.viaStops.slice(0, 3);
-	const viaStops = displayedViaStops.map(writeName).join(" – ");
+    // TODO: not possible to find out at the moment
+    /**
+    useEffect(() => {
+        const fetchColor = async () => {
+            const colorRequest = await fetch(`/api/v1/color?id=${connection.lineInformation.id}`, {method: 'GET'});
+            if (!colorRequest.ok) return;
 
-	// TODO: not possible to find out at the moment
-	/**
-	 useEffect(() => {
-	 const fetchColor = async () => {
-	 const colorRequest = await fetch(`/api/v1/color?id=${connection.lineInformation.id}`, {method: 'GET'});
-	 if (!colorRequest.ok) return;
+            const colorData = await colorRequest.json();
+            if (!colorData.success) return;
+            setColor(colorData.entry);
+        }
 
-	 const colorData = await colorRequest.json();
-	 if (!colorData.success) return;
-	 setColor(colorData.entry);
-	 }
+        fetchColor();
+    }, []);
+    */
 
-	 fetchColor();
-	 }, []);
-	 */
+    const isDelayed = () => {
+        const planned = new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime);
+        const actual = new Date(isDeparture ? connection.departure.actualTime : connection.arrival.actualTime);
 
-	const isDelayed = () => {
-		const planned = new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime);
-		const actual = new Date(isDeparture ? connection.departure.actualTime : connection.arrival.actualTime);
+        const difference = (actual.getTime() - planned.getTime()) / 60000; // in min
+        return difference >= 1;
+    }
 
-		const difference = (actual.getTime() - planned.getTime()) / 60000; // in min
-		return difference >= 1;
-	}
+    const showPlatform = () => {
+        const platform = isDeparture ? connection?.departure : connection.arrival;
+        const isSame = platform.plannedPlatform === platform.actualPlatform;
 
-	const showPlatform = () => {
-		const platform = isDeparture ? connection?.departure : connection?.arrival;
-		const isSame = platform.plannedPlatform === platform.actualPlatform;
-
-		return (
-			<span className={`md:w-full ${isSame ? "" : "bg-[#ededed] text-black"}`}>
+        return (
+            <span className={`md:w-full ${isSame ? "" : "bg-[#ededed] text-black px-2 md:px-0"}`}>
                 {isSame ? platform.plannedPlatform : platform.actualPlatform}
             </span>
 		);
