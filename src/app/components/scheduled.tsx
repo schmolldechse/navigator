@@ -38,7 +38,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
         const isSame = platform.plannedPlatform === platform.actualPlatform;
 
         return (
-            <span className={`md:w-full ${isSame ? "" : "bg-[#ededed] text-black"}`}>
+            <span className={`md:w-full ${isSame ? "" : "bg-[#ededed] text-black px-2 md:px-0"}`}>
                 {isSame ? platform.plannedPlatform : platform.actualPlatform}
             </span>
         );
