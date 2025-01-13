@@ -115,8 +115,7 @@ export default function Departures() {
                 {journeys.length > 0 && journeys.map((journey: Journey, index: number) => (
                     <div key={index}>
                         {journey.connections.length === 1 ? (
-                            <ScheduledComponent connection={journey.connections[0]} isDeparture={true}
-                                                isEven={index % 2 === 0}/>
+                            <ScheduledComponent connection={journey.connections[0]} isDeparture={true}/>
                         ) : (
                             <div>{journey.connections.length}</div> // wing train
                         )}

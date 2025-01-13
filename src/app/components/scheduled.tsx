@@ -4,12 +4,10 @@ import {Connection} from "@/app/lib/objects";
 interface ScheduledProps {
     connection: Connection,
     isDeparture: boolean,
-    isEven: boolean
 }
 
-const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, isEven}) => {
+const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture}) => {
     const [color, setColor] = useState<any>();
-    const backgroundColor = isEven ? "#0a0a0a" : "#1a1a1a";
 
     // TODO: not possible to find out at the moment
     /**
@@ -48,8 +46,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
 
     return (
         <div
-            className={`border-gray-40 ${!connection?.cancelled ? '' : 'text-[#0a0a0a]' }`}
-            style={{ backgroundColor: connection.cancelled ? "#ededed" : backgroundColor }}
+            className={`border-gray-40 ${!connection?.cancelled ? '' : 'text-[#0a0a0a] bg-[#ededed]'}`}
         >
             {/* layout for smaller screens (under md) */}
             <div
