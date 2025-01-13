@@ -36,21 +36,14 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
     }
 
     const showPlatform = () => {
-        return (<>
-            {isDeparture ? (<>
-                {connection.departure.plannedPlatform === connection.departure.actualPlatform ? (
-                    <span>{connection.departure.plannedPlatform}</span>
-                ) : (
-                    <span className="bg-[#ededed] md:w-full">{connection.departure.actualPlatform}</span>
-                )}
-            </>) : (<>
-                {connection.arrival.plannedPlatform === connection.arrival.actualPlatform ? (
-                    <span>{connection.arrival.plannedPlatform}</span>
-                ) : (
-                    <span className="bg-[#ededed] md:w-full">{connection.arrival.actualPlatform}</span>
-                )}
-            </>)}
-        </>)
+        const platform = isDeparture ? connection?.departure : connection.arrival;
+        const isSame = platform.plannedPlatform === platform.actualPlatform;
+
+        return (
+            <span className={`md:w-full ${isSame ? "" : "bg-[#ededed] text-black"}`}>
+                {isSame ? platform.plannedPlatform : platform.actualPlatform}
+            </span>
+        );
     }
 
     return (
