@@ -1,6 +1,7 @@
 import {useState} from "react";
 import {Connection} from "@/app/lib/objects";
 import {writeName} from "@/app/lib/methods";
+import ShowMore from "@/app/components/show-more";
 
 interface ScheduledProps {
 	connection: Connection,
@@ -33,9 +34,9 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 		);
 	}
 
-    const displayTime = (time: string) => new Date(time).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+    const displayTime = (time: string) => new Date(time).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
 
-	return (
+    return (
 		<div
 			className={`${!connection?.cancelled ? '' : 'text-[#0a0a0a] bg-[#ededed]'}`}
 		>
@@ -68,29 +69,52 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 					<span className="text-right text-2xl">{showPlatform()}</span>
 				</div>
 
-				{!connection?.cancelled && Array.isArray(viaStops) && viaStops.length > 0 && (<>
+				{!connection?.cancelled && connection?.viaStops?.length > 0 && (<>
 					{/* third line */}
-					<span className={"text-base"}>{viaStops}</span>
-					<br/>
+                    <marquee className={"text-base"}>{connection?.viaStops?.map(writeName).join(" – ")}</marquee>
+                    <br/>
 				</>)}
 
 				{/* fourth line */}
 				<span className="text-2xl">{writeName(isDeparture ? connection?.destination : connection?.origin)}</span>
 			</div>
 
-			{/* layout for greater screens (above md) */}
-			<span
-				className={`mx-auto hidden md:flex justify-between text-[30px] font-medium ${connection?.cancelled ? 'bg-[#ededed] text-black' : ''}`}
-			>
-                {/* first col */}
-				<span className="flex-[1] flex flex-col items-end mr-8 border-t">
+            {/* layout for greater screens (above md) */}
+            <span
+                className={`w-full mx-auto hidden md:flex flex-col justify-between text-[30px] font-medium ${connection?.cancelled ? 'bg-[#ededed] text-black' : ''}`}
+            >
+                {/* first row */}
+                <div className={"flex flex-row"}>
+                    <span className={"flex-[1] mr-8 border-t"}></span>
+                    <span className={"flex-[4] mr-4 border-t"}></span>
+                    <span className={"flex-[1] border-t"}></span>
+                </div>
+
+                {/* second row */}
+                <div className={"flex flex-row w-full"}>
                     {/* line nr */}
-					<span
-						className={`text-xl ${!color ? 'font-semibold' : 'p-2 rounded-2xl px-4 font-bold'}`}>{connection?.lineInformation!!.fullName}
+                    <span
+                        className={`flex-[1] flex justify-end mr-8 text-xl ${!color ? 'font-semibold' : 'p-2 rounded-2xl px-4 font-bold'}`}
+                    >
+                        {connection?.lineInformation!!.fullName}
                     </span>
 
-					{/* time information */}
-					<div className={"flex items-center space-x-2"}>
+                    {/* viaStops */}
+                    <div className={"flex-[4] text-lg flex flex-row items-center space-x-2 mr-4"}>
+                        {viaStops.length > 0 && (<span className={"inline-block"}>
+                            {viaStops}
+                            {connection?.viaStops.length > 3 && (<ShowMore onClick={() => setExpandVia(!expandVia)}/>)}
+                        </span>)}
+                    </div>
+
+                    {/* empty */}
+                    <span className={"flex-[1]"}></span>
+                </div>
+
+                {/* third row */}
+                <div className={"flex flex-row w-full"}>
+                    {/* time information */}
+                    <div className={"flex-[1] flex justify-end items-center space-x-2 mr-8"}>
                         <span>{displayTime(isDeparture ? connection?.departure?.plannedTime : connection?.arrival.plannedTime)}</span>
 						{isDelayed() && (
 							<span
@@ -100,21 +124,17 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
                             </span>
 						)}
                     </div>
-                </span>
 
-				{/* second col */}
-				<div className="flex-[4] flex flex-col justify-end mr-4 border-t">
-                    {/* via stops */}
-					<span className={"text-lg"}>{viaStops}</span>
+                    {/* destination/ origin */}
+                    <span
+                        className={"flex-[4] mr-4"}
+                    >
+                        {writeName(isDeparture ? connection?.destination : connection?.origin)}
+                    </span>
 
-					{/* destination/ origin */}
-					<span>{writeName(isDeparture ? connection?.destination : connection?.origin)}</span>
+                    {/* track */}
+                    <span className={"flex-[1] text-right"}>{showPlatform()}</span>
                 </div>
-
-				{/* third col */}
-				<span className="flex-[1] flex justify-end items-end text-right border-t">
-                    {showPlatform()}
-                </span>
             </span>
 		</div>
 	);
