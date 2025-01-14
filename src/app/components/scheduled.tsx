@@ -33,6 +33,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 		);
 	}
 
+    const displayTime = (time: string) => new Date(time).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" });
+
 	return (
 		<div
 			className={`border-gray-40 ${!connection?.cancelled ? '' : 'text-[#0a0a0a] bg-[#ededed]'}`}
@@ -52,20 +54,12 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 				<div className="flex flex-row items-center font-semibold">
 					{/* scheduled time */}
 					<div className="flex-[1] flex flex-row items-center space-x-2 text-2xl">
-                        <span>
-                            {new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime).toLocaleTimeString("de-DE", {
-								hour: '2-digit',
-								minute: '2-digit'
-							})}
-                        </span>
+                        <span>{displayTime(isDeparture ? connection?.departure?.plannedTime : connection?.arrival.plannedTime)}</span>
 						{isDelayed() && (
 							<span
 								className={`bg-[#ededed] text-[#0a0a0a] text-sm h-full px-[0.3rem] py-[0.05rem]`}
 							>
-                                {new Date(isDeparture ? connection.departure.actualTime : connection.arrival.actualTime).toLocaleTimeString("de-DE", {
-									hour: '2-digit',
-									minute: '2-digit'
-								})}
+                                {displayTime(isDeparture ? connection?.departure?.actualTime : connection?.arrival.actualTime)}
                             </span>
 						)}
 					</div>
@@ -97,20 +91,12 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 
 					{/* time information */}
 					<div className={"flex items-center space-x-2"}>
-                        <span>
-                            {new Date(isDeparture ? connection?.departure!!.plannedTime : connection?.arrival.plannedTime!!).toLocaleTimeString("de-DE", {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                            })}
-                        </span>
+                        <span>{displayTime(isDeparture ? connection?.departure?.plannedTime : connection?.arrival.plannedTime)}</span>
 						{isDelayed() && (
 							<span
 								className={"text-[20px] px-[0.4rem] font-bold bg-[#ededed] text-[#0a0a0a]"}
                             >
-                                {new Date(isDeparture ? connection?.departure!!.actualTime : connection?.arrival.actualTime!!).toLocaleTimeString("de-DE", {
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
+                                {displayTime(isDeparture ? connection?.departure?.actualTime : connection?.arrival.actualTime)}
                             </span>
 						)}
                     </div>
