@@ -5,9 +5,9 @@ interface HeaderProps {
 const ScheduledHeader: React.FC<HeaderProps> = ({isDeparture}) => {
     return (<>
         {/* layout for smaller screens (under md) */}
-        <div className="container mx-4 flex justify-between text-sm md:hidden">
-            <p className="text-left">Zug / Bus</p>
-            <p className="text-right">Gleis</p>
+        <div className="mx-4 flex justify-between text-sm md:hidden">
+            <p>Zug / Bus</p>
+            <p>Gleis</p>
         </div>
 
         {/* layout for greater screens (above md) */}
