@@ -50,7 +50,8 @@ const vendo = async (id: string, when: string, duration: number, results: number
                 fahrtNr: arrival.line.fahrtNr,
                 fullName: arrival.line.name,
                 productName: arrival.line.productName
-            }
+            },
+            cancelled: arrival.cancelled ?? false,
         }
 
         map.set(tripId, connection);
