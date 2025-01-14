@@ -37,7 +37,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 
 	return (
 		<div
-			className={`border-gray-40 ${!connection?.cancelled ? '' : 'text-[#0a0a0a] bg-[#ededed]'}`}
+			className={`${!connection?.cancelled ? '' : 'text-[#0a0a0a] bg-[#ededed]'}`}
 		>
 			{/* layout for smaller screens (under md) */}
 			<div
@@ -57,7 +57,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
                         <span>{displayTime(isDeparture ? connection?.departure?.plannedTime : connection?.arrival.plannedTime)}</span>
 						{isDelayed() && (
 							<span
-								className={`bg-[#ededed] text-[#0a0a0a] text-sm h-full px-[0.3rem] py-[0.05rem]`}
+								className={`bg-[#ededed] text-[#0a0a0a] text-sm px-[0.3rem] py-[0.05rem]`}
 							>
                                 {displayTime(isDeparture ? connection?.departure?.actualTime : connection?.arrival.actualTime)}
                             </span>
