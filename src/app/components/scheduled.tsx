@@ -71,8 +71,11 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 
 				{!connection?.cancelled && connection?.viaStops?.length > 0 && (<>
 					{/* third line */}
-                    <marquee className={"text-base"}>{connection?.viaStops?.map(writeName).join(" – ")}</marquee>
-                    <br/>
+                    <span className={"inline-block"}>
+                        {viaStops}
+                        {connection?.viaStops.length > 3 && (<ShowMore onClick={() => setExpandVia(!expandVia)}/>)}
+                    </span>
+                    <br />
 				</>)}
 
 				{/* fourth line */}
