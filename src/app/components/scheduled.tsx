@@ -74,7 +74,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 					<span className="text-right text-2xl">{showPlatform()}</span>
 				</div>
 
-				{!connection?.cancelled && (<>
+				{!connection?.cancelled && Array.isArray(viaStops) && viaStops.length > 0 && (<>
 					{/* third line */}
 					<span className={"text-base"}>{viaStops}</span>
 					<br/>
