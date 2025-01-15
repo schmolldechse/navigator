@@ -9,6 +9,7 @@ import ScheduledHeader from "@/app/components/scheduled-header";
 import { Connection, Journey, Station } from "@/app/lib/objects";
 import { mapConnections, sort } from "@/app/lib/mapper";
 import { browserLanguage } from "@/app/lib/methods";
+import WingTrain from "@/app/components/wingtrain";
 
 export default function Arrivals() {
     const params = useParams();
@@ -116,9 +117,9 @@ export default function Arrivals() {
                 {journeys.length > 0 && journeys.map((journey: Journey, index: number) => (
                     <div key={index}>
                         {journey.connections.length === 1 ? (
-                            <ScheduledComponent connection={journey.connections[0]} isDeparture={false}/>
+                            <ScheduledComponent connection={journey.connections[0]} isDeparture={false} renderBorder={true} renderTime={true} />
                         ) : (
-                            <div>{journey.connections.length}</div> // wing train
+                            <WingTrain isDeparture={false} journey={journey} />
                         )}
                     </div>
                 ))}

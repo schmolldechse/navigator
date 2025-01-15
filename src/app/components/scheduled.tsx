@@ -4,11 +4,13 @@ import {writeName} from "@/app/lib/methods";
 import ShowMore from "@/app/components/show-more";
 
 interface ScheduledProps {
-	connection: Connection,
-	isDeparture: boolean,
+	connection: Connection;
+	isDeparture: boolean;
+    renderBorder: boolean;
+    renderTime: boolean;
 }
 
-const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture}) => {
+const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, renderBorder, renderTime}) => {
     const [color, setColor] = useState<any>();
 
 	const [expandVia, setExpandVia] = useState(false);
@@ -42,7 +44,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 		>
 			{/* layout for smaller screens (under md) */}
 			<div
-				className={`p-2 md:hidden border-t space-y-2 font-medium`}
+				className={`p-2 md:hidden space-y-2 font-medium ${renderBorder ? 'border-t' : ''}`}
 			>
 				{/* first line */}
 				<span className={`${color ? 'py-[0.2rem] px-[0.8rem] rounded-xl' : ''} text-lg font-bold`}
@@ -53,17 +55,19 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 
 				{/* second line */}
 				<div className="flex flex-row items-center font-semibold">
-					{/* scheduled time */}
-					<div className="flex-[1] flex flex-row items-center space-x-2 text-2xl">
+                    {renderTime && (<>
+					    {/* scheduled time */}
+					    <div className="flex-[1] flex flex-row items-center space-x-2 text-2xl">
                         <span>{displayTime(isDeparture ? connection?.departure?.plannedTime : connection?.arrival.plannedTime)}</span>
-						{isDelayed() && (
-							<span
-								className={`bg-[#ededed] text-[#0a0a0a] text-sm px-[0.3rem] py-[0.05rem]`}
-							>
+                        {isDelayed() && (
+                            <span
+                                className={`bg-[#ededed] text-[#0a0a0a] text-sm px-[0.3rem] py-[0.05rem]`}
+                            >
                                 {displayTime(isDeparture ? connection?.departure?.actualTime : connection?.arrival.actualTime)}
                             </span>
-						)}
-					</div>
+                        )}
+                    </div>
+                    </>)}
 
 					{/* track */}
 					<span className="text-right text-2xl">{showPlatform()}</span>
@@ -88,9 +92,9 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
             >
                 {/* first row */}
                 <div className={"flex flex-row"}>
-                    <span className={"flex-[1] mr-8 border-t"}></span>
-                    <span className={"flex-[4] mr-4 border-t"}></span>
-                    <span className={"flex-[1] border-t"}></span>
+                    <span className={`flex-[1] mr-8 ${renderBorder ? 'border-t' : ''}`}></span>
+                    <span className={`flex-[4] mr-4 ${renderBorder ? 'border-t' : ''}`}></span>
+                    <span className={`flex-[1] ${renderBorder ? 'border-t' : ''}`}></span>
                 </div>
 
                 {/* second row */}
@@ -118,14 +122,16 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
                 <div className={"flex flex-row w-full"}>
                     {/* time information */}
                     <div className={"flex-[1] flex justify-end items-center space-x-2 mr-8"}>
-                        <span>{displayTime(isDeparture ? connection?.departure?.plannedTime : connection?.arrival.plannedTime)}</span>
-						{isDelayed() && (
-							<span
-								className={"text-[20px] px-[0.4rem] font-bold bg-[#ededed] text-[#0a0a0a]"}
-                            >
-                                {displayTime(isDeparture ? connection?.departure?.actualTime : connection?.arrival.actualTime)}
-                            </span>
-						)}
+                        {renderTime && (<>
+                            <span>{displayTime(isDeparture ? connection?.departure?.plannedTime : connection?.arrival.plannedTime)}</span>
+						    {isDelayed() && (
+							    <span
+								    className={"text-[20px] px-[0.4rem] font-bold bg-[#ededed] text-[#0a0a0a]"}
+                                >
+                                    {displayTime(isDeparture ? connection?.departure?.actualTime : connection?.arrival.actualTime)}
+                                </span>
+						    )}
+                        </>)}
                     </div>
 
                     {/* destination/ origin */}
@@ -136,7 +142,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
                     </span>
 
                     {/* track */}
-                    <span className={"flex-[1] text-right"}>{showPlatform()}</span>
+                    <span className={"flex-[1] flex text-right"}>{showPlatform()}</span>
                 </div>
             </span>
 		</div>
