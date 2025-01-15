@@ -48,7 +48,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
 				<span className={`${color ? 'py-[0.2rem] px-[0.8rem] rounded-xl' : ''} text-lg font-bold`}
 					  style={{backgroundColor: color ? `${color.backgroundColor}` : ''}}
 				>
-                    {connection.lineInformation?.fullName}
+                    {connection?.lineInformation?.fullName}{connection?.lineInformation?.additionalLineName ? ` / ${connection?.lineInformation?.additionalLineName}` : ''}
                 </span>
 
 				{/* second line */}
@@ -99,7 +99,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture})
                     <span
                         className={`flex-[1] flex justify-end mr-8 text-xl ${!color ? 'font-semibold' : 'p-2 rounded-2xl px-4 font-bold'}`}
                     >
-                        {connection?.lineInformation!!.fullName}
+                        {connection?.lineInformation?.fullName}{connection?.lineInformation?.additionalLineName ? ` / ${connection?.lineInformation?.additionalLineName}` : ''}
                     </span>
 
                     {/* viaStops */}
