@@ -33,16 +33,12 @@ const mapConnections = (journeys: Journey[], connections: Connection[], type: "d
                     ? connection.departure?.plannedTime === conn.departure?.plannedTime
                     : connection.arrival?.plannedTime === conn.arrival?.plannedTime;
 
-                /**
-                const directionMatch = type === "departures"
-                    ? connection.destination?.name === conn.direction
-                    : connection.origin?.name === conn.provenance;
-                    */
+                const nameMatch = connectionFullName === connFullName || connectionFullName === normalize(conn.lineInformation?.fahrtNr)
 
                 return (
                     platformMatch &&
                     timeMatch &&
-                    (connectionFullName === connFullName || connFullName?.includes(connectionFullName ?? '') || connectionFullName?.includes(connFullName ?? ''))
+                    nameMatch
                 );
             });
             if (!matching) return connection;
@@ -53,6 +49,10 @@ const mapConnections = (journeys: Journey[], connections: Connection[], type: "d
             return {
                 ...connection,
                 ...matching,
+                lineInformation: {
+                    ...connection.lineInformation,
+                    ...matching.lineInformation
+                }
             };
         })
     }));
