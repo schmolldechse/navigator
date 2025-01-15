@@ -33,15 +33,16 @@ const mapConnections = (journeys: Journey[], connections: Connection[], type: "d
                     ? connection.departure?.plannedTime === conn.departure?.plannedTime
                     : connection.arrival?.plannedTime === conn.arrival?.plannedTime;
 
+                /**
                 const directionMatch = type === "departures"
                     ? connection.destination?.name === conn.direction
                     : connection.origin?.name === conn.provenance;
+                    */
 
                 return (
                     platformMatch &&
                     timeMatch &&
-                    (connectionFullName === connFullName || connFullName?.includes(connectionFullName ?? '') || connectionFullName?.includes(connFullName ?? '')) &&
-                    directionMatch
+                    (connectionFullName === connFullName || connFullName?.includes(connectionFullName ?? '') || connectionFullName?.includes(connFullName ?? ''))
                 );
             });
             if (!matching) return connection;
