@@ -95,7 +95,7 @@ export default function Arrivals() {
             if (fetchedJourneys.length === 0) return;
 
             journeysRef.current = fetchedJourneys;
-            setJourneys(fetchedJourneys);
+            updateJourneys();
         }
         initJourneys();
 
