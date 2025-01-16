@@ -99,7 +99,7 @@ export default function Departures() {
         }
         initJourneys();
 
-        const intervalId = setInterval(updateJourneys, 15 * 1000);
+        const intervalId = setInterval(updateJourneys, 20 * 1000);
         return () => clearInterval(intervalId);
     }, [station?.evaNr]);
 
