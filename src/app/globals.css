@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+@import './css/design.css';
 @import './css/scrollbar.css';
 @import './css/montserrat-font.css';
 
