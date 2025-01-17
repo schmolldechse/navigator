@@ -33,7 +33,8 @@ export type Connection = {
         operator?: {
             id: string,             // the id of the railway company to identify the train's color
             name: string            // the name of the railway company (EVU) operating the train
-        }
+        },
+        product?: string,           // the type of line (e.g. bus, suburban, national, regional)
     },
     currentLocation?: {
         latitude: number,

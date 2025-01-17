@@ -49,7 +49,8 @@ const vendo = async (id: string, when: string, duration: number, results: number
                 id: arrival.line.id,
                 fahrtNr: arrival.line.fahrtNr,
                 fullName: arrival.line.name,
-                productName: arrival.line.productName
+                productName: arrival.line.productName,
+                product: arrival.line.product ?? undefined
             },
             cancelled: arrival.cancelled ?? false,
         }
