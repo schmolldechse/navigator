@@ -1,6 +1,6 @@
 import { Station } from "@/app/lib/objects";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import Image from "next/image";
 import TimePicker from "@/app/components/ui/TimePicker";
 
@@ -13,11 +13,14 @@ const FTimetable: React.FC = ({ }) => {
         station: undefined,
     });
 
+    // queries from /api/v1/station
     const [query, setQuery] = useState<Station[]>([]);
     const [focusedQuery, setFocusedQuery] = useState<number | undefined>(null);
 
+    // input field to search stations
     const [inputValue, setInputValue] = useState<string>("");
 
+    // timeout, so that a request is only sent after 0.5s if nothing has been entered
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleInput = (value: string) => {
@@ -88,6 +91,7 @@ const FTimetable: React.FC = ({ }) => {
                     <Image width={35} height={35} src={"/search.svg"} alt={"SEARCH ICON"} />
                     <input type="text" placeholder={"Search a station"}
                            onChange={(e) => handleInput(e.target.value)}
+                           onSelect={() => setStationSelected((prev) => ({ ...prev, selected: false }))}
                            className={"nd-bg-lightgray text-2xl p-1 w-full focus:outline-none"}
                            value={inputValue}
                     />
