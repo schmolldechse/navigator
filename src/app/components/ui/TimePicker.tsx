@@ -127,7 +127,7 @@ const TimePicker = () => {
                     <span
                         className={"w-full nd-bg-lightgray nd-fg-white cursor-pointer focus:outline-none"}
                     >
-                        {format(selectedDate || currentDate, "dd-MM-yyyy")} - {timeInput.hours}:{timeInput.minutes}
+                        {format(selectedDate || currentDate, "dd.MM.yyyy")} - {timeInput.hours}:{timeInput.minutes}
                     </span>
                 </div>
                 <button className={"w-fit py-2 px-6 nd-bg-white rounded"}>Now</button>
