@@ -86,7 +86,7 @@ const FTimetable: React.FC = ({ }) => {
                 <span className={`cursor-pointer ${typeSelected.type === 'arrivals' ? 'nd-fg-aqua' : 'nd-fg-white'}`} onClick={() => setTypeSelected({ type: 'arrivals' })}>Arrivals</span>
             </div>
 
-            <div className={"flex flex-col space-x-2 nd-bg-lightgray p-2 rounded-xl"} onKeyDown={handleKeyInput}>
+            <div className={"relative flex flex-col space-x-2 nd-bg-lightgray p-2 rounded-xl"} onKeyDown={handleKeyInput}>
                 <div className={"flex flex-row"}>
                     <Image width={35} height={35} src={"/search.svg"} alt={"SEARCH ICON"} />
                     <input type="text" placeholder={"Search a station"}
@@ -96,21 +96,20 @@ const FTimetable: React.FC = ({ }) => {
                            value={inputValue}
                     />
                 </div>
-                <div className={`${!stationSelected.selected} ? "absolute top-0 left-0 w-full h-full z-10 bg-opacity-50 bg-black flex flex-row items-center justify-center mt-4" : "relative"}`}>
-
+                <div className={`${!stationSelected.selected && query.length > 0 ? "absolute top-full left-0 z-50 flex flex-col mt-2 nd-bg-lightgray rounded" : "hidden"}`}>
+                    {!stationSelected.selected && query.length > 0 && query.map((location: Station, index) => (
+                        <p
+                            key={location.evaNr}
+                            className={`m-1 text-white py-0.5 px-2 cursor-pointer nd-bg-lightgray hover:bg-gray-700 rounded`}
+                            onClick={() => selectStation(location)}
+                            tabIndex={0}
+                            role="button"
+                            aria-pressed={focusedQuery === index}
+                        >
+                            {location.name}
+                        </p>
+                    ))}
                 </div>
-                {!stationSelected.selected && query.length > 0 && query.map((location: Station, index) => (
-                            <p
-                                key={location.evaNr}
-                                className={`text-white py-0.5 px-2 hover:bg-gray-700 hover:cursor-pointer rounded-md ${focusedQuery === index ? 'bg-gray-700' : ''}`}
-                                onClick={() => selectStation(location)}
-                                tabIndex={0}
-                                role="button"
-                                aria-pressed={focusedQuery === index}
-                            >
-                                {location.name}
-                            </p>
-                        ))}
             </div>
 
             <div className={"flex flex-col"}>
