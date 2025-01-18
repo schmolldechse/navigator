@@ -13,11 +13,14 @@ const FTimetable: React.FC = ({ }) => {
         station: undefined,
     });
 
+    // queries from /api/v1/station
     const [query, setQuery] = useState<Station[]>([]);
     const [focusedQuery, setFocusedQuery] = useState<number | undefined>(null);
 
+    // input field to search stations
     const [inputValue, setInputValue] = useState<string>("");
 
+    // timeout, so that a request is only sent after 0.5s if nothing has been entered
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const handleInput = (value: string) => {
