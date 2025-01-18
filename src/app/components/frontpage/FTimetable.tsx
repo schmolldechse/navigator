@@ -11,7 +11,7 @@ const FTimetable: React.FC = ({ }) => {
     const [stationSelected, setStationSelected] = useState<Station | undefined>(undefined);
 
     return (
-        <div className={"px-10 py-7 w-[40%] nd-bg-darkgray flex flex-col space-y-4 nd-fg-white"}>
+        <div className={"px-10 py-7 md:w-[40%] nd-bg-darkgray flex flex-col space-y-4 nd-fg-white"}>
             <div className={"ml-auto items-center space-x-4"}>
                 <span className={`cursor-pointer ${typeSelected.type === 'departures' ? 'nd-fg-aqua' : 'nd-fg-white'}`} onClick={() => setTypeSelected({ type: 'departures' })}>Departures</span>
                 <span className={"text-xl nd-fg-white"}>|</span>
