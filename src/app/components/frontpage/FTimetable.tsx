@@ -91,6 +91,7 @@ const FTimetable: React.FC = ({ }) => {
                     <Image width={35} height={35} src={"/search.svg"} alt={"SEARCH ICON"} />
                     <input type="text" placeholder={"Search a station"}
                            onChange={(e) => handleInput(e.target.value)}
+                           onSelect={() => setStationSelected((prev) => ({ ...prev, selected: false }))}
                            className={"nd-bg-lightgray text-2xl p-1 w-full focus:outline-none"}
                            value={inputValue}
                     />
