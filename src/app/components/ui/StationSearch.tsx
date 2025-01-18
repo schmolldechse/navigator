@@ -95,12 +95,12 @@ const StationSearch: React.FC<Props> = ({ onSelectStation }) => {
             ref={dropdownRef}
         >
             <div className="flex flex-row">
-                <Image width={35} height={35} src={"/search.svg"} alt={"SEARCH ICON"} />
+                <Image height={20} width={20} className={"md:h-[35px] md:w-[35px]"} src={"/search.svg"} alt={"SEARCH ICON"} />
                 <input
                     type="text"
                     placeholder="Search a station"
                     onChange={(e) => handleInputChange(e.target.value)}
-                    className="nd-bg-lightgray text-2xl p-1 w-full focus:outline-none"
+                    className="nd-bg-lightgray text-base md:text-2xl p-1 w-full focus:outline-none"
                     value={inputValue}
                     onFocus={() => setIsOpen(true)}
                 />
@@ -110,7 +110,7 @@ const StationSearch: React.FC<Props> = ({ onSelectStation }) => {
                     {query.map((location: Station, index) => (
                         <p
                             key={location.evaNr}
-                            className={`m-1 text-white py-0.5 px-2 cursor-pointer nd-bg-lightgray hover:bg-gray-700 rounded ${
+                            className={`text-white text-sm md:text-base m-1 py-0.5 px-2 cursor-pointer nd-bg-lightgray hover:bg-gray-700 rounded ${
                                 focusedQuery === index ? "bg-gray-700" : ""
                             }`}
                             onClick={() => selectStation(location)}

@@ -11,7 +11,7 @@ const FTimetable: React.FC = ({ }) => {
     const [stationSelected, setStationSelected] = useState<Station | undefined>(undefined);
 
     return (
-        <div className={"px-10 py-7 md:w-[40%] nd-bg-darkgray flex flex-col space-y-4 nd-fg-white"}>
+        <div className={"px-4 py-7 md:px-10 md:w-[40%] flex flex-col space-y-4 nd-bg-darkgray nd-fg-white"}>
             <div className={"ml-auto items-center space-x-4"}>
                 <span className={`cursor-pointer ${typeSelected.type === 'departures' ? 'nd-fg-aqua' : 'nd-fg-white'}`} onClick={() => setTypeSelected({ type: 'departures' })}>Departures</span>
                 <span className={"text-xl nd-fg-white"}>|</span>
@@ -26,7 +26,7 @@ const FTimetable: React.FC = ({ }) => {
             </div>
 
             <button
-                className={"w-full nd-bg-aqua p-2 rounded nd-fg-black font-medium text-xl"}
+                className={"w-full nd-bg-aqua p-2 rounded nd-fg-black font-bold text-base md:text-2xl"}
                 onClick={() => {
                     if (!stationSelected) return;
                     router.push(`/${stationSelected?.evaNr}/${typeSelected.type}`);

@@ -44,7 +44,7 @@ const TimePicker = () => {
                 className={`p-2 text-center ${isSameMonth(day, currentDate)
                     ? ""
                     : "text-gray-400"} ${isSameDay(day, selectedDate)
-                    ? "bg-red-500 text-white rounded-full"
+                    ? "nd-bg-aqua nd-fg-black font-bold rounded-full"
                     : ""}`}
                 onClick={() => setSelectedDate(day)}
             >
@@ -55,8 +55,7 @@ const TimePicker = () => {
 
     const adjustTimeByMinutes = (amount: number) => {
         setTimeInput((prev) => {
-            let totalMinutes =
-                parseInt(prev.hours) * 60 + parseInt(prev.minutes) + amount;
+            let totalMinutes = parseInt(prev.hours) * 60 + parseInt(prev.minutes) + amount;
 
             if (totalMinutes < 0) {
                 totalMinutes += 24 * 60;
@@ -119,25 +118,25 @@ const TimePicker = () => {
     return (
         <div className="relative rounded-xl text-black">
             {/* Input Field */}
-            <div className="flex flex-row space-x-2 text-xl">
-                <div className={"flex flex-row items-center space-x-4 p-2 grow nd-bg-lightgray rounded"}
+            <div className="flex flex-row space-x-2">
+                <div className={"flex flex-row items-center space-x-2 md:space-x-4 p-2 grow nd-bg-lightgray rounded"}
                      onClick={() => setShowPicker(true)}
                 >
-                    <Image className={"p-1"} width={35} height={35} src={"./ui/calendar.svg"} alt={"CALENDAR"} />
+                    <Image className={"p-1 md:h-[35px] md:w-[35px]"} width={25} height={25} src={"/ui/calendar.svg"} alt={"CALENDAR"} />
                     <span
-                        className={"w-full nd-bg-lightgray nd-fg-white cursor-pointer focus:outline-none"}
+                        className={"w-full text-base md:text-2xl nd-bg-lightgray nd-fg-white cursor-pointer focus:outline-none"}
                     >
                         {format(selectedDate || currentDate, "dd.MM.yyyy")} - {timeInput.hours}:{timeInput.minutes}
                     </span>
                 </div>
-                <button className={"w-fit py-2 px-6 nd-bg-white rounded"}>Now</button>
+                <button className={"w-fit py-2 px-3 md:px-6 nd-bg-white rounded font-bold"} onClick={resetTime}>Now</button>
             </div>
 
             {/* Calendar Picker */}
             {showPicker && (
                 <div
                     ref={pickerRef}
-                    className="absolute top-full mt-2 w-80 bg-white shadow-lg rounded p-4 z-10"
+                    className="absolute top-1/2 left-1/2 mt-8 transform -translate-x-1/2 p-4 w-80 md:top-full md:left-auto md:transform-none md:mt-2 md:w-auto z-10 shadow-lg rounded nd-bg-lightgray nd-fg-white"
                 >
                     {/* header */}
                     <div className="flex justify-between items-center mb-4">
@@ -157,9 +156,9 @@ const TimePicker = () => {
                     </div>
 
                     {/* time inputs */}
-                    <div className="mt-4 flex items-center justify-between">
+                    <div className="mt-4 flex items-center justify-between font-bold space-x-2">
                         <button
-                            className="bg-red-500 text-white px-3 py-1 rounded"
+                            className="nd-bg-aqua text-black px-4 md:px-3 py-1 rounded"
                             onClick={() => adjustTimeByMinutes(-15)}
                         >
                             -
@@ -174,9 +173,9 @@ const TimePicker = () => {
                                 onKeyDown={handleKeyPress}
                                 maxLength={2}
                                 readOnly={true}
-                                className="w-10 border rounded text-center"
+                                className="w-full border rounded text-center text-xl nd-bg-lightgray nd-fg-white border-none focus:outline-none"
                             />
-                            :
+                            <span>:</span>
                             <input
                                 type="text"
                                 name="minutes"
@@ -185,12 +184,12 @@ const TimePicker = () => {
                                 onKeyDown={handleKeyPress}
                                 maxLength={2}
                                 readOnly={true}
-                                className="w-10 border rounded text-center"
+                                className="w-full border rounded text-center text-xl nd-bg-lightgray nd-fg-white border-none focus:outline-none"
                             />
                         </div>
 
                         <button
-                            className="bg-red-500 text-white px-3 py-1 rounded"
+                            className="nd-bg-aqua text-black px-4 md:px-3 py-1 rounded"
                             onClick={() => adjustTimeByMinutes(15)}
                         >
                             +
@@ -199,8 +198,8 @@ const TimePicker = () => {
 
                     {/* select button */}
                     <button
-                        className="mt-4 w-full bg-red-500 text-white py-2 rounded"
                         onClick={() => setShowPicker(false)}
+                        className="mt-4 w-full nd-bg-aqua font-bold nd-fg-black py-2 rounded"
                     >
                         Select
                     </button>
