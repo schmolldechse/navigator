@@ -1,6 +1,6 @@
 import { Station } from "@/app/lib/objects";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import TimePicker from "@/app/components/ui/TimePicker";
 import StationSearch from "@/app/components/ui/StationSearch";
 
@@ -9,6 +9,7 @@ const FTimetable: React.FC = ({ }) => {
 
     const [typeSelected, setTypeSelected] = useState<{ type: "departures" | "arrivals" }>({ type: 'departures' });
     const [stationSelected, setStationSelected] = useState<Station | undefined>(undefined);
+    const [dateSelected, setDateSelected] = useState<Date | undefined>(undefined);
 
     return (
         <div className={"px-4 py-7 md:px-10 md:w-[40%] flex flex-col space-y-4 nd-bg-darkgray nd-fg-white"}>
@@ -22,7 +23,7 @@ const FTimetable: React.FC = ({ }) => {
 
             <div className={"flex flex-col"}>
                 <span>Pick a time:</span>
-                <TimePicker />
+                <TimePicker onChangedDate={(date) => setDateSelected(date)} />
             </div>
 
             <button

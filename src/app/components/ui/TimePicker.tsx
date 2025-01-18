@@ -1,4 +1,6 @@
-import React, { useState, useRef } from "react";
+"use client";
+
+import React, {useState, useRef, useEffect} from "react";
 import {
     addDays,
     addMonths,
@@ -13,22 +15,26 @@ import {
 } from "date-fns";
 import Image from "next/image";
 
-const TimePicker = () => {
-    const [currentDate, setCurrentDate] = useState(new Date());
-    const [selectedDate, setSelectedDate] = useState(null);
-    const [timeInput, setTimeInput] = useState({ hours: "00", minutes: "00" });
+interface Props {
+    onChangedDate: (date: Date) => void;
+}
+
+const TimePicker: React.FC<Props> = ({ onChangedDate }) => {
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+
     const [showPicker, setShowPicker] = useState(false); // Toggle for calendar
     const pickerRef = useRef(null);
+
     const inputTimeout = useRef(null); // Ref for input timeout
     const buffer = useRef({ hours: "", minutes: "" }); // Buffer for input
 
     // Helper functions
-    const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
-    const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
+    const prevMonth = () => setSelectedDate(subMonths(selectedDate, 1));
+    const nextMonth = () => setSelectedDate(addMonths(selectedDate, 1));
 
     const renderCalendarDays = () => {
-        const startDate = startOfWeek(startOfMonth(currentDate), { weekStartsOn: 1 });
-        const endDate = endOfWeek(endOfMonth(currentDate), { weekStartsOn: 1 });
+        const startDate = startOfWeek(startOfMonth(selectedDate), { weekStartsOn: 1 });
+        const endDate = endOfWeek(endOfMonth(selectedDate), { weekStartsOn: 1 });
 
         let days = [];
         let day = startDate;
@@ -41,12 +47,17 @@ const TimePicker = () => {
         return days.map((day) => (
             <div
                 key={day}
-                className={`p-2 text-center ${isSameMonth(day, currentDate)
+                className={`p-2 text-center ${isSameMonth(day, selectedDate)
                     ? ""
                     : "text-gray-400"} ${isSameDay(day, selectedDate)
                     ? "nd-bg-aqua nd-fg-black font-bold rounded-full"
                     : ""}`}
-                onClick={() => setSelectedDate(day)}
+                onClick={() => setSelectedDate((prev) => {
+                    const updatedDate = new Date(day);
+                    updatedDate.setHours(prev.getHours());
+                    updatedDate.setMinutes(prev.getMinutes());
+                    return updatedDate;
+                })}
             >
                 {format(day, "d")}
             </div>
@@ -54,40 +65,30 @@ const TimePicker = () => {
     };
 
     const adjustTimeByMinutes = (amount: number) => {
-        setTimeInput((prev) => {
-            let totalMinutes = parseInt(prev.hours) * 60 + parseInt(prev.minutes) + amount;
-
-            if (totalMinutes < 0) {
-                totalMinutes += 24 * 60;
-            } else if (totalMinutes >= 24 * 60) {
-                totalMinutes -= 24 * 60;
-            }
-
-            const newHours = Math.floor(totalMinutes / 60);
-            const newMinutes = totalMinutes % 60;
-
-            return {
-                hours: String(newHours).padStart(2, "0"),
-                minutes: String(newMinutes).padStart(2, "0"),
-            };
+        setSelectedDate((prev) => {
+            const newDate = new Date(prev);
+            newDate.setMinutes(newDate.getMinutes() + amount);
+            return newDate;
         });
     };
 
-    // Close the picker when clicking outside
-    const handleClickOutside = (e) => {
-        if (pickerRef.current && !pickerRef.current.contains(e.target)) {
-            setShowPicker(false);
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if (pickerRef.current && !pickerRef.current.contains(e.target)) {
+                setShowPicker(false);
+            }
         }
-    };
 
-    React.useEffect(() => {
+        if (selectedDate) onChangedDate(selectedDate);
+
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, []);
+    }, [selectedDate]);
 
     const handleKeyPress = (e) => {
         const part = e.target.dataset.part;
-        if (!part || !/^\d$/.test(e.key)) return;
+        if (!part || (part !== "minutes" || part !== "hours"))
+        if (!/^\d+$/.test(e.key)) return;
 
         clearTimeout(inputTimeout.current);
         buffer.current[part] += e.key;
@@ -97,19 +98,22 @@ const TimePicker = () => {
             const maxValue = part === "hours" ? 23 : 59;
             const validatedValue = Math.min(parseInt(buffer.current[part], 10), maxValue);
 
-            setTimeInput((prev) => ({
-                ...prev,
-                [part]: String(validatedValue).padStart(2, "0"),
-            }));
+            setSelectedDate((prev) => {
+                const newDate: Date = new Date(prev);
+                if (part === "hours") newDate.setHours(validatedValue);
+                if (part === "minutes") newDate.setMinutes(validatedValue);
+                return newDate;
+            });
 
             // reset buffer
             buffer.current[part] = "";
         } else {
-            // display single digit if one digit is entered
-            setTimeInput((prev) => ({
-                ...prev,
-                [part]: `0${e.key}`,
-            }));
+            setSelectedDate((prev) => {
+                const newDate: Date = new Date(prev);
+                if (part === "hours") newDate.setHours(parseInt(e.key, 10) || 0);
+                if (part === "minutes") newDate.setMinutes(parseInt(e.key, 10) || 0);
+                return newDate;
+            });
 
             inputTimeout.current = setTimeout(() => buffer.current[part] = "", 500);
         }
@@ -126,10 +130,10 @@ const TimePicker = () => {
                     <span
                         className={"w-full text-base md:text-2xl nd-bg-lightgray nd-fg-white cursor-pointer focus:outline-none"}
                     >
-                        {format(selectedDate || currentDate, "dd.MM.yyyy")} - {timeInput.hours}:{timeInput.minutes}
+                        {format(selectedDate, "dd.MM.yyyy - HH:mm")}
                     </span>
                 </div>
-                <button className={"w-fit py-2 px-3 md:px-6 nd-bg-white rounded font-bold"} onClick={resetTime}>Now</button>
+                <button className={"w-fit py-2 px-3 md:px-6 nd-bg-white rounded font-bold"} onClick={() => setSelectedDate(new Date())}>Now</button>
             </div>
 
             {/* Calendar Picker */}
@@ -140,9 +144,9 @@ const TimePicker = () => {
                 >
                     {/* header */}
                     <div className="flex justify-between items-center mb-4">
-                        <button onClick={prevMonth}>&lt; {format(subMonths(currentDate, 1), "MMM")}</button>
-                        <div className={"font-bold"}>{format(currentDate, "MMMM yyyy")}</div>
-                        <button onClick={nextMonth}>{format(addMonths(currentDate, 1), "MMM")} &gt;</button>
+                        <button onClick={prevMonth}>&lt; {format(subMonths(selectedDate, 1), "MMM")}</button>
+                        <div className={"font-bold"}>{format(selectedDate, "MMMM yyyy")}</div>
+                        <button onClick={nextMonth}>{format(addMonths(selectedDate, 1), "MMM")} &gt;</button>
                     </div>
 
                     {/* calendar grid */}
@@ -169,7 +173,7 @@ const TimePicker = () => {
                                 type="text"
                                 name="hours"
                                 data-part="hours"
-                                value={timeInput.hours}
+                                value={String(selectedDate.getHours()).padStart(2, "0")}
                                 onKeyDown={handleKeyPress}
                                 maxLength={2}
                                 readOnly={true}
@@ -180,7 +184,7 @@ const TimePicker = () => {
                                 type="text"
                                 name="minutes"
                                 data-part="minutes"
-                                value={timeInput.minutes}
+                                value={String(selectedDate.getMinutes()).padStart(2, "0")}
                                 onKeyDown={handleKeyPress}
                                 maxLength={2}
                                 readOnly={true}
@@ -198,8 +202,11 @@ const TimePicker = () => {
 
                     {/* select button */}
                     <button
-                        onClick={() => setShowPicker(false)}
                         className="mt-4 w-full nd-bg-aqua font-bold nd-fg-black py-2 rounded"
+                        onClick={() => {
+                            setShowPicker(false);
+                            onChangedDate(selectedDate);
+                        }}
                     >
                         Select
                     </button>
