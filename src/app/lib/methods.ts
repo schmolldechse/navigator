@@ -13,4 +13,10 @@ const writeName = (stop: Stop): string => {
     return stop.nameParts.map(part => part.value).join('').trim();
 }
 
-export { browserLanguage, writeName };
+const calculateDuration = (startDate: Date, endDate: Date): number => {
+    if (!startDate || !endDate) return 60;
+    const diffInMs = Math.abs(endDate.getTime() - startDate.getTime());
+    return Math.round(diffInMs / 60_000);
+}
+
+export { browserLanguage, writeName, calculateDuration };
