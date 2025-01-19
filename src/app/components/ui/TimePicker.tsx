@@ -20,7 +20,12 @@ interface Props {
 }
 
 const TimePicker: React.FC<Props> = ({ onChangedDate }) => {
-    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date>(() => {
+        const date: Date = new Date();
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+        return date;
+    });
 
     const [showPicker, setShowPicker] = useState(false); // Toggle for calendar
     const pickerRef = useRef(null);
