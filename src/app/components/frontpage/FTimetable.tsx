@@ -1,6 +1,6 @@
 import { Station } from "@/app/lib/objects";
 import { useRouter } from "next/navigation";
-import React, {useEffect, useState} from "react";
+import React, {useState} from "react";
 import TimePicker from "@/app/components/ui/TimePicker";
 import StationSearch from "@/app/components/ui/StationSearch";
 
@@ -29,8 +29,8 @@ const FTimetable: React.FC = ({ }) => {
             <button
                 className={"w-full nd-bg-aqua p-2 rounded nd-fg-black font-bold text-base md:text-2xl"}
                 onClick={() => {
-                    if (!stationSelected) return;
-                    router.push(`/${stationSelected?.evaNr}/${typeSelected.type}`);
+                    if (!stationSelected || !dateSelected) return;
+                    router.push(`/${stationSelected?.evaNr}/${typeSelected.type}?startDate=${dateSelected.toISOString()}`);
                 }}
             >
                 Request
