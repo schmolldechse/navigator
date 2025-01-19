@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams } from "next/navigation";
+import {useParams, useSearchParams} from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/app/components/navbar";
 import Clock from "@/app/components/clock";
@@ -13,6 +13,7 @@ import WingTrain from "@/app/components/wingtrain";
 
 export default function Departures() {
     const { id } = useParams();
+    const searchParams = useSearchParams();
     const [station, setStation] = useState<Station | undefined>();
 
     // fetch station
@@ -34,21 +35,25 @@ export default function Departures() {
         fetchStation();
     }, []);
 
-    const [startDate, setStartDate] = useState<Date>(() => {
-        const date: Date = new Date();
-        date.setSeconds(0);
-        date.setMilliseconds(0);
-        return date;
-    });
+    const [startDate, setStartDate] = useState<Date>();
     const [endDate, setEndDate] = useState<Date>();
 
-    // update end date
-    useEffect(() => setEndDate(() => {
-        const date = new Date();
-        date.setHours(startDate.getHours() + 1);
-        return date;
-    }), []);
+    // query "when" from URL & update endDate
+    useEffect(() => {
+        const query = searchParams.get("startDate");
+        const date = query ? new Date(query) : new Date();
 
+        if (isNaN(date.getTime())) return;
+
+        date.setSeconds(0);
+        date.setMilliseconds(0);
+        setStartDate(date);
+
+        setEndDate(() => {
+            date.setHours(date.getHours() + 1);
+            return date;
+        });
+    }, []);
 
     const [journeys, setJourneys] = useState<Journey[]>([]);
     const journeysRef = useRef<Journey[]>([]);
