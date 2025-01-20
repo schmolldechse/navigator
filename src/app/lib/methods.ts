@@ -1,4 +1,4 @@
-import {Stop} from "@/app/lib/objects";
+import { Stop } from "@/app/lib/objects";
 
 const browserLanguage = (): string => {
     const supported = ['en', 'de'];
@@ -19,4 +19,11 @@ const calculateDuration = (startDate: Date, endDate: Date): number => {
     return Math.round(diffInMs / 60_000);
 }
 
-export { browserLanguage, writeName, calculateDuration };
+const difference = (date1: Date, date2: Date): number => {
+    const latest = date1 > date2 ? date1 : date2;
+    const earliest = date1 > date2 ? date2 : date1;
+
+    return (latest.getTime() - earliest.getTime()) / 1_000;
+}
+
+export { browserLanguage, writeName, calculateDuration, difference };
