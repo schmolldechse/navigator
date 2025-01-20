@@ -1,6 +1,5 @@
 import {NextRequest, NextResponse} from "next/server.js";
-import {Connection, Journey} from "@/app/lib/objects";
-import {mapStops} from "@/app/lib/mapper";
+import {Connection, Journey, Stop} from "@/app/lib/objects";
 
 export async function GET(req: NextRequest) {
     const {searchParams} = new URL(req.url);
@@ -79,4 +78,23 @@ const mapConnection = (entry: any, type: string): Connection => {
         messages: entry.messages,
         cancelled: entry.canceled,
     }
+}
+
+const mapStops = (rawData: any): Stop[] => {
+    if (!Array.isArray(rawData)) rawData = [rawData];
+
+    return rawData.map((rawStop: any) => {
+        const {evaNumber, name, canceled, additional, separation, nameParts} = rawStop;
+        return {
+            id: evaNumber,
+            name: name,
+            cancelled: canceled,
+            additional: additional || false,
+            separation: separation || false,
+            nameParts: nameParts ? nameParts.map((part: any) => ({
+                type: part.type,
+                value: part.value
+            })) : [{type: "default", value: name}]
+        };
+    });
 }
