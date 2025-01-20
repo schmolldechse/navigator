@@ -7,7 +7,7 @@ export async function GET(req: NextRequest) {
     const id = searchParams.get("id");
     if (!id) return NextResponse.json({ error: 'Station id is required' }, { status: 400 });
 
-    const when: Date = new Date(searchParams.get("when"));
+    const when: Date = searchParams.get("when") ? new Date(searchParams.get("when")) : null;
     if (!when || isNaN(when.getTime())) return NextResponse.json({ error: 'Could not read date' }, { status: 400 });
 
     const duration = parseInt(searchParams.get("duration")) || 60;
