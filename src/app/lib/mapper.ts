@@ -88,4 +88,4 @@ const sort = (journeys: Journey[], type: "departures" | "arrivals"): Journey[] =
     })
 }
 
-export {mapConnections, sort};
+export {normalize, mapConnections, sort};

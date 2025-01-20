@@ -1,31 +1,17 @@
 "use client";
 
 import React, {useState, useRef, useEffect} from "react";
-import {
-    addDays,
-    addMonths,
-    endOfMonth,
-    endOfWeek,
-    format,
-    isSameDay,
-    isSameMonth,
-    startOfMonth,
-    startOfWeek,
-    subMonths,
-} from "date-fns";
+import { DateTime } from "luxon";
 import Image from "next/image";
 
 interface Props {
-    onChangedDate: (date: Date) => void;
+    onChangedDate: (date: DateTime) => void;
 }
 
 const TimePicker: React.FC<Props> = ({ onChangedDate }) => {
-    const [selectedDate, setSelectedDate] = useState<Date>(() => {
-        const date: Date = new Date();
-        date.setSeconds(0);
-        date.setMilliseconds(0);
-        return date;
-    });
+    const [selectedDate, setSelectedDate] = useState<DateTime>(() =>
+        DateTime.now().set({ second: 0, millisecond: 0 })
+    );
 
     const [showPicker, setShowPicker] = useState(false); // Toggle for calendar
     const pickerRef = useRef(null);
@@ -34,47 +20,41 @@ const TimePicker: React.FC<Props> = ({ onChangedDate }) => {
     const buffer = useRef({ hours: "", minutes: "" }); // Buffer for input
 
     // Helper functions
-    const prevMonth = () => setSelectedDate(subMonths(selectedDate, 1));
-    const nextMonth = () => setSelectedDate(addMonths(selectedDate, 1));
+    const prevMonth = () => setSelectedDate(selectedDate.minus({ months: 1 }));
+    const nextMonth = () => setSelectedDate(selectedDate.plus({ months: 1 }));
 
     const renderCalendarDays = () => {
-        const startDate = startOfWeek(startOfMonth(selectedDate), { weekStartsOn: 1 });
-        const endDate = endOfWeek(endOfMonth(selectedDate), { weekStartsOn: 1 });
+        const startDate = selectedDate.startOf("month").startOf("week");
+        const endDate = selectedDate.endOf("month").endOf("week");
 
         let days = [];
         let day = startDate;
 
         while (day <= endDate) {
             days.push(day);
-            day = addDays(day, 1);
+            day = day.plus({ days: 1 });
         }
 
         return days.map((day) => (
             <div
                 key={day}
-                className={`p-2 text-center ${isSameMonth(day, selectedDate)
-                    ? ""
-                    : "text-gray-400"} ${isSameDay(day, selectedDate)
-                    ? "nd-bg-aqua nd-fg-black font-bold rounded-full"
-                    : ""}`}
-                onClick={() => setSelectedDate((prev) => {
-                    const updatedDate = new Date(day);
-                    updatedDate.setHours(prev.getHours());
-                    updatedDate.setMinutes(prev.getMinutes());
-                    return updatedDate;
-                })}
+                className={`p-2 text-center 
+                    ${day.hasSame(selectedDate, "month") ? "" : "text-gray-400"} 
+                    ${day.hasSame(selectedDate, "day")
+                        ? "nd-bg-aqua nd-fg-black font-bold rounded-full"
+                        : ""
+                }`}
+                onClick={() => setSelectedDate((prev) => 
+                    day.set({ hour: prev.hour, minute: prev.minute })
+                )}
             >
-                {format(day, "d")}
+                {day.day}
             </div>
         ));
     };
 
     const adjustTimeByMinutes = (amount: number) => {
-        setSelectedDate((prev) => {
-            const newDate = new Date(prev);
-            newDate.setMinutes(newDate.getMinutes() + amount);
-            return newDate;
-        });
+        setSelectedDate((prev) => prev.plus({ minutes: amount }));
     };
 
     useEffect(() => {
@@ -103,22 +83,20 @@ const TimePicker: React.FC<Props> = ({ onChangedDate }) => {
             const maxValue = part === "hours" ? 23 : 59;
             const validatedValue = Math.min(parseInt(buffer.current[part], 10), maxValue);
 
-            setSelectedDate((prev) => {
-                const newDate: Date = new Date(prev);
-                if (part === "hours") newDate.setHours(validatedValue);
-                if (part === "minutes") newDate.setMinutes(validatedValue);
-                return newDate;
-            });
+            setSelectedDate((prev) =>
+                part === "hours"
+                    ? prev.set({ hour: validatedValue })
+                    : prev.set({ minute: validatedValue })
+            );
 
             // reset buffer
             buffer.current[part] = "";
         } else {
-            setSelectedDate((prev) => {
-                const newDate: Date = new Date(prev);
-                if (part === "hours") newDate.setHours(parseInt(e.key, 10) || 0);
-                if (part === "minutes") newDate.setMinutes(parseInt(e.key, 10) || 0);
-                return newDate;
-            });
+            setSelectedDate((prev) =>
+                part === "hours"
+                    ? prev.set({ hour: parseInt(e.key, 10) || 0 })
+                    : prev.set({ minute: parseInt(e.key, 10) || 0 })
+            );
 
             inputTimeout.current = setTimeout(() => buffer.current[part] = "", 500);
         }
@@ -135,10 +113,10 @@ const TimePicker: React.FC<Props> = ({ onChangedDate }) => {
                     <span
                         className={"w-full text-base md:text-2xl nd-bg-lightgray nd-fg-white cursor-pointer focus:outline-none"}
                     >
-                        {format(selectedDate, "dd.MM.yyyy - HH:mm")}
+                        {selectedDate.toFormat("dd.MM.yyyy - HH:mm")}
                     </span>
                 </div>
-                <button className={"w-fit py-2 px-3 md:px-6 nd-bg-white rounded font-bold"} onClick={() => setSelectedDate(new Date())}>Now</button>
+                <button className={"w-fit py-2 px-3 md:px-6 nd-bg-white rounded font-bold"} onClick={() => setSelectedDate(DateTime.now().set({ second: 0, millisecond: 0 }))}>Now</button>
             </div>
 
             {/* Calendar Picker */}
@@ -149,9 +127,9 @@ const TimePicker: React.FC<Props> = ({ onChangedDate }) => {
                 >
                     {/* header */}
                     <div className="flex justify-between items-center mb-4">
-                        <button onClick={prevMonth}>&lt; {format(subMonths(selectedDate, 1), "MMM")}</button>
-                        <div className={"font-bold"}>{format(selectedDate, "MMMM yyyy")}</div>
-                        <button onClick={nextMonth}>{format(addMonths(selectedDate, 1), "MMM")} &gt;</button>
+                        <button onClick={prevMonth}>&lt; {selectedDate.minus({ months: 1 }).toFormat("MMM")}</button>
+                        <div className={"font-bold"}>{selectedDate.toFormat("MMMM yyyy")}</div>
+                        <button onClick={nextMonth}>{selectedDate.plus({ months: 1 }).toFormat("MMM")} &gt;</button>
                     </div>
 
                     {/* calendar grid */}
@@ -178,7 +156,7 @@ const TimePicker: React.FC<Props> = ({ onChangedDate }) => {
                                 type="text"
                                 name="hours"
                                 data-part="hours"
-                                value={String(selectedDate.getHours()).padStart(2, "0")}
+                                value={String(selectedDate.hour).padStart(2, "0")}
                                 onKeyDown={handleKeyPress}
                                 maxLength={2}
                                 readOnly={true}
@@ -189,7 +167,7 @@ const TimePicker: React.FC<Props> = ({ onChangedDate }) => {
                                 type="text"
                                 name="minutes"
                                 data-part="minutes"
-                                value={String(selectedDate.getMinutes()).padStart(2, "0")}
+                                value={String(selectedDate.minute).padStart(2, "0")}
                                 onKeyDown={handleKeyPress}
                                 maxLength={2}
                                 readOnly={true}

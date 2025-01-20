@@ -1,6 +1,6 @@
 'use client';
 
-import {useParams, useSearchParams} from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Navbar from "@/app/components/navbar";
 import Clock from "@/app/components/clock";
@@ -8,8 +8,9 @@ import ScheduledComponent from "@/app/components/scheduled";
 import ScheduledHeader from "@/app/components/scheduled-header";
 import { Connection, Journey, Station } from "@/app/lib/objects";
 import { mapConnections, sort } from "@/app/lib/mapper";
-import {browserLanguage, calculateDuration} from "@/app/lib/methods";
+import { browserLanguage, calculateDuration } from "@/app/lib/methods";
 import WingTrain from "@/app/components/wingtrain";
+import { DateTime } from "luxon";
 
 export default function Departures() {
     const { id } = useParams();
@@ -35,24 +36,18 @@ export default function Departures() {
         fetchStation();
     }, []);
 
-    const [startDate, setStartDate] = useState<Date>();
-    const [endDate, setEndDate] = useState<Date>();
+    const [startDate, setStartDate] = useState<DateTime>();
+    const [endDate, setEndDate] = useState<DateTime>();
 
-    // query "when" from URL & update endDate
+    // query "startDate" from URL & update endDate
     useEffect(() => {
-        const query = searchParams.get("startDate");
-        const date = query ? new Date(query) : new Date();
+        const query = decodeURIComponent(searchParams.get("startDate"));
+        let date: DateTime = query ? DateTime.fromISO(query) : DateTime.now();
+        if (!date.isValid) date = DateTime.now();
 
-        if (isNaN(date.getTime())) return;
-
-        date.setSeconds(0);
-        date.setMilliseconds(0);
+        date = date.set({ second: 0, millisecond: 0 });
         setStartDate(date);
-
-        setEndDate(() => {
-            date.setHours(date.getHours() + 1);
-            return date;
-        });
+        setEndDate(date.plus({ hours: 1 }));
     }, []);
 
     const [journeys, setJourneys] = useState<Journey[]>([]);
@@ -70,7 +65,7 @@ export default function Departures() {
 
     const updateJourneys = async () => {
         const prevJourneys = journeysRef.current;
-        const request = await fetch(`/api/v1/station/departures?id=${station?.evaNr}&when=${startDate.toISOString()}&duration=${calculateDuration(startDate, endDate)}&results=1000`);
+        const request = await fetch(`/api/v1/station/departures?id=${station?.evaNr}&when=${encodeURIComponent(startDate.toISO())}&duration=${calculateDuration(startDate, endDate, "minutes")}&results=1000`);
         if (!request.ok) return;
 
         const response = await request.json();
@@ -104,7 +99,7 @@ export default function Departures() {
     }, [station?.evaNr]);
 
     return (
-        <div className="h-screen flex flex-col overflow-hidden md:space-y-4 text-white">
+        <div className="h-screen flex flex-col overflow-hidden md:space-y-4">
             <Navbar id={station?.evaNr ?? ""} />
 
             <div className="container mx-auto flex justify-between items-center px-4">

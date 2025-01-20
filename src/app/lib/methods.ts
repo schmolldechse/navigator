@@ -1,4 +1,6 @@
-import { Stop } from "@/app/lib/objects";
+import { Connection, Stop } from "@/app/lib/objects";
+import { normalize } from "./mapper";
+import { DateTime } from "luxon";
 
 const browserLanguage = (): string => {
     const supported = ['en', 'de'];
@@ -13,17 +15,80 @@ const writeName = (stop: Stop): string => {
     return stop.nameParts.map(part => part.value).join('').trim();
 }
 
-const calculateDuration = (startDate: Date, endDate: Date): number => {
-    if (!startDate || !endDate) return 60;
-    const diffInMs = Math.abs(endDate.getTime() - startDate.getTime());
-    return Math.round(diffInMs / 60_000);
+const calculateDuration = (
+    startDate: DateTime,
+    endDate: DateTime,
+    unit: "milliseconds" | "seconds" | "minutes" | "hours" | "days"
+): number => {
+    if (!startDate.isValid || !endDate.isValid) throw new Error("Invalid DateTime objects provided");
+    return endDate.diff(startDate, unit).toObject()[unit];
 }
 
-const difference = (date1: Date, date2: Date): number => {
-    const latest = date1 > date2 ? date1 : date2;
-    const earliest = date1 > date2 ? date2 : date1;
+/**
+ * 
+ * @param connectionsA - The connections array from `db` profile
+ * @param connectionsB - The connections array from `dbnav` profile 
+ * @param type - Specifies whether to match based on "departures" or "arrivals"
+ * @returns A new array of merged connections
+ */
+const mergeConnections = (
+    connectionsA: Connection[],
+    connectionsB: Connection[],
+    type: "departures" | "arrivals"
+): Connection[] => {
+    const isMatching = (connectionA: Connection, connectionB: Connection): boolean => {
+        const aFullName = normalize(connectionA.lineInformation?.fullName);
+        const bFullName = normalize(connectionB.lineInformation?.fullName);
 
-    return (latest.getTime() - earliest.getTime()) / 1_000;
+        const platformMatch = type === "departures"
+            ? connectionA.departure?.plannedPlatform && connectionB.departure?.plannedPlatform
+                ? connectionA.departure?.plannedPlatform === connectionB.departure?.plannedPlatform
+                : true
+            : connectionA.arrival?.plannedPlatform && connectionB.arrival?.plannedPlatform
+                ? connectionA.arrival?.plannedPlatform === connectionB.arrival?.plannedPlatform
+                : true;
+
+        const timeMatch = type === "departures"
+            ? connectionA.departure?.plannedTime === connectionB.departure?.plannedTime
+            : connectionA.arrival?.plannedTime === connectionB.arrival?.plannedTime;
+
+        const nameMatch = aFullName === bFullName || aFullName === normalize(connectionB.lineInformation?.fahrtNr);
+
+        return (
+            platformMatch &&
+            timeMatch &&
+            nameMatch
+        );
+    };
+
+    const mergeConnections = (connectionA: Connection, connectionB: Connection): Connection => {
+        return {
+            ris_journeyId: connectionA?.ris_journeyId ?? undefined,
+            hafas_journeyId: connectionB?.hafas_journeyId ?? undefined,
+            direction: type === "departures" ? (connectionA?.direction || connectionB?.direction) ?? undefined : undefined,
+            provenance: type === "arrivals" ? (connectionA?.provenance || connectionB?.provenance) ?? undefined : undefined,
+            destination: type === "departures" ? (connectionA?.destination ?? undefined) : undefined, // RIS (`db` profile) does contain this
+            origin: type === "arrivals" ? (connectionA?.origin ?? undefined) : undefined, // RIS (`db` profile) does contain this
+            departure: type === "departures" ? (connectionA?.departure || connectionB?.departure) : undefined,
+            arrival: type === "arrivals" ? (connectionA?.arrival || connectionB?.arrival) : undefined,
+            lineInformation: {
+                id: (connectionA?.lineInformation?.id || connectionB?.lineInformation?.id) ?? undefined,
+                fahrtNr: (connectionA?.lineInformation?.fahrtNr || connectionB?.lineInformation?.fahrtNr) ?? undefined, // HAFAS (`dbnav` profile) contains the line number (e.g. MEX 12)
+                fullName: (connectionA?.lineInformation?.fullName || connectionB?.lineInformation?.fullName) ?? undefined,
+                product: (connectionA?.lineInformation?.product || connectionB?.lineInformation?.product) ?? undefined,
+                operator: connectionA?.lineInformation?.operator ?? undefined
+            },
+            cancelled: (connectionA?.cancelled || connectionB?.cancelled) ?? false
+        }
+    }
+
+    const merged: Connection[] = [];
+    connectionsB.forEach((connectionB: Connection) => {
+        const matching = connectionsA.find((connectionA: Connection) => isMatching(connectionA, connectionB));
+        if (!matching) merged.push(connectionB);
+        else merged.push(mergeConnections(matching, connectionB));
+    });
+    return merged;
 }
 
-export { browserLanguage, writeName, calculateDuration, difference };
+export { browserLanguage, writeName, calculateDuration, mergeConnections };
