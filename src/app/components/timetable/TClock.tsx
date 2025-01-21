@@ -1,24 +1,18 @@
 'use client';
 
+import { DateTime } from "luxon";
 import {useEffect, useState} from "react";
 
-interface ClockProps {
+interface Props {
     className: string
 }
 
-const Clock: React.FC<ClockProps> = ({ className }) => {
-    const [hours, setHours] = useState<string>("00");
-    const [minutes, setMinutes] = useState<string>("00");
-
+const TClock: React.FC<Props> = ({ className }) => {
+    const [time, setTime] = useState<DateTime>(DateTime.local());
     const [showColon, setShowColon] = useState<boolean>(true);
 
     useEffect(() => {
-        const updateTime = () => {
-            const now = new Date();
-            setHours(String(now.getHours()).padStart(2, '0'));
-            setMinutes(String(now.getMinutes()).padStart(2, '0'));
-        }
-
+        const updateTime = () => setTime(DateTime.local());
         updateTime();
 
         const timer = setInterval(() => {
@@ -31,11 +25,11 @@ const Clock: React.FC<ClockProps> = ({ className }) => {
 
     return (
         <span className={className}>
-            {hours}
+            {time.toFormat("HH")}
             <span className={`${showColon ? '' : 'invisible'}`}>:</span>
-            {minutes}
+            {time.toFormat("mm")}
         </span>
     );
 }
 
-export default Clock;
+export default TClock;

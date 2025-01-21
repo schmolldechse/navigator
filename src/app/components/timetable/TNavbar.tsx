@@ -1,21 +1,20 @@
 'use client';
 
-import {Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger} from "@/components/ui/sheet";
-import {usePathname, useRouter} from "next/navigation";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { usePathname, useRouter } from "next/navigation";
 import { Menu } from "lucide-react";
 
-interface NavbarProps {
+interface Props {
     id: string
 }
 
-const Navbar: React.FC<NavbarProps> = ({id}) => {
+const TNavbar: React.FC<Props> = ({ id }) => {
     const router = useRouter();
     const pathname = usePathname();
 
     const navbarItems = [
-        {label: "Departures", path: '/departures'},
-        {label: "Arrivals", path: '/arrivals'},
-        {label: "Statistics", path: '/statistics'},
+        { label: "Departures", path: '/departures' },
+        { label: "Arrivals", path: '/arrivals' },
     ]
 
     const handleNavigation = (path: string) => router.push(`/${id}${path}`);
@@ -73,4 +72,4 @@ const Navbar: React.FC<NavbarProps> = ({id}) => {
     );
 }
 
-export default Navbar;
+export default TNavbar;

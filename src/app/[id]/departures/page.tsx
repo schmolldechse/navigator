@@ -2,8 +2,6 @@
 
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import Navbar from "@/app/components/navbar";
-import Clock from "@/app/components/clock";
 import ScheduledComponent from "@/app/components/scheduled";
 import ScheduledHeader from "@/app/components/scheduled-header";
 import { Connection, Journey, Station } from "@/app/lib/objects";
@@ -11,6 +9,8 @@ import { mapConnections, sort } from "@/app/lib/mapper";
 import { browserLanguage, calculateDuration } from "@/app/lib/methods";
 import WingTrain from "@/app/components/wingtrain";
 import { DateTime } from "luxon";
+import TNavbar from "@/app/components/timetable/TNavbar";
+import TClock from "@/app/components/timetable/TClock";
 
 export default function Departures() {
     const { id } = useParams();
@@ -100,11 +100,11 @@ export default function Departures() {
 
     return (
         <div className="h-screen flex flex-col overflow-hidden md:space-y-4">
-            <Navbar id={station?.evaNr ?? ""} />
+            <TNavbar id={station?.evaNr ?? ""} />
 
             <div className="container mx-auto flex justify-between items-center px-4">
                 <span className="text-xl md:text-4xl font-semibold mt-4 px-2 md:px-4">{station?.name ?? ""}</span>
-                <Clock className="text-2xl md:text-4xl font-medium mt-4 px-2 md:px-4" />
+                <TClock className="text-2xl md:text-4xl font-medium mt-4 px-2 md:px-4" />
             </div>
 
             <ScheduledHeader isDeparture={true} />
