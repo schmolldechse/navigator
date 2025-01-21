@@ -1,7 +1,6 @@
 export type Connection = {
     ris_journeyId?: string,          // RIS identifier   (DB RIS internal, HAFAS v2)
     hafas_journeyId?: string,        // HAFAS identifier (HAFAS v1)
-    tripId?: string,
     origin?: Stop,
     destination?: Stop,
     actualDestination?: Stop,
