@@ -40,10 +40,7 @@ export async function GET(req: NextRequest) {
 }
 
 const mapConnection = (entry: any, type: string): Connection => {
-    const timeSchedule = new Date(entry.timeSchedule).getTime();
-    const timeDelayed = new Date(entry.timeDelayed).getTime();
-
-    const delay: number = Math.abs(timeDelayed - timeSchedule) / 1000; // in s
+    const delay: number = calculateDuration(DateTime.fromISO(entry?.timeDelayed), DateTime.fromISO(entry?.timeSchedule), "seconds");
 
     const isDeparture = type === "departures";
 
