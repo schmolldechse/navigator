@@ -56,7 +56,7 @@ const mapConnections = async (profile: "db" | "dbnav", data: any): Promise<Conne
         const tripId = departure.tripId;
         if (!tripId || map.has(tripId)) return;
 
-        const delay: number = calculateDuration(DateTime.fromISO(departure?.when), DateTime.fromISO(departure?.plannedWhen), "seconds");
+        const delay: number = calculateDuration(DateTime.fromISO(departure?.when || departure?.plannedWhen), DateTime.fromISO(departure?.plannedWhen), "seconds");
 
         const connection: Connection = {
             hafas_journeyId: !isRIS ? tripId : undefined,
@@ -69,7 +69,7 @@ const mapConnections = async (profile: "db" | "dbnav", data: any): Promise<Conne
             },
             departure: {
                 plannedTime: departure?.plannedWhen ?? undefined,
-                actualTime: departure?.when ?? undefined,
+                actualTime: (departure?.when || departure?.plannedWhen) ?? undefined,
                 delay: departure?.delay ?? delay,
                 plannedPlatform: departure?.plannedPlatform ?? undefined,
                 actualPlatform: departure?.platform ?? undefined
