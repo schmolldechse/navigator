@@ -1,5 +1,7 @@
 import {NextRequest, NextResponse} from "next/server.js";
 import {Connection, Journey, Stop} from "@/app/lib/objects";
+import { calculateDuration } from "@/app/lib/methods";
+import { DateTime } from "luxon";
 
 export async function GET(req: NextRequest) {
     const {searchParams} = new URL(req.url);
