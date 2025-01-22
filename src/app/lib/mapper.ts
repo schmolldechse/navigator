@@ -1,56 +1,39 @@
-import {Connection, Journey, Stop} from "@/app/lib/objects";
+import { Connection, Journey, Stop } from "@/app/lib/objects";
+import { isMatching } from "./methods";
+import { DateTime } from "luxon";
 
 const normalize = (name?: string): string | undefined => {
     return name?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
 }
 
-const mapConnections = (journeys: Journey[], connections: Connection[], type: "departures" | "arrivals"): {
+const mapConnections = (
     journeys: Journey[],
-    faulty: Connection[]
-} => {
-    const matched = new Set<string>();
+    connections: Connection[],
+    type: "departures" | "arrivals"
+): Journey[] => {
+    const matched: { hafas_journeyId: string }[] = [];
 
     const updatedJourneys = journeys.map((journey: Journey) => ({
         ...journey,
-        connections: journey.connections.map((connection: Connection) => {
-            // connection   - from RIS
-            // conn         - from HAFAS
-            const matching = connections.find((conn: Connection) => {
-                if (connection.hafas_journeyId && (connection.hafas_journeyId === conn.hafas_journeyId)) return true;
+        connections: journey.connections.map((connectionA: Connection) => {
+            // connectionA      - from RIS
+            // connectionB      - from HAFAS
+            const matching = connections.find((connectionB: Connection) => {
+                const matchesRIS = connectionA.ris_journeyId && (connectionA.ris_journeyId === connectionB.ris_journeyId);
+                const matchesHAFAS = connectionA.hafas_journeyId && (connectionA.hafas_journeyId === connectionB.hafas_journeyId);
 
-                const connectionFullName = normalize(connection.lineInformation?.fullName);
-                const connFullName = normalize(conn.lineInformation?.fullName);
-
-                const platformMatch = type === "departures"
-                    ? connection.departure?.plannedPlatform && conn.departure?.plannedPlatform
-                        ? connection.departure?.plannedPlatform === conn.departure?.plannedPlatform
-                        : true
-                    : connection.arrival?.plannedPlatform && conn.arrival?.plannedPlatform
-                        ? connection.arrival?.plannedPlatform === conn.arrival?.plannedPlatform
-                        : true;
-
-                const timeMatch = type === "departures"
-                    ? connection.departure?.plannedTime === conn.departure?.plannedTime
-                    : connection.arrival?.plannedTime === conn.arrival?.plannedTime;
-
-                const nameMatch = connectionFullName === connFullName || connectionFullName === normalize(conn.lineInformation?.fahrtNr)
-
-                return (
-                    platformMatch &&
-                    timeMatch &&
-                    nameMatch
-                );
+                if (matchesRIS || matchesHAFAS) return true;
+                if (isMatching(connectionA, connectionB, type)) return true;
+                return false;
             });
-            if (!matching) return connection;
+            if (!matching) return connectionA;
 
-            if (matching.ris_journeyId) matched.add(matching.ris_journeyId);
-            if (matching.hafas_journeyId) matched.add(matching.hafas_journeyId);
-
+            matched.push({ hafas_journeyId: matching?.hafas_journeyId });
             return {
-                ...connection,
+                ...connectionA,
                 ...matching,
                 lineInformation: {
-                    ...connection.lineInformation,
+                    ...connectionA.lineInformation,
                     ...matching.lineInformation
                 }
             };
@@ -59,16 +42,10 @@ const mapConnections = (journeys: Journey[], connections: Connection[], type: "d
 
     // sort out the connections that do not have an assigned journey
     // this may happen if, for example, a train is running with an "lineInformation.additionalLineName" and no second id can be found
-    const faulty = connections.filter(conn => !matched.has(conn.ris_journeyId ?? '') && !matched.has(conn.hafas_journeyId ?? ''));
-    return {journeys: updatedJourneys, faulty: faulty};
+    const faulty = connections.filter(connection => !matched.some(m => m.hafas_journeyId === connection?.hafas_journeyId));
+    const newJourneys = faulty.map(connection => ({ connections: [connection] }));
 
-    /**
-     // handle Connection's which have no Journey
-     const newJourneys = connections.filter(conn => !matched.has(conn.ris_journeyId ?? '') && !matched.has(conn.hafas_journeyId ?? ''))
-     .map(conn => ({connections: [conn]}));
-
-     return [...updatedJourneys, ...newJourneys];
-     */
+    return [...updatedJourneys, ...newJourneys]
 }
 
 const sort = (journeys: Journey[], type: "departures" | "arrivals"): Journey[] => {

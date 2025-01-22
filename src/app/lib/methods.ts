@@ -24,6 +24,31 @@ const calculateDuration = (
     return endDate.diff(startDate, unit).toObject()[unit];
 }
 
+const isMatching = (connectionA: Connection, connectionB: Connection, type: "departures" | "arrivals"): boolean => {
+    const aFullName = normalize(connectionA.lineInformation?.fullName);
+    const bFullName = normalize(connectionB.lineInformation?.fullName);
+
+    const platformMatch = type === "departures"
+        ? connectionA.departure?.plannedPlatform && connectionB.departure?.plannedPlatform
+            ? connectionA.departure?.plannedPlatform === connectionB.departure?.plannedPlatform
+            : true
+        : connectionA.arrival?.plannedPlatform && connectionB.arrival?.plannedPlatform
+            ? connectionA.arrival?.plannedPlatform === connectionB.arrival?.plannedPlatform
+            : true;
+
+    const timeMatch = type === "departures"
+        ? connectionA.departure?.plannedTime === connectionB.departure?.plannedTime
+        : connectionA.arrival?.plannedTime === connectionB.arrival?.plannedTime;
+
+    const nameMatch = aFullName === bFullName || aFullName === normalize(connectionB.lineInformation?.fahrtNr);
+
+    return (
+        platformMatch &&
+        timeMatch &&
+        nameMatch
+    );
+};
+
 /**
  * 
  * @param connectionsA - The connections array from `db` profile
@@ -36,32 +61,7 @@ const mergeConnections = (
     connectionsB: Connection[],
     type: "departures" | "arrivals"
 ): Connection[] => {
-    const isMatching = (connectionA: Connection, connectionB: Connection): boolean => {
-        const aFullName = normalize(connectionA.lineInformation?.fullName);
-        const bFullName = normalize(connectionB.lineInformation?.fullName);
-
-        const platformMatch = type === "departures"
-            ? connectionA.departure?.plannedPlatform && connectionB.departure?.plannedPlatform
-                ? connectionA.departure?.plannedPlatform === connectionB.departure?.plannedPlatform
-                : true
-            : connectionA.arrival?.plannedPlatform && connectionB.arrival?.plannedPlatform
-                ? connectionA.arrival?.plannedPlatform === connectionB.arrival?.plannedPlatform
-                : true;
-
-        const timeMatch = type === "departures"
-            ? connectionA.departure?.plannedTime === connectionB.departure?.plannedTime
-            : connectionA.arrival?.plannedTime === connectionB.arrival?.plannedTime;
-
-        const nameMatch = aFullName === bFullName || aFullName === normalize(connectionB.lineInformation?.fahrtNr);
-
-        return (
-            platformMatch &&
-            timeMatch &&
-            nameMatch
-        );
-    };
-
-    const mergeConnections = (connectionA: Connection, connectionB: Connection): Connection => {
+    const merge = (connectionA: Connection, connectionB: Connection): Connection => {
         return {
             ris_journeyId: connectionA?.ris_journeyId ?? undefined,
             hafas_journeyId: connectionB?.hafas_journeyId ?? undefined,
@@ -84,11 +84,11 @@ const mergeConnections = (
 
     const merged: Connection[] = [];
     connectionsB.forEach((connectionB: Connection) => {
-        const matching = connectionsA.find((connectionA: Connection) => isMatching(connectionA, connectionB));
+        const matching = connectionsA.find((connectionA: Connection) => isMatching(connectionA, connectionB, type));
         if (!matching) merged.push(connectionB);
-        else merged.push(mergeConnections(matching, connectionB));
+        else merged.push(merge(matching, connectionB));
     });
     return merged;
 }
 
-export { browserLanguage, writeName, calculateDuration, mergeConnections };
+export { browserLanguage, writeName, calculateDuration, isMatching, mergeConnections };
