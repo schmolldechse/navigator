@@ -1,7 +1,8 @@
 import {useState} from "react";
 import {Connection} from "@/app/lib/objects";
-import {writeName} from "@/app/lib/methods";
+import {calculateDuration, writeName} from "@/app/lib/methods";
 import ShowMore from "@/app/components/show-more";
+import { DateTime } from "luxon";
 
 interface ScheduledProps {
 	connection: Connection;
@@ -18,11 +19,12 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
 	const viaStops = displayedViaStops.map(writeName).join(" – ");
 
     const isDelayed = () => {
-        const planned = new Date(isDeparture ? connection.departure.plannedTime : connection.arrival.plannedTime);
-        const actual = new Date(isDeparture ? connection.departure.actualTime : connection.arrival.actualTime);
-
-        const difference = (actual.getTime() - planned.getTime()) / 60000; // in min
-        return difference >= 1;
+        const diff = calculateDuration(
+            DateTime.fromISO(isDeparture ? connection?.departure?.plannedTime : connection?.arrival?.plannedTime),
+            DateTime.fromISO(isDeparture ? connection?.departure?.actualTime : connection?.arrival?.actualTime),
+            "minutes"
+        );
+        return diff >= 1;
     }
 
     const showPlatform = () => {
