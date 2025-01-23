@@ -1,12 +1,25 @@
+'use client';
+
 interface Props {
     type: "timetable" | "route_planner";
+    setType: (type: "timetable" | "route_planner") => void;
 }
 
-const FNavbar: React.FC<Props> = ({ type }) => {
+const FNavbar = ({ type, setType }) => {
     return (
         <span className={"montserrat-regular flex items-center space-x-4"}>
-            <span className={`cursor-pointer ${type === 'timetable' ? 'border-b-2 border-white' : ''}`}>Timetable</span>
-            <span className={`cursor-pointer ${type === 'route_planner' ? 'border-b-2 border-white' : ''}`}>Route Planner</span>
+            <span
+                onClick={() => setType('timetable')}
+                className={`cursor-pointer ${type === 'timetable' ? 'border-b-2 border-white' : ''}`}
+            >
+                Timetable
+            </span>
+            <span
+                onClick={() => setType('route_planner')}
+                className={`cursor-pointer ${type === 'route_planner' ? 'border-b-2 border-white' : ''}`}
+            >
+                Route Planner
+            </span>
         </span>
     );
 }
