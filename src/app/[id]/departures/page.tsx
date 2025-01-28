@@ -54,7 +54,16 @@ export default function Departures() {
     const journeysRef = useRef<Journey[]>([]);
 
     const journeysFromDB = async (): Promise<Journey[]> => {
-        const request = await fetch(`/api/v1/bahnhof-proxy?id=${station?.evaNr}&type=departures&duration=60&locale=${browserLanguage()}`);
+        const now = DateTime.now().set({ second: 0, millisecond: 0 });
+        const durationMinutes = calculateDuration(now, endDate, "minutes");
+
+        // if duration is less or equal than 0, no need to fetch
+        if (durationMinutes <= 0) return [];
+
+        // limit duration to a maximum of 6 hours
+        const maxDuration = Math.min(durationMinutes, 6 * 60);
+
+        const request = await fetch(`/api/v1/bahnhof-proxy?id=${station?.evaNr}&type=departures&duration=${maxDuration}&locale=${browserLanguage()}`);
         if (!request.ok) return [];
 
         const response = await request.json();
@@ -63,8 +72,14 @@ export default function Departures() {
         return response.entries as Journey[];
     }
 
-    const updateJourneys = async () => {
+    /**
+     * Fetches journeys from the `db-vendo-client` and update the journeys
+     * @param appendJourneys - if true, append all received journeys. This is helpful, when there's a different date selected than current date
+     */
+    const updateJourneys = async (appendJourneys: boolean) => {
         const prevJourneys = journeysRef.current;
+
+        // fetch journeys for the full range from startDate to endDate
         const request = await fetch(`/api/v1/station/departures?id=${station?.evaNr}&when=${encodeURIComponent(startDate.toISO())}&duration=${calculateDuration(startDate, endDate, "minutes")}&results=1000`);
         if (!request.ok) return;
 
@@ -73,8 +88,8 @@ export default function Departures() {
 
         const connections: Connection[] = response.entries as Connection[];
 
-        const mappedJourneys = mapConnections(prevJourneys, connections, "departures");
-        const sorted = sort(mappedJourneys.journeys, "departures");
+        const mappedJourneys = mapConnections(prevJourneys, connections, "departures", appendJourneys);
+        const sorted = sort(mappedJourneys, "departures");
 
         setJourneys(sorted);
         journeysRef.current = sorted;
@@ -86,15 +101,24 @@ export default function Departures() {
         journeysRef.current = [];
 
         const initJourneys = async () => {
+            const now = DateTime.now().set({ second: 0, millisecond: 0 });
+            const diffInHoursStart = startDate.diff(now, 'hours').hours;
+            const diffInHoursEnd = endDate.diff(now, 'hours').hours;
+
+            if (diffInHoursStart < -1 || diffInHoursEnd > 6) {
+                await updateJourneys(true);
+                return;
+            }
+
             const fetchedJourneys: Journey[] = await journeysFromDB();
             if (fetchedJourneys.length === 0) return;
 
             journeysRef.current = fetchedJourneys;
-            updateJourneys();
+            await updateJourneys(false);
         }
         initJourneys();
 
-        const intervalId = setInterval(updateJourneys, 20 * 1000);
+        const intervalId = setInterval(updateJourneys, 20 * 1000, false);
         return () => clearInterval(intervalId);
     }, [station?.evaNr]);
 

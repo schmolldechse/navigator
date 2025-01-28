@@ -25,6 +25,9 @@ const calculateDuration = (
 }
 
 const isMatching = (connectionA: Connection, connectionB: Connection, type: "departures" | "arrivals"): boolean => {
+    if (connectionA?.ris_journeyId === connectionB?.ris_journeyId) return true;
+    if (connectionA?.hafas_journeyId === connectionB?.hafas_journeyId) return true;
+
     const aFullName = normalize(connectionA.lineInformation?.fullName);
     const bFullName = normalize(connectionB.lineInformation?.fullName);
 
@@ -50,9 +53,9 @@ const isMatching = (connectionA: Connection, connectionB: Connection, type: "dep
 };
 
 /**
- * 
+ *
  * @param connectionsA - The connections array from `db` profile
- * @param connectionsB - The connections array from `dbnav` profile 
+ * @param connectionsB - The connections array from `dbnav` profile
  * @param type - Specifies whether to match based on "departures" or "arrivals"
  * @returns A new array of merged connections
  */
