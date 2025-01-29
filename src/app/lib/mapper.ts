@@ -15,26 +15,17 @@ const mapConnections = (
         return connections.map(connection => ({ connections: [connection] }));
     }
 
-    const updated= journeys.map((journey: Journey) => ({
-        ...journey,
-        connections: journey.connections.map((connectionA: Connection) => {
-            // connectionA      - from RIS
-            // connectionB      - from `db-vendo-client`
+    return journeys.map((journey: Journey) => {
+        const updated = journey?.connections.map((connectionA: Connection) => {
             const matching = connections.find((connectionB: Connection) => isMatching(connectionA, connectionB, type));
-            if (!matching) return connectionA;
+            return matching ? { ...connectionA, ...matching } : connectionA;
+        });
 
-            return {
-                ...connectionA,
-                ...matching,
-                lineInformation: {
-                    ...connectionA.lineInformation,
-                    ...matching.lineInformation
-                }
-            };
-        })
-    }));
-
-    return [...updated];
+        return {
+            ...journey,
+            connections: updated
+        }
+    });
 }
 
 const sort = (journeys: Journey[], type: "departures" | "arrivals"): Journey[] => {
