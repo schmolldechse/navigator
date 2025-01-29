@@ -24,7 +24,12 @@ const calculateDuration = (
     return endDate.diff(startDate, unit).toObject()[unit];
 }
 
-const isMatching = (connectionA: Connection, connectionB: Connection, type: "departures" | "arrivals"): boolean => {
+const isMatching = (
+    connectionA: Connection,
+    connectionB: Connection,
+    type: "departures" | "arrivals",
+    isWing: boolean = false
+): boolean => {
     if (connectionA?.ris_journeyId === connectionB?.ris_journeyId) return true;
     if (connectionA?.hafas_journeyId === connectionB?.hafas_journeyId) return true;
 
@@ -45,10 +50,17 @@ const isMatching = (connectionA: Connection, connectionB: Connection, type: "dep
 
     const nameMatch = aFullName === bFullName || aFullName === normalize(connectionB.lineInformation?.fahrtNr);
 
+    const wingMatch = isWing
+        ? type === "departures"
+            ? connectionA?.destination?.id === connectionB?.destination?.id
+            : connectionA?.origin?.id === connectionB?.origin?.id
+        : true;
+
     return (
         platformMatch &&
         timeMatch &&
-        nameMatch
+        nameMatch &&
+        wingMatch
     );
 };
 
