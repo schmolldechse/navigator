@@ -39,7 +39,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
 		);
 	}
 
-    const displayTime = (time: string) => new Date(time).toLocaleTimeString("de-DE", {hour: "2-digit", minute: "2-digit"});
+    const displayTime = (time: string) => DateTime.fromISO(time).setLocale("de-DE").toLocaleString(DateTime.TIME_24_SIMPLE);
 
     return (
 		<div
