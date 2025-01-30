@@ -18,7 +18,16 @@ const mapConnections = (
     return journeys.map((journey: Journey) => {
         const updated = journey?.connections.map((connectionA: Connection) => {
             const matching = connections.find((connectionB: Connection) => isMatching(connectionA, connectionB, type, journey?.connections.length > 1));
-            return matching ? { ...connectionA, ...matching } : connectionA;
+            return matching ?
+                {
+                    ...connectionA,
+                    ...matching,
+                    lineInformation: {
+                        ...connectionA.lineInformation,
+                        ...matching.lineInformation
+                    }
+                }
+            : connectionA;
         });
 
         return {
