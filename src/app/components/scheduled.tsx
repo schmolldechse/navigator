@@ -4,14 +4,14 @@ import {calculateDuration, writeName} from "@/app/lib/methods";
 import ShowMore from "@/app/components/show-more";
 import { DateTime } from "luxon";
 
-interface ScheduledProps {
+interface Props {
 	connection: Connection;
 	isDeparture: boolean;
     renderBorder: boolean;
-    renderTime: boolean;
+    renderInfo: boolean;
 }
 
-const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, renderBorder, renderTime}) => {
+const ScheduledComponent = ({connection, isDeparture, renderBorder, renderInfo}: Props) => {
     const [color, setColor] = useState<any>();
 
 	const [expandVia, setExpandVia] = useState(false);
@@ -58,28 +58,29 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
                     {connection?.lineInformation?.fullName}{connection?.lineInformation?.additionalLineName ? ` / ${connection?.lineInformation?.additionalLineName}` : ''}
                 </span>
 
-				{/* second line */}
-				<div className="flex flex-row items-center font-semibold">
-                    {renderTime && (<>
-					    {/* scheduled time */}
-					    <div className="flex-[1] flex flex-row items-center space-x-2 text-2xl">
+				{/*
+				second line
+				renderInfo decides if the information will be shown. this is the case for single connections, or the last connection of a wing-train.
+				 */}
+                {renderInfo && (<div className="flex flex-row items-center font-semibold">
+                    {/* scheduled time */}
+                    <div className="flex-[1] flex flex-row items-center space-x-2 text-2xl">
                         <span>{displayTime(isDeparture ? connection?.departure?.plannedTime : connection?.arrival.plannedTime)}</span>
                         {isDelayed() && (
-                            <span
-                                className={`bg-[#ededed] text-[#0a0a0a] text-sm px-[0.3rem] py-[0.05rem]`}
-                            >
+                            <span className={`bg-[#ededed] text-[#0a0a0a] text-sm px-[0.3rem] py-[0.05rem]`}>
                                 {displayTime(isDeparture ? connection?.departure?.actualTime : connection?.arrival.actualTime)}
                             </span>
                         )}
                     </div>
-                    </>)}
 
-					{/* track */}
-					<span className="text-right text-2xl">{showPlatform()}</span>
-				</div>
+                    {/* track */}
+                    <span className="text-right text-2xl">{showPlatform()}</span>
+				</div>)}
 
 				{/* third line */}
 				{viaStops && viaStops?.length > 0 && (<>
+                    {/* additional line break is necessary here. renderInfo decides if time & platform will be shown. if not, viaStops will be right near of the lineInformation?.fullName */}
+                    {!renderInfo && <br />}
                     <span className={"inline-block"}>
                         {viaStops}
                         {connection?.viaStops.length > 3 && (<ShowMore onClick={() => setExpandVia(!expandVia)}/>)}
@@ -131,7 +132,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
                 <div className={"flex flex-row w-full"}>
                     {/* time information */}
                     <div className={"flex-[1] flex justify-end items-center space-x-2 mr-8"}>
-                        {renderTime && (<>
+                        {/* renderInfo decides if the information will be shown. this is the case for single connections, or the last connection of a wing-train. */}
+                        {renderInfo && (<>
                             <span>{displayTime(isDeparture ? connection?.departure?.plannedTime : connection?.arrival.plannedTime)}</span>
 						    {isDelayed() && (
 							    <span
@@ -151,7 +153,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
                     </span>
 
                     {/* track */}
-                    <span className={"flex-[1] flex text-right"}>{showPlatform()}</span>
+                    <span className={"flex-[1] flex text-right"}>{renderInfo && showPlatform()}</span>
                 </div>
             </span>
 		</div>

@@ -136,7 +136,7 @@ export default function Arrivals() {
                 {journeys.length > 0 && journeys.map((journey: Journey, index: number) => (
                     <div key={index}>
                         {journey.connections.length === 1 ? (
-                            <ScheduledComponent connection={journey.connections[0]} isDeparture={false} renderBorder={true} renderTime={true} />
+                            <ScheduledComponent connection={journey.connections[0]} isDeparture={false} renderBorder={true} renderInfo={true} />
                         ) : (
                             <WingTrain isDeparture={false} journey={journey} />
                         )}
