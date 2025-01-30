@@ -23,7 +23,9 @@ export type Connection = {
         actualPlatform: string
     },
     lineInformation?: {
-        kind?: string,              // the type of train service operating (from DB RIS)
+        type?: string,              // the type of train service operating (from RIS)
+        replacementServiceType?: string, // the type of replacement service (e.g. "BUS")
+        kind?: string,              // which kind of line (e.g. may be "replacement-service" for a train)
         additionalLineName?: string, // an additional name of the train line in operation (e.g. IC 387 is running simultaneously as RE 87)
         productName?: string,       // the type of train service operarting (e.g., RB, RE, IRE)
         fullName?: string,          // the name of the train line in operation (e.g. RE 7)

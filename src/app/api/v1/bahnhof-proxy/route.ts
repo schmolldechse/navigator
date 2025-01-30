@@ -66,6 +66,8 @@ const mapConnection = (entry: any, type: string): Connection => {
             actualPlatform: entry.platform
         } : undefined,
         lineInformation: {
+            type: entry.type,
+            replacementServiceType: entry.replacementServiceType ?? undefined,
             kind: entry.kind,
             additionalLineName: entry.additionalLineName,
             fullName: entry.lineName,
