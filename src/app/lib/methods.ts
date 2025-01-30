@@ -29,7 +29,7 @@ const isMatching = (
     connectionA: Connection,
     connectionB: Connection,
     type: "departures" | "arrivals",
-    isWing: boolean = false
+    destinationOriginCriteria: boolean = false
 ): boolean => {
     if (connectionA?.ris_journeyId === connectionB?.ris_journeyId) return true;
     if (connectionA?.hafas_journeyId === connectionB?.hafas_journeyId) return true;
@@ -51,17 +51,17 @@ const isMatching = (
 
     const nameMatch = aFullName === bFullName || aFullName === normalize(connectionB.lineInformation?.fahrtNr);
 
-    const wingMatch = isWing
+    const destinationOriginMatch = destinationOriginCriteria
         ? type === "departures"
-            ? connectionA?.destination?.id === connectionB?.destination?.id
-            : connectionA?.origin?.id === connectionB?.origin?.id
+            ? connectionA?.destination?.id === connectionB?.destination?.id || connectionA?.destination?.name === connectionB?.direction
+            : connectionA?.origin?.id === connectionB?.origin?.id || connectionA?.origin?.name === connectionB?.provenance
         : true;
 
     return (
         platformMatch &&
         timeMatch &&
         nameMatch &&
-        wingMatch
+        destinationOriginMatch
     );
 };
 
@@ -100,7 +100,12 @@ const mergeConnections = (
 
     const merged: Connection[] = [];
     connectionsB.forEach((connectionB: Connection) => {
-        const matching = connectionsA.find((connectionA: Connection) => isMatching(connectionA, connectionB, type));
+        /**
+         * additional check for destination/ origin is needed here!
+         * for example: a wing-train got 2 connections with the same name ("RE 6") but different locations.
+         * it wasn't able to merge one of them, because they had the same name
+         */
+        const matching = connectionsA.find((connectionA: Connection) => isMatching(connectionA, connectionB, type, true));
         if (!matching) merged.push(connectionB);
         else merged.push(merge(matching, connectionB));
     });
