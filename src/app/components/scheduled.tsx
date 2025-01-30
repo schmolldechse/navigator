@@ -15,9 +15,11 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
     const [color, setColor] = useState<any>();
 
 	const [expandVia, setExpandVia] = useState(false);
-	const viaStops = (expandVia ? connection?.viaStops : connection?.viaStops?.slice(0, 3))
-        .map(stop => writeName(stop))
-        .join(" - ");
+	const viaStops = connection?.viaStops
+        ? (expandVia ? connection?.viaStops : connection?.viaStops?.slice(0, 3))
+            .map(stop => writeName(stop))
+            .join(" - ")
+        : [];
 
     const isDelayed = () => {
         const diff = calculateDuration(
