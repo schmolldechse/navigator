@@ -85,7 +85,11 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
 				</>)}
 
 				{/* fourth line */}
-				<span className="text-2xl">{writeName(isDeparture ? connection?.destination : connection?.origin)}</span>
+                <span className="text-2xl">
+                    {isDeparture
+                        ? writeName(connection?.destination, connection?.direction)
+                        : writeName(connection?.origin, connection?.provenance)}
+                </span>
 			</div>
 
             {/* layout for greater screens (above md) */}
@@ -137,10 +141,10 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
                     </div>
 
                     {/* destination/ origin */}
-                    <span
-                        className={"flex-[4] mr-4"}
-                    >
-                        {writeName(isDeparture ? connection?.destination : connection?.origin)}
+                    <span className={"flex-[4] mr-4"}>
+                        {isDeparture
+                            ? writeName(connection?.destination, connection?.direction)
+                            : writeName(connection?.origin, connection?.provenance)}
                     </span>
 
                     {/* track */}

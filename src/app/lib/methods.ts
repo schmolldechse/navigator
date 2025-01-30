@@ -8,7 +8,8 @@ const browserLanguage = (): string => {
     return supported.includes(language) ? language : 'en';
 }
 
-const writeName = (stop: Stop): string => {
+const writeName = (stop: Stop, fallbackName: string = ""): string => {
+    if (!stop.name) return fallbackName;
     if (!stop.nameParts) return stop.name;
     if (stop.nameParts.length === 0) return stop.name;
 
