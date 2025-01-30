@@ -17,7 +17,7 @@ interface Filter {
 const TFilter = ({ onSelectType }: Props) => {
     const filters: Filter[] = [
         { types: ["*"], display: "Alle" },
-        { types: ["HIGH_SPEED_TRAIN", "nationalExpress"], display: "Fernverkehr", src: "/timetable/nationalexpress.svg", background: "bg-yellow-300 p-0.5 rounded-xl" },
+        { types: ["HIGH_SPEED_TRAIN", "INTERCITY_TRAIN", "nationalExpress", "national"], display: "Fernverkehr", src: "/timetable/nationalexpress.svg", background: "bg-yellow-300 p-0.5 rounded-xl" },
         { types: ["REGIONAL_TRAIN", "regional"], display: "Regional", src: "/timetable/regional.svg", background: "bg-red-500 p-0.5 rounded-xl" },
         { types: ["CITY_TRAIN", "suburban"], display: "S-Bahn", src: "/timetable/suburban.svg" },
         { types: ["TRAM", "tram"], display: "Straßen/ Stadtbahn", src: "/timetable/tram.svg" },
@@ -34,7 +34,7 @@ const TFilter = ({ onSelectType }: Props) => {
      * RIS , `db-vendo-client`
      * -----------------------
      * *
-     * HIGH_SPEED_TRAIN , nationalExpress
+     * HIGH_SPEED_TRAIN , INTERCITY_TRAIN , national , nationalExpress
      * REGIONAL_TRAIN , regional
      * CITY_TRAIN , suburban
      * TRAM , tram
