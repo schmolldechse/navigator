@@ -15,7 +15,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
     const [color, setColor] = useState<any>();
 
 	const [expandVia, setExpandVia] = useState(false);
-	const viaStops = (expandVia ? connection?.viaStops : connection?.viaStops.slice(0, 3))
+	const viaStops = (expandVia ? connection?.viaStops : connection?.viaStops?.slice(0, 3))
         .map(stop => writeName(stop))
         .join(" - ");
 
@@ -76,8 +76,8 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
 					<span className="text-right text-2xl">{showPlatform()}</span>
 				</div>
 
-				{!connection?.cancelled && connection?.viaStops?.length > 0 && (<>
-					{/* third line */}
+				{/* third line */}
+				{viaStops && viaStops?.length > 0 && (<>
                     <span className={"inline-block"}>
                         {viaStops}
                         {connection?.viaStops.length > 3 && (<ShowMore onClick={() => setExpandVia(!expandVia)}/>)}
@@ -115,7 +115,7 @@ const ScheduledComponent: React.FC<ScheduledProps> = ({connection, isDeparture, 
 
                     {/* viaStops */}
                     <div className={"flex-[4] text-lg flex flex-row items-center space-x-2 mr-4"}>
-                        {viaStops.length > 0 && (<span className={"inline-block"}>
+                        {viaStops && viaStops.length > 0 && (<span className={"inline-block"}>
                             {viaStops}
                             {connection?.viaStops.length > 3 && (<ShowMore onClick={() => setExpandVia(!expandVia)}/>)}
                         </span>)}
