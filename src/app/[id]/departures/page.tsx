@@ -11,6 +11,7 @@ import WingTrain from "@/app/components/wingtrain";
 import { DateTime } from "luxon";
 import TNavbar from "@/app/components/timetable/TNavbar";
 import TClock from "@/app/components/timetable/TClock";
+import TFilter from "@/app/components/timetable/TFilter";
 
 export default function Departures() {
     const { id } = useParams();
@@ -130,6 +131,8 @@ export default function Departures() {
                 <span className="text-xl md:text-4xl font-semibold mt-4 px-2 md:px-4">{station?.name ?? ""}</span>
                 <TClock className="text-2xl md:text-4xl font-medium mt-4 px-2 md:px-4" />
             </div>
+
+            <TFilter onSelectType={(types: string[]) => console.log("types:", types)} />
 
             <ScheduledHeader isDeparture={true} />
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">

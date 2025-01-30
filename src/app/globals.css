@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import './css/design.css';
+@import "./css/hexagon.css";
 @import './css/scrollbar.css';
 @import './css/montserrat-font.css';
 
