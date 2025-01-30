@@ -11,6 +11,7 @@ import WingTrain from "@/app/components/wingtrain";
 import { DateTime } from "luxon";
 import TNavbar from "@/app/components/timetable/TNavbar";
 import TClock from "@/app/components/timetable/TClock";
+import TFilter from "@/app/components/timetable/TFilter";
 
 export default function Arrivals() {
     const { id } = useParams();
@@ -49,6 +50,20 @@ export default function Arrivals() {
         setStartDate(date);
         setEndDate(date.plus({ hours: 1 }));
     }, []);
+
+    const [currentFilter, setCurrentFilter] = useState<string[]>();
+    const matchesFilter = (journey: Journey) => {
+        if (currentFilter === undefined) return true;
+        if (currentFilter.includes("*")) return true;
+
+        const firstConnection = journey.connections[0];
+        return currentFilter.some(filter =>
+            firstConnection.lineInformation?.type === filter ||
+            firstConnection.lineInformation?.replacementServiceType === filter ||
+            firstConnection.lineInformation?.kind === filter ||
+            firstConnection.lineInformation?.product === filter
+        );
+    }
 
     const [journeys, setJourneys] = useState<Journey[]>([]);
     const journeysRef = useRef<Journey[]>([]);
@@ -131,17 +146,24 @@ export default function Arrivals() {
                 <TClock className="text-2xl md:text-4xl font-medium mt-4 px-2 md:px-4" />
             </div>
 
+            <TFilter onSelectType={setCurrentFilter} />
+
             <ScheduledHeader isDeparture={false} />
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">
-                {journeys.length > 0 && journeys.map((journey: Journey, index: number) => (
-                    <div key={index}>
-                        {journey.connections.length === 1 ? (
-                            <ScheduledComponent connection={journey.connections[0]} isDeparture={false} renderBorder={true} renderInfo={true} />
-                        ) : (
-                            <WingTrain isDeparture={false} journey={journey} />
-                        )}
-                    </div>
-                ))}
+                {journeys.length > 0 && journeys
+                    .filter(matchesFilter)
+                    .map((journey: Journey, index: number) => (
+                        <div key={index}>
+                            {journey.connections.length === 1 ? (
+                                <ScheduledComponent
+                                    connection={journey.connections[0]}
+                                    isDeparture={false}
+                                    renderBorder={true}
+                                    renderInfo={true}
+                                />
+                        ) : <WingTrain isDeparture={false} journey={journey} />}
+                        </div>
+                    ))}
             </div>
         </div>
     )
