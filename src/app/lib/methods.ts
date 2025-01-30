@@ -49,6 +49,7 @@ const isMatching = (
         ? connectionA.departure?.plannedTime === connectionB.departure?.plannedTime
         : connectionA.arrival?.plannedTime === connectionB.arrival?.plannedTime;
 
+    // TODO: documentation why matching with fahrtNr is necessary
     const nameMatch = aFullName === bFullName || aFullName === normalize(connectionB.lineInformation?.fahrtNr);
 
     const destinationOriginMatch = destinationOriginCriteria
