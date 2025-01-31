@@ -17,11 +17,11 @@ interface Filter {
 const TFilter = ({ onSelectType }: Props) => {
     const filters: Filter[] = [
         { types: ["*"], display: "Alle" },
-        { types: ["HIGH_SPEED_TRAIN", "INTERCITY_TRAIN", "nationalExpress", "national"], display: "Fernverkehr", src: "/timetable/nationalexpress.svg", background: "bg-yellow-300 p-0.5 rounded-xl" },
-        { types: ["REGIONAL_TRAIN", "regional"], display: "Regional", src: "/timetable/regional.svg", background: "bg-red-500 p-0.5 rounded-xl" },
-        { types: ["CITY_TRAIN", "suburban"], display: "S-Bahn", src: "/timetable/suburban.svg" },
-        { types: ["TRAM", "tram"], display: "Straßen/ Stadtbahn", src: "/timetable/tram.svg" },
-        { types: ["BUS", "bus"], display: "Bus", src: "/timetable/bus.svg", background: "bg-fuchsia-800 hexagon p-1" },
+        { types: ["HIGH_SPEED_TRAIN", "INTERCITY_TRAIN", "nationalExpress", "national"], display: "Fernverkehr", src: "/timetable/filter/nationalexpress.svg", background: "bg-yellow-300 p-0.5 rounded-xl" },
+        { types: ["REGIONAL_TRAIN", "regional"], display: "Regional", src: "/timetable/filter/regional.svg", background: "bg-red-500 p-0.5 rounded-xl" },
+        { types: ["CITY_TRAIN", "suburban"], display: "S-Bahn", src: "/timetable/filter/suburban.svg" },
+        { types: ["TRAM", "tram"], display: "Straßen/ Stadtbahn", src: "/timetable/filter/tram.svg" },
+        { types: ["BUS", "bus"], display: "Bus", src: "/timetable/filter/bus.svg", background: "bg-fuchsia-800 hexagon p-1" },
     ]
 
     const [selectType, setSelectedType] = useState<Filter>(filters[0]);
