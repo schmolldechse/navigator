@@ -142,8 +142,8 @@ export default function Arrivals() {
             <TNavbar id={station?.evaNr ?? ""} />
 
             <div className="container mx-auto flex justify-between items-center px-4">
-                <span className="text-xl md:text-4xl font-semibold mt-4 px-2 md:px-4">{station?.name ?? ""}</span>
-                <TClock className="text-2xl md:text-4xl font-medium mt-4 px-2 md:px-4" />
+                <span className="text-xl md:text-4xl font-semibold px-2 md:px-4">{station?.name ?? ""}</span>
+                <TClock className="text-2xl md:text-4xl font-medium px-2 md:px-4" />
             </div>
 
             <div className={"hidden md:block"}>

@@ -19,7 +19,7 @@ const TNavbar: React.FC<Props> = ({ id }) => {
     const handleNavigation = (path: string) => router.push(`/${id}${path}`);
 
     return (
-        <nav className="flex justify-between items-center text-xl montserrat-regular p-4 w-full">
+        <nav className="flex justify-between items-center text-xl montserrat-regular px-2 w-full">
             {/* home */}
             <Logo onClick={() => router.push("/")} />
 
