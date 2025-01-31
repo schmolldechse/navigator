@@ -1,10 +1,8 @@
-import React from "react";
-
 interface Props {
     onClick: () => void;
 }
 
-const ShowMore: React.FC<Props> = ({onClick}) => {
+const CShowMore = ({onClick}: Props) => {
     return (
         <span className="ml-2 inline-flex items-center justify-center cursor-pointer px-2 py-1 rounded-2xl bg-gray-700 group"
               onClick={onClick} style={{verticalAlign: 'middle'}}
@@ -24,4 +22,4 @@ const ShowMore: React.FC<Props> = ({onClick}) => {
     );
 };
 
-export default ShowMore;
+export default CShowMore;

@@ -2,12 +2,12 @@
 
 import { useParams, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import ScheduledComponent from "@/app/components/scheduled";
-import ScheduledHeader from "@/app/components/scheduled-header";
+import ConnectionComponent from "@/app/components/timetable/connection/Connection";
+import CHeader from "@/app/components/timetable/connection/CHeader";
 import { Connection, Journey, Station } from "@/app/lib/objects";
 import { mapConnections, sort } from "@/app/lib/mapper";
 import { browserLanguage, calculateDuration } from "@/app/lib/methods";
-import WingTrain from "@/app/components/wingtrain";
+import WingTrain from "@/app/components/timetable/connection/WingTrain";
 import { DateTime } from "luxon";
 import TNavbar from "@/app/components/timetable/TNavbar";
 import TClock from "@/app/components/timetable/TClock";
@@ -150,14 +150,14 @@ export default function Departures() {
                 <TFilter onSelectType={setCurrentFilter} />
             </div>
 
-            <ScheduledHeader isDeparture={true} />
+            <CHeader isDeparture={true} />
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">
                 {journeys.length > 0 && journeys
                     .filter(matchesFilter)
                     .map((journey: Journey, index: number) => (
                         <div key={index}>
                             {journey.connections.length === 1 ? (
-                                <ScheduledComponent
+                                <ConnectionComponent
                                     connection={journey.connections[0]}
                                     isDeparture={true}
                                     renderBorder={true}

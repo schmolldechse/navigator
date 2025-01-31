@@ -1,7 +1,7 @@
 import {useState} from "react";
 import {Connection} from "@/app/lib/objects";
 import {calculateDuration, writeName} from "@/app/lib/methods";
-import ShowMore from "@/app/components/show-more";
+import CShowMore from "@/app/components/timetable/connection/CShowMore";
 import { DateTime } from "luxon";
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
     renderInfo: boolean;
 }
 
-const ScheduledComponent = ({connection, isDeparture, renderBorder, renderInfo}: Props) => {
+const ConnectionComponent = ({connection, isDeparture, renderBorder, renderInfo}: Props) => {
     const [color, setColor] = useState<any>();
 
 	const [expandVia, setExpandVia] = useState(false);
@@ -83,7 +83,7 @@ const ScheduledComponent = ({connection, isDeparture, renderBorder, renderInfo}:
                     {!renderInfo && <br />}
                     <span className={"inline-block"}>
                         {viaStops}
-                        {connection?.viaStops.length > 3 && (<ShowMore onClick={() => setExpandVia(!expandVia)}/>)}
+                        {connection?.viaStops.length > 3 && (<CShowMore onClick={() => setExpandVia(!expandVia)}/>)}
                     </span>
                     <br />
 				</>)}
@@ -120,7 +120,7 @@ const ScheduledComponent = ({connection, isDeparture, renderBorder, renderInfo}:
                     <div className={"flex-[4] text-lg flex flex-row items-center space-x-2 mr-4"}>
                         {viaStops && viaStops.length > 0 && (<span className={"inline-block"}>
                             {viaStops}
-                            {connection?.viaStops.length > 3 && (<ShowMore onClick={() => setExpandVia(!expandVia)}/>)}
+                            {connection?.viaStops.length > 3 && (<CShowMore onClick={() => setExpandVia(!expandVia)}/>)}
                         </span>)}
                     </div>
 
@@ -160,4 +160,4 @@ const ScheduledComponent = ({connection, isDeparture, renderBorder, renderInfo}:
 	);
 }
 
-export default ScheduledComponent;
+export default ConnectionComponent;

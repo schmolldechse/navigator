@@ -1,8 +1,8 @@
-interface HeaderProps {
+interface Props {
     isDeparture: boolean
 }
 
-const ScheduledHeader: React.FC<HeaderProps> = ({isDeparture}) => {
+const CHeader = ({isDeparture}: Props) => {
     return (<>
         {/* layout for smaller screens (under md) */}
         <div className="mx-4 flex justify-between text-sm md:hidden">
@@ -29,4 +29,4 @@ const ScheduledHeader: React.FC<HeaderProps> = ({isDeparture}) => {
     </>)
 }
 
-export default ScheduledHeader;
+export default CHeader;
