@@ -3,6 +3,7 @@ import {Connection} from "@/app/lib/objects";
 import {calculateDuration, writeName} from "@/app/lib/methods";
 import CShowMore from "@/app/components/timetable/connection/CShowMore";
 import { DateTime } from "luxon";
+import CInfo from "@/app/components/timetable/connection/CInfo";
 
 interface Props {
 	connection: Connection;
@@ -103,7 +104,9 @@ const ConnectionComponent = ({connection, isDeparture, renderBorder, renderInfo}
                 {/* first row */}
                 <div className={"flex flex-row"}>
                     <span className={`flex-[1] mr-8 ${renderBorder ? 'border-t' : ''}`}></span>
-                    <span className={`flex-[4] mr-4 ${renderBorder ? 'border-t' : ''}`}></span>
+                    <span className={`flex-[4] mr-4 ${renderBorder ? 'border-t' : ''}`}>
+                        <CInfo connection={connection} />
+                    </span>
                     <span className={`flex-[1] ${renderBorder ? 'border-t' : ''}`}></span>
                 </div>
 

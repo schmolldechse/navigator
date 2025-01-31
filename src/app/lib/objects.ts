@@ -46,7 +46,7 @@ export type Connection = {
     canceledStops?: Stop[],
     stopovers?: [],
     remarks?: [],
-    messages?: any,
+    messages?: Messages,
     cancelled?: boolean,
     loadFactor?: string,
     providesVehicleSequence?: boolean
@@ -64,6 +64,28 @@ export type Stop = {
 export type NamePart = {
     type: string,
     value: string
+}
+
+export type Messages = {
+    common: Message[] | [],
+    delay: Message[] | [],
+    cancelation: Message[] | [],
+    destination: Message[] | [],
+    via: Message[] | []
+}
+
+export type Message = {
+    text?: string,
+    type: string, // e.g. "bicycle-transport", "canceled-stops", "additional-stops", ...
+    change?: boolean,
+    important?: boolean,
+    open?: boolean,
+    links?: (Stop | ChangedTrack)[] // "additional-stops" would hold a Stop. "track-changed" would hold a ChangedTrack
+}
+
+export type ChangedTrack = {
+    type: string,
+    name: string,
 }
 
 // a journey can hold multiple connections, e.g. if the train parts are separated later
