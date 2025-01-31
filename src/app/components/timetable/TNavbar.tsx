@@ -1,5 +1,3 @@
-'use client';
-
 import { usePathname, useRouter } from "next/navigation";
 import Logo from "../branding/logo";
 
@@ -7,7 +5,7 @@ interface Props {
     id: string
 }
 
-const TNavbar: React.FC<Props> = ({ id }) => {
+const TNavbar = ({ id }: Props) => {
     const router = useRouter();
     const pathname = usePathname();
 
@@ -19,7 +17,7 @@ const TNavbar: React.FC<Props> = ({ id }) => {
     const handleNavigation = (path: string) => router.push(`/${id}${path}`);
 
     return (
-        <nav className="flex justify-between items-center text-xl montserrat-regular px-2 w-full">
+        <nav className="flex justify-between items-center montserrat-regular text-base md:text-xl w-full pt-4 pl-4 pr-8">
             {/* home */}
             <Logo onClick={() => router.push("/")} />
 

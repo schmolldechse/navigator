@@ -5,9 +5,9 @@ interface Props {
     setType: (type: "timetable" | "route_planner") => void;
 }
 
-const FNavbar = ({ type, setType }) => {
+const FNavbar = ({ type, setType }: Props) => {
     return (
-        <span className={"montserrat-regular flex items-center space-x-4"}>
+        <span className={"montserrat-regular text-base md:text-xl flex items-center space-x-4"}>
             <span
                 onClick={() => setType('timetable')}
                 className={`cursor-pointer ${type === 'timetable' ? 'border-b-2 border-white' : ''}`}
