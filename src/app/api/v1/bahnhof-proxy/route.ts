@@ -78,6 +78,7 @@ const mapConnection = (entry: any, type: string): Connection => {
         canceledStops: mapStops(entry.canceledStops),
         messages: entry.messages,
         cancelled: entry.canceled,
+        providesVehicleSequence: entry.providesVehicleSequence ?? false
     }
 }
 

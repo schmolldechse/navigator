@@ -48,7 +48,8 @@ export type Connection = {
     remarks?: [],
     messages?: any,
     cancelled?: boolean,
-    loadFactor?: string
+    loadFactor?: string,
+    providesVehicleSequence?: boolean
 }
 
 export type Stop = {
