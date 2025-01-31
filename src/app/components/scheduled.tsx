@@ -91,7 +91,7 @@ const ScheduledComponent = ({connection, isDeparture, renderBorder, renderInfo}:
 				{/* fourth line */}
                 <span className="text-2xl">
                     {isDeparture
-                        ? writeName(connection?.destination, connection?.direction)
+                        ? writeName(connection?.actualDestination || connection?.destination, connection?.direction) // use actualDestination first, if available
                         : writeName(connection?.origin, connection?.provenance)}
                 </span>
 			</div>
@@ -148,7 +148,7 @@ const ScheduledComponent = ({connection, isDeparture, renderBorder, renderInfo}:
                     {/* destination/ origin */}
                     <span className={"flex-[4] mr-4"}>
                         {isDeparture
-                            ? writeName(connection?.destination, connection?.direction)
+                            ? writeName(connection?.actualDestination || connection?.destination, connection?.direction) // use actualDestination first, if available
                             : writeName(connection?.origin, connection?.provenance)}
                     </span>
 
