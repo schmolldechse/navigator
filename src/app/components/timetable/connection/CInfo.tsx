@@ -13,7 +13,7 @@ interface ValidMessage {
 const CInfo = ({ connection }: Props) => {
     const validMessages: ValidMessage[] = [
         { type: "bicycle-transport", svgSource: "/timetable/infos/bicycle-transport.svg" },
-        { type: "bicycle-reservation-required" },
+        { type: "bicycle-reservation-required", svgSource: "/timetable/infos/bicycle-reservation-required.svg" },
         { type: "canceled-stops" },
         { type: "additional-stops" },
         { type: "track-changed" },
@@ -40,6 +40,7 @@ const CInfo = ({ connection }: Props) => {
             const validMessage = validMessages.find((validMessage: ValidMessage) => validMessage.type === message.type);
             return (
                 <div key={index} className={"flex flex-row"}>
+                    {validMessage?.svgSource && <Image src={validMessage.svgSource} alt={message.text} width={25} height={25} />}
                     {message.text}
                 </div>
             )
