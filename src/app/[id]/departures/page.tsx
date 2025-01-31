@@ -146,7 +146,9 @@ export default function Departures() {
                 <TClock className="text-2xl md:text-4xl font-medium mt-4 px-2 md:px-4" />
             </div>
 
-            <TFilter onSelectType={setCurrentFilter} />
+            <div className={"hidden md:block"}>
+                <TFilter onSelectType={setCurrentFilter} />
+            </div>
 
             <ScheduledHeader isDeparture={true} />
             <div className="container mx-auto flex-grow overflow-y-auto scrollbar-hidden">
@@ -164,6 +166,10 @@ export default function Departures() {
                             ) : <WingTrain isDeparture={true} journey={journey} />}
                         </div>
                     ))}
+            </div>
+
+            <div className={"block md:hidden"}>
+                <TFilter onSelectType={setCurrentFilter} />
             </div>
         </div>
     )
