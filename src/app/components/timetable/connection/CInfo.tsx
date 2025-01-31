@@ -21,7 +21,13 @@ const CInfo = ({ connection }: Props) => {
         { type: "unplanned-info" },
         { type: "canceled-trip" },
         { type: "ticket-information" }, // if a train has a additionalLineName
-        { type: "additional-coaches" }
+        { type: "additional-coaches" },
+        { type: "missing-coaches" },
+        { type: "replacement-service" },
+        { type: "no-food" },
+        { type: "no-first-class" },
+        { type: "reservation-required" },
+        { type: "general-warning" }
     ]
     if (!connection?.messages) return null;
 
