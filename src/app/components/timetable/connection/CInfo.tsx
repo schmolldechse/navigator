@@ -1,4 +1,4 @@
-import {Connection, Message} from "@/app/lib/objects";
+import {Connection, Message, Stop} from "@/app/lib/objects";
 import React from "react";
 import ITrackChanged from "@/app/components/timetable/connection/icons/ITrackChanged";
 import ICanceledStops from "@/app/components/timetable/connection/icons/ICanceledStops";
@@ -12,6 +12,7 @@ import ITicketInformation from "@/app/components/timetable/connection/icons/ITic
 import IAdditionalCoaches from "@/app/components/timetable/connection/icons/IAdditionalCoaches";
 import IMissingCoaches from "@/app/components/timetable/connection/icons/IMissingCoaches";
 import INoFood from "@/app/components/timetable/connection/icons/INoFood";
+import {mapStops, writeName} from "@/app/lib/methods";
 
 interface Props {
     connection: Connection;
@@ -45,6 +46,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "no-wi-fi" },
         { type: "bicycle-warning" },
         { type: "no-onward-journey" }, // X as SVG, like in canceled-trip
+        { type: "continuation-by" }
     ];
     if (!connection?.messages) return null;
 
@@ -64,13 +66,46 @@ const CInfo = ({ connection }: Props) => {
     });
     if (filteredMessages.length === 0) return null;
 
+    const formatMessage = (message: Message): string => {
+        if (!message?.type || !message?.text) return "Invalid message object";
+        if (!message?.links || message?.links.length === 0) return message?.text;
+
+        let formatted = message?.text;
+        message?.links?.forEach((link, index) => {
+            const placeholder = `{{${index}}}`;
+
+            switch (message?.type) {
+                case "replacement-service":
+                    formatted = formatted.replace(placeholder, link?.lineName);
+                    break;
+                case "continuation-by":
+                case "no-onward-journey":
+                case "unplanned-info":
+                case "ticket-information":
+                    if (link?.type === "station") {
+                        const stop: Stop = mapStops(link)[0];
+                        formatted = formatted.replace(placeholder, writeName(stop, link?.name));
+                    } else if (link?.type === "line") formatted = formatted.replace(placeholder, link?.lineName);
+                    break;
+                case "general-warning":
+                    // no other type currently found
+                    if (link?.type === "link") formatted = formatted.replace(placeholder, link?.label);
+                    break;
+                default:
+                    formatted = formatted.replace(placeholder, link?.name);
+                    break;
+            }
+        });
+        return formatted;
+    }
+
     return (<>
         {filteredMessages.map((message: Message, index: number) => {
             const validMessage = validMessages.find((validMessage: ValidMessage) => validMessage.type === message.type);
             return (
                 <div key={index} className={`flex flex-row space-x-2 my-1 py-0.5 text-xl ${message?.change ? 'nd-bg-white nd-fg-black' : ''}`}>
                     {validMessage?.iconComponent && <validMessage.iconComponent height={25} width={25} />}
-                    <span>{message.text}</span>
+                    <span>{formatMessage(message)}</span>
                 </div>
             )
         })}
