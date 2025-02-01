@@ -3,6 +3,7 @@ import React from "react";
 import ITrackChanged from "@/app/components/timetable/connection/icons/ITrackChanged";
 import ICanceledStops from "@/app/components/timetable/connection/icons/ICanceledStops";
 import IAdditionalStops from "@/app/components/timetable/connection/icons/IAdditionalStops";
+import IBicycleReservationRequired from "@/app/components/timetable/connection/icons/IBicycleReservationRequired";
 
 interface Props {
     connection: Connection;
@@ -17,7 +18,7 @@ interface ValidMessage {
 const CInfo = ({ connection }: Props) => {
     const validMessages: ValidMessage[] = [
         { type: "bicycle-transport", svgSource: "/timetable/infos/bicycle-transport.svg" },
-        { type: "bicycle-reservation-required", svgSource: "/timetable/infos/bicycle-reservation-required.svg" },
+        { type: "bicycle-reservation-required", iconComponent: IBicycleReservationRequired },
         { type: "canceled-stops", iconComponent: ICanceledStops },
         { type: "additional-stops", iconComponent: IAdditionalStops },
         { type: "track-changed", iconComponent: ITrackChanged },
