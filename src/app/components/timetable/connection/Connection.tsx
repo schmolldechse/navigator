@@ -52,7 +52,10 @@ const ConnectionComponent = ({connection, isDeparture, renderBorder, renderInfo}
 			<div
 				className={`p-2 md:hidden space-y-2 font-medium ${renderBorder ? 'border-t' : ''}`}
 			>
-				{/* first line */}
+                {/* first line */}
+                <CInfo connection={connection} />
+
+				{/* second line */}
 				<span className={`${color ? 'py-[0.2rem] px-[0.8rem] rounded-xl' : ''} text-lg font-bold`}
 					  style={{backgroundColor: color ? `${color.backgroundColor}` : ''}}
 				>
@@ -60,7 +63,7 @@ const ConnectionComponent = ({connection, isDeparture, renderBorder, renderInfo}
                 </span>
 
 				{/*
-				second line
+				third line
 				renderInfo decides if the information will be shown. this is the case for single connections, or the last connection of a wing-train.
 				 */}
                 {renderInfo && (<div className="flex flex-row items-center font-semibold">
@@ -78,7 +81,7 @@ const ConnectionComponent = ({connection, isDeparture, renderBorder, renderInfo}
                     <span className="text-right text-2xl">{showPlatform()}</span>
 				</div>)}
 
-				{/* third line */}
+				{/* fourth line */}
 				{viaStops && viaStops?.length > 0 && (<>
                     {/* additional line break is necessary here. renderInfo decides if time & platform will be shown. if not, viaStops will be right near of the lineInformation?.fullName */}
                     {!renderInfo && <br />}
@@ -89,7 +92,7 @@ const ConnectionComponent = ({connection, isDeparture, renderBorder, renderInfo}
                     <br />
 				</>)}
 
-				{/* fourth line */}
+				{/* fifth line */}
                 <span className="text-2xl">
                     {isDeparture
                         ? writeName(connection?.actualDestination || connection?.destination, connection?.direction) // use actualDestination first, if available
