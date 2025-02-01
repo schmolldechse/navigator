@@ -1,5 +1,5 @@
 import {Connection, Message, Stop} from "@/app/lib/objects";
-import React from "react";
+import React, {useState} from "react";
 import ITrackChanged from "@/app/components/timetable/connection/icons/ITrackChanged";
 import ICanceledStops from "@/app/components/timetable/connection/icons/ICanceledStops";
 import IAdditionalStops from "@/app/components/timetable/connection/icons/IAdditionalStops";
@@ -13,6 +13,7 @@ import IAdditionalCoaches from "@/app/components/timetable/connection/icons/IAdd
 import IMissingCoaches from "@/app/components/timetable/connection/icons/IMissingCoaches";
 import INoFood from "@/app/components/timetable/connection/icons/INoFood";
 import {mapStops, writeName} from "@/app/lib/methods";
+import CShowMore from "@/app/components/timetable/connection/CShowMore";
 
 interface Props {
     connection: Connection;
@@ -66,6 +67,8 @@ const CInfo = ({ connection }: Props) => {
     });
     if (filteredMessages.length === 0) return null;
 
+    const [expanded, setExpanded] = useState<boolean>(false);
+
     const formatMessage = (message: Message): string => {
         if (!message?.type || !message?.text) return "Invalid message object";
         if (!message?.links || message?.links.length === 0) return message?.text;
@@ -85,15 +88,34 @@ const CInfo = ({ connection }: Props) => {
     }
 
     return (<>
-        {filteredMessages.map((message: Message, index: number) => {
-            const validMessage = validMessages.find((validMessage: ValidMessage) => validMessage.type === message.type);
-            return (
-                <div key={index} className={`flex flex-row space-x-2 my-1 py-0.5 text-xl ${message?.change ? 'nd-bg-white nd-fg-black' : ''}`}>
-                    {validMessage?.iconComponent && <validMessage.iconComponent height={25} width={25} />}
-                    <span>{formatMessage(message)}</span>
-                </div>
-            )
-        })}
+        {filteredMessages.length > 1 && !expanded && (
+            <div className="flex flex-row space-x-2 my-1 py-0.5 text-xl">
+                {filteredMessages.map((message: Message, index: number) => {
+                    const validMessage = validMessages.find((validMessage: ValidMessage) => validMessage.type === message.type);
+                    return validMessage?.iconComponent ? (
+                        <span
+                            key={index}
+                            className={`flex items-center justify-center ${message?.change ? 'nd-bg-white nd-fg-black' : ''}`}
+                        >
+                            <validMessage.iconComponent height={25} width={25} />
+                        </span>
+                    ) : null;
+                })}
+                <CShowMore onClick={() => setExpanded(true)} />
+            </div>
+        )}
+
+        {(filteredMessages.length <= 1 || expanded) && (<>
+            {filteredMessages.map((message: Message, index: number) => {
+                const validMessage = validMessages.find((validMessage: ValidMessage) => validMessage.type === message.type);
+                return (
+                    <div key={index} className={`flex flex-row space-x-2 my-1 py-0.5 text-xl ${message?.change ? 'nd-bg-white nd-fg-black' : ''}`}>
+                        {validMessage?.iconComponent && <validMessage.iconComponent height={25} width={25} />}
+                        <span>{formatMessage(message)}</span>
+                    </div>
+                )
+            })}
+        </>)}
     </>)
 };
 
