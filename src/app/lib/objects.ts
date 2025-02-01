@@ -80,12 +80,7 @@ export type Message = {
     change?: boolean,
     important?: boolean,
     open?: boolean,
-    links?: (Stop | ChangedTrack)[] // "additional-stops" would hold a Stop. "track-changed" would hold a ChangedTrack
-}
-
-export type ChangedTrack = {
-    type: string,
-    name: string,
+    links?: any[]
 }
 
 // a journey can hold multiple connections, e.g. if the train parts are separated later
