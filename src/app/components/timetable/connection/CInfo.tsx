@@ -46,9 +46,15 @@ const CInfo = ({ connection }: Props) => {
         return Object.values(messages).flat();
     }
 
-    const filteredMessages = collectMessages(connection?.messages).filter((message) =>
-        validMessages.some((validMessage) => validMessage.type === message.type)
-    );
+    const filteredMessages = collectMessages(connection?.messages).filter((message) => {
+        const isValidMessage = validMessages.some((validMessage) => validMessage.type === message.type);
+
+        if (connection?.cancelled) {
+            return isValidMessage && message.important;
+        }
+
+        return isValidMessage;
+    });
     if (filteredMessages.length === 0) return null;
 
     return (<>
