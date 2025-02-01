@@ -14,8 +14,8 @@ const CInfo = ({ connection }: Props) => {
     const validMessages: ValidMessage[] = [
         { type: "bicycle-transport", svgSource: "/timetable/infos/bicycle-transport.svg" },
         { type: "bicycle-reservation-required", svgSource: "/timetable/infos/bicycle-reservation-required.svg" },
-        { type: "canceled-stops" },
-        { type: "additional-stops" },
+        { type: "canceled-stops", svgSource: "/timetable/infos/canceled-stops.svg" },
+        { type: "additional-stops", svgSource: "/timetable/infos/additional-stops.svg" },
         { type: "track-changed" },
         { type: "accessibility-warning" }, // e.g. without "Vehicle-mounted boarding aid", "No disabled WC on the train",
         { type: "unplanned-info" },

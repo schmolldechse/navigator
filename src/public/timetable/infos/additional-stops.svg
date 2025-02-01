@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="additional-stops" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <style>
+      .cls-1 {
+        letter-spacing: -.13em;
+      }
+
+      .cls-2 {
+        fill: #fff;
+        font-family: Calibri, Calibri;
+        font-size: 779.2px;
+      }
+
+      .cls-3 {
+        letter-spacing: -.12em;
+      }
+
+      .cls-4 {
+        fill: none;
+        stroke: #fff;
+        stroke-miterlimit: 10;
+        stroke-width: 30px;
+      }
+    </style>
+  </defs>
+  <rect class="cls-4" x="39.04" y="39.04" width="945.91" height="945.91" rx="50" ry="50"/>
+  <text class="cls-2" transform="translate(111.64 787.61)"><tspan class="cls-1" x="0" y="0">H </tspan><tspan class="cls-3" x="466.84" y="-250">+</tspan></text>
+</svg>
