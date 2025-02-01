@@ -1,6 +1,7 @@
 import {Connection, Message} from "@/app/lib/objects";
 import React from "react";
 import ITrackChanged from "@/app/components/timetable/connection/icons/ITrackChanged";
+import ICanceledStops from "@/app/components/timetable/connection/icons/ICanceledStops";
 
 interface Props {
     connection: Connection;
@@ -16,7 +17,7 @@ const CInfo = ({ connection }: Props) => {
     const validMessages: ValidMessage[] = [
         { type: "bicycle-transport", svgSource: "/timetable/infos/bicycle-transport.svg" },
         { type: "bicycle-reservation-required", svgSource: "/timetable/infos/bicycle-reservation-required.svg" },
-        { type: "canceled-stops", svgSource: "/timetable/infos/canceled-stops.svg" },
+        { type: "canceled-stops", iconComponent: ICanceledStops },
         { type: "additional-stops", svgSource: "/timetable/infos/additional-stops.svg" },
         { type: "track-changed", iconComponent: ITrackChanged },
         { type: "accessibility-warning" }, // e.g. without "Vehicle-mounted boarding aid", "No disabled WC on the train",
