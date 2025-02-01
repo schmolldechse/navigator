@@ -16,6 +16,25 @@ const writeName = (stop: Stop, fallbackName: string = ""): string => {
     return stop.nameParts.map(part => part.value).join('').trim();
 }
 
+const mapStops = (rawData: any): Stop[] => {
+    if (!Array.isArray(rawData)) rawData = [rawData];
+
+    return rawData.map((rawStop: any) => {
+        const {evaNumber, name, canceled, additional, separation, nameParts} = rawStop;
+        return {
+            id: evaNumber,
+            name: name,
+            cancelled: canceled,
+            additional: additional || false,
+            separation: separation || false,
+            nameParts: nameParts ? nameParts.map((part: any) => ({
+                type: part.type,
+                value: part.value
+            })) : [{type: "default", value: name}]
+        };
+    });
+}
+
 const calculateDuration = (
     startDate: DateTime,
     endDate: DateTime,
@@ -113,4 +132,4 @@ const mergeConnections = (
     return merged;
 }
 
-export { browserLanguage, writeName, calculateDuration, isMatching, mergeConnections };
+export { browserLanguage, writeName, calculateDuration, isMatching, mergeConnections, mapStops };

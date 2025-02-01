@@ -1,6 +1,6 @@
 import {NextRequest, NextResponse} from "next/server.js";
-import {Connection, Journey, Stop} from "@/app/lib/objects";
-import { calculateDuration } from "@/app/lib/methods";
+import {Connection, Journey} from "@/app/lib/objects";
+import {calculateDuration, mapStops} from "@/app/lib/methods";
 import { DateTime } from "luxon";
 
 export async function GET(req: NextRequest) {
@@ -80,23 +80,4 @@ const mapConnection = (entry: any, type: string): Connection => {
         cancelled: entry.canceled,
         providesVehicleSequence: entry.providesVehicleSequence ?? false
     }
-}
-
-const mapStops = (rawData: any): Stop[] => {
-    if (!Array.isArray(rawData)) rawData = [rawData];
-
-    return rawData.map((rawStop: any) => {
-        const {evaNumber, name, canceled, additional, separation, nameParts} = rawStop;
-        return {
-            id: evaNumber,
-            name: name,
-            cancelled: canceled,
-            additional: additional || false,
-            separation: separation || false,
-            nameParts: nameParts ? nameParts.map((part: any) => ({
-                type: part.type,
-                value: part.value
-            })) : [{type: "default", value: name}]
-        };
-    });
 }
