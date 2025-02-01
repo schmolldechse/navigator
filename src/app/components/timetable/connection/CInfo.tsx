@@ -89,7 +89,7 @@ const CInfo = ({ connection }: Props) => {
 
     return (<>
         {filteredMessages.length > 1 && !expanded && (
-            <div className="flex flex-row space-x-2 my-1 py-0.5 text-xl">
+            <div className="flex flex-row space-x-2 my-1 py-0.5">
                 {filteredMessages.map((message: Message, index: number) => {
                     const validMessage = validMessages.find((validMessage: ValidMessage) => validMessage.type === message.type);
                     return validMessage?.iconComponent ? (
@@ -109,7 +109,7 @@ const CInfo = ({ connection }: Props) => {
             {filteredMessages.map((message: Message, index: number) => {
                 const validMessage = validMessages.find((validMessage: ValidMessage) => validMessage.type === message.type);
                 return (
-                    <div key={index} className={`flex flex-row space-x-2 my-1 py-0.5 text-xl ${message?.change ? 'nd-bg-white nd-fg-black' : ''}`}>
+                    <div key={index} className={`flex flex-row space-x-2 my-1 py-0.5 text-lg ${message?.change ? 'nd-bg-white nd-fg-black' : ''}`}>
                         {validMessage?.iconComponent && <validMessage.iconComponent height={25} width={25} />}
                         <span>{formatMessage(message)}</span>
                     </div>
