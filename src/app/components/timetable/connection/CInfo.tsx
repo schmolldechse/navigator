@@ -11,6 +11,7 @@ import ICancelledTrip from "@/app/components/timetable/connection/icons/ICancell
 import ITicketInformation from "@/app/components/timetable/connection/icons/ITicketInformation";
 import IAdditionalCoaches from "@/app/components/timetable/connection/icons/IAdditionalCoaches";
 import IMissingCoaches from "@/app/components/timetable/connection/icons/IMissingCoaches";
+import INoFood from "@/app/components/timetable/connection/icons/INoFood";
 
 interface Props {
     connection: Connection;
@@ -35,7 +36,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "additional-coaches", iconComponent: IAdditionalCoaches },
         { type: "missing-coaches", iconComponent: IMissingCoaches },
         { type: "replacement-service" },
-        { type: "no-food" },
+        { type: "no-food", iconComponent: INoFood },
         { type: "no-first-class" },
         { type: "reservation-required" },
         { type: "general-warning" },
