@@ -8,6 +8,7 @@ import IBicycleTransport from "@/app/components/timetable/connection/icons/IBicy
 import IAccessibilityWarning from "@/app/components/timetable/connection/icons/IAccessibilityWarning";
 import IUnplannedInfo from "@/app/components/timetable/connection/icons/IUnplannedInfo";
 import ICancelledTrip from "@/app/components/timetable/connection/icons/ICancelledTrip";
+import ITicketInformation from "@/app/components/timetable/connection/icons/ITicketInformation";
 
 interface Props {
     connection: Connection;
@@ -28,7 +29,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "accessibility-warning", iconComponent: IAccessibilityWarning }, // e.g. without "Vehicle-mounted boarding aid", "No disabled WC on the train",
         { type: "unplanned-info", iconComponent: IUnplannedInfo },
         { type: "canceled-trip", iconComponent: ICancelledTrip },
-        { type: "ticket-information" }, // if a train has a additionalLineName
+        { type: "ticket-information", iconComponent: ITicketInformation }, // if a train has a additionalLineName
         { type: "additional-coaches" },
         { type: "missing-coaches" },
         { type: "replacement-service" },
