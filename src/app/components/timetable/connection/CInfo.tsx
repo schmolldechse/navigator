@@ -47,7 +47,7 @@ const CInfo = ({ connection }: Props) => {
         {filteredMessages.map((message: Message, index: number) => {
             const validMessage = validMessages.find((validMessage: ValidMessage) => validMessage.type === message.type);
             return (
-                <div key={index} className={"flex flex-row space-x-2 text-xl"}>
+                <div key={index} className={`flex flex-row space-x-2 my-1 py-0.5 text-xl ${message?.change ? 'nd-bg-white nd-fg-black' : ''}`}>
                     {validMessage?.iconComponent && <validMessage.iconComponent height={25} width={25} />}
                     <span>{message.text}</span>
                 </div>
