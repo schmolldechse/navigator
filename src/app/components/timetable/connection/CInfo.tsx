@@ -41,8 +41,11 @@ const CInfo = ({ connection }: Props) => {
         { type: "reservation-required" },
         { type: "general-warning" },
         { type: "chanced-sequence" },
-        { type: "lift-warning" }
-    ]
+        { type: "lift-warning" },
+        { type: "no-wi-fi" },
+        { type: "bicycle-warning" },
+        { type: "no-onward-journey" }, // X as SVG, like in canceled-trip
+    ];
     if (!connection?.messages) return null;
 
     const collectMessages = (messages?: Record<string, Message[] | []>): Message[] => {
