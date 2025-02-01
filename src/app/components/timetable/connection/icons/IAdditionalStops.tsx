@@ -13,7 +13,6 @@ const IAdditionalStops = ({ width = 25, height = 25 }: Props) => {
             viewBox="0 0 1024 1024"
             width={width}
             height={height}
-            className={"ml-1"}
         >
             <rect fill={"#fff"} x="-413.71" y="-331.84" width="1851.43" height="1598.24"/>
             <text letterSpacing={".12em"} fill={"#0a0a0a"} fontFamily={"Calibri-Bold, Calibri"} fontWeight={"700"} fontSize={"1200px"} transform="translate(66.87 913.75) scale(.75 1)">

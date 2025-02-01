@@ -11,7 +11,6 @@ const IAccessibilityWarning = ({ width = 25, height = 25 }: Props) => {
             viewBox="0 0 1024 1024"
             height={ height }
             width={ width }
-            className={"ml-1"}
         >
             <g>
                 <path fill={"#0a0a0a"}

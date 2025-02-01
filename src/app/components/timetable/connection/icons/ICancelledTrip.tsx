@@ -11,7 +11,6 @@ const ICancelledTrip = ({ width = 25, height = 25 }: Props) => {
             viewBox="0 0 1024 1024"
             height={height}
             width={width}
-            className={"ml-1"}
         >
             <rect fill={"#0a0a0a"} x="-232.15" y="-167.22" width="1449.49" height="1338.73"/>
             <g>

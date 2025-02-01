@@ -13,7 +13,6 @@ const ICanceledStops = ({ width = 25, height = 25 }: Props) => {
             viewBox="0 0 1024 1024"
             width={width}
             height={height}
-            className={"ml-1"}
         >
             <rect fill={"#fff"} x="-393.55" y="-339.75" width="1851.43" height="1598.24"/>
             <text letterSpacing={"-.1em"} fill={"#0a0a0a"} fontFamily={"Calibri-Bold, Calibri"} fontWeight={"700"} fontSize={"1200px"} transform="translate(87.03 905.83) scale(.75 1)">

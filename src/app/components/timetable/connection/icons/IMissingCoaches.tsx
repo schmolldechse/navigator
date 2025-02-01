@@ -11,7 +11,6 @@ const IMissingCoaches = ({ width = 25, height = 25 }: Props) => {
             viewBox="0 0 1024 1024"
             height={height}
             width={width}
-            className={"ml-1"}
         >
             <rect fill={"#fff"} x="-154.45" y="-126.53" width="1317.36" height="1234.29"/>
             <rect fill={"#0a0a0a"} x="603.59" y="179.99" width="332.01" height="80.14"/>
