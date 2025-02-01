@@ -1,5 +1,6 @@
 import {Connection, Message} from "@/app/lib/objects";
-import Image from "next/image";
+import React from "react";
+import ITrackChanged from "@/app/components/timetable/connection/icons/ITrackChanged";
 
 interface Props {
     connection: Connection;
@@ -7,7 +8,8 @@ interface Props {
 
 interface ValidMessage {
     type: string;
-    svgSource?: string,
+    svgSource?: string;
+    iconComponent?: React.FC<{ width?: number, height?: number }>;
 }
 
 const CInfo = ({ connection }: Props) => {
@@ -16,7 +18,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "bicycle-reservation-required", svgSource: "/timetable/infos/bicycle-reservation-required.svg" },
         { type: "canceled-stops", svgSource: "/timetable/infos/canceled-stops.svg" },
         { type: "additional-stops", svgSource: "/timetable/infos/additional-stops.svg" },
-        { type: "track-changed" },
+        { type: "track-changed", iconComponent: ITrackChanged },
         { type: "accessibility-warning" }, // e.g. without "Vehicle-mounted boarding aid", "No disabled WC on the train",
         { type: "unplanned-info" },
         { type: "canceled-trip" },
@@ -45,9 +47,9 @@ const CInfo = ({ connection }: Props) => {
         {filteredMessages.map((message: Message, index: number) => {
             const validMessage = validMessages.find((validMessage: ValidMessage) => validMessage.type === message.type);
             return (
-                <div key={index} className={"flex flex-row"}>
-                    {validMessage?.svgSource && <Image src={validMessage.svgSource} alt={message.text} width={25} height={25} />}
-                    {message.text}
+                <div key={index} className={"flex flex-row space-x-2 text-xl"}>
+                    {validMessage?.iconComponent && <validMessage.iconComponent height={25} width={25} />}
+                    <span>{message.text}</span>
                 </div>
             )
         })}
