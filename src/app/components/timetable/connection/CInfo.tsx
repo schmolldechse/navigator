@@ -74,27 +74,12 @@ const CInfo = ({ connection }: Props) => {
         message?.links?.forEach((link, index) => {
             const placeholder = `{{${index}}}`;
 
-            switch (message?.type) {
-                case "replacement-service":
-                    formatted = formatted.replace(placeholder, link?.lineName);
-                    break;
-                case "continuation-by":
-                case "no-onward-journey":
-                case "unplanned-info":
-                case "ticket-information":
-                    if (link?.type === "station") {
-                        const stop: Stop = mapStops(link)[0];
-                        formatted = formatted.replace(placeholder, writeName(stop, link?.name));
-                    } else if (link?.type === "line") formatted = formatted.replace(placeholder, link?.lineName);
-                    break;
-                case "general-warning":
-                    // no other type currently found
-                    if (link?.type === "link") formatted = formatted.replace(placeholder, link?.label);
-                    break;
-                default:
-                    formatted = formatted.replace(placeholder, link?.name);
-                    break;
-            }
+            if (link?.type === "station") {
+                const stop: Stop = mapStops(link)[0];
+                formatted = formatted.replace(placeholder, writeName(stop, link?.name));
+            } else if (link?.type === "line") formatted = formatted.replace(placeholder, link?.lineName);
+            else if (link?.type === "link") formatted = formatted.replace(placeholder, link?.label);
+            else formatted = formatted.replace(placeholder, link?.name);
         });
         return formatted;
     }
