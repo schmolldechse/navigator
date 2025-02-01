@@ -2,6 +2,7 @@ import {Connection, Message} from "@/app/lib/objects";
 import React from "react";
 import ITrackChanged from "@/app/components/timetable/connection/icons/ITrackChanged";
 import ICanceledStops from "@/app/components/timetable/connection/icons/ICanceledStops";
+import IAdditionalStops from "@/app/components/timetable/connection/icons/IAdditionalStops";
 
 interface Props {
     connection: Connection;
@@ -18,7 +19,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "bicycle-transport", svgSource: "/timetable/infos/bicycle-transport.svg" },
         { type: "bicycle-reservation-required", svgSource: "/timetable/infos/bicycle-reservation-required.svg" },
         { type: "canceled-stops", iconComponent: ICanceledStops },
-        { type: "additional-stops", svgSource: "/timetable/infos/additional-stops.svg" },
+        { type: "additional-stops", iconComponent: IAdditionalStops },
         { type: "track-changed", iconComponent: ITrackChanged },
         { type: "accessibility-warning" }, // e.g. without "Vehicle-mounted boarding aid", "No disabled WC on the train",
         { type: "unplanned-info" },
