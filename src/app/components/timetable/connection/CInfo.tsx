@@ -9,6 +9,8 @@ import IAccessibilityWarning from "@/app/components/timetable/connection/icons/I
 import IUnplannedInfo from "@/app/components/timetable/connection/icons/IUnplannedInfo";
 import ICancelledTrip from "@/app/components/timetable/connection/icons/ICancelledTrip";
 import ITicketInformation from "@/app/components/timetable/connection/icons/ITicketInformation";
+import IAdditionalCoaches from "@/app/components/timetable/connection/icons/IAdditionalCoaches";
+import IMissingCoaches from "@/app/components/timetable/connection/icons/IMissingCoaches";
 
 interface Props {
     connection: Connection;
@@ -30,8 +32,8 @@ const CInfo = ({ connection }: Props) => {
         { type: "unplanned-info", iconComponent: IUnplannedInfo },
         { type: "canceled-trip", iconComponent: ICancelledTrip },
         { type: "ticket-information", iconComponent: ITicketInformation }, // if a train has a additionalLineName
-        { type: "additional-coaches" },
-        { type: "missing-coaches" },
+        { type: "additional-coaches", iconComponent: IAdditionalCoaches },
+        { type: "missing-coaches", iconComponent: IMissingCoaches },
         { type: "replacement-service" },
         { type: "no-food" },
         { type: "no-first-class" },
