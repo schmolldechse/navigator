@@ -99,7 +99,7 @@ const ConnectionComponent = ({connection, isDeparture, renderBorder, renderInfo}
 
             {/* layout for greater screens (above md) */}
             <span
-                className={`w-full mx-auto hidden md:flex flex-col justify-between text-[30px] font-medium ${connection?.cancelled ? 'bg-[#ededed] text-black' : ''}`}
+                className={`w-full mx-auto hidden md:flex flex-col justify-between text-[30px] font-medium`}
             >
                 {/* first row */}
                 <div className={"flex flex-row"}>
