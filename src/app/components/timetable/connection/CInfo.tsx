@@ -32,7 +32,9 @@ const CInfo = ({ connection }: Props) => {
         { type: "no-food" },
         { type: "no-first-class" },
         { type: "reservation-required" },
-        { type: "general-warning" }
+        { type: "general-warning" },
+        { type: "chanced-sequence" },
+        { type: "lift-warning" }
     ]
     if (!connection?.messages) return null;
 
