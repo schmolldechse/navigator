@@ -22,6 +22,7 @@ import INoBicycleTransport from "@/app/components/timetable/connection/icons/INo
 import IReservationsMissing from "@/app/components/timetable/connection/icons/IReservationsMissing";
 import IContinuationBy from "@/app/components/timetable/connection/icons/IContinuationBy";
 import INoOnwardJourney from "@/app/components/timetable/connection/icons/INoOnwardJourney";
+import IChangedSequence from "@/app/components/timetable/connection/icons/IChangedSequence";
 
 interface Props {
     connection: Connection;
@@ -50,7 +51,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "no-first-class", iconComponent: INoFirstClass },
         { type: "reservation-required", iconComponent: IReservationRequired },
         { type: "general-warning", iconComponent: IGeneralWarning },
-        { type: "chanced-sequence" },
+        { type: "changed-sequence", iconComponent: IChangedSequence },
         { type: "lift-warning" },
         { type: "no-wi-fi" },
         { type: "bicycle-warning", iconComponent: IBicycleWarning },
