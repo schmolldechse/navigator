@@ -16,6 +16,7 @@ import {mapStops, writeName} from "@/app/lib/methods";
 import CShowMore from "@/app/components/timetable/connection/CShowMore";
 import INoFirstClass from "@/app/components/timetable/connection/icons/INoFirstClass";
 import IReservationRequired from "@/app/components/timetable/connection/icons/IReservationRequired";
+import IGeneralWarning from "@/app/components/timetable/connection/icons/IGeneralWarning";
 
 interface Props {
     connection: Connection;
@@ -43,7 +44,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "no-food", iconComponent: INoFood },
         { type: "no-first-class", iconComponent: INoFirstClass },
         { type: "reservation-required", iconComponent: IReservationRequired },
-        { type: "general-warning" },
+        { type: "general-warning", iconComponent: IGeneralWarning },
         { type: "chanced-sequence" },
         { type: "lift-warning" },
         { type: "no-wi-fi" },
