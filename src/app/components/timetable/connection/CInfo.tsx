@@ -21,6 +21,7 @@ import IBicycleWarning from "@/app/components/timetable/connection/icons/IBicycl
 import INoBicycleTransport from "@/app/components/timetable/connection/icons/INoBicycleTransport";
 import IReservationsMissing from "@/app/components/timetable/connection/icons/IReservationsMissing";
 import IContinuationBy from "@/app/components/timetable/connection/icons/IContinuationBy";
+import INoOnwardJourney from "@/app/components/timetable/connection/icons/INoOnwardJourney";
 
 interface Props {
     connection: Connection;
@@ -53,7 +54,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "lift-warning" },
         { type: "no-wi-fi" },
         { type: "bicycle-warning", iconComponent: IBicycleWarning },
-        { type: "no-onward-journey" }, // X as SVG, like in canceled-trip
+        { type: "no-onward-journey", iconComponent: INoOnwardJourney },
         { type: "continuation-by", iconComponent: IContinuationBy },
         { type: "reservations-missing", iconComponent: IReservationsMissing },
         { type: "no-bicycle-transport", iconComponent: INoBicycleTransport }
