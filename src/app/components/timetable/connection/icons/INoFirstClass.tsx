@@ -3,7 +3,7 @@ interface Props {
     height?: number;
 }
 
-const INoFirstClass = ({ width = 25, height = 25 }: Props) => {
+const INoFirstClass = ({width = 25, height = 25}: Props) => {
     return (
         <svg
             id="no-first-class"
@@ -11,6 +11,7 @@ const INoFirstClass = ({ width = 25, height = 25 }: Props) => {
             viewBox="0 0 1024 1024"
             height={height}
             width={width}
+            className={"shrink-0"}
         >
             <path fill={"#0a0a0a"}
                   d="M227.95,393.08l-.13-140.8c85.85-11.03,146-41.99,176.74-96.06h167.49v223.65L845.55,67.27h111.18L178.45,956.73h-111.18l306.86-350.71.13-256.34h-3.91c-38.9,25.72-86.68,39.78-142.4,43.41Z"/>

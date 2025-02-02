@@ -3,14 +3,15 @@ interface Props {
     height?: number;
 }
 
-const IAccessibilityWarning = ({ width = 25, height = 25 }: Props) => {
+const IAccessibilityWarning = ({width = 25, height = 25}: Props) => {
     return (
         <svg
             id="accessibility-warning"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 1024 1024"
-            height={ height }
-            width={ width }
+            height={height}
+            width={width}
+            className={"shrink-0"}
         >
             <g>
                 <path fill={"#0a0a0a"}

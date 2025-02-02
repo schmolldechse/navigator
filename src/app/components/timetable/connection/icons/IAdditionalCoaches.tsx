@@ -3,7 +3,7 @@ interface Props {
     height?: number;
 }
 
-const IAdditionalCoaches = ({ width = 25, height = 25 }: Props) => {
+const IAdditionalCoaches = ({width = 25, height = 25}: Props) => {
     return (
         <svg
             id="additional-coaches"
@@ -11,6 +11,7 @@ const IAdditionalCoaches = ({ width = 25, height = 25 }: Props) => {
             viewBox="0 0 1024 1024"
             height={height}
             width={width}
+            className={"shrink-0"}
         >
             <rect fill={"#fff"} x="-114.1" y="-69.56" width="1324.48" height="1215.3"/>
             <rect fill={"#0a0a0a"} x="603.59" y="179.99" width="332.01" height="80.14"/>

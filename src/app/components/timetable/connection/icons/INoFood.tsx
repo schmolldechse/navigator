@@ -3,7 +3,7 @@ interface Props {
     height?: number;
 }
 
-const INoFood = ({ width = 25, height = 25 }: Props) => {
+const INoFood = ({width = 25, height = 25}: Props) => {
     return (
         <svg
             id="no-food"
@@ -11,6 +11,7 @@ const INoFood = ({ width = 25, height = 25 }: Props) => {
             viewBox="0 0 1024 1024"
             height={height}
             width={width}
+            className={"shrink-0"}
         >
             <rect fill={"#fff"} x="-180.2" y="-166.93" width="1465.64" height="1465.64"/>
             <path fill={"#0a0a0a"}

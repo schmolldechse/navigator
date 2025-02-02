@@ -5,7 +5,7 @@ interface Props {
     height?: number;
 }
 
-const IBicycleReservationRequired = ({ width = 25, height = 25 }: Props) => {
+const IBicycleReservationRequired = ({width = 25, height = 25}: Props) => {
     return (
         <svg
             id="bicycle-reservation-required"
@@ -13,9 +13,11 @@ const IBicycleReservationRequired = ({ width = 25, height = 25 }: Props) => {
             viewBox="0 0 1024 1024"
             width={width}
             height={height}
+            className={"shrink-0"}
         >
             <g>
-                <circle strokeWidth={"50px"} fill={"none"} stroke={"#fff"} strokeMiterlimit={"10"}  cx="701.47" cy="624.19" r="130.48"/>
+                <circle strokeWidth={"50px"} fill={"none"} stroke={"#fff"} strokeMiterlimit={"10"} cx="701.47" cy="624.19"
+                        r="130.48"/>
                 <path fill={"#fff"}
                       d="M1175.89,621.29c1.4,3.72,3.43,7.2,6.13,10.11,4.27,4.61,10.88,8.06,20.54,5.85,12.66-2.9,18.46-15.56,11.21-37.52l-108.79-293.41s-15.3-37.45-53.8-37.45h-60.13v46.95l67.52.53,30.07,72.79,87.26,232.15Z"/>
                 <path fill={"#fff"}
@@ -28,7 +30,8 @@ const IBicycleReservationRequired = ({ width = 25, height = 25 }: Props) => {
                 <path fill={"#fff"}
                       d="M1100.31,406.45c-7.85,1.14-155.13,157.98-181.77,190l-16.03,3.85h-53.01l-2.77,49.71h49.74c13.54,0,26.81-3.9,38.14-11.32,8.39-5.5,18.61-13.22,29.22-23.62,40.62-39.82,100-104.36,150.07-172.48l-13.58-36.13Z"/>
             </g>
-            <rect strokeWidth={"30px"} fill={"none"} stroke={"#fff"} strokeMiterlimit={"10"} x="43.92" y="38.81" width="945.91" height="945.91" rx="50" ry="50"/>
+            <rect strokeWidth={"30px"} fill={"none"} stroke={"#fff"} strokeMiterlimit={"10"} x="43.92" y="38.81" width="945.91"
+                  height="945.91" rx="50" ry="50"/>
             <text fill={"#fff"} fontFamily={"Calibri, Calibri"} fontSize={"779.2px"} transform="translate(61.7 754.67)">
                 <tspan x="0" y="0">R</tspan>
             </text>
