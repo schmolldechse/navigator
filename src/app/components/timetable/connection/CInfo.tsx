@@ -17,6 +17,7 @@ import CShowMore from "@/app/components/timetable/connection/CShowMore";
 import INoFirstClass from "@/app/components/timetable/connection/icons/INoFirstClass";
 import IReservationRequired from "@/app/components/timetable/connection/icons/IReservationRequired";
 import IGeneralWarning from "@/app/components/timetable/connection/icons/IGeneralWarning";
+import IBicycleWarning from "@/app/components/timetable/connection/icons/IBicycleWarning";
 
 interface Props {
     connection: Connection;
@@ -48,7 +49,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "chanced-sequence" },
         { type: "lift-warning" },
         { type: "no-wi-fi" },
-        { type: "bicycle-warning" },
+        { type: "bicycle-warning", iconComponent: IBicycleWarning },
         { type: "no-onward-journey" }, // X as SVG, like in canceled-trip
         { type: "continuation-by" },
         { type: "reservations-missing" },
