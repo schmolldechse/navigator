@@ -25,6 +25,7 @@ import INoOnwardJourney from "@/app/components/timetable/connection/icons/INoOnw
 import IChangedSequence from "@/app/components/timetable/connection/icons/IChangedSequence";
 import INoWiFi from "@/app/components/timetable/connection/icons/INoWiFi";
 import ILiftWarning from "@/app/components/timetable/connection/icons/ILiftWarning";
+import IReplacementService from "@/app/components/timetable/connection/icons/IReplacementService";
 
 interface Props {
     connection: Connection;
@@ -48,7 +49,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "ticket-information", iconComponent: ITicketInformation }, // if a train has a additionalLineName
         { type: "additional-coaches", iconComponent: IAdditionalCoaches },
         { type: "missing-coaches", iconComponent: IMissingCoaches },
-        { type: "replacement-service" },
+        { type: "replacement-service", iconComponent: IReplacementService },
         { type: "no-food", iconComponent: INoFood },
         { type: "no-first-class", iconComponent: INoFirstClass },
         { type: "reservation-required", iconComponent: IReservationRequired },
