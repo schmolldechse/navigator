@@ -50,7 +50,9 @@ const CInfo = ({ connection }: Props) => {
         { type: "no-wi-fi" },
         { type: "bicycle-warning" },
         { type: "no-onward-journey" }, // X as SVG, like in canceled-trip
-        { type: "continuation-by" }
+        { type: "continuation-by" },
+        { type: "reservations-missing" },
+        { type: "no-bicycle-transport" }
     ];
     if (!connection?.messages) return null;
 
