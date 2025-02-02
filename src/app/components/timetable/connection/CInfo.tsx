@@ -18,6 +18,7 @@ import INoFirstClass from "@/app/components/timetable/connection/icons/INoFirstC
 import IReservationRequired from "@/app/components/timetable/connection/icons/IReservationRequired";
 import IGeneralWarning from "@/app/components/timetable/connection/icons/IGeneralWarning";
 import IBicycleWarning from "@/app/components/timetable/connection/icons/IBicycleWarning";
+import INoBicycleTransport from "@/app/components/timetable/connection/icons/INoBicycleTransport";
 
 interface Props {
     connection: Connection;
@@ -53,7 +54,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "no-onward-journey" }, // X as SVG, like in canceled-trip
         { type: "continuation-by" },
         { type: "reservations-missing" },
-        { type: "no-bicycle-transport" }
+        { type: "no-bicycle-transport", iconComponent: INoBicycleTransport }
     ];
     if (!connection?.messages) return null;
 
