@@ -23,6 +23,7 @@ import IReservationsMissing from "@/app/components/timetable/connection/icons/IR
 import IContinuationBy from "@/app/components/timetable/connection/icons/IContinuationBy";
 import INoOnwardJourney from "@/app/components/timetable/connection/icons/INoOnwardJourney";
 import IChangedSequence from "@/app/components/timetable/connection/icons/IChangedSequence";
+import INoWiFi from "@/app/components/timetable/connection/icons/INoWiFi";
 
 interface Props {
     connection: Connection;
@@ -53,7 +54,7 @@ const CInfo = ({ connection }: Props) => {
         { type: "general-warning", iconComponent: IGeneralWarning },
         { type: "changed-sequence", iconComponent: IChangedSequence },
         { type: "lift-warning" },
-        { type: "no-wi-fi" },
+        { type: "no-wi-fi", iconComponent: INoWiFi },
         { type: "bicycle-warning", iconComponent: IBicycleWarning },
         { type: "no-onward-journey", iconComponent: INoOnwardJourney },
         { type: "continuation-by", iconComponent: IContinuationBy },
