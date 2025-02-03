@@ -26,6 +26,7 @@ import IChangedSequence from "@/app/components/timetable/connection/icons/IChang
 import INoWiFi from "@/app/components/timetable/connection/icons/INoWiFi";
 import ILiftWarning from "@/app/components/timetable/connection/icons/ILiftWarning";
 import IReplacementService from "@/app/components/timetable/connection/icons/IReplacementService";
+import {DateTime} from "luxon";
 
 interface Props {
     connection: Connection;
@@ -94,6 +95,9 @@ const CInfo = ({ connection }: Props) => {
             if (link?.type === "station") {
                 const stop: Stop = mapStops(link)[0];
                 formatted = formatted.replace(placeholder, writeName(stop, link?.name));
+            } else if (link?.type === "time") {
+                const time = DateTime.fromISO(link?.time).setLocale("de-DE").toLocaleString(DateTime.TIME_24_SIMPLE);
+                formatted = formatted.replace(placeholder, time);
             } else if (link?.type === "line") formatted = formatted.replace(placeholder, link?.lineName);
             else if (link?.type === "link") formatted = formatted.replace(placeholder, link?.label);
             else formatted = formatted.replace(placeholder, link?.name);
