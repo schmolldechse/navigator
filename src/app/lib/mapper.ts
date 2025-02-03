@@ -22,6 +22,14 @@ const mapConnections = (
                 {
                     ...connectionA,
                     ...matching,
+                    destination: {
+                        ...connectionA.destination,
+                        ...matching.destination
+                    },
+                    origin: {
+                        ...connectionA.origin,
+                        ...matching.origin
+                    },
                     lineInformation: {
                         ...connectionA.lineInformation,
                         ...matching.lineInformation
