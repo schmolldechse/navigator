@@ -3,6 +3,8 @@
 	import Navbar from "$lib/Navbar.svelte";
 
 	let { children } = $props();
+
+	let type = $state("timetable");
 </script>
 
 <div class="m-4">
@@ -16,7 +18,7 @@
 			</span>
 		</a>
 
-		<Navbar />
+		<Navbar bind:type />
 	</div>
 
 	{@render children()}
