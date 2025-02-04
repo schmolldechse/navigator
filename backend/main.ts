@@ -1,8 +1,15 @@
-export function add(a: number, b: number): number {
-  return a + b;
-}
+import { Application, Router } from "@oak/oak";
 
-// Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts
-if (import.meta.main) {
-  console.log("Add 2 + 3 =", add(2, 3));
-}
+const app = new Application();
+const port = 8000;
+
+const router = new Router();
+router.post("/api/v1/stations", async (ctx) => {
+  ctx.response.body = "Hello World";
+});
+
+app.use(router.routes());
+app.use(router.allowedMethods());
+
+app.addEventListener("listen", () => console.log(`Server running on port ${port}`));
+await app.listen({ port });
