@@ -2,14 +2,17 @@
 	import "../app.css";
 	import Navbar from "$components/Navbar.svelte";
 	import Logo from "$components/Logo.svelte";
+	import { setContext } from "svelte";
 
 	let { children } = $props();
 
 	let type = $state("timetable");
+
+	setContext("type", () => type );
 </script>
 
 <div class="m-4">
-	<div class="flex justify-between items-center pr-4 bg-slate-300 dark:bg-transparent">
+	<div class="flex justify-between items-center pr-4 bg-slate-300 dark:bg-transparent mb-4">
 
 		<!-- Logo -->
 		<a href="/">
