@@ -5,6 +5,8 @@
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
     "@types/express": "npm:@types/express@^5.0.0",
-    "express": "npm:express@^4.21.2"
+    "@types/luxon": "npm:@types/luxon@^3.4.2",
+    "express": "npm:express@^4.21.2",
+    "luxon": "npm:luxon@^3.5.0"
   }
 }

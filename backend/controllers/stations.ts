@@ -1,6 +1,6 @@
 // @ts-types="npm:@types/express"
 import express from "npm:express";
-import {Station} from "../models/stations.ts";
+import {Station} from "../models/station.ts";
 import {mapToEnum, Products} from "../models/products.ts";
 
 export class StationController {
