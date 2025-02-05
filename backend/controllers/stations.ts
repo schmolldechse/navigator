@@ -1,25 +1,34 @@
-import {Station} from "../../models/station.ts";
-import {mapToEnum, Products} from "../../models/products.ts";
-import { Context } from "@oak/oak";
+// @ts-types="npm:@types/express"
+import express from "npm:express";
+import {Station} from "../models/stations.ts";
+import {mapToEnum, Products} from "../models/products.ts";
 
 export class StationController {
-    async handleRequest(req: Context["request"]): Promise<Response> {
-        if (req.method !== "POST") return new Response("Method not allowed", {status: 405});
+    public router = express.Router();
 
+    constructor() {
+        this.router.post("/api/v1/stations", this.handleRequest.bind(this));
+    }
+
+    async handleRequest(req: express.Request, res: express.Response): Promise<void> {
         let body = req.body;
         const { query } = body;
 
-        if (!query) return new Response("Either a 'evaNr' oder 'Station name' is missing", {status: 400});
+        if (!query) {
+            res.status(400).send("Either a 'evaNr' or a Station name is missing");
+            return;
+        }
 
         if (typeof query === "number") {
             const data = await fetchStation(query.toString());
             const station = data[0];
 
-            return new Response(JSON.stringify(station), {status: 200});
+            res.status(200).json(station);
         } else if (typeof query === "string") {
             const data = await fetchStation(query);
-            return new Response(JSON.stringify(data), {status: 200});
-        } else return new Response("Invalid query", {status: 400});
+
+            res.status(200).json(data);
+        } else res.status(400).send("Invalid query type");
     }
 }
 
