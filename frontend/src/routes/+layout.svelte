@@ -1,7 +1,7 @@
 <script lang="ts">
 	import "../app.css";
-	import Navbar from "$lib/Navbar.svelte";
-	import Logo from "$lib/Logo.svelte";
+	import Navbar from "$components/Navbar.svelte";
+	import Logo from "$components/Logo.svelte";
 
 	let { children } = $props();
 
