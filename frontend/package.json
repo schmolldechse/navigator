@@ -19,6 +19,7 @@
     "@sveltejs/adapter-auto": "^4.0.0",
     "@sveltejs/kit": "^2.16.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "@types/luxon": "^3.4.2",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
@@ -36,6 +37,7 @@
   },
   "dependencies": {
     "@fontsource/montserrat": "^5.1.1",
+    "luxon": "^3.5.0",
     "svelte-meta-tags": "^4.1.0"
   }
 }

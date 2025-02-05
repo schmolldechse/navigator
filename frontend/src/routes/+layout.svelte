@@ -12,7 +12,7 @@
 </script>
 
 <div class="m-4">
-	<div class="flex justify-between items-center pr-4 bg-slate-300 dark:bg-transparent mb-4">
+	<div class="flex justify-between items-center pr-4 bg-accent dark:bg-transparent mb-4">
 
 		<!-- Logo -->
 		<a href="/">
