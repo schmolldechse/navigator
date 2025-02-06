@@ -1,9 +1,12 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import {onMount} from 'svelte';
 	import type {Station} from "../models/models/station";
+
 	let isOpen = $state(false);
 	let selectedIndex = $state(-1);
-	let selectedValue: Station | undefined = $state(undefined);
+	let selectedStation: Station | undefined = $state(undefined);
+	let inputText = $state("");
+
 	let inputElement: HTMLInputElement;
 
 	let stations: Station[] = $state([]);
@@ -28,7 +31,7 @@
 				break;
 			case 'Enter':
 				if (selectedIndex >= 0) {
-					selectedValue = stations[selectedIndex];
+					selectedStation = stations[selectedIndex];
 					isOpen = false;
 				}
 				break;
@@ -39,7 +42,8 @@
 	}
 
 	function selectItem(station: Station) {
-		selectedValue = station;
+		selectedStation = station;
+		inputText = station?.name ?? "";
 		isOpen = false;
 		selectedIndex = -1;
 	}
@@ -53,10 +57,10 @@
 	async function searchStations(query: string) {
 		const response = await fetch(`http://localhost:8000/api/v1/stations`, {
 			method: 'POST',
-			body: JSON.stringify({ query: query }),
-            headers: {
+			body: JSON.stringify({query: query}),
+			headers: {
 				'Content-Type': 'application/json',
-            }
+			}
 		});
 		if (!response.ok) return;
 
@@ -75,14 +79,20 @@
 
 	function handleInput(event: Event) {
 		const query = (event.target as HTMLInputElement).value;
-		clearTimeout(debounceTimeout);
-		debounceTimeout = setTimeout(() => {
-			if (query) {
-				searchStations(query);
-			} else {
-				isOpen = false;
-			}
-		}, 500);
+		inputText = query;
+
+		// only search when no station is selected
+		if (!selectedStation || query !== selectedStation.name) {
+			clearTimeout(debounceTimeout);
+			debounceTimeout = setTimeout(() => {
+				if (query) {
+					searchStations(query);
+				} else {
+					isOpen = false;
+					selectedStation = undefined;
+				}
+			}, 500);
+		}
 	}
 
 	onMount(() => {
@@ -94,7 +104,7 @@
 <div class="relative w-64">
     <input
             bind:this={inputElement}
-            bind:value={selectedValue}
+            bind:value={inputText}
             onclick={handleInputClick}
             onfocus={handleInputClick}
             onkeydown={handleKeydown}
