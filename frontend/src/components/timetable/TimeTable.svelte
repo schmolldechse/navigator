@@ -2,11 +2,19 @@
 	import {DateTime} from "luxon";
 	import StationSearch from "$components/StationSearch.svelte";
     import type {Station} from "$models/station";
+    import TimePicker from "$components/timetable/TimePicker.svelte";
 
 	let typeSelected: "departures" | "arrivals" = $state("departures");
 
-	let stationSelected: Station | undefined = $state();
+    let stationSelected: Station | undefined = $state(undefined);
 	let dateSelected = $state(DateTime.now().set({second: 0, millisecond: 0}));
+
+    const gotoRequest = () => {
+        if (stationSelected !== undefined) {
+            console.log(stationSelected);
+            window.location.href = `/${stationSelected?.evaNr}/${typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}`;
+        }
+    }
 </script>
 
 <div class="md:w-[40%] flex flex-col">
@@ -39,16 +47,16 @@
         </button>
     </div>
 
-    <StationSearch bind:selectedStation={ stationSelected } />
+    <StationSearch onStationSelect={(station) => stationSelected = station} />
 
     <div class="flex flex-col">
         <span>Pick a time:</span>
         <!-- Date picker should be here -->
     </div>
 
-    <a class="{stationSelected && dateSelected ? 'bg-accent text-black' : 'bg-primary text-text'} p-2 rounded-md text-background font-bold text-base md:text-2xl flex justify-center items-center"
-       href="/{stationSelected?.evaNr}/{typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}"
+    <button class="{stationSelected && dateSelected ? 'bg-accent text-black' : 'bg-primary text-text'} p-2 rounded-md text-background font-bold text-base md:text-2xl flex justify-center items-center"
+       onclick={gotoRequest}
     >
         Request
-    </a>
+    </button>
 </div>

@@ -1,11 +1,12 @@
 <script lang="ts">
     import {onMount} from 'svelte';
     import Search from "$components/svg/Search.svelte";
-    import type {Station} from "$models/station";
+    import type { Station } from "$models/station";
 
     let isOpen = $state(false);
     let selectedIndex = $state(-1);
-    let { selectedStation = $bindable() } : { selectedStation: Station | undefined } = $props();
+    let selectedStation: Station | undefined = $state()
+    let { onStationSelect }: { onStationSelect: (station: Station | undefined) => void } = $props();
     let inputText = $state("");
 
     let inputElement: HTMLInputElement;
@@ -41,6 +42,7 @@
     }
 
     function selectStation(station: Station | undefined) {
+        onStationSelect(station);
         selectedStation = station;
         inputText = station?.name ?? "";
         isOpen = false;

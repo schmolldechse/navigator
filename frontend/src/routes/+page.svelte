@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { MetaTags } from "svelte-meta-tags";
 	import { getContext } from "svelte";
-	import TimeTable from "$components/TimeTable.svelte";
+	import TimeTable from "$components/timetable/TimeTable.svelte";
 
 	const type: () => string = getContext("type");
 </script>
