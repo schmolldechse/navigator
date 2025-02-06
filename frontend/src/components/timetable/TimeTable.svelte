@@ -51,7 +51,7 @@
 
     <div class="flex flex-col">
         <span>Pick a time:</span>
-        <!-- Date picker should be here -->
+        <TimePicker onChangedDate={(newDate) => dateSelected = newDate}/>
     </div>
 
     <button class="{stationSelected && dateSelected ? 'bg-accent text-black' : 'bg-primary text-text'} p-2 rounded-md text-background font-bold text-base md:text-2xl flex justify-center items-center"
