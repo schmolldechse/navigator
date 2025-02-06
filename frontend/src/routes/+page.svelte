@@ -7,19 +7,19 @@
 </script>
 
 <MetaTags
-	title="NAVIGATOR"
+	title="Navigator"
 	description="The Navigator for your train journeys."
 	openGraph={{
 		url: "https://navigator.voldechse.wtf",
-		title: "NAVIGATOR",
-		siteName: "NAVIGATOR",
+		title: "Navigator",
+		siteName: "Navigator",
 		description: "The Navigator for your train journeys.",
 		images: [
 			{
 				url: "https://navigator.voldechse.wtf/logo.png",
 				width: 1024,
 				height: 1024,
-				alt: "NAVIGATOR Logo"
+				alt: "Navigator Logo"
 			}
 		]
 	}} />
