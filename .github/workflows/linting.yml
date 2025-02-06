@@ -1,4 +1,4 @@
-name: Linting and Formatting
+name: Linting Checks
 
 on:
   push:
@@ -24,10 +24,6 @@ jobs:
         working-directory: frontend
         run: npm ci && npm run lint
 
-      - name: Frontend format
-        working-directory: frontend
-        run: npm run format
-
       # Backend checks
       - name: Setup Deno
         uses: denoland/setup-deno@v1
@@ -37,15 +33,3 @@ jobs:
       - name: Deno format check
         working-directory: backend
         run: deno task fmt:check
-
-      - name: Apply Deno formatting
-        working-directory: backend
-        run: deno task fmt
-
-      - name: Commit formatting changes
-        uses: EndBug/add-and-commit@v9
-        with:
-          branch: github-ci
-          default_author: github_actions
-          message: 'style: automated code formatting'
-          add: '*.ts *.js *.svelte *.json *.html'
