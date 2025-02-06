@@ -1,11 +1,11 @@
 <script lang="ts">
     import {onMount} from 'svelte';
-    import type {Station} from "../models/models/station";
     import Search from "$components/svg/Search.svelte";
+    import type {Station} from "$models/station";
 
     let isOpen = $state(false);
     let selectedIndex = $state(-1);
-    let selectedStation: Station | undefined = $state(undefined);
+    let { selectedStation = $bindable() } : { selectedStation: Station | undefined } = $props();
     let inputText = $state("");
 
     let inputElement: HTMLInputElement;
@@ -40,7 +40,7 @@
         }
     }
 
-    function selectStation(station: Station) {
+    function selectStation(station: Station | undefined) {
         selectedStation = station;
         inputText = station?.name ?? "";
         isOpen = false;
@@ -78,6 +78,11 @@
 
     function handleInput(event: Event) {
         const query = (event.target as HTMLInputElement).value;
+        if (query.length === 0) {
+            selectStation(undefined);
+            return;
+        }
+
         inputText = query;
 
         // only search when no station is selected
@@ -88,7 +93,6 @@
                     searchStations(query);
                 } else {
                     isOpen = false;
-                    selectedStation = undefined;
                 }
             }, 500);
         }
