@@ -38,15 +38,15 @@
         </button>
     </div>
 
-    <StationSearch/>
-</div>
+    <StationSearch />
 
-<div class="flex flex-col">
-    <span>Pick a time:</span>
-    <!-- Date picker should be here -->
-</div>
+    <div class="flex flex-col">
+        <span>Pick a time:</span>
+        <!-- Date picker should be here -->
+    </div>
 
-<a class="w-full bg-primary p-2 rounded text-black font-bold text-base md:text-2xl text-center flex justify-center items-center"
-   href="/{stationSelected}/{typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}">
-    Request
-</a>
+    <a class="w-full bg-primary p-2 rounded text-black font-bold text-base md:text-2xl text-center flex justify-center items-center"
+       href="/{stationSelected}/{typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}">
+        Request
+    </a>
+</div>
