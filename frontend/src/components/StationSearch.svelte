@@ -105,7 +105,7 @@
 </script>
 
 <div class="relative w-full">
-    <div class="flex flex-row items-center gap-x-2 bg-primary rounded-2xl px-2 focus-within:ring-2 focus-within:ring-accent">
+    <div class="flex flex-row items-center gap-x-2 bg-primary rounded-2xl px-2 focus-within:ring-2 focus-within:ring-accent hover:ring-2 hover:ring-accent">
         <Search height="50px" width="50px" />
         <input
                 bind:this={inputElement}
