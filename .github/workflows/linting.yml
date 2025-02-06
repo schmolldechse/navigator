@@ -3,10 +3,6 @@ name: Linting and Formatting
 on:
   push:
     branches: [github-ci]
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - '!.github/workflows/**'
   workflow_dispatch:
 
 jobs:
