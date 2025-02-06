@@ -2,7 +2,11 @@ name: Linting Checks
 
 on:
   push:
-    branches: [github-ci]
+    branches:
+      - "svelte-rewrite"
+  pull_request:
+    branches:
+      - '**'
   workflow_dispatch:
 
 jobs:
@@ -13,7 +17,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: github-ci
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -31,7 +35,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          ref: github-ci
+          ref: ${{ github.head_ref || github.ref_name }}
 
       - name: Setup Deno
         uses: denoland/setup-deno@v1
