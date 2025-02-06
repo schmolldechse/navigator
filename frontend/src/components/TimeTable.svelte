@@ -9,7 +9,7 @@
 	let dateSelected = $state(DateTime.now().set({second: 0, millisecond: 0}));
 </script>
 
-<div class="w-[40%] flex flex-col">
+<div class="md:w-[40%] flex flex-col">
 
     <div class="flex flex-row items-center justify-end gap-x-2">
         <button
