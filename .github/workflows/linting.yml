@@ -6,8 +6,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  code-quality:
+  lint-frontend:
     runs-on: ubuntu-latest
+    name: Lint Frontend
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -19,17 +20,24 @@ jobs:
         with:
           node-version: 20
 
-      # Frontend checks
-      - name: Frontend lint
+      - name: Frontend format check
         working-directory: frontend
         run: npm ci && npm run lint
 
-      # Backend checks
+  lint-backend:
+    runs-on: ubuntu-latest
+    name: Lint Backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: github-ci
+
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: '1.40.x'
+          deno-version: 'v2.x'
 
       - name: Deno format check
         working-directory: backend
-        run: deno task fmt:check
+        run: deno fmt --check
