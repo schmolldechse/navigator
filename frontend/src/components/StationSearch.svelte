@@ -100,7 +100,7 @@
     });
 </script>
 
-<div class="relative w-64">
+<div class="relative w-full">
     <div class="flex flex-row items-center gap-x-2 bg-primary rounded-2xl px-2 focus-within:ring-2 focus-within:ring-accent">
         <Search height="50px" width="50px" />
         <input
@@ -118,7 +118,7 @@
     </div>
 
     {#if isOpen && stations.length > 0}
-        <div class="absolute top-full left-0 w-fit h-fit mt-1 z-50 bg-primary rounded-lg border border-text p-2">
+        <div class="max-w-96 absolute top-full left-0 h-fit mt-1 z-50 bg-primary rounded-lg border border-text p-2">
             {#each stations as station, index (station)}
                 <button
                         tabindex="0"
