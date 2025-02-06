@@ -10,7 +10,7 @@
 
 <div class="w-[40%] flex flex-col">
 
-    <div class="flex flex-row items-center gap-x-2 font-bold">
+    <div class="flex flex-row items-center justify-end gap-x-2">
         <button
                 type="button"
                 class="cursor-pointer font-bold"
