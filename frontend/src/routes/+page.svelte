@@ -26,10 +26,8 @@
 
 <div class="flex items-center justify-center">
 
-	<div class="px-4 py-7 md:px-10 md:w-[40%] flex flex-col space-y-4 bg-zinc-700 text-white">
 		{#if type() === "timetable"}
 			<TimeTable />
 		{/if}
-	</div>
 
 </div>
