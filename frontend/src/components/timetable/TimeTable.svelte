@@ -56,7 +56,7 @@
             <button class="flex flex-row items-center bg-primary rounded-3xl px-2"
 			onclick={() => (dateSelected = DateTime.now().set({ second: 0, millisecond: 0 }))}>
                 <Clock height="25px" width="25px" />
-                <span class="text-xl">Now</span>
+                <span class="hidden md:block text-xl">Now</span>
             </button>
 
             <button
