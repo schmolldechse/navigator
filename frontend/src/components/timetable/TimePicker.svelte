@@ -3,12 +3,10 @@
 	import { DateTime } from "luxon";
 	import Calendar from "$components/svg/Calendar.svelte";
 
-	let { onChangedDate }: { onChangedDate: (date: DateTime) => void } = $props();
+	let { selectedDate = $bindable(DateTime.now().set({ second: 0, millisecond: 0 })) } = $props();
 
 	let isOpen: boolean = $state(false);
 	let inputElement: HTMLDivElement;
-
-	let selectedDate: DateTime = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 
 	let inputTimeout: number;
 	let buffer = { current: { hours: "", minutes: "" } };
@@ -160,10 +158,7 @@
 			<!-- select button -->
 			<button
 				class="mt-4 w-full rounded bg-accent py-2 font-bold text-black"
-				onclick={() => {
-					isOpen = false;
-					onChangedDate(selectedDate);
-				}}
+				onclick={() => isOpen = false}
 			>
 				Select
 			</button>

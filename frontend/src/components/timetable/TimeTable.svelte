@@ -50,10 +50,11 @@
 	<StationSearch onStationSelect={(station) => (stationSelected = station)} />
 
     <div class="flex flex-row justify-between">
-        <TimePicker onChangedDate={(newDate) => (dateSelected = newDate)}/>
+		<TimePicker bind:selectedDate={dateSelected} />
 
         <div class="flex flex-row">
-            <button class="flex flex-row items-center bg-primary rounded-3xl px-2">
+            <button class="flex flex-row items-center bg-primary rounded-3xl px-2"
+			onclick={() => (dateSelected = DateTime.now().set({ second: 0, millisecond: 0 }))}>
                 <Clock height="25px" width="25px" />
                 <span class="text-xl">Now</span>
             </button>
