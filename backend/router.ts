@@ -1,7 +1,7 @@
 // @ts-types="npm:@types/express"
 import express from "npm:express";
-import {StationController} from "./controllers/stations.ts";
-import {BahnhofController} from "./controllers/bahnhof.ts";
+import { StationController } from "./controllers/stations.ts";
+import { BahnhofController } from "./controllers/bahnhof.ts";
 
 const router = express.Router();
 

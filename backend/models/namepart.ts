@@ -1,4 +1,4 @@
 export interface NamePart {
-    type: string;
-    value: string;
+	type: string;
+	value: string;
 }
