@@ -22,12 +22,11 @@
 				alt: "Navigator Logo"
 			}
 		]
-	}} />
+	}}
+/>
 
 <div class="flex items-center justify-center">
-
-		{#if type() === "timetable"}
-			<TimeTable />
-		{/if}
-
+	{#if type() === "timetable"}
+		<TimeTable />
+	{/if}
 </div>

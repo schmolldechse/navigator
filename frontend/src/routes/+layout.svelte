@@ -8,17 +8,16 @@
 
 	let type = $state("timetable");
 
-	setContext("type", () => type );
+	setContext("type", () => type);
 </script>
 
 <div class="m-4">
-	<div class="flex justify-between items-center pr-4 bg-accent dark:bg-transparent mb-4">
-
+	<div class="mb-4 flex items-center justify-between bg-accent pr-4 dark:bg-transparent">
 		<!-- Logo -->
 		<a href="/">
-			<span class="flex flex-row items-center font-bold cursor-pointer">
+			<span class="flex cursor-pointer flex-row items-center font-bold">
 				<Logo />
-				<h1 class="hidden md:inline text-[2rem] relative top-[-0.25rem]">NAVIGATOR</h1>
+				<h1 class="relative top-[-0.25rem] hidden text-[2rem] md:inline">NAVIGATOR</h1>
 			</span>
 		</a>
 
@@ -26,6 +25,4 @@
 	</div>
 
 	{@render children()}
-
 </div>
-

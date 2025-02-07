@@ -1,29 +1,29 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 @import "@fontsource/montserrat";
 @import "@fontsource/montserrat/700.css";
 
 @layer base {
-    :root {
-        --text: #000000;
-        --background: #f5f5f5;
-        --primary: #bfbfbf;
-        --secondary: #d28484;
-        --accent: #f5d000;
-    }
+	:root {
+		--text: #000000;
+		--background: #f5f5f5;
+		--primary: #bfbfbf;
+		--secondary: #d28484;
+		--accent: #f5d000;
+	}
 
-    @media (prefers-color-scheme: dark) {
-        :root {
-            --text: #ffffff;
-            --background: #0a0a0a;
-            --primary: #404040;
-            --secondary: #7b2e2e;
-            --accent: #ffda0a;
-        }
-    }
+	@media (prefers-color-scheme: dark) {
+		:root {
+			--text: #ffffff;
+			--background: #0a0a0a;
+			--primary: #404040;
+			--secondary: #7b2e2e;
+			--accent: #ffda0a;
+		}
+	}
 }
 
 body {
-    @apply bg-background text-text font-montserrat;
+	@apply bg-background font-montserrat text-text;
 }

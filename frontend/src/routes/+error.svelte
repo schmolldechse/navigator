@@ -1,14 +1,12 @@
 <script lang="ts">
-	import { page } from '$app/state';
+	import { page } from "$app/state";
 </script>
 
-<div class="flex justify-center align-middle items-center">
+<div class="flex items-center justify-center align-middle">
 	<div>
 		<p class="text-7xl font-bold">
 			{page.status}
 		</p>
-		<p class="text-2xl font-medium">
-			This is not what you are looking for...
-		</p>
+		<p class="text-2xl font-medium">This is not what you are looking for...</p>
 	</div>
 </div>
