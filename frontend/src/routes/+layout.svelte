@@ -15,7 +15,7 @@
 	<a href="/">
 		<div class="flex cursor-pointer flex-row items-center">
 			<Logo />
-			<h1 class="relative top-[-0.25rem] hidden md:inline text-[2rem] font-bold">NAVIGATOR</h1>
+			<h1 class="relative top-[-0.25rem] hidden text-[2rem] font-bold md:inline">NAVIGATOR</h1>
 		</div>
 	</a>
 

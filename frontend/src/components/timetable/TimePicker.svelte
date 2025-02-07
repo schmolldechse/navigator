@@ -74,8 +74,8 @@
 		type="button"
 		class:ring-2={isOpen}
 		class:ring-accent={isOpen}
-		class="flex flex-row items-center gap-x-2 rounded-md p-0.5 md:p-2 text-center md:text-2xl hover:ring-2 hover:ring-accent"
-		onclick={() => isOpen = true}
+		class="flex flex-row items-center gap-x-2 rounded-md p-0.5 text-center hover:ring-2 hover:ring-accent md:p-2 md:text-2xl"
+		onclick={() => (isOpen = true)}
 	>
 		<Calendar />
 		<span>{selectedDate.toFormat("dd.MM.yyyy - HH:mm")}</span>
@@ -83,7 +83,7 @@
 
 	{#if isOpen}
 		<div
-			class="absolute left-1/2 top-1/2 z-10 mt-8 w-80 -translate-x-1/4 transform rounded bg-primary p-4 shadow-lg md:left-auto md:top-full md:mt-2 md:w-128 md:transform-none"
+			class="md:w-128 absolute left-1/2 top-1/2 z-10 mt-8 w-80 -translate-x-1/4 transform rounded bg-primary p-4 shadow-lg md:left-auto md:top-full md:mt-2 md:transform-none"
 		>
 			<!-- header -->
 			<div class="mb-4 flex items-center justify-between">
@@ -156,10 +156,7 @@
 			</div>
 
 			<!-- select button -->
-			<button
-				class="mt-4 w-full rounded bg-accent py-2 font-bold text-black"
-				onclick={() => isOpen = false}
-			>
+			<button class="mt-4 w-full rounded bg-accent py-2 font-bold text-black" onclick={() => (isOpen = false)}>
 				Select
 			</button>
 		</div>

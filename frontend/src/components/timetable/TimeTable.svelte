@@ -18,7 +18,7 @@
 	};
 </script>
 
-<div class="flex flex-col md:w-[40%] gap-y-2">
+<div class="flex flex-col gap-y-2 md:w-[40%]">
 	<div class="flex flex-row items-center justify-end gap-x-2">
 		<button
 			type="button"
@@ -53,23 +53,24 @@
 		<TimePicker bind:selectedDate={dateSelected} />
 
 		<div class="ml-auto flex gap-1 md:gap-3">
-		<!-- Reset time -->
-		<button class="flex flex-row items-center bg-primary rounded-3xl px-2 md:px-4"
-				onclick={() => (dateSelected = DateTime.now().set({ second: 0, millisecond: 0 }))}>
-			<Clock height="25px" width="25px" />
-			<span class="hidden md:block text-xl">Now</span>
-		</button>
+			<!-- Reset time -->
+			<button
+				class="flex flex-row items-center rounded-3xl bg-primary px-2 md:px-4"
+				onclick={() => (dateSelected = DateTime.now().set({ second: 0, millisecond: 0 }))}
+			>
+				<Clock height="25px" width="25px" />
+				<span class="hidden text-xl md:block">Now</span>
+			</button>
 
-		<!-- Query departures/ arrivals of a station -->
-		<button
-			class="{stationSelected && dateSelected
-			? 'bg-accent text-black'
-			: 'bg-primary text-text'} flex items-center justify-center rounded-3xl px-4 text-background md:text-2xl font-bold"
-			onclick={gotoRequest}
-		>
-			Search
-		</button>
+			<!-- Query departures/ arrivals of a station -->
+			<button
+				class="{stationSelected && dateSelected
+					? 'bg-accent text-black'
+					: 'bg-primary text-text'} flex items-center justify-center rounded-3xl px-4 font-bold text-background md:text-2xl"
+				onclick={gotoRequest}
+			>
+				Search
+			</button>
 		</div>
 	</div>
-
 </div>
