@@ -28,5 +28,7 @@
 <div class="flex items-center justify-center">
 	{#if type() === "timetable"}
 		<TimeTable />
+	{:else if type() === "route_planner"}
+		<p>There is currently no content you're looking for...</p>
 	{/if}
 </div>
