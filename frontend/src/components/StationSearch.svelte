@@ -105,7 +105,7 @@
 
 <div class="relative w-full">
 	<div
-		class="flex flex-row items-center gap-x-2 rounded-2xl bg-primary px-2 focus-within:ring-2 focus-within:ring-accent hover:ring-2 hover:ring-accent"
+		class="flex flex-row items-center gap-x-2 rounded-2xl bg-primary px-2 focus-within:ring-2 focus-within:ring-accent hover:ring-2 hover:ring-accent md:text-2xl"
 	>
 		<Search height="50px" width="50px" />
 		<input
