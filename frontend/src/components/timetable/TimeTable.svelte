@@ -66,7 +66,7 @@
 			<button
 				class="{stationSelected && dateSelected
 					? 'bg-accent text-black'
-					: 'bg-primary text-text'} flex items-center justify-center rounded-3xl px-4 font-bold text-background md:text-2xl"
+					: 'bg-primary text-text hover:bg-secondary'} flex items-center justify-center rounded-3xl px-4 font-bold text-background md:text-2xl"
 				onclick={gotoRequest}
 			>
 				Search
