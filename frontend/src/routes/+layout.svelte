@@ -12,7 +12,7 @@
 
 <div class="flex h-screen w-screen flex-col">
 	<!-- Logo/ Navbar -->
-	<div class="flex items-center justify-between bg-accent pr-4 dark:bg-transparent">
+	<div class="flex items-center justify-between pr-4">
 		<a href="/">
 			<div class="flex cursor-pointer flex-row items-center">
 				<Logo />

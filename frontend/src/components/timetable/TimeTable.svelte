@@ -16,7 +16,7 @@
 	};
 </script>
 
-<div class="flex flex-col gap-y-2 md:w-[40%]">
+<div class="mt-[-15rem] flex flex-col gap-y-2 md:w-[40%]">
 	<div class="flex flex-row items-center justify-end gap-x-2">
 		<button
 			type="button"
