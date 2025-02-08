@@ -12,9 +12,7 @@ enum Products {
 }
 
 const mapToEnum = (value: string): Products | undefined => {
-	return Object.keys(Products).some((key) =>
-			Products[key as keyof typeof Products] === value
-		)
+	return Object.keys(Products).some((key) => Products[key as keyof typeof Products] === value)
 		? value as Products
 		: undefined;
 };

@@ -71,8 +71,6 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 		},
 		products: (data?.products || [])
 			.map((product: string) => mapToEnum(product))
-			.filter((product: Products): product is Products =>
-				product !== undefined
-			),
+			.filter((product: Products): product is Products => product !== undefined),
 	}));
 };

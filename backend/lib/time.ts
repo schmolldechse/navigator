@@ -9,7 +9,7 @@ const calculateDuration = (
 	if (!startDate.isValid || !endDate.isValid) {
 		throw new Error("Invalid DateTime objects provided");
 	}
-	return endDate.diff(startDate, unit).toObject()[unit];
+	return endDate.diff(startDate).as(unit);
 };
 
-export default { calculateDuration };
+export default calculateDuration;

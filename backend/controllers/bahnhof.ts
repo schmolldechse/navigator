@@ -1,6 +1,9 @@
 // @ts-types="npm:@types/express"
 import express from "npm:express";
 import { Connection, Journey } from "../models/connection.ts";
+import mapConnection from "../lib/mapping.ts";
+
+type RequestType = "departures" | "arrivals";
 
 export class BahnhofController {
 	public router = express.Router();
@@ -50,11 +53,14 @@ export class BahnhofController {
 			return;
 		}
 
+		const journeys: Journey[] = [];
 		Object.values(response?.entries).forEach((journeyRaw) => {
-			// a journey may hold multiple Connection's, therefore it's an array
+			// a journey may hold multiple Connection's
 			if (!Array.isArray(journeyRaw)) return;
 
-			const journey: Journey = {};
+			const journey: Journey = {
+				connections: [],
+			};
 			journeyRaw.forEach((connectionRaw) => {
 				const risId = connectionRaw?.journeyID;
 				if (!risId) return;
@@ -63,21 +69,15 @@ export class BahnhofController {
 					connectionRaw,
 					type,
 				);
+				if (!connection) return;
+				if (!journey.connections.some((c) => c.ris_journeyId === connection.ris_journeyId)) {
+					journey.connections.push(connection);
+				}
 			});
+
+			journeys.push(journey);
 		});
 
-		res.status(200).send(response?.entries);
+		res.status(200).send(journeys);
 	}
 }
-
-const mapConnection = (
-	entry: any,
-	type: "departures" | "arrivals",
-): Connection => {
-	const delay: number = calculateDuration(
-		DateTime.fromISO(entry?.scheduledTime),
-		DateTime.fromISO(entry?.realTime),
-		"minutes",
-	);
-	const isDeparture = type === "departures";
-};
