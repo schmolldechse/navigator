@@ -65,9 +65,7 @@
 		const data = await response.json();
 		if (!Array.isArray(data)) return;
 
-		const filtered: Station[] = data
-			.filter((location: any) => location.evaNr && location.name)
-			.map((location: any) => location as Station);
+		const filtered: Station[] = data.map((location: any) => location as Station);
 
 		stations = filtered;
 		isOpen = filtered.length > 0;

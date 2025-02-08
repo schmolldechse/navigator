@@ -11,10 +11,8 @@
 	let dateSelected = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 
 	const gotoRequest = () => {
-		if (stationSelected !== undefined) {
-			console.log(stationSelected);
-			window.location.href = `/${stationSelected?.evaNr}/${typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}`;
-		}
+		if (!stationSelected || !dateSelected) return;
+		window.location.href = `/${stationSelected?.evaNumber}/${typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}`;
 	};
 </script>
 

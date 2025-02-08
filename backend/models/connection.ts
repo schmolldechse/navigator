@@ -1,3 +1,7 @@
+import { Stop } from "./station.ts";
+import { Time } from "./time.ts";
+import { Message } from "./message.ts";
+
 export interface Journey {
 	connections: Connection[];
 }
@@ -8,6 +12,7 @@ export interface Connection {
 	origin?: Stop;
 	provenance?: string;
 	destination?: Stop;
+	actualDestination?: Stop;
 	direction?: string;
 	viaStops?: Stop[];
 	departure?: Time;
@@ -26,7 +31,13 @@ export interface Connection {
 	cancelledStopsAfterActualDestination?: Stop[];
 	additionalStops?: Stop[];
 	cancelledStops?: Stop[];
-	messages?: Messages;
+	messages?: {
+		common: Message[];
+		delay: Message[];
+		cancellation: Message[];
+		destination: Message[];
+		via: Message[];
+	};
 	cancelled?: boolean;
 	providesVehicleSequence?: boolean;
 }

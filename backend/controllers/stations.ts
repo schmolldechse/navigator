@@ -62,14 +62,14 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 	}
 
 	return response.map((data: any) => ({
-		name: data.name,
-		locationId: data.locationId,
-		evaNr: data.evaNr,
+		name: data?.name,
+		locationId: data?.locationId,
+		evaNumber: data?.evaNr,
 		coordinates: {
-			latitude: data.coordinates.latitude,
-			longitude: data.coordinates.longitude,
+			latitude: data?.coordinates?.latitude,
+			longitude: data?.coordinates?.longitude,
 		},
-		products: (data.products || [])
+		products: (data?.products || [])
 			.map((product: string) => mapToEnum(product))
 			.filter((product: Products): product is Products =>
 				product !== undefined

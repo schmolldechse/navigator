@@ -1,6 +1,9 @@
+import { Products } from "./products.ts";
+import { NamePart } from "./namepart.ts";
+
 export interface Station {
 	name: string;
-	evaNr: string;
+	evaNumber: string;
 	locationId?: string;
 	coordinates?: {
 		latitude: number;
