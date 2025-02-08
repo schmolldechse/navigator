@@ -2,8 +2,7 @@
 import express from "npm:express";
 import { Connection, Journey } from "../../models/connection.ts";
 import mapConnection from "../../lib/mapping.ts";
-
-type RequestType = "departures" | "arrivals";
+import { RequestType } from "./vendoHandler.ts";
 
 export class BahnhofHandler {
 	async handleRequest(

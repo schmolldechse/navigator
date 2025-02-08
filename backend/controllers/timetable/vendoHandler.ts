@@ -4,7 +4,6 @@ import { Connection } from "../../models/connection.ts";
 import mapConnection from "../../lib/mapping.ts";
 import { DateTime } from "npm:luxon";
 import merge from "../../lib/merge.ts";
-import Conn = Deno.Conn;
 
 export type RequestType = "departures" | "arrivals";
 // fetches boards; db = RIS id, dbnav = HAFAS, all = both
@@ -31,7 +30,7 @@ export class VendoHandler {
 		let query: Query = req.query as unknown as Query;
 		query = {
 			...req.query as unknown as Query,
-			when: query.when ?? DateTime.local().toISO(),
+			when: query.when ?? DateTime.now().toISO(),
 			duration: query.duration ?? 60,
 			results: query.results ?? 1000,
 		}
