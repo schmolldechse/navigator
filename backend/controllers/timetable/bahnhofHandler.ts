@@ -1,17 +1,11 @@
 // @ts-types="npm:@types/express"
 import express from "npm:express";
-import { Connection, Journey } from "../models/connection.ts";
-import mapConnection from "../lib/mapping.ts";
+import { Connection, Journey } from "../../models/connection.ts";
+import mapConnection from "../../lib/mapping.ts";
 
 type RequestType = "departures" | "arrivals";
 
-export class BahnhofController {
-	public router = express.Router();
-
-	constructor() {
-		this.router.get("/api/v1/proxy", this.handleRequest.bind(this));
-	}
-
+export class BahnhofHandler {
 	async handleRequest(
 		req: express.Request,
 		res: express.Response,
@@ -68,6 +62,7 @@ export class BahnhofController {
 				const connection: Connection = mapConnection(
 					connectionRaw,
 					type,
+					"db",
 				);
 				if (!connection) return;
 				if (!journey.connections.some((c) => c.ris_journeyId === connection.ris_journeyId)) {
