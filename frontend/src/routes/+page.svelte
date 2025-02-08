@@ -25,7 +25,7 @@
 	}}
 />
 
-<div class="flex items-center justify-center">
+<div class="flex flex-[1] items-center justify-center">
 	{#if type() === "timetable"}
 		<TimeTable />
 	{:else if type() === "route_planner"}
