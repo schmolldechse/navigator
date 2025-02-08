@@ -53,7 +53,7 @@
 		<div class="ml-auto flex gap-1 md:gap-3">
 			<!-- Reset time -->
 			<button
-				class="flex flex-row items-center rounded-3xl bg-primary px-2 md:px-4"
+				class="flex flex-row items-center rounded-3xl bg-primary px-2 md:px-4 md:gap-x-1"
 				onclick={() => (dateSelected = DateTime.now().set({ second: 0, millisecond: 0 }))}
 			>
 				<Clock height="25px" width="25px" />
