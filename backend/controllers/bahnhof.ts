@@ -13,9 +13,19 @@ export class BahnhofController {
 		req: express.Request,
 		res: express.Response,
 	): Promise<void> {
-		const { evaNr, duration = 60, locale = "en", type } = req.query;
-		if (!evaNr) {
-			res.status(400).send("Station's evaNr is required");
+		const {
+			evaNumber,
+			duration = 60,
+			locale = "en",
+			type,
+		} = req.query as unknown as {
+			evaNumber: string;
+			duration?: number;
+			locale?: string;
+			type: RequestType;
+		};
+		if (!evaNumber) {
+			res.status(400).send("Station's evaNumber is required");
 			return;
 		}
 
@@ -27,7 +37,7 @@ export class BahnhofController {
 		}
 
 		const request = await fetch(
-			`https://bahnhof.de/api/boards/${type}?evaNumbers=${evaNr}&duration=${duration}&locale=${locale}`,
+			`https://bahnhof.de/api/boards/${type}?evaNumbers=${evaNumber}&duration=${duration}&locale=${locale}`,
 		);
 		if (!request.ok) {
 			res.status(200);
