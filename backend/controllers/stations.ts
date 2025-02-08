@@ -7,20 +7,16 @@ export class StationController {
 	public router = express.Router();
 
 	constructor() {
-		this.router.post("/api/v1/stations", this.handleRequest.bind(this));
+		this.router.get("/api/v1/stations", this.handleRequest.bind(this));
 	}
 
 	async handleRequest(
 		req: express.Request,
 		res: express.Response,
 	): Promise<void> {
-		let body = req.body;
-		const { query } = body;
-
+		const { query } = req.query as unknown as { query: string | number };
 		if (!query) {
-			res.status(400).send(
-				"Either a 'evaNr' or a Station name is missing",
-			);
+			res.status(400).send("Either a 'evaNr' or a Station name is missing");
 			return;
 		}
 
