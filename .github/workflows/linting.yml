@@ -40,6 +40,10 @@ jobs:
         with:
           bun-version: 'latest'
 
+      - name: Install dependencies
+        working-directory: backend
+        run: bun install --dev
+
       - name: Prettier format check
         working-directory: backend
         run: bun run lint
