@@ -1,7 +1,7 @@
 import { Connection, Journey } from "../../models/connection.ts";
 import mapConnection from "../../lib/mapping.ts";
-import merge from "../../lib/merge.ts";
 import { DateTime } from "npm:luxon";
+import { mergeConnections } from "../../lib/merge.ts";
 
 export type RequestType = "departures" | "arrivals";
 
@@ -62,7 +62,7 @@ export const retrieveCombinedConnections = async (query: Query): Promise<Connect
 		retrieveConnections({ ...query, profile: Profile.DBNAV }),
 	]);
 
-	const connections = merge(db, dbnav, query.type);
+	const connections = mergeConnections(db, dbnav, query.type);
 	if (!connections) return [];
 
 	return connections.sort((a, b) => {

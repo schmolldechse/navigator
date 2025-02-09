@@ -87,4 +87,4 @@ const normalize = (name?: string): string | undefined => {
 	return name?.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 };
 
-export default mergeConnections;
+export { mergeConnections, isMatching };
