@@ -40,7 +40,9 @@ export class CombinedHandler {
 
 		// Bahnhof API only allows requests for the next 6 hours, so there won't be any data for requests outside of this range
 		if (diffToStart < -1 || diffToEnd > 6) {
-			res.status(200).json(await retrieveCombinedConnections(query));
+			res.status(200).json((await retrieveCombinedConnections(query)).map((connection) => ({
+				connections: [connection],
+			})));
 			return;
 		}
 

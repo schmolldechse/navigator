@@ -41,10 +41,14 @@ export class VendoHandler {
 		}
 
 		if (query.profile === Profile.COMBINED) {
-			res.status(200).json(await retrieveCombinedConnections(query));
+			res.status(200).json((await retrieveCombinedConnections(query)).map((connection) => ({
+				connections: [connection],
+			})));
 			return;
 		}
 
-		res.status(200).json(await retrieveConnections(query));
+		res.status(200).json((await retrieveConnections(query)).map((connection) => ({
+			connections: [connection],
+		})));
 	}
 }
