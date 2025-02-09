@@ -93,7 +93,7 @@ export class CombinedHandler {
 			);
 			return !updatedConnections.some((journey: Journey) =>
 				journey.connections.some((connectionA: Connection) => isMatching(connectionA, connectionB, query.type))
-			) && connectionBTime < firstJourney;
+			) && connectionBTime <= firstJourney;
 		}).map((connection) => ({ connections: [connection] }));
 
 		// sort
