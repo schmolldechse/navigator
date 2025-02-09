@@ -21,14 +21,14 @@ export class BahnhofHandler {
 			type: RequestType;
 		};
 		if (!evaNumber) {
-			res.status(400).send("Station's evaNumber is required");
+			res.status(400).json({ error: "Station's evaNumber is required" });
 			return;
 		}
 
 		if (!type) {
-			res.status(400).send(
+			res.status(400).json({error:
 				"Type is required. Expected 'departures' or 'arrivals'",
-			);
+			});
 			return;
 		}
 
@@ -36,13 +36,13 @@ export class BahnhofHandler {
 			`https://bahnhof.de/api/boards/${type}?evaNumbers=${evaNumber}&duration=${duration}&locale=${locale}`,
 		);
 		if (!request.ok) {
-			res.status(200);
+			res.status(404);
 			return;
 		}
 
 		const response = await request.json();
 		if (!response?.entries || !Array.isArray(response?.entries)) {
-			res.status(200);
+			res.status(204);
 			return;
 		}
 
@@ -72,6 +72,6 @@ export class BahnhofHandler {
 			journeys.push(journey);
 		});
 
-		res.status(200).send(journeys);
+		res.status(200).json(journeys);
 	}
 }

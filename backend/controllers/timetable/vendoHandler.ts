@@ -36,26 +36,28 @@ export class VendoHandler {
 		}
 
 		if (!query?.evaNumber) {
-			res.status(400).send("Station's evaNumber is required");
+			res.status(400).json({error: "Station's evaNumber is required"});
 			return;
 		}
 
 		if (!query?.type) {
-			res.status(400).send(
-				"Type is required. Expected 'departures' or 'arrivals'",
-			);
+			res.status(400).json({
+				error:
+					"Type is required. Expected 'departures' or 'arrivals'",
+			});
 			return;
 		}
 
 		if (!query?.profile) {
-			res.status(400).send(
-				"Profile is required. Expected 'db' or 'dbnav'",
-			);
+			res.status(400).json({
+				error:
+					"Profile is required. Expected 'db' or 'dbnav'",
+			});
 			return;
 		}
 
 		if (!DateTime.fromISO(query.when).isValid) {
-			res.status(400).send("Invalid date");
+			res.status(400).json({error: "Invalid date"});
 			return;
 		}
 
@@ -67,11 +69,11 @@ export class VendoHandler {
 
 			const connections = merge(db, dbnav, query.type);
 			if (!connections) {
-				res.status(200).send([]);
+				res.status(204);
 				return;
 			}
 
-			res.status(200).send(connections.sort((a, b) => {
+			res.status(200).json(connections.sort((a, b) => {
 				const dir = query.type === "departures" ? "departure" : "arrival";
 				const getTime = (c: Connection) => DateTime.fromISO(c[dir]?.actualTime ?? c[dir]?.plannedTime);
 				return getTime(a) - getTime(b);
@@ -79,7 +81,7 @@ export class VendoHandler {
 			return;
 		}
 
-		res.status(200).send(await this.retrieveConnections(query));
+		res.status(200).json(await this.retrieveConnections(query));
 	}
 
 	private async retrieveConnections(query: Query): Promise<Connection[]> {
