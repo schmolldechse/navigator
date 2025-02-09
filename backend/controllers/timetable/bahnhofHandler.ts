@@ -2,36 +2,32 @@
 import express from "npm:express";
 import { Connection, Journey } from "../../models/connection.ts";
 import mapConnection from "../../lib/mapping.ts";
-import { RequestType } from "./vendoHandler.ts";
+import { Query } from "./requests.ts";
 
 export class BahnhofHandler {
 	async handleRequest(
 		req: express.Request,
 		res: express.Response,
 	): Promise<void> {
-		const {
-			evaNumber,
-			duration = 60,
-			locale = "en",
-			type,
-		} = req.query as unknown as {
-			evaNumber: string;
-			duration?: number;
-			locale?: string;
-			type: RequestType;
+		let query: Query = req.query as unknown as Query;
+		query = {
+			...req.query as unknown as Query,
+			duration: query.duration ?? 60,
+			locale: query.locale ?? "en",
 		};
-		if (!evaNumber) {
+
+		if (!query.evaNumber) {
 			res.status(400).json({ error: "Station's evaNumber is required" });
 			return;
 		}
 
-		if (!type) {
+		if (!query.type) {
 			res.status(400).json({ error: "Type is required. Expected 'departures' or 'arrivals'" });
 			return;
 		}
 
 		const request = await fetch(
-			`https://bahnhof.de/api/boards/${type}?evaNumbers=${evaNumber}&duration=${duration}&locale=${locale}`,
+			`https://bahnhof.de/api/boards/${query.type}?evaNumbers=${query.evaNumber}&duration=${query.duration}&locale=${query.locale}`,
 		);
 		if (!request.ok) {
 			res.status(404);
@@ -58,7 +54,7 @@ export class BahnhofHandler {
 
 				const connection: Connection = mapConnection(
 					connectionRaw,
-					type,
+					query.type,
 					"db",
 				);
 				if (!connection) return;

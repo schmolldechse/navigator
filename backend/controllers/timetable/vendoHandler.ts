@@ -1,7 +1,7 @@
 // @ts-types="npm:@types/express"
 import express from "npm:express";
 import { DateTime } from "npm:luxon";
-import { Profile, Query, retrieveCombinedConnections, retrieveConnections } from "./vendoRequest.ts";
+import { Profile, Query, retrieveCombinedConnections, retrieveConnections } from "./requests.ts";
 
 export class VendoHandler {
 	async handleSingle(

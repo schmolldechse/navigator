@@ -1,5 +1,5 @@
 import { Connection } from "../models/connection.ts";
-import { RequestType } from "../controllers/timetable/vendoRequest.ts";
+import { RequestType } from "../controllers/timetable/requests.ts";
 
 const mergeConnections = (
 	connectionsA: Connection[],

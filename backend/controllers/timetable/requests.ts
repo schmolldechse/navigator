@@ -4,7 +4,13 @@ import merge from "../../lib/merge.ts";
 import { DateTime } from "npm:luxon";
 
 export type RequestType = "departures" | "arrivals";
-// fetches boards; db = RIS id, dbnav = HAFAS, all = both
+
+/**
+ * specifies the profile used in boards
+ * db = RIS id
+ * dbnav = HAFAS
+ * combined = both
+ */
 export enum Profile {
 	DB = "db",
 	DBNAV = "dbnav",
@@ -18,6 +24,7 @@ export type Query = {
 	when?: string;
 	duration?: number;
 	results?: number;
+	locale?: string;
 };
 
 export const retrieveConnections = async (query: Query): Promise<Connection[]> => {
