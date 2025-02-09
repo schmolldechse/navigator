@@ -48,7 +48,7 @@ export class CombinedHandler {
 		// Bahnhof API only allows requests for the next 6 hours
 		if (diffToStart < -1 || diffToEnd > 6) {
 			// TODO: somehow url is not correct
-			const request = await fetch(`http://localhost:8000/api/v1/timetable/vendo?evaNumber=${query.evaNumber}&type=${query.type}&when=${encodeURIComponent(query.when as string)}&duration=${query.duration}&results=${query.results}`, { method: "GET" });
+			const request = await fetch(`http://localhost:8000/api/v1/timetable/vendo?evaNumber=${query.evaNumber}&type=${query.type}&when=${encodeURIComponent(query.when!)}&duration=${query.duration}&results=${query.results}&profile=combined`, { method: "GET" });
 			if (!request.ok) {
 				res.status(200).send(request.body);
 				return;

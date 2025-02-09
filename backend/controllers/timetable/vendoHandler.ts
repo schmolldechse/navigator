@@ -83,7 +83,7 @@ export class VendoHandler {
 	}
 
 	private async retrieveConnections(query: Query): Promise<Connection[]> {
-		const request = await fetch(`https://vendo-prof-${query.profile}.voldechse.wtf/stops/${query.evaNumber}/${query.type}?when${query.when}&duration=${query.duration}&results=${query.results}`, { method: 'GET' });
+		const request = await fetch(`https://vendo-prof-${query.profile}.voldechse.wtf/stops/${query.evaNumber}/${query.type}?when=${encodeURIComponent(query.when!)}&duration=${query.duration}&results=${query.results}`, { method: 'GET' });
 		if (!request.ok) return [];
 
 		const data = await request.json();
