@@ -1,23 +1,26 @@
-import { Connection, Journey } from "../../models/connection.ts";
+import type { Connection, Journey } from "../../models/connection.ts";
 import mapConnection from "../../lib/mapping.ts";
-import { DateTime } from "npm:luxon";
+import { DateTime } from "luxon";
 import { mergeConnections } from "../../lib/merge.ts";
 
-export type RequestType = "departures" | "arrivals";
+export enum RequestType {
+	DEPARTURES = "departures",
+	ARRIVALS = "arrivals"
+}
 
 /**
  * specifies the profile used in boards
- * db = RIS id
+ * db = RIS
  * dbnav = HAFAS
  * combined = both
  */
 export enum Profile {
 	DB = "db",
 	DBNAV = "dbnav",
-	COMBINED = "combined",
+	COMBINED = "combined"
 }
 
-export type Query = {
+export interface Query {
 	evaNumber: string;
 	type: RequestType;
 	profile?: Profile;
@@ -25,14 +28,14 @@ export type Query = {
 	duration?: number;
 	results?: number;
 	locale?: string;
-};
+}
 
 export const retrieveConnections = async (query: Query): Promise<Connection[]> => {
 	const request = await fetch(
-		`https://vendo-prof-${query.profile}.voldechse.wtf/stops/${query.evaNumber}/${query.type}?when=${
-			encodeURIComponent(query.when!)
-		}&duration=${query.duration}&results=${query.results}`,
-		{ method: "GET" },
+		`https://vendo-prof-${query.profile}.voldechse.wtf/stops/${query.evaNumber}/${query.type}?when=${encodeURIComponent(
+			query.when!
+		)}&duration=${query.duration}&results=${query.results}`,
+		{ method: "GET" }
 	);
 	if (!request.ok) return [];
 
@@ -44,11 +47,7 @@ export const retrieveConnections = async (query: Query): Promise<Connection[]> =
 		const tripId = connectionRaw?.tripId;
 		if (!tripId || map.has(tripId)) return;
 
-		const connection: Connection = mapConnection(
-			connectionRaw,
-			query.type,
-			query.profile!.toString() as "db" | "dbnav",
-		);
+		const connection: Connection = mapConnection(connectionRaw, query.type, query.profile!.toString() as "db" | "dbnav");
 		if (!connection) return;
 		map.set(tripId, connection);
 	});
@@ -59,7 +58,7 @@ export const retrieveConnections = async (query: Query): Promise<Connection[]> =
 export const retrieveCombinedConnections = async (query: Query): Promise<Connection[]> => {
 	const [db, dbnav] = await Promise.all([
 		retrieveConnections({ ...query, profile: Profile.DB }),
-		retrieveConnections({ ...query, profile: Profile.DBNAV }),
+		retrieveConnections({ ...query, profile: Profile.DBNAV })
 	]);
 
 	const connections = mergeConnections(db, dbnav, query.type);
@@ -67,14 +66,17 @@ export const retrieveCombinedConnections = async (query: Query): Promise<Connect
 
 	return connections.sort((a, b) => {
 		const dir = query.type === "departures" ? "departure" : "arrival";
-		const getTime = (c: Connection) => DateTime.fromISO(c[dir]?.actualTime ?? c[dir]?.plannedTime);
+		const getTime = (c: Connection) => {
+			const time = c[dir]?.actualTime ?? c[dir]?.plannedTime;
+			return time ? DateTime.fromISO(time).toMillis() : 0;
+		};
 		return getTime(a) - getTime(b);
 	});
 };
 
-export const retrieveBahnhofConnections = async (query: Query): Promise<Journey[]> => {
+export const retrieveBahnhofJourneys = async (query: Query): Promise<Journey[]> => {
 	const request = await fetch(
-		`https://bahnhof.de/api/boards/${query.type}?evaNumbers=${query.evaNumber}&duration=${query.duration}&locale=${query.locale}`,
+		`https://bahnhof.de/api/boards/${query.type}?evaNumbers=${query.evaNumber}&duration=${query.duration}&locale=${query.locale}`
 	);
 	if (!request.ok) return [];
 
@@ -86,6 +88,6 @@ export const retrieveBahnhofConnections = async (query: Query): Promise<Journey[
 		.map((journeyRaw) => ({
 			connections: journeyRaw
 				.filter((connectionRaw) => connectionRaw?.journeyID)
-				.map((connectionRaw) => mapConnection(connectionRaw, query.type, "db")),
+				.map((connectionRaw) => mapConnection(connectionRaw, query.type, "db"))
 		}));
 };

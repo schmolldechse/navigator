@@ -1,19 +1,14 @@
-import { Connection } from "../models/connection.ts";
+import type { Connection } from "../models/connection.ts";
 import calculateDuration from "./time.ts";
-// @ts-types="npm:@types/luxon"
-import { DateTime } from "npm:luxon";
-import { Stop } from "../models/station.ts";
-import { Message } from "../models/message.ts";
+import { DateTime } from "luxon";
+import type { Stop } from "../models/station.ts";
+import type { Message } from "../models/message.ts";
 
-const mapConnection = (
-	entry: any,
-	type: "departures" | "arrivals",
-	profile: "db" | "dbnav",
-): Connection => {
+const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db" | "dbnav"): Connection => {
 	const delay: number = calculateDuration(
 		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen),
 		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen),
-		"seconds",
+		"seconds"
 	);
 	const isDeparture = type === "departures";
 	const isRIS = profile === "db";
@@ -28,21 +23,21 @@ const mapConnection = (
 		provenance: !isRIS ? entry?.provenance : undefined,
 		departure: isDeparture
 			? {
-				plannedTime: entry?.timeSchedule ?? entry?.plannedWhen,
-				actualTime: entry?.timeDelayed ?? entry?.when,
-				delay: delay,
-				plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform,
-				actualPlatform: entry?.platform,
-			}
+					plannedTime: entry?.timeSchedule ?? entry?.plannedWhen,
+					actualTime: entry?.timeDelayed ?? entry?.when,
+					delay: delay,
+					plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform,
+					actualPlatform: entry?.platform
+				}
 			: undefined,
 		arrival: !isDeparture
 			? {
-				plannedTime: entry?.timeSchedule ?? entry?.plannedWhen,
-				actualTime: entry?.timeDelayed ?? entry?.when,
-				delay: delay,
-				plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform,
-				actualPlatform: entry?.platform,
-			}
+					plannedTime: entry?.timeSchedule ?? entry?.plannedWhen,
+					actualTime: entry?.timeDelayed ?? entry?.when,
+					delay: delay,
+					plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform,
+					actualPlatform: entry?.platform
+				}
 			: undefined,
 		lineInformation: {
 			type: entry?.type,
@@ -52,8 +47,8 @@ const mapConnection = (
 			fahrtNr: entry?.line?.fahrtNr ?? undefined,
 			operator: {
 				id: entry?.line?.operator?.id ?? undefined,
-				name: entry?.line?.operator?.name ?? undefined,
-			},
+				name: entry?.line?.operator?.name ?? undefined
+			}
 		},
 		viaStops: mapStops(entry?.viaStops) ?? undefined,
 		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
@@ -61,7 +56,7 @@ const mapConnection = (
 		cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
 		messages: entry?.messages ? mapMessages(entry.messages) : undefined,
 		cancelled: entry?.canceled ?? entry?.cancelled ?? false,
-		providesVehicleSequence: entry?.providesVehicleSequence ?? false,
+		providesVehicleSequence: entry?.providesVehicleSequence ?? false
 	};
 };
 
@@ -74,14 +69,17 @@ const mapStops = (entry: any): Stop[] | null => {
 		cancelled: rawStop?.canceled ?? rawStop?.cancelled ?? false,
 		additional: rawStop?.additional ?? undefined,
 		separation: rawStop?.separation ?? undefined,
-		nameParts: rawStop?.nameParts?.map((rawPart: any) => ({
-			type: rawPart?.type,
-			value: rawPart?.value,
-		})) ?? undefined,
+		nameParts:
+			rawStop?.nameParts?.map((rawPart: any) => ({
+				type: rawPart?.type,
+				value: rawPart?.value
+			})) ?? undefined
 	}));
 };
 
-const mapMessages = (entry: any): {
+const mapMessages = (
+	entry: any
+): {
 	common: Message[];
 	delay: Message[];
 	cancellation: Message[];
@@ -93,7 +91,7 @@ const mapMessages = (entry: any): {
 		delay: (entry.delay || []).map((message: any) => message as Message),
 		cancellation: (entry.cancellation || []).map((message: any) => message as Message),
 		destination: (entry.destination || []).map((message: any) => message as Message),
-		via: (entry.via || []).map((message: any) => message as Message),
+		via: (entry.via || []).map((message: any) => message as Message)
 	};
 };
 

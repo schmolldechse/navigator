@@ -1,28 +1,24 @@
-import { Connection } from "../models/connection.ts";
+import type { Connection } from "../models/connection.ts";
 import { RequestType } from "../controllers/timetable/requests.ts";
 
-const mergeConnections = (
-	connectionsA: Connection[],
-	connectionsB: Connection[],
-	type: RequestType,
-): Connection[] => {
+const mergeConnections = (connectionsA: Connection[], connectionsB: Connection[], type: RequestType): Connection[] => {
 	const merge = (connectionA: Connection, connectionB: Connection): Connection => {
 		return {
 			ris_journeyId: connectionA?.ris_journeyId ?? undefined,
 			hafas_journeyId: connectionB?.hafas_journeyId ?? undefined,
-			direction: type === "departures" ? (connectionA?.direction || connectionB?.direction) ?? undefined : undefined,
-			provenance: type === "arrivals" ? (connectionA?.provenance || connectionB?.provenance) ?? undefined : undefined,
+			direction: type === "departures" ? ((connectionA?.direction || connectionB?.direction) ?? undefined) : undefined,
+			provenance: type === "arrivals" ? ((connectionA?.provenance || connectionB?.provenance) ?? undefined) : undefined,
 			destination: type === "departures" ? (connectionA?.destination ?? undefined) : undefined, // RIS (`db` profile) does contain this
 			origin: type === "arrivals" ? (connectionA?.origin ?? undefined) : undefined, // RIS (`db` profile) does contain this
-			departure: type === "departures" ? (connectionA?.departure || connectionB?.departure) : undefined,
-			arrival: type === "arrivals" ? (connectionA?.arrival || connectionB?.arrival) : undefined,
+			departure: type === "departures" ? connectionA?.departure || connectionB?.departure : undefined,
+			arrival: type === "arrivals" ? connectionA?.arrival || connectionB?.arrival : undefined,
 			lineInformation: {
 				fahrtNr: (connectionA?.lineInformation?.fahrtNr || connectionB?.lineInformation?.fahrtNr) ?? undefined, // HAFAS (`dbnav` profile) contains the line number (e.g. MEX 12)
 				lineName: (connectionA?.lineInformation?.lineName || connectionB?.lineInformation?.lineName) ?? undefined,
 				product: (connectionA?.lineInformation?.product || connectionB?.lineInformation?.product) ?? undefined,
-				operator: connectionA?.lineInformation?.operator ?? undefined,
+				operator: connectionA?.lineInformation?.operator ?? undefined
 			},
-			cancelled: (connectionA?.cancelled || connectionB?.cancelled) ?? false,
+			cancelled: (connectionA?.cancelled || connectionB?.cancelled) ?? false
 		};
 	};
 
@@ -44,7 +40,7 @@ const isMatching = (
 	connectionA: Connection,
 	connectionB: Connection,
 	type: "departures" | "arrivals",
-	destinationOriginCriteria: boolean = false,
+	destinationOriginCriteria: boolean = false
 ): boolean => {
 	if (connectionA?.ris_journeyId === connectionB?.ris_journeyId) return true;
 	if (connectionA?.hafas_journeyId === connectionB?.hafas_journeyId) return true;
@@ -52,17 +48,19 @@ const isMatching = (
 	const aFullName = normalize(connectionA.lineInformation?.lineName);
 	const bFullName = normalize(connectionB.lineInformation?.lineName);
 
-	const platformMatch = type === "departures"
-		? connectionA.departure?.plannedPlatform && connectionB.departure?.plannedPlatform
-			? connectionA.departure?.plannedPlatform === connectionB.departure?.plannedPlatform
-			: true
-		: connectionA.arrival?.plannedPlatform && connectionB.arrival?.plannedPlatform
-		? connectionA.arrival?.plannedPlatform === connectionB.arrival?.plannedPlatform
-		: true;
+	const platformMatch =
+		type === "departures"
+			? connectionA.departure?.plannedPlatform && connectionB.departure?.plannedPlatform
+				? connectionA.departure?.plannedPlatform === connectionB.departure?.plannedPlatform
+				: true
+			: connectionA.arrival?.plannedPlatform && connectionB.arrival?.plannedPlatform
+				? connectionA.arrival?.plannedPlatform === connectionB.arrival?.plannedPlatform
+				: true;
 
-	const timeMatch = type === "departures"
-		? connectionA.departure?.plannedTime === connectionB.departure?.plannedTime
-		: connectionA.arrival?.plannedTime === connectionB.arrival?.plannedTime;
+	const timeMatch =
+		type === "departures"
+			? connectionA.departure?.plannedTime === connectionB.departure?.plannedTime
+			: connectionA.arrival?.plannedTime === connectionB.arrival?.plannedTime;
 
 	// TODO: documentation why matching with fahrtNr is necessary
 	const nameMatch = aFullName === bFullName || aFullName === normalize(connectionB.lineInformation?.fahrtNr);
@@ -75,12 +73,7 @@ const isMatching = (
 				connectionA?.origin?.name === connectionB?.provenance
 		: true;
 
-	return (
-		platformMatch &&
-		timeMatch &&
-		nameMatch &&
-		destinationOriginMatch
-	);
+	return platformMatch && timeMatch && nameMatch && destinationOriginMatch;
 };
 
 const normalize = (name?: string): string | undefined => {

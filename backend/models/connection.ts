@@ -1,6 +1,6 @@
-import { Stop } from "./station.ts";
-import { Time } from "./time.ts";
-import { Message } from "./message.ts";
+import type { Stop } from "./station.ts";
+import type { Time } from "./time.ts";
+import type { Message } from "./message.ts";
 
 export interface Journey {
 	connections: Connection[];

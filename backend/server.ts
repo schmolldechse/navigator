@@ -1,12 +1,17 @@
-// @ts-types="npm:@types/express"
-import express from "npm:express";
-import cors from "npm:cors";
-import router from "./router.ts";
+import express from "express";
+import cors from "cors";
+import swaggerUi from "swagger-ui-express";
 
 const app = express();
 
+import swaggerDocument from "./build/swagger.json";
+import { RegisterRoutes } from "./build/routes.ts";
+
 app.use(express.json());
-app.use(cors("*"));
-app.use(router);
+app.use(cors({ origin: "*" }));
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+RegisterRoutes(app);
 
 app.listen(8000, () => console.log("Server is running on port 8000"));

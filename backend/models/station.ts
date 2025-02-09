@@ -1,5 +1,4 @@
 import { Products } from "./products.ts";
-import { NamePart } from "./namepart.ts";
 
 export interface Station {
 	name: string;
@@ -17,4 +16,9 @@ export interface Stop extends Station {
 	additional?: boolean;
 	separation?: boolean;
 	nameParts?: NamePart[];
+}
+
+export interface NamePart {
+	type: string;
+	value: string;
 }

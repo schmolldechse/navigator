@@ -35,11 +35,11 @@ jobs:
         with:
           ref: ${{ github.head_ref || github.ref_name }}
 
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
         with:
-          deno-version: 'v2.x'
+          bun-version: 'latest'
 
-      - name: Deno format check
+      - name: Prettier format check
         working-directory: backend
-        run: deno fmt --check
+        run: bun run lint
