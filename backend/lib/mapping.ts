@@ -8,7 +8,7 @@ import { Message } from "../models/message.ts";
 const mapConnection = (
 	entry: any,
 	type: "departures" | "arrivals",
-	profile: "db" | "dbnav"
+	profile: "db" | "dbnav",
 ): Connection => {
 	const delay: number = calculateDuration(
 		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen),
@@ -53,7 +53,7 @@ const mapConnection = (
 			operator: {
 				id: entry?.line?.operator?.id ?? undefined,
 				name: entry?.line?.operator?.name ?? undefined,
-			}
+			},
 		},
 		viaStops: mapStops(entry?.viaStops) ?? undefined,
 		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,

@@ -1,10 +1,10 @@
 import { Connection } from "../models/connection.ts";
-import { RequestType } from "../controllers/timetable/vendoHandler.ts";
+import { RequestType } from "../controllers/timetable/vendoRequest.ts";
 
 const mergeConnections = (
 	connectionsA: Connection[],
 	connectionsB: Connection[],
-	type: RequestType
+	type: RequestType,
 ): Connection[] => {
 	const merge = (connectionA: Connection, connectionB: Connection): Connection => {
 		return {
@@ -20,11 +20,11 @@ const mergeConnections = (
 				fahrtNr: (connectionA?.lineInformation?.fahrtNr || connectionB?.lineInformation?.fahrtNr) ?? undefined, // HAFAS (`dbnav` profile) contains the line number (e.g. MEX 12)
 				lineName: (connectionA?.lineInformation?.lineName || connectionB?.lineInformation?.lineName) ?? undefined,
 				product: (connectionA?.lineInformation?.product || connectionB?.lineInformation?.product) ?? undefined,
-				operator: connectionA?.lineInformation?.operator ?? undefined
+				operator: connectionA?.lineInformation?.operator ?? undefined,
 			},
-			cancelled: (connectionA?.cancelled || connectionB?.cancelled) ?? false
-		}
-	}
+			cancelled: (connectionA?.cancelled || connectionB?.cancelled) ?? false,
+		};
+	};
 
 	const merged: Connection[] = [];
 	connectionsB.forEach((connectionB: Connection) => {
@@ -38,13 +38,13 @@ const mergeConnections = (
 		else merged.push(merge(matching, connectionB));
 	});
 	return merged;
-}
+};
 
 const isMatching = (
 	connectionA: Connection,
 	connectionB: Connection,
 	type: "departures" | "arrivals",
-	destinationOriginCriteria: boolean = false
+	destinationOriginCriteria: boolean = false,
 ): boolean => {
 	if (connectionA?.ris_journeyId === connectionB?.ris_journeyId) return true;
 	if (connectionA?.hafas_journeyId === connectionB?.hafas_journeyId) return true;
@@ -57,8 +57,8 @@ const isMatching = (
 			? connectionA.departure?.plannedPlatform === connectionB.departure?.plannedPlatform
 			: true
 		: connectionA.arrival?.plannedPlatform && connectionB.arrival?.plannedPlatform
-			? connectionA.arrival?.plannedPlatform === connectionB.arrival?.plannedPlatform
-			: true;
+		? connectionA.arrival?.plannedPlatform === connectionB.arrival?.plannedPlatform
+		: true;
 
 	const timeMatch = type === "departures"
 		? connectionA.departure?.plannedTime === connectionB.departure?.plannedTime
@@ -69,8 +69,10 @@ const isMatching = (
 
 	const destinationOriginMatch = destinationOriginCriteria
 		? type === "departures"
-			? connectionA?.destination?.evaNumber === connectionB?.destination?.evaNumber || connectionA?.destination?.name === connectionB?.direction
-			: connectionA?.origin?.evaNumber === connectionB?.origin?.evaNumber || connectionA?.origin?.name === connectionB?.provenance
+			? connectionA?.destination?.evaNumber === connectionB?.destination?.evaNumber ||
+				connectionA?.destination?.name === connectionB?.direction
+			: connectionA?.origin?.evaNumber === connectionB?.origin?.evaNumber ||
+				connectionA?.origin?.name === connectionB?.provenance
 		: true;
 
 	return (
@@ -79,10 +81,10 @@ const isMatching = (
 		nameMatch &&
 		destinationOriginMatch
 	);
-}
+};
 
 const normalize = (name?: string): string | undefined => {
-	return name?.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-}
+	return name?.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+};
 
 export default mergeConnections;

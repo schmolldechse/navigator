@@ -26,9 +26,7 @@ export class BahnhofHandler {
 		}
 
 		if (!type) {
-			res.status(400).json({error:
-				"Type is required. Expected 'departures' or 'arrivals'",
-			});
+			res.status(400).json({ error: "Type is required. Expected 'departures' or 'arrivals'" });
 			return;
 		}
 
