@@ -30,7 +30,7 @@ export class VendoHandler {
 		let query: Query = req.query as unknown as Query;
 		query = {
 			...req.query as unknown as Query,
-			when: query.when ?? DateTime.now().toISO(),
+			when: query.when ?? DateTime.now().set({ seconds: 0, milliseconds: 0 }).toISO(),
 			duration: query.duration ?? 60,
 			results: query.results ?? 1000,
 		}
