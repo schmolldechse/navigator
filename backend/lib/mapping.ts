@@ -23,9 +23,9 @@ const mapConnection = (
 		hafas_journeyId: !isRIS ? entry?.tripId : undefined,
 		destination: isDeparture && isRIS ? mapStops(entry?.destination)![0] : undefined,
 		actualDestination: entry?.actualDestination ? mapStops(entry?.actualDestination)![0] : undefined,
-		direction: entry?.direction ?? undefined,
+		direction: !isRIS ? entry?.direction : undefined,
 		origin: !isDeparture && isRIS ? mapStops(entry?.origin)![0] : undefined,
-		provenance: entry?.provenance ?? undefined,
+		provenance: !isRIS ? entry?.provenance : undefined,
 		departure: isDeparture
 			? {
 				plannedTime: entry?.timeSchedule ?? entry?.plannedWhen,
