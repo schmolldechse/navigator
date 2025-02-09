@@ -1,4 +1,4 @@
-import { Connection } from "../../models/connection.ts";
+import { Connection, Journey } from "../../models/connection.ts";
 import mapConnection from "../../lib/mapping.ts";
 import merge from "../../lib/merge.ts";
 import { DateTime } from "npm:luxon";
@@ -70,4 +70,22 @@ export const retrieveCombinedConnections = async (query: Query): Promise<Connect
 		const getTime = (c: Connection) => DateTime.fromISO(c[dir]?.actualTime ?? c[dir]?.plannedTime);
 		return getTime(a) - getTime(b);
 	});
+};
+
+export const retrieveBahnhofConnections = async (query: Query): Promise<Journey[]> => {
+	const request = await fetch(
+		`https://bahnhof.de/api/boards/${query.type}?evaNumbers=${query.evaNumber}&duration=${query.duration}&locale=${query.locale}`,
+	);
+	if (!request.ok) return [];
+
+	const response = await request.json();
+	if (!response?.entries || !Array.isArray(response?.entries)) return [];
+
+	return Object.values(response?.entries)
+		.filter(Array.isArray)
+		.map((journeyRaw) => ({
+			connections: journeyRaw
+				.filter((connectionRaw) => connectionRaw?.journeyID)
+				.map((connectionRaw) => mapConnection(connectionRaw, query.type, "db")),
+		}));
 };
