@@ -1,6 +1,7 @@
 import { type Station } from "../models/station.ts";
 import { mapToEnum, Products } from "../models/products.ts";
 import { Controller, Get, Path, Query, Res, Route, type TsoaResponse } from "tsoa";
+import { getRedisClient } from "../lib/redis.ts";
 
 @Route("stations")
 export class StationController extends Controller {
@@ -13,7 +14,10 @@ export class StationController extends Controller {
 			return badRequestResponse(400, { reason: "Query parameter is required" });
 		}
 
-		return await fetchStation(query);
+		const stations: Station[] = (await fetchStation(query))
+			.filter((station: Station) => station.evaNumber);
+		await cacheStations(stations);
+		return stations;
 	}
 
 	@Get("/{evaNumber}")
@@ -24,6 +28,9 @@ export class StationController extends Controller {
 		if (!Number.isInteger(evaNumber)) {
 			return badRequestResponse(400, { reason: "EvaNumber is not an integer" });
 		}
+
+		const cachedStation = await getCachedStation(evaNumber.toString());
+		if (cachedStation) return cachedStation;
 
 		return (await fetchStation(evaNumber.toString()))[0];
 	}
@@ -62,3 +69,27 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 			.filter((product: Products): product is Products => product !== undefined)
 	}));
 };
+
+const cacheStations = async (stations: Station[]): Promise<void> => {
+	const client = await getRedisClient();
+
+	// check existing stations
+	const keys = stations.map((stations: Station) => stations.evaNumber);
+	const existingStations = await client.mGet(keys);
+
+	// filter out existing stations
+	const pipeline = client.multi();
+	stations.map((station: Station) => {
+		if (existingStations.includes(station.evaNumber)) return;
+		const { coordinates, ...stationData } = station;
+		pipeline.set(station.evaNumber, JSON.stringify(stationData));
+	});
+
+	await pipeline.exec();
+}
+
+const getCachedStation = async (evaNumber: string): Promise<Station | null> => {
+	const cachedStation = await (await getRedisClient()).get(evaNumber);
+	if (!cachedStation) return null;
+	return JSON.parse(cachedStation!) as Station;
+}
