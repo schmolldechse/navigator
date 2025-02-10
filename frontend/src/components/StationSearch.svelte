@@ -53,22 +53,20 @@
 	}
 
 	async function searchStations(query: string) {
-		const response = await fetch(`http://localhost:8000/api/v1/stations`, {
-			method: "POST",
-			body: JSON.stringify({ query: query }),
-			headers: {
-				"Content-Type": "application/json"
-			}
+		const queryString = new URLSearchParams({
+			query
+		}).toString();
+
+		const response = await fetch(`http://localhost:8000/api/v1/stations?${queryString}`, {
+			method: "GET"
 		});
 		if (!response.ok) return;
 
-		const data = await response.json();
-		if (!Array.isArray(data)) return;
+		const jsonData = await response.json();
+		if (!Array.isArray(jsonData)) return;
 
-		const filtered: Station[] = data.map((location: any) => location as Station);
-
-		stations = filtered;
-		isOpen = filtered.length > 0;
+		stations = jsonData as Station[];
+		isOpen = stations.length > 0;
 	}
 
 	let debounceTimeout: number;
