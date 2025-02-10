@@ -13,10 +13,10 @@ export const getRedisClient = async (): Promise<RedisClientType> => {
 	const redisUrl = `redis://${user}:${password}@${host}:${port}`;
 
 	client = createClient({ url: redisUrl });
-	client.on('error', (err) => console.error("Redis client error: ", err));
+	client.on("error", (err) => console.error("Redis client error: ", err));
 
 	await client.connect();
 	console.log("Redis client connected");
 
 	return client;
-}
+};
