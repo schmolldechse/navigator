@@ -4,16 +4,12 @@
 	import type { Station } from "$models/station";
 	import TimePicker from "$components/TimePicker.svelte";
 	import Clock from "$components/svg/Clock.svelte";
+	import { gotoTimetable } from "$lib";
 
 	let typeSelected: "departures" | "arrivals" = $state("departures");
 
 	let stationSelected: Station | undefined = $state(undefined);
 	let dateSelected = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
-
-	const gotoRequest = () => {
-		if (!stationSelected || !dateSelected) return;
-		window.location.href = `/${stationSelected?.evaNumber}/${typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}`;
-	};
 </script>
 
 <div class="mt-[-15rem] flex flex-col gap-y-2 md:w-[40%]">
@@ -65,7 +61,10 @@
 				class="{stationSelected && dateSelected
 					? 'bg-accent text-black'
 					: 'bg-primary text-text hover:bg-secondary'} flex items-center justify-center rounded-3xl px-4 font-bold text-background md:text-2xl"
-				onclick={gotoRequest}
+				onclick={() => {
+					if (!stationSelected || !dateSelected) return;
+					gotoTimetable(stationSelected?.evaNumber, typeSelected, dateSelected.toISO());
+				}}
 			>
 				Search
 			</button>

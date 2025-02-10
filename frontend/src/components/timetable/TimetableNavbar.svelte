@@ -1,10 +1,37 @@
 <script lang="ts">
 	import NavbarButton from "$components/NavbarButton.svelte";
+	import { gotoTimetable } from "$lib";
+	import { page } from "$app/state";
+	import { DateTime } from "luxon";
 
-	let { type = $bindable() } = $props();
+	let type: "departures" | "arrivals" = $state(page.params.type as "departures" | "arrivals");
 </script>
 
-<span class="montserrat-regular flex items-center space-x-4 text-base md:text-xl">
-	<NavbarButton isSelected={type === "departures"} onclick={() => (type = "departures")}>Departures</NavbarButton>
-	<NavbarButton isSelected={type === "arrivals"} onclick={() => (type = "arrivals")}>Arrivals</NavbarButton>
+<span class="flex items-center space-x-4 text-base md:text-xl">
+	<NavbarButton
+		isSelected={type === "departures"}
+		onclick={() => {
+			type = "departures";
+			gotoTimetable(
+				page.params.evaNumber,
+				type,
+				page.url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
+			);
+		}}
+	>
+		Departures
+	</NavbarButton>
+	<NavbarButton
+		isSelected={type === "arrivals"}
+		onclick={() => {
+			type = "arrivals";
+			gotoTimetable(
+				page.params.evaNumber,
+				type,
+				page.url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
+			);
+		}}
+	>
+		Arrivals
+	</NavbarButton>
 </span>
