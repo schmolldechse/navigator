@@ -10,7 +10,7 @@
 	setContext("type", () => type);
 </script>
 
-<div class="flex h-screen w-screen flex-col">
+<div class="flex h-screen w-screen overflow-hidden flex-col">
 	<!-- Logo/ Navbar -->
 	<div class="flex items-center justify-between pr-4">
 		<a href="/">

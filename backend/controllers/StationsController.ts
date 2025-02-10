@@ -14,10 +14,7 @@ export class StationController extends Controller {
 			return badRequestResponse(400, { reason: "Query parameter is required" });
 		}
 
-		const stations: Station[] = (await fetchStation(query))
-			.filter((station: Station) => station.evaNumber);
-		await cacheStations(stations);
-		return stations;
+		return await fetchAndCacheStations(query);
 	}
 
 	@Get("/{evaNumber}")
@@ -32,9 +29,16 @@ export class StationController extends Controller {
 		const cachedStation = await getCachedStation(evaNumber.toString());
 		if (cachedStation) return cachedStation;
 
-		return (await fetchStation(evaNumber.toString()))[0];
+		return (await fetchAndCacheStations(evaNumber.toString()))[0];
 	}
 }
+
+const fetchAndCacheStations = async (searchTerm: string): Promise<Station[]> => {
+	const stations: Station[] = (await fetchStation(searchTerm)).filter((station: Station) => station.evaNumber);
+	await cacheStations(stations);
+
+	return stations;
+};
 
 const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 	const request = await fetch("https://app.vendo.noncd.db.de/mob/location/search", {
@@ -86,10 +90,10 @@ const cacheStations = async (stations: Station[]): Promise<void> => {
 	});
 
 	await pipeline.exec();
-}
+};
 
 const getCachedStation = async (evaNumber: string): Promise<Station | null> => {
 	const cachedStation = await (await getRedisClient()).get(evaNumber);
 	if (!cachedStation) return null;
 	return JSON.parse(cachedStation!) as Station;
-}
+};

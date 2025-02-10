@@ -3,9 +3,10 @@
 	import { onDestroy, onMount } from "svelte";
 	import { DateTime } from "luxon";
 	import { MetaTags } from "svelte-meta-tags";
-	import type { PageLoad } from "./$types";
+	import type { PageProps } from "./$types";
 
-	const { data }: PageLoad = $props();
+	let { data }: PageProps = $props();
+
 	onMount(() => {
 		const interval = setInterval(() => invalidateAll(), 30 * 1000);
 
@@ -32,11 +33,25 @@
 	}}
 />
 
-{#each data.journeys as journey}
-	{#each journey.connections as connection}
-		<p>
-			{connection.lineInformation.lineName}
-			@{DateTime.fromISO(connection.departure.plannedTime).toFormat("HH:mm")}
-		</p>
+<div class="scrollbar-hidden overflow-y-scroll">
+	{#each data.journeys as journey}
+		{#each journey.connections as connection}
+			<p>
+				{connection.lineInformation?.lineName}
+				@{connection.departure?.plannedTime
+					? DateTime.fromISO(connection.departure.plannedTime).toFormat("HH:mm")
+					: "N/A"}
+			</p>
+		{/each}
 	{/each}
-{/each}
+</div>
+
+<style>
+	.scrollbar-hidden::-webkit-scrollbar {
+		display: none;
+	}
+	.scrollbar-hidden {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+</style>
