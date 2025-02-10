@@ -1,11 +1,10 @@
-import express from "express";
 import cors from "cors";
 import swaggerUi from "swagger-ui-express";
-
-const app = express();
-
 import swaggerDocument from "./build/swagger.json";
 import { RegisterRoutes } from "./build/routes.ts";
+import express from "express";
+
+const app = express();
 
 app.use(express.json());
 app.use(cors({ origin: "*" }));

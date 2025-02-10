@@ -1,30 +1,33 @@
 import { type Station } from "../models/station.ts";
 import { mapToEnum, Products } from "../models/products.ts";
-import { Controller, Get, Query, Res, Route, type TsoaResponse } from "tsoa";
+import { Controller, Get, Path, Query, Res, Route, type TsoaResponse } from "tsoa";
 
 @Route("stations")
 export class StationController extends Controller {
 	@Get()
-	async handleRequest(
+	async queryStations(
 		@Query() query: string,
 		@Res() badRequestResponse: TsoaResponse<400, { reason: string }>
-	): Promise<Station | Station[]> {
+	): Promise<Station[]> {
 		if (!query) {
 			return badRequestResponse(400, { reason: "Query parameter is required" });
 		}
 
-		if (isInteger(query)) {
-			const data = await fetchStation(query.toString());
-			return data[0];
-		}
-
 		return await fetchStation(query);
 	}
-}
 
-const isInteger = (value: string): boolean => {
-	return /^\d+$/.test(value);
-};
+	@Get("/{evaNumber}")
+	async getStationByEvaNumber(
+		@Path() evaNumber: number,
+		@Res() badRequestResponse: TsoaResponse<400, { reason: string }>
+	): Promise<Station> {
+		if (!Number.isInteger(evaNumber)) {
+			return badRequestResponse(400, { reason: "EvaNumber is not an integer" });
+		}
+
+		return (await fetchStation(evaNumber.toString()))[0];
+	}
+}
 
 const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 	const request = await fetch("https://app.vendo.noncd.db.de/mob/location/search", {
