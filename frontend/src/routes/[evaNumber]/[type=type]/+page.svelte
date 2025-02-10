@@ -4,6 +4,7 @@
 	import { DateTime } from "luxon";
 	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
+	import Clock from "$components/Clock.svelte";
 
 	let { data }: PageProps = $props();
 
@@ -33,6 +34,13 @@
 	}}
 />
 
+<div class="flex flex-col items-center">
+	<div class="flex w-[97.5%] items-center justify-between px-4 md:w-[80%]">
+		<span class="px-2 text-xl font-semibold md:px-4 md:text-4xl">{data.stationName}</span>
+		<Clock />
+	</div>
+</div>
+
 <div class="scrollbar-hidden overflow-y-scroll">
 	{#each data.journeys as journey}
 		{#each journey.connections as connection}
@@ -50,6 +58,7 @@
 	.scrollbar-hidden::-webkit-scrollbar {
 		display: none;
 	}
+
 	.scrollbar-hidden {
 		-ms-overflow-style: none;
 		scrollbar-width: none;
