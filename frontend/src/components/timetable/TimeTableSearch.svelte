@@ -2,7 +2,7 @@
 	import { DateTime } from "luxon";
 	import StationSearch from "$components/StationSearch.svelte";
 	import type { Station } from "$models/station";
-	import TimePicker from "$components/timetable/TimePicker.svelte";
+	import TimePicker from "$components/TimePicker.svelte";
 	import Clock from "$components/svg/Clock.svelte";
 
 	let typeSelected: "departures" | "arrivals" = $state("departures");

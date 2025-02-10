@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { MetaTags } from "svelte-meta-tags";
 	import { getContext } from "svelte";
-	import TimeTable from "$components/timetable/TimeTable.svelte";
+	import TimeTableSearch from "$components/timetable/TimeTableSearch.svelte";
 
 	const type: () => string = getContext("type");
 </script>
@@ -27,7 +27,7 @@
 
 <div class="flex flex-[1] items-center justify-center">
 	{#if type() === "timetable"}
-		<TimeTable />
+		<TimeTableSearch />
 	{:else if type() === "route_planner"}
 		<p>There is currently no content you're looking for...</p>
 	{/if}

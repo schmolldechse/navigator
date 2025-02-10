@@ -14,7 +14,8 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			$components: "src/components",
-			$models: "../backend/models"
+			$models: "../backend/models",
+			$src: "src/"
 		}
 	}
 };

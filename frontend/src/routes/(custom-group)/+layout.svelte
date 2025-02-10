@@ -1,5 +1,5 @@
 <script lang="ts">
-	import "../app.css";
+	import "$src/app.css";
 	import Navbar from "$components/Navbar.svelte";
 	import Logo from "$components/Logo.svelte";
 	import { setContext } from "svelte";
@@ -10,10 +10,10 @@
 	setContext("type", () => type);
 </script>
 
-<div class="flex h-screen w-screen overflow-hidden flex-col">
-	<!-- Logo/ Navbar -->
+<div class="flex h-screen w-screen flex-col overflow-hidden">
+	<!-- Logo/ TimetableNavbar -->
 	<div class="flex items-center justify-between pr-4">
-		<a href="/">
+		<a href="/frontend/static">
 			<div class="flex cursor-pointer flex-row items-center">
 				<Logo />
 				<h1 class="relative top-[-0.25rem] hidden text-[2rem] font-bold md:inline">NAVIGATOR</h1>
@@ -23,6 +23,6 @@
 		<Navbar bind:type />
 	</div>
 
-	<!-- TimeTable/ Route Planner -->
+	<!-- TimeTableSearch/ Route Planner -->
 	{@render children()}
 </div>
