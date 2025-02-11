@@ -5,6 +5,7 @@
 	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
 	import Clock from "$components/timetable/Clock.svelte";
+	import Filter from "$components/timetable/Filter.svelte";
 
 	let { data }: PageProps = $props();
 
@@ -39,6 +40,8 @@
 		<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
 		<Clock />
 	</div>
+
+	<Filter />
 </div>
 
 <div class="scrollbar-hidden overflow-y-scroll">
