@@ -8,7 +8,7 @@ export const load: PageLoad = async ({ fetch, params, data, url }): Promise<{ st
 	const queryString = new URLSearchParams({
 		evaNumber: params.evaNumber,
 		type: params.type,
-		when: url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, minute: 0 }).toISO()
+		when: url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
 	}).toString();
 
 	const response = await fetch(`http://localhost:8000/api/v1/timetable/combined?${queryString}`, {
