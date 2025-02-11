@@ -3,6 +3,7 @@ import calculateDuration from "./time.ts";
 import { DateTime } from "luxon";
 import type { Stop } from "../models/station.ts";
 import type { Message } from "../models/message.ts";
+import {mapToProduct} from "../models/products.ts";
 
 const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db" | "dbnav"): Connection => {
 	const delay: number = calculateDuration(
@@ -40,9 +41,8 @@ const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db
 				}
 			: undefined,
 		lineInformation: {
-			type: entry?.type,
+			type: mapToProduct(entry?.type ?? entry?.line?.product).toString() ?? undefined,
 			replacementServiceType: entry?.replacementServiceType ?? undefined,
-			product: entry?.line?.product ?? undefined,
 			lineName: entry?.lineName ?? entry?.line?.name,
 			additionalLineName: entry?.additionalLineName,
 			fahrtNr: entry?.line?.fahrtNr ?? undefined,
