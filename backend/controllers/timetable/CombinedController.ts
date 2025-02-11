@@ -113,5 +113,5 @@ const getFirst = (journeys: Journey[], type: "departures" | "arrivals"): DateTim
 			)
 		)
 		.filter(Boolean) as string[];
-	return DateTime.fromISO(allTimes.reduce((a, b) => (a < b ? a : b)));
+	return DateTime.fromISO(allTimes.reduce((a, b) => (a < b ? a : b), allTimes[0]));
 };
