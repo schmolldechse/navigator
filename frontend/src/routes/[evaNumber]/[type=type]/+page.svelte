@@ -41,7 +41,10 @@
 		<Clock />
 	</div>
 
-	<Filter />
+	<Filter
+		allowedProducts={data.station.products ? Object.values(data.station.products) : []}
+		onFilterChange={(types) => console.log(types)}
+	/>
 </div>
 
 <div class="scrollbar-hidden overflow-y-scroll">

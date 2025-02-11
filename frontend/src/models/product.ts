@@ -1,8 +1,8 @@
-import type {SvelteComponent} from "svelte";
+import type { Component } from "svelte";
 
 export type ProductType = {
 	key: string;
 	name: string;
-	component?: typeof SvelteComponent;
+	component?: Component;
 	values: string[];
 }
