@@ -40,7 +40,7 @@
 		},
 		{
 			key: "Bus",
-			name: "Busses",
+			name: "Bus",
 			component: Bus,
 			values: ["BUSSE"]
 		},
