@@ -12,6 +12,8 @@
 		--text: #ffffff;
 		--background: #0a0a0a;
 		--primary: #404040;
+		--primary-dark: #1e1e1e;
+		--primary-darker: #121212;
 		--secondary: #7b2e2e;
 		--accent: #ffda0a;
 	}
