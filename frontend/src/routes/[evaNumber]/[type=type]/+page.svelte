@@ -35,8 +35,8 @@
 />
 
 <div class="flex flex-col items-center">
-	<div class="flex w-[97.5%] items-center justify-between px-4 md:w-[80%]">
-		<span class="px-2 text-xl font-semibold md:px-4 md:text-4xl">{data.stationName}</span>
+	<div class="container mx-auto flex items-center justify-between px-4">
+		<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.stationName}</span>
 		<Clock />
 	</div>
 </div>
