@@ -112,7 +112,7 @@
 	class="container mx-auto flex items-center md:gap-x-4 bg-primary-darker py-2 overflow-x-auto md:justify-center scrollbar-hidden">
 	{#each filteredTypes as type}
 		<button
-			class="flex items-center gap-x-2 px-4 py-4 rounded-full shrink-0"
+			class="flex items-center gap-x-2 px-4 py-2 rounded-full shrink-0"
 			class:bg-primary-dark={type.values.every(v => selected.includes(v))}
 			onclick={() => toggleType(type)}
 		>
