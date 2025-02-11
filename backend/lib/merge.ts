@@ -1,7 +1,12 @@
 import type { Connection } from "../models/connection.ts";
 import { RequestType } from "../controllers/timetable/requests.ts";
 
-const mergeConnections = (connectionsA: Connection[], connectionsB: Connection[], type: RequestType): Connection[] => {
+const mergeConnections = (
+	connectionsA: Connection[],
+	connectionsB: Connection[],
+	type: RequestType,
+	destinationOriginCriteria: boolean = false
+): Connection[] => {
 	const merge = (connectionA: Connection, connectionB: Connection): Connection => {
 		return {
 			ris_journeyId: connectionA?.ris_journeyId ?? undefined,
@@ -29,7 +34,9 @@ const mergeConnections = (connectionsA: Connection[], connectionsB: Connection[]
 		 * for example: a wing-train got 2 connections with the same name ("RE 6") but different locations.
 		 * it wasn't able to merge one of them, because they had the same name
 		 */
-		const matching = connectionsA.find((connectionA: Connection) => isMatching(connectionA, connectionB, type, true));
+		const matching = connectionsA.find((connectionA: Connection) =>
+			isMatching(connectionA, connectionB, type, destinationOriginCriteria)
+		);
 		if (!matching) merged.push(connectionB);
 		else merged.push(merge(matching, connectionB));
 	});
@@ -62,8 +69,12 @@ const isMatching = (
 			? connectionA.departure?.plannedTime === connectionB.departure?.plannedTime
 			: connectionA.arrival?.plannedTime === connectionB.arrival?.plannedTime;
 
-	// TODO: documentation why matching with fahrtNr is necessary
-	const nameMatch = aFullName === bFullName || aFullName === normalize(connectionB.lineInformation?.fahrtNr);
+	// matches line by lineName or by comparing fahrtNr
+	// necessary for Vendo, as the destinationOriginMatch is not sufficient. Vendo may contain a different stationsName when comparing
+	const lineMatch =
+		aFullName === bFullName ||
+		aFullName === normalize(connectionB.lineInformation?.fahrtNr) ||
+		connectionA?.lineInformation?.fahrtNr === connectionB?.lineInformation?.fahrtNr;
 
 	const destinationOriginMatch = destinationOriginCriteria
 		? type === "departures"
@@ -73,7 +84,7 @@ const isMatching = (
 				connectionA?.origin?.name === connectionB?.provenance
 		: true;
 
-	return platformMatch && timeMatch && nameMatch && destinationOriginMatch;
+	return platformMatch && timeMatch && lineMatch && destinationOriginMatch;
 };
 
 const normalize = (name?: string): string | undefined => {
