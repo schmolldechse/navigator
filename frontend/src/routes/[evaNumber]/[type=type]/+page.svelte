@@ -36,7 +36,7 @@
 
 <div class="flex flex-col items-center">
 	<div class="container mx-auto flex items-center justify-between px-4">
-		<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.stationName}</span>
+		<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
 		<Clock />
 	</div>
 </div>

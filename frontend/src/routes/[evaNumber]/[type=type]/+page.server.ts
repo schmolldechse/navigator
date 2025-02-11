@@ -2,7 +2,7 @@ import type { PageServerLoad } from "./$types";
 import type { Station } from "$models/station";
 import { error } from "@sveltejs/kit";
 
-export const load: PageServerLoad = async ({ fetch, params }): Promise<{ stationName: string }> => {
+export const load: PageServerLoad = async ({ fetch, params }): Promise<{ station: Station }> => {
 	const response = await fetch(`http://localhost:8000/api/v1/stations/${params.evaNumber}`, {
 		method: "GET"
 	});
@@ -17,5 +17,5 @@ export const load: PageServerLoad = async ({ fetch, params }): Promise<{ station
 		throw error(404, `No station found for ${params.evaNumber}`);
 	}
 
-	return { stationName: station.name };
+	return { station: station };
 };
