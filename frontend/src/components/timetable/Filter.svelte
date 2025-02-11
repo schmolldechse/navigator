@@ -48,7 +48,7 @@
 			key: "Ferry",
 			name: "Ferry",
 			component: Ferry,
-			values: ["FERRY"]
+			values: ["SCHIFFE"]
 		},
 		{
 			key: "Subway",
