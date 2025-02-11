@@ -8,9 +8,12 @@
 	import Ferry from "$components/timetable/filter/icons/Ferry.svelte";
 	import type { ProductType } from "$src/models/product";
 
-	let { allowedProducts, selected = $bindable<string[]>(["*"]) }: {
-		allowedProducts: string[],
-		selected: string[]
+	let {
+		allowedProducts,
+		selected = $bindable<string[]>(["*"])
+	}: {
+		allowedProducts: string[];
+		selected: string[];
 	} = $props();
 
 	const types = $state<ProductType[]>([
@@ -65,10 +68,7 @@
 	]);
 
 	const filteredTypes = $derived(
-		types.filter(type =>
-			type.key === "*" ||
-			type.values.some(value => allowedProducts.includes(value))
-		)
+		types.filter((type) => type.key === "*" || type.values.some((value) => allowedProducts.includes(value)))
 	);
 
 	const toggleType = (type: ProductType) => {
@@ -81,11 +81,11 @@
 			if (starIndex > -1) selected.splice(starIndex, 1);
 
 			// check if any value is already selected
-			const hasAnyValue = type.values.some(v => selected.includes(v));
+			const hasAnyValue = type.values.some((v) => selected.includes(v));
 
 			if (hasAnyValue) {
 				// remove all type values
-				selected.splice(0, selected.length, ...selected.filter(v => !type.values.includes(v)));
+				selected.splice(0, selected.length, ...selected.filter((v) => !type.values.includes(v)));
 			} else {
 				// add all type values
 				selected.push(...type.values);
@@ -97,23 +97,13 @@
 	};
 </script>
 
-<style>
-    .scrollbar-hidden::-webkit-scrollbar {
-        display: none;
-    }
-
-    .scrollbar-hidden {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
-</style>
-
 <div
-	class="container mx-auto flex items-center md:gap-x-4 bg-primary-darker py-2 overflow-x-auto md:justify-center scrollbar-hidden">
+	class="scrollbar-hidden container mx-auto flex items-center overflow-x-auto bg-primary-darker py-2 md:justify-center md:gap-x-4"
+>
 	{#each filteredTypes as type}
 		<button
-			class="flex items-center gap-x-2 px-4 py-2 rounded-full shrink-0"
-			class:bg-primary-dark={type.values.every(v => selected.includes(v))}
+			class="flex shrink-0 items-center gap-x-2 rounded-full px-4 py-2"
+			class:bg-primary-dark={type.values.every((v) => selected.includes(v))}
 			onclick={() => toggleType(type)}
 		>
 			{#if type.component}
@@ -124,3 +114,14 @@
 		</button>
 	{/each}
 </div>
+
+<style>
+	.scrollbar-hidden::-webkit-scrollbar {
+		display: none;
+	}
+
+	.scrollbar-hidden {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+</style>

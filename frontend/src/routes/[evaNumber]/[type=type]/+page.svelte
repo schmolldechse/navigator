@@ -52,30 +52,29 @@
 		<Clock />
 	</div>
 
-	<Filter
-		allowedProducts={data.station.products ? Object.values(data.station.products) : []}
-		bind:selected={currentFilter}
-	/>
+	<Filter allowedProducts={data.station.products ? Object.values(data.station.products) : []} bind:selected={currentFilter} />
 
-	<div class="container mx-auto scrollbar-hidden overflow-y-hidden">
+	<div class="scrollbar-hidden container mx-auto overflow-y-hidden">
 		{#each data.journeys as journey}
-			{#if !matchesFilter(journey)} {:else}
-				<p>{journey?.connections[0]?.lineInformation?.lineName}
-				@ {journey?.connections[0]?.departure?.plannedTime
-				? DateTime.fromISO(journey?.connections[0]?.departure.plannedTime).toFormat("HH:mm")
-						: "N/A"}</p>
+			{#if !matchesFilter(journey)}{:else}
+				<p>
+					{journey?.connections[0]?.lineInformation?.lineName}
+					@ {journey?.connections[0]?.departure?.plannedTime
+						? DateTime.fromISO(journey?.connections[0]?.departure.plannedTime).toFormat("HH:mm")
+						: "N/A"}
+				</p>
 			{/if}
 		{/each}
 	</div>
 </div>
 
 <style>
-    .scrollbar-hidden::-webkit-scrollbar {
-        display: none;
-    }
+	.scrollbar-hidden::-webkit-scrollbar {
+		display: none;
+	}
 
-    .scrollbar-hidden {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
+	.scrollbar-hidden {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
 </style>

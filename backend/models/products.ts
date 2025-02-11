@@ -40,14 +40,14 @@ const keyValueMap: Record<string, Products> = {
 	subway: Products.UBAHN,
 
 	tram: Products.STRASSENBAHN
-}
+};
 
 const mapToProduct = (input: string | undefined): Products => {
 	if (!input) return Products.UNKNOWN;
 
-	const key = input.replace(/[_-]/g,  "").toLowerCase();
+	const key = input.replace(/[_-]/g, "").toLowerCase();
 	return keyValueMap[key] ?? Products.UNKNOWN;
-}
+};
 
 const mapToEnum = (value: string): Products | undefined => {
 	return Object.keys(Products).some((key) => Products[key as keyof typeof Products] === value)

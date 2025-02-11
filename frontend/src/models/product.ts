@@ -5,4 +5,4 @@ export type ProductType = {
 	name: string;
 	component?: Component;
 	values: string[];
-}
+};

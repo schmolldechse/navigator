@@ -9,8 +9,8 @@ export default {
 				text: "var(--text)",
 				background: "var(--background)",
 				primary: "var(--primary)",
-				'primary-dark': "var(--primary-dark)",
-				'primary-darker': "var(--primary-darker)",
+				"primary-dark": "var(--primary-dark)",
+				"primary-darker": "var(--primary-darker)",
 				secondary: "var(--secondary)",
 				accent: "var(--accent)"
 			},

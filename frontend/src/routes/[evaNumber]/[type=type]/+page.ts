@@ -1,8 +1,8 @@
 import type { PageLoad } from "./$types";
 import type { Journey } from "$models/connection";
 import { error } from "@sveltejs/kit";
-import {DateTime} from "luxon";
-import type {Station} from "$models/station";
+import { DateTime } from "luxon";
+import type { Station } from "$models/station";
 
 export const load: PageLoad = async ({ fetch, params, data, url }): Promise<{ station: Station; journeys: Journey[] }> => {
 	const queryString = new URLSearchParams({

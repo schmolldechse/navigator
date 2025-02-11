@@ -55,7 +55,10 @@ export const retrieveConnections = async (query: Query): Promise<Connection[]> =
 	return Array.from(map.values());
 };
 
-export const retrieveCombinedConnections = async (query: Query, destinationOriginCriteria: boolean = false): Promise<Connection[]> => {
+export const retrieveCombinedConnections = async (
+	query: Query,
+	destinationOriginCriteria: boolean = false
+): Promise<Connection[]> => {
 	const [db, dbnav] = await Promise.all([
 		retrieveConnections({ ...query, profile: Profile.DB }),
 		retrieveConnections({ ...query, profile: Profile.DBNAV })
