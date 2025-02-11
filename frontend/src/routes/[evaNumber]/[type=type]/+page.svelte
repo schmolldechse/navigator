@@ -17,7 +17,7 @@
 </script>
 
 <MetaTags
-	title={data.stationName}
+	title={data.station.name}
 	description="The Navigator for your train journeys."
 	openGraph={{
 		url: "https://navigator.voldechse.wtf",
