@@ -1,11 +1,13 @@
 import type { PageLoad } from "./$types";
 import type { Journey } from "$models/connection";
 import { error } from "@sveltejs/kit";
+import {DateTime} from "luxon";
 
-export const load: PageLoad = async ({ fetch, params, data }): Promise<{ stationName: string; journeys: Journey[] }> => {
+export const load: PageLoad = async ({ fetch, params, data, url }): Promise<{ stationName: string; journeys: Journey[] }> => {
 	const queryString = new URLSearchParams({
 		evaNumber: params.evaNumber,
-		type: params.type
+		type: params.type,
+		when: url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, minute: 0 }).toISO()
 	}).toString();
 
 	const response = await fetch(`http://localhost:8000/api/v1/timetable/combined?${queryString}`, {
