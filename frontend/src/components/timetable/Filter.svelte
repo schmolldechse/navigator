@@ -8,9 +8,9 @@
 	import Ferry from "$components/timetable/filter/icons/Ferry.svelte";
 	import type { ProductType } from "$src/models/product";
 
-	let { allowedProducts, onFilterChange }: {
+	let { allowedProducts, selected = $bindable<string[]>(["*"]) }: {
 		allowedProducts: string[],
-		onFilterChange: (enabledTypes: string[]) => void
+		selected: string[]
 	} = $props();
 
 	const types = $state<ProductType[]>([
@@ -64,7 +64,6 @@
 		}
 	]);
 
-	const selectedTypes = $state<string[]>(["*"]);
 	const filteredTypes = $derived(
 		types.filter(type =>
 			type.key === "*" ||
@@ -74,28 +73,27 @@
 
 	const toggleType = (type: ProductType) => {
 		if (type.key === "*") {
-			// deselect other types if selecting "*"
-			selectedTypes.splice(0, selectedTypes.length, "*");
+			// deselect all other types if "*" is selected
+			selected.splice(0, selected.length, "*");
 		} else {
-			// remove "*" if any other type is selected
-			const allIndex = selectedTypes.indexOf("*");
-			if (allIndex > -1) selectedTypes.splice(allIndex, 1);
+			// remove "*" if selected
+			const starIndex = selected.indexOf("*");
+			if (starIndex > -1) selected.splice(starIndex, 1);
 
-			// toggle specific type
-			const index = selectedTypes.indexOf(type.key);
-			if (index > -1) {
-				selectedTypes.splice(index, 1); // deselect if already selected
-				if (selectedTypes.length === 0) {
-					// default to "*" if no type is selected anymore
-					selectedTypes.push("*");
-				}
+			// check if any value is already selected
+			const hasAnyValue = type.values.some(v => selected.includes(v));
+
+			if (hasAnyValue) {
+				// remove all type values
+				selected.splice(0, selected.length, ...selected.filter(v => !type.values.includes(v)));
 			} else {
-				selectedTypes.push(type.key); // select the type
+				// add all type values
+				selected.push(...type.values);
 			}
-		}
 
-		// map selected keys to their corresponding values
-		onFilterChange(selectedTypes.includes("*") ? ["*"] : types.filter(type => selectedTypes.includes(type.key)).flatMap(type => type.values));
+			// add "*" if no type is selected
+			if (selected.length === 0) selected.push("*");
+		}
 	};
 </script>
 
@@ -110,11 +108,12 @@
     }
 </style>
 
-<div class="container mx-auto flex items-center md:gap-x-4 bg-primary-darker py-2 overflow-x-auto md:justify-center scrollbar-hidden">
+<div
+	class="container mx-auto flex items-center md:gap-x-4 bg-primary-darker py-2 overflow-x-auto md:justify-center scrollbar-hidden">
 	{#each filteredTypes as type}
 		<button
 			class="flex items-center gap-x-2 px-4 py-4 rounded-full shrink-0"
-			class:bg-primary-dark={selectedTypes.includes(type.key)}
+			class:bg-primary-dark={type.values.every(v => selected.includes(v))}
 			onclick={() => toggleType(type)}
 		>
 			{#if type.component}

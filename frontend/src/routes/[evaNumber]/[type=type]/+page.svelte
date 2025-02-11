@@ -1,17 +1,28 @@
 <script lang="ts">
 	import { invalidateAll } from "$app/navigation";
 	import { onDestroy, onMount } from "svelte";
-	import { DateTime } from "luxon";
 	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
 	import Clock from "$components/timetable/Clock.svelte";
 	import Filter from "$components/timetable/Filter.svelte";
+	import type { Connection, Journey } from "$models/connection";
+	import { DateTime } from "luxon";
 
 	let { data }: PageProps = $props();
 
+	let currentFilter = $state(["*"]);
+	const matchesFilter = (journey: Journey) => {
+		if (currentFilter.length === 0) return true;
+		if (currentFilter.includes("*")) return true;
+
+		const firstConnection: Connection = journey?.connections[0];
+		if (firstConnection === undefined) return false;
+
+		return currentFilter.includes(firstConnection?.lineInformation?.type ?? "");
+	};
+
 	onMount(() => {
 		const interval = setInterval(() => invalidateAll(), 30 * 1000);
-
 		onDestroy(() => clearInterval(interval));
 	});
 </script>
@@ -43,30 +54,28 @@
 
 	<Filter
 		allowedProducts={data.station.products ? Object.values(data.station.products) : []}
-		onFilterChange={(types) => console.log(types)}
+		bind:selected={currentFilter}
 	/>
-</div>
 
-<div class="scrollbar-hidden overflow-y-scroll">
-	{#each data.journeys as journey}
-		{#each journey.connections as connection}
-			<p>
-				{connection.lineInformation?.lineName}
-				@{connection.departure?.plannedTime
-					? DateTime.fromISO(connection.departure.plannedTime).toFormat("HH:mm")
-					: "N/A"}
-			</p>
+	<div class="container mx-auto scrollbar-hidden overflow-y-hidden">
+		{#each data.journeys as journey}
+			{#if !matchesFilter(journey)} {:else}
+				<p>{journey?.connections[0]?.lineInformation?.lineName}
+				@ {journey?.connections[0]?.departure?.plannedTime
+				? DateTime.fromISO(journey?.connections[0]?.departure.plannedTime).toFormat("HH:mm")
+						: "N/A"}</p>
+			{/if}
 		{/each}
-	{/each}
+	</div>
 </div>
 
 <style>
-	.scrollbar-hidden::-webkit-scrollbar {
-		display: none;
-	}
+    .scrollbar-hidden::-webkit-scrollbar {
+        display: none;
+    }
 
-	.scrollbar-hidden {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
-	}
+    .scrollbar-hidden {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 </style>
