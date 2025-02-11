@@ -42,6 +42,7 @@ const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db
 		lineInformation: {
 			type: entry?.type,
 			replacementServiceType: entry?.replacementServiceType ?? undefined,
+			product: entry?.line?.product ?? undefined,
 			lineName: entry?.lineName ?? entry?.line?.name,
 			additionalLineName: entry?.additionalLineName,
 			fahrtNr: entry?.line?.fahrtNr ?? undefined,
