@@ -4,7 +4,7 @@
 
 <button
 	onclick={() => onclick("arrivals")}
-	class="cursor-pointer decoration-2 underline-offset-4"
+	class="cursor-pointer decoration-2 underline-offset-8"
 	class:underline={isSelected}
 	class:no-underline={!isSelected}
 >

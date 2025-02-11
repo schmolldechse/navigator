@@ -12,7 +12,7 @@
 
 <div class="flex h-screen w-screen flex-col overflow-hidden">
 	<!-- Logo/ TimetableNavbar -->
-	<div class="flex items-center justify-between pr-4">
+	<div class="m-4 flex items-center justify-between pr-4">
 		<a href="/frontend/static">
 			<div class="flex cursor-pointer flex-row items-center">
 				<Logo />

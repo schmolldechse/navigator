@@ -4,7 +4,7 @@
 	import { DateTime } from "luxon";
 	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
-	import Clock from "$components/Clock.svelte";
+	import Clock from "$components/timetable/Clock.svelte";
 
 	let { data }: PageProps = $props();
 
