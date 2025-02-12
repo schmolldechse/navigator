@@ -7,13 +7,17 @@
 	import ViaStops from "$components/timetable/info/ViaStops.svelte";
 	import Messages from "$components/timetable/messages/Messages.svelte";
 
-	let { connection }: { connection: Connection } = $props();
+	let { connection, renderBorder, renderInformation }: {
+		connection: Connection,
+		renderBorder: boolean,
+		renderInformation: boolean
+	} = $props();
 	const isDeparture = getContext<boolean>("isDeparture");
 </script>
 
 <div class:bg-text={connection?.cancelled ?? false}
 	 class:text-background={connection?.cancelled ?? false}
-	 class="font-medium py-2"
+	 class="font-medium py-1"
 >
 	<!-- layout for smaller screens (under md) -->
 	<div class="p-2 md:hidden gap-y-2">
@@ -49,11 +53,11 @@
 	<div class="mx-auto hidden md:flex flex-col justify-between">
 		<!-- 1st row -->
 		<div class="flex flex-row">
-			<span class="flex-[1] mr-8"></span>
-			<span class="flex-[4] mr-4">
+			<span class="flex-[1] mr-8" class:border-t={renderBorder} class:border-text={renderBorder}></span>
+			<span class="flex-[4] mr-4" class:border-t={renderBorder} class:border-text={renderBorder}>
 				<Messages connection={connection} />
 			</span>
-			<span class="flex-[1]"></span>
+			<span class="flex-[1]" class:border-t={renderBorder} class:border-text={renderBorder}></span>
 		</div>
 
 		<!-- 2nd row -->
@@ -78,7 +82,9 @@
 		<div class="flex flex-row items-center text-3xl">
 			<!-- Time Information -->
 			<div class="flex-[1] mr-8">
-				<TimeComponent time={isDeparture ? connection?.departure : connection?.arrival} />
+				{#if renderInformation}
+					<TimeComponent time={isDeparture ? connection?.departure : connection?.arrival} />
+				{/if}
 			</div>
 
 			<div class="flex-[4] mr-4">

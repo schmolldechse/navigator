@@ -56,13 +56,13 @@
         <Clock/>
     </div>
 
-	<div class="scrollbar-hidden overflow-y-scroll container mx-auto flex flex-col">
+	<div class="scrollbar-hidden overflow-y-scroll container mx-auto flex flex-col divide-y-2 md:divide-y-0">
 		{#each data.journeys as journey}
 			{#if !matchesFilter(journey)}{:else}
 				{#if journey.connections.length > 1}
 					<WingTrain journey={journey} />
 				{:else}
-					<ConnectionComponent connection={journey.connections[0]} />
+					<ConnectionComponent connection={journey.connections[0]} renderInformation={true} renderBorder={true} />
 				{/if}
 			{/if}
 		{/each}
