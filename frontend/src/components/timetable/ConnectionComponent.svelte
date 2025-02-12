@@ -13,7 +13,7 @@
 
 <div class:bg-text={connection?.cancelled ?? false}
 	 class:text-background={connection?.cancelled ?? false}
-	 class="font-medium"
+	 class="font-medium py-2"
 >
 	<!-- layout for smaller screens (under md) -->
 	<div class="p-2 md:hidden gap-y-2">
