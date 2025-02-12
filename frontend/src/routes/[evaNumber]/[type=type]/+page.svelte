@@ -8,6 +8,7 @@
 	import type { Connection, Journey } from "$models/connection";
 	import ConnectionComponent from "$components/timetable/ConnectionComponent.svelte";
 	import { page } from "$app/state";
+	import WingTrain from "$components/timetable/WingTrain.svelte";
 
 	let { data }: PageProps = $props();
 
@@ -58,7 +59,11 @@
 	<div class="scrollbar-hidden overflow-y-scroll container mx-auto flex flex-col">
 		{#each data.journeys as journey}
 			{#if !matchesFilter(journey)}{:else}
-				<ConnectionComponent connection={journey.connections[0]} />
+				{#if journey.connections.length > 1}
+					<WingTrain journey={journey} />
+				{:else}
+					<ConnectionComponent connection={journey.connections[0]} />
+				{/if}
 			{/if}
 		{/each}
 	</div>
