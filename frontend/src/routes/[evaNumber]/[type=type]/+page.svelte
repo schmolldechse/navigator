@@ -63,7 +63,7 @@
 		{/each}
 	</div>
 
-    <div class="fixed bottom-0 left-0 right-0 z-50">
+    <div class="w-full bottom-0 left-0 right-0 z-50">
         <Filter allowedProducts={data.station.products ? Object.values(data.station.products) : []}
                 bind:selected={currentFilter}/>
     </div>
