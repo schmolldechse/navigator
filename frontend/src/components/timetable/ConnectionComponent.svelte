@@ -32,7 +32,7 @@
 		<div class="flex flex-row">
 			<!-- Line Name -->
 			<span
-				class="flex-[1] mr-8 flex justify-end text-xl"
+				class="flex-[1] mr-8 flex justify-end text-xl font-semibold"
 			>
 				{connection?.lineInformation?.lineName} {connection?.lineInformation?.additionalLineName ? " / " + connection?.lineInformation?.additionalLineName : ""}
 			</span>
