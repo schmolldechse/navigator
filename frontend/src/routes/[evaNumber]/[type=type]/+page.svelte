@@ -4,7 +4,7 @@
 	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
 	import Clock from "$components/timetable/Clock.svelte";
-	import Filter from "$components/timetable/Filter.svelte";
+	import Filter from "$components/timetable/filter/Filter.svelte";
 	import type { Connection, Journey } from "$models/connection";
 	import ConnectionComponent from "$components/timetable/ConnectionComponent.svelte";
 
