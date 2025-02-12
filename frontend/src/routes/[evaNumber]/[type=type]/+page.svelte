@@ -55,13 +55,13 @@
         <Clock/>
     </div>
 
-    <div class="scrollbar-hidden overflow-y-scroll container mx-auto flex flex-col">
-        {#each data.journeys as journey}
-            {#if !matchesFilter(journey)}{:else}
-            {/if}
-        {/each}
-    </div>
+	<div class="scrollbar-hidden overflow-y-scroll container mx-auto flex flex-col">
+		{#each data.journeys as journey}
+			{#if !matchesFilter(journey)}{:else}
 				<ConnectionComponent connection={journey.connections[0]} />
+			{/if}
+		{/each}
+	</div>
 
     <div class="fixed bottom-0 left-0 right-0 z-50">
         <Filter allowedProducts={data.station.products ? Object.values(data.station.products) : []}
