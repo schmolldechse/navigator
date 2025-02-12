@@ -18,8 +18,7 @@ export interface Connection {
 	departure?: Time;
 	arrival?: Time;
 	lineInformation?: {
-		type?: string; // from Bahnhof API, uppercase
-		product?: string; // from Vendo, lowercase
+		type?: string; // see product.ts for value
 		replacementServiceType?: string;
 		lineName?: string;
 		additionalLineName?: string;

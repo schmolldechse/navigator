@@ -20,7 +20,6 @@ const mergeConnections = (
 			lineInformation: {
 				fahrtNr: (connectionA?.lineInformation?.fahrtNr || connectionB?.lineInformation?.fahrtNr) ?? undefined, // HAFAS (`dbnav` profile) contains the line number (e.g. MEX 12)
 				lineName: (connectionA?.lineInformation?.lineName || connectionB?.lineInformation?.lineName) ?? undefined,
-				product: (connectionA?.lineInformation?.product || connectionB?.lineInformation?.product) ?? undefined,
 				operator: connectionA?.lineInformation?.operator ?? undefined
 			},
 			cancelled: (connectionA?.cancelled || connectionB?.cancelled) ?? false
