@@ -5,6 +5,7 @@
 	import { writeStop } from "$lib";
 	import Platform from "$components/timetable/info/Platform.svelte";
 	import ViaStops from "$components/timetable/info/ViaStops.svelte";
+	import Messages from "$components/timetable/messages/Messages.svelte";
 
 	let { connection }: { connection: Connection } = $props();
 	const isDeparture = getContext<boolean>("isDeparture");
@@ -24,7 +25,9 @@
 		<!-- 1st row -->
 		<div class="flex flex-row">
 			<span class="flex-[1] mr-8"></span>
-			<span class="flex-[4] mr-4">Connection details</span>
+			<span class="flex-[4] mr-4">
+				<Messages connection={connection} />
+			</span>
 			<span class="flex-[1]"></span>
 		</div>
 
