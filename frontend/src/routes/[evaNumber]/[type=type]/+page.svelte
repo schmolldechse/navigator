@@ -46,26 +46,29 @@
 	}}
 />
 
-<div class="flex flex-col items-center">
-	<div class="container mx-auto flex items-center justify-between px-4">
-		<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
-		<Clock />
-	</div>
+<div class="flex flex-col items-center pb-safe">
+    <div class="container mx-auto flex items-center justify-between px-4">
+        <span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
+        <Clock/>
+    </div>
 
-	<Filter allowedProducts={data.station.products ? Object.values(data.station.products) : []} bind:selected={currentFilter} />
+    <div class="scrollbar-hidden container mx-auto overflow-y-hidden">
+        {#each data.journeys as journey}
+            {#if !matchesFilter(journey)}{:else}
+                <p>
+                    {journey?.connections[0]?.lineInformation?.lineName}
+                    @ {journey?.connections[0]?.departure?.plannedTime
+                    ? DateTime.fromISO(journey?.connections[0]?.departure.plannedTime).toFormat("HH:mm")
+                    : "N/A"}
+                </p>
+            {/if}
+        {/each}
+    </div>
 
-	<div class="scrollbar-hidden container mx-auto overflow-y-hidden">
-		{#each data.journeys as journey}
-			{#if !matchesFilter(journey)}{:else}
-				<p>
-					{journey?.connections[0]?.lineInformation?.lineName}
-					@ {journey?.connections[0]?.departure?.plannedTime
-						? DateTime.fromISO(journey?.connections[0]?.departure.plannedTime).toFormat("HH:mm")
-						: "N/A"}
-				</p>
-			{/if}
-		{/each}
-	</div>
+    <div class="fixed bottom-0 left-0 right-0 z-50">
+        <Filter allowedProducts={data.station.products ? Object.values(data.station.products) : []}
+                bind:selected={currentFilter}/>
+    </div>
 </div>
 
 <style>
