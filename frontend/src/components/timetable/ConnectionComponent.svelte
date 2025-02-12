@@ -17,7 +17,32 @@
 >
 	<!-- layout for smaller screens (under md) -->
 	<div class="p-2 md:hidden gap-y-2">
+		<!-- 1st row; Messages -->
+		<Messages connection={connection} />
 
+		<!-- 2nd row; Line Name -->
+		<span
+			class="text-lg font-bold"
+		>
+			{connection?.lineInformation?.lineName} {connection?.lineInformation?.additionalLineName ? " / " + connection?.lineInformation?.additionalLineName : ""}
+		</span>
+
+		<!-- 3rd row; Time & Platform Information -->
+		<div class="flex flex-row items-center justify-between text-2xl font-semibold">
+			<TimeComponent time={isDeparture ? connection?.departure : connection?.arrival} />
+			<Platform time={isDeparture ? connection?.departure : connection?.arrival} />
+		</div>
+
+		<!-- 4th row; viaStops -->
+		<ViaStops viaStops={connection?.viaStops} />
+
+		<!-- 5th row; destination/ origin -->
+		<div class="text-2xl">
+			{isDeparture
+				? writeStop(connection?.actualDestination || connection?.destination, connection?.direction)
+				: writeStop(connection?.origin, connection?.provenance)
+			}
+		</div>
 	</div>
 
 	<!-- layout for larger screens (above md) -->
