@@ -6,7 +6,8 @@ const gotoTimetable = (evaNumber: string, type: "departures" | "arrivals", start
 	goto(`/${evaNumber}/${type}?startDate=${encodeURIComponent(startDate)}`);
 };
 
-const writeStop = (stop: Stop, fallbackName: string = ""): string => {
+const writeStop = (stop?: Stop, fallbackName: string = ""): string => {
+	if (!stop) return fallbackName;
 	if (!stop.name) return fallbackName;
 	if (!stop.nameParts || stop.nameParts.length === 0) return stop.name;
 	return stop.nameParts.map(part => part.value).join("").trim();
