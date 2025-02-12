@@ -2,22 +2,27 @@
 	import type {Connection} from "$models/connection";
 	import {DateTime} from "luxon";
 	import calculateDuration from "$lib/time";
+	import Platform from "$components/timetable/info/Platform.svelte";
+	import {getContext} from "svelte";
 
-	let {connection, isDeparture}: { connection: Connection, isDeparture: boolean } = $props();
+	let {connection}: { connection: Connection } = $props();
+	const isDeparture = getContext<boolean>("isDeparture");
 
 	let expanded = $state<boolean>(false);
 
 	const isDelayed = () => {
+		const platform = isDeparture ? connection?.departure : connection?.arrival;
+
 		const diff = calculateDuration(
-			DateTime.fromISO(isDeparture ? connection?.departure?.actualTime! : connection?.arrival?.actualTime!),
-			DateTime.fromISO(isDeparture ? connection?.departure?.plannedTime! : connection?.arrival?.plannedTime!),
+			DateTime.fromISO(platform?.actualTime!),
+			DateTime.fromISO(platform?.plannedTime!),
             "minutes"
         );
 		return diff >= 1;
     }
 </script>
 
-<div>
-    <span>{JSON.stringify(connection?.departure)}</span>
-    <span>{connection?.lineInformation?.lineName}</span>
-</div>
+<span>
+    {connection?.lineInformation?.lineName}
+    <Platform time={isDeparture ? connection?.departure : connection?.arrival} />
+</span>

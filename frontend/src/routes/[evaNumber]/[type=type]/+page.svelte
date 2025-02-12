@@ -1,14 +1,17 @@
 <script lang="ts">
 	import { invalidateAll } from "$app/navigation";
-	import { onDestroy, onMount } from "svelte";
+	import { onDestroy, onMount, setContext } from "svelte";
 	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
 	import Clock from "$components/timetable/Clock.svelte";
 	import Filter from "$components/timetable/filter/Filter.svelte";
 	import type { Connection, Journey } from "$models/connection";
 	import ConnectionComponent from "$components/timetable/ConnectionComponent.svelte";
+	import { page } from "$app/state";
 
 	let { data }: PageProps = $props();
+
+	setContext("isDeparture", page.params.type === "departures");
 
 	let currentFilter = $state(["*"]);
 	const matchesFilter = (journey: Journey) => {
@@ -55,10 +58,10 @@
     <div class="scrollbar-hidden overflow-y-scroll container mx-auto flex flex-col">
         {#each data.journeys as journey}
             {#if !matchesFilter(journey)}{:else}
-                <ConnectionComponent connection={journey.connections[0]} isDeparture={true} />
             {/if}
         {/each}
     </div>
+				<ConnectionComponent connection={journey.connections[0]} />
 
     <div class="fixed bottom-0 left-0 right-0 z-50">
         <Filter allowedProducts={data.station.products ? Object.values(data.station.products) : []}
