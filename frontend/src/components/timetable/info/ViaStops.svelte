@@ -12,11 +12,14 @@
 		{#if expanded}
 			{viaStops.map((stop) => writeStop(stop, stop.name)).join(" - ")}
 		{:else}
-			{viaStops.slice(0, 3).map((stop) => writeStop(stop, stop.name)).join(" - ")}
+			{viaStops
+				.slice(0, 3)
+				.map((stop) => writeStop(stop, stop.name))
+				.join(" - ")}
 		{/if}
 	{/if}
 </span>
 
 {#if viaStops && viaStops.length > 3}
-	<ShowMore onclick={() => expanded = !expanded} />
+	<ShowMore onclick={() => (expanded = !expanded)} />
 {/if}

@@ -32,9 +32,9 @@
 </script>
 
 <MetaTags
-        title={data.station.name}
-        description="The Navigator for your train journeys."
-        openGraph={{
+	title={data.station.name}
+	description="The Navigator for your train journeys."
+	openGraph={{
 		url: "https://navigator.voldechse.wtf",
 		title: "Navigator",
 		siteName: "Navigator",
@@ -50,37 +50,37 @@
 	}}
 />
 
-<div class="flex flex-col items-center pb-safe overflow-auto scrollbar-hidden">
-    <div class="container mx-auto flex items-center justify-between px-4">
-        <span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
-        <Clock/>
-    </div>
+<div class="pb-safe scrollbar-hidden flex flex-col items-center overflow-auto">
+	<div class="container mx-auto flex items-center justify-between px-4">
+		<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
+		<Clock />
+	</div>
 
-	<div class="scrollbar-hidden overflow-y-scroll container mx-auto flex flex-col divide-y-2 md:divide-y-0">
+	<div class="scrollbar-hidden container mx-auto flex flex-col divide-y-2 overflow-y-scroll md:divide-y-0">
 		{#each data.journeys as journey}
-			{#if !matchesFilter(journey)}{:else}
-				{#if journey.connections.length > 1}
-					<WingTrain journey={journey} />
-				{:else}
-					<ConnectionComponent connection={journey.connections[0]} renderInformation={true} renderBorder={true} />
-				{/if}
+			{#if !matchesFilter(journey)}{:else if journey.connections.length > 1}
+				<WingTrain {journey} />
+			{:else}
+				<ConnectionComponent connection={journey.connections[0]} renderInformation={true} renderBorder={true} />
 			{/if}
 		{/each}
 	</div>
 
-	<div class="self-end w-full bottom-0">
-		<Filter allowedProducts={data.station.products ? Object.values(data.station.products) : []}
-				bind:selected={currentFilter} />
+	<div class="bottom-0 w-full self-end">
+		<Filter
+			allowedProducts={data.station.products ? Object.values(data.station.products) : []}
+			bind:selected={currentFilter}
+		/>
 	</div>
 </div>
 
 <style>
-    .scrollbar-hidden::-webkit-scrollbar {
-        display: none;
-    }
+	.scrollbar-hidden::-webkit-scrollbar {
+		display: none;
+	}
 
-    .scrollbar-hidden {
-        -ms-overflow-style: none;
-        scrollbar-width: none;
-    }
+	.scrollbar-hidden {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
 </style>

@@ -1,4 +1,4 @@
-import type {DateTime} from "luxon";
+import type { DateTime } from "luxon";
 
 const calculateDuration = (
 	startDate: DateTime,

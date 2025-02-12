@@ -7,6 +7,6 @@
 
 <div class="flex flex-col">
 	{#each journey.connections as connection, i}
-		<ConnectionComponent connection={connection} renderBorder={i === 0} renderInformation={i === journey.connections.length - 1} />
+		<ConnectionComponent {connection} renderBorder={i === 0} renderInformation={i === journey.connections.length - 1} />
 	{/each}
 </div>

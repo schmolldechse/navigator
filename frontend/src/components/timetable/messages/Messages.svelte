@@ -1,5 +1,4 @@
 <script lang="ts">
-
 	import type { Message } from "$models/message";
 	import type { Component } from "svelte";
 	import type { Connection } from "$models/connection";
@@ -38,7 +37,7 @@
 	type ValidMessage = {
 		type: string;
 		component?: Component;
-	}
+	};
 
 	const validMessages: ValidMessage[] = [
 		{ type: "bicycle-transport", component: BicycleTransport },
@@ -73,7 +72,7 @@
 
 	const filteredMessages: Message[] = $derived(
 		collectMessages(connection?.messages || {}).filter((message) => {
-			const isValid = validMessages.some(validMessage => validMessage.type === message.type);
+			const isValid = validMessages.some((validMessage) => validMessage.type === message.type);
 			return connection?.cancelled ? isValid && message?.important : isValid;
 		})
 	);
@@ -101,22 +100,22 @@
 </script>
 
 {#if filteredMessages.length > 1 && !expanded}
-	<div class="flex flex-row gap-x-2 my-1 py-0.5">
+	<div class="my-1 flex flex-row gap-x-2 py-0.5">
 		{#each filteredMessages as message, index (index)}
-			{@const validMessage = validMessages.find(validMessage => validMessage.type === message.type)}
+			{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
 			{#if validMessage?.component}
 				{@const Component = validMessage.component}
 				<Component />
 			{/if}
 		{/each}
-		<ShowMore onclick={() => expanded = true} />
+		<ShowMore onclick={() => (expanded = true)} />
 	</div>
 {/if}
 
 {#if filteredMessages.length <= 1 || expanded}
 	{#each filteredMessages as message, index (index)}
-		{@const validMessage = validMessages.find(validMessage => validMessage.type === message.type)}
-		<div class="flex flex-row gap-x-2 my-1 py-0.5 text-lg">
+		{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
+		<div class="my-1 flex flex-row gap-x-2 py-0.5 text-lg">
 			{#if validMessage?.component}
 				{@const Component = validMessage.component}
 				<Component />

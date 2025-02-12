@@ -97,9 +97,7 @@
 	};
 </script>
 
-<div
-	class="scrollbar-hidden flex items-center overflow-x-auto bg-primary-darker py-2 md:justify-center md:gap-x-4"
->
+<div class="scrollbar-hidden flex items-center overflow-x-auto bg-primary-darker py-2 md:justify-center md:gap-x-4">
 	{#each filteredTypes as type}
 		<button
 			class="flex shrink-0 items-center gap-x-2 rounded-full px-4 py-2"
