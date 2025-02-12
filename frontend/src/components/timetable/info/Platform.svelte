@@ -1,14 +1,16 @@
 <script lang="ts">
-	import type {Time} from "$models/time";
-	let {time}: { time?: Time } = $props();
+	import type { Time } from "$models/time";
+	let { time }: { time?: Time } = $props();
 
 	const samePlatform = $state(time?.plannedPlatform === time?.actualPlatform);
 </script>
 
-<span class={[
-        "md:w-full",
-        !samePlatform && "bg-text text-background px-2 py-1 md:px-0"
-    ]}
+<span class="md:w-full"
+	  class:bg-text={!samePlatform}
+	  class:text-background={!samePlatform}
+	  class:px-2={!samePlatform}
+	  class:py-1={!samePlatform}
+	  class:md:px-0={!samePlatform}
 >
-    {samePlatform ? time?.plannedPlatform : time?.actualPlatform}
+    {!samePlatform ? time?.actualPlatform : time?.plannedPlatform}
 </span>
