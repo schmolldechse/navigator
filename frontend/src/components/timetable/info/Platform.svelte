@@ -7,7 +7,7 @@
 
 <span class={[
         "md:w-full",
-        !samePlatform && "bg-text text-background px-2 md:px-0 font-bold"
+        !samePlatform && "bg-text text-background px-2 py-1 md:px-0"
     ]}
 >
     {samePlatform ? time?.plannedPlatform : time?.actualPlatform}
