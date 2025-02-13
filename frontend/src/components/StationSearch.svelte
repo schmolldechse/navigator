@@ -1,97 +1,87 @@
 <script lang="ts">
-	import { onMount } from "svelte";
-	import Search from "$components/svg/Search.svelte";
 	import type { Station } from "$models/station";
+	import Search from "$components/svg/Search.svelte";
+	import { onMount } from "svelte";
 
-	let isOpen = $state(false);
-	let selectedIndex = $state(-1);
-	let selectedStation: Station | undefined = $state();
-	let { onStationSelect }: { onStationSelect: (station: Station | undefined) => void } = $props();
-	let inputText = $state("");
-
-	let inputElement: HTMLInputElement;
+	let { station = $bindable(undefined) }: { station?: Station } = $props();
+	let open = $state<boolean>(false);
+	let selectedIndex = $state<number>(-1);
 
 	let stations: Station[] = $state([]);
 
-	const handleInputClick = () => {
-		isOpen = true;
+	let inputElement: HTMLInputElement;
+	const clickOutside = (event: MouseEvent) => {
+		if (inputElement && inputElement.contains(event.target as Node)) return;
+		open = false;
+		selectedIndex = -1;
 	};
 
-	const handleKeydown = (e: KeyboardEvent) => {
-		if (!isOpen) return;
-
-		switch (e.key) {
-			case "ArrowDown":
-				selectedIndex = selectedIndex === -1 ? 0 : (selectedIndex + 1) % stations.length;
-				break;
-			case "ArrowUp":
-				selectedIndex =
-					selectedIndex === -1 ? stations.length - 1 : (selectedIndex - 1 + stations.length) % stations.length;
-				break;
-			case "Enter":
-				if (selectedIndex < 0) return;
-				selectStation(stations[selectedIndex]);
-				break;
-			case "Escape":
-				isOpen = false;
-				break;
-		}
-	};
-
-	function selectStation(station: Station | undefined) {
-		onStationSelect(station);
-		selectedStation = station;
-		inputText = station?.name ?? "";
-		isOpen = false;
-		selectedIndex = -1;
-	}
-
-	function clickOutside(event: MouseEvent) {
-		if (inputElement.contains(event.target as Node)) return;
-		isOpen = false;
-		selectedIndex = -1;
-	}
-
-	async function searchStations(query: string) {
-		const queryString = new URLSearchParams({
-			query
-		}).toString();
-
-		const response = await fetch(`http://localhost:8000/api/v1/stations?${queryString}`, {
-			method: "GET"
-		});
+	const searchStations = async (query: string) => {
+		const searchParams = new URLSearchParams({ query }).toString();
+		const response = await fetch(`/api/v1/stations?${searchParams}`, { method: "GET" });
 		if (!response.ok) return;
 
 		const jsonData = await response.json();
 		if (!Array.isArray(jsonData)) return;
 
 		stations = jsonData as Station[];
-		isOpen = stations.length > 0;
-	}
+		open = stations.length > 0;
+	};
 
-	let debounceTimeout: number;
+	const selectStation = (index: number) => {
+		station = stations[index];
+		inputElement.value = station?.name ?? "";
+		open = false;
+		selectedIndex = -1;
+	};
 
-	function handleInput(event: Event) {
-		const query = (event.target as HTMLInputElement).value;
-		if (query.length === 0) {
-			selectStation(undefined);
+	let debounce: number;
+	const handleInput = () => {
+		if (!inputElement) return;
+		const value = inputElement.value;
+
+		if (value.length === 0) {
+			station = undefined;
 			return;
 		}
 
-		inputText = query;
-
-		// only search when no station is selected
-		if (!selectedStation || query !== selectedStation.name) {
-			clearTimeout(debounceTimeout);
-			debounceTimeout = setTimeout(() => {
-				if (query) {
-					searchStations(query);
+		if (!station || value !== station?.name) {
+			clearTimeout(debounce);
+			debounce = setTimeout(() => {
+				if (value) {
+					searchStations(value);
 				} else {
-					isOpen = false;
+					open = false;
 				}
 			}, 500);
 		}
-	}
+	};
+
+	const handleKeyInput = (event: KeyboardEvent) => {
+		if (!open || inputElement.value.length === 0) return;
+
+		switch (event.key) {
+			case "ArrowDown":
+			case "Tab":
+				event.preventDefault();
+				selectedIndex = selectedIndex === stations.length - 1 ? 0 : selectedIndex + 1;
+				break;
+			case "ArrowUp":
+				event.preventDefault();
+				selectedIndex = selectedIndex === 0 ? stations.length - 1 : selectedIndex - 1;
+				break;
+			case "Enter":
+				if (selectedIndex < 0 || selectedIndex > stations.length)
+					return;
+				selectStation(selectedIndex);
+				break;
+			case "Escape":
+				open = false;
+				break;
+			default:
+				break;
+		}
+	};
 
 	onMount(() => {
 		document.addEventListener("click", clickOutside);
@@ -99,32 +89,29 @@
 	});
 </script>
 
-<div class="relative w-full">
+<div class="w-full relative flex flex-col text-text placeholder:text-text">
 	<div
-		class="flex flex-row items-center gap-x-2 rounded-2xl bg-primary px-2 focus-within:ring-2 focus-within:ring-accent hover:ring-2 hover:ring-accent md:text-2xl"
-	>
+		class="flex flex-row items-center bg-primary px-2 rounded-2xl gap-x-1 focus-within:ring-2 focus-within:ring-accent md:text-2xl font-medium">
 		<Search height="50px" width="50px" />
 		<input
 			bind:this={inputElement}
-			bind:value={inputText}
-			onclick={handleInputClick}
-			onfocus={handleInputClick}
-			onkeydown={handleKeydown}
+			type="text"
+			class="w-full border-none outline-none bg-primary p-2"
+			placeholder="Search for a station"
+			onclick={() => open = true}
 			oninput={handleInput}
-			aria-expanded={isOpen}
-			aria-activedescendant={selectedIndex >= 0 ? `option-${selectedIndex}` : undefined}
-			class="w-full rounded-lg border border-none bg-primary p-2 text-text outline-none placeholder:text-text"
-			placeholder="Search your station..."
+			onkeydown={handleKeyInput}
 		/>
 	</div>
 
-	{#if isOpen && stations.length > 0}
-		<div class="absolute left-0 top-full z-50 mt-1 h-fit max-w-96 rounded-lg border border-text bg-primary p-2">
+	{#if open && stations.length > 0}
+		<div
+			class="absolute flex flex-col left-0 top-full z-50 mt-1 h-fit max-w-96 rounded-lg border border-text bg-primary p-2">
 			{#each stations as station, index (station)}
 				<button
 					tabindex="0"
-					onclick={() => selectStation(station)}
-					onfocus={() => (selectedIndex = index)}
+					onclick={() => selectStation(index)}
+					onfocus={() => selectedIndex = index}
 					class:bg-secondary={selectedIndex === index}
 					class="w-full cursor-pointer rounded-md p-1 text-left"
 				>
@@ -135,22 +122,22 @@
 	{/if}
 </div>
 
-<style>
-	::placeholder {
-		color: var(--text);
-		opacity: 0.75;
-	}
+<style lang="postcss">
+    ::placeholder {
+        color: var(--text);
+        opacity: 0.75;
+    }
 
-	::-webkit-input-placeholder {
-		color: var(--text);
-	}
+    ::-webkit-input-placeholder {
+        color: var(--text);
+    }
 
-	::-moz-placeholder {
-		color: var(--text);
-		opacity: 0.75;
-	}
+    ::-moz-placeholder {
+        color: var(--text);
+        opacity: 0.75;
+    }
 
-	:-ms-input-placeholder {
-		color: var(--text);
-	}
+    :-ms-input-placeholder {
+        color: var(--text);
+    }
 </style>

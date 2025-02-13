@@ -19,6 +19,6 @@
 		<TimetableNavbar />
 	</div>
 
-	<!-- TimeTableSearch/ Route Planner -->
+	<!-- TimetableSearch/ Route Planner -->
 	{@render children()}
 </div>

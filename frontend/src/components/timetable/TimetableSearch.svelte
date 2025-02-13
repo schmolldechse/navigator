@@ -8,7 +8,7 @@
 
 	let typeSelected: "departures" | "arrivals" = $state("departures");
 
-	let stationSelected: Station | undefined = $state(undefined);
+	let stationSelected: Station | undefined = $state();
 	let dateSelected = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 </script>
 
@@ -41,7 +41,7 @@
 		</button>
 	</div>
 
-	<StationSearch onStationSelect={(station) => (stationSelected = station)} />
+	<StationSearch bind:station={stationSelected} />
 
 	<div class="flex flex-row">
 		<TimePicker bind:selectedDate={dateSelected} />
