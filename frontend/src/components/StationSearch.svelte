@@ -71,8 +71,7 @@
 				selectedIndex = selectedIndex === 0 ? stations.length - 1 : selectedIndex - 1;
 				break;
 			case "Enter":
-				if (selectedIndex < 0 || selectedIndex > stations.length)
-					return;
+				if (selectedIndex < 0 || selectedIndex > stations.length) return;
 				selectStation(selectedIndex);
 				break;
 			case "Escape":
@@ -89,16 +88,17 @@
 	});
 </script>
 
-<div class="w-full relative flex flex-col text-text placeholder:text-text">
+<div class="relative flex w-full flex-col text-text placeholder:text-text">
 	<div
-		class="flex flex-row items-center bg-primary px-2 rounded-2xl gap-x-1 focus-within:ring-2 focus-within:ring-accent md:text-2xl font-medium">
+		class="flex flex-row items-center gap-x-1 rounded-2xl bg-primary px-2 font-medium focus-within:ring-2 focus-within:ring-accent md:text-2xl"
+	>
 		<Search height="50px" width="50px" />
 		<input
 			bind:this={inputElement}
 			type="text"
-			class="w-full border-none outline-none bg-primary p-2"
+			class="w-full border-none bg-primary p-2 outline-none"
 			placeholder="Search for a station"
-			onclick={() => open = true}
+			onclick={() => (open = true)}
 			oninput={handleInput}
 			onkeydown={handleKeyInput}
 		/>
@@ -106,12 +106,13 @@
 
 	{#if open && stations.length > 0}
 		<div
-			class="absolute flex flex-col left-0 top-full z-50 mt-1 h-fit max-w-96 rounded-lg border border-text bg-primary p-2">
+			class="absolute left-0 top-full z-50 mt-1 flex h-fit max-w-96 flex-col rounded-lg border border-text bg-primary p-2"
+		>
 			{#each stations as station, index (station)}
 				<button
 					tabindex="0"
 					onclick={() => selectStation(index)}
-					onfocus={() => selectedIndex = index}
+					onfocus={() => (selectedIndex = index)}
 					class:bg-secondary={selectedIndex === index}
 					class="w-full cursor-pointer rounded-md p-1 text-left"
 				>
@@ -123,21 +124,21 @@
 </div>
 
 <style lang="postcss">
-    ::placeholder {
-        color: var(--text);
-        opacity: 0.75;
-    }
+	::placeholder {
+		color: var(--text);
+		opacity: 0.75;
+	}
 
-    ::-webkit-input-placeholder {
-        color: var(--text);
-    }
+	::-webkit-input-placeholder {
+		color: var(--text);
+	}
 
-    ::-moz-placeholder {
-        color: var(--text);
-        opacity: 0.75;
-    }
+	::-moz-placeholder {
+		color: var(--text);
+		opacity: 0.75;
+	}
 
-    :-ms-input-placeholder {
-        color: var(--text);
-    }
+	:-ms-input-placeholder {
+		color: var(--text);
+	}
 </style>

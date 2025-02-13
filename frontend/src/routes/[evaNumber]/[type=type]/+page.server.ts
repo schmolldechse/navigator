@@ -4,10 +4,14 @@ import { error } from "@sveltejs/kit";
 import type { Journey } from "$models/connection";
 import { DateTime } from "luxon";
 
-export const load: PageServerLoad = async ({ params, url }): Promise<{ station: Station, journeys: Journey[] }> => {
+export const load: PageServerLoad = async ({ params, url }): Promise<{ station: Station; journeys: Journey[] }> => {
 	const [station, journeys] = await Promise.all([
 		loadStation(params.evaNumber),
-		loadJourneys(params.evaNumber, params.type, url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO())
+		loadJourneys(
+			params.evaNumber,
+			params.type,
+			url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
+		)
 	]);
 	return { station, journeys };
 };
@@ -47,4 +51,4 @@ const loadJourneys = async (evaNumber: string, type: string, startDate: string):
 	}
 
 	return jsonData as Journey[];
-}
+};
