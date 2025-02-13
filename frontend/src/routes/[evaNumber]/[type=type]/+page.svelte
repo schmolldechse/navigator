@@ -1,6 +1,5 @@
 <script lang="ts">
-	import { invalidateAll } from "$app/navigation";
-	import { onDestroy, onMount, setContext } from "svelte";
+	import { setContext } from "svelte";
 	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
 	import Clock from "$components/timetable/Clock.svelte";
@@ -24,11 +23,6 @@
 
 		return currentFilter.includes(firstConnection?.lineInformation?.type ?? "");
 	};
-
-	onMount(() => {
-		const interval = setInterval(() => invalidateAll(), 30 * 1000);
-		onDestroy(() => clearInterval(interval));
-	});
 </script>
 
 <MetaTags
