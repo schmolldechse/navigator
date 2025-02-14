@@ -1,5 +1,5 @@
 {
-	"name": "backend",
+	"name": "Navigator Backend",
 	"module": "server.ts",
 	"type": "module",
 	"scripts": {

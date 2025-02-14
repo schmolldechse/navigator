@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(cors({ origin: "*" }));
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.get("/api", (req, res) => res.redirect("/api-docs"));
 
 RegisterRoutes(app);
 
