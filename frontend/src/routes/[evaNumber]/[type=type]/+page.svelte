@@ -44,7 +44,7 @@
 	}}
 />
 
-<div class="pb-safe scrollbar-hidden flex flex-col items-center overflow-auto">
+<div class="scrollbar-hidden flex flex-col items-center overflow-auto">
 	<div class="container mx-auto flex items-center justify-between px-4">
 		<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
 		<Clock />
@@ -60,7 +60,7 @@
 		{/each}
 	</div>
 
-	<div class="bottom-0 w-full self-end">
+	<div class="absolute bottom-0 w-full self-end">
 		<Filter
 			allowedProducts={data.station.products ? Object.values(data.station.products) : []}
 			bind:selected={currentFilter}
