@@ -6,7 +6,8 @@ services:
     ports: [ "3000:3000" ]
     networks: [ "navigator-network" ]
     environment:
-      - VITE_BACKEND_BASE_URL=${VITE_BACKEND_BASE_URL}
+      VITE_BACKEND_BASE_URL: ${VITE_BACKEND_BASE_URL}
+      VITE_BACKEND_DOCKER_BASE_URL: ${VITE_BACKEND_DOCKER_BASE_URL}
 
   navigator-backend:
     container_name: navigator-backend

@@ -6,6 +6,7 @@ COPY . .
 RUN npm install
 
 ENV VITE_BACKEND_BASE_URL=http://localhost:8000
+ENV VITE_BACKEND_DOCKER_BASE_URL=http://navigator-backend:8000
 
 RUN npm run build
 RUN npm prune --production # Remove dev dependencies
