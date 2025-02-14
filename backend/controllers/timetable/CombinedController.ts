@@ -3,7 +3,7 @@ import { RequestType, retrieveBahnhofJourneys, retrieveCombinedConnections } fro
 import type { Connection, Journey } from "../../models/connection.ts";
 import { isMatching } from "../../lib/merge.ts";
 import calculateDuration from "../../lib/time.ts";
-import { Controller, Get, Queries, Res, Route, type TsoaResponse } from "tsoa";
+import { Controller, Get, Queries, Res, Route, Tags, type TsoaResponse } from "tsoa";
 
 class CombinedQuery {
 	evaNumber!: string;
@@ -15,6 +15,7 @@ class CombinedQuery {
 }
 
 @Route("timetable/combined")
+@Tags("Combined")
 export class CombinedController extends Controller {
 	@Get()
 	async getCombinedJourneys(

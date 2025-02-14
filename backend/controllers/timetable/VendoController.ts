@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { Profile, RequestType, retrieveCombinedConnections, retrieveConnections } from "./requests.ts";
-import { Controller, Get, Queries, Res, Route, type TsoaResponse } from "tsoa";
+import { Controller, Get, Queries, Res, Route, Tags, type TsoaResponse } from "tsoa";
 import type { Journey } from "../../models/connection.ts";
 
 class VendoQuery {
@@ -13,6 +13,7 @@ class VendoQuery {
 }
 
 @Route("timetable/vendo")
+@Tags("Vendo")
 export class VendoController extends Controller {
 	@Get()
 	async getVendoJourneys(
