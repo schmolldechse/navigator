@@ -5,6 +5,8 @@ services:
     restart: always
     ports: [ "3000:3000" ]
     networks: [ "navigator-network" ]
+    environment:
+      - VITE_BACKEND_BASE_URL=${VITE_BACKEND_BASE_URL}
 
   navigator-backend:
     container_name: navigator-backend
@@ -28,7 +30,7 @@ services:
     volumes:
       - ./redis:/usr/local/etc/redis
       - navigator-stations:/data
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
 
 networks:
   navigator-network:
