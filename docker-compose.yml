@@ -16,11 +16,11 @@ services:
     ports: [ "8000:8000" ]
     networks: [ "navigator-network" ]
     environment:
-      REDIS_HOST: navigator-redis
-      REDIS_PORT: 6379
-      REDIS_DB: 0
-      REDIS_USER: navigator-stations
-      REDIS_PASSWORD: password
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_USER: ${REDIS_USER}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
   navigator-redis:
     container_name: navigator-redis
