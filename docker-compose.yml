@@ -19,7 +19,7 @@ services:
       REDIS_PORT: 6379
       REDIS_DB: 0
       REDIS_USER: navigator-stations
-      REDIS_PASSWORD: pass-your-pw-here
+      REDIS_PASSWORD: password
 
   navigator-redis:
     container_name: navigator-redis
