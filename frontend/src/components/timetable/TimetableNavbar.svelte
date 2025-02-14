@@ -10,9 +10,9 @@
 <span class="flex items-center space-x-4 text-base md:text-xl">
 	<NavbarButton
 		isSelected={type === "departures"}
-		onclick={() => {
+		onclick={async () => {
 			type = "departures";
-			gotoTimetable(
+			await gotoTimetable(
 				page.params.evaNumber,
 				type,
 				page.url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
@@ -23,9 +23,9 @@
 	</NavbarButton>
 	<NavbarButton
 		isSelected={type === "arrivals"}
-		onclick={() => {
+		onclick={async () => {
 			type = "arrivals";
-			gotoTimetable(
+			await gotoTimetable(
 				page.params.evaNumber,
 				type,
 				page.url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()

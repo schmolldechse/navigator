@@ -2,8 +2,8 @@
 import { goto } from "$app/navigation";
 import type { Stop } from "$models/station";
 
-const gotoTimetable = (evaNumber: string, type: "departures" | "arrivals", startDate: string) => {
-	goto(`/${evaNumber}/${type}?startDate=${encodeURIComponent(startDate)}`);
+const gotoTimetable = async (evaNumber: string, type: "departures" | "arrivals", startDate: string) => {
+	await goto(`/${evaNumber}/${type}?startDate=${encodeURIComponent(startDate)}`);
 };
 
 const writeStop = (stop?: Stop, fallbackName: string = ""): string => {
