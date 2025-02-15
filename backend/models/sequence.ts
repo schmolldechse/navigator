@@ -41,9 +41,17 @@ export interface Vehicle {
 	orientation: string;
 	positionOnTrack: PositionOnTrack;
 	equipment: Equipment[];
-	orderNumber?: number; // ??
+	orderNumber?: number; // coach number
 }
 
+/**
+ * category might be:
+ *
+ * LOCOMOTIVE
+ * DOUBLEDECK_FIRST_CLASS
+ * DOUBLEDECK_ECONOMY_CLASS
+ * DOUBLEDECK_CONTROLCAR_ECONOMY_CLASS
+ */
 export interface VehicleType {
 	category: string;
 	model: string;
@@ -68,6 +76,7 @@ export interface PositionOnTrack {
  * WHEELCHAIR_SPACE
  * SEATS_BAHN_COMFORT
  * BIKE_SPACE
+ * ZONE_MULTI_PURPOSE
  */
 export interface Equipment {
 	type: string;
