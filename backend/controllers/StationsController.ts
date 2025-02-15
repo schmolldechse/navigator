@@ -20,11 +20,11 @@ export class StationController extends Controller {
 
 	@Get("/{evaNumber}")
 	async getStationByEvaNumber(
-		@Path() evaNumber: number,
+		@Path() evaNumber: string,
 		@Res() badRequestResponse: TsoaResponse<400, { reason: string }>
 	): Promise<Station> {
-		if (!Number.isInteger(evaNumber)) {
-			return badRequestResponse(400, { reason: "EvaNumber is not an integer" });
+		if (!/^\d+$/.test(evaNumber)) {
+			return badRequestResponse(400, { reason: "evaNumber is not an integer" });
 		}
 
 		const cachedStation = await getCachedStation(evaNumber.toString());
