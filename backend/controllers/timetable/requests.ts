@@ -1,7 +1,7 @@
 import type { Connection, Journey } from "../../models/connection.ts";
-import mapConnection from "../../lib/mapping.ts";
 import { DateTime } from "luxon";
 import { mergeConnections } from "../../lib/merge.ts";
+import { mapConnection } from "../../lib/mapping.ts";
 
 export enum RequestType {
 	DEPARTURES = "departures",

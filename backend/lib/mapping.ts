@@ -96,4 +96,4 @@ const mapMessages = (
 	};
 };
 
-export default mapConnection;
+export { mapConnection };

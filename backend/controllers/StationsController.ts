@@ -53,12 +53,12 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 	});
 
 	if (!request.ok) {
-		throw new Error("HTTP Request error occurred");
+		throw new Error(`Failed to fetch stations for ${searchTerm}`);
 	}
 
 	const response = await request.json();
 	if (!response || !Array.isArray(response)) {
-		throw new Error("Invalid response format");
+		throw new Error(`Response was expected to be an array, but got ${typeof response}`);
 	}
 
 	return response.map((data: any) => ({
