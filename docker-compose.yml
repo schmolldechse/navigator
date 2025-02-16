@@ -5,6 +5,9 @@ services:
     restart: always
     ports: [ "3000:3000" ]
     networks: [ "navigator-network" ]
+    environment:
+      VITE_BACKEND_BASE_URL: ${VITE_BACKEND_BASE_URL}
+      VITE_BACKEND_DOCKER_BASE_URL: ${VITE_BACKEND_DOCKER_BASE_URL}
 
   navigator-backend:
     container_name: navigator-backend
@@ -13,11 +16,11 @@ services:
     ports: [ "8000:8000" ]
     networks: [ "navigator-network" ]
     environment:
-      REDIS_HOST: navigator-redis
-      REDIS_PORT: 6379
-      REDIS_DB: 0
-      REDIS_USER: navigator-stations
-      REDIS_PASSWORD: pass-your-pw-here
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_DB: ${REDIS_DB}
+      REDIS_USER: ${REDIS_USER}
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
 
   navigator-redis:
     container_name: navigator-redis
@@ -28,7 +31,7 @@ services:
     volumes:
       - ./redis:/usr/local/etc/redis
       - navigator-stations:/data
-    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
 
 networks:
   navigator-network:

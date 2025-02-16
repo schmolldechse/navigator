@@ -61,9 +61,9 @@
 				class="{stationSelected && dateSelected
 					? 'bg-accent text-black'
 					: 'bg-primary text-text hover:bg-secondary'} flex items-center justify-center rounded-3xl px-4 font-bold text-background md:text-2xl"
-				onclick={() => {
+				onclick={async () => {
 					if (!stationSelected || !dateSelected) return;
-					gotoTimetable(stationSelected?.evaNumber, typeSelected, dateSelected.toISO());
+					await gotoTimetable(stationSelected?.evaNumber, typeSelected, dateSelected.toISO());
 				}}
 			>
 				Search

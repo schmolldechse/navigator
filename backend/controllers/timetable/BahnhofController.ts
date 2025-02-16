@@ -1,5 +1,5 @@
 import { type RequestType, retrieveBahnhofJourneys } from "./requests.ts";
-import { Controller, Get, Queries, Route } from "tsoa";
+import { Controller, Get, Queries, Route, Tags } from "tsoa";
 import type { Journey } from "../../models/connection.ts";
 
 class BahnhofQuery {
@@ -10,6 +10,7 @@ class BahnhofQuery {
 }
 
 @Route("timetable/bahnhof")
+@Tags("Bahnhof")
 export class BahnhofController extends Controller {
 	@Get()
 	async getBahnhofJourneys(@Queries() query: BahnhofQuery): Promise<Journey[]> {

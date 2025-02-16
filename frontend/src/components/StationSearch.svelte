@@ -18,7 +18,9 @@
 
 	const searchStations = async (query: string) => {
 		const searchParams = new URLSearchParams({ query }).toString();
-		const response = await fetch(`/api/v1/stations?${searchParams}`, { method: "GET" });
+
+		const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
+		const response = await fetch(`${baseUrl}/api/v1/stations?${searchParams}`, { method: "GET" });
 		if (!response.ok) return;
 
 		const jsonData = await response.json();

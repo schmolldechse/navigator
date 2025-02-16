@@ -6,7 +6,29 @@
 		"outputDirectory": "build",
 		"specVersion": 3,
 		"version": "1.0.0",
-		"basePath": "/api/v1/"
+		"basePath": "/api/v1/",
+		"tags": [
+			{
+				"name": "Bahnhof",
+				"description": "Returns journeys from the DeutscheBahn Bahnhof API. All journeys are returned with a RIS ID"
+			},
+			{
+				"name": "Vendo",
+				"description": "Returns journeys from the db-vendo-client@6.3.4. It is possible to select the profile which returns the journeys with the depending ID of the profile",
+				"externalDocs": {
+					"description": "See more in the API Documentation",
+					"url": "https://github.com/public-transport/db-vendo-client"
+				}
+			},
+			{
+				"name": "Combined",
+				"description": "Combines both Bahnhof & Vendo journeys into a single response for better convenience"
+			},
+			{
+				"name": "Stations",
+				"description": "Returns all stations from the DeutscheBahn API"
+			}
+		]
 	},
 	"routes": {
 		"routesDir": "build",

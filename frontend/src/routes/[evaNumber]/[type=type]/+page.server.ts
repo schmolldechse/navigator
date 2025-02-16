@@ -17,7 +17,8 @@ export const load: PageServerLoad = async ({ params, url }): Promise<{ station: 
 };
 
 const loadStation = async (evaNumber: string): Promise<Station> => {
-	const response = await fetch(`http://navigator-backend:8000/api/v1/stations/${evaNumber}`, {
+	const baseUrl = import.meta.env.VITE_BACKEND_DOCKER_BASE_URL;
+	const response = await fetch(`${baseUrl}/api/v1/stations/${evaNumber}`, {
 		method: "GET"
 	});
 	if (!response.ok) {
@@ -32,13 +33,14 @@ const loadStation = async (evaNumber: string): Promise<Station> => {
 };
 
 const loadJourneys = async (evaNumber: string, type: string, startDate: string): Promise<Journey[]> => {
+	const baseUrl = import.meta.env.VITE_BACKEND_DOCKER_BASE_URL;
 	const queryString = new URLSearchParams({
 		evaNumber: evaNumber,
 		type: type,
 		when: startDate
 	}).toString();
 
-	const response = await fetch(`http://navigator-backend:8000/api/v1/timetable/combined?${queryString}`, {
+	const response = await fetch(`${baseUrl}/api/v1/timetable/combined?${queryString}`, {
 		method: "GET"
 	});
 	if (!response.ok) {

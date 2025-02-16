@@ -1,9 +1,10 @@
 import { type Station } from "../models/station.ts";
 import { mapToEnum, Products } from "../models/products.ts";
-import { Controller, Get, Path, Query, Res, Route, type TsoaResponse } from "tsoa";
+import { Controller, Get, Path, Query, Res, Route, Tags, type TsoaResponse } from "tsoa";
 import { getRedisClient } from "../lib/redis.ts";
 
 @Route("stations")
+@Tags("Stations")
 export class StationController extends Controller {
 	@Get()
 	async queryStations(
@@ -19,11 +20,11 @@ export class StationController extends Controller {
 
 	@Get("/{evaNumber}")
 	async getStationByEvaNumber(
-		@Path() evaNumber: number,
+		@Path() evaNumber: string,
 		@Res() badRequestResponse: TsoaResponse<400, { reason: string }>
 	): Promise<Station> {
-		if (!Number.isInteger(evaNumber)) {
-			return badRequestResponse(400, { reason: "EvaNumber is not an integer" });
+		if (!/^\d+$/.test(evaNumber)) {
+			return badRequestResponse(400, { reason: "evaNumber is not an integer" });
 		}
 
 		const cachedStation = await getCachedStation(evaNumber.toString());
@@ -52,12 +53,12 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 	});
 
 	if (!request.ok) {
-		throw new Error("HTTP Request error occurred");
+		throw new Error(`Failed to fetch stations for ${searchTerm}`);
 	}
 
 	const response = await request.json();
 	if (!response || !Array.isArray(response)) {
-		throw new Error("Invalid response format");
+		throw new Error(`Response was expected to be an array, but got ${typeof response}`);
 	}
 
 	return response.map((data: any) => ({
