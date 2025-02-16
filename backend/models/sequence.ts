@@ -77,6 +77,7 @@ export interface PositionOnTrack {
  * SEATS_BAHN_COMFORT
  * BIKE_SPACE
  * ZONE_MULTI_PURPOSE
+ * BISTRO
  */
 export interface Equipment {
 	type: string;
