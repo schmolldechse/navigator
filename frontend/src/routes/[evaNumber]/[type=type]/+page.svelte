@@ -44,13 +44,13 @@
 	}}
 />
 
-<div class="scrollbar-hidden flex flex-col items-center overflow-auto">
+<div class="scrollbar-hidden flex-1 flex flex-col items-center overflow-auto">
 	<div class="container mx-auto flex items-center justify-between px-4">
 		<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
 		<Clock />
 	</div>
 
-	<div class="scrollbar-hidden container mx-auto flex flex-col divide-y-2 overflow-y-scroll md:divide-y-0">
+	<div class="scrollbar-hidden container mx-auto flex-1 flex flex-col divide-y-2 overflow-y-scroll md:divide-y-0">
 		{#each data.journeys as journey}
 			{#if !matchesFilter(journey)}{:else if journey.connections.length > 1}
 				<WingTrain {journey} />
@@ -60,7 +60,7 @@
 		{/each}
 	</div>
 
-	<div class="absolute bottom-0 w-full self-end">
+	<div class="w-full mt-auto">
 		<Filter
 			allowedProducts={data.station.products ? Object.values(data.station.products) : []}
 			bind:selected={currentFilter}
