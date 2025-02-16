@@ -47,10 +47,10 @@ export interface Vehicle {
 /**
  * category might be:
  *
+ * POWERCAR
  * LOCOMOTIVE
- * DOUBLEDECK_FIRST_CLASS
- * DOUBLEDECK_ECONOMY_CLASS
- * DOUBLEDECK_CONTROLCAR_ECONOMY_CLASS
+ * DOUBLEDECK_*
+ * PASSENGERCARRIAGE_*
  */
 export interface VehicleType {
 	category: string;
