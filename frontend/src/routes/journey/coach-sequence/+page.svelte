@@ -4,10 +4,25 @@
 	import { MetaTags } from "svelte-meta-tags";
 
 	let { data }: PageProps = $props();
+
+	const tripReference = (): { referenceId: string; destination: string } => {
+		const referenceIds = new Set<string>();
+		const destinations = new Set<string>();
+
+		data.sequence?.vehicleGroup?.forEach(({ tripReference: { category, fahrtNr, destination } }) => {
+			if (fahrtNr) referenceIds.add(`${category} ${fahrtNr}`);
+			if (destination?.name) destinations.add(destination.name);
+		});
+
+		return {
+			referenceId: Array.from(referenceIds).join(" / "),
+			destination: Array.from(destinations).join(" / "),
+		};
+	};
 </script>
 
 <MetaTags
-	title={"Coach Sequence"}
+	title={`Coach Sequence for ${tripReference().referenceId}`}
 	description={`See the sequence of coaches on the track`}
 	openGraph={{
 		url: "https://navigator.voldechse.wtf/",
