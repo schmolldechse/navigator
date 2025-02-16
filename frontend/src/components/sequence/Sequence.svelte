@@ -1,17 +1,17 @@
 <script lang="ts">
 	import type { Sequence, Vehicle } from "$models/sequence";
-	import Locomotive from "$components/sequence/coaches/Locomotive.svelte";
-	import CoachStart from "$components/sequence/coaches/CoachStart.svelte";
-	import CoachEnd from "$components/sequence/coaches/CoachEnd.svelte";
-	import CoachMiddle from "$components/sequence/coaches/CoachMiddle.svelte";
-	import ControlcarStart from "$components/sequence/coaches/ControlcarStart.svelte";
-	import ControlcarEnd from "$components/sequence/coaches/ControlcarEnd.svelte";
+	import Locomotive from "$components/sequence/coaches/small/Locomotive.svelte";
+	import CoachStart from "$components/sequence/coaches/small/CoachStart.svelte";
+	import CoachEnd from "$components/sequence/coaches/small/CoachEnd.svelte";
+	import CoachMiddle from "$components/sequence/coaches/small/CoachMiddle.svelte";
+	import ControlcarStart from "$components/sequence/coaches/small/ControlcarStart.svelte";
+	import ControlcarEnd from "$components/sequence/coaches/small/ControlcarEnd.svelte";
+	import VehicleInfo from "$components/sequence/VehicleInfo.svelte";
 
 	let { sequence }: { sequence: Sequence } = $props();
 	let vehicle = $state<Vehicle>(sequence.vehicleGroup![0].vehicles[0]);
 
 	const trackLength = $derived(sequence.track.end.position - sequence.track.start.position);
-
 	const calculateLength = (start: number, end: number) => {
 		const width = ((end - start) / trackLength) * 100;
 		const left = (start / trackLength) * 100;

@@ -5,11 +5,11 @@
 <svg id="coach-sequence" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"
 	 class="shrink-0 h-full w-full"
 	 preserveAspectRatio="xMidYMid meet">
-	<g id="sequences">
-		<g id="controlcar-start">
-			<polyline class="cls-1" points="949 762 137 762 137 416.69 386.34 162 949 162"/>
+	<g id="coaches-small">
+		<g id="controlcar-end">
+			<polyline class="cls-1" points="75 762 887 762 887 416.69 637.66 162 75 162"/>
 			{#if firstClass}
-				<line class="cls-2" x1="110.8" y1="924" x2="949" y2="924"/>
+				<line class="cls-2" x1="75" y1="924" x2="913.2" y2="924"/>
 			{/if}
 		</g>
 	</g>
