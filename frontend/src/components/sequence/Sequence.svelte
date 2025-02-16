@@ -71,17 +71,15 @@
 						{#if vehicleType.category.includes("LOCOMOTIVE")}
 							<Locomotive />
 						{:else if hasLocomotive(vehicle, "before")}
-							<CoachStart />
+							<CoachStart firstClass={vehicleType.firstClass} />
 						{:else if hasLocomotive(vehicle, "after")}
-							<CoachEnd />
-						{:else if vehicleType.category.includes("CONTROLCAR")}
-							{#if index === 0}
-								<ControlcarEnd />
-							{:else if index === group.vehicles.length - 1}
-								<ControlcarStart />
-							{/if}
+							<CoachEnd firstClass={vehicleType.firstClass} />
+						{:else if index === 0}
+							<ControlcarEnd firstClass={vehicleType.firstClass} />
+						{:else if index === group.vehicles.length - 1}
+							<ControlcarStart firstClass={vehicleType.firstClass} />
 						{:else}
-							<CoachMiddle />
+							<CoachMiddle firstClass={vehicleType.firstClass} />
 						{/if}
 					</div>
 				{/each}

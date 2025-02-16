@@ -1,18 +1,34 @@
+<script lang="ts">
+	let { firstClass }: { firstClass: boolean } = $props();
+</script>
+
 <svg id="coach-sequence" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"
 	 class="shrink-0 h-full w-full"
-preserveAspectRatio="xMidYMid meet">
+	 preserveAspectRatio="xMidYMid meet">
 	<g id="sequences">
 		<g id="coach-middle">
 			<line class="cls-1" x1="949" y1="162" x2="75" y2="162"/>
 			<line class="cls-1" x1="75" y1="762" x2="949" y2="762"/>
+			{#if firstClass}
+				<line class="cls-2" x1="75" y1="924" x2="949" y2="924"/>
+			{/if}
 		</g>
 	</g>
 </svg>
 
 <style lang="postcss">
     .cls-1 {
-        @apply fill-none stroke-text;
-        stroke-miterlimit: 10;
+        @apply stroke-text;
         stroke-width: 50px;
+    }
+
+    .cls-1, .cls-2 {
+        @apply fill-none;
+        stroke-miterlimit: 10;
+    }
+
+    .cls-2 {
+        @apply stroke-accent;
+        stroke-width: 75px;
     }
 </style>
