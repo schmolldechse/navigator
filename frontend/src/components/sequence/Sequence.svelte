@@ -37,6 +37,21 @@
 
 		return adjacentVehicle?.vehicleType.category === "LOCOMOTIVE";
 	};
+
+	const tripReference = (): { referenceId: string; destination: string } => {
+		const referenceIds = new Set<string>();
+		const destinations = new Set<string>();
+
+		sequence?.vehicleGroup?.forEach(({ tripReference: { category, fahrtNr, destination } }) => {
+			if (fahrtNr) referenceIds.add(`${category} ${fahrtNr}`);
+			if (destination?.name) destinations.add(destination.name);
+		});
+
+		return {
+			referenceId: Array.from(referenceIds).join(" / "),
+			destination: Array.from(destinations).join(" / "),
+		};
+	};
 </script>
 
 <div class="overflow-x-auto h-full max-w-full bg-primary-darker content-end rounded-lg pb-4 md:px-16 space-y-4">
@@ -86,4 +101,9 @@
 			{/each}
 		</div>
 	{/if}
+
+	<div class="flex flex-col">
+		<span class="text-text">{tripReference().referenceId}</span>
+		<span class="font-semibold">{tripReference().destination}</span>
+	</div>
 </div>
