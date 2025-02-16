@@ -23,7 +23,7 @@ const mergeConnections = (
 				lineName: (connectionA?.lineInformation?.lineName || connectionB?.lineInformation?.lineName) ?? undefined,
 				operator: connectionA?.lineInformation?.operator ?? undefined
 			},
-			viaStops: (connectionA?.viaStops ?? connectionB?.viaStops) ?? undefined,
+			viaStops: connectionA?.viaStops ?? connectionB?.viaStops ?? undefined,
 			cancelled: (connectionA?.cancelled || connectionB?.cancelled) ?? false
 		};
 	};
