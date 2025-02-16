@@ -33,14 +33,17 @@ export class SequenceController extends Controller {
 }
 
 const fetchCoachSequence = async (query: SequenceQuery): Promise<any> => {
-	const request = await fetch(`https://app.vendo.noncd.db.de/mob/zuglaeufe/${query.lineDetails}/halte/by-abfahrt/${query.evaNumber}_${query.date}/wagenreihung`, {
-		method: "GET",
-		headers: {
-			Accept: "application/x.db.vendo.mob.wagenreihung.v3+json",
-			"Content-Type": "application/x.db.vendo.mob.wagenreihung.v3+json",
-			"X-Correlation-ID": crypto.randomUUID() + "_" + crypto.randomUUID()
+	const request = await fetch(
+		`https://app.vendo.noncd.db.de/mob/zuglaeufe/${query.lineDetails}/halte/by-abfahrt/${query.evaNumber}_${query.date}/wagenreihung`,
+		{
+			method: "GET",
+			headers: {
+				Accept: "application/x.db.vendo.mob.wagenreihung.v3+json",
+				"Content-Type": "application/x.db.vendo.mob.wagenreihung.v3+json",
+				"X-Correlation-ID": crypto.randomUUID() + "_" + crypto.randomUUID()
+			}
 		}
-	});
+	);
 
 	if (!request.ok) {
 		throw new Error("Failed to fetch coach sequence");

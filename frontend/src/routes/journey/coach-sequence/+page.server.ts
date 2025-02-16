@@ -21,12 +21,15 @@ export const load = async ({ url }): Promise<{ sequence: Sequence }> => {
 		return error(400, `${dateValidation.invalidExplanation}`);
 	}
 
-	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/journey/sequence?lineDetails=${lineDetails}&evaNumber=${evaNumber}&date=${date}`, {
-		method: "GET"
-	});
+	const request = await fetch(
+		`${env.BACKEND_DOCKER_BASE_URL}/api/v1/journey/sequence?lineDetails=${lineDetails}&evaNumber=${evaNumber}&date=${date}`,
+		{
+			method: "GET"
+		}
+	);
 	if (!request.ok) {
 		throw error(400, "Failed to fetch coach sequence");
 	}
 
-	return { sequence: await request.json() as Sequence };
-}
+	return { sequence: (await request.json()) as Sequence };
+};

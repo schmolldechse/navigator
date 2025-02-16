@@ -4,7 +4,7 @@
 	let { children } = $props();
 </script>
 
-<div class="flex flex-col h-screen w-screen overflow-hidden">
+<div class="flex h-screen w-screen flex-col overflow-hidden">
 	<!-- Logo -->
 	<div class="m-4 flex items-center justify-between pr-4">
 		<a href="/">

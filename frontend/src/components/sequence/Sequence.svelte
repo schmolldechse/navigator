@@ -32,12 +32,13 @@
 		};
 	};
 
-	const flattenVehicles = $derived(sequence.vehicleGroup
-			?.flatMap(g => g.vehicles)
-			.sort((a, b) => a.positionOnTrack.start.position - b.positionOnTrack.start.position)
-		|| []);
+	const flattenVehicles = $derived(
+		sequence.vehicleGroup
+			?.flatMap((g) => g.vehicles)
+			.sort((a, b) => a.positionOnTrack.start.position - b.positionOnTrack.start.position) || []
+	);
 	const hasLocomotive = (currentVehicle: Vehicle, direction: "before" | "after") => {
-		const index = flattenVehicles.findIndex(v => v === currentVehicle);
+		const index = flattenVehicles.findIndex((v) => v === currentVehicle);
 		if (index === -1) return false;
 
 		const adjacentIndex = direction === "before" ? index - 1 : index + 1;
@@ -62,17 +63,14 @@
 	};
 </script>
 
-<div class="overflow-x-auto h-full max-w-full bg-primary-darker content-end rounded-lg pb-4 md:px-16">
+<div class="h-full max-w-full content-end overflow-x-auto rounded-lg bg-primary-darker pb-4 md:px-16">
 	<VehicleInfo track={sequence.track} vehicle={vehicleById} />
 
 	<!-- Track Visualization -->
-	<div class="mt-12 w-full min-w-[800px] relative">
+	<div class="relative mt-12 w-full min-w-[800px]">
 		{#each sequence.track.sections as section}
 			{@const style = calculateLength(section.start.position, section.end.position)}
-			<div
-				class="absolute h-full flex items-center justify-center"
-				style="width: {style.width}; left: {style.left}"
-			>
+			<div class="absolute flex h-full items-center justify-center" style="width: {style.width}; left: {style.left}">
 				<span class="font-medium">{section.name}</span>
 			</div>
 		{/each}
@@ -80,7 +78,7 @@
 
 	<!-- Vehicle Groups Visualization -->
 	{#if sequence.vehicleGroup}
-		<div class="relative w-full min-w-[800px] h-20">
+		<div class="relative h-20 w-full min-w-[800px]">
 			{#each sequence.vehicleGroup as group, groupIndex (group)}
 				<!-- Render each vehicle in its exact position on the track -->
 				{#each group.vehicles as vehicle, vehicleIndex (vehicle)}
@@ -89,9 +87,10 @@
 						vehicle.positionOnTrack.end.position
 					)}
 					{@const vehicleType = vehicle.vehicleType}
-					{@const isSelected = selectedVehicle.groupIndex === groupIndex && selectedVehicle.vehicleIndex === vehicleIndex}
+					{@const isSelected =
+						selectedVehicle.groupIndex === groupIndex && selectedVehicle.vehicleIndex === vehicleIndex}
 					<button
-						class="h-full absolute cursor-pointer hover:scale-110 transition-transform"
+						class="absolute h-full cursor-pointer transition-transform hover:scale-110"
 						style="width: {style.width}; left: {style.left}; min-width: {style.minWidth}"
 						class:scale-110={isSelected}
 						onclick={() => selectVehicle(groupIndex, vehicleIndex)}
@@ -115,7 +114,7 @@
 		</div>
 	{/if}
 
-	<div class="flex flex-col mt-4">
+	<div class="mt-4 flex flex-col">
 		<span class="text-text">{tripReference().referenceId}</span>
 		<span class="font-semibold">{tripReference().destination}</span>
 	</div>

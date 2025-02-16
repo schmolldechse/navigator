@@ -16,7 +16,7 @@
 
 		return {
 			referenceId: Array.from(referenceIds).join(" / "),
-			destination: Array.from(destinations).join(" / "),
+			destination: Array.from(destinations).join(" / ")
 		};
 	};
 </script>
@@ -40,6 +40,6 @@
 	}}
 />
 
-<div class="flex flex-[1] justify-center mb-6">
+<div class="mb-6 flex flex-[1] justify-center">
 	<Sequence sequence={data.sequence} />
 </div>

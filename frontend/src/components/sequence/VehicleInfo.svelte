@@ -4,18 +4,21 @@
 	import DoubleDeck from "$components/sequence/coaches/big/DoubleDeck.svelte";
 	import SingleFloor from "$components/sequence/coaches/big/SingleFloor.svelte";
 
-	let { track, vehicle }: { track?: Track, vehicle?: Vehicle } = $props();
+	let { track, vehicle }: { track?: Track; vehicle?: Vehicle } = $props();
 
 	const sectionInfo = (): string => {
 		const vehicleStart = vehicle?.positionOnTrack.start.position ?? 0;
 		const vehicleEnd = vehicle?.positionOnTrack.end.position ?? 0;
 
-		const sections = track?.sections.filter(section => !(vehicleEnd < section.start.position || vehicleStart > section.end.position)) ?? [];
+		const sections =
+			track?.sections.filter(
+				(section) => !(vehicleEnd < section.start.position || vehicleStart > section.end.position)
+			) ?? [];
 
 		if (sections.length === 1) {
 			return `Stops in section ${sections[0].name}`;
 		} else if (sections.length > 1) {
-			return `Stops between sections ${sections.map(section => section.name).join(" & ")}`;
+			return `Stops between sections ${sections.map((section) => section.name).join(" & ")}`;
 		} else {
 			return "No valid section";
 		}
@@ -23,11 +26,12 @@
 </script>
 
 {#if !vehicle}{:else}
-	<div class="flex flex-col w-full py-8 text-lg font-medium"
-		 class:border-b={!vehicle?.vehicleType?.firstClass}
-		 class:border-gray-700={!vehicle?.vehicleType?.firstClass}
-		 class:border-b-4={vehicle?.vehicleType?.firstClass}
-		 class:border-accent={vehicle?.vehicleType?.firstClass}
+	<div
+		class="flex w-full flex-col py-8 text-lg font-medium"
+		class:border-b={!vehicle?.vehicleType?.firstClass}
+		class:border-gray-700={!vehicle?.vehicleType?.firstClass}
+		class:border-b-4={vehicle?.vehicleType?.firstClass}
+		class:border-accent={vehicle?.vehicleType?.firstClass}
 	>
 		{#if vehicle?.orderNumber}
 			<div class="flex flex-row gap-x-6">
@@ -48,13 +52,13 @@
 					{:else if vehicle?.vehicleType?.category?.includes("POWERCAR")}
 						<span class="font-bold">Powercar</span>
 					{:else if vehicle?.vehicleType?.firstClass && vehicle?.vehicleType?.secondClass}
-						<div class="flex flex-row font-bold gap-x-1">
+						<div class="flex flex-row gap-x-1 font-bold">
 							<span class="text-[#f9c523]">1.</span>
 							<span>/</span>
 							<span>2. Class</span>
 						</div>
 					{:else if vehicle?.vehicleType?.firstClass}
-						<span class="text-[#f9c523] font-bold">1. Class</span>
+						<span class="font-bold text-[#f9c523]">1. Class</span>
 					{:else}
 						<span class="font-bold">2. Class</span>
 					{/if}
@@ -79,13 +83,13 @@
 					{:else if vehicle?.vehicleType?.category?.includes("POWERCAR")}
 						<span class="font-bold">Powercar</span>
 					{:else if vehicle?.vehicleType?.firstClass && vehicle?.vehicleType?.secondClass}
-						<div class="flex flex-row font-bold gap-x-1">
+						<div class="flex flex-row gap-x-1 font-bold">
 							<span class="text-[#f9c523]">1.</span>
 							<span>/</span>
 							<span>2. Class</span>
 						</div>
 					{:else if vehicle?.vehicleType?.firstClass}
-						<span class="text-[#f9c523] font-bold">1. Class</span>
+						<span class="font-bold text-[#f9c523]">1. Class</span>
 					{:else}
 						<span class="font-bold">2. Class</span>
 					{/if}

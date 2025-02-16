@@ -144,7 +144,7 @@ const mapCoachSequence = (entry: any): Sequence => {
 		direction: entry?.fahrtrichtung === "RECHTS" ? "RIGHT" : "LEFT",
 		plannedTrack: entry?.gleisSoll,
 		actualTrack: entry?.gleisVorschau
-	}
-}
+	};
+};
 
 export { mapConnection, mapCoachSequence };
