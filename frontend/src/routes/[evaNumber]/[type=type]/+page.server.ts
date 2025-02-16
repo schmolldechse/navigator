@@ -3,6 +3,7 @@ import type { Station } from "$models/station";
 import { error } from "@sveltejs/kit";
 import type { Journey } from "$models/connection";
 import { DateTime } from "luxon";
+import { env } from "$env/dynamic/private";
 
 export const load: PageServerLoad = async ({ params, url }): Promise<{ station: Station; journeys: Journey[] }> => {
 	const [station, journeys] = await Promise.all([
@@ -17,8 +18,7 @@ export const load: PageServerLoad = async ({ params, url }): Promise<{ station: 
 };
 
 const loadStation = async (evaNumber: string): Promise<Station> => {
-	const baseUrl = import.meta.env.VITE_BACKEND_DOCKER_BASE_URL;
-	const response = await fetch(`${baseUrl}/api/v1/stations/${evaNumber}`, {
+	const response = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/stations/${evaNumber}`, {
 		method: "GET"
 	});
 	if (!response.ok) {
@@ -33,14 +33,13 @@ const loadStation = async (evaNumber: string): Promise<Station> => {
 };
 
 const loadJourneys = async (evaNumber: string, type: string, startDate: string): Promise<Journey[]> => {
-	const baseUrl = import.meta.env.VITE_BACKEND_DOCKER_BASE_URL;
 	const queryString = new URLSearchParams({
 		evaNumber: evaNumber,
 		type: type,
 		when: startDate
 	}).toString();
 
-	const response = await fetch(`${baseUrl}/api/v1/timetable/combined?${queryString}`, {
+	const response = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/timetable/combined?${queryString}`, {
 		method: "GET"
 	});
 	if (!response.ok) {

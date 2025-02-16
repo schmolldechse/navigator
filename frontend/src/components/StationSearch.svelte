@@ -2,6 +2,7 @@
 	import type { Station } from "$models/station";
 	import Search from "$components/svg/Search.svelte";
 	import { onMount } from "svelte";
+	import { env } from "$env/dynamic/public";
 
 	let { station = $bindable(undefined) }: { station?: Station } = $props();
 	let open = $state<boolean>(false);
@@ -19,8 +20,7 @@
 	const searchStations = async (query: string) => {
 		const searchParams = new URLSearchParams({ query }).toString();
 
-		const baseUrl = import.meta.env.VITE_BACKEND_BASE_URL;
-		const response = await fetch(`${baseUrl}/api/v1/stations?${searchParams}`, { method: "GET" });
+		const response = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/stations?${searchParams}`, { method: "GET" });
 		if (!response.ok) return;
 
 		const jsonData = await response.json();
