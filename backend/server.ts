@@ -3,6 +3,7 @@ import swaggerUi from "swagger-ui-express";
 import swaggerDocument from "./build/swagger.json";
 import { RegisterRoutes } from "./build/routes.ts";
 import express from "express";
+import * as path from "node:path";
 
 const app = express();
 
@@ -10,7 +11,7 @@ app.use(express.json());
 app.use(cors({ origin: "*" }));
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
-app.get("/api-spec", (req, res) => res.download("./build/swagger.json"));
+app.get("/api-spec", (req, res) => res.sendFile(path.join(__dirname, "build", "swagger.json")));
 app.get("/api", (req, res) => res.redirect("/api-docs"));
 
 RegisterRoutes(app);
