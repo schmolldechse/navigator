@@ -9,7 +9,15 @@
 	import VehicleInfo from "$components/sequence/VehicleInfo.svelte";
 
 	let { sequence }: { sequence: Sequence } = $props();
-	let vehicle = $state<Vehicle>(sequence.vehicleGroup![0].vehicles[0]);
+	let selectedVehicle = $state<{ groupIndex: number; vehicleIndex: number }>({ groupIndex: 0, vehicleIndex: 0 });
+	let vehicleById = $derived(sequence.vehicleGroup?.[selectedVehicle.groupIndex]?.vehicles[selectedVehicle.vehicleIndex]);
+
+	const selectVehicle = (groupIndex: number, vehicleIndex: number) => {
+		const group = sequence?.vehicleGroup?.[groupIndex];
+		if (!group) return;
+
+		selectedVehicle = { groupIndex, vehicleIndex };
+	};
 
 	const trackLength = $derived(sequence.track.end.position - sequence.track.start.position);
 	const calculateLength = (start: number, end: number) => {
@@ -49,14 +57,16 @@
 
 		return {
 			referenceId: Array.from(referenceIds).join(" / "),
-			destination: Array.from(destinations).join(" / "),
+			destination: Array.from(destinations).join(" / ")
 		};
 	};
 </script>
 
-<div class="overflow-x-auto h-full max-w-full bg-primary-darker content-end rounded-lg pb-4 md:px-16 space-y-4">
+<div class="overflow-x-auto h-full max-w-full bg-primary-darker content-end rounded-lg pb-4 md:px-16">
+	<VehicleInfo track={sequence.track} vehicle={vehicleById} />
+
 	<!-- Track Visualization -->
-	<div class="w-full min-w-[800px] relative">
+	<div class="mt-12 w-full min-w-[800px] relative">
 		{#each sequence.track.sections as section}
 			{@const style = calculateLength(section.start.position, section.end.position)}
 			<div
@@ -71,17 +81,20 @@
 	<!-- Vehicle Groups Visualization -->
 	{#if sequence.vehicleGroup}
 		<div class="relative w-full min-w-[800px] h-20">
-			{#each sequence.vehicleGroup as group}
+			{#each sequence.vehicleGroup as group, groupIndex (group)}
 				<!-- Render each vehicle in its exact position on the track -->
-				{#each group.vehicles as vehicle, index (vehicle)}
+				{#each group.vehicles as vehicle, vehicleIndex (vehicle)}
 					{@const style = calculateLength(
 						vehicle.positionOnTrack.start.position,
 						vehicle.positionOnTrack.end.position
 					)}
 					{@const vehicleType = vehicle.vehicleType}
-					<div
+					{@const isSelected = selectedVehicle.groupIndex === groupIndex && selectedVehicle.vehicleIndex === vehicleIndex}
+					<button
 						class="h-full absolute cursor-pointer hover:scale-110 transition-transform"
 						style="width: {style.width}; left: {style.left}; min-width: {style.minWidth}"
+						class:scale-110={isSelected}
+						onclick={() => selectVehicle(groupIndex, vehicleIndex)}
 					>
 						{#if vehicleType.category.includes("LOCOMOTIVE")}
 							<Locomotive />
@@ -89,20 +102,20 @@
 							<CoachStart firstClass={vehicleType.firstClass} />
 						{:else if hasLocomotive(vehicle, "after")}
 							<CoachEnd firstClass={vehicleType.firstClass} />
-						{:else if index === 0}
+						{:else if vehicleIndex === 0}
 							<ControlcarEnd firstClass={vehicleType.firstClass} />
-						{:else if index === group.vehicles.length - 1}
+						{:else if vehicleIndex === group.vehicles.length - 1}
 							<ControlcarStart firstClass={vehicleType.firstClass} />
 						{:else}
 							<CoachMiddle firstClass={vehicleType.firstClass} />
 						{/if}
-					</div>
+					</button>
 				{/each}
 			{/each}
 		</div>
 	{/if}
 
-	<div class="flex flex-col">
+	<div class="flex flex-col mt-4">
 		<span class="text-text">{tripReference().referenceId}</span>
 		<span class="font-semibold">{tripReference().destination}</span>
 	</div>
