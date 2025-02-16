@@ -6,7 +6,7 @@ import type { Message } from "../models/message.ts";
 import { mapToProduct } from "../models/products.ts";
 import type { Sequence } from "../models/sequence.ts";
 
-const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db" | "dbnav"): Connection => {
+const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db" | "dbweb"): Connection => {
 	const delay: number = calculateDuration(
 		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen),
 		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen),
@@ -52,7 +52,7 @@ const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db
 				name: entry?.line?.operator?.name ?? undefined
 			}
 		},
-		viaStops: mapStops(entry?.viaStops) ?? undefined,
+		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers) ?? undefined,
 		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
 		additionalStops: mapStops(entry?.additionalStops) ?? undefined,
 		cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
@@ -66,8 +66,8 @@ const mapStops = (entry: any): Stop[] | null => {
 	if (!entry) return null;
 	if (!Array.isArray(entry)) entry = [entry];
 	return entry.map((rawStop: any) => ({
-		evaNumber: rawStop?.evaNumber ?? rawStop?.id,
-		name: rawStop?.name,
+		evaNumber: rawStop?.evaNumber ?? rawStop?.id ?? rawStop?.stop?.id,
+		name: rawStop?.name ?? rawStop?.stop?.name,
 		cancelled: rawStop?.canceled ?? rawStop?.cancelled ?? false,
 		additional: rawStop?.additional ?? undefined,
 		separation: rawStop?.separation ?? undefined,

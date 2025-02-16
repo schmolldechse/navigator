@@ -11,12 +11,12 @@ export enum RequestType {
 /**
  * specifies the profile used in boards
  * db = RIS
- * dbnav = HAFAS
+ * dbweb = HAFAS
  * combined = both
  */
 export enum Profile {
 	DB = "db",
-	DBNAV = "dbnav",
+	DBWEB = "dbweb",
 	COMBINED = "combined"
 }
 
@@ -34,7 +34,7 @@ export const retrieveConnections = async (query: Query): Promise<Connection[]> =
 	const request = await fetch(
 		`https://vendo-prof-${query.profile}.voldechse.wtf/stops/${query.evaNumber}/${query.type}?when=${encodeURIComponent(
 			query.when!
-		)}&duration=${query.duration}&results=${query.results}`,
+		)}&duration=${query.duration}&results=${query.results}&stopovers=true`,
 		{ method: "GET" }
 	);
 	if (!request.ok) return [];
@@ -47,7 +47,7 @@ export const retrieveConnections = async (query: Query): Promise<Connection[]> =
 		const tripId = connectionRaw?.tripId;
 		if (!tripId || map.has(tripId)) return;
 
-		const connection: Connection = mapConnection(connectionRaw, query.type, query.profile!.toString() as "db" | "dbnav");
+		const connection: Connection = mapConnection(connectionRaw, query.type, query.profile!.toString() as "db" | "dbweb");
 		if (!connection) return;
 		map.set(tripId, connection);
 	});
@@ -59,12 +59,12 @@ export const retrieveCombinedConnections = async (
 	query: Query,
 	destinationOriginCriteria: boolean = false
 ): Promise<Connection[]> => {
-	const [db, dbnav] = await Promise.all([
+	const [db, dbweb] = await Promise.all([
 		retrieveConnections({ ...query, profile: Profile.DB }),
-		retrieveConnections({ ...query, profile: Profile.DBNAV })
+		retrieveConnections({ ...query, profile: Profile.DBWEB })
 	]);
 
-	const connections = mergeConnections(db, dbnav, query.type, destinationOriginCriteria);
+	const connections = mergeConnections(db, dbweb, query.type, destinationOriginCriteria);
 	if (!connections) return [];
 
 	return connections.sort((a, b) => {
