@@ -18,6 +18,7 @@ const mergeConnections = (
 			departure: type === "departures" ? connectionA?.departure || connectionB?.departure : undefined,
 			arrival: type === "arrivals" ? connectionA?.arrival || connectionB?.arrival : undefined,
 			lineInformation: {
+				type: (connectionA?.lineInformation?.type || connectionB?.lineInformation?.type) ?? undefined,
 				fahrtNr: (connectionA?.lineInformation?.fahrtNr || connectionB?.lineInformation?.fahrtNr) ?? undefined, // HAFAS (`dbnav` profile) contains the line number (e.g. MEX 12)
 				lineName: (connectionA?.lineInformation?.lineName || connectionB?.lineInformation?.lineName) ?? undefined,
 				operator: connectionA?.lineInformation?.operator ?? undefined
