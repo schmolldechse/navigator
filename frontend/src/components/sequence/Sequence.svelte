@@ -4,6 +4,8 @@
 	import CoachStart from "$components/sequence/coaches/CoachStart.svelte";
 	import CoachEnd from "$components/sequence/coaches/CoachEnd.svelte";
 	import CoachMiddle from "$components/sequence/coaches/CoachMiddle.svelte";
+	import ControlcarStart from "$components/sequence/coaches/ControlcarStart.svelte";
+	import ControlcarEnd from "$components/sequence/coaches/ControlcarEnd.svelte";
 
 	let { sequence }: { sequence: Sequence } = $props();
 	let vehicle = $state<Vehicle>(sequence.vehicleGroup![0].vehicles[0]);
@@ -72,6 +74,12 @@
 							<CoachStart />
 						{:else if hasLocomotive(vehicle, "after")}
 							<CoachEnd />
+						{:else if vehicleType.category.includes("CONTROLCAR")}
+							{#if index === 0}
+								<ControlcarEnd />
+							{:else if index === group.vehicles.length - 1}
+								<ControlcarStart />
+							{/if}
 						{:else}
 							<CoachMiddle />
 						{/if}
