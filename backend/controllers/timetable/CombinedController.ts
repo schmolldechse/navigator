@@ -32,28 +32,24 @@ export class CombinedController extends Controller {
 		}
 
 		const now = DateTime.now().set({ second: 0, millisecond: 0 });
-		const diffToStart: number = calculateDuration(DateTime.fromISO(query.when!), now, "minutes");
-		const diffToEnd: number = calculateDuration(
-			now,
+		// duration to the requested time (when)
+		const diffToWhen: number = calculateDuration(DateTime.fromISO(query.when!), now, "minutes");
+		// duration to the requested time (when) + duration
+		const diffToWhenPlusDuration: number = calculateDuration(
 			DateTime.fromISO(query.when!).plus({ minutes: query.duration! }),
+			now,
 			"minutes"
 		);
 
 		// Bahnhof API only allows requests for the next 6 hours, so there won't be any data for requests outside of this range
-		if (diffToStart < -60 || diffToEnd > 360) {
+		if (diffToWhen < -60 || diffToWhenPlusDuration > 360) {
 			return (await retrieveCombinedConnections(query)).map((connection) => ({
 				connections: [connection]
 			}));
 		}
 
-		// effectiveDuration is the duration for the Bahnhof API as we can't provide a date to look for
-		const effectiveDuration: number = calculateDuration(
-			DateTime.fromISO(query.when!).plus({ minutes: query.duration! }),
-			now,
-			"minutes"
-		);
 		const [bahnhof, vendo] = await Promise.all([
-			retrieveBahnhofJourneys({ ...query, duration: effectiveDuration }),
+			retrieveBahnhofJourneys({ ...query, duration: diffToWhenPlusDuration }),
 			retrieveCombinedConnections(query)
 		]);
 
