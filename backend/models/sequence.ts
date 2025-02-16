@@ -32,7 +32,7 @@ export interface TripReference {
 	line: string;
 	destination: { name: string; };
 	category: string;
-	fahrtNr: string;
+	fahrtNr: number;
 }
 
 export interface Vehicle {
