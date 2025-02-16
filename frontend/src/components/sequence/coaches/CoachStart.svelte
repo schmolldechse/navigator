@@ -1,5 +1,5 @@
 <svg id="coach-sequence" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024"
-	 class="w-[50px] h-[50px] shrink-0"
+	 class="shrink-0 h-full w-full"
 preserveAspectRatio="xMidYMid meet">
 	<g id="sequences">
 		<g id="coach-start">
