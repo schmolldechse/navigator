@@ -19,6 +19,7 @@ export interface Connection {
 	arrival?: Time;
 	lineInformation?: {
 		type?: string; // see product.ts for value
+		product?: string; // product category like 'MEX', 'RB', 'RE', ...
 		replacementServiceType?: string;
 		lineName?: string;
 		additionalLineName?: string;

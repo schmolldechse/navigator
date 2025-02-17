@@ -2,7 +2,9 @@ import type { Connection } from "../models/connection.ts";
 import { RequestType } from "../controllers/timetable/requests.ts";
 
 const mergeConnections = (
+	// connections from `db` profile
 	connectionsA: Connection[],
+	// connections from `dbweb` profile
 	connectionsB: Connection[],
 	type: RequestType,
 	destinationOriginCriteria: boolean = false
@@ -19,7 +21,8 @@ const mergeConnections = (
 			arrival: type === "arrivals" ? connectionA?.arrival || connectionB?.arrival : undefined,
 			lineInformation: {
 				type: (connectionA?.lineInformation?.type || connectionB?.lineInformation?.type) ?? undefined,
-				fahrtNr: (connectionA?.lineInformation?.fahrtNr || connectionB?.lineInformation?.fahrtNr) ?? undefined, // HAFAS (`dbnav` profile) contains the line number (e.g. MEX 12)
+				product: (connectionA?.lineInformation?.product || connectionB?.lineInformation?.product) ?? undefined,
+				fahrtNr: (connectionA?.lineInformation?.fahrtNr || connectionB?.lineInformation?.fahrtNr) ?? undefined, // fahrtNr from `db` profile is more reliable
 				lineName: (connectionA?.lineInformation?.lineName || connectionB?.lineInformation?.lineName) ?? undefined,
 				operator: connectionA?.lineInformation?.operator ?? undefined
 			},
