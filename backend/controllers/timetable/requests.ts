@@ -49,6 +49,9 @@ export const retrieveConnections = async (query: Query): Promise<Connection[]> =
 
 		const connection: Connection = mapConnection(connectionRaw, query.type, query.profile!.toString() as "db" | "dbweb");
 		if (!connection) return;
+
+		connection?.viaStops?.shift();
+
 		map.set(tripId, connection);
 	});
 
