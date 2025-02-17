@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { RequestType, retrieveBahnhofJourneys, retrieveCombinedConnections } from "./requests.ts";
 import type { Connection, Journey } from "../../models/connection.ts";
-import { isMatching } from "../../lib/merge.ts";
+import { isMatching, merge } from "../../lib/merge.ts";
 import calculateDuration from "../../lib/time.ts";
 import { Controller, Get, Queries, Res, Route, Tags, type TsoaResponse } from "tsoa";
 
@@ -59,16 +59,17 @@ export class CombinedController extends Controller {
 				const matching = vendo.find((connectionB: Connection) =>
 					isMatching(connectionA, connectionB, query.type, journey?.connections.length > 1)
 				);
-				return matching
-					? {
-							...connectionA,
-							...matching,
-							lineInformation: {
-								...connectionA.lineInformation,
-								...matching.lineInformation
-							}
-						}
-					: connectionA;
+
+				if (!matching) return connectionA;
+
+				const merged = merge(connectionA, matching, query.type);
+				return {
+					...merged,
+					lineInformation: {
+						...merged?.lineInformation,
+						lineName: matching?.lineInformation?.lineName
+					}
+				}
 			});
 
 			return {

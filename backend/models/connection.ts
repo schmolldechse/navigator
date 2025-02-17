@@ -25,8 +25,8 @@ export interface Connection {
 		additionalLineName?: string;
 		fahrtNr?: string;
 		operator?: {
-			id: string;
-			name: string;
+			id?: string;
+			name?: string;
 		};
 	};
 	cancelledStopsAfterActualDestination?: Stop[];
