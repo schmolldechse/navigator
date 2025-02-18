@@ -18,10 +18,10 @@ const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db
 	return {
 		ris_journeyId: isRIS ? (entry?.journeyID ?? entry?.tripId) : undefined,
 		hafas_journeyId: !isRIS ? entry?.tripId : undefined,
-		destination: isDeparture && isRIS ? mapStops(entry?.destination)![0] : undefined,
+		destination: isDeparture && isRIS && entry?.destination ? mapStops(entry?.destination)![0] : undefined,
 		actualDestination: entry?.actualDestination ? mapStops(entry?.actualDestination)![0] : undefined,
 		direction: !isRIS ? entry?.direction : undefined,
-		origin: !isDeparture && isRIS ? mapStops(entry?.origin)![0] : undefined,
+		origin: !isDeparture && isRIS && entry?.origin ? mapStops(entry?.origin)![0] : undefined,
 		provenance: !isRIS ? entry?.provenance : undefined,
 		departure: isDeparture
 			? {
