@@ -8,6 +8,7 @@
 	import ZoneFamily from "$components/sequence/equipments/ZoneFamily.svelte";
 	import ZoneQuiet from "$components/sequence/equipments/ZoneQuiet.svelte";
 	import AirCondition from "$components/sequence/equipments/AirCondition.svelte";
+	import ToiletWheelchair from "$components/sequence/equipments/ToiletWheelchair.svelte";
 
 	let { track, vehicle }: { track?: Track; vehicle?: Vehicle } = $props();
 
@@ -37,7 +38,8 @@
 		{ type: "SEATS_SEVERELY_DISABLED", message: "Priority seats", component: SeatsSeverelyDisabled },
 		{ type: "ZONE_FAMILY", message: "Family area", component: ZoneFamily },
 		{ type: "ZONE_QUIET", message: "Resting area", component: ZoneQuiet },
-		{ type: "AIR_CONDITION", message: "Air-conditioned", component: AirCondition}
+		{ type: "AIR_CONDITION", message: "Air-conditioned", component: AirCondition },
+		{ type: "TOILET_WHEELCHAIR", message: "Universal WC", component: ToiletWheelchair }
 	];
 
 	const filteredEquipments: Equipment[] = $derived(
