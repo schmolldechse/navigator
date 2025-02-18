@@ -34,8 +34,9 @@
 
 		<!-- 2nd row; Line Name -->
 		<div class="flex flex-row text-lg font-bold">
-			<a href={`/journey/coach-sequence?lineDetails=${connection?.lineInformation?.product}_${connection?.lineInformation?.fahrtNr}&evaNumber=${station?.evaNumber}&date=${DateTime.local().toFormat("yyyyMMdd")}`}
-			   target="_blank"
+			<a
+				href={`/journey/coach-sequence?lineDetails=${connection?.lineInformation?.product}_${connection?.lineInformation?.fahrtNr}&evaNumber=${station?.evaNumber}&date=${DateTime.local().toFormat("yyyyMMdd")}`}
+				target="_blank"
 			>
 				{connection?.lineInformation?.lineName}
 			</a>
@@ -75,9 +76,10 @@
 		<!-- 2nd row -->
 		<div class="flex flex-row">
 			<!-- Line Name -->
-			<div class="mr-8 flex-[1] justify-end flex flex-row text-right text-xl font-semibold">
-				<a href={`/journey/coach-sequence?lineDetails=${connection?.lineInformation?.product}_${connection?.lineInformation?.fahrtNr}&evaNumber=${station?.evaNumber}&date=${DateTime.local().toFormat("yyyyMMdd")}`}
-				   target="_blank"
+			<div class="mr-8 flex flex-[1] flex-row justify-end text-right text-xl font-semibold">
+				<a
+					href={`/journey/coach-sequence?lineDetails=${connection?.lineInformation?.product}_${connection?.lineInformation?.fahrtNr}&evaNumber=${station?.evaNumber}&date=${DateTime.local().toFormat("yyyyMMdd")}`}
+					target="_blank"
 				>
 					{connection?.lineInformation?.lineName}
 				</a>

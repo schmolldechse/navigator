@@ -4,11 +4,12 @@ import { RequestType } from "../controllers/timetable/requests.ts";
 const merge = (connectionA: Connection, connectionB: Connection, type: RequestType): Connection => {
 	return {
 		// journeyId
-		ris_journeyId: (connectionA?.ris_journeyId ?? connectionB?.ris_journeyId) ?? undefined,
-		hafas_journeyId: (connectionB?.hafas_journeyId ?? connectionB?.hafas_journeyId) ?? undefined,
+		ris_journeyId: connectionA?.ris_journeyId ?? connectionB?.ris_journeyId ?? undefined,
+		hafas_journeyId: connectionB?.hafas_journeyId ?? connectionB?.hafas_journeyId ?? undefined,
 		// destination
 		destination: type === "departures" ? (connectionA?.destination ?? undefined) : undefined, // RIS (`db` profile) contains this
-		actualDestination: type === "departures" ? (connectionA?.actualDestination ?? connectionB?.actualDestination) : undefined, // Bahnhof API contains this
+		actualDestination:
+			type === "departures" ? (connectionA?.actualDestination ?? connectionB?.actualDestination) : undefined, // Bahnhof API contains this
 		direction: type === "departures" ? (connectionA?.direction ?? connectionB?.direction) : undefined,
 		// origin
 		origin: type === "arrivals" ? (connectionA?.origin ?? undefined) : undefined, // RIS (`db` profile) does contain this
@@ -18,24 +19,30 @@ const merge = (connectionA: Connection, connectionB: Connection, type: RequestTy
 		arrival: type === "arrivals" ? (connectionA?.arrival ?? connectionB?.arrival) : undefined,
 		// lineInformation
 		lineInformation: {
-			type: (connectionA?.lineInformation?.type ?? connectionB?.lineInformation?.type) ?? undefined, // used for Filter component
-			replacementServiceType: (connectionA?.lineInformation?.replacementServiceType ?? connectionB?.lineInformation?.replacementServiceType) ?? undefined,
-			product: (connectionA?.lineInformation?.product ?? connectionB?.lineInformation?.product) ?? undefined, // used in "lineDetails" for coach-sequence
+			type: connectionA?.lineInformation?.type ?? connectionB?.lineInformation?.type ?? undefined, // used for Filter component
+			replacementServiceType:
+				connectionA?.lineInformation?.replacementServiceType ??
+				connectionB?.lineInformation?.replacementServiceType ??
+				undefined,
+			product: connectionA?.lineInformation?.product ?? connectionB?.lineInformation?.product ?? undefined, // used in "lineDetails" for coach-sequence
 			lineName: (connectionA?.lineInformation?.lineName || connectionB?.lineInformation?.lineName) ?? undefined,
-			additionalLineName: (connectionA?.lineInformation?.additionalLineName || connectionB?.lineInformation?.additionalLineName) ?? undefined,
+			additionalLineName:
+				(connectionA?.lineInformation?.additionalLineName || connectionB?.lineInformation?.additionalLineName) ??
+				undefined,
 			fahrtNr: (connectionA?.lineInformation?.fahrtNr || connectionB?.lineInformation?.fahrtNr) ?? undefined, // fahrtNr from `db` profile is more reliable
 			operator: {
-				id: (connectionA?.lineInformation?.operator?.id ?? connectionB?.lineInformation?.operator?.id) ?? undefined,
-				name: (connectionA?.lineInformation?.operator?.name ?? connectionB?.lineInformation?.operator?.name) ?? undefined
+				id: connectionA?.lineInformation?.operator?.id ?? connectionB?.lineInformation?.operator?.id ?? undefined,
+				name: connectionA?.lineInformation?.operator?.name ?? connectionB?.lineInformation?.operator?.name ?? undefined
 			}
 		},
-		viaStops: (connectionA?.viaStops ?? connectionB?.viaStops) ?? undefined,
-		cancelledStopsAfterActualDestination: (connectionA?.cancelledStopsAfterActualDestination ?? connectionB?.cancelledStopsAfterActualDestination) ?? undefined,
-		additionalStops: (connectionA?.additionalStops ?? connectionB?.additionalStops) ?? undefined,
-		cancelledStops: (connectionA?.cancelledStops ?? connectionB?.cancelledStops) ?? undefined,
-		messages: (connectionA?.messages ?? connectionB?.messages) ?? undefined,
-		cancelled: (connectionA?.cancelled ?? connectionB?.cancelled) ?? false,
-		providesVehicleSequence: (connectionA?.providesVehicleSequence ?? connectionB?.providesVehicleSequence) ?? false
+		viaStops: connectionA?.viaStops ?? connectionB?.viaStops ?? undefined,
+		cancelledStopsAfterActualDestination:
+			connectionA?.cancelledStopsAfterActualDestination ?? connectionB?.cancelledStopsAfterActualDestination ?? undefined,
+		additionalStops: connectionA?.additionalStops ?? connectionB?.additionalStops ?? undefined,
+		cancelledStops: connectionA?.cancelledStops ?? connectionB?.cancelledStops ?? undefined,
+		messages: connectionA?.messages ?? connectionB?.messages ?? undefined,
+		cancelled: connectionA?.cancelled ?? connectionB?.cancelled ?? false,
+		providesVehicleSequence: connectionA?.providesVehicleSequence ?? connectionB?.providesVehicleSequence ?? false
 	};
 };
 

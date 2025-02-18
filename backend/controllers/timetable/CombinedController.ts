@@ -69,7 +69,7 @@ export class CombinedController extends Controller {
 						...merged?.lineInformation,
 						lineName: matching?.lineInformation?.lineName
 					}
-				}
+				};
 			});
 
 			return {

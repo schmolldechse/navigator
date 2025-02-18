@@ -47,13 +47,15 @@
 	];
 
 	const filteredEquipments: Equipment[] = $derived(
-		vehicle?.equipment?.filter((equipment) => validEquipments.some((validEquipment) => validEquipment.type === equipment.type)) ?? []
+		vehicle?.equipment?.filter((equipment) =>
+			validEquipments.some((validEquipment) => validEquipment.type === equipment.type)
+		) ?? []
 	);
 </script>
 
 {#if !vehicle}{:else}
 	<div
-		class="flex w-full flex-col py-8 text-lg font-medium gap-y-4"
+		class="flex w-full flex-col gap-y-4 py-8 text-lg font-medium"
 		class:border-b={!vehicle?.vehicleType?.firstClass}
 		class:border-gray-700={!vehicle?.vehicleType?.firstClass}
 		class:border-b-4={vehicle?.vehicleType?.firstClass}
