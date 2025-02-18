@@ -1,8 +1,12 @@
 <script lang="ts">
-	import type { Track, Vehicle } from "$models/sequence";
+	import type { Equipment, Track, Vehicle } from "$models/sequence";
 	import Locomotive from "$components/sequence/coaches/big/Locomotive.svelte";
 	import DoubleDeck from "$components/sequence/coaches/big/DoubleDeck.svelte";
 	import SingleFloor from "$components/sequence/coaches/big/SingleFloor.svelte";
+	import type { Component } from "svelte";
+	import SeatsSeverelyDisabled from "$components/sequence/equipments/SeatsSeverelyDisabled.svelte";
+	import ZoneFamily from "$components/sequence/equipments/ZoneFamily.svelte";
+	import ZoneQuiet from "$components/sequence/equipments/ZoneQuiet.svelte";
 
 	let { track, vehicle }: { track?: Track; vehicle?: Vehicle } = $props();
 
@@ -21,16 +25,47 @@
 			return `Stops between sections ${sections.map((section) => section.name).join(" & ")}`;
 		} else return "";
 	};
+
+	type ValidEquipment = {
+		type: string;
+		message?: string;
+		component?: Component;
+	};
+
+	const validEquipments: ValidEquipment[] = [
+		{ type: "SEATS_SEVERELY_DISABLED", message: "Priority seats", component: SeatsSeverelyDisabled },
+		{ type: "ZONE_FAMILY", message: "Family area", component: ZoneFamily },
+		{ type: "ZONE_QUIET", message: "Resting area", component: ZoneQuiet }
+	];
+
+	const filteredEquipments: Equipment[] = $derived(
+		vehicle?.equipment?.filter((equipment) => validEquipments.some((validEquipment) => validEquipment.type === equipment.type)) ?? []
+	);
 </script>
 
 {#if !vehicle}{:else}
 	<div
-		class="flex w-full flex-col py-8 text-lg font-medium"
+		class="flex w-full flex-col py-8 text-lg font-medium gap-y-4"
 		class:border-b={!vehicle?.vehicleType?.firstClass}
 		class:border-gray-700={!vehicle?.vehicleType?.firstClass}
 		class:border-b-4={vehicle?.vehicleType?.firstClass}
 		class:border-accent={vehicle?.vehicleType?.firstClass}
 	>
+		<div class="flex flex-col">
+			{#if filteredEquipments.length > 0}
+				{#each filteredEquipments as equipment, index (index)}
+					{@const validEquipment = validEquipments.find((validEquipment) => validEquipment.type === equipment.type)}
+					<div class="my-1 flex flex-row gap-x-2 text-lg">
+						{#if validEquipment?.component}
+							{@const Component = validEquipment.component}
+							<Component />
+						{/if}
+						<span>{validEquipment?.message}</span>
+					</div>
+				{/each}
+			{/if}
+		</div>
+
 		{#if vehicle?.orderNumber}
 			<div class="flex flex-row gap-x-6">
 				<div class="flex flex-col">
