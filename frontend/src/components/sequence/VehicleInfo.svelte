@@ -37,11 +37,11 @@
 			<div class="flex flex-row gap-x-6">
 				<div class="flex flex-col">
 					{#if vehicle?.vehicleType?.category?.includes("LOCOMOTIVE") || vehicle?.vehicleType?.category?.includes("POWERCAR")}
-						<Locomotive height="50px" width="50px" />
+						<Locomotive height="45px" width="45px" />
 					{:else if vehicle?.vehicleType?.category?.includes("DOUBLEDECK")}
-						<DoubleDeck height="50px" width="50px" />
+						<DoubleDeck height="45px" width="45px" />
 					{:else}
-						<SingleFloor height="50px" width="50px" />
+						<SingleFloor height="45px" width="45px" />
 					{/if}
 					<span class="text-6xl font-semibold">{vehicle?.orderNumber}</span>
 				</div>
