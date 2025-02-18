@@ -7,6 +7,7 @@
 	import SeatsSeverelyDisabled from "$components/sequence/equipments/SeatsSeverelyDisabled.svelte";
 	import ZoneFamily from "$components/sequence/equipments/ZoneFamily.svelte";
 	import ZoneQuiet from "$components/sequence/equipments/ZoneQuiet.svelte";
+	import AirCondition from "$components/sequence/equipments/AirCondition.svelte";
 
 	let { track, vehicle }: { track?: Track; vehicle?: Vehicle } = $props();
 
@@ -35,7 +36,8 @@
 	const validEquipments: ValidEquipment[] = [
 		{ type: "SEATS_SEVERELY_DISABLED", message: "Priority seats", component: SeatsSeverelyDisabled },
 		{ type: "ZONE_FAMILY", message: "Family area", component: ZoneFamily },
-		{ type: "ZONE_QUIET", message: "Resting area", component: ZoneQuiet }
+		{ type: "ZONE_QUIET", message: "Resting area", component: ZoneQuiet },
+		{ type: "AIR_CONDITION", message: "Air-conditioned", component: AirCondition}
 	];
 
 	const filteredEquipments: Equipment[] = $derived(

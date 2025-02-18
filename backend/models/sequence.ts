@@ -69,8 +69,6 @@ export interface PositionOnTrack {
  * SEATS_SEVERELY_DISABLED
  * ZONE_FAMILY
  * ZONE_QUIET
- * INFO
- * CABIN_INFANT
  * AIR_CONDITION
  * TOILET_WHEELCHAIR
  * WHEELCHAIR_SPACE
@@ -78,6 +76,9 @@ export interface PositionOnTrack {
  * BIKE_SPACE
  * ZONE_MULTI_PURPOSE
  * BISTRO
+ * -----------------
+ * INFO
+ * CABIN_INFANT
  */
 export interface Equipment {
 	type: string;
