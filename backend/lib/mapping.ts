@@ -57,7 +57,7 @@ const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db
 		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
 		additionalStops: mapStops(entry?.additionalStops) ?? undefined,
 		cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
-		messages: entry?.messages ? mapMessages(entry.messages) : undefined,
+		messages: mapMessages(entry?.messages ?? entry?.remarks, isRIS) ?? undefined,
 		cancelled: entry?.canceled ?? entry?.cancelled ?? false,
 		providesVehicleSequence: entry?.providesVehicleSequence ?? false
 	};
@@ -81,14 +81,30 @@ const mapStops = (entry: any): Stop[] | null => {
 };
 
 const mapMessages = (
-	entry: any
+	entry: any,
+	isRIS: boolean = false
 ): {
 	common: Message[];
 	delay: Message[];
 	cancellation: Message[];
 	destination: Message[];
 	via: Message[];
-} => {
+} | null => {
+	if (!entry) return null;
+
+	if (!isRIS) {
+		return {
+			common: entry.map((message: any) => ({
+				type: "general-warning",
+				text: message?.text ?? message?.summary
+			})),
+			delay: [],
+			cancellation: [],
+			destination: [],
+			via: []
+		};
+	}
+
 	return {
 		common: (entry.common || []).map((message: any) => message as Message),
 		delay: (entry.delay || []).map((message: any) => message as Message),
