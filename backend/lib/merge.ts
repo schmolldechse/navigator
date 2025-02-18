@@ -47,28 +47,6 @@ const mergeConnections = (
 	type: RequestType,
 	destinationOriginCriteria: boolean = false
 ): Connection[] => {
-	const merge = (connectionA: Connection, connectionB: Connection): Connection => {
-		return {
-			ris_journeyId: connectionA?.ris_journeyId ?? undefined,
-			hafas_journeyId: connectionB?.hafas_journeyId ?? undefined,
-			direction: type === "departures" ? ((connectionA?.direction || connectionB?.direction) ?? undefined) : undefined,
-			provenance: type === "arrivals" ? ((connectionA?.provenance || connectionB?.provenance) ?? undefined) : undefined,
-			destination: type === "departures" ? (connectionA?.destination ?? undefined) : undefined, // RIS (`db` profile) does contain this
-			origin: type === "arrivals" ? (connectionA?.origin ?? undefined) : undefined, // RIS (`db` profile) does contain this
-			departure: type === "departures" ? connectionA?.departure || connectionB?.departure : undefined,
-			arrival: type === "arrivals" ? connectionA?.arrival || connectionB?.arrival : undefined,
-			lineInformation: {
-				type: (connectionA?.lineInformation?.type || connectionB?.lineInformation?.type) ?? undefined,
-				product: (connectionA?.lineInformation?.product || connectionB?.lineInformation?.product) ?? undefined,
-				fahrtNr: (connectionA?.lineInformation?.fahrtNr || connectionB?.lineInformation?.fahrtNr) ?? undefined, // fahrtNr from `db` profile is more reliable
-				lineName: (connectionA?.lineInformation?.lineName || connectionB?.lineInformation?.lineName) ?? undefined,
-				operator: connectionA?.lineInformation?.operator ?? undefined
-			},
-			viaStops: connectionA?.viaStops ?? connectionB?.viaStops ?? undefined,
-			cancelled: (connectionA?.cancelled || connectionB?.cancelled) ?? false
-		};
-	};
-
 	const merged: Connection[] = [];
 	connectionsB.forEach((connectionB: Connection) => {
 		/**
