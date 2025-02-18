@@ -8,10 +8,12 @@
 	import ConnectionComponent from "$components/timetable/ConnectionComponent.svelte";
 	import { page } from "$app/state";
 	import WingTrain from "$components/timetable/WingTrain.svelte";
+	import type { Station } from "$models/station";
 
 	let { data }: PageProps = $props();
 
-	setContext("isDeparture", page.params.type === "departures");
+	setContext<boolean>("isDeparture", page.params.type === "departures");
+	setContext<Station>("station", data.station);
 
 	let currentFilter = $state(["*"]);
 	const matchesFilter = (journey: Journey) => {

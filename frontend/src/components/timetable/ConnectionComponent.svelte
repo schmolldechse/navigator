@@ -6,6 +6,8 @@
 	import Platform from "$components/timetable/info/Platform.svelte";
 	import ViaStops from "$components/timetable/info/ViaStops.svelte";
 	import Messages from "$components/timetable/messages/Messages.svelte";
+	import type { Station } from "$models/station";
+	import { DateTime } from "luxon";
 
 	let {
 		connection,
@@ -17,6 +19,7 @@
 		renderInformation: boolean;
 	} = $props();
 	const isDeparture = getContext<boolean>("isDeparture");
+	const station = getContext<Station>("station");
 </script>
 
 <div
@@ -30,10 +33,16 @@
 		<Messages {connection} />
 
 		<!-- 2nd row; Line Name -->
-		<span class="text-lg font-bold">
-			{connection?.lineInformation?.lineName}
-			{connection?.lineInformation?.additionalLineName ? " / " + connection?.lineInformation?.additionalLineName : ""}
-		</span>
+		<div class="flex flex-row text-lg font-bold">
+			<a href={`/journey/coach-sequence?lineDetails=${connection?.lineInformation?.product}_${connection?.lineInformation?.fahrtNr}&evaNumber=${station?.evaNumber}&date=${DateTime.local().toFormat("yyyyMMdd")}`}
+			   target="_blank"
+			>
+				{connection?.lineInformation?.lineName}
+			</a>
+			{#if connection?.lineInformation?.additionalLineName}
+				<span>/ {connection?.lineInformation?.additionalLineName}</span>
+			{/if}
+		</div>
 
 		<!-- 3rd row; Time & Platform Information -->
 		<div class="flex flex-row items-center justify-between text-2xl font-semibold">
@@ -66,10 +75,16 @@
 		<!-- 2nd row -->
 		<div class="flex flex-row">
 			<!-- Line Name -->
-			<span class="mr-8 flex flex-[1] justify-end text-xl font-semibold">
-				{connection?.lineInformation?.lineName}
-				{connection?.lineInformation?.additionalLineName ? " / " + connection?.lineInformation?.additionalLineName : ""}
-			</span>
+			<div class="mr-8 flex-[1] justify-end flex flex-row text-right text-xl font-semibold">
+				<a href={`/journey/coach-sequence?lineDetails=${connection?.lineInformation?.product}_${connection?.lineInformation?.fahrtNr}&evaNumber=${station?.evaNumber}&date=${DateTime.local().toFormat("yyyyMMdd")}`}
+				   target="_blank"
+				>
+					{connection?.lineInformation?.lineName}
+				</a>
+				{#if connection?.lineInformation?.additionalLineName}
+					<span>/ {connection?.lineInformation?.additionalLineName}</span>
+				{/if}
+			</div>
 
 			<!-- viaStops -->
 			<div class="mr-4 flex-[4] text-lg">
