@@ -19,9 +19,7 @@
 			return `Stops in section ${sections[0].name}`;
 		} else if (sections.length > 1) {
 			return `Stops between sections ${sections.map((section) => section.name).join(" & ")}`;
-		} else {
-			return "No valid section";
-		}
+		} else return "";
 	};
 </script>
 
