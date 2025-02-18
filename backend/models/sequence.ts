@@ -51,6 +51,7 @@ export interface Vehicle {
  * LOCOMOTIVE
  * DOUBLEDECK_*
  * PASSENGERCARRIAGE_*
+ * HALDININGCAR
  */
 export interface VehicleType {
 	category: string;
@@ -66,19 +67,9 @@ export interface PositionOnTrack {
 }
 
 /**
- * SEATS_SEVERELY_DISABLED
- * ZONE_FAMILY
- * ZONE_QUIET
- * AIR_CONDITION
- * TOILET_WHEELCHAIR
- * WHEELCHAIR_SPACE
- * SEATS_BAHN_COMFORT
- * BIKE_SPACE
- * ZONE_MULTI_PURPOSE
- * BISTRO
- * -----------------
- * INFO
- * CABIN_INFANT
+ * DONE: SEATS_SEVERELY_DISABLED , ZONE_FAMILY , ZONE_QUIET , AIR_CONDITION , TOILET_WHEELCHAIR , WHEELCHAIR_SPACE , BIKE_SPACE
+ * TODO: INFO , CABIN_INFANT , SEATS_BAHN_COMFORT
+ * UNKNOWN: HALDININGCAR? see VehicleType
  */
 export interface Equipment {
 	type: string;
