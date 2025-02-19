@@ -21,6 +21,10 @@
 		"typescript": "^5.0.0"
 	},
 	"dependencies": {
+		"@auth/core": "^0.37.4",
+		"@auth/express": "^0.8.4",
+		"@auth/prisma-adapter": "^2.7.4",
+		"@prisma/client": "^6.4.0",
 		"cors": "^2.8.5",
 		"express": "^4.21.2",
 		"luxon": "^3.5.0",
