@@ -92,13 +92,13 @@
 
 <div class="relative flex w-full flex-col text-text placeholder:text-text">
 	<div
-		class="flex flex-row items-center gap-x-1 rounded-2xl bg-primary px-2 font-medium focus-within:ring-2 focus-within:ring-accent md:text-2xl"
+		class="flex flex-row items-center gap-x-1 rounded-2xl bg-primary-dark px-2 font-medium focus-within:ring-2 focus-within:ring-accent md:text-2xl"
 	>
 		<Search height="50px" width="50px" />
 		<input
 			bind:this={inputElement}
 			type="text"
-			class="w-full border-none bg-primary p-2 outline-none"
+			class="w-full border-none bg-primary-dark p-2 outline-none"
 			placeholder="Search for a station"
 			onclick={() => (open = true)}
 			oninput={handleInput}
@@ -108,7 +108,7 @@
 
 	{#if open && stations.length > 0}
 		<div
-			class="absolute left-0 top-full z-50 mt-1 flex h-fit max-w-96 flex-col rounded-lg border border-text bg-primary p-2"
+			class="absolute left-0 top-full z-50 mt-1 flex h-fit max-w-96 flex-col rounded-lg border border-text bg-primary-dark p-2"
 		>
 			{#each stations as station, index (station)}
 				<button
