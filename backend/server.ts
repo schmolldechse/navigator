@@ -4,6 +4,8 @@ import swaggerDocument from "./build/swagger.json";
 import { RegisterRoutes } from "./build/routes.ts";
 import express from "express";
 import * as path from "node:path";
+import { ExpressAuth } from "@auth/express";
+import authConfig from "./lib/auth/auth.ts";
 
 const app = express();
 
@@ -15,5 +17,7 @@ app.get("/api-spec", (req, res) => res.sendFile(path.join(__dirname, "build", "s
 app.get("/api", (req, res) => res.redirect("/api-docs"));
 
 RegisterRoutes(app);
+
+app.use("/auth", ExpressAuth(authConfig));
 
 app.listen(8000, () => console.log("Server is running on port 8000"));
