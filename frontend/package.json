@@ -38,6 +38,7 @@
 	},
 	"dependencies": {
 		"@fontsource/montserrat": "^5.1.1",
+		"better-auth": "^1.1.19",
 		"luxon": "^3.5.0",
 		"svelte-meta-tags": "^4.1.0"
 	}

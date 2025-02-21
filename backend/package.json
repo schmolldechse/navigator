@@ -1,35 +1,35 @@
 {
-	"name": "Navigator Backend",
-	"module": "server.ts",
-	"type": "module",
-	"scripts": {
-		"format": "prettier --write .",
-		"lint": "prettier --check .",
-		"tsoa": "tsoa routes && tsoa spec",
-		"prestart": "bun run tsoa",
-		"start": "bun run server.ts"
-	},
-	"devDependencies": {
-		"@types/bun": "latest",
-		"@types/cors": "^2.8.17",
-		"@types/express": "^5.0.0",
-		"@types/luxon": "^3.4.2",
-		"@types/swagger-ui-express": "^4.1.7",
-		"prettier": "^3.5.0"
-	},
-	"peerDependencies": {
-		"typescript": "^5.0.0"
-	},
-	"dependencies": {
-		"@auth/core": "^0.37.4",
-		"@auth/express": "^0.8.4",
-		"@auth/prisma-adapter": "^2.7.4",
-		"@prisma/client": "^6.4.0",
-		"cors": "^2.8.5",
-		"express": "^4.21.2",
-		"luxon": "^3.5.0",
-		"redis": "^4.7.0",
-		"swagger-ui-express": "^5.0.1",
-		"tsoa": "^6.6.0"
-	}
+  "name": "navigator-backend",
+  "module": "src/server.ts",
+  "type": "module",
+  "scripts": {
+    "format": "prettier --write .",
+    "lint": "prettier --check .",
+    "tsoa": "tsoa routes && tsoa spec",
+    "prestart": "bun run tsoa",
+    "start": "bun run src/server.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/luxon": "^3.4.2",
+    "@types/swagger-ui-express": "^4.1.8",
+    "prettier": "^3.5.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "better-auth": "^1.1.19",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "luxon": "^3.5.0",
+    "redis": "^4.7.0",
+    "swagger-ui-express": "^5.0.1",
+    "tsoa": "^6.6.0"
+  },
+  "prisma": {
+    "schema": "./src/prisma/schema.prisma"
+  }
 }

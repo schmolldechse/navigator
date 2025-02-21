@@ -1,7 +1,7 @@
-import { type Station } from "../models/station.ts";
-import { mapToEnum, Products } from "../models/products.ts";
 import { Controller, Get, Path, Query, Res, Route, Tags, type TsoaResponse } from "tsoa";
 import { getRedisClient } from "../lib/redis.ts";
+import type { Station } from "../models/station.ts";
+import { mapToEnum, Products } from "../models/products.ts";
 
 @Route("stations")
 @Tags("Stations")

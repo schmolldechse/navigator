@@ -3,8 +3,19 @@
 	import Navbar from "$components/Navbar.svelte";
 	import Logo from "$components/Logo.svelte";
 	import { setContext } from "svelte";
+	import type { LayoutProps } from "./$types";
+	import { authClient } from "$lib/auth-client";
 
-	let { children } = $props();
+	let { data, children }: LayoutProps = $props();
+
+	const session = authClient.useSession();
+
+	const signIn = async () => {
+		await authClient.signIn.social({
+			provider: "github",
+			callbackURL: window.location.href
+		});
+	}
 
 	let type = $state("timetable");
 	setContext("type", () => type);
@@ -19,6 +30,10 @@
 				<h1 class="relative top-[-0.25rem] hidden text-[2rem] font-bold md:inline">NAVIGATOR</h1>
 			</div>
 		</a>
+
+		<button onclick={signIn}>
+			Continue with github
+		</button>
 
 		<Navbar bind:type />
 	</div>

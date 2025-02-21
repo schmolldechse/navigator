@@ -15,4 +15,4 @@ ENV REDIS_PASSWORD=password
 RUN bun tsoa
 
 EXPOSE 8000
-CMD ["bun", "run", "server.ts"]
+CMD ["bun", "run", "src/server.ts"]
