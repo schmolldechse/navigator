@@ -15,10 +15,12 @@ model User {
   image         String?
   createdAt     DateTime
   updatedAt     DateTime
+  username      String?
   sessions      Session[]
   accounts      Account[]
 
   @@unique([email])
+  @@unique([username])
   @@map("user")
 }
 
@@ -54,15 +56,4 @@ model Account {
   updatedAt             DateTime
 
   @@map("account")
-}
-
-model Verification {
-  id         String    @id
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime?
-  updatedAt  DateTime?
-
-  @@map("verification")
 }
