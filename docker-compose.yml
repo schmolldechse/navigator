@@ -1,7 +1,7 @@
 services:
   navigator-frontend:
     container_name: navigator-frontend
-    image: schmolldechsee/navigator-frontend:latest
+    image: ghcr.io/schmolldechse/navigator-frontend:latest
     restart: always
     ports: [ "3000:3000" ]
     networks: [ "navigator-network" ]
@@ -11,7 +11,7 @@ services:
 
   navigator-backend:
     container_name: navigator-backend
-    image: schmolldechsee/navigator-backend:latest
+    image: ghcr.io/schmolldechse/navigator-backend:latest
     restart: always
     ports: [ "8000:8000" ]
     networks: [ "navigator-network" ]
