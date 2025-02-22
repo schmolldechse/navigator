@@ -15,7 +15,7 @@
 			provider: "github",
 			callbackURL: window.location.href
 		});
-	}
+	};
 
 	let type = $state("timetable");
 	setContext("type", () => type);
@@ -31,9 +31,7 @@
 			</div>
 		</a>
 
-		<button onclick={signIn}>
-			Continue with github
-		</button>
+		<button onclick={signIn}> Continue with github </button>
 
 		<Navbar bind:type />
 	</div>
