@@ -23,9 +23,12 @@
 	}}
 />
 
-<div class="flex-1 self-center bg-primary-darker w-full md:w-2/4 rounded-3xl mb-8 flex flex-col p-4 justify-center items-center">
-	<button class="flex flex-row items-center gap-x-4 bg-primary-dark p-4 rounded-l hover:bg-primary"
-			onclick={() => authClient.signIn.social({ provider: "github", callbackURL: window.location.origin })}
+<div
+	class="bg-primary-darker mb-8 flex w-full flex-1 flex-col items-center justify-center self-center rounded-3xl p-4 md:w-2/4"
+>
+	<button
+		class="bg-primary-dark hover:bg-primary flex flex-row items-center gap-x-4 rounded-l p-4"
+		onclick={() => authClient.signIn.social({ provider: "github", callbackURL: window.location.origin })}
 	>
 		<GitHub height="35px" width="35px" />
 		<span class="text-xl font-medium">Continue with GitHub</span>

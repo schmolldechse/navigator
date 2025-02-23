@@ -20,7 +20,7 @@
 <div class="flex flex-row items-center justify-end gap-x-2">
 	<span>{displayTime(time?.plannedTime ?? "")}</span>
 	{#if isDelayed()}
-		<span class="md:py-0.25 bg-text px-2 text-lg font-bold text-background md:text-2xl"
+		<span class="bg-text text-background px-2 text-lg font-bold md:py-0.25 md:text-2xl"
 			>{displayTime(time?.actualTime ?? "")}</span
 		>
 	{/if}

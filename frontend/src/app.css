@@ -1,20 +1,20 @@
-@import 'tailwindcss';
-@import '@fontsource/montserrat' layer(utilities);
-@import '@fontsource/montserrat/400.css' layer(utilities);
-@import '@fontsource/montserrat/500.css' layer(utilities);
-@import '@fontsource/montserrat/600.css' layer(utilities);
-@import '@fontsource/montserrat/700.css' layer(utilities);
+@import "tailwindcss";
+@import "@fontsource/montserrat" layer(utilities);
+@import "@fontsource/montserrat/400.css" layer(utilities);
+@import "@fontsource/montserrat/500.css" layer(utilities);
+@import "@fontsource/montserrat/600.css" layer(utilities);
+@import "@fontsource/montserrat/700.css" layer(utilities);
 
 @theme {
-  --color-text: var(--text);
-  --color-background: var(--background);
-  --color-primary: var(--primary);
-  --color-primary-dark: var(--primary-dark);
-  --color-primary-darker: var(--primary-darker);
-  --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
+	--color-text: var(--text);
+	--color-background: var(--background);
+	--color-primary: var(--primary);
+	--color-primary-dark: var(--primary-dark);
+	--color-primary-darker: var(--primary-darker);
+	--color-secondary: var(--secondary);
+	--color-accent: var(--accent);
 
-  --font-montserrat: Montserrat, sans-serif;
+	--font-montserrat: Montserrat, sans-serif;
 }
 
 /*
@@ -26,13 +26,13 @@
   color utility to any element that depends on these defaults.
 */
 @layer base {
-  *,
-  ::after,
-  ::before,
-  ::backdrop,
-  ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
-  }
+	*,
+	::after,
+	::before,
+	::backdrop,
+	::file-selector-button {
+		border-color: var(--color-gray-200, currentColor);
+	}
 }
 
 @layer base {

@@ -23,4 +23,4 @@ export const usernameClientPlugin = () => {
 		id: "username-client-plugin",
 		$InferServerPlugin: {} as ReturnType<typeof usernamePlugin>
 	} satisfies BetterAuthClientPlugin;
-}
+};

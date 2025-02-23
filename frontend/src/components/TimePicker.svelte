@@ -74,7 +74,7 @@
 		type="button"
 		class:ring-2={isOpen}
 		class:ring-accent={isOpen}
-		class="flex flex-row items-center gap-x-2 rounded-md p-0.5 text-center hover:ring-2 hover:ring-accent md:p-2 md:text-2xl"
+		class="hover:ring-accent flex flex-row items-center gap-x-2 rounded-md p-0.5 text-center hover:ring-2 md:p-2 md:text-2xl"
 		onclick={() => (isOpen = true)}
 	>
 		<Calendar />
@@ -83,7 +83,7 @@
 
 	{#if isOpen}
 		<div
-			class="md:w-128 absolute left-1/2 top-1/2 z-10 mt-8 w-80 -translate-x-1/4 transform rounded-sm bg-primary p-4 shadow-lg md:left-auto md:top-full md:mt-2 md:transform-none"
+			class="bg-primary absolute top-1/2 left-1/2 z-10 mt-8 w-80 -translate-x-1/4 transform rounded-sm p-4 shadow-lg md:top-full md:left-auto md:mt-2 md:w-128 md:transform-none"
 		>
 			<!-- header -->
 			<div class="mb-4 flex items-center justify-between">
@@ -111,7 +111,7 @@
 							selectedDate,
 							'day'
 						)
-							? 'rounded-md bg-accent font-bold text-black'
+							? 'bg-accent rounded-md font-bold text-black'
 							: ''}"
 						onclick={() => (selectedDate = day.set({ hour: selectedDate.hour, minute: selectedDate.minute }))}
 					>
@@ -122,7 +122,7 @@
 
 			<!-- time inputs -->
 			<div class="mt-4 flex items-center justify-between space-x-2 font-bold">
-				<button class="rounded-sm bg-accent px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(-15)}>
+				<button class="bg-accent rounded-sm px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(-15)}>
 					-
 				</button>
 
@@ -135,7 +135,7 @@
 						onkeydown={handleKeyPress}
 						maxLength={2}
 						readOnly={true}
-						class="w-full rounded-sm border border-none bg-transparent text-center text-xl text-text focus:outline-hidden"
+						class="text-text w-full rounded-sm border border-none bg-transparent text-center text-xl focus:outline-hidden"
 					/>
 					<span>:</span>
 					<input
@@ -146,17 +146,17 @@
 						onkeydown={handleKeyPress}
 						maxLength={2}
 						readOnly={true}
-						class="w-full rounded-sm border border-none bg-transparent text-center text-xl text-text focus:outline-hidden"
+						class="text-text w-full rounded-sm border border-none bg-transparent text-center text-xl focus:outline-hidden"
 					/>
 				</div>
 
-				<button class="rounded-sm bg-accent px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(15)}>
+				<button class="bg-accent rounded-sm px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(15)}>
 					+
 				</button>
 			</div>
 
 			<!-- select button -->
-			<button class="mt-4 w-full rounded-sm bg-accent py-2 font-bold text-black" onclick={() => (isOpen = false)}>
+			<button class="bg-accent mt-4 w-full rounded-sm py-2 font-bold text-black" onclick={() => (isOpen = false)}>
 				Select
 			</button>
 		</div>

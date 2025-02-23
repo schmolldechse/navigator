@@ -17,9 +17,9 @@
 </svg>
 
 <style lang="postcss">
-    .cls-1 {
+	.cls-1 {
 		fill: var(--color-accent);
-        stroke: black;
-        stroke-width: 2;
-    }
+		stroke: black;
+		stroke-width: 2;
+	}
 </style>

@@ -49,7 +49,7 @@
 		<div class="ml-auto flex gap-1 md:gap-3">
 			<!-- Reset time -->
 			<button
-				class="flex flex-row items-center rounded-3xl bg-primary-dark px-2 md:gap-x-1 md:px-4"
+				class="bg-primary-dark flex flex-row items-center rounded-3xl px-2 md:gap-x-1 md:px-4"
 				onclick={() => (dateSelected = DateTime.now().set({ second: 0, millisecond: 0 }))}
 			>
 				<Clock height="25px" width="25px" />
@@ -60,7 +60,7 @@
 			<button
 				class="{stationSelected && dateSelected
 					? 'bg-accent text-black'
-					: 'bg-primary-dark text-text hover:bg-secondary'} flex items-center justify-center rounded-3xl px-4 font-bold text-background md:text-2xl"
+					: 'bg-primary-dark text-text hover:bg-secondary'} text-background flex items-center justify-center rounded-3xl px-4 font-bold md:text-2xl"
 				onclick={async () => {
 					if (!stationSelected || !dateSelected) return;
 					await gotoTimetable(stationSelected?.evaNumber, typeSelected, dateSelected.toISO());

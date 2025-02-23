@@ -11,5 +11,8 @@
 		<img src={$session.data.user.image} height={50} width={50} alt="User avatar" />
 	</div>
 {:else}
-	<button class="text-xl font-bold hover:text-accent transition-colors duration-500" onclick={async () => await goto("/login")}>SIGN IN</button>
+	<button
+		class="hover:text-accent text-xl font-bold transition-colors duration-500"
+		onclick={async () => await goto("/login")}>SIGN IN</button
+	>
 {/if}

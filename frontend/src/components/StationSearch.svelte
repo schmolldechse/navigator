@@ -90,15 +90,15 @@
 	});
 </script>
 
-<div class="relative flex w-full flex-col text-text placeholder:text-text">
+<div class="text-text placeholder:text-text relative flex w-full flex-col">
 	<div
-		class="flex flex-row items-center gap-x-1 rounded-2xl bg-primary-dark px-2 font-medium focus-within:ring-2 focus-within:ring-accent md:text-2xl"
+		class="bg-primary-dark focus-within:ring-accent flex flex-row items-center gap-x-1 rounded-2xl px-2 font-medium focus-within:ring-2 md:text-2xl"
 	>
 		<Search height="50px" width="50px" />
 		<input
 			bind:this={inputElement}
 			type="text"
-			class="w-full border-none bg-primary-dark p-2 outline-hidden"
+			class="bg-primary-dark w-full border-none p-2 outline-hidden"
 			placeholder="Search for a station"
 			onclick={() => (open = true)}
 			oninput={handleInput}
@@ -108,7 +108,7 @@
 
 	{#if open && stations.length > 0}
 		<div
-			class="absolute left-0 top-full z-50 mt-1 flex h-fit max-w-96 flex-col rounded-lg border border-text bg-primary-dark p-2"
+			class="border-text bg-primary-dark absolute top-full left-0 z-50 mt-1 flex h-fit max-w-96 flex-col rounded-lg border p-2"
 		>
 			{#each stations as station, index (station)}
 				<button

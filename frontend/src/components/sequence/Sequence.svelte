@@ -63,7 +63,7 @@
 	};
 </script>
 
-<div class="flex h-full max-w-full flex-col overflow-x-auto rounded-lg bg-primary-darker pb-4 md:px-16">
+<div class="bg-primary-darker flex h-full max-w-full flex-col overflow-x-auto rounded-lg pb-4 md:px-16">
 	<span class="pt-8 text-3xl font-bold">Coach Sequence</span>
 
 	<div class="h-full max-w-full content-end">
