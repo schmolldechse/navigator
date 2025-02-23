@@ -29,14 +29,15 @@
 
 <style lang="postcss">
 	.cls-1 {
-		@apply fill-[#fbbc09];
+		--gold: #fbbc09;
+		fill: var(--gold);
 	}
 
 	.cls-2 {
-		@apply fill-text;
+		fill: var(--color-text);
 	}
 
 	.cls-3 {
-		@apply fill-background;
+		fill: var(--color-background);
 	}
 </style>

@@ -16,17 +16,18 @@
 </svg>
 
 <style lang="postcss">
-	.cls-1 {
-		@apply fill-primary-darker;
-	}
+    .cls-1 {
+        fill: var(--color-primary-darker);
+    }
 
-	.cls-2 {
-		@apply fill-text;
-	}
+    .cls-2 {
+        fill: var(--color-text);
+    }
 
-	.cls-3 {
-		@apply fill-none stroke-text;
-		stroke-miterlimit: 10;
-		stroke-width: 30px;
-	}
+    .cls-3 {
+        fill: none;
+        stroke: var(--color-text);
+        stroke-miterlimit: 10;
+        stroke-width: 30px;
+    }
 </style>

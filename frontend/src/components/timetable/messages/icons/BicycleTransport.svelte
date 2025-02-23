@@ -15,17 +15,17 @@
 
 <style lang="postcss">
 	.cls-1 {
-		@apply fill-text;
+		fill: var(--color-text);
 	}
 
 	.cls-2 {
-		@apply stroke-text;
 		fill: none;
+		stroke: var(--color-text);
 		stroke-miterlimit: 10;
 		stroke-width: 30px;
 	}
 
 	.cls-3 {
-		@apply fill-background;
+		fill: var(--color-background);
 	}
 </style>

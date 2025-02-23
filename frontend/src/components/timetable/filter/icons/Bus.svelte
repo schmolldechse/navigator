@@ -22,10 +22,11 @@
 
 <style lang="postcss">
 	.cls-1 {
-		@apply fill-[#c02987];
+		--magenta: #c02987;
+		fill: var(--magenta);
 	}
 
 	.cls-2 {
-		@apply fill-text;
+		fill: var(--color-text);
 	}
 </style>

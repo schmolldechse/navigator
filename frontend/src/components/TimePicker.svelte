@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { DateTime } from "luxon";
-	import Calendar from "$components/svg/Calendar.svelte";
+	import Calendar from "$components/ui/icons/Calendar.svelte";
 
 	let { selectedDate = $bindable(DateTime.now().set({ second: 0, millisecond: 0 })) } = $props();
 

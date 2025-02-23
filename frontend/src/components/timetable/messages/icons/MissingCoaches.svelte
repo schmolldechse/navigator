@@ -15,10 +15,10 @@
 
 <style lang="postcss">
 	.cls-1 {
-		@apply fill-text;
+		fill: var(--color-text);
 	}
 
 	.cls-2 {
-		@apply fill-background;
+		fill: var(--color-background);
 	}
 </style>

@@ -3,7 +3,7 @@
 	import StationSearch from "$components/StationSearch.svelte";
 	import type { Station } from "$models/station";
 	import TimePicker from "$components/TimePicker.svelte";
-	import Clock from "$components/svg/Clock.svelte";
+	import Clock from "$components/ui/icons/Clock.svelte";
 	import { gotoTimetable } from "$lib";
 
 	let typeSelected: "departures" | "arrivals" = $state("departures");

@@ -23,10 +23,10 @@
 
 	.cls-1,
 	.cls-2 {
-		@apply fill-background;
+		fill: var(--color-background);
 	}
 
 	.cls-3 {
-		@apply fill-text;
+		fill: var(--color-text);
 	}
 </style>

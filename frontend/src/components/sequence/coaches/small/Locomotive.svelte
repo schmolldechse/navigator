@@ -17,7 +17,8 @@
 
 <style lang="postcss">
 	.cls-1 {
-		@apply fill-none stroke-text;
+		fill: none;
+		stroke: var(--color-text);
 		stroke-miterlimit: 10;
 		stroke-width: 50px;
 	}

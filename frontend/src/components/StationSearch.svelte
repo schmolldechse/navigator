@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Station } from "$models/station";
-	import Search from "$components/svg/Search.svelte";
+	import Search from "$components/ui/icons/Search.svelte";
 	import { onMount } from "svelte";
 	import { env } from "$env/dynamic/public";
 

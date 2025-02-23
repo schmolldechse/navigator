@@ -15,6 +15,6 @@
 
 <style lang="postcss">
 	.cls-1 {
-		@apply fill-text;
+        fill: var(--color-text);
 	}
 </style>

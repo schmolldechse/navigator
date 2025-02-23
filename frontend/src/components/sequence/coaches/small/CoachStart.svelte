@@ -21,18 +21,18 @@
 
 <style lang="postcss">
 	.cls-1 {
-		@apply stroke-text;
+        stroke: var(--color-text);
 		stroke-width: 50px;
 	}
 
 	.cls-1,
 	.cls-2 {
-		@apply fill-none;
+        fill: none;
 		stroke-miterlimit: 10;
 	}
 
 	.cls-2 {
-		@apply stroke-accent;
+        stroke: var(--color-accent);
 		stroke-width: 75px;
 	}
 </style>
