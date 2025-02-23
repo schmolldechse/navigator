@@ -6,7 +6,8 @@
 	let { children }: LayoutProps = $props();
 </script>
 
-<div class="flex h-screen w-screen flex-col overflow-hidden">
+<div class="min-h-screen flex flex-col">
 	<Navbar />
+
 	{@render children()}
 </div>

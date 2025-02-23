@@ -5,7 +5,7 @@
 	let { userInfo = true }: { userInfo?: boolean } = $props();
 </script>
 
-<div class="mx-2 mt-4 flex items-center justify-between pr-4">
+<div class="px-2 pt-4 flex items-center justify-between pr-4 sticky top-0 w-full bg-background h-20">
 	<VisualIdentity />
 
 	{#if userInfo}

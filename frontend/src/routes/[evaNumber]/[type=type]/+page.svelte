@@ -46,37 +46,25 @@
 	}}
 />
 
-<div class="scrollbar-hidden flex flex-1 flex-col items-center overflow-auto">
-	<div class="container mx-auto flex items-center justify-between px-4">
-		<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
-		<Clock />
-	</div>
 
-	<div class="scrollbar-hidden container mx-auto flex flex-1 flex-col divide-y-2 overflow-y-scroll md:divide-y-0">
-		{#each data.journeys as journey}
-			{#if !matchesFilter(journey)}{:else if journey.connections.length > 1}
-				<WingTrain {journey} />
-			{:else}
-				<ConnectionComponent connection={journey.connections[0]} renderInformation={true} renderBorder={true} />
-			{/if}
-		{/each}
-	</div>
-
-	<div class="mt-auto w-full">
-		<Filter
-			allowedProducts={data.station.products ? Object.values(data.station.products) : []}
-			bind:selected={currentFilter}
-		/>
-	</div>
+<div class="container mx-auto flex items-center justify-between px-4 sticky top-20 pt-4 bg-background z-10 w-full">
+	<span class="text-xl font-semibold md:px-4 md:text-4xl">{data.station.name}</span>
+	<Clock />
 </div>
 
-<style>
-	.scrollbar-hidden::-webkit-scrollbar {
-		display: none;
-	}
+<div class="container mx-auto flex flex-1 flex-col divide-y-2 md:divide-y-0 scrollbar-track-sky-300">
+	{#each data.journeys as journey}
+		{#if !matchesFilter(journey)}{:else if journey.connections.length > 1}
+			<WingTrain {journey} />
+		{:else}
+			<ConnectionComponent connection={journey.connections[0]} renderInformation={true} renderBorder={true} />
+		{/if}
+	{/each}
+</div>
 
-	.scrollbar-hidden {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
-	}
-</style>
+<div class="w-full sticky bottom-0 mt-auto">
+	<Filter
+		allowedProducts={data.station.products ? Object.values(data.station.products) : []}
+		bind:selected={currentFilter}
+	/>
+</div>
