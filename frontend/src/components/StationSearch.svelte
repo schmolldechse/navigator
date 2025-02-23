@@ -98,7 +98,7 @@
 		<input
 			bind:this={inputElement}
 			type="text"
-			class="w-full border-none bg-primary-dark p-2 outline-none"
+			class="w-full border-none bg-primary-dark p-2 outline-hidden"
 			placeholder="Search for a station"
 			onclick={() => (open = true)}
 			oninput={handleInput}

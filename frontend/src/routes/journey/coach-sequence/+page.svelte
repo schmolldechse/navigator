@@ -40,6 +40,6 @@
 	}}
 />
 
-<div class="mb-6 flex flex-[1] justify-center">
+<div class="mb-6 flex flex-1 justify-center">
 	<Sequence sequence={data.sequence} />
 </div>

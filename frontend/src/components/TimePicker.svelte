@@ -83,7 +83,7 @@
 
 	{#if isOpen}
 		<div
-			class="md:w-128 absolute left-1/2 top-1/2 z-10 mt-8 w-80 -translate-x-1/4 transform rounded bg-primary p-4 shadow-lg md:left-auto md:top-full md:mt-2 md:transform-none"
+			class="md:w-128 absolute left-1/2 top-1/2 z-10 mt-8 w-80 -translate-x-1/4 transform rounded-sm bg-primary p-4 shadow-lg md:left-auto md:top-full md:mt-2 md:transform-none"
 		>
 			<!-- header -->
 			<div class="mb-4 flex items-center justify-between">
@@ -122,7 +122,7 @@
 
 			<!-- time inputs -->
 			<div class="mt-4 flex items-center justify-between space-x-2 font-bold">
-				<button class="rounded bg-accent px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(-15)}>
+				<button class="rounded-sm bg-accent px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(-15)}>
 					-
 				</button>
 
@@ -135,7 +135,7 @@
 						onkeydown={handleKeyPress}
 						maxLength={2}
 						readOnly={true}
-						class="w-full rounded border border-none bg-transparent text-center text-xl text-text focus:outline-none"
+						class="w-full rounded-sm border border-none bg-transparent text-center text-xl text-text focus:outline-hidden"
 					/>
 					<span>:</span>
 					<input
@@ -146,17 +146,17 @@
 						onkeydown={handleKeyPress}
 						maxLength={2}
 						readOnly={true}
-						class="w-full rounded border border-none bg-transparent text-center text-xl text-text focus:outline-none"
+						class="w-full rounded-sm border border-none bg-transparent text-center text-xl text-text focus:outline-hidden"
 					/>
 				</div>
 
-				<button class="rounded bg-accent px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(15)}>
+				<button class="rounded-sm bg-accent px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(15)}>
 					+
 				</button>
 			</div>
 
 			<!-- select button -->
-			<button class="mt-4 w-full rounded bg-accent py-2 font-bold text-black" onclick={() => (isOpen = false)}>
+			<button class="mt-4 w-full rounded-sm bg-accent py-2 font-bold text-black" onclick={() => (isOpen = false)}>
 				Select
 			</button>
 		</div>

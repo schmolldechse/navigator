@@ -1,11 +1,39 @@
-@import "tailwindcss/base";
-@import "tailwindcss/components";
-@import "tailwindcss/utilities";
-@import "@fontsource/montserrat";
-@import "@fontsource/montserrat/400.css";
-@import "@fontsource/montserrat/500.css";
-@import "@fontsource/montserrat/600.css";
-@import "@fontsource/montserrat/700.css";
+@import 'tailwindcss';
+@import '@fontsource/montserrat' layer(utilities);
+@import '@fontsource/montserrat/400.css' layer(utilities);
+@import '@fontsource/montserrat/500.css' layer(utilities);
+@import '@fontsource/montserrat/600.css' layer(utilities);
+@import '@fontsource/montserrat/700.css' layer(utilities);
+
+@theme {
+  --color-text: var(--text);
+  --color-background: var(--background);
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-darker: var(--primary-darker);
+  --color-secondary: var(--secondary);
+  --color-accent: var(--accent);
+
+  --font-montserrat: Montserrat, sans-serif;
+}
+
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
 
 @layer base {
 	:root {
