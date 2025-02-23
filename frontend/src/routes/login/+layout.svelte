@@ -7,6 +7,6 @@
 </script>
 
 <div class="flex h-screen w-screen flex-col overflow-hidden">
-	<Navbar />
+	<Navbar userInfo={false} />
 	{@render children()}
 </div>

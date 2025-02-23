@@ -1,4 +1,4 @@
-import type { BetterAuthPlugin } from "better-auth";
+import type { BetterAuthClientPlugin, BetterAuthPlugin } from "better-auth";
 
 export const usernamePlugin = () => {
 	return {
@@ -17,3 +17,10 @@ export const usernamePlugin = () => {
 		}
 	} satisfies BetterAuthPlugin;
 };
+
+export const usernameClientPlugin = () => {
+	return {
+		id: "username-client-plugin",
+		$InferServerPlugin: {} as ReturnType<typeof usernamePlugin>
+	} satisfies BetterAuthClientPlugin;
+}

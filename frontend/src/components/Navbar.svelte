@@ -1,10 +1,14 @@
 <script lang="ts">
-	import NavbarButton from "$components/NavbarButton.svelte";
+	import VisualIdentity from "$components/branding/VisualIdentity.svelte";
+	import UserInfo from "$components/auth/UserInfo.svelte";
 
-	let { type = $bindable() } = $props();
+	let { userInfo = true }: { userInfo?: boolean } = $props();
 </script>
 
-<span class="flex items-center space-x-4 text-base md:text-xl">
-	<NavbarButton isSelected={type === "timetable"} onclick={() => (type = "timetable")}>Timetable</NavbarButton>
-	<NavbarButton isSelected={type === "route_planner"} onclick={() => (type = "route_planner")}>Route Planner</NavbarButton>
-</span>
+<div class="mx-2 mt-4 flex items-center justify-between pr-4">
+	<VisualIdentity />
+
+	{#if userInfo}
+		<UserInfo />
+	{/if}
+</div>

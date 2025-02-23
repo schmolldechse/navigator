@@ -1,24 +1,12 @@
 <script lang="ts">
 	import "$src/app.css";
-	import Logo from "$components/Logo.svelte";
-	import TimetableNavbar from "$components/timetable/TimetableNavbar.svelte";
+	import Navbar from "$components/Navbar.svelte";
+	import type { LayoutProps } from "./$types";
 
-	let { children } = $props();
+	let { children }: LayoutProps = $props();
 </script>
 
 <div class="flex h-screen w-screen flex-col overflow-hidden">
-	<!-- Logo/ TimetableNavbar -->
-	<div class="m-4 flex items-center justify-between pr-4">
-		<a href="/">
-			<div class="flex cursor-pointer flex-row items-center">
-				<Logo />
-				<h1 class="relative top-[-0.25rem] hidden text-[2rem] font-bold md:inline">NAVIGATOR</h1>
-			</div>
-		</a>
-
-		<TimetableNavbar />
-	</div>
-
-	<!-- TimetableSearch/ Route Planner -->
+	<Navbar />
 	{@render children()}
 </div>
