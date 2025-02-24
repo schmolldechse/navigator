@@ -1,16 +1,11 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import { DateTime } from "luxon";
 
 	let date = $state(DateTime.local());
-	let show = $state(true);
+	let show = $derived(date.second % 2 === 0);
 
-	onMount(() => {
-		const interval = setInterval(() => {
-			show = !show;
-			date = DateTime.local();
-		}, 1000);
-
+	$effect(() => {
+		const interval = setInterval(() => date = DateTime.local(), 1000);
 		return () => clearInterval(interval);
 	});
 </script>
