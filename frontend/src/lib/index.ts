@@ -1,10 +1,5 @@
 // place files you want to import through the `$lib` alias in this folder.
-import { goto } from "$app/navigation";
 import type { Stop } from "$models/station";
-
-const gotoTimetable = async (evaNumber: string, type: "departures" | "arrivals", startDate: string) => {
-	await goto(`/${evaNumber}/${type}?startDate=${encodeURIComponent(startDate)}`);
-};
 
 const writeStop = (stop?: Stop, fallbackName: string = ""): string => {
 	if (!stop) return fallbackName;
@@ -33,4 +28,4 @@ const mapStops = (entry: any): Stop[] | null => {
 	}));
 };
 
-export { gotoTimetable, writeStop, mapStops };
+export { writeStop, mapStops };

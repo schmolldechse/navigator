@@ -4,7 +4,7 @@
 	import type { Station } from "$models/station";
 	import TimePicker from "$components/TimePicker.svelte";
 	import Clock from "$components/ui/icons/Clock.svelte";
-	import { gotoTimetable } from "$lib";
+	import { goto } from "$app/navigation";
 
 	let typeSelected: "departures" | "arrivals" = $state("departures");
 
@@ -63,7 +63,7 @@
 					: 'bg-primary-dark text-text hover:bg-secondary'} text-background flex items-center justify-center rounded-3xl px-4 font-bold md:text-2xl"
 				onclick={async () => {
 					if (!stationSelected || !dateSelected) return;
-					await gotoTimetable(stationSelected?.evaNumber, typeSelected, dateSelected.toISO());
+					await goto(`/${stationSelected?.evaNumber}/${typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}`);
 				}}
 			>
 				Search
