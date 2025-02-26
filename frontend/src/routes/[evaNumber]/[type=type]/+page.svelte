@@ -28,6 +28,13 @@
 		return currentFilter.includes(firstConnection?.lineInformation?.type ?? "");
 	};
 
+	const allowedProducts = (): string[] => {
+		const products = data?.station?.products || [];
+
+		const types = data?.journeys?.flatMap(journey => journey.connections.map(conn => conn.lineInformation?.type)).filter(Boolean);
+		return products.filter(product => types.includes(product));
+	}
+
 	const navigate = async () => {
 		const type = isDeparture ? "arrivals" : "departures";
 		const startDate = page.url.searchParams.get("startDate") ?? new Date().toISOString();
@@ -80,5 +87,5 @@
 </div>
 
 <div class="sticky bottom-0 mt-auto w-full">
-	<Filter allowedProducts={data.station.products ? Object.values(data.station.products) : []} bind:selected={currentFilter} />
+	<Filter allowedProducts={allowedProducts()} bind:selected={currentFilter} />
 </div>
