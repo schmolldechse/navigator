@@ -1,5 +1,5 @@
 import { createAuthClient } from "better-auth/svelte";
-import { usernameClientPlugin } from "$authPlugins/username";
+import { usernameClientPlugin } from "./plugins/username";
 
 export const authClient = createAuthClient({
 	baseURL: "http://localhost:8000/auth",

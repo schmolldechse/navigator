@@ -15,8 +15,7 @@ const config = {
 		alias: {
 			$components: "src/components",
 			$models: "../backend/src/models",
-			$src: "src/",
-			$authPlugins: "../backend/src/lib/plugins"
+			$src: "src/"
 		}
 	}
 };
