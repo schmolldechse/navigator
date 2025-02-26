@@ -31,9 +31,11 @@
 	const allowedProducts = (): string[] => {
 		const products = data?.station?.products || [];
 
-		const types = data?.journeys?.flatMap(journey => journey.connections.map(conn => conn.lineInformation?.type)).filter(Boolean);
-		return products.filter(product => types.includes(product));
-	}
+		const types = data?.journeys
+			?.flatMap((journey) => journey.connections.map((conn) => conn.lineInformation?.type))
+			.filter(Boolean);
+		return products.filter((product) => types.includes(product));
+	};
 
 	const navigate = async () => {
 		const type = isDeparture ? "arrivals" : "departures";
@@ -41,7 +43,7 @@
 
 		// TODO: inspect why "goto" does not reload the page, even using invalidateAll
 		window.location.href = `/${station?.evaNumber}/${type}?startDate=${encodeURIComponent(startDate)}`;
-	}
+	};
 </script>
 
 <MetaTags
@@ -63,16 +65,20 @@
 	}}
 />
 
-<div class="bg-background sticky top-20 z-10 container mx-auto flex-col w-full px-6 pt-4">
+<div class="bg-background sticky top-20 z-10 container mx-auto w-full flex-col px-6 pt-4">
 	<div class="flex justify-between">
-		<span class="text-xl font-semibold md:text-4xl whitespace-normal break-words min-w-0 max-w-[75%]">{data.station.name}</span>
+		<span class="max-w-[75%] min-w-0 text-xl font-semibold break-words whitespace-normal md:text-4xl"
+			>{data.station.name}</span
+		>
 		<Clock />
 	</div>
 
-	<button class="text-base md:text-xl cursor-pointer relative group" onclick={navigate}>
+	<button class="group relative cursor-pointer text-base md:text-xl" onclick={navigate}>
 		<span class="font-bold">🡒</span>
 		Show {isDeparture ? "Arrivals" : "Departures"}
-		<span class="absolute left-0 bottom-0 w-full h-0.5 bg-accent transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
+		<span
+			class="bg-accent absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform transition-transform duration-300 group-hover:scale-x-100"
+		></span>
 	</button>
 </div>
 

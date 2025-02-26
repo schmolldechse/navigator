@@ -5,7 +5,7 @@
 	let show = $derived(date.second % 2 === 0);
 
 	$effect(() => {
-		const interval = setInterval(() => date = DateTime.local(), 1000);
+		const interval = setInterval(() => (date = DateTime.local()), 1000);
 		return () => clearInterval(interval);
 	});
 </script>

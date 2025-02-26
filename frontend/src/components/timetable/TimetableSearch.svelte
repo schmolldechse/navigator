@@ -63,7 +63,9 @@
 					: 'bg-primary-dark text-text hover:bg-secondary'} text-background flex items-center justify-center rounded-3xl px-4 font-bold md:text-2xl"
 				onclick={async () => {
 					if (!stationSelected || !dateSelected) return;
-					await goto(`/${stationSelected?.evaNumber}/${typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}`);
+					await goto(
+						`/${stationSelected?.evaNumber}/${typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}`
+					);
 				}}
 			>
 				Search
