@@ -47,7 +47,7 @@ services:
     ports: [ "5432:5432" ]
     networks: [ "navigator-network" ]
     volumes:
-      - ./postgres_data:/var/lib/postgresql/data
+      - postgres_data:/var/lib/postgresql/data
 
 networks:
   navigator-network:
