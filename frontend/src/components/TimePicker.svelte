@@ -74,7 +74,7 @@
 		type="button"
 		class:ring-2={isOpen}
 		class:ring-accent={isOpen}
-		class="hover:ring-accent flex flex-row items-center gap-x-2 rounded-md p-0.5 text-center hover:ring-2 md:p-2 md:text-2xl"
+		class="hover:ring-accent flex flex-row items-center gap-x-2 rounded-md p-0.5 text-center hover:ring-2 md:p-2 md:text-2xl cursor-pointer"
 		onclick={() => (isOpen = true)}
 	>
 		<Calendar />

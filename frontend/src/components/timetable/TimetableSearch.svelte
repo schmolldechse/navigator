@@ -46,10 +46,10 @@
 	<div class="flex flex-row">
 		<TimePicker bind:selectedDate={dateSelected} />
 
-		<div class="ml-auto flex gap-1 md:gap-3">
+		<div class="ml-auto flex gap-x-1 md:gap-x-3">
 			<!-- Reset time -->
 			<button
-				class="bg-primary-dark flex flex-row items-center rounded-3xl px-2 md:gap-x-1 md:px-4"
+				class="bg-primary-dark flex flex-row items-center rounded-3xl px-2 md:gap-x-1 md:px-4 cursor-pointer"
 				onclick={() => (dateSelected = DateTime.now().set({ second: 0, millisecond: 0 }))}
 			>
 				<Clock height="25px" width="25px" />
@@ -60,7 +60,7 @@
 			<button
 				class="{stationSelected && dateSelected
 					? 'bg-accent text-black'
-					: 'bg-primary-dark text-text hover:bg-secondary'} text-background flex items-center justify-center rounded-3xl px-4 font-bold md:text-2xl"
+					: 'bg-primary-dark text-text hover:bg-secondary'} text-background rounded-3xl px-4 font-bold md:text-2xl cursor-pointer"
 				onclick={async () => {
 					if (!stationSelected || !dateSelected) return;
 					await goto(
