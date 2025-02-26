@@ -49,7 +49,7 @@
 		<div class="ml-auto flex gap-x-1 md:gap-x-3">
 			<!-- Reset time -->
 			<button
-				class="bg-primary-dark flex flex-row items-center rounded-3xl px-2 md:gap-x-1 md:px-4 cursor-pointer"
+				class="bg-primary-dark flex cursor-pointer flex-row items-center rounded-3xl px-2 md:gap-x-1 md:px-4"
 				onclick={() => (dateSelected = DateTime.now().set({ second: 0, millisecond: 0 }))}
 			>
 				<Clock height="25px" width="25px" />
@@ -60,7 +60,7 @@
 			<button
 				class="{stationSelected && dateSelected
 					? 'bg-accent text-black'
-					: 'bg-primary-dark text-text hover:bg-secondary'} text-background rounded-3xl px-4 font-bold md:text-2xl cursor-pointer"
+					: 'bg-primary-dark text-text hover:bg-secondary'} text-background cursor-pointer rounded-3xl px-4 font-bold md:text-2xl"
 				onclick={async () => {
 					if (!stationSelected || !dateSelected) return;
 					await goto(
