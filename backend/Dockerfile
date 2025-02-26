@@ -23,5 +23,7 @@ ENV GITHUB_CLIENT_SECRET=github-client-secret
 
 RUN bun tsoa
 
+RUN bun x prisma generate
+
 EXPOSE 8000
 CMD ["bun", "run", "src/server.ts"]
