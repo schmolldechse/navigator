@@ -56,7 +56,7 @@
 	}}
 />
 
-<div class="bg-background sticky top-20 z-10 container mx-auto flex-col w-full px-8 pt-4">
+<div class="bg-background sticky top-20 z-10 container mx-auto flex-col w-full px-6 pt-4">
 	<div class="flex justify-between">
 		<span class="text-xl font-semibold md:text-4xl whitespace-normal break-words min-w-0 max-w-[75%]">{data.station.name}</span>
 		<Clock />
