@@ -16,6 +16,6 @@ export const auth = betterAuth({
 	},
 	basePath: "/auth",
 	trustedOrigins: ["http://localhost:5173"],
-	secret: process.env.BETTER_AUTH_SECRET!,
+	secret: process.env.AUTH_SECRET!,
 	plugins: [usernamePlugin()]
 });
