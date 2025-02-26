@@ -62,8 +62,10 @@
 		<Clock />
 	</div>
 
-	<button onclick={navigate}>
-		{isDeparture ? "Departures" : "Arrivals"}
+	<button class="text-base md:text-xl cursor-pointer relative group" onclick={navigate}>
+		<span class="font-bold">🡒</span>
+		Show {isDeparture ? "Arrivals" : "Departures"}
+		<span class="absolute left-0 bottom-0 w-full h-0.5 bg-accent transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100"></span>
 	</button>
 </div>
 
