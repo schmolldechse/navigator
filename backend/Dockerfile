@@ -26,4 +26,4 @@ RUN bun tsoa
 RUN bun x prisma generate
 
 EXPOSE 8000
-CMD ["bun", "run", "src/server.ts"]
+CMD ["bun x migrate deploy", "&&", "bun run src/server.ts"]
