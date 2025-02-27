@@ -22,7 +22,7 @@ ENV GITHUB_CLIENT_ID=github-client-id
 ENV GITHUB_CLIENT_SECRET=github-client-secret
 
 RUN bun tsoa
-RUN bunx prisma generate
 
 EXPOSE 8000
-CMD ["sh", "-c", "bunx prisma migrate deploy && bun run src/server.ts"]
+
+CMD ["sh", "-c", "bun migrate && bun run src/server.ts"]

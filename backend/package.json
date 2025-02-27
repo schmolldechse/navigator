@@ -7,7 +7,8 @@
 		"lint": "prettier --check .",
 		"tsoa": "tsoa routes && tsoa spec",
 		"prestart": "bun run tsoa",
-		"start": "bun run src/server.ts"
+		"start": "bun run src/server.ts",
+		"migrate": "bunx prisma generate && bunx prisma migrate deploy && bunx prisma db push"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
