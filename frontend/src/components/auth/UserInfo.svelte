@@ -12,7 +12,7 @@
 	</div>
 {:else}
 	<button
-		class="hover:text-accent text-xl font-bold transition-colors duration-500"
+		class="hover:text-accent text-xl font-bold transition-colors duration-500 cursor-pointer"
 		onclick={async () => await goto("/login")}>SIGN IN</button
 	>
 {/if}
