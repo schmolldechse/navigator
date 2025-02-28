@@ -1,5 +1,5 @@
 <script lang="ts">
-	let { width = "75", height = "75" }: { height?: string, width?: string } = $props();
+	let { width = "75", height = "75" }: { height?: string; width?: string } = $props();
 </script>
 
 <svg viewBox="0 0 1024 1024" class="ml-[10px]" {width} {height}>
@@ -21,9 +21,9 @@
 </svg>
 
 <style lang="postcss">
-    .cls-1 {
-        fill: var(--color-accent);
-        stroke: black;
-        stroke-width: 2;
-    }
+	.cls-1 {
+		fill: var(--color-accent);
+		stroke: black;
+		stroke-width: 2;
+	}
 </style>

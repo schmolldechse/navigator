@@ -26,14 +26,14 @@
 	}}
 />
 
-<div class="flex flex-col h-screen container mx-auto items-center gap-y-4 pt-24 md:pt-48">
+<div class="container mx-auto flex h-screen flex-col items-center gap-y-4 pt-24 md:pt-48">
 	<div class="flex justify-center">
 		<LogoIcon height="150" width="150" />
 	</div>
 
-	<div class="md:w-[40%] space-y-12">
+	<div class="space-y-12 md:w-[40%]">
 		<div class="flex flex-col">
-			<span class="font-bold text-3xl">Login</span>
+			<span class="text-3xl font-bold">Login</span>
 			<span>Please login to continue.</span>
 		</div>
 

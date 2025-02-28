@@ -4,7 +4,7 @@
 </script>
 
 <button
-	class="w-full bg-primary-darker hover:bg-primary-dark cursor-pointer flex flex-row items-center justify-center gap-x-4 rounded-l p-2"
+	class="bg-primary-darker hover:bg-primary-dark flex w-full cursor-pointer flex-row items-center justify-center gap-x-4 rounded-l p-2"
 	onclick={() => authClient.signIn.social({ provider: "github", callbackURL: window.location.origin })}
 >
 	<GitHub height="25" width="25" />
