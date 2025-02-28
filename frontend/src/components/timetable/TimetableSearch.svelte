@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { DateTime } from "luxon";
-	import StationSearch from "$components/StationSearch.svelte";
+	import StationSearch from "$components/ui/controls/StationSearch.svelte";
 	import type { Station } from "$models/station";
-	import TimePicker from "$components/TimePicker.svelte";
+	import TimePicker from "$components/ui/controls/TimePicker.svelte";
 	import Clock from "$components/ui/icons/Clock.svelte";
 	import { goto } from "$app/navigation";
 
