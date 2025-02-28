@@ -7,8 +7,8 @@
 
 {#if $session.data}
 	<div class="flex items-center gap-x-4">
-		<span class="text-xl font-medium">{$session.data.user.username}</span>
-		<img src={$session.data.user.image} height={50} width={50} alt="User avatar" />
+		<span class="hidden md:block text-xl font-medium">{$session.data.user.username}</span>
+		<img src={$session.data.user.image} height={30} width={30} class="md:h-12 md:w-12" alt="User avatar" />
 	</div>
 {:else}
 	<button
