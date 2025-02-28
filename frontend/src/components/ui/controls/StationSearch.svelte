@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Station } from "$models/station";
-	import Search from "$components/ui/icons/Search.svelte";
 	import { onMount } from "svelte";
 	import { env } from "$env/dynamic/public";
+	import { Search } from "lucide-svelte";
 
 	let { station = $bindable(undefined) }: { station?: Station } = $props();
 	let open = $state<boolean>(false);
@@ -94,7 +94,7 @@
 	<div
 		class="bg-primary-dark focus-within:ring-accent flex flex-row items-center gap-x-1 rounded-2xl px-2 font-medium focus-within:ring-2 md:text-2xl"
 	>
-		<Search height="50px" width="50px" />
+		<Search size={44} />
 		<input
 			bind:this={inputElement}
 			type="text"

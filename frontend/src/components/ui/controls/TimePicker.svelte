@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from "svelte";
 	import { DateTime } from "luxon";
-	import Calendar from "$components/ui/icons/Calendar.svelte";
+	import { CalendarDays } from "lucide-svelte";
 
 	let { selectedDate = $bindable(DateTime.now().set({ second: 0, millisecond: 0 })) } = $props();
 
@@ -77,7 +77,7 @@
 		class="hover:ring-accent flex cursor-pointer flex-row items-center gap-x-2 rounded-md p-0.5 text-center hover:ring-2 md:p-2 md:text-2xl"
 		onclick={() => (isOpen = true)}
 	>
-		<Calendar />
+		<CalendarDays />
 		<span>{selectedDate.toFormat("dd.MM.yyyy - HH:mm")}</span>
 	</button>
 
