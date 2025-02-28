@@ -27,9 +27,9 @@
 />
 
 <div class="container mx-auto flex h-screen flex-col items-center gap-y-4 pt-24 md:pt-48">
-	<div class="flex justify-center">
+	<a class="flex justify-center" href="/">
 		<LogoIcon height="150" width="150" />
-	</div>
+	</a>
 
 	<div class="space-y-12 md:w-[40%]">
 		<div class="flex flex-col">
