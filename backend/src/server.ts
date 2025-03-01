@@ -6,6 +6,7 @@ import express from "express";
 import * as path from "node:path";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth/auth.ts";
+import { errorHandler } from "./lib/auth/errorHandler.ts";
 
 const app = express();
 
@@ -19,5 +20,7 @@ app.get("/api-spec", (req, res) => res.sendFile(path.join(__dirname, "build", "s
 app.get("/api", (req, res) => res.redirect("/api-docs"));
 
 RegisterRoutes(app);
+
+app.use(errorHandler);
 
 app.listen(8000, () => console.log("Server is running on port 8000"));

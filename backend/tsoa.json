@@ -28,10 +28,18 @@
 				"name": "Stations",
 				"description": "Returns all stations from the DeutscheBahn API"
 			}
-		]
+		],
+		"securityDefinitions": {
+			"better_auth": {
+				"type": "apiKey",
+				"in": "cookie",
+				"name": "better-auth.session_token"
+			}
+		}
 	},
 	"routes": {
 		"routesDir": "build",
-		"basePath": "/api/v1/"
+		"basePath": "/api/v1/",
+		"authenticationModule": "./src/lib/auth/middleware.ts"
 	}
 }
