@@ -1,21 +1,11 @@
 <script lang="ts">
-	import { getContext, setContext } from "svelte";
-	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
-	import Clock from "$components/timetable/Clock.svelte";
 	import Filter from "$components/timetable/filter/Filter.svelte";
 	import type { Connection, Journey } from "$models/connection";
 	import ConnectionComponent from "$components/timetable/ConnectionComponent.svelte";
-	import { page } from "$app/state";
 	import WingTrain from "$components/timetable/WingTrain.svelte";
-	import type { Station } from "$models/station";
 
 	let { data }: PageProps = $props();
-
-	setContext<boolean>("isDeparture", page.params.type === "departures");
-	let isDeparture = getContext<boolean>("isDeparture");
-	setContext<Station>("station", data.station);
-	let station = getContext<Station>("station");
 
 	let currentFilter = $state(["*"]);
 	const matchesFilter = (journey: Journey) => {
@@ -36,51 +26,7 @@
 			.filter(Boolean);
 		return products.filter((product) => types.includes(product));
 	};
-
-	const navigate = async () => {
-		const type = isDeparture ? "arrivals" : "departures";
-		const startDate = page.url.searchParams.get("startDate") ?? new Date().toISOString();
-
-		// TODO: inspect why "goto" does not reload the page, even using invalidateAll
-		window.location.href = `/${station?.evaNumber}/${type}?startDate=${encodeURIComponent(startDate)}`;
-	};
 </script>
-
-<MetaTags
-	title={data.station.name}
-	description="The Navigator for your train journeys."
-	openGraph={{
-		url: "https://navigator.voldechse.wtf",
-		title: "Navigator",
-		siteName: "Navigator",
-		description: "The Navigator for your train journeys.",
-		images: [
-			{
-				url: "https://navigator.voldechse.wtf/logo.png",
-				width: 1024,
-				height: 1024,
-				alt: "Navigator Logo"
-			}
-		]
-	}}
-/>
-
-<div class="bg-background sticky top-20 z-10 container mx-auto w-full flex-col px-6 pt-4">
-	<div class="flex justify-between">
-		<span class="max-w-[75%] min-w-0 text-xl font-semibold break-words whitespace-normal md:text-4xl"
-			>{data.station.name}</span
-		>
-		<Clock />
-	</div>
-
-	<button class="group relative cursor-pointer text-base md:text-xl" onclick={navigate}>
-		<span class="font-bold">🡒</span>
-		Show {isDeparture ? "Arrivals" : "Departures"}
-		<span
-			class="bg-accent absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform transition-transform duration-300 group-hover:scale-x-100"
-		></span>
-	</button>
-</div>
 
 <div class="scrollbar-track-sky-300 container mx-auto flex flex-1 flex-col divide-y-2 md:divide-y-0">
 	{#each data.journeys as journey}

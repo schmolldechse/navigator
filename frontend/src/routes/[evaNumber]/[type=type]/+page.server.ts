@@ -1,35 +1,16 @@
 import type { PageServerLoad } from "./$types";
-import type { Station } from "$models/station";
 import { error } from "@sveltejs/kit";
 import type { Journey } from "$models/connection";
 import { DateTime } from "luxon";
 import { env } from "$env/dynamic/private";
 
-export const load: PageServerLoad = async ({ params, url }): Promise<{ station: Station; journeys: Journey[] }> => {
-	const [station, journeys] = await Promise.all([
-		loadStation(params.evaNumber),
-		loadJourneys(
-			params.evaNumber,
-			params.type,
-			url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
-		)
-	]);
-	return { station, journeys };
-};
-
-const loadStation = async (evaNumber: string): Promise<Station> => {
-	const response = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/stations/${evaNumber}`, {
-		method: "GET"
-	});
-	if (!response.ok) {
-		throw error(404, `No station found for ${evaNumber}`);
-	}
-
-	const station = (await response.json()) as Station;
-	if (station.evaNumber === undefined) {
-		throw error(404, `No station found for ${evaNumber}`);
-	}
-	return station;
+export const load: PageServerLoad = async ({ params, url }): Promise<{ journeys: Journey[] }> => {
+	const journeys = await loadJourneys(
+		params.evaNumber,
+		params.type,
+		url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
+	);
+	return { journeys };
 };
 
 const loadJourneys = async (evaNumber: string, type: string, startDate: string): Promise<Journey[]> => {

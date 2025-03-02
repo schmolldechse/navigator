@@ -10,7 +10,7 @@
 	});
 </script>
 
-<span class="text-2xl font-medium md:text-4xl">
+<span class="whitespace-nowrap text-2xl font-medium md:text-4xl">
 	{date.toFormat("HH")}
 	<span class:invisible={!show}>:</span>
 	{date.toFormat("mm")}
