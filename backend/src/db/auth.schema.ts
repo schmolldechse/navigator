@@ -9,7 +9,7 @@ export const user = authSchema.table("user", {
 	image: text("image"),
 	createdAt: timestamp("createdAt", { precision: 3 }).notNull(),
 	updatedAt: timestamp("updatedAt", { precision: 3 }).notNull(),
-	username: text("username").notNull().unique(),
+	username: text("username").notNull().unique()
 });
 
 export const session = authSchema.table("session", {
@@ -20,14 +20,18 @@ export const session = authSchema.table("session", {
 	updatedAt: timestamp("updatedAt", { precision: 3 }).notNull(),
 	ipAddress: text("ipAddress"),
 	userAgent: text("userAgent"),
-	userId: text("userId").notNull().references(() => user.id),
+	userId: text("userId")
+		.notNull()
+		.references(() => user.id)
 });
 
 export const account = authSchema.table("account", {
 	id: text("id").notNull().primaryKey(),
 	accountId: text("accountId").notNull(),
 	providerId: text("providerId").notNull(),
-	userId: text("userId").notNull().references(() => user.id),
+	userId: text("userId")
+		.notNull()
+		.references(() => user.id),
 	accessToken: text("accessToken"),
 	refreshToken: text("refreshToken"),
 	idToken: text("idToken"),
@@ -36,7 +40,7 @@ export const account = authSchema.table("account", {
 	scope: text("scope"),
 	password: text("password"),
 	createdAt: timestamp("createdAt", { precision: 3 }).notNull(),
-	updatedAt: timestamp("updatedAt", { precision: 3 }).notNull(),
+	updatedAt: timestamp("updatedAt", { precision: 3 }).notNull()
 });
 
 export const verification = authSchema.table("verification", {
@@ -45,5 +49,5 @@ export const verification = authSchema.table("verification", {
 	value: text("value").notNull(),
 	expiresAt: timestamp("expiresAt", { precision: 3 }).notNull(),
 	createdAt: timestamp("createdAt", { precision: 3 }),
-	updatedAt: timestamp("updatedAt", { precision: 3 }),
+	updatedAt: timestamp("updatedAt", { precision: 3 })
 });

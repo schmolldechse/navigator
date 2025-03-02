@@ -32,12 +32,7 @@ export class UserStationController extends Controller {
 		const [result] = await db
 			.select()
 			.from(favoriteStations)
-			.where(
-				and(
-					eq(favoriteStations.userId, session?.user?.id!),
-					eq(favoriteStations.evaNumber, Number(evaNumber))
-				)
-			)
+			.where(and(eq(favoriteStations.userId, session?.user?.id!), eq(favoriteStations.evaNumber, Number(evaNumber))))
 			.limit(1);
 		return { evaNumber: Number(evaNumber), favored: !!result };
 	}
@@ -58,32 +53,20 @@ export class UserStationController extends Controller {
 		const [existing] = await db
 			.select()
 			.from(favoriteStations)
-			.where(
-				and(
-					eq(favoriteStations.userId, session?.user?.id!),
-					eq(favoriteStations.evaNumber, Number(evaNumber))
-				)
-			)
+			.where(and(eq(favoriteStations.userId, session?.user?.id!), eq(favoriteStations.evaNumber, Number(evaNumber))))
 			.limit(1);
 
 		if (existing) {
 			await db
 				.delete(favoriteStations)
-				.where(
-					and(
-						eq(favoriteStations.userId, session?.user?.id!),
-						eq(favoriteStations.evaNumber, Number(evaNumber))
-					)
-				);
+				.where(and(eq(favoriteStations.userId, session?.user?.id!), eq(favoriteStations.evaNumber, Number(evaNumber))));
 			return { evaNumber: Number(evaNumber), favored: false };
 		}
 
-		await db
-			.insert(favoriteStations)
-			.values({
-				userId: session?.user?.id!,
-				evaNumber: Number(evaNumber)
-			});
+		await db.insert(favoriteStations).values({
+			userId: session?.user?.id!,
+			evaNumber: Number(evaNumber)
+		});
 		return { evaNumber: Number(evaNumber), favored: true };
 	}
 }

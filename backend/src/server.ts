@@ -15,12 +15,15 @@ app.use(express.json());
 app.use(cors({ origin: "*" }));
 
 app.get("/openapi.json", (req, res) => res.sendFile(path.join(__dirname, "..", "build", "openapi.json")));
-app.use("/api-docs", apiReference({
-	theme: "purple",
-	spec: {
-		url: '/openapi.json'
-	}
-}));
+app.use(
+	"/api-docs",
+	apiReference({
+		theme: "purple",
+		spec: {
+			url: "/openapi.json"
+		}
+	})
+);
 app.get("/api", (req, res) => res.redirect("/api-docs"));
 
 RegisterRoutes(app);

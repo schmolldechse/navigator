@@ -5,7 +5,7 @@ import { Pool } from "pg";
 
 export const auth = betterAuth({
 	database: new Pool({
-		connectionString: process.env.AUTH_POSTGRES_URL! + "?options=-csearch_path=auth",
+		connectionString: process.env.AUTH_POSTGRES_URL! + "?options=-csearch_path=auth"
 	}),
 	socialProviders: {
 		github: {
