@@ -14,7 +14,7 @@ class FavorizedResponse {
 }
 
 @Route("user/station")
-@Tags("")
+@Tags("User")
 export class UserStationController extends Controller {
 	@Get("favored/{evaNumber}")
 	@Security("better_auth")

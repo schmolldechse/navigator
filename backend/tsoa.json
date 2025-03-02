@@ -27,6 +27,10 @@
 			{
 				"name": "Stations",
 				"description": "Returns all stations from the DeutscheBahn API"
+			},
+			{
+				"name": "User",
+				"description": "Favorite stations."
 			}
 		],
 		"securityDefinitions": {
