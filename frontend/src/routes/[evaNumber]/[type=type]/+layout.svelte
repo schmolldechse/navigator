@@ -9,6 +9,7 @@
 	import { page } from "$app/state";
 	import { getContext, setContext } from "svelte";
 	import type { Station } from "$models/station";
+	import { env } from "$env/dynamic/public";
 
 	let { children, data }: LayoutProps = $props();
 	setContext<Station>("station", data.station);
@@ -18,6 +19,33 @@
 	let isDeparture = getContext<boolean>("isDeparture");
 
 	const session = authClient.useSession();
+
+	let favor = $state<boolean>(false);
+	$effect(() => {
+		if (!$session?.data) return;
+
+		const checkFavored = async () => {
+			const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/user/station/favored/${station?.evaNumber}`, {
+				method: "GET",
+				credentials: "include"
+			});
+			if (!request.ok) return;
+			favor = (await request.json()).favored;
+		}
+
+		checkFavored();
+	});
+
+	const toggleFavour = async () => {
+		if (!$session?.data) return;
+
+		const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/user/station/favor/${station?.evaNumber}`, {
+			method: "POST",
+			credentials: "include"
+		});
+		if (!request.ok) return;
+		favor = (await request.json()).favored;
+	};
 
 	const navigate = async () => {
 		const type = isDeparture ? "arrivals" : "departures";
@@ -55,7 +83,7 @@
 			{#snippet favoriteStation()}
 				<div class="flex flex-row break-all items-baseline gap-x-2">
 					{#if $session.data}
-						<Star class="shrink-0" />
+						<Star class="shrink-0 cursor-pointer transition-all duration-300 {favor ? 'fill-accent stroke-yellow-400' : 'fill-transparent hover:stroke-accent'}" onclick={toggleFavour} />
 					{/if}
 					<span class="text-xl font-semibold break-words whitespace-normal md:text-4xl">{station.name}</span>
 				</div>

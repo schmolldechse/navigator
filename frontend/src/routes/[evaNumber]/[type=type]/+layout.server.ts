@@ -2,7 +2,6 @@ import type { Station } from "$models/station";
 import { error } from "@sveltejs/kit";
 import { env } from "$env/dynamic/private";
 import type { LayoutServerLoad } from "./$types";
-import { authClient } from "$lib/auth-client";
 
 export const load: LayoutServerLoad = async ({ params }): Promise<{ station: Station }> => {
 	const station = await loadStation(params.evaNumber);
