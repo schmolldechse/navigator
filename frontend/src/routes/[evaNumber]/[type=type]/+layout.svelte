@@ -4,7 +4,7 @@
 	import type { LayoutProps } from "./$types";
 	import { MetaTags } from "svelte-meta-tags";
 	import Clock from "$components/timetable/Clock.svelte";
-	import { Star } from "lucide-svelte";
+	import { CornerDownRight, Star } from "lucide-svelte";
 	import { authClient } from "$lib/auth-client";
 	import { page } from "$app/state";
 	import { getContext, setContext } from "svelte";
@@ -65,8 +65,8 @@
 			<Clock />
 		</div>
 
-		<button class="group relative cursor-pointer text-base md:text-xl" onclick={navigate}>
-			<span class="font-bold">🡒</span>
+		<button class="flex gap-x-2 group relative cursor-pointer text-base md:text-xl" onclick={navigate}>
+			<CornerDownRight />
 			Show {isDeparture ? "Arrivals" : "Departures"}
 			<span
 				class="bg-accent absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform transition-transform duration-300 group-hover:scale-x-100"
