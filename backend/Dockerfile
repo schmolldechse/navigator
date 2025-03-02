@@ -15,7 +15,7 @@ ENV REDIS_PASSWORD=password
 
 # BetterAuth
 ENV AUTH_SECRET=auth-secret
-ENV AUTH_DATABASE_URL=postgresql://navigator-users:password@navigator-postgres:5432/users
+ENV AUTH_POSTGRES_URL=postgresql://navigator-users:password@navigator-postgres:5432/users
 
 # Auth Providers
 ENV GITHUB_CLIENT_ID=github-client-id
@@ -25,4 +25,4 @@ RUN bun tsoa
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "bun migrate && bun run src/server.ts"]
+CMD ["sh", "-c", "bun drizzle:auth && bun run src/server.ts"]
