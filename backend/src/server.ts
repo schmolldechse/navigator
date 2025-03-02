@@ -14,15 +14,13 @@ app.all("/auth/*", toNodeHandler(auth));
 app.use(express.json());
 app.use(cors({ origin: "*" }));
 
+app.get("/openapi.json", (req, res) => res.sendFile(path.join(__dirname, "..", "build", "openapi.json")));
 app.use("/api-docs", apiReference({
 	theme: "purple",
 	spec: {
-		// Put your OpenAPI url here:
-		url: '/api-spec'
+		url: '/openapi.json'
 	}
 }));
-
-app.get("/api-spec", (req, res) => res.sendFile(path.join(__dirname, "..", "build", "swagger.json")));
 app.get("/api", (req, res) => res.redirect("/api-docs"));
 
 RegisterRoutes(app);
