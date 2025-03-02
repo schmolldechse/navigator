@@ -1,17 +1,89 @@
-import { Controller, Get, Route, Security, Tags, Request } from "tsoa";
+import { Controller, Example, Get, Path, Post, Request, Res, Route, Security, Tags, type TsoaResponse } from "tsoa";
 import express from "express";
 import { auth } from "../../../lib/auth/auth.ts";
+import { db } from "../../../lib/db/data-db.ts";
+import { favoriteStations } from "../../../db/data.schema.ts";
+import { and, eq } from "drizzle-orm";
+
+class FavorizedResponse {
+	@Example(8000096)
+	evaNumber!: number;
+
+	@Example(true)
+	favored!: boolean;
+}
 
 @Route("user/station")
 @Tags("")
 export class UserStationController extends Controller {
-	@Get("test")
+	@Get("favored/{evaNumber}")
 	@Security("better_auth")
-	async favorStation(
+	async isFavored(
+		@Path() evaNumber: string,
 		@Request() req: express.Request,
-	): Promise<any> {
+		@Res() badRequestResponse: TsoaResponse<400, { reason: string }>
+	): Promise<FavorizedResponse> {
+		if (!/^\d+$/.test(evaNumber)) {
+			return badRequestResponse(400, { reason: "evaNumber is not an integer" });
+		}
+
 		const session = await auth.api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
-		console.log(session?.user);
-		return;
+
+		const [result] = await db
+			.select()
+			.from(favoriteStations)
+			.where(
+				and(
+					eq(favoriteStations.userId, session?.user?.id!),
+					eq(favoriteStations.evaNumber, Number(evaNumber))
+				)
+			)
+			.limit(1);
+		return { evaNumber: Number(evaNumber), favored: !!result };
+	}
+
+	@Post("favor/{evaNumber}")
+	@Security("better_auth")
+	async favor(
+		@Path() evaNumber: string,
+		@Request() req: express.Request,
+		@Res() badRequestResponse: TsoaResponse<400, { reason: string }>
+	): Promise<FavorizedResponse> {
+		if (!/^\d+$/.test(evaNumber)) {
+			return badRequestResponse(400, { reason: "evaNumber is not an integer" });
+		}
+
+		const session = await auth.api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
+
+		const [existing] = await db
+			.select()
+			.from(favoriteStations)
+			.where(
+				and(
+					eq(favoriteStations.userId, session?.user?.id!),
+					eq(favoriteStations.evaNumber, Number(evaNumber))
+				)
+			)
+			.limit(1);
+
+		if (existing) {
+			await db
+				.delete(favoriteStations)
+				.where(
+					and(
+						eq(favoriteStations.userId, session?.user?.id!),
+						eq(favoriteStations.evaNumber, Number(evaNumber))
+					)
+				);
+			return { evaNumber: Number(evaNumber), favored: false };
+		}
+
+		await db
+			.insert(favoriteStations)
+			.values({
+				userId: session?.user?.id!,
+				evaNumber: Number(evaNumber)
+			});
+		return { evaNumber: Number(evaNumber), favored: true };
 	}
 }
