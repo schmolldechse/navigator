@@ -31,7 +31,7 @@
 			});
 			if (!request.ok) return;
 			favor = (await request.json()).favored;
-		}
+		};
 
 		checkFavored();
 	});
@@ -81,9 +81,14 @@
 	<div class="bg-background sticky top-20 z-10 container mx-auto w-full flex-col px-6 pt-4">
 		<div class="flex justify-between">
 			{#snippet favoriteStation()}
-				<div class="flex flex-row break-all items-baseline gap-x-2">
+				<div class="flex flex-row items-baseline gap-x-2 break-all">
 					{#if $session.data}
-						<Star class="shrink-0 cursor-pointer transition-all duration-300 {favor ? 'fill-accent stroke-yellow-400' : 'fill-transparent hover:stroke-accent'}" onclick={toggleFavour} />
+						<Star
+							class="shrink-0 cursor-pointer transition-all duration-300 {favor
+								? 'fill-accent stroke-yellow-400'
+								: 'hover:stroke-accent fill-transparent'}"
+							onclick={toggleFavour}
+						/>
 					{/if}
 					<span class="text-xl font-semibold break-words whitespace-normal md:text-4xl">{station.name}</span>
 				</div>
@@ -93,7 +98,7 @@
 			<Clock />
 		</div>
 
-		<button class="flex gap-x-2 group relative cursor-pointer text-base md:text-xl" onclick={navigate}>
+		<button class="group relative flex cursor-pointer gap-x-2 text-base md:text-xl" onclick={navigate}>
 			<CornerDownRight />
 			Show {isDeparture ? "Arrivals" : "Departures"}
 			<span
