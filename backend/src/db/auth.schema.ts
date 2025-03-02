@@ -1,6 +1,7 @@
-import { pgTable, text, timestamp, boolean } from 'drizzle-orm/pg-core';
+import { text, timestamp, boolean, pgSchema } from "drizzle-orm/pg-core";
 
-export const user = pgTable("user", {
+export const authSchema = pgSchema("auth");
+export const user = authSchema.table("user", {
 	id: text("id").notNull().primaryKey(),
 	name: text("name").notNull(),
 	email: text("email").notNull().unique(),
@@ -11,7 +12,7 @@ export const user = pgTable("user", {
 	username: text("username").notNull().unique(),
 });
 
-export const session = pgTable("session", {
+export const session = authSchema.table("session", {
 	id: text("id").notNull().primaryKey(),
 	expiresAt: timestamp("expiresAt", { precision: 3 }).notNull(),
 	token: text("token").notNull().unique(),
@@ -22,7 +23,7 @@ export const session = pgTable("session", {
 	userId: text("userId").notNull().references(() => user.id),
 });
 
-export const account = pgTable("account", {
+export const account = authSchema.table("account", {
 	id: text("id").notNull().primaryKey(),
 	accountId: text("accountId").notNull(),
 	providerId: text("providerId").notNull(),
@@ -38,7 +39,7 @@ export const account = pgTable("account", {
 	updatedAt: timestamp("updatedAt", { precision: 3 }).notNull(),
 });
 
-export const verification = pgTable("verification", {
+export const verification = authSchema.table("verification", {
 	id: text("id").notNull().primaryKey(),
 	identifier: text("identifier").notNull(),
 	value: text("value").notNull(),
