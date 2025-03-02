@@ -16,7 +16,6 @@
 		"@types/express": "^5.0.0",
 		"@types/luxon": "^3.4.2",
 		"@types/pg": "^8.11.11",
-		"@types/swagger-ui-express": "^4.1.8",
 		"drizzle-kit": "^0.30.5",
 		"prettier": "^3.5.2"
 	},
@@ -24,6 +23,7 @@
 		"typescript": "^5.0.0"
 	},
 	"dependencies": {
+		"@scalar/express-api-reference": "^0.4.186",
 		"better-auth": "^1.1.19",
 		"cors": "^2.8.5",
 		"drizzle-orm": "^0.40.0",
@@ -31,7 +31,6 @@
 		"luxon": "^3.5.0",
 		"pg": "^8.13.3",
 		"redis": "^4.7.0",
-		"swagger-ui-express": "^5.0.1",
 		"tsoa": "^6.6.0"
 	}
 }
