@@ -16,6 +16,24 @@ class FavorizedResponse {
 @Route("user/station")
 @Tags("User")
 export class UserStationController extends Controller {
+
+	@Get("favored")
+	@Security("better_auth")
+	async favored(
+		@Request() req: express.Request
+	): Promise<FavorizedResponse[]> {
+		const session = await auth.api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
+
+		const favors = await db
+			.select()
+			.from(favoriteStations)
+			.where(eq(favoriteStations.userId, session?.user?.id!));
+		return favors.flatMap((favor) => ({
+			evaNumber: favor.evaNumber,
+			favored: true
+		})) as FavorizedResponse[];
+	}
+
 	@Get("favored/{evaNumber}")
 	@Security("better_auth")
 	async isFavored(
@@ -63,6 +81,7 @@ export class UserStationController extends Controller {
 			return { evaNumber: Number(evaNumber), favored: false };
 		}
 
+		// TODO: check if station exists
 		await db.insert(favoriteStations).values({
 			userId: session?.user?.id!,
 			evaNumber: Number(evaNumber)
