@@ -1,6 +1,5 @@
 <script lang="ts">
 	import "$src/app.css";
-	import Navbar from "$components/Navbar.svelte";
 	import type { LayoutProps } from "./$types";
 	import { MetaTags } from "svelte-meta-tags";
 	import Clock from "$components/timetable/Clock.svelte";
@@ -75,37 +74,33 @@
 	}}
 />
 
-<div class="flex min-h-screen flex-col">
-	<Navbar />
+<div class="bg-background sticky top-20 z-10 container mx-auto w-full flex-col px-6 pt-4">
+	<div class="flex justify-between">
+		{#snippet favoriteStation()}
+			<div class="flex flex-row items-baseline gap-x-2 break-all">
+				{#if $session.data}
+					<Star
+						class="shrink-0 cursor-pointer transition-all duration-300 {favor
+							? 'fill-accent stroke-yellow-400'
+							: 'hover:stroke-accent fill-transparent'}"
+						onclick={toggleFavour}
+					/>
+				{/if}
+				<span class="text-xl font-semibold break-words whitespace-normal md:text-4xl">{station.name}</span>
+			</div>
+		{/snippet}
 
-	<div class="bg-background sticky top-20 z-10 container mx-auto w-full flex-col px-6 pt-4">
-		<div class="flex justify-between">
-			{#snippet favoriteStation()}
-				<div class="flex flex-row items-baseline gap-x-2 break-all">
-					{#if $session.data}
-						<Star
-							class="shrink-0 cursor-pointer transition-all duration-300 {favor
-								? 'fill-accent stroke-yellow-400'
-								: 'hover:stroke-accent fill-transparent'}"
-							onclick={toggleFavour}
-						/>
-					{/if}
-					<span class="text-xl font-semibold break-words whitespace-normal md:text-4xl">{station.name}</span>
-				</div>
-			{/snippet}
-
-			{@render favoriteStation()}
-			<Clock />
-		</div>
-
-		<button class="group relative flex cursor-pointer gap-x-2 text-base md:text-xl" onclick={navigate}>
-			<CornerDownRight />
-			Show {isDeparture ? "Arrivals" : "Departures"}
-			<span
-				class="bg-accent absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform transition-transform duration-300 group-hover:scale-x-100"
-			></span>
-		</button>
+		{@render favoriteStation()}
+		<Clock />
 	</div>
 
-	{@render children()}
+	<button class="group relative flex cursor-pointer gap-x-2 text-base md:text-xl" onclick={navigate}>
+		<CornerDownRight />
+		Show {isDeparture ? "Arrivals" : "Departures"}
+		<span
+			class="bg-accent absolute bottom-0 left-0 h-0.5 w-full scale-x-0 transform transition-transform duration-300 group-hover:scale-x-100"
+		></span>
+	</button>
 </div>
+
+{@render children()}
