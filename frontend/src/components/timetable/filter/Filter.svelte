@@ -97,10 +97,10 @@
 	};
 </script>
 
-<div class="scrollbar-hidden bg-primary-darker flex items-center overflow-x-auto p-2 md:justify-center md:gap-x-2">
+<div class="scrollbar-hidden bg-primary-darker flex items-center overflow-x-auto p-2 md:justify-center gap-x-2">
 	{#each filteredTypes as type}
 		<button
-			class="flex shrink-0 items-center gap-x-2 rounded-full px-4 py-2"
+			class="flex shrink-0 items-center gap-x-2 rounded-full px-4 py-2 cursor-pointer hover:outline-2 hover:outline-accent"
 			class:bg-primary-dark={type.values.every((v) => selected.includes(v))}
 			onclick={() => toggleType(type)}
 		>
