@@ -1,7 +1,7 @@
 import { Controller, Example, Get, Path, Post, Request, Res, Route, Security, Tags, type TsoaResponse } from "tsoa";
 import express from "express";
 import { auth } from "../../../lib/auth/auth.ts";
-import { db } from "../../../lib/db/data-db.ts";
+import { db } from "../../../lib/db/postgres-data-db.ts";
 import { favoriteStations } from "../../../db/data.schema.ts";
 import { and, eq } from "drizzle-orm";
 
