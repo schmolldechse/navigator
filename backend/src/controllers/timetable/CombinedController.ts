@@ -6,7 +6,7 @@ import { RequestType, retrieveBahnhofJourneys, retrieveCombinedConnections } fro
 import { isMatching, merge } from "../../lib/merge.ts";
 
 class CombinedQuery {
-	evaNumber!: string;
+	evaNumber!: number;
 	type!: RequestType;
 	when?: string;
 	duration?: number = 60;
@@ -19,8 +19,7 @@ class CombinedQuery {
 export class CombinedController extends Controller {
 	@Get()
 	async getCombinedJourneys(
-		@Queries() query: CombinedQuery,
-		@Res() badRequestResponse: TsoaResponse<400, { reason: string }>
+		@Queries() query: CombinedQuery
 	): Promise<Journey[]> {
 		query = {
 			...query,
@@ -28,7 +27,7 @@ export class CombinedController extends Controller {
 		};
 
 		if (!DateTime.fromISO(query.when!).isValid) {
-			return badRequestResponse(400, { reason: "Invalid date" });
+			throw new HttpError(400, "Invalid date");
 		}
 
 		const now = DateTime.now().set({ second: 0, millisecond: 0 });

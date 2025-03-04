@@ -4,7 +4,7 @@ import { Controller, Get, Queries, Res, Route, Tags, type TsoaResponse } from "t
 import type { Journey } from "../../models/connection.ts";
 
 class VendoQuery {
-	evaNumber!: string;
+	evaNumber!: number;
 	type!: RequestType;
 	profile!: Profile;
 	when?: string;
@@ -17,8 +17,7 @@ class VendoQuery {
 export class VendoController extends Controller {
 	@Get()
 	async getVendoJourneys(
-		@Queries() query: VendoQuery,
-		@Res() badRequestResponse: TsoaResponse<400, { reason: string }>
+		@Queries() query: VendoQuery
 	): Promise<Journey[]> {
 		query = {
 			...query,
@@ -26,7 +25,7 @@ export class VendoController extends Controller {
 		};
 
 		if (!DateTime.fromISO(query.when!).isValid) {
-			return badRequestResponse(400, { reason: "Invalid date" });
+			throw new HttpError(400, "Invalid date");
 		}
 
 		if (query.profile === Profile.COMBINED) {

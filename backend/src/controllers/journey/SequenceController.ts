@@ -1,10 +1,11 @@
-import { Controller, Get, Queries, Res, Route, Tags, type TsoaResponse } from "tsoa";
+import { Controller, Get, Queries, Route, Tags } from "tsoa";
 import { DateTime } from "luxon";
 import { mapCoachSequence } from "../../lib/mapping.ts";
+import { HttpError } from "../../lib/errors/HttpError.ts";
 
 class SequenceQuery {
 	lineDetails!: string;
-	evaNumber!: string;
+	evaNumber!: number;
 	date!: string;
 }
 
@@ -13,20 +14,10 @@ class SequenceQuery {
 export class SequenceController extends Controller {
 	@Get()
 	async getSequenceById(
-		@Queries() query: SequenceQuery,
-		@Res() badRequestResponse: TsoaResponse<400, { reason: string }>
+		@Queries() query: SequenceQuery
 	): Promise<any> {
-		if (query.lineDetails === "") {
-			return badRequestResponse(400, { reason: "lineDetails must not be empty" });
-		}
-		if (!/^\d+$/.test(query.evaNumber)) {
-			return badRequestResponse(400, { reason: "evaNumber is not an integer" });
-		}
-
 		const dateValidation = DateTime.fromFormat(query.date, "yyyyMMdd");
-		if (!dateValidation.isValid) {
-			return badRequestResponse(400, { reason: `${dateValidation.invalidExplanation}` });
-		}
+		if (!dateValidation.isValid) throw new HttpError(400, `${dateValidation.invalidExplanation}`);
 
 		return fetchCoachSequence(query);
 	}

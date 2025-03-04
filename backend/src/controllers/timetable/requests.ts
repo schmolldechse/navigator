@@ -21,7 +21,7 @@ export enum Profile {
 }
 
 export interface Query {
-	evaNumber: string;
+	evaNumber: number;
 	type: RequestType;
 	profile?: Profile;
 	when?: string;
