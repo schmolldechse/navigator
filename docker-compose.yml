@@ -16,26 +16,25 @@ services:
     ports: [ "8000:8000" ]
     networks: [ "navigator-network" ]
     environment:
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
-      REDIS_DB: ${REDIS_DB}
-      REDIS_USER: ${REDIS_USER}
-      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      MONGO_URL: ${MONGO_URL}
       AUTH_SECRET: ${AUTH_SECRET}
       AUTH_POSTGRES_URL: ${AUTH_POSTGRES_URL}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
 
-  navigator-redis:
-    container_name: navigator-redis
-    image: redis:latest
+  navigator-mongodb:
+    container_name: navigator-mongodb
+    image: bitnami/mongodb:latest
     restart: always
-    ports: [ "6379:6379" ]
+    ports: [ "27017:27017" ]
     networks: [ "navigator-network" ]
+    environment:
+      MONGODB_ROOT_PASSWORD: strong-password-here
+      MONGODB_EXTRA_DATABASES: ${MONGODB_EXTRA_DATABASES}
+      MONGODB_EXTRA_USERNAMES: ${MONGODB_EXTRA_USERNAMES}
+      MONGODB_EXTRA_PASSWORDS: ${MONGODB_EXTRA_PASSWORDS}
     volumes:
-      - ./redis:/usr/local/etc/redis
-      - navigator-stations:/data
-    command: [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+      - mongodb_data:/bitnami/mongodb
 
   navigator-postgres:
     container_name: navigator-postgres
@@ -54,5 +53,5 @@ networks:
     driver: bridge
 
 volumes:
-  navigator-stations:
+  mongodb_data:
   postgres_data:

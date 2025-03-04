@@ -6,12 +6,8 @@ COPY package.json bun.lockb* ./
 RUN bun install
 COPY . .
 
-# caching Stations in redis
-ENV REDIS_HOST=navigator-redis
-ENV REDIS_PORT=6379
-ENV REDIS_DB=0
-ENV REDIS_USER=navigator-stations
-ENV REDIS_PASSWORD=password
+# MongoDB
+ENV MONGO_URL=mongodb://lo-u-data:password@navigator-mongo:27017/data
 
 # BetterAuth
 ENV AUTH_SECRET=auth-secret

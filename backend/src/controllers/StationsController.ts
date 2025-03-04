@@ -1,7 +1,7 @@
 import { Controller, Get, Path, Query, Res, Route, Tags, type TsoaResponse } from "tsoa";
-import { getRedisClient } from "../lib/redis.ts";
 import type { Station } from "../models/station.ts";
 import { mapToEnum, Products } from "../models/products.ts";
+import { connectToDb } from "../lib/db/mongo-data-db.ts";
 
 @Route("stations")
 @Tags("Stations")
@@ -30,13 +30,16 @@ export class StationController extends Controller {
 		const cachedStation = await getCachedStation(evaNumber.toString());
 		if (cachedStation) return cachedStation;
 
-		return (await fetchAndCacheStations(evaNumber.toString()))[0];
+		const stations = await fetchAndCacheStations(evaNumber.toString());
+		if (!stations.length) return badRequestResponse(400, { reason: "Station not found" });
+
+		return stations[0];
 	}
 }
 
 const fetchAndCacheStations = async (searchTerm: string): Promise<Station[]> => {
-	const stations: Station[] = (await fetchStation(searchTerm)).filter((station: Station) => station.evaNumber);
-	await cacheStations(stations);
+	const stations: Station[] = (await fetchStation(searchTerm)).filter((station: Station) => station.evaNumber && /^\d+$/.test(station.evaNumber));
+	if (stations.length > 0) await cacheStations(stations);
 
 	return stations;
 };
@@ -76,25 +79,23 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 };
 
 const cacheStations = async (stations: Station[]): Promise<void> => {
-	const client = await getRedisClient();
+	const client = await connectToDb();
+	const collection = client.collection<Station>("stations");
 
-	// check existing stations
-	const keys = stations.map((stations: Station) => stations.evaNumber);
-	const existingStations = await client.mGet(keys);
+	const bulkOps = stations.map(station => ({
+		updateOne: {
+			filter: { evaNumber: station.evaNumber },
+			update: { $setOnInsert: station },
+			upsert: true
+		}
+	}));
 
-	// filter out existing stations
-	const pipeline = client.multi();
-	stations.map((station: Station) => {
-		if (existingStations.includes(station.evaNumber)) return;
-		const { coordinates, ...stationData } = station;
-		pipeline.set(station.evaNumber, JSON.stringify(stationData));
-	});
-
-	await pipeline.exec();
+	await collection.bulkWrite(bulkOps);
 };
 
 const getCachedStation = async (evaNumber: string): Promise<Station | null> => {
-	const cachedStation = await (await getRedisClient()).get(evaNumber);
-	if (!cachedStation) return null;
-	return JSON.parse(cachedStation!) as Station;
+	const client = await connectToDb();
+	const collection = client.collection<Station>("stations");
+
+	return await collection.findOne({ evaNumber }, { projection: { _id: 0 } }) as Station;
 };
