@@ -4,6 +4,9 @@ import { auth } from "../../../lib/auth/auth.ts";
 import { db } from "../../../lib/db/postgres-data-db.ts";
 import { favoriteStations } from "../../../db/data.schema.ts";
 import { and, eq } from "drizzle-orm";
+import { connectToDb } from "../../../lib/db/mongo-data-db.ts";
+import type { Station } from "../../../models/station.ts";
+import { HttpError } from "../../../lib/errors/HttpError.ts";
 
 class FavoredResponse {
 	@Example(8000096)
@@ -71,7 +74,9 @@ export class UserStationController extends Controller {
 			return { evaNumber: evaNumber, favored: false };
 		}
 
-		// TODO: check if station exists
+		const station = await checkStation(evaNumber);
+		if (!station) throw new HttpError(404, "Station not queried yet");
+
 		await db.insert(favoriteStations).values({
 			userId: session?.user?.id!,
 			evaNumber: evaNumber
@@ -79,3 +84,10 @@ export class UserStationController extends Controller {
 		return { evaNumber: evaNumber, favored: true };
 	}
 }
+
+const checkStation = async (evaNumber: number): Promise<Station | null> => {
+	const client = await connectToDb();
+	const collection = client.collection<Station>("stations");
+
+	return await collection.findOne({ evaNumber }, { projection: { _id: 0 } }) as Station;
+};
