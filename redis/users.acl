@@ -1,2 +1,0 @@
-user default off nopass ~* &* -@all
-user navigator-stations on >password ~* &0 +@all
