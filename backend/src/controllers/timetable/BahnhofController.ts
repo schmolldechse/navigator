@@ -3,7 +3,7 @@ import { Controller, Get, Queries, Route, Tags } from "tsoa";
 import type { Journey } from "../../models/connection.ts";
 
 class BahnhofQuery {
-	evaNumber!: string;
+	evaNumber!: number;
 	type!: RequestType;
 	duration?: number = 60;
 	locale?: string = "en";
