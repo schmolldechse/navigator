@@ -2,7 +2,12 @@ import { Products } from "./products.ts";
 
 export interface Station {
 	name: string;
-	evaNumber: string;
+	/**
+	 * @isInt evaNumber of a station
+	 * @pattern /^\d+$/
+	 * @example 8000096
+	 */
+	evaNumber: number;
 	locationId?: string;
 	coordinates?: {
 		latitude: number;
