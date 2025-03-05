@@ -26,5 +26,7 @@ export const auth = betterAuth({
 	basePath: "/auth",
 	trustedOrigins: ["http://localhost:5173"],
 	secret: process.env.AUTH_SECRET!,
+
+	// TODO: extract plugins into a separate repo
 	plugins: [usernamePlugin(), rolePlugin(), openAPI()]
 });
