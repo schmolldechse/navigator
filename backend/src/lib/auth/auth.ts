@@ -2,6 +2,8 @@ import { betterAuth } from "better-auth";
 import { usernamePlugin } from "../plugins/username.ts";
 import type { GithubProfile } from "better-auth/social-providers";
 import { Pool } from "pg";
+import { rolePlugin } from "../plugins/role.ts";
+import { openAPI } from "better-auth/plugins";
 
 export const auth = betterAuth({
 	database: new Pool({
@@ -24,5 +26,5 @@ export const auth = betterAuth({
 	basePath: "/auth",
 	trustedOrigins: ["http://localhost:5173"],
 	secret: process.env.AUTH_SECRET!,
-	plugins: [usernamePlugin()]
+	plugins: [usernamePlugin(), rolePlugin(), openAPI()]
 });

@@ -1,4 +1,6 @@
-import { text, timestamp, boolean, pgSchema } from "drizzle-orm/pg-core";
+import { text, timestamp, boolean, pgSchema, pgEnum } from "drizzle-orm/pg-core";
+
+export const roleEnum = pgEnum("role", ["default", "admin"]);
 
 export const authSchema = pgSchema("auth");
 export const user = authSchema.table("user", {
@@ -9,7 +11,8 @@ export const user = authSchema.table("user", {
 	image: text("image"),
 	createdAt: timestamp("createdAt", { precision: 3 }).notNull(),
 	updatedAt: timestamp("updatedAt", { precision: 3 }).notNull(),
-	username: text("username").notNull().unique()
+	username: text("username").notNull().unique(),
+	role: roleEnum().notNull().default("default")
 });
 
 export const session = authSchema.table("session", {
