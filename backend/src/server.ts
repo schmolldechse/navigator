@@ -17,6 +17,7 @@ app.use(cors({ origin: "*" }));
 app.get("/openapi.json", (req, res) => res.sendFile(path.join(__dirname, "..", "build", "openapi.json")));
 app.use(
 	"/api-docs",
+	// TODO: multiple OpenAPI specs; auth & navigator api; see https://github.com/scalar/scalar/pull/4872
 	apiReference({
 		theme: "purple",
 		spec: {
