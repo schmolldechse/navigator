@@ -1,5 +1,4 @@
 <script lang="ts">
-	import "$src/app.css";
 	import Navbar from "$components/Navbar.svelte";
 	import type { LayoutProps } from "./$types";
 

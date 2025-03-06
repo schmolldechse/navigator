@@ -3,7 +3,8 @@
 	import type { LayoutProps } from "./$types";
 	import { MetaTags } from "svelte-meta-tags";
 	import Clock from "$components/timetable/Clock.svelte";
-	import { CornerDownRight, Star } from "lucide-svelte";
+	import CornerDownRight from "lucide-svelte/icons/corner-down-right";
+	import Star from "lucide-svelte/icons/star";
 	import { authClient } from "$lib/auth-client";
 	import { page } from "$app/state";
 	import { getContext, setContext } from "svelte";

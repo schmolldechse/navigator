@@ -2,7 +2,7 @@
 	import type { Station } from "$models/station";
 	import { onMount } from "svelte";
 	import { env } from "$env/dynamic/public";
-	import { Search } from "lucide-svelte";
+	import Search from "lucide-svelte/icons/search";
 
 	let { station = $bindable(undefined) }: { station?: Station } = $props();
 	let open = $state<boolean>(false);
