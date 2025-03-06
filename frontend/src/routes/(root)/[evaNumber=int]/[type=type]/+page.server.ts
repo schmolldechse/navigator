@@ -4,8 +4,8 @@ import type { Journey } from "$models/connection";
 import { DateTime } from "luxon";
 import { env } from "$env/dynamic/private";
 
-export const load: PageServerLoad = async ({ params, url }): Promise<{ journeys: Journey[] }> => {
-	const journeys = await loadJourneys(
+export const load: PageServerLoad = async ({ params, url }): Promise<{ journeys: Promise<Journey[]> }> => {
+	const journeys = loadJourneys(
 		params.evaNumber,
 		params.type,
 		url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
