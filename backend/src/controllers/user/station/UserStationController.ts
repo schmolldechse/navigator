@@ -2,7 +2,7 @@ import { Controller, Example, Get, Path, Post, Request, Route, Security, Tags } 
 import express from "express";
 import { auth } from "../../../lib/auth/auth.ts";
 import { db } from "../../../lib/db/postgres-data-db.ts";
-import { favoriteStations } from "../../../db/data.schema.ts";
+import { favoriteStations } from "../../../db/postgres/data.schema.ts";
 import { and, eq } from "drizzle-orm";
 import { connectToDb } from "../../../lib/db/mongo-data-db.ts";
 import type { Station } from "../../../models/station.ts";
@@ -89,5 +89,5 @@ const checkStation = async (evaNumber: number): Promise<Station | null> => {
 	const client = await connectToDb();
 	const collection = client.collection<Station>("stations");
 
-	return await collection.findOne({ evaNumber }, { projection: { _id: 0 } }) as Station;
+	return await collection.findOne({ evaNumber }) as Station;
 };

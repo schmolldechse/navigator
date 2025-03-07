@@ -1,7 +1,7 @@
 import { Controller, Get, Path, Query, Route, Tags } from "tsoa";
 import type { Station } from "../models/station.ts";
 import { mapToEnum, Products } from "../models/products.ts";
-import { connectToDb } from "../lib/db/mongo-data-db.ts";
+import { getCollection } from "../lib/db/mongo-data-db.ts";
 import { HttpError } from "../lib/errors/HttpError.ts";
 
 @Route("stations")
@@ -38,7 +38,7 @@ export class StationController extends Controller {
 }
 
 const fetchAndCacheStations = async (searchTerm: string): Promise<Station[]> => {
-	const stations: Station[] = (await fetchStation(searchTerm)).filter((station: Station) => station.evaNumber);
+	const stations: Station[] = await fetchStation(searchTerm);
 	if (stations.length > 0) await cacheStations(stations);
 
 	return stations;
@@ -81,8 +81,7 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 };
 
 const cacheStations = async (stations: Station[]): Promise<void> => {
-	const client = await connectToDb();
-	const collection = client.collection<Station>("stations");
+	const collection = await getCollection("stations");
 
 	const bulkOps = stations.map(station => ({
 		updateOne: {
@@ -96,8 +95,9 @@ const cacheStations = async (stations: Station[]): Promise<void> => {
 };
 
 const getCachedStation = async (evaNumber: number): Promise<Station | null> => {
-	const client = await connectToDb();
-	const collection = client.collection<Station>("stations");
+	const collection = await getCollection("stations");
+	const station = await collection.findOne({ evaNumber });
 
-	return await collection.findOne({ evaNumber }, { projection: { _id: 0 } }) as Station;
+	const { _id, lastQueried, ...extracted } = station;
+	return extracted;
 };
