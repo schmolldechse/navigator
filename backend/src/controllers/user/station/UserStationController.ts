@@ -4,7 +4,7 @@ import { auth } from "../../../lib/auth/auth.ts";
 import { db } from "../../../lib/db/postgres-data-db.ts";
 import { favoriteStations } from "../../../db/postgres/data.schema.ts";
 import { and, eq } from "drizzle-orm";
-import { connectToDb } from "../../../lib/db/mongo-data-db.ts";
+import { connectToDb, getCollection } from "../../../lib/db/mongo-data-db.ts";
 import type { Station } from "../../../models/station.ts";
 import { HttpError } from "../../../lib/errors/HttpError.ts";
 
@@ -24,17 +24,18 @@ export class UserStationController extends Controller {
 	@Get("favored")
 	async favored(
 		@Request() req: express.Request
-	): Promise<FavoredResponse[]> {
+	): Promise<Station[]> {
 		const session = await auth.api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
 
 		const favors = await db
 			.select()
 			.from(favoriteStations)
 			.where(eq(favoriteStations.userId, session?.user?.id!));
-		return favors.flatMap((favor) => ({
-			evaNumber: favor.evaNumber,
-			favored: true
-		})) as FavoredResponse[];
+		const evaNumbers = favors.map((favor) => favor.evaNumber);
+
+		const collection = await getCollection("stations");
+		return (await collection.find({ evaNumber: { $in: evaNumbers } }).toArray())
+			.map(({ _id, lastQueried, ...rest }) => rest);
 	}
 
 	@Get("favored/{evaNumber}")
