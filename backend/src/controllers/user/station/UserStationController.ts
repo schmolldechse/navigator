@@ -18,10 +18,10 @@ class FavoredResponse {
 
 @Route("user/station")
 @Tags("User")
+@Security("better_auth")
 export class UserStationController extends Controller {
 
 	@Get("favored")
-	@Security("better_auth")
 	async favored(
 		@Request() req: express.Request
 	): Promise<FavoredResponse[]> {
@@ -38,7 +38,6 @@ export class UserStationController extends Controller {
 	}
 
 	@Get("favored/{evaNumber}")
-	@Security("better_auth")
 	async isFavored(
 		@Path() evaNumber: number,
 		@Request() req: express.Request
@@ -54,7 +53,6 @@ export class UserStationController extends Controller {
 	}
 
 	@Post("favor/{evaNumber}")
-	@Security("better_auth")
 	async favor(
 		@Path() evaNumber: number,
 		@Request() req: express.Request

@@ -37,7 +37,7 @@
 		"securityDefinitions": {
 			"better_auth": {
 				"type": "apiKey",
-				"in": "cookie",
+				"in": "header",
 				"name": "better-auth.session_token"
 			}
 		}
