@@ -9,6 +9,10 @@ export const expressAuthentication = async (req: express.Request, securityName: 
 			return Promise.reject(new HttpError(401, "Unauthorized"));
 		}
 
+		if (scopes?.includes("admin") && session?.user?.role !== "admin") {
+			return Promise.reject(new HttpError(401, "Unauthorized"));
+		}
+
 		return Promise.resolve();
 	}
 };
