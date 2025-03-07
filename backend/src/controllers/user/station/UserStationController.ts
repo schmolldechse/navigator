@@ -35,7 +35,7 @@ export class UserStationController extends Controller {
 
 		const collection = await getCollection("stations");
 		return (await collection.find({ evaNumber: { $in: evaNumbers } }).toArray())
-			.map(({ _id, lastQueried, ...rest }) => rest);
+			.map(({ _id, lastQueried, queryingEnabled, ...rest }) => rest);
 	}
 
 	@Get("favored/{evaNumber}")

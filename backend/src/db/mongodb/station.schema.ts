@@ -4,6 +4,7 @@ import type { ObjectId } from "mongodb";
 
 interface StationDocument extends Station {
 	_id?: ObjectId;
+	queryingEnabled?: boolean;
 	lastQueried?: DateTime;
 }
 

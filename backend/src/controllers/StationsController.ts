@@ -98,6 +98,6 @@ const getCachedStation = async (evaNumber: number): Promise<Station | null> => {
 	const collection = await getCollection("stations");
 	const station = await collection.findOne({ evaNumber });
 
-	const { _id, lastQueried, ...extracted } = station;
+	const { _id, lastQueried, queryingEnabled, ...extracted } = station;
 	return extracted;
 };
