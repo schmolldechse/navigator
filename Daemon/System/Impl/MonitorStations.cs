@@ -18,7 +18,8 @@ public class MonitorStations : Daemon
             .Aggregate()
             .Match(filter)
             .Sample(1)
-            .FirstAsync();
+            .FirstOrDefaultAsync(cancellationToken);
+        if (station == null) return;
 
         Console.WriteLine("Monitoring station: " + station.ToJson());
     }
