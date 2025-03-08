@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import type { PageProps } from "./$types";
 	import Filter from "$components/timetable/filter/Filter.svelte";
 	import type { Connection, Journey } from "$models/connection";

@@ -5,6 +5,7 @@
 	import TimePicker from "$components/ui/controls/TimePicker.svelte";
 	import Clock from "$components/ui/icons/Clock.svelte";
 	import { goto } from "$app/navigation";
+	import Search from "lucide-svelte/icons/search";
 
 	let typeSelected: "departures" | "arrivals" = $state("departures");
 
@@ -41,7 +42,9 @@
 		</button>
 	</div>
 
-	<StationSearch bind:station={stationSelected} />
+	<StationSearch bind:station={stationSelected} placeholder="To">
+		<Search size={44} />
+	</StationSearch>
 
 	<div class="flex flex-row">
 		<TimePicker bind:selectedDate={dateSelected} />

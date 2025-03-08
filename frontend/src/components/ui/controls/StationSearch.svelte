@@ -1,15 +1,22 @@
 <script lang="ts">
 	import type { Station } from "$models/station";
-	import { onMount } from "svelte";
+	import { onMount, type Snippet } from "svelte";
 	import { env } from "$env/dynamic/public";
-	import Search from "lucide-svelte/icons/search";
 
-	let { station = $bindable(undefined) }: { station?: Station } = $props();
+	let { station = $bindable(undefined), placeholder = "Search for a station", children }: {
+		station?: Station,
+		placeholder: string,
+		children: Snippet
+	} = $props();
+
+	$effect(() => {
+		if (!station) return;
+		inputElement.value = station.name;
+	});
+
 	let open = $state<boolean>(false);
 	let selectedIndex = $state<number>(-1);
-
 	let stations: Station[] = $state([]);
-
 	let inputElement: HTMLInputElement;
 	const clickOutside = (event: MouseEvent) => {
 		if (inputElement && inputElement.contains(event.target as Node)) return;
@@ -94,12 +101,12 @@
 	<div
 		class="bg-primary-dark focus-within:ring-accent flex flex-row items-center gap-x-1 rounded-2xl px-2 font-medium focus-within:ring-2 md:text-2xl"
 	>
-		<Search size={44} />
+		{@render children()}
 		<input
 			bind:this={inputElement}
 			type="text"
 			class="bg-primary-dark w-full border-none p-2 outline-hidden"
-			placeholder="Search for a station"
+			{placeholder}
 			onclick={() => (open = true)}
 			oninput={handleInput}
 			onkeydown={handleKeyInput}
