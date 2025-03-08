@@ -1,7 +1,8 @@
 import { Controller, Get, Path, Post, Route, Security, Tags } from "tsoa";
 import { getCollection } from "../../lib/db/mongo-data-db.ts";
-import { DateTime } from "luxon";
 import type { Station } from "../../models/station.ts";
+import { HttpError } from "../../lib/errors/HttpError.ts";
+import type { StationDocument } from "../../db/mongodb/station.schema.ts";
 
 @Route("admin/station")
 @Tags("Admin")
@@ -15,19 +16,20 @@ export class AdminStationController extends Controller {
 			.map(({ _id, lastQueried, queryingEnabled, ...rest }) => rest as Station);
 	}
 
-	// TODO: toggle queryingEnabled
 	@Post("query/{evaNumber}")
-	async updateLastQueried(
+	async toggleQueryEnabled(
 		@Path() evaNumber: number
-	): Promise<{ ok: boolean }> {
+	): Promise<Station> {
 		const collection = await getCollection("stations");
-		const station = await collection.findOne({ evaNumber });
-		if (!station) return { ok: false };
+		const updated = await collection.findOneAndUpdate(
+			{ evaNumber },
+			[{ $set: { queryingEnabled: { $not: "$queryingEnabled" } } }],
+			{ returnDocument: "after" }
+		) as StationDocument;
 
-		station.lastQueried = DateTime.now();
-		station.queryingEnabled = true;
-		await collection.updateOne({ evaNumber }, { $set: station });
+		if (!updated) throw new HttpError(400, "Station not found");
 
-		return { ok: true };
+		const { _id, lastQueried, queryingEnabled, ...rest } = updated;
+		return rest as Station;
 	}
 }
