@@ -63,7 +63,9 @@ public class Message
 
 public class LineInformation
 {
-    [BsonElement("type")] public TransportProducts Type { get; set; }
+    [BsonElement("type")]
+    [BsonRepresentation(BsonType.String)]
+    public TransportProducts Type { get; set; }
 
     [BsonElement("product")] public string Product { get; set; }
 
