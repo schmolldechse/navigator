@@ -45,13 +45,14 @@ public class MonitorStations : Daemon
                 update,
                 cancellationToken: cancellationToken
             );
-
-            await Task.WhenAll(
+            
+            int upsertCount = Task.WhenAll(
                 CallApi(station.EvaNumber, start.Date, 720),
                 CallApi(station.EvaNumber, start.Date.AddHours(12), 720)
-            );
+            ).GetAwaiter().GetResult().Sum();
 
-            Console.WriteLine($"Updated 'LastQueried' for station {station.Name} to 7 days ago: {start}");
+            Console.WriteLine($"{station.Name} had no saved result's yet! Set 'LastQueried' for station {station.Name}: {start} (7 days ago)");
+            Console.WriteLine($"Queried {upsertCount} new RIS id's");
         }
         else if (station.LastQueried.Value.Date < date.Date)
         {
@@ -68,16 +69,16 @@ public class MonitorStations : Daemon
                 cancellationToken: cancellationToken
             );
 
-            await Task.WhenAll(
+            int upsertCount = Task.WhenAll(
                 CallApi(station.EvaNumber, newLastQueried.Date, 720),
                 CallApi(station.EvaNumber, newLastQueried.Date.AddHours(12), 720)
-            );
+            ).GetAwaiter().GetResult().Sum();
 
-            Console.WriteLine($"Incremented 'LastQueried' for station {station.Name} to {newLastQueried}");
+            Console.WriteLine($"Queried {upsertCount} new RIS id's & incremented 'LastQueried' for station {station.Name}: {newLastQueried}");
         }
     }
 
-    private async Task CallApi(int evaNumber, DateTime when, int duration)
+    private async Task<int> CallApi(int evaNumber, DateTime when, int duration)
     {
         string formattedDateTime = when.ToString("yyyy-MM-ddTHH:mm:sszzz");
         var response = await _httpClient.GetAsync(string.Format(_apiUrl, evaNumber,
@@ -100,7 +101,7 @@ public class MonitorStations : Daemon
                 return new JourneyDocument() { risId = fullTripId, FirstQueried = DateTime.Now.ToLocalTime() };
             })
             .ToList();
-        if (!journeys.Any()) return;
+        if (!journeys.Any()) return 0;
 
         var collection = await MongoDriver.GetCollectionAsync<JourneyDocument>("ris-rids");
         var bulkOps = journeys.Select(journey => new UpdateOneModel<JourneyDocument>(
@@ -108,7 +109,9 @@ public class MonitorStations : Daemon
                 Builders<JourneyDocument>.Update.SetOnInsert(j => j.risId, journey.risId)
                     .SetOnInsert(j => j.FirstQueried, journey.FirstQueried))
             { IsUpsert = true }).ToList<WriteModel<JourneyDocument>>();
-        await collection.BulkWriteAsync(bulkOps);
+        
+        var result = await collection.BulkWriteAsync(bulkOps);
+        return result.Upserts.Count;
     }
 
     public override void Dispose()
