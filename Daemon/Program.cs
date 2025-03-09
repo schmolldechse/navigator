@@ -18,6 +18,7 @@ class Program
 
         services.AddSingleton<DaemonManager>();
         services.AddSingleton<MonitorStations>();
+        services.AddSingleton<MonitorJourneys>();
 
         var serviceProvider = services.BuildServiceProvider();
 
@@ -35,6 +36,7 @@ class Program
         using (var manager = serviceProvider.GetRequiredService<DaemonManager>())
         {
             manager.AddDaemon(serviceProvider.GetRequiredService<MonitorStations>());
+            manager.AddDaemon(serviceProvider.GetRequiredService<MonitorJourneys>());
             manager.StartAll();
 
             _shutdownEvent.Wait();
