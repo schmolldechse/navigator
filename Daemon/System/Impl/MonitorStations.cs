@@ -89,8 +89,7 @@ public class MonitorStations : Daemon
         response.EnsureSuccessStatusCode();
 
         var content = JObject.Parse(await response.Content.ReadAsStringAsync());
-        List<RisDocument> journeys = content["arrivals"]!
-            .Select(arrival =>
+        List<RisDocument> journeys = content["arrivals"]!.Select(arrival =>
             {
                 string fullTripId = arrival["tripId"]!.ToString();
                 string datePart = fullTripId.Substring(0, 8);
@@ -106,7 +105,7 @@ public class MonitorStations : Daemon
                     discoveredAt = new DateTime(
                         DateOnly.FromDateTime(DateTime.Parse(arrival["plannedWhen"]!.ToString()).Date),
                         TimeOnly.FromTimeSpan(DateTime.Now.Date.TimeOfDay)
-                    );
+                    ).ToLocalTime();
                 }
 
                 return new RisDocument() { risId = fullTripId, DiscoveredAt = discoveredAt };
