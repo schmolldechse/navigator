@@ -82,7 +82,7 @@ public abstract class Daemon : IDisposable
 
     protected abstract Task ExecuteCoreAsync(CancellationToken cancellationToken);
 
-    public void Dispose()
+    public virtual void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
