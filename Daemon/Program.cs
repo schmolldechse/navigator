@@ -2,6 +2,7 @@
 using Daemon.System.Impl;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using MongoDB.Bson.Serialization.Conventions;
 
 namespace Daemon;
 
@@ -33,6 +34,9 @@ class Program
             _shutdownEvent.Set();
         };
 
+        // ignore null values in MongoDB
+        ConventionRegistry.Register("Ignore null values", new ConventionPack() { new IgnoreIfNullConvention(true) }, t => true);
+        
         using (var manager = serviceProvider.GetRequiredService<DaemonManager>())
         {
             manager.AddDaemon(serviceProvider.GetRequiredService<MonitorStations>());
