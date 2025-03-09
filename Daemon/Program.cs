@@ -1,30 +1,47 @@
 ﻿using Daemon.System;
 using Daemon.System.Impl;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Daemon;
 
 class Program
 {
-    private static readonly ManualResetEventSlim _shutdownEvent = new ManualResetEventSlim(false);
-
     static async Task Main(string[] args)
     {
+        var services = new ServiceCollection();
+        services.AddLogging(builder =>
+        {
+            builder.AddConsole();
+            builder.SetMinimumLevel(LogLevel.Information);
+        });
+
+        services.AddSingleton<DaemonManager>();
+        services.AddSingleton<MonitorStations>();
+
+        var serviceProvider = services.BuildServiceProvider();
+
+        var logger = serviceProvider.GetService<ILogger<Program>>();
+        logger.LogInformation("Application starting");
+
+        var _shutdownEvent = new ManualResetEventSlim(false);
         Console.CancelKeyPress += (sender, e) =>
         {
-            Console.WriteLine("Shutting down...");
             e.Cancel = true;
+            logger.LogInformation("Shutdown requested");
             _shutdownEvent.Set();
         };
 
-        using (var manager = new DaemonManager())
+        using (var manager = serviceProvider.GetRequiredService<DaemonManager>())
         {
-            manager.AddDaemon(new MonitorStations());
+            manager.AddDaemon(serviceProvider.GetRequiredService<MonitorStations>());
             manager.StartAll();
 
             _shutdownEvent.Wait();
 
-            Console.WriteLine("Stopping daemons...");
             await manager.StopAllAsync();
         }
+
+        logger.LogInformation("Application shutdown complete");
     }
 }

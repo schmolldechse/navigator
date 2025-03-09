@@ -1,5 +1,6 @@
 using System.Globalization;
 using Daemon.Models;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 
@@ -10,7 +11,7 @@ public class MonitorStations : Daemon
     private readonly HttpClient _httpClient;
     private readonly string _apiUrl = "https://vendo-prof-db.voldechse.wtf/stops/{0}/arrivals?when={1}&duration={2}";
 
-    public MonitorStations() : base("MonitorStations", TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30))
+    public MonitorStations(ILogger<MonitorStations> logger) : base("MonitorStations", TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30), logger)
     {
         _httpClient = new HttpClient();
     }
@@ -51,8 +52,8 @@ public class MonitorStations : Daemon
                 CallApi(station.EvaNumber, start.Date.AddHours(12), 720)
             ).GetAwaiter().GetResult().Sum();
 
-            Console.WriteLine($"{station.Name} had no saved result's yet! Set 'LastQueried' for station {station.Name}: {start} (7 days ago)");
-            Console.WriteLine($"Queried {upsertCount} new RIS id's");
+            _logger.LogInformation($"{station.Name} had no saved result's yet! Set 'LastQueried' for station {station.Name}: {start} (7 days ago)");
+            _logger.LogInformation($"Queried {upsertCount} new RIS id's");
         }
         else if (station.LastQueried.Value.Date < date.Date)
         {
@@ -74,7 +75,7 @@ public class MonitorStations : Daemon
                 CallApi(station.EvaNumber, newLastQueried.Date.AddHours(12), 720)
             ).GetAwaiter().GetResult().Sum();
 
-            Console.WriteLine($"Queried {upsertCount} new RIS id's & incremented 'LastQueried' for station {station.Name}: {newLastQueried}");
+            _logger.LogInformation($"Queried {upsertCount} new RIS id's & incremented 'LastQueried' for station {station.Name}: {newLastQueried}");
         }
     }
 
