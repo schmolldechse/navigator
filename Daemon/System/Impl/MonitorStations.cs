@@ -11,7 +11,8 @@ public class MonitorStations : Daemon
     private readonly HttpClient _httpClient;
     private readonly string _apiUrl = "https://vendo-prof-db.voldechse.wtf/stops/{0}/arrivals?when={1}&duration={2}";
 
-    public MonitorStations(ILogger<MonitorStations> logger) : base("MonitorStations", TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30), logger)
+    public MonitorStations(ILogger<MonitorStations> logger) : base("MonitorStations", TimeSpan.FromSeconds(5),
+        TimeSpan.FromSeconds(30), logger)
     {
         _httpClient = new HttpClient();
     }
@@ -46,7 +47,7 @@ public class MonitorStations : Daemon
                 update,
                 cancellationToken: cancellationToken
             );
-            
+
             int upsertCount = Task.WhenAll(
                 CallApi(station.EvaNumber, start.Date, 720),
                 CallApi(station.EvaNumber, start.Date.AddHours(12), 720)
@@ -99,7 +100,16 @@ public class MonitorStations : Daemon
                     fullTripId = fullTripId.Substring(9);
                 }
 
-                return new JourneyDocument() { risId = fullTripId, FirstQueried = DateTime.Now.ToLocalTime() };
+                DateTime? discoveredAt = null;
+                if (arrival["plannedWhen"] != null)
+                {
+                    discoveredAt = new DateTime(
+                        DateOnly.FromDateTime(DateTime.Parse(arrival["plannedWhen"]!.ToString()).Date),
+                        TimeOnly.FromTimeSpan(DateTime.Now.Date.TimeOfDay)
+                    );
+                }
+
+                return new JourneyDocument() { risId = fullTripId, DiscoveredAt = discoveredAt };
             })
             .ToList();
         if (!journeys.Any()) return 0;
@@ -108,9 +118,9 @@ public class MonitorStations : Daemon
         var bulkOps = journeys.Select(journey => new UpdateOneModel<JourneyDocument>(
                 Builders<JourneyDocument>.Filter.Eq(j => j.risId, journey.risId),
                 Builders<JourneyDocument>.Update.SetOnInsert(j => j.risId, journey.risId)
-                    .SetOnInsert(j => j.FirstQueried, journey.FirstQueried))
+                    .SetOnInsert(j => j.DiscoveredAt, journey.DiscoveredAt))
             { IsUpsert = true }).ToList<WriteModel<JourneyDocument>>();
-        
+
         var result = await collection.BulkWriteAsync(bulkOps);
         return result.Upserts.Count;
     }

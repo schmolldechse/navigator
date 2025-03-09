@@ -11,9 +11,9 @@ public class JourneyDocument
     [BsonElement("risId")]
     public string risId { get; set; }
 
-    [BsonElement("firstQueried")]
+    [BsonElement("discoveredAt")]
     [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
-    public DateTime? FirstQueried { get; set; }
+    public DateTime? DiscoveredAt { get; set; }
     
     [BsonElement("lastSuccessfulQueried")]
     [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
