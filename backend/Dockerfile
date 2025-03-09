@@ -21,4 +21,4 @@ RUN bun tsoa
 
 EXPOSE 8000
 
-CMD ["sh", "-c", "bun drizzle:auth && bun run src/server.ts"]
+CMD ["sh", "-c", "bun drizzle:generate && bun run drizzle:migrate && bun run src/server.ts"]
