@@ -89,7 +89,7 @@ public class MonitorStations : Daemon
         response.EnsureSuccessStatusCode();
 
         var content = JObject.Parse(await response.Content.ReadAsStringAsync());
-        List<JourneyDocument> journeys = content["arrivals"]!
+        List<RisDocument> journeys = content["arrivals"]!
             .Select(arrival =>
             {
                 string fullTripId = arrival["tripId"]!.ToString();
@@ -109,17 +109,17 @@ public class MonitorStations : Daemon
                     );
                 }
 
-                return new JourneyDocument() { risId = fullTripId, DiscoveredAt = discoveredAt };
+                return new RisDocument() { risId = fullTripId, DiscoveredAt = discoveredAt };
             })
             .ToList();
         if (!journeys.Any()) return 0;
 
-        var collection = await MongoDriver.GetCollectionAsync<JourneyDocument>("ris-ids");
-        var bulkOps = journeys.Select(journey => new UpdateOneModel<JourneyDocument>(
-                Builders<JourneyDocument>.Filter.Eq(j => j.risId, journey.risId),
-                Builders<JourneyDocument>.Update.SetOnInsert(j => j.risId, journey.risId)
+        var collection = await MongoDriver.GetCollectionAsync<RisDocument>("ris-ids");
+        var bulkOps = journeys.Select(journey => new UpdateOneModel<RisDocument>(
+                Builders<RisDocument>.Filter.Eq(j => j.risId, journey.risId),
+                Builders<RisDocument>.Update.SetOnInsert(j => j.risId, journey.risId)
                     .SetOnInsert(j => j.DiscoveredAt, journey.DiscoveredAt))
-            { IsUpsert = true }).ToList<WriteModel<JourneyDocument>>();
+            { IsUpsert = true }).ToList<WriteModel<RisDocument>>();
 
         var result = await collection.BulkWriteAsync(bulkOps);
         return result.Upserts.Count;
