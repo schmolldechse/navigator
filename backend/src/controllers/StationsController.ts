@@ -92,7 +92,7 @@ const cacheStations = async (stations: Station[]): Promise<void> => {
 
 const getCachedStation = async (evaNumber: number): Promise<Station | null> => {
 	const collection = await getCollection("stations");
-	const station = await collection.findOne({ evaNumber }) as StationDocument;
+	const station = (await collection.findOne({ evaNumber })) as StationDocument;
 	if (!station) return null;
 
 	const { _id, lastQueried, queryingEnabled, ...extracted } = station;
