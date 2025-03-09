@@ -114,7 +114,7 @@ public class MonitorStations : Daemon
             .ToList();
         if (!journeys.Any()) return 0;
 
-        var collection = await MongoDriver.GetCollectionAsync<JourneyDocument>("ris-rids");
+        var collection = await MongoDriver.GetCollectionAsync<JourneyDocument>("ris-ids");
         var bulkOps = journeys.Select(journey => new UpdateOneModel<JourneyDocument>(
                 Builders<JourneyDocument>.Filter.Eq(j => j.risId, journey.risId),
                 Builders<JourneyDocument>.Update.SetOnInsert(j => j.risId, journey.risId)
