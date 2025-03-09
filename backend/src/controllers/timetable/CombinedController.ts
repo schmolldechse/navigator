@@ -18,9 +18,7 @@ class CombinedQuery {
 @Tags("Combined")
 export class CombinedController extends Controller {
 	@Get()
-	async getCombinedJourneys(
-		@Queries() query: CombinedQuery
-	): Promise<Journey[]> {
+	async getCombinedJourneys(@Queries() query: CombinedQuery): Promise<Journey[]> {
 		query = {
 			...query,
 			when: query.when ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()

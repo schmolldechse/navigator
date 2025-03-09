@@ -13,9 +13,9 @@ export const rolePlugin = () => {
 
 		return { session } as {
 			session: {
-				user: UserWithRole,
-				session: Session,
-			}
+				user: UserWithRole;
+				session: Session;
+			};
 		};
 	});
 
@@ -53,28 +53,32 @@ export const rolePlugin = () => {
 			};
 		},
 		endpoints: {
-			setRole: createAuthEndpoint("/admin/set-role", {
-				method: "POST",
-				body: z.object({
-					userId: z.string({
-						description: "The user ID to set the role for"
+			setRole: createAuthEndpoint(
+				"/admin/set-role",
+				{
+					method: "POST",
+					body: z.object({
+						userId: z.string({
+							description: "The user ID to set the role for"
+						}),
+						role: z.string({
+							description: "The role to set. `admin` or `default`"
+						})
 					}),
-					role: z.string({
-						description: "The role to set. `admin` or `default`"
-					})
-				}),
-				use: [adminMiddleware]
-			}, async (ctx) => {
-				const updatedUser = await ctx.context.internalAdapter.updateUser(
-					ctx.body.userId,
-					{
-						role: ctx.body.role
-					},
-					ctx
-				);
-				if (!updatedUser) throw new APIError("BAD_REQUEST");
-				return ctx.json({ user: updatedUser as UserWithRole });
-			})
+					use: [adminMiddleware]
+				},
+				async (ctx) => {
+					const updatedUser = await ctx.context.internalAdapter.updateUser(
+						ctx.body.userId,
+						{
+							role: ctx.body.role
+						},
+						ctx
+					);
+					if (!updatedUser) throw new APIError("BAD_REQUEST");
+					return ctx.json({ user: updatedUser as UserWithRole });
+				}
+			)
 		}
 	} satisfies BetterAuthPlugin;
 };

@@ -13,9 +13,7 @@ class SequenceQuery {
 @Tags("Coach Sequences")
 export class SequenceController extends Controller {
 	@Get()
-	async getSequenceById(
-		@Queries() query: SequenceQuery
-	): Promise<any> {
+	async getSequenceById(@Queries() query: SequenceQuery): Promise<any> {
 		const dateValidation = DateTime.fromFormat(query.date, "yyyyMMdd");
 		if (!dateValidation.isValid) throw new HttpError(400, `${dateValidation.invalidExplanation}`);
 

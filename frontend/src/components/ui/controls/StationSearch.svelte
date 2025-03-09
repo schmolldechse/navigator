@@ -3,10 +3,14 @@
 	import { onMount, type Snippet } from "svelte";
 	import { env } from "$env/dynamic/public";
 
-	let { station = $bindable(undefined), placeholder = "Search for a station", children }: {
-		station?: Station,
-		placeholder: string,
-		children: Snippet
+	let {
+		station = $bindable(undefined),
+		placeholder = "Search for a station",
+		children
+	}: {
+		station?: Station;
+		placeholder: string;
+		children: Snippet;
 	} = $props();
 
 	$effect(() => {

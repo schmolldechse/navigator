@@ -18,13 +18,13 @@
 </script>
 
 <div class="mt-[-15rem] flex flex-col gap-y-2 md:w-[40%]">
-	<div class="relative flex flex-col w-full gap-y-2">
+	<div class="relative flex w-full flex-col gap-y-2">
 		<StationSearch bind:station={stationFrom} placeholder="From">
 			<MapPinIcon size={44} />
 		</StationSearch>
 
 		<button
-			class="group absolute self-end top-1/2 mr-4 -translate-y-1/2 bg-primary-darker border-black border-2 rounded-full p-2 hover:bg-accent z-10 cursor-pointer"
+			class="group bg-primary-darker hover:bg-accent absolute top-1/2 z-10 mr-4 -translate-y-1/2 cursor-pointer self-end rounded-full border-2 border-black p-2"
 			onclick={() => {
 				const temp = stationFrom;
 				stationFrom = stationTo;

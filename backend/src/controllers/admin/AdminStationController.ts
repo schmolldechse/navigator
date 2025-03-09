@@ -8,24 +8,22 @@ import type { StationDocument } from "../../db/mongodb/station.schema.ts";
 @Tags("Admin")
 @Security("better_auth", ["admin"])
 export class AdminStationController extends Controller {
-
 	@Get("query")
 	async getEnabledQueryStations(): Promise<Station[]> {
 		const collection = await getCollection("stations");
-		return (await collection.find({ queryingEnabled: true }).toArray())
-			.map(({ _id, lastQueried, queryingEnabled, ...rest }) => rest as Station);
+		return (await collection.find({ queryingEnabled: true }).toArray()).map(
+			({ _id, lastQueried, queryingEnabled, ...rest }) => rest as Station
+		);
 	}
 
 	@Post("query/{evaNumber}")
-	async toggleQueryEnabled(
-		@Path() evaNumber: number
-	): Promise<Station> {
+	async toggleQueryEnabled(@Path() evaNumber: number): Promise<Station> {
 		const collection = await getCollection("stations");
-		const updated = await collection.findOneAndUpdate(
+		const updated = (await collection.findOneAndUpdate(
 			{ evaNumber },
 			[{ $set: { queryingEnabled: { $not: "$queryingEnabled" } } }],
 			{ returnDocument: "after" }
-		) as StationDocument;
+		)) as StationDocument;
 
 		if (!updated) throw new HttpError(400, "Station not found");
 

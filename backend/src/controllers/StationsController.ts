@@ -7,15 +7,12 @@ import { HttpError } from "../lib/errors/HttpError.ts";
 @Route("stations")
 @Tags("Stations")
 export class StationController extends Controller {
-
 	/**
 	 * Searches for stations from the Deutsche Bahn API on the specified query.
 	 * @param query The possible station name / evaNumber
 	 */
 	@Get()
-	async queryStations(
-		@Query() query: string
-	): Promise<Station[]> {
+	async queryStations(@Query() query: string): Promise<Station[]> {
 		return await fetchAndCacheStations(query);
 	}
 
@@ -24,9 +21,7 @@ export class StationController extends Controller {
 	 * @param evaNumber The evaNumber of the station
 	 */
 	@Get("/{evaNumber}")
-	async getStationByEvaNumber(
-		@Path() evaNumber: number
-	): Promise<Station> {
+	async getStationByEvaNumber(@Path() evaNumber: number): Promise<Station> {
 		const cachedStation = await getCachedStation(evaNumber);
 		if (cachedStation) return cachedStation;
 
@@ -83,7 +78,7 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 const cacheStations = async (stations: Station[]): Promise<void> => {
 	const collection = await getCollection("stations");
 
-	const bulkOps = stations.map(station => ({
+	const bulkOps = stations.map((station) => ({
 		updateOne: {
 			filter: { evaNumber: station.evaNumber },
 			update: { $setOnInsert: station },

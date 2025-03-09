@@ -20,29 +20,21 @@ class FavoredResponse {
 @Tags("User")
 @Security("better_auth")
 export class UserStationController extends Controller {
-
 	@Get("favored")
-	async favored(
-		@Request() req: express.Request
-	): Promise<Station[]> {
+	async favored(@Request() req: express.Request): Promise<Station[]> {
 		const session = await auth.api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
 
-		const favors = await db
-			.select()
-			.from(favoriteStations)
-			.where(eq(favoriteStations.userId, session?.user?.id!));
+		const favors = await db.select().from(favoriteStations).where(eq(favoriteStations.userId, session?.user?.id!));
 		const evaNumbers = favors.map((favor) => favor.evaNumber);
 
 		const collection = await getCollection("stations");
-		return (await collection.find({ evaNumber: { $in: evaNumbers } }).toArray())
-			.map(({ _id, lastQueried, queryingEnabled, ...rest }) => rest);
+		return (await collection.find({ evaNumber: { $in: evaNumbers } }).toArray()).map(
+			({ _id, lastQueried, queryingEnabled, ...rest }) => rest
+		);
 	}
 
 	@Get("favored/{evaNumber}")
-	async isFavored(
-		@Path() evaNumber: number,
-		@Request() req: express.Request
-	): Promise<FavoredResponse> {
+	async isFavored(@Path() evaNumber: number, @Request() req: express.Request): Promise<FavoredResponse> {
 		const session = await auth.api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
 
 		const [result] = await db
@@ -54,10 +46,7 @@ export class UserStationController extends Controller {
 	}
 
 	@Post("favor/{evaNumber}")
-	async favor(
-		@Path() evaNumber: number,
-		@Request() req: express.Request
-	): Promise<FavoredResponse> {
+	async favor(@Path() evaNumber: number, @Request() req: express.Request): Promise<FavoredResponse> {
 		const session = await auth.api.getSession({ headers: new Headers(req.headers as Record<string, string>) });
 
 		const [existing] = await db
@@ -88,5 +77,5 @@ const checkStation = async (evaNumber: number): Promise<Station | null> => {
 	const client = await connectToDb();
 	const collection = client.collection<Station>("stations");
 
-	return await collection.findOne({ evaNumber }) as Station;
+	return (await collection.findOne({ evaNumber })) as Station;
 };

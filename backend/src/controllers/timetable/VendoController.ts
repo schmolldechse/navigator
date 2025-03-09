@@ -16,9 +16,7 @@ class VendoQuery {
 @Tags("Vendo")
 export class VendoController extends Controller {
 	@Get()
-	async getVendoJourneys(
-		@Queries() query: VendoQuery
-	): Promise<Journey[]> {
+	async getVendoJourneys(@Queries() query: VendoQuery): Promise<Journey[]> {
 		query = {
 			...query,
 			when: query.when ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
