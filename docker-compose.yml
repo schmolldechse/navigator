@@ -15,6 +15,9 @@ services:
     restart: always
     ports: [ "8000:8000" ]
     networks: [ "navigator-network" ]
+    depends_on:
+      - navigator-mongodb
+      - navigator-postgres
     environment:
       MONGO_URL: ${MONGO_URL}
       AUTH_SECRET: ${AUTH_SECRET}
@@ -27,6 +30,8 @@ services:
     image: ghcr.io/schmolldechse/navigator-daemon:latest
     restart: on-failure
     networks: [ "navigator-network" ]
+    depends_on:
+      - navigator-mongodb
     environment:
       MONGO_URL: ${MONGO_URL}
 
