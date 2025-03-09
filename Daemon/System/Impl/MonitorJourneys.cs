@@ -139,25 +139,25 @@ public class MonitorJourneys : Daemon
                         {
                             PlannedTime = !string.IsNullOrEmpty(stop["plannedArrival"]?.ToString())
                                 ? DateTime.Parse(stop["plannedArrival"].ToString()).ToLocalTime()
-                                : default,
+                                : null,
                             ActualTime = !string.IsNullOrEmpty(stop["arrival"]?.ToString())
                                 ? DateTime.Parse(stop["arrival"].ToString()).ToLocalTime()
-                                : default,
+                                : null,
                             Delay = stop["arrivalDelay"]?.ToObject<int?>() ?? 0,
-                            PlannedPlatform = stop["plannedArrivalPlatform"]?.ToString() ?? "",
-                            ActualPlatform = stop["arrivalPlatform"]?.ToString() ?? "",
+                            PlannedPlatform = stop["plannedArrivalPlatform"]?.ToString() ?? null,
+                            ActualPlatform = stop["arrivalPlatform"]?.ToString() ?? null,
                         },
                         Departure = new Time()
                         {
                             PlannedTime = !string.IsNullOrEmpty(stop["plannedDeparture"]?.ToString())
                                 ? DateTime.Parse(stop["plannedDeparture"].ToString()).ToLocalTime()
-                                : default,
+                                : null,
                             ActualTime = !string.IsNullOrEmpty(stop["departure"]?.ToString())
                                 ? DateTime.Parse(stop["departure"].ToString()).ToLocalTime()
-                                : default,
+                                : null,
                             Delay = stop["departureDelay"]?.ToObject<int?>() ?? 0,
-                            PlannedPlatform = stop["plannedDeparturePlatform"]?.ToString() ?? "",
-                            ActualPlatform = stop["departurePlatform"]?.ToString() ?? "",
+                            PlannedPlatform = stop["plannedDeparturePlatform"]?.ToString() ?? null,
+                            ActualPlatform = stop["departurePlatform"]?.ToString() ?? null,
                         },
                         Cancelled = stop["cancelled"]?.ToObject<bool>() ?? false,
                         Messages = stop["remarks"] != null

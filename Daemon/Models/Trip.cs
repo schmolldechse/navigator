@@ -41,13 +41,13 @@ public class Stop : Station
 
 public class Time
 {
-    [BsonElement("plannedTime")] public DateTime PlannedTime { get; set; }
+    [BsonElement("plannedTime")] public DateTime? PlannedTime { get; set; }
 
     [BsonElement("actualTime")] public DateTime? ActualTime { get; set; }
 
     [BsonElement("delay")] public int? Delay { get; set; }
 
-    [BsonElement("plannedPlatform")] public string PlannedPlatform { get; set; }
+    [BsonElement("plannedPlatform")] public string? PlannedPlatform { get; set; }
 
     [BsonElement("actualPlatform")] public string? ActualPlatform { get; set; }
 }
