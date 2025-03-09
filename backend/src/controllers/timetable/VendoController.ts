@@ -1,7 +1,8 @@
 import { DateTime } from "luxon";
 import { Profile, RequestType, retrieveCombinedConnections, retrieveConnections } from "./requests.ts";
-import { Controller, Get, Queries, Res, Route, Tags, type TsoaResponse } from "tsoa";
+import { Controller, Get, Queries, Route, Tags } from "tsoa";
 import type { Journey } from "../../models/connection.ts";
+import { HttpError } from "../../lib/errors/HttpError.ts";
 
 class VendoQuery {
 	evaNumber!: number;

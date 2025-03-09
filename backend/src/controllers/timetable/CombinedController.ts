@@ -1,9 +1,10 @@
 import { DateTime } from "luxon";
-import { Controller, Get, Queries, Res, Route, Tags, type TsoaResponse } from "tsoa";
+import { Controller, Get, Queries, Route, Tags } from "tsoa";
 import type { Connection, Journey } from "../../models/connection.ts";
 import calculateDuration from "../../lib/time.ts";
 import { RequestType, retrieveBahnhofJourneys, retrieveCombinedConnections } from "./requests.ts";
 import { isMatching, merge } from "../../lib/merge.ts";
+import { HttpError } from "../../lib/errors/HttpError.ts";
 
 class CombinedQuery {
 	evaNumber!: number;

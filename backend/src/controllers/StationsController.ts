@@ -3,6 +3,7 @@ import type { Station } from "../models/station.ts";
 import { mapToEnum, Products } from "../models/products.ts";
 import { getCollection } from "../lib/db/mongo-data-db.ts";
 import { HttpError } from "../lib/errors/HttpError.ts";
+import type { StationDocument } from "../db/mongodb/station.schema.ts";
 
 @Route("stations")
 @Tags("Stations")
@@ -91,8 +92,9 @@ const cacheStations = async (stations: Station[]): Promise<void> => {
 
 const getCachedStation = async (evaNumber: number): Promise<Station | null> => {
 	const collection = await getCollection("stations");
-	const station = await collection.findOne({ evaNumber });
+	const station = await collection.findOne({ evaNumber }) as StationDocument;
+	if (!station) return null;
 
 	const { _id, lastQueried, queryingEnabled, ...extracted } = station;
-	return extracted;
+	return extracted as Station;
 };
