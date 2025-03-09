@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { MetaTags } from "svelte-meta-tags";
 	import TimetableSearch from "$components/timetable/TimetableSearch.svelte";
+	import RoutePlannerSearch from "$components/route-planner/RoutePlannerSearch.svelte";
 
 	let type = $state("timetable");
 </script>
@@ -28,6 +29,6 @@
 	{#if type === "timetable"}
 		<TimetableSearch />
 	{:else if type === "route_planner"}
-		<p>There is currently no content you're looking for...</p>
+		<RoutePlannerSearch />
 	{/if}
 </div>
