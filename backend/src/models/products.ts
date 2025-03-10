@@ -13,7 +13,7 @@ enum Products {
 	SCHIFFE = "SCHIFFE", // FERRY, ferry
 	UBAHN = "UBAHN", // SUBWAY, subway
 	STRASSENBAHN = "STRASSENBAHN", // TRAM, tram
-	ANRUFPFLICHTIGEVERKEHRE = "ANRUFPFLICHTIGEVERKEHRE",
+	ANRUFPFLICHTIGEVERKEHRE = "ANRUFPFLICHTIGEVERKEHRE", // SHUTTLE, taxi
 	UNKNOWN = "UNKNOWN"
 }
 
@@ -39,7 +39,10 @@ const keyValueMap: Record<string, Products> = {
 
 	subway: Products.UBAHN,
 
-	tram: Products.STRASSENBAHN
+	tram: Products.STRASSENBAHN,
+
+	shuttle: Products.ANRUFPFLICHTIGEVERKEHRE,
+	taxi: Products.ANRUFPFLICHTIGEVERKEHRE
 };
 
 const mapToProduct = (input: string | undefined): Products => {

@@ -27,7 +27,10 @@ public class TransportProductMapper
 
         { "subway", TransportProducts.UBahn },
 
-        { "tram", TransportProducts.Strassenbahn }
+        { "tram", TransportProducts.Strassenbahn },
+
+        { "shuttle", TransportProducts.AnrufpflichtigeVerkehre },
+        { "taxi", TransportProducts.AnrufpflichtigeVerkehre }
     };
 
     public static TransportProducts GetTransportProduct(string transport)
