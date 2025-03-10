@@ -17,12 +17,6 @@ export const auth = betterAuth({
 			mapProfileToUser: (profile: GithubProfile) => ({ username: profile.login })
 		}
 	},
-	session: {
-		cookieCache: {
-			enabled: true,
-			maxAge: 5 * 60
-		}
-	},
 	basePath: "/auth",
 	trustedOrigins: ["http://localhost:5173"],
 	secret: process.env.AUTH_SECRET!,
