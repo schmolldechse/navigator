@@ -42,7 +42,7 @@
 		</button>
 	</div>
 
-	<StationSearch bind:station={stationSelected} placeholder="To">
+	<StationSearch bind:station={stationSelected} placeholder="Search your station...">
 		<Search size={44} />
 	</StationSearch>
 
