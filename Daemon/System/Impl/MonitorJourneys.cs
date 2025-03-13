@@ -27,7 +27,7 @@ public class MonitorJourneys : Daemon
         var risCollection = await MongoDriver.GetCollectionAsync<RisDocument>("ris-ids");
         var lastSuccessfulQueriedFilter = Builders<RisDocument>.Filter.Or(
             Builders<RisDocument>.Filter.Exists(x => x.LastSuccessfulQueried, false),
-            Builders<RisDocument>.Filter.Lt(x => x.LastSuccessfulQueried, date)
+            Builders<RisDocument>.Filter.Lt(x => x.LastSuccessfulQueried, date.Date.AddDays(-1))
         );
 
         var risDocument = await risCollection
@@ -64,7 +64,9 @@ public class MonitorJourneys : Daemon
                 await tripCollection.InsertOneAsync(trip);
             }
         }
-        else if (risDocument.LastSuccessfulQueried.Value.Date < date.Date) // do not fetch connections for the same day, as the connection may not reached their goal
+        else if
+            (risDocument.LastSuccessfulQueried.Value.Date <
+             date.Date) // do not fetch connections for the same day, as the connection may not reached their goal
         {
             var newLastQueried = new DateTime(
                 DateOnly.FromDateTime(risDocument.LastSuccessfulQueried.Value.Date.AddDays(1)),
