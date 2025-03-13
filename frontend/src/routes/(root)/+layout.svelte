@@ -6,6 +6,6 @@
 </script>
 
 <div class="flex min-h-screen w-full flex-col">
-	<Navbar dropdown={true} />
+	<Navbar dropdownEnabled={true} />
 	{@render children()}
 </div>
