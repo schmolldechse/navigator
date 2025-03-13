@@ -3,7 +3,11 @@
 	import UserInfo from "$components/auth/UserInfo.svelte";
 	import Menu from "lucide-svelte/icons/menu";
 
-	let { userInfo = true, dropdownEnabled = false }: { userInfo?: boolean, dropdownEnabled?: boolean } = $props();
+	let { userInfo = true, dropdownEnabled = false, currentType = $bindable("timetable") }: {
+		userInfo?: boolean,
+		dropdownEnabled?: boolean,
+		currentType?: string
+	} = $props();
 	let dropdownOpen = $state<boolean>(false);
 
 	let menuTriggerElement = $state<HTMLElement | null>(null);
@@ -15,14 +19,8 @@
 	}
 
 	let dropdownElements = $state<DropdownElement[]>([
-		{
-			name: "Timetable",
-			type: "timetable"
-		},
-		{
-			name: "Route Planner",
-			type: "route-planner"
-		}
+		{ name: "Timetable", type: "timetable" },
+		{ name: "Route Planner", type: "route_planner" }
 	]);
 
 	$effect(() => {
@@ -54,7 +52,11 @@
 				<div class="absolute top-0 right-0 mt-2 w-48 bg-primary-darker shadow-lg rounded-md p-2 z-10"
 					 bind:this={dropdownElement}>
 					{#each dropdownElements as element}
-						<span class="block px-4 py-2 text-base text-text hover:bg-primary-dark cursor-pointer">{element.name}</span>
+						<button
+							class="text-left w-full block px-4 py-2 text-base text-text hover:bg-primary-dark cursor-pointer" onclick={() => {
+								currentType = element.type;
+								dropdownOpen = false;
+							}}>{element.name}</button>
 					{/each}
 				</div>
 			{/if}

@@ -4,8 +4,9 @@
 	import RoutePlannerSearch from "$components/route-planner/RoutePlannerSearch.svelte";
 	import { DateTime } from "luxon";
 	import GitHub from "$components/ui/icons/GitHub.svelte";
+	import { getContext } from "svelte";
 
-	let type = $state("timetable");
+	let currentType = getContext<() => string>("currentType");
 </script>
 
 <MetaTags
@@ -28,9 +29,9 @@
 />
 
 <div class="flex flex-1 items-center justify-center">
-	{#if type === "timetable"}
+	{#if currentType() === "timetable"}
 		<TimetableSearch />
-	{:else if type === "route_planner"}
+	{:else if currentType() === "route_planner"}
 		<RoutePlannerSearch />
 	{/if}
 </div>
