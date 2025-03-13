@@ -3,10 +3,14 @@
 	import UserInfo from "$components/auth/UserInfo.svelte";
 	import Menu from "lucide-svelte/icons/menu";
 
-	let { userInfo = true, dropdownEnabled = false, currentType = $bindable("timetable") }: {
-		userInfo?: boolean,
-		dropdownEnabled?: boolean,
-		currentType?: string
+	let {
+		userInfo = true,
+		dropdownEnabled = false,
+		currentType = $bindable("timetable")
+	}: {
+		userInfo?: boolean;
+		dropdownEnabled?: boolean;
+		currentType?: string;
 	} = $props();
 	let dropdownOpen = $state<boolean>(false);
 
@@ -16,7 +20,7 @@
 	type DropdownElement = {
 		name: string;
 		type: string;
-	}
+	};
 
 	let dropdownElements = $state<DropdownElement[]>([
 		{ name: "Timetable", type: "timetable" },
@@ -39,24 +43,28 @@
 <div class="bg-background sticky top-0 flex h-20 w-full items-center justify-between px-2 pt-4 pr-4">
 	<VisualIdentity />
 
-	<div class="flex flex-row items-center gap-x-4 relative">
+	<div class="relative flex flex-row items-center gap-x-4">
 		{#if userInfo}
 			<UserInfo />
 		{/if}
 		{#if dropdownEnabled}
-			<button bind:this={menuTriggerElement} onclick={() => dropdownOpen = !dropdownOpen}>
+			<button bind:this={menuTriggerElement} onclick={() => (dropdownOpen = !dropdownOpen)}>
 				<Menu size={35} class="cursor-pointer" />
 			</button>
 
 			{#if dropdownOpen}
-				<div class="absolute top-0 right-0 mt-2 w-48 bg-primary-darker shadow-lg rounded-md p-2 z-10"
-					 bind:this={dropdownElement}>
+				<div
+					class="bg-primary-darker absolute top-0 right-0 z-10 mt-2 w-48 rounded-md p-2 shadow-lg"
+					bind:this={dropdownElement}
+				>
 					{#each dropdownElements as element}
 						<button
-							class="text-left w-full block px-4 py-2 text-base text-text hover:bg-primary-dark cursor-pointer" onclick={() => {
+							class="text-text hover:bg-primary-dark block w-full cursor-pointer px-4 py-2 text-left text-base"
+							onclick={() => {
 								currentType = element.type;
 								dropdownOpen = false;
-							}}>{element.name}</button>
+							}}>{element.name}</button
+						>
 					{/each}
 				</div>
 			{/if}

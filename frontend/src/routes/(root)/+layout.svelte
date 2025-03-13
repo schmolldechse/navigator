@@ -10,6 +10,6 @@
 </script>
 
 <div class="flex min-h-screen w-full flex-col">
-	<Navbar bind:currentType={currentType} dropdownEnabled={true} />
+	<Navbar bind:currentType dropdownEnabled={true} />
 	{@render children()}
 </div>
