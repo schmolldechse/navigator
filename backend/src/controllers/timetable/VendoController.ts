@@ -14,8 +14,11 @@ class VendoQuery {
 }
 
 @Route("timetable/vendo")
-@Tags("Vendo")
+@Tags("Timetable")
 export class VendoController extends Controller {
+	/**
+	 * Aggregates and normalizes journeys from both Bahnhof and Vendo APIs into a unified response format
+	 */
 	@Get()
 	async getVendoJourneys(@Queries() query: VendoQuery): Promise<Journey[]> {
 		query = {

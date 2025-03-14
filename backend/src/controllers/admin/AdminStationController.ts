@@ -1,4 +1,4 @@
-import { Controller, Get, Path, Post, Route, Security, Tags } from "tsoa";
+import { Controller, Get, Hidden, Path, Post, Route, Security, Tags } from "tsoa";
 import { getCollection } from "../../lib/db/mongo-data-db.ts";
 import type { Station } from "../../models/station.ts";
 import { HttpError } from "../../lib/errors/HttpError.ts";
@@ -7,6 +7,7 @@ import type { StationDocument } from "../../db/mongodb/station.schema.ts";
 @Route("admin/station")
 @Tags("Admin")
 @Security("better_auth", ["admin"])
+@Hidden()
 export class AdminStationController extends Controller {
 	@Get("query")
 	async getEnabledQueryStations(): Promise<Station[]> {
