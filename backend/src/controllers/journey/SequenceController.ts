@@ -11,7 +11,7 @@ class SequenceQuery {
 }
 
 @Route("journey/sequence")
-@Tags("Coach Sequences")
+@Tags("Journey")
 export class SequenceController extends Controller {
 	@Get()
 	async getSequenceById(@Queries() query: SequenceQuery): Promise<Sequence> {

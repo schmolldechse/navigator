@@ -1,6 +1,8 @@
 import { Controller, Get, Queries, Route, Tags } from "tsoa";
 import { DateTime } from "luxon";
 import { HttpError } from "../../lib/errors/HttpError.ts";
+import { mapToRoute } from "../../lib/mapping.ts";
+import { type Route as PlannedRoute } from "../../models/connection.ts"
 
 class RoutePlannerQuery {
 	/**
@@ -26,7 +28,7 @@ class RoutePlannerQuery {
 @Tags("Journey")
 export class JourneyController extends Controller {
 	@Get()
-	async getRouteByDefinition(@Queries() query: RoutePlannerQuery): Promise<any> {
+	async getRouteByDefinition(@Queries() query: RoutePlannerQuery): Promise<PlannedRoute> {
 		if (query.to === query.from) throw new HttpError(400, "From and to cannot be the same station");
 
 		if (!query.departure && !query.arrival && !query.earlierThan && !query.laterThan) throw new HttpError(400, "Missing either 'departure', 'arrival', 'earlierThan' or 'laterThan'");
@@ -37,20 +39,20 @@ export class JourneyController extends Controller {
 		if (query.departure && !DateTime.fromISO(query.departure).isValid) throw new HttpError(400, "Invalid departure date");
 		if (query.arrival && !DateTime.fromISO(query.arrival).isValid) throw new HttpError(400, "Invalid arrival date");
 
-		return fetchRoute(query);
+		return await fetchRoute(query);
 	}
 }
 
-const fetchRoute = async (query: RoutePlannerQuery): Promise<any> => {
+const fetchRoute = async (query: RoutePlannerQuery): Promise<PlannedRoute> => {
 	const params = new URLSearchParams({
-		from: query.from,
-		to: query.to
+		from: query.from.toString(),
+		to: query.to.toString()
 	});
 
 	if (query.earlierThan) params.set("earlierThan", query.earlierThan);
 	else if (query.laterThan) params.set("laterThan", query.laterThan);
 	else {
-		params.set("results", query.results);
+		params.set("results", query.results!.toString());
 
 		if (query.departure) params.set("departure", query.departure);
 		else if (query.arrival) params.set("arrival", query.arrival);
@@ -59,5 +61,7 @@ const fetchRoute = async (query: RoutePlannerQuery): Promise<any> => {
 	const request = await fetch(`https://vendo-prof-db.voldechse.wtf/journeys?${params.toString()}`, { method: "GET", });
 	if (!request.ok) throw new Error("Failed to fetch route");
 
-	console.log(await request.json());
+	const routes = mapToRoute(await request.json()) as PlannedRoute;
+	console.log(routes);
+	return routes;
 };

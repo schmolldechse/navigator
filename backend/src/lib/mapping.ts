@@ -1,18 +1,19 @@
 import calculateDuration from "./time.ts";
 import { DateTime } from "luxon";
-import type { Connection } from "../models/connection.ts";
+import type { Connection, Route } from "../models/connection.ts";
 import { mapToProduct } from "../models/products.ts";
 import type { Stop } from "../models/station.ts";
 import type { Message } from "../models/message.ts";
 import type { Sequence } from "../models/sequence.ts";
 
-const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db" | "dbweb"): Connection => {
+const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", profile: "db" | "dbweb"): Connection => {
 	const delay: number = calculateDuration(
 		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen),
 		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen),
 		"seconds"
 	);
 	const isDeparture = type === "departures";
+	const isBoth = type === "both";
 	const isRIS = profile === "db";
 
 	return {
@@ -23,23 +24,23 @@ const mapConnection = (entry: any, type: "departures" | "arrivals", profile: "db
 		direction: !isRIS ? entry?.direction : undefined,
 		origin: !isDeparture && isRIS && entry?.origin ? mapStops(entry?.origin)![0] : undefined,
 		provenance: !isRIS ? entry?.provenance : undefined,
-		departure: isDeparture
+		departure: isDeparture || isBoth
 			? {
-					plannedTime: entry?.timeSchedule ?? entry?.plannedWhen,
-					actualTime: entry?.timeDelayed ?? entry?.when,
-					delay: delay,
-					plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform,
-					actualPlatform: entry?.platform
-				}
+				plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? entry?.plannedDeparture,
+				actualTime: entry?.timeDelayed ?? entry?.when ?? entry?.departure,
+				delay: delay ?? entry?.departureDelay,
+				plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedDeparturePlatform,
+				actualPlatform: entry?.platform ?? entry?.departurePlatform
+			}
 			: undefined,
-		arrival: !isDeparture
+		arrival: !isDeparture || isBoth
 			? {
-					plannedTime: entry?.timeSchedule ?? entry?.plannedWhen,
-					actualTime: entry?.timeDelayed ?? entry?.when,
-					delay: delay,
-					plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform,
-					actualPlatform: entry?.platform
-				}
+				plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? entry?.plannedArrival,
+				actualTime: entry?.timeDelayed ?? entry?.when ?? entry?.arrival,
+				delay: delay ?? entry?.arrivalDelay,
+				plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedArrivalPlatform,
+				actualPlatform: entry?.platform ?? entry?.arrivalPlatform
+			}
 			: undefined,
 		lineInformation: {
 			type: mapToProduct(entry?.type ?? entry?.line?.product).toString() ?? undefined,
@@ -164,4 +165,16 @@ const mapCoachSequence = (entry: any): Sequence => {
 	};
 };
 
-export { mapConnection, mapCoachSequence };
+const mapToRoute = (entry: any): Route => {
+	console.log(entry);
+	return {
+		earlierRef: entry?.earlierRef,
+		laterRef: entry?.laterRef,
+		journeys: entry?.journeys?.map((rawJourney: any) => ({
+			connections: rawJourney?.legs?.map((rawConnection: any) => mapConnection(rawConnection, "both", "dbweb")),
+			refreshToken: rawJourney?.refreshToken
+		}))
+	};
+};
+
+export { mapConnection, mapCoachSequence, mapToRoute };
