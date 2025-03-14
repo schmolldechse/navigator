@@ -9,7 +9,7 @@ export interface Sequence {
 export interface Track {
 	start: { position: number };
 	end: { position: number };
-	sections: Section[] | [];
+	sections: Section[];
 	name: string; // name of the track
 }
 
