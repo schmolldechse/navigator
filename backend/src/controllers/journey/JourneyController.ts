@@ -34,8 +34,8 @@ export class JourneyController extends Controller {
 		if (query.departure && query.arrival) throw new HttpError(400, "Either departure or arrival can be set, not both");
 		if (query.earlierThan && query.laterThan) throw new HttpError(400, "Either earlierThan or laterThan can be set, not both");
 
-		if (query.departure && DateTime.fromISO(query.departure).isInvalid) throw new HttpError(400, "Invalid departure date");
-		if (query.arrival && DateTime.fromISO(query.arrival).isInvalid) throw new HttpError(400, "Invalid arrival date");
+		if (query.departure && !DateTime.fromISO(query.departure).isValid) throw new HttpError(400, "Invalid departure date");
+		if (query.arrival && !DateTime.fromISO(query.arrival).isValid) throw new HttpError(400, "Invalid arrival date");
 
 		return fetchRoute(query);
 	}
