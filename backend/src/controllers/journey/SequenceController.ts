@@ -18,7 +18,7 @@ export class SequenceController extends Controller {
 		const dateValidation = DateTime.fromFormat(query.date, "yyyyMMdd");
 		if (!dateValidation.isValid) throw new HttpError(400, `${dateValidation.invalidExplanation}`);
 
-		return fetchCoachSequence(query);
+		return await fetchCoachSequence(query);
 	}
 }
 
