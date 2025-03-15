@@ -5,7 +5,8 @@
 	import TimePicker from "$components/ui/controls/TimePicker.svelte";
 	import Clock from "$components/ui/icons/Clock.svelte";
 	import { goto } from "$app/navigation";
-	import { ArrowUpDown, MapPinIcon } from "lucide-svelte";
+	import ArrowUpDown from "lucide-svelte/icons/arrow-up-down";
+	import MapPinIcon from "lucide-svelte/icons/map-pin";
 
 	let stationFrom: Station | undefined = $state();
 	let stationTo: Station | undefined = $state();
