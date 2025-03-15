@@ -2,7 +2,7 @@ import { Controller, Get, Queries, Route, Tags } from "tsoa";
 import { DateTime } from "luxon";
 import { HttpError } from "../../lib/errors/HttpError.ts";
 import { mapToRoute } from "../../lib/mapping.ts";
-import { type Route as PlannedRoute } from "../../models/connection.ts"
+import { type RouteData } from "../../models/route.ts";
 
 class RoutePlannerQuery {
 	/**
@@ -28,7 +28,7 @@ class RoutePlannerQuery {
 @Tags("Journey")
 export class JourneyController extends Controller {
 	@Get()
-	async getRouteByDefinition(@Queries() query: RoutePlannerQuery): Promise<PlannedRoute> {
+	async getRouteByDefinition(@Queries() query: RoutePlannerQuery): Promise<RouteData> {
 		if (query.to === query.from) throw new HttpError(400, "From and to cannot be the same station");
 
 		if (!query.departure && !query.arrival && !query.earlierThan && !query.laterThan) throw new HttpError(400, "Missing either 'departure', 'arrival', 'earlierThan' or 'laterThan'");
@@ -43,7 +43,7 @@ export class JourneyController extends Controller {
 	}
 }
 
-const fetchRoute = async (query: RoutePlannerQuery): Promise<PlannedRoute> => {
+const fetchRoute = async (query: RoutePlannerQuery): Promise<RouteData> => {
 	const params = new URLSearchParams({
 		from: query.from.toString(),
 		to: query.to.toString()
@@ -61,7 +61,5 @@ const fetchRoute = async (query: RoutePlannerQuery): Promise<PlannedRoute> => {
 	const request = await fetch(`https://vendo-prof-db.voldechse.wtf/journeys?${params.toString()}`, { method: "GET", });
 	if (!request.ok) throw new Error("Failed to fetch route");
 
-	const routes = mapToRoute(await request.json()) as PlannedRoute;
-	console.log(routes);
-	return routes;
+	return await mapToRoute(await request.json()) as RouteData;
 };

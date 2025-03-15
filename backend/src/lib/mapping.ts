@@ -1,43 +1,46 @@
 import calculateDuration from "./time.ts";
 import { DateTime } from "luxon";
-import type { Connection, Route } from "../models/connection.ts";
+import type { Connection } from "../models/connection.ts";
 import { mapToProduct } from "../models/products.ts";
 import type { Stop } from "../models/station.ts";
 import type { Message } from "../models/message.ts";
 import type { Sequence } from "../models/sequence.ts";
+import type { RouteData } from "../models/route.ts";
 
 const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", profile: "db" | "dbweb"): Connection => {
-	const delay: number = calculateDuration(
-		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen),
-		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen),
-		"seconds"
-	);
+	const delay = (): number => {
+		return calculateDuration(
+			DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen),
+			DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen),
+			"seconds"
+		);
+	};
+
 	const isDeparture = type === "departures";
-	const isBoth = type === "both";
 	const isRIS = profile === "db";
 
 	return {
 		ris_journeyId: isRIS ? (entry?.journeyID ?? entry?.tripId) : undefined,
 		hafas_journeyId: !isRIS ? entry?.tripId : undefined,
-		destination: isDeparture && isRIS && entry?.destination ? mapStops(entry?.destination)![0] : undefined,
+		destination: ((isDeparture && isRIS) || type === "both") && entry?.destination ? mapStops(entry?.destination)![0] : undefined,
 		actualDestination: entry?.actualDestination ? mapStops(entry?.actualDestination)![0] : undefined,
 		direction: !isRIS ? entry?.direction : undefined,
-		origin: !isDeparture && isRIS && entry?.origin ? mapStops(entry?.origin)![0] : undefined,
+		origin: ((!isDeparture && isRIS) || type === "both") && entry?.origin ? mapStops(entry?.origin)![0] : undefined,
 		provenance: !isRIS ? entry?.provenance : undefined,
-		departure: isDeparture || isBoth
+		departure: type === "both" || isDeparture
 			? {
 				plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? entry?.plannedDeparture,
 				actualTime: entry?.timeDelayed ?? entry?.when ?? entry?.departure,
-				delay: delay ?? entry?.departureDelay,
+				delay: entry?.departureDelay ?? delay,
 				plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedDeparturePlatform,
 				actualPlatform: entry?.platform ?? entry?.departurePlatform
 			}
 			: undefined,
-		arrival: !isDeparture || isBoth
+		arrival: type === "both" || !isDeparture
 			? {
 				plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? entry?.plannedArrival,
 				actualTime: entry?.timeDelayed ?? entry?.when ?? entry?.arrival,
-				delay: delay ?? entry?.arrivalDelay,
+				delay: entry?.arrivalDelay ?? delay,
 				plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedArrivalPlatform,
 				actualPlatform: entry?.platform ?? entry?.arrivalPlatform
 			}
@@ -165,13 +168,12 @@ const mapCoachSequence = (entry: any): Sequence => {
 	};
 };
 
-const mapToRoute = (entry: any): Route => {
-	console.log(entry);
+const mapToRoute = (entry: any): RouteData => {
 	return {
 		earlierRef: entry?.earlierRef,
 		laterRef: entry?.laterRef,
 		journeys: entry?.journeys?.map((rawJourney: any) => ({
-			connections: rawJourney?.legs?.map((rawConnection: any) => mapConnection(rawConnection, "both", "dbweb")),
+			legs: rawJourney?.legs?.map((rawLeg: any) => mapConnection(rawLeg, "both", "dbweb")),
 			refreshToken: rawJourney?.refreshToken
 		}))
 	};

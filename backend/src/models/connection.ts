@@ -2,15 +2,8 @@ import type { Stop } from "./station.ts";
 import type { Time } from "./time.ts";
 import type { Message } from "./message.ts";
 
-export interface Route {
-	earlierRef: string;
-	laterRef: string;
-	journeys: Journey[];
-}
-
 export interface Journey {
 	connections: Connection[];
-	refreshToken?: string;
 }
 
 export interface Connection {
