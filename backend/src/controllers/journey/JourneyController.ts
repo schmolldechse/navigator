@@ -61,5 +61,5 @@ const fetchRoute = async (query: RoutePlannerQuery): Promise<RouteData> => {
 	const request = await fetch(`https://vendo-prof-db.voldechse.wtf/journeys?${params.toString()}`, { method: "GET", });
 	if (!request.ok) throw new Error("Failed to fetch route");
 
-	return await mapToRoute(await request.json()) as RouteData;
+	return mapToRoute(await request.json()) as RouteData;
 };
