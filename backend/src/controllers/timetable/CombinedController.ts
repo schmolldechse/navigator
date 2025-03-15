@@ -16,8 +16,11 @@ class CombinedQuery {
 }
 
 @Route("timetable/combined")
-@Tags("Combined")
+@Tags("Timetable")
 export class CombinedController extends Controller {
+	/**
+	 * Returns journeys through db-vendo-client@6.5.1 with multiple ID profiles: 'db' (RIS IDs), 'dbweb' (HAFAS IDs), and 'combined' (merged journey elements)
+	 */
 	@Get()
 	async getCombinedJourneys(@Queries() query: CombinedQuery): Promise<Journey[]> {
 		query = {

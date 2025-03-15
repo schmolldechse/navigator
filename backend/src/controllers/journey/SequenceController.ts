@@ -2,6 +2,7 @@ import { Controller, Get, Queries, Route, Tags } from "tsoa";
 import { DateTime } from "luxon";
 import { mapCoachSequence } from "../../lib/mapping.ts";
 import { HttpError } from "../../lib/errors/HttpError.ts";
+import type { Sequence } from "../../models/sequence.ts";
 
 class SequenceQuery {
 	lineDetails!: string;
@@ -10,18 +11,18 @@ class SequenceQuery {
 }
 
 @Route("journey/sequence")
-@Tags("Coach Sequences")
+@Tags("Journey")
 export class SequenceController extends Controller {
 	@Get()
-	async getSequenceById(@Queries() query: SequenceQuery): Promise<any> {
+	async getSequenceById(@Queries() query: SequenceQuery): Promise<Sequence> {
 		const dateValidation = DateTime.fromFormat(query.date, "yyyyMMdd");
 		if (!dateValidation.isValid) throw new HttpError(400, `${dateValidation.invalidExplanation}`);
 
-		return fetchCoachSequence(query);
+		return await fetchCoachSequence(query);
 	}
 }
 
-const fetchCoachSequence = async (query: SequenceQuery): Promise<any> => {
+const fetchCoachSequence = async (query: SequenceQuery): Promise<Sequence> => {
 	const request = await fetch(
 		`https://app.vendo.noncd.db.de/mob/zuglaeufe/${query.lineDetails}/halte/by-abfahrt/${query.evaNumber}_${query.date}/wagenreihung`,
 		{
@@ -38,5 +39,5 @@ const fetchCoachSequence = async (query: SequenceQuery): Promise<any> => {
 		throw new Error("Failed to fetch coach sequence");
 	}
 
-	return mapCoachSequence(await request.json());
+	return mapCoachSequence(await request.json()) as Sequence;
 };

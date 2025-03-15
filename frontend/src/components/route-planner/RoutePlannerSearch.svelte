@@ -5,7 +5,8 @@
 	import TimePicker from "$components/ui/controls/TimePicker.svelte";
 	import Clock from "$components/ui/icons/Clock.svelte";
 	import { goto } from "$app/navigation";
-	import { ArrowUpDown, MapPinIcon } from "lucide-svelte";
+	import ArrowUpDown from "lucide-svelte/icons/arrow-up-down";
+	import MapPinIcon from "lucide-svelte/icons/map-pin";
 
 	let stationFrom: Station | undefined = $state();
 	let stationTo: Station | undefined = $state();
@@ -59,9 +60,7 @@
 					: 'bg-primary-dark text-text hover:bg-secondary'} text-background cursor-pointer rounded-3xl px-4 font-bold md:text-2xl"
 				onclick={async () => {
 					if (!queryReady()) return;
-					await goto(
-						`/${stationFrom?.evaNumber}/${typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}`
-					);
+					await goto(`journey/planned?from=${stationFrom?.evaNumber}&to=${stationTo?.evaNumber}?departure=${encodeURIComponent(dateSelected.toISO())}`);
 				}}
 			>
 				Search

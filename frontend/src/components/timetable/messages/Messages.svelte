@@ -105,7 +105,9 @@
 			{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
 			{#if validMessage?.component}
 				{@const Component = validMessage.component}
-				<Component />
+				<div title={formatMessage(message)}>
+					<Component />
+				</div>
 			{/if}
 		{/each}
 		<ShowMore onclick={() => (expanded = true)} />

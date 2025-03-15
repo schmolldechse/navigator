@@ -10,8 +10,11 @@ class BahnhofQuery {
 }
 
 @Route("timetable/bahnhof")
-@Tags("Bahnhof")
+@Tags("Timetable")
 export class BahnhofController extends Controller {
+	/**
+	 * Returns journeys from DeutscheBahn Bahnhof API. All journeys include RIS identifiers.
+	 */
 	@Get()
 	async getBahnhofJourneys(@Queries() query: BahnhofQuery): Promise<Journey[]> {
 		return await retrieveBahnhofJourneys(query);
