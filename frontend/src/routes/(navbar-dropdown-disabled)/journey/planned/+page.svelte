@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
+	import Route from "$components/route-planner/Route.svelte";
+	import { MetaTags } from "svelte-meta-tags";
 
 	let { data }: PageProps = $props();
 </script>
@@ -24,4 +25,12 @@
 	}}
 />
 
-<p>Route Planner</p>
+<div class="md:max-w-[75%] w-full mx-auto flex flex-1 bg-primary-darker min-h-full rounded-t-2xl">
+	{#await data.plannedRoute}
+		<p>loading...</p>
+	{:then plannedRoute}
+		{#each plannedRoute?.journeys as route}
+			<Route {route} />
+		{/each}
+	{/await}
+</div>
