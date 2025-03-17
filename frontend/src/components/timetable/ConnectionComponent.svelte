@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Connection } from "$models/connection";
 	import { getContext } from "svelte";
-	import TimeComponent from "$components/timetable/info/TimeComponent.svelte";
+	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
 	import { writeStop } from "$lib";
 	import Platform from "$components/timetable/info/Platform.svelte";
 	import ViaStops from "$components/timetable/info/ViaStops.svelte";
@@ -47,7 +47,7 @@
 
 		<!-- 3rd row; Time & Platform Information -->
 		<div class="flex flex-row items-center justify-between text-2xl font-semibold">
-			<TimeComponent time={isDeparture ? connection?.departure : connection?.arrival} />
+			<TimeInformation time={isDeparture ? connection?.departure : connection?.arrival} />
 			<Platform time={isDeparture ? connection?.departure : connection?.arrival} />
 		</div>
 
@@ -102,7 +102,7 @@
 			<!-- Time Information -->
 			<div class="mr-8 flex-1">
 				{#if renderInformation}
-					<TimeComponent time={isDeparture ? connection?.departure : connection?.arrival} />
+					<TimeInformation time={isDeparture ? connection?.departure : connection?.arrival} />
 				{/if}
 			</div>
 
