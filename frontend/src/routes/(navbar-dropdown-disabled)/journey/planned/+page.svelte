@@ -25,7 +25,7 @@
 	}}
 />
 
-<div class="md:max-w-[75%] w-full mx-auto flex flex-1 bg-primary-darker min-h-full rounded-t-2xl">
+<div class="md:max-w-[75%] w-full mx-auto flex flex-1 bg-primary-darker min-h-full rounded-t-2xl flex-col">
 	{#await data.plannedRoute}
 		<p>loading...</p>
 	{:then plannedRoute}

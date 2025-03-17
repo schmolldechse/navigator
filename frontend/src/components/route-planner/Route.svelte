@@ -1,10 +1,14 @@
 <script lang="ts">
 	import type { Route } from "$models/route";
-	import TimeComponent from "$components/timetable/info/TimeComponent.svelte";
+	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
+	import Minus from "lucide-svelte/icons/minus";
 
 	let { route }: { route: Route } = $props();
 </script>
 
-<div>
-	<TimeComponent time={route?.legs[0]?.arrival} />
+<!-- fix: multiple Route's having the same width for the time info -->
+<div class="text-2xl flex flex-row items-start">
+	<TimeInformation time={route?.legs[0]?.departure} direction="col" />
+	<Minus />
+	<TimeInformation time={route?.legs[route?.legs?.length - 1]?.arrival} direction="col" />
 </div>
