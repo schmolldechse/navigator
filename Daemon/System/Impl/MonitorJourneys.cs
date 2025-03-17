@@ -39,70 +39,73 @@ public class MonitorJourneys : Daemon
 
         if (risDocument.LastSuccessfulQueried == null)
         {
-            Trip trip = null;
-            try
-            {
-                trip = await CallApi(risDocument.risId, _startTime);
-            }
-            catch
-            {
-            } // ignore 
-
-            var newLastQueried = new DateTime(
-                DateOnly.FromDateTime(_startTime),
-                TimeOnly.FromTimeSpan(date.TimeOfDay)
-            );
-
-            await risCollection.FindOneAndUpdateAsync(
-                Builders<RisDocument>.Filter.Eq(x => x.risId, risDocument.risId),
-                Builders<RisDocument>.Update.Set(x => x.LastSuccessfulQueried, newLastQueried)
-            );
-
-            if (trip != null)
-            {
-                var tripCollection = await MongoDriver.GetCollectionAsync<Trip>("trips");
-                await tripCollection.InsertOneAsync(trip);
-            }
+            await ProcessNewDocument(risDocument, date, risCollection, cancellationToken);
         }
-        else if
-            (risDocument.LastSuccessfulQueried.Value.Date <
-             date.Date) // do not fetch connections for the same day, as the connection may not reached their goal
+        // do not fetch connections for the same day, as the connection may not reach their destination
+        else if (risDocument.LastSuccessfulQueried.Value.Date < date.Date) 
         {
-            var newLastQueried = new DateTime(
-                DateOnly.FromDateTime(risDocument.LastSuccessfulQueried.Value.Date.AddDays(1)),
-                TimeOnly.FromTimeSpan(date.TimeOfDay)
-            );
-
-            await risCollection.FindOneAndUpdateAsync(
-                Builders<RisDocument>.Filter.Eq(x => x.risId, risDocument.risId),
-                Builders<RisDocument>.Update.Set(x => x.LastSuccessfulQueried, newLastQueried)
-            );
-
-            Trip trip = null;
-            try
-            {
-                trip = await CallApi(risDocument.risId, newLastQueried);
-            }
-            catch
-            {
-            } // ignore 
-
-            if (trip != null)
-            {
-                var tripCollection = await MongoDriver.GetCollectionAsync<Trip>("trips");
-                await tripCollection.InsertOneAsync(trip);
-            }
+            await ProcessExistingDocument(risDocument, date, risCollection, cancellationToken);
         }
     }
 
-    private async Task<Trip> CallApi(string risId, DateTime when)
+    private async Task ProcessNewDocument(
+        RisDocument risDocument,
+        DateTime date,
+        IMongoCollection<RisDocument> risCollection,
+        CancellationToken cancellationToken)
+    {
+        var newLastQueried = new DateTime(
+            DateOnly.FromDateTime(_startTime),
+            TimeOnly.FromTimeSpan(date.TimeOfDay)
+        );
+        await risCollection.FindOneAndUpdateAsync(
+            Builders<RisDocument>.Filter.Eq(x => x.risId, risDocument.risId),
+            Builders<RisDocument>.Update.Set(x => x.LastSuccessfulQueried, newLastQueried),
+            cancellationToken: cancellationToken
+        );
+        
+        Trip trip = await CallApi(risDocument.risId, _startTime, cancellationToken);
+        if (trip == null) return;
+
+        await StoreTrip(trip, cancellationToken);
+    }
+
+    private async Task ProcessExistingDocument(
+        RisDocument risDocument,
+        DateTime date,
+        IMongoCollection<RisDocument> risCollection,
+        CancellationToken cancellationToken)
+    {
+        var newLastQueried = new DateTime(
+            DateOnly.FromDateTime(risDocument.LastSuccessfulQueried.Value.Date.AddDays(1)),
+            TimeOnly.FromTimeSpan(date.TimeOfDay)
+        );
+        await risCollection.FindOneAndUpdateAsync(
+            Builders<RisDocument>.Filter.Eq(x => x.risId, risDocument.risId),
+            Builders<RisDocument>.Update.Set(x => x.LastSuccessfulQueried, newLastQueried),
+            cancellationToken: cancellationToken
+        );
+        
+        Trip trip = await CallApi(risDocument.risId, newLastQueried, cancellationToken);
+        if (trip == null) return;
+        
+        await StoreTrip(trip, cancellationToken);
+    }
+
+    private async Task<Trip> CallApi(string risId, DateTime when, CancellationToken cancellationToken)
     {
         string formattedId = when.ToString("yyyyMMdd") + "-" + risId;
-        var response = await _httpClient.GetAsync(string.Format(_apiUrl, formattedId));
-        response.EnsureSuccessStatusCode();
+        
+        _logger.LogDebug($"Calling Trip API for: {formattedId}");
+        var response = await _httpClient.GetAsync(string.Format(_apiUrl, formattedId), cancellationToken);
+        if (!response.IsSuccessStatusCode) return null;
 
-        var content = JObject.Parse(await response.Content.ReadAsStringAsync());
-        if (content["trip"] == null) return null;
+        var content = JObject.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
+        if (content["trip"] == null)
+        {
+            _logger.LogDebug($"No response from Trip API for: {formattedId}");
+            return null;
+        }
 
         var trip = new Trip()
         {
@@ -183,6 +186,12 @@ public class MonitorJourneys : Daemon
                 : null
         };
         return trip;
+    }
+
+    private async Task StoreTrip(Trip trip, CancellationToken cancellationToken)
+    {
+        var tripsCollection = await MongoDriver.GetCollectionAsync<Trip>("trips");
+        await tripsCollection.InsertOneAsync(trip, cancellationToken: cancellationToken);
     }
 
     public override void Dispose()
