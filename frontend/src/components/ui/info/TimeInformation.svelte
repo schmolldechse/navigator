@@ -13,7 +13,9 @@
 	 class:flex-row={direction === "row"}
 	 class:flex-col={direction === "col"}
 >
-	<span>{displayTime(time?.plannedTime ?? "")}</span>
+	<span
+		class:px-2={direction === "col"}
+	>{displayTime(time?.plannedTime ?? "")}</span>
 	{#if isDelayed()}
 		<span class="bg-text text-background px-2 text-lg font-bold md:py-0.25 md:text-2xl">{displayTime(time?.actualTime ?? "")}</span>
 	{/if}

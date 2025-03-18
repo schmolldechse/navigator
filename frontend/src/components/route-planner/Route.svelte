@@ -6,7 +6,6 @@
 	let { route }: { route: Route } = $props();
 </script>
 
-<!-- fix: multiple Route's having the same width for the time info -->
 <div class="text-2xl flex flex-row items-start">
 	<TimeInformation time={route?.legs[0]?.departure} direction="col" />
 	<Minus />
