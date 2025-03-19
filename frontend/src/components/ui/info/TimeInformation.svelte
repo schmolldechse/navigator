@@ -5,7 +5,7 @@
 
 	let { time, direction = "row" }: { time?: Time, direction?: "row" | "col" } = $props();
 
-	const isDelayed = () => calculateDuration(DateTime.fromISO(time?.actualTime || time?.plannedTime!), DateTime.fromISO(time?.plannedTime!), "minutes") >= 1;
+	const isDelayed = () => calculateDuration(DateTime.fromISO(time?.actualTime || time?.plannedTime!), DateTime.fromISO(time?.plannedTime!), ["minutes"])?.minutes ?? 0 >= 1;
 	const displayTime = (time: string) => DateTime.fromISO(time).setLocale("de-DE").toLocaleString(DateTime.TIME_24_SIMPLE);
 </script>
 
