@@ -41,4 +41,5 @@ export interface Connection {
 	};
 	cancelled?: boolean;
 	providesVehicleSequence?: boolean;
+	walking?: boolean;
 }

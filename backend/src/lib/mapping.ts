@@ -31,21 +31,21 @@ const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", pro
 			? {
 				plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? entry?.plannedDeparture,
 				actualTime: entry?.timeDelayed ?? entry?.when ?? entry?.departure,
-				delay: entry?.departureDelay ?? delay,
-				plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedDeparturePlatform,
-				actualPlatform: entry?.platform ?? entry?.departurePlatform
+				delay: !entry?.walking ? entry?.departureDelay ?? delay : undefined,
+				plannedPlatform: !entry?.walking ? entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedDeparturePlatform : undefined,
+				actualPlatform: !entry?.walking ? entry?.platform ?? entry?.departurePlatform : undefined
 			}
 			: undefined,
 		arrival: type === "both" || !isDeparture
 			? {
 				plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? entry?.plannedArrival,
 				actualTime: entry?.timeDelayed ?? entry?.when ?? entry?.arrival,
-				delay: entry?.arrivalDelay ?? delay,
-				plannedPlatform: entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedArrivalPlatform,
-				actualPlatform: entry?.platform ?? entry?.arrivalPlatform
+				delay: !entry?.walking ? entry?.arrivalDelay ?? delay : undefined,
+				plannedPlatform: !entry?.walking ? entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedArrivalPlatform : undefined,
+				actualPlatform: !entry?.walking ? entry?.platform ?? entry?.arrivalPlatform : undefined
 			}
 			: undefined,
-		lineInformation: {
+		lineInformation: !entry?.walking ? {
 			type: mapToProduct(entry?.type ?? entry?.line?.product).toString() ?? undefined,
 			replacementServiceType: entry?.replacementServiceType ?? undefined,
 			product: entry?.line?.productName ?? undefined,
@@ -56,14 +56,15 @@ const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", pro
 				id: entry?.line?.operator?.id ?? undefined,
 				name: entry?.line?.operator?.name ?? undefined
 			}
-		},
+		} : undefined,
 		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers) ?? undefined,
 		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
 		additionalStops: mapStops(entry?.additionalStops) ?? undefined,
 		cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
 		messages: mapMessages(entry?.messages ?? entry?.remarks, isRIS) ?? undefined,
-		cancelled: entry?.canceled ?? entry?.cancelled ?? false,
-		providesVehicleSequence: entry?.providesVehicleSequence ?? false
+		cancelled: !entry?.walking ? entry?.canceled ?? entry?.cancelled ?? false : undefined,
+		providesVehicleSequence: !entry?.walking ? entry?.providesVehicleSequence ?? false : undefined,
+		walking: entry?.walking ? entry?.walking : undefined,
 	};
 };
 
