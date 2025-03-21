@@ -12,14 +12,13 @@
 			DateTime.fromISO(route?.legs[route?.legs?.length - 1]?.arrival?.plannedTime ?? route?.legs[route?.legs?.length - 1]?.arrival?.actualTime ?? ""),
 			DateTime.fromISO(route?.legs[0]?.departure?.plannedTime ?? route?.legs[0]?.departure?.actualTime ?? ""),
 			["minutes"]
-		);
-		const total = duration.as("minutes");
+		).as("minutes");
 
-		if (total > 60) {
-			const hours = Math.floor(total / 60);
-			const minutes = total % 60;
+		if (duration > 60) {
+			const hours = Math.floor(duration / 60);
+			const minutes = duration % 60;
 			return `${hours} h ${minutes} min`;
-		} else return `${Math.floor(total)} min`;
+		} else return `${Math.floor(duration)} min`;
 	};
 </script>
 
