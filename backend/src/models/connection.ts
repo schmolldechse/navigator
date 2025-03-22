@@ -2,11 +2,11 @@ import type { Stop } from "./station.ts";
 import type { Time } from "./time.ts";
 import type { Message } from "./message.ts";
 
-export interface Journey {
+interface Journey {
 	connections: Connection[];
 }
 
-export interface Connection {
+interface Connection {
 	ris_journeyId?: string;
 	hafas_journeyId?: string;
 	origin?: Stop;
@@ -43,3 +43,15 @@ export interface Connection {
 	providesVehicleSequence?: boolean;
 	walking?: boolean;
 }
+
+interface LineColor {
+	lineName: string;
+	hafasLineId: string;
+	hafasOperatorCode: string;
+	backgroundColor: string;
+	textColor: string;
+	borderColor: string;
+	shape: string;
+}
+
+export type { Journey, Connection, LineColor };
