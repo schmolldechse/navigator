@@ -32,20 +32,17 @@
 		if (legs.length === 0) return 0;
 
 		return legs.flatMap(leg => calculateDuration(
-				DateTime.fromISO(leg?.arrival?.actualTime ?? leg?.arrival?.plannedTime ?? ""),
-				DateTime.fromISO(leg?.departure?.actualTime ?? leg?.departure?.plannedTime ?? ""),
-				["minutes"]
-			).as("minutes"))
-			.reduce((acc, el) => acc + el);
+			DateTime.fromISO(leg?.arrival?.actualTime ?? leg?.arrival?.plannedTime ?? ""),
+			DateTime.fromISO(leg?.departure?.actualTime ?? leg?.departure?.plannedTime ?? ""),
+			["minutes"]
+		).as("minutes")).reduce((acc, el) => acc + el);
 	});
 
-	const durationByConnection = (connection: Connection) => {
-		return calculateDuration(
-			DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
-			DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
-			["minutes"]
-		).as("minutes");
-	}
+	const durationByConnection = (connection: Connection) => calculateDuration(
+		DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
+		DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
+		["minutes"]
+	).as("minutes");
 
 	const getWidthRatio = (duration: number, maxDuration: number) => {
 		if (maxDuration <= 0) return "0%";
