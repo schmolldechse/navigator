@@ -26,12 +26,12 @@
 	}}
 />
 
-<div class="md:max-w-[65%] w-full px-2 md:px-0 mx-auto flex flex-1 min-h-full flex-col">
+<div class="mx-auto flex min-h-full w-full flex-1 flex-col px-2 md:max-w-[65%] md:px-0">
 	{#await data.plannedRoute}
 		<p>loading...</p>
 	{:then plannedRoute}
 		<div class="flex flex-col gap-y-2">
-			<div class="flex flex-row gap-x-2 items-center">
+			<div class="flex flex-row items-center gap-x-2">
 				<span class="text-lg">Earlier connections</span>
 				<ArrowUp color="#ffda0a" />
 			</div>
@@ -40,7 +40,7 @@
 					<Route {route} />
 				{/each}
 			</div>
-			<div class="flex flex-row gap-x-2 items-center">
+			<div class="flex flex-row items-center gap-x-2">
 				<span class="text-lg">Later connections</span>
 				<ArrowDown color="#ffda0a" />
 			</div>

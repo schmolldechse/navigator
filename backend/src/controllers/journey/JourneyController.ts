@@ -42,7 +42,6 @@ class LineColorQuery {
 @Route("journey")
 @Tags("Journey")
 export class JourneyController extends Controller {
-
 	/**
 	 * Retrieve line colors based on the provided line names & optional operator codes. It supports querying multiple lines & operators, separated by semicolons (";")
 	 */
@@ -57,17 +56,19 @@ export class JourneyController extends Controller {
 		// set operator for each line to undefined, if no operator is given
 		const pairs = lines.map((line, index) => ({ line, operator: validOperators[index] || undefined }));
 
-		return (await Promise.all(pairs.map(pair => fromLineName(pair.line, pair.operator)))).flat();
+		return (await Promise.all(pairs.map((pair) => fromLineName(pair.line, pair.operator)))).flat();
 	}
 
 	@Get("route-planner")
 	async getRouteByDefinition(@Queries() query: RoutePlannerQuery): Promise<RouteData> {
 		if (query.to === query.from) throw new HttpError(400, "From and to cannot be the same station");
 
-		if (!query.departure && !query.arrival && !query.earlierThan && !query.laterThan) throw new HttpError(400, "Missing either 'departure', 'arrival', 'earlierThan' or 'laterThan'");
+		if (!query.departure && !query.arrival && !query.earlierThan && !query.laterThan)
+			throw new HttpError(400, "Missing either 'departure', 'arrival', 'earlierThan' or 'laterThan'");
 
 		if (query.departure && query.arrival) throw new HttpError(400, "Either departure or arrival can be set, not both");
-		if (query.earlierThan && query.laterThan) throw new HttpError(400, "Either earlierThan or laterThan can be set, not both");
+		if (query.earlierThan && query.laterThan)
+			throw new HttpError(400, "Either earlierThan or laterThan can be set, not both");
 
 		if (query.departure && !DateTime.fromISO(query.departure).isValid) throw new HttpError(400, "Invalid departure date");
 		if (query.arrival && !DateTime.fromISO(query.arrival).isValid) throw new HttpError(400, "Invalid arrival date");
@@ -91,7 +92,7 @@ const fetchRoute = async (query: RoutePlannerQuery): Promise<RouteData> => {
 		else if (query.arrival) params.set("arrival", query.arrival);
 	}
 
-	const request = await fetch(`https://vendo-prof-db.voldechse.wtf/journeys?${params.toString()}`, { method: "GET", });
+	const request = await fetch(`https://vendo-prof-db.voldechse.wtf/journeys?${params.toString()}`, { method: "GET" });
 	if (!request.ok) throw new Error("Failed to fetch route");
 
 	return mapToRoute(await request.json()) as RouteData;

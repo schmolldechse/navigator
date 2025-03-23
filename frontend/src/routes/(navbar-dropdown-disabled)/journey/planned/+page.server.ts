@@ -17,10 +17,12 @@ export const load = async ({ url }): Promise<{ plannedRoute: Promise<RouteData> 
 		...(url.searchParams.has("arrival") && { arrival: url.searchParams.get("arrival")! }),
 		...(url.searchParams.has("results") && { results: url.searchParams.get("results")! }),
 		...(url.searchParams.has("earlierThan") && { earlierThan: url.searchParams.get("earlierThan")! }),
-		...(url.searchParams.has("laterThan") && { laterThan: url.searchParams.get("laterThan")! }),
+		...(url.searchParams.has("laterThan") && { laterThan: url.searchParams.get("laterThan")! })
 	});
 
-	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/journey/route-planner?${params.toString()}`, { method: "GET" });
+	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/journey/route-planner?${params.toString()}`, {
+		method: "GET"
+	});
 	if (!request.ok) {
 		throw error(400, "Failed to fetch route");
 	}
