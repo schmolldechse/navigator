@@ -109,7 +109,7 @@
 		<input
 			bind:this={inputElement}
 			type="text"
-			class="bg-primary-dark w-full border-none p-2 outline-hidden"
+			class="w-full border-none p-2 outline-hidden"
 			{placeholder}
 			onclick={() => (open = true)}
 			oninput={handleInput}
