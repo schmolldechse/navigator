@@ -29,7 +29,7 @@
 	}}
 />
 
-<div class="mx-auto flex min-h-full w-full flex-1 flex-col px-2 md:max-w-[65%] md:px-0 gap-y-4">
+<div class="mx-auto flex min-h-full w-full flex-1 flex-col gap-y-4 px-2 md:max-w-[65%] md:px-0">
 	<!-- Route Request Info -->
 	<RouteRequest stations={data.stations} />
 

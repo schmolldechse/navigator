@@ -3,7 +3,7 @@ import { env } from "$env/dynamic/private";
 import type { RouteData } from "$models/route";
 import type { Station } from "$models/station";
 
-export const load = async ({ url }): Promise<{ plannedRoute: Promise<RouteData>, stations: Promise<[Station, Station]> }> => {
+export const load = async ({ url }): Promise<{ plannedRoute: Promise<RouteData>; stations: Promise<[Station, Station]> }> => {
 	const from = url.searchParams.get("from");
 	const to = url.searchParams.get("to");
 
@@ -14,7 +14,7 @@ export const load = async ({ url }): Promise<{ plannedRoute: Promise<RouteData>,
 	return {
 		plannedRoute: fetchRoutes(url, to, from),
 		stations: Promise.all([fetchStation(Number(from)), fetchStation(Number(to))])
-	}
+	};
 };
 
 const fetchStation = async (evaNumber: number): Promise<Station> => {
@@ -22,8 +22,8 @@ const fetchStation = async (evaNumber: number): Promise<Station> => {
 		method: "GET"
 	});
 	if (!request.ok) throw error(400, "Failed to fetch station");
-	return await request.json() as Station;
-}
+	return (await request.json()) as Station;
+};
 
 const fetchRoutes = async (url: URL, to: string, from: string): Promise<RouteData> => {
 	const params = new URLSearchParams({
@@ -39,5 +39,5 @@ const fetchRoutes = async (url: URL, to: string, from: string): Promise<RouteDat
 		method: "GET"
 	});
 	if (!request.ok) throw error(400, "Failed to fetch route");
-	return await request.json() as RouteData;
+	return (await request.json()) as RouteData;
 };

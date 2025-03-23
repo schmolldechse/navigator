@@ -110,7 +110,7 @@
 
 	<!-- TODO: Details -->
 	<div class="flex justify-center">
-		<button class="flex flex-row items-center gap-x-2 cursor-pointer" onclick={() => (detailsOpen = !detailsOpen)}>
+		<button class="flex cursor-pointer flex-row items-center gap-x-2" onclick={() => (detailsOpen = !detailsOpen)}>
 			<span class="text-sm md:text-lg">Details</span>
 			{#if !detailsOpen}
 				<ChevronDown color="#ffda0a" />
@@ -121,7 +121,7 @@
 	</div>
 
 	{#if detailsOpen}
-		<div class="border-t border-primary-dark/75">
+		<div class="border-primary-dark/75 border-t">
 			<span class="text-lg font-semibold">Route Details</span>
 		</div>
 	{/if}

@@ -16,7 +16,8 @@
 	{@render children()}
 
 	<footer
-		class="bg-primary-darker sticky bottom-0 flex w-full flex-row items-center justify-between p-4 text-xs md:text-base">
+		class="bg-primary-darker sticky bottom-0 flex w-full flex-row items-center justify-between p-4 text-xs md:text-base"
+	>
 		<span>&copy; {DateTime.now().year} - Schmolldechse & Contributors</span>
 
 		<a class="flex flex-row items-center gap-2" href="https://github.com/schmolldechse/navigator">
