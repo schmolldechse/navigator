@@ -6,8 +6,11 @@
 	import { DateTime } from "luxon";
 	import type { Connection, LineColor } from "$models/connection";
 	import { env } from "$env/dynamic/public";
+	import ChevronDown from "lucide-svelte/icons/chevron-down";
+	import ChevronUp from "lucide-svelte/icons/chevron-up";
 
 	let { route }: { route: Route } = $props();
+	let detailsOpen = $state<boolean>(false);
 
 	const formatDuration = (): string => {
 		const end = route?.legs[route?.legs?.length - 1];
@@ -105,5 +108,15 @@
 		{/each}
 	</div>
 
-	<!-- TODO: open view -->
+	<!-- TODO: Details -->
+	<div class="flex justify-center">
+		<button class="flex flex-row items-center gap-x-2 cursor-pointer" onclick={() => (detailsOpen = !detailsOpen)}>
+			<span class="text-sm md:text-lg">Details</span>
+			{#if !detailsOpen}
+				<ChevronDown color="#ffda0a" />
+			{:else}
+				<ChevronUp color="#ffda0a" />
+			{/if}
+		</button>
+	</div>
 </div>
