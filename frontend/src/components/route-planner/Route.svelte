@@ -119,4 +119,10 @@
 			{/if}
 		</button>
 	</div>
+
+	{#if detailsOpen}
+		<div class="border-t border-primary-dark/75">
+			<span class="text-lg font-semibold">Route Details</span>
+		</div>
+	{/if}
 </div>
