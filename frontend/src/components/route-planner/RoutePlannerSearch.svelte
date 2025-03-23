@@ -18,7 +18,7 @@
 	};
 </script>
 
-<div class="mt-[-15rem] flex flex-col gap-y-2 md:w-[40%]">
+<div class="flex flex-col gap-y-2 md:w-[40%]">
 	<div class="relative flex w-full flex-col gap-y-2">
 		<StationSearch bind:station={stationFrom} placeholder="From">
 			<MapPinIcon size={44} />
