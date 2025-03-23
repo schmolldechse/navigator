@@ -47,6 +47,28 @@
 	}
 }
 
+@layer line-shapes {
+	.circle {
+		padding: .6275em 0;
+		border-radius: 1.5em;
+	}
+
+	.hexagon {
+		padding: 0 0.75em;
+		clip-path: polygon(50% -100%, 100% 50%, 50% 200%, 0 50%);
+	}
+
+	.pill .rectangle .rectangle-rounded-corner {
+		padding: 0 0.75em;
+		border-radius: 0.6em;
+	}
+
+	.trapezoid {
+		padding: 0 0.75em;
+		clip-path: polygon( 100% 0, 50% 250%, 0 0);
+	}
+}
+
 body {
 	@apply bg-background font-montserrat text-text;
 }

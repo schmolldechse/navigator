@@ -4,7 +4,8 @@
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
 	import calculateDuration from "$lib/time";
 	import { DateTime } from "luxon";
-	import type { Connection } from "$models/connection";
+	import type { Connection, LineColor } from "$models/connection";
+	import { env } from "$env/dynamic/public";
 
 	let { route }: { route: Route } = $props();
 
@@ -47,9 +48,28 @@
 	}
 
 	const getWidthRatio = (duration: number, maxDuration: number) => {
-		if (maxDuration <= 0) return '0%';
-		return `${(duration / maxDuration) * 100}%;`
-	}
+		if (maxDuration <= 0) return "0%";
+		return `${(duration / maxDuration) * 100}%;`;
+	};
+
+	let legColors = $state<LineColor[]>([]);
+	$effect(() => {
+		const fetchLineColors = async () => {
+			const params = new URLSearchParams({
+				line: route?.legs.filter(leg => !leg?.walking).map(leg => leg?.lineInformation?.lineName).join(";"),
+				hafasOperatorCode: route?.legs.filter(leg => !leg?.walking).map(leg => leg?.lineInformation?.operator?.id).join(";")
+			});
+
+			const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/journey/color?${params}`);
+			if (!request.ok) return;
+
+			legColors = await request.json() as LineColor[];
+		};
+
+		fetchLineColors();
+	});
+
+	const getLineColor = (lineName?: string): LineColor | undefined => legColors.find(color => color.lineName === lineName);
 </script>
 
 <div class="px-4 py-2 text-2xl font-medium space-y-2 border-primary-dark/75 border-2 rounded-lg">
@@ -66,9 +86,17 @@
 			class="text-lg mt-[0.35rem]">{formatDuration()}</span>
 	</div>
 
+	<!-- Legs -->
 	<div class="flex flex-row w-full gap-x-2">
 		{#each route?.legs.filter(leg => !leg?.walking) as leg}
-			<span class="rounded-lg bg-primary-darker text-base md:text-lg px-2 py-1 text-center line-clamp-1 md:line-clamp-none truncate" style={`width: ${getWidthRatio(durationByConnection(leg), durationWithoutWalking())}`}>{leg?.lineInformation?.lineName}</span>
+			<span
+				class="rounded-lg bg-primary-darker text-base md:text-lg px-2 py-1 text-center line-clamp-1 md:line-clamp-none truncate"
+				style={`width: ${getWidthRatio(durationByConnection(leg), durationWithoutWalking())}; min-width: 5em`}
+			>
+				{leg?.lineInformation?.lineName}
+			</span>
 		{/each}
 	</div>
+
+	<!-- TODO: open view -->
 </div>
