@@ -2,7 +2,8 @@
 	import type { PageProps } from "./$types";
 	import Route from "$components/route-planner/Route.svelte";
 	import { MetaTags } from "svelte-meta-tags";
-	import { ArrowDown, ArrowUp } from "lucide-svelte";
+	import ArrowDown from "lucide-svelte/icons/arrow-down";
+	import ArrowUp from "lucide-svelte/icons/arrow-up";
 
 	let { data }: PageProps = $props();
 </script>
