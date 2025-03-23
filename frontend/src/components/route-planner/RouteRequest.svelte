@@ -7,7 +7,7 @@
 </script>
 
 <div class="flex flex-col items-start gap-y-1">
-	<span class="text-2xl font-bold">Your requested route</span>
+	<span class="text-2xl font-bold">Route</span>
 	{#await stations}
 		<div class="flex flex-row items-center gap-x-2">
 			<CircleDot />
