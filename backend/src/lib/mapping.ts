@@ -6,19 +6,13 @@ import type { Stop } from "../models/station.ts";
 import type { Message } from "../models/message.ts";
 import type { Sequence } from "../models/sequence.ts";
 import type { RouteData } from "../models/route.ts";
+import type { Time } from "../models/time.ts";
 
 const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", profile: "db" | "dbweb"): Connection => {
-	const delay = (): number => {
-		return calculateDuration(
-			DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen),
-			DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen),
-			"seconds"
-		);
-	};
-
 	const isDeparture = type === "departures";
 	const isRIS = profile === "db";
 
+	// TODO: parse stopovers
 	return {
 		ris_journeyId: isRIS ? (entry?.journeyID ?? entry?.tripId) : undefined,
 		hafas_journeyId: !isRIS ? entry?.tripId : undefined,
@@ -28,43 +22,21 @@ const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", pro
 		direction: !isRIS ? entry?.direction : undefined,
 		origin: ((!isDeparture && isRIS) || type === "both") && entry?.origin ? mapStops(entry?.origin)![0] : undefined,
 		provenance: !isRIS ? entry?.provenance : undefined,
-		departure:
-			type === "both" || isDeparture
-				? {
-						plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? entry?.plannedDeparture,
-						actualTime: entry?.timeDelayed ?? entry?.when ?? entry?.departure,
-						delay: !entry?.walking ? (entry?.departureDelay ?? delay) : undefined,
-						plannedPlatform: !entry?.walking
-							? (entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedDeparturePlatform)
-							: undefined,
-						actualPlatform: !entry?.walking ? (entry?.platform ?? entry?.departurePlatform) : undefined
-					}
-				: undefined,
-		arrival:
-			type === "both" || !isDeparture
-				? {
-						plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? entry?.plannedArrival,
-						actualTime: entry?.timeDelayed ?? entry?.when ?? entry?.arrival,
-						delay: !entry?.walking ? (entry?.arrivalDelay ?? delay) : undefined,
-						plannedPlatform: !entry?.walking
-							? (entry?.platformSchedule ?? entry?.plannedPlatform ?? entry?.plannedArrivalPlatform)
-							: undefined,
-						actualPlatform: !entry?.walking ? (entry?.platform ?? entry?.arrivalPlatform) : undefined
-					}
-				: undefined,
+		departure: type === "both" || isDeparture ? mapTime(entry, "departure") : undefined,
+		arrival: type === "both" || !isDeparture ? mapTime(entry, "arrival") : undefined,
 		lineInformation: !entry?.walking
 			? {
-					type: mapToProduct(entry?.type ?? entry?.line?.product).toString() ?? undefined,
-					replacementServiceType: entry?.replacementServiceType ?? undefined,
-					product: entry?.line?.productName ?? undefined,
-					lineName: entry?.lineName ?? entry?.line?.name,
-					additionalLineName: entry?.additionalLineName,
-					fahrtNr: entry?.line?.fahrtNr ?? undefined,
-					operator: {
-						id: entry?.line?.operator?.id ?? undefined,
-						name: entry?.line?.operator?.name ?? undefined
-					}
+				type: mapToProduct(entry?.type ?? entry?.line?.product).toString() ?? undefined,
+				replacementServiceType: entry?.replacementServiceType ?? undefined,
+				product: entry?.line?.productName ?? undefined,
+				lineName: entry?.lineName ?? entry?.line?.name,
+				additionalLineName: entry?.additionalLineName,
+				fahrtNr: entry?.line?.fahrtNr ?? undefined,
+				operator: {
+					id: entry?.line?.operator?.id ?? undefined,
+					name: entry?.line?.operator?.name ?? undefined
 				}
+			}
 			: undefined,
 		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers) ?? undefined,
 		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
@@ -74,6 +46,26 @@ const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", pro
 		cancelled: !entry?.walking ? (entry?.canceled ?? entry?.cancelled ?? false) : undefined,
 		providesVehicleSequence: !entry?.walking ? (entry?.providesVehicleSequence ?? false) : undefined,
 		walking: entry?.walking ? entry?.walking : undefined
+	};
+};
+
+const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
+	const isDeparture = type === "departure";
+
+	const delay = (): number => calculateDuration(
+		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen),
+		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen),
+		"seconds"
+	);
+
+	return {
+		plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival),
+		actualTime: entry?.timeDelayed ?? entry?.when ?? (isDeparture ? entry?.departure : entry?.arrival),
+		delay: !entry?.walking ? ((isDeparture ? entry?.departureDelay : entry?.arrivalDelay) ?? delay) : undefined,
+		plannedPlatform: !entry?.walking
+			? (entry?.platformSchedule ?? entry?.plannedPlatform ?? (isDeparture ? entry?.plannedDeparturePlatform : entry?.plannedArrivalPlatform))
+			: undefined,
+		actualPlatform: !entry?.walking ? (entry?.platform ?? (isDeparture ? entry?.departurePlatform : entry?.arrivalPlatform)) : undefined
 	};
 };
 
