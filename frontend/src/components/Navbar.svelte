@@ -1,7 +1,7 @@
 <script lang="ts">
 	import VisualIdentity from "$components/branding/VisualIdentity.svelte";
 	import UserInfo from "$components/auth/UserInfo.svelte";
-	import Dropdown, { type DropdownElement } from "./Dropdown.svelte";
+	import Dropdown, { type DropdownElement } from "$components/Dropdown.svelte";
 
 	let {
 		userInfo = true,
