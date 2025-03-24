@@ -80,7 +80,8 @@ export class JourneyController extends Controller {
 const fetchRoute = async (query: RoutePlannerQuery): Promise<RouteData> => {
 	const params = new URLSearchParams({
 		from: query.from.toString(),
-		to: query.to.toString()
+		to: query.to.toString(),
+		stopovers: 'true'
 	});
 
 	if (query.earlierThan) params.set("earlierThan", query.earlierThan);
