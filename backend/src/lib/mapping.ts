@@ -53,8 +53,8 @@ const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	const isDeparture = type === "departure";
 
 	const delay = (): number => calculateDuration(
-		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen),
-		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen),
+		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen ?? (isDeparture ? entry?.departure : entry?.arrival)),
+		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival)),
 		"seconds"
 	);
 
