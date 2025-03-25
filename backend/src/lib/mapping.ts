@@ -59,8 +59,8 @@ const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	);
 
 	return {
-		plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival),
-		actualTime: entry?.timeDelayed ?? entry?.when ?? (isDeparture ? entry?.departure : entry?.arrival),
+		plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival) ?? undefined,
+		actualTime: entry?.timeDelayed ?? entry?.when ?? (isDeparture ? entry?.departure : entry?.arrival) ?? undefined,
 		delay: !entry?.walking ? ((isDeparture ? entry?.departureDelay : entry?.arrivalDelay) ?? delay) : undefined,
 		plannedPlatform: !entry?.walking
 			? (entry?.platformSchedule ?? entry?.plannedPlatform ?? (isDeparture ? entry?.plannedDeparturePlatform : entry?.plannedArrivalPlatform))
