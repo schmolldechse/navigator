@@ -89,35 +89,20 @@ const mapStops = (entry: any): Stop[] | null => {
 const mapMessages = (
 	entry: any,
 	isRIS: boolean = false
-): {
-	common: Message[];
-	delay: Message[];
-	cancellation: Message[];
-	destination: Message[];
-	via: Message[];
-} | null => {
-	if (!entry) return null;
+): Message[] | [] => {
+	if (!entry) return [];
 
-	if (!isRIS) {
-		return {
-			common: entry.map((message: any) => ({
-				type: "general-warning",
-				text: message?.text ?? message?.summary
-			})),
-			delay: [],
-			cancellation: [],
-			destination: [],
-			via: []
-		};
-	}
+	if (!isRIS) return entry.map((message: any) => ({
+		type: message?.type,
+		text: message?.text ?? message?.summary
+	}));
 
-	return {
-		common: (entry.common || []).map((message: any) => message as Message),
-		delay: (entry.delay || []).map((message: any) => message as Message),
-		cancellation: (entry.cancellation || []).map((message: any) => message as Message),
-		destination: (entry.destination || []).map((message: any) => message as Message),
-		via: (entry.via || []).map((message: any) => message as Message)
-	};
+	return (entry?.common || [])
+		.concat(entry?.delay || [])
+		.concat(entry?.cancelation || [])
+		.concat(entry?.destination || [])
+		.concat(entry?.via || [])
+		.map((message: any) => message as Message);
 };
 
 const mapCoachSequence = (entry: any): Sequence => {

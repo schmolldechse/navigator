@@ -32,13 +32,7 @@ interface Connection {
 	cancelledStopsAfterActualDestination?: Stop[];
 	additionalStops?: Stop[];
 	cancelledStops?: Stop[];
-	messages?: {
-		common: Message[];
-		delay: Message[];
-		cancellation: Message[];
-		destination: Message[];
-		via: Message[];
-	};
+	messages?: Message[];
 	cancelled?: boolean;
 	providesVehicleSequence?: boolean;
 	walking?: boolean;

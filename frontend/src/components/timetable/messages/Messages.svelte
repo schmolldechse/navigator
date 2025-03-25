@@ -66,16 +66,14 @@
 		{ type: "no-bicycle-transport", component: NoBicycleTransport }
 	];
 
-	const collectMessages = (messages?: Record<string, Message[]> | undefined): Message[] => {
-		return messages ? Object.values(messages).flat() : [];
-	};
-
-	const filteredMessages: Message[] = $derived(
-		collectMessages(connection?.messages || {}).filter((message) => {
-			const isValid = validMessages.some((validMessage) => validMessage.type === message.type);
-			return connection?.cancelled ? isValid && message?.important : isValid;
-		})
-	);
+	/**
+	 * Filter messages based on their importance
+	 * @deprecated
+	 */
+	const filteredMessages: Message[] = $derived((connection?.messages || []).filter((message) => {
+		const isValid = validMessages.some((validMessage) => validMessage.type === message.type);
+		return connection?.cancelled ? isValid && message?.important : isValid;
+	}));
 
 	const formatMessage = (message: Message): string => {
 		if (!message?.type || !message?.text) return "Invalid message object";
@@ -99,9 +97,9 @@
 	};
 </script>
 
-{#if filteredMessages.length > 1 && !expanded}
+{#if (connection?.messages || []).length > 1 && !expanded}
 	<div class="my-1 flex flex-row gap-x-2 py-0.5">
-		{#each filteredMessages as message, index (index)}
+		{#each (connection?.messages || []) as message, index (index)}
 			{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
 			{#if validMessage?.component}
 				{@const Component = validMessage.component}
@@ -114,8 +112,8 @@
 	</div>
 {/if}
 
-{#if filteredMessages.length <= 1 || expanded}
-	{#each filteredMessages as message, index (index)}
+{#if (connection?.messages || []).length <= 1 || expanded}
+	{#each (connection?.messages || []) as message, index (index)}
 		{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
 		<div class="my-1 flex flex-row gap-x-2 py-0.5 text-lg">
 			{#if validMessage?.component}
