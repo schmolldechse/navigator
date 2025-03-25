@@ -8,7 +8,7 @@ import type { Sequence } from "../models/sequence.ts";
 import type { RouteData } from "../models/route.ts";
 import type { Time } from "../models/time.ts";
 
-const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", profile: "db" | "dbweb"): Connection => {
+const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", profile: "db" | "dbweb", parseStopoversInfo: boolean = false): Connection => {
 	const isDeparture = type === "departures";
 	const isRIS = profile === "db";
 
@@ -38,7 +38,7 @@ const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", pro
 				}
 			}
 			: undefined,
-		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers) ?? undefined,
+		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers ?? entry?.stopovers, parseStopoversInfo) ?? undefined,
 		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
 		additionalStops: mapStops(entry?.additionalStops) ?? undefined,
 		cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
@@ -69,27 +69,33 @@ const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	};
 };
 
-const mapStops = (entry: any): Stop[] | null => {
+const mapStops = (entry: any, parseFurtherInfo: boolean = false): Stop[] | null => {
 	if (!entry) return null;
 	if (!Array.isArray(entry)) entry = [entry];
+
+	// when parsing further information, it skips the first & last element of viaStops
+	if (parseFurtherInfo) {
+		if (entry?.length > 1 && entry?.length <= 2) entry.shift();
+		else if (entry?.length > 2) entry = entry.slice(1, -1);
+	}
+
 	return entry.map((rawStop: any) => ({
 		evaNumber: rawStop?.evaNumber ?? rawStop?.id ?? rawStop?.stop?.id,
 		name: rawStop?.name ?? rawStop?.stop?.name,
 		cancelled: rawStop?.canceled ?? rawStop?.cancelled ?? false,
 		additional: rawStop?.additional ?? undefined,
 		separation: rawStop?.separation ?? undefined,
-		nameParts:
-			rawStop?.nameParts?.map((rawPart: any) => ({
-				type: rawPart?.type,
-				value: rawPart?.value
-			})) ?? undefined
+		nameParts: rawStop?.nameParts?.map((rawPart: any) => ({
+			type: rawPart?.type,
+			value: rawPart?.value
+		})) ?? undefined,
+		departure: parseFurtherInfo ? mapTime(rawStop, "departure") : undefined,
+		arrival: parseFurtherInfo ? mapTime(rawStop, "arrival") : undefined,
+		messages: parseFurtherInfo ? mapMessages(rawStop?.remarks, false) : undefined
 	}));
 };
 
-const mapMessages = (
-	entry: any,
-	isRIS: boolean = false
-): Message[] | [] => {
+const mapMessages = (entry: any, isRIS: boolean = false): Message[] | [] => {
 	if (!entry) return [];
 
 	if (!isRIS) return entry.map((message: any) => ({

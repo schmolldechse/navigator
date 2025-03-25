@@ -1,6 +1,8 @@
 import { Products } from "./products.ts";
+import type { Time } from "./time.ts";
+import type { Message } from "./message.ts";
 
-export interface Station {
+interface Station {
 	name: string;
 	/**
 	 * @isInt evaNumber of a station
@@ -16,14 +18,20 @@ export interface Station {
 	products?: Products[];
 }
 
-export interface Stop extends Station {
+interface Stop extends Station {
 	cancelled: boolean;
 	additional?: boolean;
 	separation?: boolean;
 	nameParts?: NamePart[];
+
+	departure?: Time;
+	arrival?: Time;
+	messages?: Message[];
 }
 
-export interface NamePart {
+interface NamePart {
 	type: string;
 	value: string;
 }
+
+export type { Station, Stop, NamePart }
