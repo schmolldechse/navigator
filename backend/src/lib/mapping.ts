@@ -155,15 +155,13 @@ const mapCoachSequence = (entry: any): Sequence => {
 	};
 };
 
-const mapToRoute = (entry: any): RouteData => {
-	return {
-		earlierRef: entry?.earlierRef,
-		laterRef: entry?.laterRef,
-		journeys: entry?.journeys?.map((rawJourney: any) => ({
-			legs: rawJourney?.legs?.map((rawLeg: any) => mapConnection(rawLeg, "both", "dbweb")),
-			refreshToken: rawJourney?.refreshToken
-		}))
-	};
-};
+const mapToRoute = (entry: any): RouteData => ({
+	earlierRef: entry?.earlierRef,
+	laterRef: entry?.laterRef,
+	journeys: entry?.journeys?.map((rawJourney: any) => ({
+		legs: rawJourney?.legs?.map((rawLeg: any) => mapConnection(rawLeg, "both", "dbweb", true)),
+		refreshToken: rawJourney?.refreshToken
+	}))
+});
 
 export { mapConnection, mapCoachSequence, mapToRoute };
