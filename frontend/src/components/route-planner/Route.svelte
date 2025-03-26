@@ -8,6 +8,7 @@
 	import { env } from "$env/dynamic/public";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
+	import LegInfo from "$components/route-planner/LegInfo.svelte";
 
 	let { route }: { route: Route } = $props();
 	let detailsOpen = $state<boolean>(false);
@@ -80,7 +81,7 @@
 		fetchLineColors();
 	});
 
-	const getLineColor = (lineName?: string): LineColor | undefined => legColors.find((color) => color.lineName === lineName);
+	let showViaStops = $state<boolean>(false);
 </script>
 
 <div class="border-primary-dark/75 space-y-2 rounded-lg border-2 px-4 py-2 text-2xl font-medium">
@@ -121,8 +122,12 @@
 	</div>
 
 	{#if detailsOpen}
-		<div class="border-primary-dark/75 border-t">
+		<div class="border-primary-dark/75 border-t flex flex-col">
 			<span class="text-lg font-semibold">Route Details</span>
+
+			{#each route?.legs as leg, i}
+				<LegInfo {leg} />
+			{/each}
 		</div>
 	{/if}
 </div>
