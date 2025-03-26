@@ -2,8 +2,14 @@
 	import type { Time } from "$models/time";
 	import calculateDuration from "$lib/time";
 	import { DateTime } from "luxon";
+	import clsx from "clsx";
 
-	let { time, direction = "row" }: { time?: Time; direction?: "row" | "col" } = $props();
+	let { time, direction = "row", class: className = "", delayClass = "" }: {
+		time?: Time;
+		direction?: "row" | "col",
+		class?: string,
+		delayClass?: string
+	} = $props();
 
 	const isDelayed = () =>
 		calculateDuration(DateTime.fromISO(time?.actualTime || time?.plannedTime!), DateTime.fromISO(time?.plannedTime!), [
@@ -13,17 +19,13 @@
 </script>
 
 <div
-	class="flex"
-	class:flex-row={direction === "row"}
-	class:items-center={direction === "row"}
-	class:justify-end={direction === "row"}
-	class:gap-x-2={direction === "row"}
-	class:flex-col={direction === "col"}
+	class={clsx("flex", {
+		"flex-row items-center justify-end gap-x-2": direction === "row",
+		"flex-col": direction === "col"
+	}, className)}
 >
 	<span>{displayTime(time?.plannedTime ?? "")}</span>
 	{#if isDelayed()}
-		<span class:md:text-2xl={direction === "row"} class="bg-text text-background px-2 text-center text-lg font-bold"
-			>{displayTime(time?.actualTime ?? "")}</span
-		>
+		<span class={clsx("w-fit bg-text text-background px-2 text-center font-bold", delayClass)}>{displayTime(time?.actualTime ?? "")}</span>
 	{/if}
 </div>

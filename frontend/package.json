@@ -40,6 +40,7 @@
 	"dependencies": {
 		"@fontsource/montserrat": "^5.1.1",
 		"better-auth": "^1.1.19",
+		"clsx": "^2.1.1",
 		"lucide-svelte": "^0.477.0",
 		"luxon": "^3.5.0",
 		"svelte-meta-tags": "^4.1.0"

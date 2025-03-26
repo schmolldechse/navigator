@@ -47,7 +47,7 @@
 
 		<!-- 3rd row; Time & Platform Information -->
 		<div class="flex flex-row items-center justify-between text-2xl font-semibold">
-			<TimeInformation time={isDeparture ? connection?.departure : connection?.arrival} />
+			<TimeInformation time={isDeparture ? connection?.departure : connection?.arrival} delayClass="text-lg" />
 			<Platform time={isDeparture ? connection?.departure : connection?.arrival} />
 		</div>
 
@@ -102,7 +102,7 @@
 			<!-- Time Information -->
 			<div class="mr-8 flex-1">
 				{#if renderInformation}
-					<TimeInformation time={isDeparture ? connection?.departure : connection?.arrival} />
+					<TimeInformation time={isDeparture ? connection?.departure : connection?.arrival} delayClass="text-2xl" />
 				{/if}
 			</div>
 

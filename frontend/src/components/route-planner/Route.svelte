@@ -87,9 +87,9 @@
 	<!-- Time Info -->
 	<div class="flex flex-row gap-x-2">
 		<div class="flex flex-row">
-			<TimeInformation time={route?.legs[0]?.departure} direction="col" />
+			<TimeInformation time={route?.legs[0]?.departure} direction="col" delayClass="text-lg" />
 			<Minus class="mx-2 mt-[0.25rem]" />
-			<TimeInformation time={route?.legs[route?.legs?.length - 1]?.arrival} direction="col" />
+			<TimeInformation time={route?.legs[route?.legs?.length - 1]?.arrival} direction="col" delayClass="text-lg" />
 		</div>
 
 		<span class="text-primary/90">|</span>
