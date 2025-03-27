@@ -98,11 +98,11 @@
 	</div>
 
 	<!-- Legs -->
-	<div class="flex w-full flex-row gap-x-2">
+	<div class="flex w-full flex-row gap-x-2 overflow-x-auto accent-scrollbar">
 		{#each route?.legs.filter((leg) => !leg?.walking) as leg}
 			<span
-				class="bg-primary-darker line-clamp-1 truncate rounded-lg px-2 py-1 text-center text-base md:line-clamp-none md:text-lg"
-				style={`width: ${getWidthRatio(durationByConnection(leg), durationWithoutWalking())}; min-width: 5em`}
+				class="bg-primary-darker line-clamp-1 truncate rounded-lg px-2 py-1 text-center text-base md:line-clamp-none md:text-lg min-w-fit"
+				style={`width: ${getWidthRatio(durationByConnection(leg), durationWithoutWalking())};`}
 			>
 				{leg?.lineInformation?.lineName}
 			</span>

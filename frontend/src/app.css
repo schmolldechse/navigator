@@ -5,6 +5,10 @@
 @import "@fontsource/montserrat/600.css" layer(utilities);
 @import "@fontsource/montserrat/700.css" layer(utilities);
 
+@plugin 'tailwind-scrollbar' {
+	nocompatible: true;
+}
+
 @theme {
 	--color-text: var(--text);
 	--color-background: var(--background);
@@ -33,9 +37,7 @@
 	::file-selector-button {
 		border-color: var(--color-gray-200, currentColor);
 	}
-}
 
-@layer base {
 	:root {
 		--text: #ffffff;
 		--background: #0a0a0a;
@@ -44,6 +46,16 @@
 		--primary-darker: #121212;
 		--secondary: #7b2e2e;
 		--accent: #ffda0a;
+	}
+}
+
+@layer scrollbar {
+	.accent-scrollbar {
+		@apply scrollbar scrollbar-w-2 scrollbar-track-background scrollbar-thumb-accent scrollbar-thumb-rounded-full;
+	}
+
+	.accent-scrollbar::-webkit-scrollbar-button {
+		display: none;
 	}
 }
 

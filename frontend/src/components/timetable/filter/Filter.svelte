@@ -97,7 +97,7 @@
 	};
 </script>
 
-<div class="scrollbar-hidden bg-primary-darker flex items-center gap-x-2 overflow-x-auto p-2 md:justify-center">
+<div class="scrollbar-none bg-primary-darker flex items-center gap-x-2 overflow-x-auto p-2 md:justify-center">
 	{#each filteredTypes as type}
 		<button
 			class="hover:outline-accent flex shrink-0 cursor-pointer items-center gap-x-2 rounded-full px-4 py-2"
@@ -112,14 +112,3 @@
 		</button>
 	{/each}
 </div>
-
-<style>
-	.scrollbar-hidden::-webkit-scrollbar {
-		display: none;
-	}
-
-	.scrollbar-hidden {
-		-ms-overflow-style: none;
-		scrollbar-width: none;
-	}
-</style>
