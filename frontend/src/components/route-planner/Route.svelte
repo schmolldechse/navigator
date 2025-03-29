@@ -9,6 +9,7 @@
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
 	import LegInfo from "$components/route-planner/LegInfo.svelte";
+	import { onMount } from "svelte";
 
 	let { route }: { route: Route } = $props();
 	let detailsOpen = $state<boolean>(false);
@@ -59,7 +60,7 @@
 	};
 
 	let legColors = $state<LineColor[]>([]);
-	$effect(() => {
+	onMount(() => {
 		const fetchLineColors = async () => {
 			const params = new URLSearchParams({
 				line: route?.legs
@@ -98,11 +99,11 @@
 	</div>
 
 	<!-- Legs -->
-	<div class="flex w-full flex-row gap-x-2 overflow-x-auto accent-scrollbar">
+	<div class="accent-scrollbar flex w-full flex-row gap-x-2 overflow-x-auto">
 		{#each route?.legs.filter((leg) => !leg?.walking) as leg}
 			<span
-				class="bg-primary-darker line-clamp-1 truncate rounded-lg px-2 py-1 text-center text-base md:line-clamp-none md:text-lg min-w-fit"
-				style={`width: ${getWidthRatio(durationByConnection(leg), durationWithoutWalking())};`}
+				class="bg-primary-darker line-clamp-1 min-w-fit truncate rounded-lg px-2 py-1 text-center text-base md:line-clamp-none md:text-lg"
+				style:width={getWidthRatio(durationByConnection(leg), durationWithoutWalking())}
 			>
 				{leg?.lineInformation?.lineName}
 			</span>
@@ -122,7 +123,7 @@
 	</div>
 
 	{#if detailsOpen}
-		<div class="border-primary-dark/75 border-t flex flex-col">
+		<div class="border-primary-dark/75 flex flex-col border-t">
 			<span class="text-lg font-semibold">Route Details</span>
 
 			{#each route?.legs as leg, i}

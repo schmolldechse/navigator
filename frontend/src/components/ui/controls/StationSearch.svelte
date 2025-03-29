@@ -13,11 +13,6 @@
 		children: Snippet;
 	} = $props();
 
-	$effect(() => {
-		if (!station) return;
-		inputElement.value = station.name;
-	});
-
 	let open = $state<boolean>(false);
 	let selectedIndex = $state<number>(-1);
 	let stations: Station[] = $state([]);

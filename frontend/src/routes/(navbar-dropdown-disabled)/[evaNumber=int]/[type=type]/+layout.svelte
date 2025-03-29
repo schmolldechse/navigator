@@ -7,7 +7,7 @@
 	import Star from "lucide-svelte/icons/star";
 	import { authClient } from "$lib/auth-client";
 	import { page } from "$app/state";
-	import { getContext, setContext } from "svelte";
+	import { getContext, onMount, setContext } from "svelte";
 	import type { Station } from "$models/station";
 	import { env } from "$env/dynamic/public";
 
@@ -21,7 +21,7 @@
 	const session = authClient.useSession();
 
 	let favor = $state<boolean>(false);
-	$effect(() => {
+	onMount(() => {
 		if (!$session?.data) return;
 
 		const checkFavored = async () => {
