@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Message } from "$models/message";
-	import type { Component } from "svelte";
+	import { type Component, onMount } from "svelte";
 	import type { Connection } from "$models/connection";
 	import { DateTime } from "luxon";
 	import type { Stop } from "$models/station";
@@ -33,6 +33,10 @@
 
 	let { connection }: { connection?: Connection } = $props();
 	let expanded = $state<boolean>(false);
+	onMount(() => {
+		if (!connection?.cancelled) return;
+		expanded = true;
+	});
 
 	type ValidMessage = {
 		type: string;
