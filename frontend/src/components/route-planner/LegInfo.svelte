@@ -3,6 +3,7 @@
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
 	import CircleDot from "lucide-svelte/icons/circle-dot";
 	import Platform from "$components/ui/info/Platform.svelte";
+	import ChevronRight from "lucide-svelte/icons/chevron-right";
 
 	let { leg }: { leg: Connection } = $props();
 </script>
@@ -28,7 +29,10 @@
 	<div class="flex-5 flex flex-col justify-between">
 		<!-- Origin -->
 		<div class="flex flex-row justify-between">
-			<span class="font-bold w-full">{leg?.origin?.name}</span>
+			<a class="font-bold w-full flex flex-row" href={`/${leg?.origin?.evaNumber}/departures`} target="_blank">
+				{leg?.origin?.name}
+				<ChevronRight color="#ffda0a" />
+			</a>
 			<Platform time={leg?.departure} class="text-right md:max-w-[15%]" direction="col" />
 		</div>
 
@@ -43,7 +47,10 @@
 
 		<!-- Destination -->
 		<div class="flex flex-row justify-between items-end">
-			<span class="font-bold w-full">{leg?.destination?.name}</span>
+			<a class="font-bold w-full flex flex-row" href={`/${leg?.destination?.evaNumber}/departures`} target="_blank">
+				{leg?.destination?.name}
+				<ChevronRight color="#ffda0a" />
+			</a>
 			<Platform time={leg?.arrival} class="text-right md:max-w-[15%]" direction="col" />
 		</div>
 	</div>
