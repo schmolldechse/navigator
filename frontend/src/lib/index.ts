@@ -1,5 +1,7 @@
 // place files you want to import through the `$lib` alias in this folder.
 import type { Stop } from "$models/station";
+import { DateTime, Duration, type DurationUnit } from "luxon";
+import type { Connection } from "$models/connection";
 
 const writeStop = (stop?: Stop, fallbackName: string = ""): string => {
 	if (!stop) return fallbackName;
@@ -28,4 +30,17 @@ const mapStops = (entry: any): Stop[] | null => {
 	}));
 };
 
-export { writeStop, mapStops };
+const calculateDuration = (startDate: DateTime, endDate: DateTime, unit: DurationUnit | DurationUnit[]): Duration => {
+	if (!startDate.isValid || !endDate.isValid) {
+		throw new Error("Invalid DateTime objects provided");
+	}
+	return startDate.diff(endDate, unit);
+};
+
+const durationOfConnection = (connection: Connection): number => calculateDuration(
+	DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
+	DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
+	["minutes"]
+).as("minutes");
+
+export { writeStop, mapStops, calculateDuration, durationOfConnection };

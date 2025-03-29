@@ -2,9 +2,9 @@
 	import type { Route } from "$models/route";
 	import Minus from "lucide-svelte/icons/minus";
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
-	import calculateDuration from "$lib/time";
+	import { calculateDuration, durationOfConnection } from "$lib";
 	import { DateTime } from "luxon";
-	import type { Connection, LineColor } from "$models/connection";
+	import type { LineColor } from "$models/connection";
 	import { env } from "$env/dynamic/public";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
@@ -36,29 +36,21 @@
 		const legs = (route?.legs || []).filter((leg) => !leg?.walking);
 		if (legs.length === 0) return 0;
 
-		return legs
-			.flatMap((leg) =>
-				calculateDuration(
-					DateTime.fromISO(leg?.arrival?.actualTime ?? leg?.arrival?.plannedTime ?? ""),
-					DateTime.fromISO(leg?.departure?.actualTime ?? leg?.departure?.plannedTime ?? ""),
-					["minutes"]
-				).as("minutes")
-			)
-			.reduce((acc, el) => acc + el);
+		return legs.flatMap((leg) => calculateDuration(
+			DateTime.fromISO(leg?.arrival?.actualTime ?? leg?.arrival?.plannedTime ?? ""),
+			DateTime.fromISO(leg?.departure?.actualTime ?? leg?.departure?.plannedTime ?? ""),
+			["minutes"]).as("minutes")
+		).reduce((acc, el) => acc + el);
 	});
-
-	const durationByConnection = (connection: Connection) =>
-		calculateDuration(
-			DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
-			DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
-			["minutes"]
-		).as("minutes");
 
 	const getWidthRatio = (duration: number, maxDuration: number) => {
 		if (maxDuration <= 0) return "0%";
 		return `${(duration / maxDuration) * 100}%`;
 	};
 
+	/**
+	 * @deprecated
+	 */
 	let legColors = $state<LineColor[]>([]);
 	onMount(() => {
 		const fetchLineColors = async () => {
@@ -103,7 +95,7 @@
 		{#each route?.legs.filter((leg) => !leg?.walking) as leg}
 			<span
 				class="bg-primary-darker line-clamp-1 min-w-fit truncate rounded-lg px-2 py-1 text-center text-base md:line-clamp-none md:text-lg"
-				style:width={getWidthRatio(durationByConnection(leg), durationWithoutWalking())}
+				style:width={getWidthRatio(durationOfConnection(leg), durationWithoutWalking())}
 			>
 				{leg?.lineInformation?.lineName}
 			</span>
@@ -127,7 +119,10 @@
 			<span class="text-lg font-semibold">Route Details</span>
 
 			{#each route?.legs as leg, i}
-				<LegInfo {leg} />
+				{#if leg?.walking}<span>walking</span>
+				{:else}
+					<LegInfo {leg} />
+				{/if}
 			{/each}
 		</div>
 	{/if}

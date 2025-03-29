@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Time } from "$models/time";
-	import calculateDuration from "$lib/time";
+	import { calculateDuration } from "$lib";
 	import { DateTime } from "luxon";
 
 	let {
