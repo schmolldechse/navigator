@@ -3,7 +3,7 @@
 	import { getContext } from "svelte";
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
 	import { writeStop } from "$lib";
-	import Platform from "$components/timetable/info/Platform.svelte";
+	import Platform from "$components/ui/info/Platform.svelte";
 	import ViaStops from "$components/timetable/info/ViaStops.svelte";
 	import Messages from "$components/timetable/messages/Messages.svelte";
 	import type { Station } from "$models/station";
