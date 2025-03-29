@@ -2,7 +2,7 @@
 	import type { Route } from "$models/route";
 	import Minus from "lucide-svelte/icons/minus";
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
-	import { calculateDuration, durationOfConnection } from "$lib";
+	import { calculateDuration, durationOfConnection, formatDuration } from "$lib";
 	import { DateTime } from "luxon";
 	import type { LineColor } from "$models/connection";
 	import { env } from "$env/dynamic/public";
@@ -13,23 +13,6 @@
 
 	let { route }: { route: Route } = $props();
 	let detailsOpen = $state<boolean>(false);
-
-	const formatDuration = (): string => {
-		const end = route?.legs[route?.legs?.length - 1];
-		const start = route?.legs[0];
-
-		const duration = calculateDuration(
-			DateTime.fromISO(end?.arrival?.actualTime ?? end?.arrival?.plannedTime ?? ""),
-			DateTime.fromISO(start?.departure?.actualTime ?? start?.departure?.plannedTime ?? ""),
-			["minutes"]
-		).as("minutes");
-
-		if (duration > 60) {
-			const hours = Math.floor(duration / 60);
-			const minutes = duration % 60;
-			return `${hours} h ${minutes} min`;
-		} else return `${Math.floor(duration)} min`;
-	};
 
 	const durationWithoutWalking = $derived(() => {
 		// remove legs with "walking" property
@@ -48,9 +31,6 @@
 		return `${(duration / maxDuration) * 100}%`;
 	};
 
-	/**
-	 * @deprecated
-	 */
 	let legColors = $state<LineColor[]>([]);
 	onMount(() => {
 		const fetchLineColors = async () => {
@@ -87,7 +67,7 @@
 		</div>
 
 		<span class="text-primary/90">|</span>
-		<span class="mt-[0.35rem] text-lg">{formatDuration()}</span>
+		<span class="mt-[0.35rem] text-lg">{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}</span>
 	</div>
 
 	<!-- Legs -->
@@ -121,7 +101,7 @@
 			{#each route?.legs as leg, i}
 				{#if leg?.walking}<span>walking</span>
 				{:else}
-					<LegInfo {leg} />
+					<LegInfo {leg} lineColor={legColors.find(color => color.lineName === leg?.lineInformation?.lineName)} />
 				{/if}
 			{/each}
 		</div>
