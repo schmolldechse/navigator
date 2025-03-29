@@ -2,12 +2,15 @@
 	import type { Connection } from "$models/connection";
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
 	import CircleDot from "lucide-svelte/icons/circle-dot";
+	import Platform from "$components/ui/info/Platform.svelte";
 
 	let { leg }: { leg: Connection } = $props();
 </script>
 
-<div class="flex text-base">
-	<div class="flex-1 flex flex-row gap-x-2 justify-end">
+<!-- max width on larger screens -->
+<div class="flex text-base gap-x-2 md:max-w-[85%]">
+	<!-- Connecting Line-Area; must be larger on smaller screens -->
+	<div class="flex-2 md:flex-1 flex flex-row gap-x-2 justify-end max-w-[20%]">
 		<div class="flex flex-col justify-between">
 			<TimeInformation time={leg?.departure} direction="col" class="text-base items-end"
 							 delayClass="text-sm md:text-base" />
@@ -20,7 +23,15 @@
 			<CircleDot class="shrink-0" />
 		</div>
 	</div>
-	<div class="flex-4 flex flex-col">
+
+	<!-- Leg Info -->
+	<div class="flex-5 flex flex-col justify-between">
+		<!-- Origin -->
+		<div class="flex flex-row justify-between">
+			<span class="font-bold w-full">{leg?.origin?.name}</span>
+			<Platform time={leg?.departure} class="text-right md:max-w-[15%]" direction="col" />
+		</div>
+
 		<span class="bg-green-500 w-full">hey</span>
 		<span class="bg-green-500 w-full">hey</span>
 		<span class="bg-green-500 w-full">hey</span>
@@ -28,20 +39,12 @@
 		<span class="bg-green-500 w-full">hey</span>
 		<span class="bg-green-500 w-full">hey</span>
 		<span class="bg-green-500 w-full">hey</span>
+		<span class="bg-green-500 w-full">hey</span>
+
+		<!-- Destination -->
+		<div class="flex flex-row justify-between items-end">
+			<span class="font-bold w-full">{leg?.destination?.name}</span>
+			<Platform time={leg?.arrival} class="text-right md:max-w-[15%]" direction="col" />
+		</div>
 	</div>
-	<span class="bg-yellow-500 w-full flex-1">hey</span>
 </div>
-
-<!--
-<div class="flex items-start w-[75%] gap-x-4 text-sm">
-	<div class="flex flex-col items-end flex-1">
-		<TimeInformation time={leg?.departure} direction="col" class="text-base items-end" delayClass="text-sm md:text-lg" />
-	</div>
-
-	<div class="flex-shrink-0 circle bg-black rounded-full mt-1"></div>
-
-	<span class="flex-5">{leg?.origin?.name}</span>
-
-	<span class="flex-1">{leg?.departure?.plannedPlatform}</span>
-</div>
--->
