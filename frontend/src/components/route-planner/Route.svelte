@@ -56,7 +56,7 @@
 
 	const getWidthRatio = (duration: number, maxDuration: number) => {
 		if (maxDuration <= 0) return "0%";
-		return `${(duration / maxDuration) * 100}%;`;
+		return `${(duration / maxDuration) * 100}%`;
 	};
 
 	let legColors = $state<LineColor[]>([]);
