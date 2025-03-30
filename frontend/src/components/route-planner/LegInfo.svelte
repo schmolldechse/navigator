@@ -46,8 +46,9 @@
 				<div class="text-sm text-right">{formatDuration(leg?.arrival, leg?.departure)}</div>
 				<div class="left-[0.625rem] w-[4px] h-full px-3"></div>
 			</div>
-			<div class="flex-5">
+			<div class="flex-5 flex flex-col">
 				<span class="font-extrabold">{leg?.lineInformation?.lineName} ({leg?.lineInformation?.fahrtNr})</span>
+				<span class="text-text/65">Continues to {leg?.direction}</span>
 			</div>
 		</div>
 
