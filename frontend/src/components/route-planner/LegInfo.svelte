@@ -47,7 +47,16 @@
 				<div class="left-[0.625rem] w-[4px] h-full px-3"></div>
 			</div>
 			<div class="flex-5 flex flex-col">
-				<span class="font-extrabold">{leg?.lineInformation?.lineName} ({leg?.lineInformation?.fahrtNr})</span>
+				<div class="flex flex-row items-baseline gap-x-2">
+					<span class="font-extrabold w-fit {lineColor?.shape}"
+						  style:color={lineColor?.textColor ? lineColor?.textColor : "inherit"}
+						  style:background-color={lineColor?.backgroundColor ? lineColor?.backgroundColor : "inherit"}
+						  style:border-color={lineColor?.borderColor ? lineColor?.borderColor : "none"}
+					>
+						{leg?.lineInformation?.lineName}
+					</span>
+					<span>({leg?.lineInformation?.fahrtNr})</span>
+				</div>
 				<span class="text-text/65">Continues to {leg?.direction}</span>
 			</div>
 		</div>
