@@ -83,7 +83,7 @@
 				</div>
 				<div class="basis-[15%] md:basis-[5%] flex justify-center">
 					<CircleDot class="absolute shrink-0 z-10 bg-background self-center" />
-					<span class="absolute bg-text h-full w-[4px] z-0 self-start"></span>
+					<span class="absolute bg-text h-full w-[4px] z-0 self-end"></span>
 				</div>
 				<a class="basis-3/5 font-bold w-fit flex flex-row items-center self-center"
 				   href={`/${stop?.evaNumber}/departures`}
