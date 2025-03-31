@@ -37,6 +37,9 @@ interface Connection {
 	providesVehicleSequence?: boolean;
 	walking?: boolean;
 
+	// in meter
+	distance?: number;
+
 	/**
 	 * low-to-medium
 	 * high

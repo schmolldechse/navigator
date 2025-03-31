@@ -46,6 +46,7 @@ const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", pro
 		cancelled: !entry?.walking ? (entry?.canceled ?? entry?.cancelled ?? false) : undefined,
 		providesVehicleSequence: !entry?.walking ? (entry?.providesVehicleSequence ?? false) : undefined,
 		walking: entry?.walking ? entry?.walking : undefined,
+		distance: entry?.walking ? entry?.distance : undefined,
 		loadFactor: entry?.loadFactor ?? undefined
 	};
 };
