@@ -2,72 +2,65 @@
 	import type { Connection, LineColor } from "$models/connection";
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
 	import CircleDot from "lucide-svelte/icons/circle-dot";
+	import { ChevronRight } from "lucide-svelte";
 	import Platform from "$components/ui/info/Platform.svelte";
-	import ChevronRight from "lucide-svelte/icons/chevron-right";
 	import { formatDuration } from "$lib";
 
 	let { leg, lineColor }: { leg: Connection, lineColor?: LineColor } = $props();
 </script>
 
-<!-- max width on larger screens -->
-<div class="relative flex text-base gap-x-2 md:max-w-[85%] min-h-[12rem]">
-	<!-- Connecting Line-Area; must be larger on smaller screens -->
-	<div class="flex-2 md:flex-1 flex flex-row gap-x-2 justify-end max-w-[20%]">
-		<!-- Time Info -->
-		<div class="flex flex-col justify-between">
-			<TimeInformation time={leg?.departure} direction="col" class="text-base items-end"
-							 delayClass="text-sm md:text-base" />
-			<TimeInformation time={leg?.arrival} direction="col" class="text-base items-end"
-							 delayClass="text-sm md:text-base" />
+<div class="flex flex-col text-base">
+	<!-- Origin -->
+	<div class="flex flex-row">
+		<TimeInformation time={leg?.departure} direction="col" class="basis-1/5 text-base items-end"
+						 delayClass="text-sm md:text-base" />
+		<div class="relative basis-[15%] md:basis-[5%] flex justify-center">
+			<CircleDot class="absolute shrink-0 z-10 bg-background self-start" />
+			<span class="absolute bg-text h-full w-[4px] z-0 self-end"></span>
 		</div>
-
-		<!-- Station Dots -->
-		<div class="flex flex-col justify-between">
-			<CircleDot class="shrink-0" />
-			<span class="relative mt-[-0.25rem] inset-y-0.5 left-[0.625rem] w-[4px] h-full bg-white"></span>
-			<CircleDot class="shrink-0" />
-		</div>
+		<a class="basis-3/5 font-bold w-fit flex flex-row" href={`/${leg?.origin?.evaNumber}/departures`}
+		   target="_blank">
+			{leg?.origin?.name}
+			<ChevronRight color="#ffda0a" class="shrink-0" />
+		</a>
+		<Platform time={leg?.departure} class="basis-1/5 text-right" direction="col" />
 	</div>
 
-	<!-- Leg Info -->
-	<div class="flex-5 flex flex-col justify-between">
-		<!-- Origin -->
-		<div class="flex flex-row justify-between">
-			<a class="font-bold w-full flex flex-row" href={`/${leg?.origin?.evaNumber}/departures`} target="_blank">
-				{leg?.origin?.name}
-				<ChevronRight color="#ffda0a" />
-			</a>
-			<Platform time={leg?.departure} class="text-right md:max-w-[15%]" direction="col" />
+	<!-- Line Info -->
+	<div class="relative flex flex-row pt-6 md:pt-12">
+		<span class="basis-1/5 text-sm text-right">{formatDuration(leg?.arrival, leg?.departure)}</span>
+		<div class="basis-[15%] md:basis-[5%] flex justify-center">
+			<span class="absolute bg-text h-full inset-y-4 w-[4px] z-0 self-end"></span>
 		</div>
-
-		<!-- Line Info -->
-		<div class="absolute w-full top-[5rem] left-0 flex flex-row gap-x-2 text-base items-baseline">
-			<div class="flex-2 md:flex-1 flex flex-row gap-x-2 justify-end max-w-[20%]">
-				<div class="text-sm text-right">{formatDuration(leg?.arrival, leg?.departure)}</div>
-				<div class="left-[0.625rem] w-[4px] h-full px-3"></div>
-			</div>
-			<div class="flex-5 flex flex-col">
-				<div class="flex flex-row items-baseline gap-x-2">
-					<span class="font-extrabold w-fit {lineColor?.shape}"
-						  style:color={lineColor?.textColor ? lineColor?.textColor : "inherit"}
-						  style:background-color={lineColor?.backgroundColor ? lineColor?.backgroundColor : "inherit"}
-						  style:border-color={lineColor?.borderColor ? lineColor?.borderColor : "none"}
-					>
+		<div class="basis-3/5 flex flex-col">
+			<div class="flex flex-row items-baseline gap-x-2">
+			<span class="font-extrabold w-fit {lineColor?.shape}"
+				  style:color={lineColor?.textColor ? lineColor?.textColor : "inherit"}
+				  style:background-color={lineColor?.backgroundColor ? lineColor?.backgroundColor : "inherit"}
+				  style:border-color={lineColor?.borderColor ? lineColor?.borderColor : "none"}
+			>
 						{leg?.lineInformation?.lineName}
 					</span>
-					<span>({leg?.lineInformation?.fahrtNr})</span>
-				</div>
-				<span class="text-text/65">Continues to {leg?.direction}</span>
+				<span>({leg?.lineInformation?.fahrtNr})</span>
 			</div>
+			<span class="text-text/65">{leg?.direction ? `Continues to ${leg.direction}` : ""}</span>
 		</div>
+		<span class="basis-1/5"></span>
+	</div>
 
-		<!-- Destination -->
-		<div class="flex flex-row justify-between items-end">
-			<a class="font-bold w-full flex flex-row" href={`/${leg?.destination?.evaNumber}/departures`} target="_blank">
-				{leg?.destination?.name}
-				<ChevronRight color="#ffda0a" />
-			</a>
-			<Platform time={leg?.arrival} class="text-right md:max-w-[15%]" direction="col" />
+	<!-- Destination -->
+	<div class="flex flex-row">
+		<TimeInformation time={leg?.arrival} direction="col" class="basis-1/5 text-base items-end"
+						 delayClass="text-sm md:text-base" />
+		<div class="relative basis-[15%] md:basis-[5%] flex justify-center">
+			<CircleDot class="absolute shrink-0 z-10 bg-background self-end" />
+			<span class="absolute bg-text h-full w-[4px] z-0 self-start"></span>
 		</div>
+		<a class="basis-3/5 font-bold w-fit flex flex-row items-center self-end" href={`/${leg?.destination?.evaNumber}/departures`}
+		   target="_blank">
+			{leg?.destination?.name}
+			<ChevronRight color="#ffda0a" class="shrink-0" />
+		</a>
+		<Platform time={leg?.arrival} class="basis-1/5 text-right self-end" direction="col" />
 	</div>
 </div>
