@@ -5,8 +5,11 @@
 	import { ChevronRight } from "lucide-svelte";
 	import Platform from "$components/ui/info/Platform.svelte";
 	import { formatDuration } from "$lib";
+	import ChevronDown from "lucide-svelte/icons/chevron-down";
+	import ChevronUp from "lucide-svelte/icons/chevron-up";
 
 	let { leg, lineColor }: { leg: Connection, lineColor?: LineColor } = $props();
+	let showViaStops = $state<boolean>(false);
 </script>
 
 <div class="flex flex-col text-base">
@@ -48,15 +51,61 @@
 		<span class="basis-1/5"></span>
 	</div>
 
+	<!-- ViaStops -->
+	{#if leg?.viaStops?.length ?? 0 > 0}
+		<div class="relative flex flex-row pt-6 md:pt-12">
+			<span class="basis-1/5"></span>
+			<div class="basis-[15%] md:basis-[5%] flex justify-center">
+				<span class="absolute bg-text h-full inset-y-4 w-[4px] z-0 self-end"></span>
+			</div>
+			<button class="text-left basis-3/5 flex flex-row items-center gap-x-2 w-fit cursor-pointer"
+					onclick={() => showViaStops = !showViaStops}>
+				{leg?.viaStops?.length ?? 0} stop{leg?.viaStops?.length ?? 0 > 1 ? "s" : ""}
+
+				{#if !showViaStops}
+					<ChevronDown color="#ffda0a" />
+				{:else}
+					<ChevronUp color="#ffda0a" />
+				{/if}
+			</button>
+			<span class="basis-1/5"></span>
+		</div>
+	{/if}
+
+	{#if showViaStops}
+		{#each leg?.viaStops ?? [] as stop, i}
+			<div class="relative flex flex-row pt-2">
+				<div class="basis-1/5 flex flex-col items-end">
+					<TimeInformation time={stop?.arrival} noDoubleSpan={true} class="basis-1/5 text-base items-end"
+									 delayClass="text-sm md:text-base" />
+					<TimeInformation time={stop?.departure} noDoubleSpan={true} class="basis-1/5 text-base items-end"
+									 delayClass="text-sm md:text-base" />
+				</div>
+				<div class="basis-[15%] md:basis-[5%] flex justify-center">
+					<CircleDot class="absolute shrink-0 z-10 bg-background self-center" />
+					<span class="absolute bg-text h-full w-[4px] z-0 self-start"></span>
+				</div>
+				<a class="basis-3/5 font-bold w-fit flex flex-row items-center self-center"
+				   href={`/${stop?.evaNumber}/departures`}
+				   target="_blank">
+					{stop?.name}
+					<ChevronRight color="#ffda0a" class="shrink-0" />
+				</a>
+				<Platform time={stop?.departure} class="basis-1/5 text-right self-center" changeClass="font-bold" direction="row"  />
+			</div>
+		{/each}
+	{/if}
+
 	<!-- Destination -->
-	<div class="flex flex-row">
+	<div class="relative flex flex-row pt-4 md:pt-6">
 		<TimeInformation time={leg?.arrival} direction="col" class="basis-1/5 text-base items-end"
 						 delayClass="text-sm md:text-base" />
-		<div class="relative basis-[15%] md:basis-[5%] flex justify-center">
+		<div class="basis-[15%] md:basis-[5%] flex justify-center">
 			<CircleDot class="absolute shrink-0 z-10 bg-background self-end" />
-			<span class="absolute bg-text h-full w-[4px] z-0 self-start"></span>
+			<span class="absolute bg-text h-full w-[4px] z-0 self-end"></span>
 		</div>
-		<a class="basis-3/5 font-bold w-fit flex flex-row items-center self-end" href={`/${leg?.destination?.evaNumber}/departures`}
+		<a class="basis-3/5 font-bold w-fit flex flex-row items-center self-end"
+		   href={`/${leg?.destination?.evaNumber}/departures`}
 		   target="_blank">
 			{leg?.destination?.name}
 			<ChevronRight color="#ffda0a" class="shrink-0" />

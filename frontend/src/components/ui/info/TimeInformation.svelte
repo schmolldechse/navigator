@@ -5,11 +5,13 @@
 
 	let {
 		time,
+		noDoubleSpan = false,
 		direction = "row",
 		class: className = "",
 		delayClass = ""
 	}: {
 		time?: Time;
+		noDoubleSpan?: boolean;
 		direction?: "row" | "col";
 		class?: string;
 		delayClass?: string;
@@ -22,18 +24,16 @@
 	const displayTime = (time: string) => DateTime.fromISO(time).setLocale("de-DE").toLocaleString(DateTime.TIME_24_SIMPLE);
 </script>
 
-<div
-	class={[
-		"flex",
-		{ "flex-row items-center justify-end gap-x-2": direction === "row" },
-		{ "flex-col": direction === "col" },
-		className
-	]}
->
-	<span>{displayTime(time?.plannedTime ?? "")}</span>
-	{#if isDelayed()}
-		<span class={["bg-text text-background w-fit px-2 text-center font-bold", delayClass]}
-			>{displayTime(time?.actualTime ?? "")}</span
-		>
-	{/if}
-</div>
+{#if noDoubleSpan}
+	<span
+		class={["w-fit", { "font-bold px-2 bg-text text-background": isDelayed() }, { [delayClass]: isDelayed() }, className]}
+	>{displayTime(isDelayed() ? time?.actualTime ?? "" : time?.plannedTime ?? "")}</span>
+{:else}
+	<div
+		class={["flex", { "flex-row items-center justify-end gap-x-2": direction === "row" }, { "flex-col": direction === "col" }, className]}>
+		<span>{displayTime(time?.plannedTime ?? "")}</span>
+		{#if isDelayed()}<span
+			class={["bg-text text-background w-fit px-2 text-center font-bold", delayClass]}>{displayTime(time?.actualTime ?? "")}</span>{/if}
+	</div>
+{/if}
+

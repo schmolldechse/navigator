@@ -1,9 +1,10 @@
 <script lang="ts">
 	import type { Time } from "$models/time";
 
-	let { time, class: className = "", direction = "row" }: {
+	let { time, class: className = "", changeClass = "", direction = "row" }: {
 		time?: Time,
 		class?: string,
+		changeClass?: string,
 		direction?: string
 	} = $props();
 
@@ -11,7 +12,7 @@
 </script>
 
 {#if direction === "row"}
-<span class={["md:w-full", {"bg-text text-background px-2 py-1 md:px-0": !samePlatform}, className]}>
+<span class={["md:w-full", {"bg-text text-background px-2 py-1 md:px-0": !samePlatform}, { [changeClass]: !samePlatform }, className]}>
 	{!samePlatform ? time?.actualPlatform : time?.plannedPlatform}
 </span>
 {:else}
