@@ -38,11 +38,12 @@ const calculateDuration = (startDate: DateTime, endDate: DateTime, unit: Duratio
 	return startDate.diff(endDate, unit);
 };
 
-const durationOfConnection = (connection: Connection): number => calculateDuration(
-	DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
-	DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
-	["minutes"]
-).as("minutes");
+const durationOfConnection = (connection: Connection): number =>
+	calculateDuration(
+		DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
+		DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
+		["minutes"]
+	).as("minutes");
 
 const formatDuration = (end?: Time, start?: Time): string => {
 	const duration = calculateDuration(

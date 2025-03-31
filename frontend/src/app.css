@@ -70,7 +70,9 @@
 		clip-path: polygon(50% -100%, 100% 50%, 50% 200%, 0 50%);
 	}
 
-	.pill , .rectangle , .rectangle-rounded-corner {
+	.pill,
+	.rectangle,
+	.rectangle-rounded-corner {
 		padding: 0 0.75em;
 	}
 

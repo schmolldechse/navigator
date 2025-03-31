@@ -74,10 +74,12 @@
 	 * Filter messages based on their importance
 	 * @deprecated
 	 */
-	const filteredMessages: Message[] = $derived((connection?.messages || []).filter((message) => {
-		const isValid = validMessages.some((validMessage) => validMessage.type === message.type);
-		return connection?.cancelled ? isValid && message?.important : isValid;
-	}));
+	const filteredMessages: Message[] = $derived(
+		(connection?.messages || []).filter((message) => {
+			const isValid = validMessages.some((validMessage) => validMessage.type === message.type);
+			return connection?.cancelled ? isValid && message?.important : isValid;
+		})
+	);
 
 	const formatMessage = (message: Message): string => {
 		if (!message?.type || !message?.text) return "Invalid message object";
@@ -103,7 +105,7 @@
 
 {#if (connection?.messages || []).length > 1 && !expanded}
 	<div class="my-1 flex flex-row gap-x-2 py-0.5">
-		{#each (connection?.messages || []) as message, index (index)}
+		{#each connection?.messages || [] as message, index (index)}
 			{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
 			{#if validMessage?.component}
 				{@const Component = validMessage.component}
@@ -117,7 +119,7 @@
 {/if}
 
 {#if (connection?.messages || []).length <= 1 || expanded}
-	{#each (connection?.messages || []) as message, index (index)}
+	{#each connection?.messages || [] as message, index (index)}
 		{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
 		<div class="my-1 flex flex-row gap-x-2 py-0.5 text-lg">
 			{#if validMessage?.component}

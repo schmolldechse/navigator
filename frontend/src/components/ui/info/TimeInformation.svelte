@@ -25,15 +25,21 @@
 </script>
 
 {#if noDoubleSpan}
-	<span
-		class={["w-fit", { "font-bold px-2 bg-text text-background": isDelayed() }, { [delayClass]: isDelayed() }, className]}
-	>{displayTime(isDelayed() ? time?.actualTime ?? "" : time?.plannedTime ?? "")}</span>
+	<span class={["w-fit", { "bg-text text-background px-2 font-bold": isDelayed() }, { [delayClass]: isDelayed() }, className]}
+		>{displayTime(isDelayed() ? (time?.actualTime ?? "") : (time?.plannedTime ?? ""))}</span
+	>
 {:else}
 	<div
-		class={["flex", { "flex-row items-center justify-end gap-x-2": direction === "row" }, { "flex-col": direction === "col" }, className]}>
+		class={[
+			"flex",
+			{ "flex-row items-center justify-end gap-x-2": direction === "row" },
+			{ "flex-col": direction === "col" },
+			className
+		]}
+	>
 		<span>{displayTime(time?.plannedTime ?? "")}</span>
-		{#if isDelayed()}<span
-			class={["bg-text text-background w-fit px-2 text-center font-bold", delayClass]}>{displayTime(time?.actualTime ?? "")}</span>{/if}
+		{#if isDelayed()}<span class={["bg-text text-background w-fit px-2 text-center font-bold", delayClass]}
+				>{displayTime(time?.actualTime ?? "")}</span
+			>{/if}
 	</div>
 {/if}
-

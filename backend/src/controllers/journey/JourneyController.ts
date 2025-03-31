@@ -81,7 +81,7 @@ const fetchRoute = async (query: RoutePlannerQuery): Promise<RouteData> => {
 	const params = new URLSearchParams({
 		from: query.from.toString(),
 		to: query.to.toString(),
-		stopovers: 'true'
+		stopovers: "true"
 	});
 
 	if (query.earlierThan) params.set("earlierThan", query.earlierThan);

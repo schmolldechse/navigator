@@ -8,7 +8,12 @@ import type { Sequence } from "../models/sequence.ts";
 import type { RouteData } from "../models/route.ts";
 import type { Time } from "../models/time.ts";
 
-const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", profile: "db" | "dbweb", parseStopoversInfo: boolean = false): Connection => {
+const mapConnection = (
+	entry: any,
+	type: "departures" | "arrivals" | "both",
+	profile: "db" | "dbweb",
+	parseStopoversInfo: boolean = false
+): Connection => {
 	const isDeparture = type === "departures";
 	const isRIS = profile === "db";
 
@@ -26,17 +31,17 @@ const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", pro
 		arrival: type === "both" || !isDeparture ? mapTime(entry, "arrival") : undefined,
 		lineInformation: !entry?.walking
 			? {
-				type: mapToProduct(entry?.type ?? entry?.line?.product).toString() ?? undefined,
-				replacementServiceType: entry?.replacementServiceType ?? undefined,
-				product: entry?.line?.productName ?? undefined,
-				lineName: entry?.lineName ?? entry?.line?.name,
-				additionalLineName: entry?.additionalLineName,
-				fahrtNr: entry?.line?.fahrtNr ?? undefined,
-				operator: {
-					id: entry?.line?.operator?.id ?? undefined,
-					name: entry?.line?.operator?.name ?? undefined
+					type: mapToProduct(entry?.type ?? entry?.line?.product).toString() ?? undefined,
+					replacementServiceType: entry?.replacementServiceType ?? undefined,
+					product: entry?.line?.productName ?? undefined,
+					lineName: entry?.lineName ?? entry?.line?.name,
+					additionalLineName: entry?.additionalLineName,
+					fahrtNr: entry?.line?.fahrtNr ?? undefined,
+					operator: {
+						id: entry?.line?.operator?.id ?? undefined,
+						name: entry?.line?.operator?.name ?? undefined
+					}
 				}
-			}
 			: undefined,
 		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers ?? entry?.stopovers, parseStopoversInfo) ?? undefined,
 		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
@@ -54,20 +59,33 @@ const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", pro
 const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	const isDeparture = type === "departure";
 
-	const delay = (): number => calculateDuration(
-		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen ?? (isDeparture ? entry?.departure : entry?.arrival)),
-		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival)),
-		"seconds"
-	);
+	const delay = (): number =>
+		calculateDuration(
+			DateTime.fromISO(
+				entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen ?? (isDeparture ? entry?.departure : entry?.arrival)
+			),
+			DateTime.fromISO(
+				entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival)
+			),
+			"seconds"
+		);
 
 	return {
-		plannedTime: entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival) ?? undefined,
+		plannedTime:
+			entry?.timeSchedule ??
+			entry?.plannedWhen ??
+			(isDeparture ? entry?.plannedDeparture : entry?.plannedArrival) ??
+			undefined,
 		actualTime: entry?.timeDelayed ?? entry?.when ?? (isDeparture ? entry?.departure : entry?.arrival) ?? undefined,
 		delay: !entry?.walking ? ((isDeparture ? entry?.departureDelay : entry?.arrivalDelay) ?? delay) : undefined,
 		plannedPlatform: !entry?.walking
-			? (entry?.platformSchedule ?? entry?.plannedPlatform ?? (isDeparture ? entry?.plannedDeparturePlatform : entry?.plannedArrivalPlatform))
+			? (entry?.platformSchedule ??
+				entry?.plannedPlatform ??
+				(isDeparture ? entry?.plannedDeparturePlatform : entry?.plannedArrivalPlatform))
 			: undefined,
-		actualPlatform: !entry?.walking ? (entry?.platform ?? (isDeparture ? entry?.departurePlatform : entry?.arrivalPlatform)) : undefined
+		actualPlatform: !entry?.walking
+			? (entry?.platform ?? (isDeparture ? entry?.departurePlatform : entry?.arrivalPlatform))
+			: undefined
 	};
 };
 
@@ -87,10 +105,11 @@ const mapStops = (entry: any, parseFurtherInfo: boolean = false): Stop[] | null 
 		cancelled: rawStop?.canceled ?? rawStop?.cancelled ?? false,
 		additional: rawStop?.additional ?? undefined,
 		separation: rawStop?.separation ?? undefined,
-		nameParts: rawStop?.nameParts?.map((rawPart: any) => ({
-			type: rawPart?.type,
-			value: rawPart?.value
-		})) ?? undefined,
+		nameParts:
+			rawStop?.nameParts?.map((rawPart: any) => ({
+				type: rawPart?.type,
+				value: rawPart?.value
+			})) ?? undefined,
 		departure: parseFurtherInfo ? mapTime(rawStop, "departure") : undefined,
 		arrival: parseFurtherInfo ? mapTime(rawStop, "arrival") : undefined,
 		messages: parseFurtherInfo ? mapMessages(rawStop?.remarks, false) : undefined
@@ -100,10 +119,11 @@ const mapStops = (entry: any, parseFurtherInfo: boolean = false): Stop[] | null 
 const mapMessages = (entry: any, isRIS: boolean = false): Message[] | [] => {
 	if (!entry) return [];
 
-	if (!isRIS) return entry.map((message: any) => ({
-		type: message?.type,
-		text: message?.text ?? message?.summary
-	}));
+	if (!isRIS)
+		return entry.map((message: any) => ({
+			type: message?.type,
+			text: message?.text ?? message?.summary
+		}));
 
 	return (entry?.common || [])
 		.concat(entry?.delay || [])

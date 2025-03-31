@@ -19,11 +19,15 @@
 		const legs = (route?.legs || []).filter((leg) => !leg?.walking);
 		if (legs.length === 0) return 0;
 
-		return legs.flatMap((leg) => calculateDuration(
-			DateTime.fromISO(leg?.arrival?.actualTime ?? leg?.arrival?.plannedTime ?? ""),
-			DateTime.fromISO(leg?.departure?.actualTime ?? leg?.departure?.plannedTime ?? ""),
-			["minutes"]).as("minutes")
-		).reduce((acc, el) => acc + el);
+		return legs
+			.flatMap((leg) =>
+				calculateDuration(
+					DateTime.fromISO(leg?.arrival?.actualTime ?? leg?.arrival?.plannedTime ?? ""),
+					DateTime.fromISO(leg?.departure?.actualTime ?? leg?.departure?.plannedTime ?? ""),
+					["minutes"]
+				).as("minutes")
+			)
+			.reduce((acc, el) => acc + el);
 	});
 
 	const getWidthRatio = (duration: number, maxDuration: number) => {
@@ -67,7 +71,9 @@
 		</div>
 
 		<span class="text-primary/90">|</span>
-		<span class="mt-[0.35rem] text-lg">{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}</span>
+		<span class="mt-[0.35rem] text-lg"
+			>{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}</span
+		>
 	</div>
 
 	<!-- Legs -->
@@ -101,7 +107,7 @@
 			{#each route?.legs as leg, i}
 				{#if leg?.walking}<span>walking</span>
 				{:else}
-					<LegInfo {leg} lineColor={legColors.find(color => color.lineName === leg?.lineInformation?.lineName)} />
+					<LegInfo {leg} lineColor={legColors.find((color) => color.lineName === leg?.lineInformation?.lineName)} />
 				{/if}
 			{/each}
 		</div>

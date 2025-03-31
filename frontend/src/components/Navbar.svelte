@@ -19,7 +19,7 @@
 	]);
 </script>
 
-<div class="bg-background sticky top-0 flex h-20 w-full items-center justify-between px-2 pt-4 pr-4 z-999">
+<div class="bg-background sticky top-0 z-999 flex h-20 w-full items-center justify-between px-2 pt-4 pr-4">
 	<VisualIdentity />
 
 	<div class="relative flex flex-row items-center gap-x-4">

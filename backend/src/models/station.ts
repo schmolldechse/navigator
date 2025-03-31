@@ -34,4 +34,4 @@ interface NamePart {
 	value: string;
 }
 
-export type { Station, Stop, NamePart }
+export type { Station, Stop, NamePart };
