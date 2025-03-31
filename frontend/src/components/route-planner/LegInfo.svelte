@@ -2,7 +2,7 @@
 	import type { Connection, LineColor } from "$models/connection";
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
 	import CircleDot from "lucide-svelte/icons/circle-dot";
-	import { ChevronRight } from "lucide-svelte";
+	import ChevronRight from "lucide-svelte/icons/chevron-right";
 	import Platform from "$components/ui/info/Platform.svelte";
 	import { formatDuration } from "$lib";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
