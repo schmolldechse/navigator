@@ -45,7 +45,8 @@ const mapConnection = (entry: any, type: "departures" | "arrivals" | "both", pro
 		messages: mapMessages(entry?.messages ?? entry?.remarks, isRIS) ?? undefined,
 		cancelled: !entry?.walking ? (entry?.canceled ?? entry?.cancelled ?? false) : undefined,
 		providesVehicleSequence: !entry?.walking ? (entry?.providesVehicleSequence ?? false) : undefined,
-		walking: entry?.walking ? entry?.walking : undefined
+		walking: entry?.walking ? entry?.walking : undefined,
+		loadFactor: entry?.loadFactor ?? undefined
 	};
 };
 

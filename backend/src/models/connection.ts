@@ -36,6 +36,14 @@ interface Connection {
 	cancelled?: boolean;
 	providesVehicleSequence?: boolean;
 	walking?: boolean;
+
+	/**
+	 * low-to-medium
+	 * high
+	 * very-high
+	 * exceptionally-high
+	 */
+	loadFactor?: string;
 }
 
 interface LineColor {
