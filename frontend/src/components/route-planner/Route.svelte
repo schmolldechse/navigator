@@ -10,6 +10,7 @@
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
 	import LegInfo from "$components/route-planner/LegInfo.svelte";
 	import { onMount } from "svelte";
+	import Changeover from "$components/route-planner/Changeover.svelte";
 
 	let { route }: { route: Route } = $props();
 	let detailsOpen = $state<boolean>(false);
@@ -57,8 +58,6 @@
 
 		fetchLineColors();
 	});
-
-	let showViaStops = $state<boolean>(false);
 </script>
 
 <div class="border-primary-dark/75 space-y-2 rounded-lg border-2 px-4 py-2 text-2xl font-medium">
@@ -88,7 +87,6 @@
 		{/each}
 	</div>
 
-	<!-- TODO: Details -->
 	<div class="flex justify-center">
 		<button class="flex cursor-pointer flex-row items-center gap-x-2" onclick={() => (detailsOpen = !detailsOpen)}>
 			<span class="text-sm md:text-lg">Details</span>
@@ -105,7 +103,7 @@
 			<span class="text-lg font-semibold">Route Details</span>
 
 			{#each route?.legs as leg, i}
-				{#if leg?.walking}<span>walking</span>
+				{#if leg?.walking}<Changeover arrival={route?.legs[i - 1]?.arrival} departure={route?.legs[i + 1]?.departure} />
 				{:else}
 					<LegInfo {leg} lineColor={legColors.find((color) => color.lineName === leg?.lineInformation?.lineName)} />
 				{/if}
