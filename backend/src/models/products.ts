@@ -37,9 +37,10 @@ const Products = {
 const mapToProduct = (input?: string): Product => {
 	if (!input) return Products.UNKNOWN;
 
-	const matchedProduct = Object.values(Products).find((product: Product) =>
-		product.value.toLowerCase() === input.toLowerCase() ||
-		product.possibilities.some(possibility => possibility.toLowerCase() === input.toLowerCase())
+	const matchedProduct = Object.values(Products).find(
+		(product: Product) =>
+			product.value.toLowerCase() === input.toLowerCase() ||
+			product.possibilities.some((possibility) => possibility.toLowerCase() === input.toLowerCase())
 	);
 	return matchedProduct || Products.UNKNOWN;
 };
