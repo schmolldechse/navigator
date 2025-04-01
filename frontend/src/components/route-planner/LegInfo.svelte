@@ -25,7 +25,11 @@
 			<CircleDot class="bg-background absolute z-10 shrink-0 self-start" />
 			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 		</div>
-		<a class="flex w-fit basis-3/5 flex-row font-bold items-center" href={`/${leg?.origin?.evaNumber}/departures`} target="_blank">
+		<a
+			class="flex w-fit basis-3/5 flex-row items-center font-bold"
+			href={`/${leg?.origin?.evaNumber}/departures`}
+			target="_blank"
+		>
 			{leg?.origin?.name}
 			<ChevronRight color="#ffda0a" class="shrink-0" />
 		</a>
@@ -122,7 +126,7 @@
 		<TimeInformation
 			time={leg?.arrival}
 			direction="col"
-			class="basis-1/5 items-end text-base self-end"
+			class="basis-1/5 items-end self-end text-base"
 			delayClass="text-sm md:text-base"
 		/>
 		<div class="flex basis-[15%] justify-center md:basis-[5%]">

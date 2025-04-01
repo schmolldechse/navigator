@@ -107,7 +107,12 @@
 			{#each route?.legs as leg, i}
 				{#if leg?.walking}<Changeover arrival={route?.legs[i - 1]?.arrival} departure={route?.legs[i + 1]?.departure} />
 				{:else}
-					<LegInfo {leg} lineColor={legColors.find((color) => normalize(color.lineName) === normalize(leg?.lineInformation?.lineName ?? ""))} />
+					<LegInfo
+						{leg}
+						lineColor={legColors.find(
+							(color) => normalize(color.lineName) === normalize(leg?.lineInformation?.lineName ?? "")
+						)}
+					/>
 				{/if}
 			{/each}
 		</div>
