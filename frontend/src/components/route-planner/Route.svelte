@@ -58,6 +58,8 @@
 
 		fetchLineColors();
 	});
+
+	const normalize = (value: string): string => value.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
 </script>
 
 <div class="border-primary-dark/75 space-y-2 rounded-lg border-2 px-4 py-2 text-2xl font-medium">
@@ -105,7 +107,7 @@
 			{#each route?.legs as leg, i}
 				{#if leg?.walking}<Changeover arrival={route?.legs[i - 1]?.arrival} departure={route?.legs[i + 1]?.departure} />
 				{:else}
-					<LegInfo {leg} lineColor={legColors.find((color) => color.lineName === leg?.lineInformation?.lineName)} />
+					<LegInfo {leg} lineColor={legColors.find((color) => normalize(color.lineName) === normalize(leg?.lineInformation?.lineName ?? ""))} />
 				{/if}
 			{/each}
 		</div>

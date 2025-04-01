@@ -12,7 +12,7 @@ const parse = async (path: string): Promise<any[]> => {
 	return parsed.data;
 };
 
-const normalize = (value: string): string => value.toLowerCase().replace("/[\s-]/g", "");
+const normalize = (value: string): string => value.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
 
 const fromLineName = async (inputLine: string, inputOperator?: string): Promise<LineColor[]> => {
 	const data = await parse(path.join(__dirname, "..", "..", "assets", "line-colors.csv"));
