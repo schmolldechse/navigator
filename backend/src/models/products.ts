@@ -1,61 +1,47 @@
 /**
- * See comments for more possible values.
- * - uppercase -> RIS
- * - lowercase -> HAFAS
+ * A Product represents a specific type of transportation.
+ * It is used by both {@link Connection} and {@link Station} to specify the type of transportation.
+ *
+ * The Product consists of:
+ * - value: The name of the product obtained from the Vendo DeutscheBahn API
+ * - possibilities: An array of product names that can be matched to the value. For example, if the API returns "HIGH_SPEED_TRAIN", it maps to HOCHGESCHWINDIGKEITSZUEGE
  */
-enum Products {
-	HOCHGESCHWINDIGKEITSZUEGE = "HOCHGESCHWINDIGKEITSZUEGE", // HIGH_SPEED_TRAIN, nationalExpress
-	INTERCITYUNDEUROCITYZUEGE = "INTERCITYUNDEUROCITYZUEGE", // INTERCITY_TRAIN, national
-	INTERREGIOUNDSCHNELLZUEGE = "INTERREGIOUNDSCHNELLZUEGE", // INTER_REGIONAL_TRAIN
-	NAHVERKEHRSONSTIGEZUEGE = "NAHVERKEHRSONSTIGEZUEGE", // REGIONAL_TRAIN, regional
-	SBAHNEN = "SBAHNEN", // CITY_TRAIN, suburban
-	BUSSE = "BUSSE", // BUS, bus
-	SCHIFFE = "SCHIFFE", // FERRY, ferry
-	UBAHN = "UBAHN", // SUBWAY, subway
-	STRASSENBAHN = "STRASSENBAHN", // TRAM, tram
-	ANRUFPFLICHTIGEVERKEHRE = "ANRUFPFLICHTIGEVERKEHRE", // SHUTTLE, taxi
-	UNKNOWN = "UNKNOWN"
+interface Product {
+	value: string;
+	possibilities: string[];
 }
 
-const keyValueMap: Record<string, Products> = {
-	highspeedtrain: Products.HOCHGESCHWINDIGKEITSZUEGE,
-	nationalexpress: Products.HOCHGESCHWINDIGKEITSZUEGE,
+/**
+ * A collection of Products that map a specific transportation category to its corresponding value
+ */
+const Products = {
+	HOCHGESCHWINDIGKEITSZUEGE: {
+		value: "HOCHGESCHWINDIGKEITSZUEGE",
+		possibilities: ["HIGH_SPEED_TRAIN", "nationalExpress"]
+	},
+	INTERCITYUNDEUROCITYZUEGE: { value: "INTERCITYUNDEUROCITYZUEGE", possibilities: ["INTERCITY_TRAIN", "national"] },
+	INTERREGIOUNDSCHNELLZUEGE: { value: "INTERREGIOUNDSCHNELLZUEGE", possibilities: ["INTER_REGIONAL_TRAIN"] },
+	NAHVERKEHRSONSTIGEZUEGE: {
+		value: "NAHVERKEHRSONSTIGEZUEGE",
+		possibilities: ["REGIONAL_TRAIN", "regionalExpress", "regional"]
+	},
+	SBAHNEN: { value: "SBAHNEN", possibilities: ["CITY_TRAIN", "suburban"] },
+	BUSSE: { value: "BUSSE", possibilities: ["BUS"] },
+	SCHIFFE: { value: "SCHIFFE", possibilities: ["FERRY"] },
+	UBAHN: { value: "UBAHN", possibilities: ["SUBWAY"] },
+	STRASSENBAHN: { value: "STRASSENBAHN", possibilities: ["TRAM"] },
+	ANRUFPFLICHTIGEVERKEHRE: { value: "ANRUFPFLICHTIGEVERKEHRE", possibilities: ["SHUTTLE", "taxi"] },
+	UNKNOWN: { value: "UNKNOWN", possibilities: [] }
+} as const;
 
-	intercitytrain: Products.INTERCITYUNDEUROCITYZUEGE,
-	national: Products.INTERREGIOUNDSCHNELLZUEGE,
-
-	interregionaltrain: Products.INTERREGIOUNDSCHNELLZUEGE,
-
-	regionaltrain: Products.NAHVERKEHRSONSTIGEZUEGE,
-	regionalexpress: Products.NAHVERKEHRSONSTIGEZUEGE,
-	regional: Products.NAHVERKEHRSONSTIGEZUEGE,
-
-	citytrain: Products.SBAHNEN,
-	suburban: Products.SBAHNEN,
-
-	bus: Products.BUSSE,
-
-	ferry: Products.SCHIFFE,
-
-	subway: Products.UBAHN,
-
-	tram: Products.STRASSENBAHN,
-
-	shuttle: Products.ANRUFPFLICHTIGEVERKEHRE,
-	taxi: Products.ANRUFPFLICHTIGEVERKEHRE
-};
-
-const mapToProduct = (input: string | undefined): Products => {
+const mapToProduct = (input?: string): Product => {
 	if (!input) return Products.UNKNOWN;
 
-	const key = input.replace(/[_-]/g, "").toLowerCase();
-	return keyValueMap[key] ?? Products.UNKNOWN;
+	const matchedProduct = Object.values(Products).find((product: Product) =>
+		product.value.toLowerCase() === input.toLowerCase() ||
+		product.possibilities.some(possibility => possibility.toLowerCase() === input.toLowerCase())
+	);
+	return matchedProduct || Products.UNKNOWN;
 };
 
-const mapToEnum = (value: string): Products | undefined => {
-	return Object.keys(Products).some((key) => Products[key as keyof typeof Products] === value)
-		? (value as Products)
-		: undefined;
-};
-
-export { mapToEnum, mapToProduct, Products };
+export { type Product, Products, mapToProduct };

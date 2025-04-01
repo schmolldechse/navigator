@@ -1,6 +1,6 @@
 import { Controller, Get, Path, Query, Route, Tags } from "tsoa";
 import type { Station } from "../models/station.ts";
-import { mapToEnum, Products } from "../models/products.ts";
+import { mapToProduct, type Product, Products } from "../models/products.ts";
 import { getCollection } from "../lib/db/mongo-data-db.ts";
 import { HttpError } from "../lib/errors/HttpError.ts";
 import type { StationDocument } from "../db/mongodb/station.schema.ts";
@@ -71,8 +71,9 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 				longitude: data?.coordinates?.longitude
 			},
 			products: (data?.products || [])
-				.map((product: string) => mapToEnum(product))
-				.filter((product: Products): product is Products => product !== undefined)
+				.map(mapToProduct)
+				.filter((product: Product) => product != Products.UNKNOWN)
+				.map((product: Product) => product.value)
 		}));
 };
 

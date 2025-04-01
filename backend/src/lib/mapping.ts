@@ -17,7 +17,6 @@ const mapConnection = (
 	const isDeparture = type === "departures";
 	const isRIS = profile === "db";
 
-	// TODO: parse stopovers
 	return {
 		ris_journeyId: isRIS ? (entry?.journeyID ?? entry?.tripId) : undefined,
 		hafas_journeyId: !isRIS ? entry?.tripId : undefined,
@@ -31,7 +30,7 @@ const mapConnection = (
 		arrival: type === "both" || !isDeparture ? mapTime(entry, "arrival") : undefined,
 		lineInformation: !entry?.walking
 			? {
-					type: mapToProduct(entry?.type ?? entry?.line?.product).toString() ?? undefined,
+					type: mapToProduct(entry?.type ?? entry?.line?.product).value ?? undefined,
 					replacementServiceType: entry?.replacementServiceType ?? undefined,
 					product: entry?.line?.productName ?? undefined,
 					lineName: entry?.lineName ?? entry?.line?.name,
