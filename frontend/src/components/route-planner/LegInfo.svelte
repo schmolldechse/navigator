@@ -122,7 +122,7 @@
 		<TimeInformation
 			time={leg?.arrival}
 			direction="col"
-			class="basis-1/5 items-end text-base"
+			class="basis-1/5 items-end text-base self-end"
 			delayClass="text-sm md:text-base"
 		/>
 		<div class="flex basis-[15%] justify-center md:basis-[5%]">
