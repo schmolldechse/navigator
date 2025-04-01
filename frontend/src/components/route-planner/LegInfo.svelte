@@ -25,7 +25,7 @@
 			<CircleDot class="bg-background absolute z-10 shrink-0 self-start" />
 			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 		</div>
-		<a class="flex w-fit basis-3/5 flex-row font-bold" href={`/${leg?.origin?.evaNumber}/departures`} target="_blank">
+		<a class="flex w-fit basis-3/5 flex-row font-bold items-center" href={`/${leg?.origin?.evaNumber}/departures`} target="_blank">
 			{leg?.origin?.name}
 			<ChevronRight color="#ffda0a" class="shrink-0" />
 		</a>
