@@ -113,7 +113,7 @@
 			</div>
 
 			<span class="flex flex-1 text-right">
-				<Platform time={isDeparture ? connection?.departure : connection?.arrival} />
+				<Platform class="md:w-full" time={isDeparture ? connection?.departure : connection?.arrival} />
 			</span>
 		</div>
 	</div>

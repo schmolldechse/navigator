@@ -18,9 +18,7 @@
 
 {#if direction === "row"}
 	<span
-		class={[
-			"md:w-full",
-			{ "bg-text text-background px-2 py-1 md:px-0": !samePlatform },
+		class={[{ "bg-text text-background px-2 py-1 md:px-0": !samePlatform },
 			{ [changeClass]: !samePlatform },
 			className
 		]}
