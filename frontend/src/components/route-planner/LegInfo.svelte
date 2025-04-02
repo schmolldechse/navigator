@@ -103,7 +103,7 @@
 					<CircleDot class="bg-background absolute z-10 shrink-0 self-center" />
 					<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 				</div>
-				<div class="flex flex-row basis-4/6 items-center justify-between self-center">
+				<div class="flex flex-row basis-4/6 items-center justify-between">
 					<a
 						class="flex flex-row font-bold"
 						href={`/${stop?.evaNumber}/departures`}
@@ -114,7 +114,7 @@
 					</a>
 					<Platform
 						time={stop?.departure}
-						class="min-w-[15%] self-center text-right"
+						class="self-center text-right"
 						changeClass="font-bold"
 						direction="row"
 					/>
