@@ -28,7 +28,7 @@
 		{!samePlatform ? time?.actualPlatform : time?.plannedPlatform}
 	</span>
 {:else}
-	<div class={["flex flex-col items-end md:w-full", className]}>
+	<div class={["flex flex-col items-end", className]}>
 		<span>{time?.plannedPlatform ?? ""}</span>
 		{#if !samePlatform}
 			<span class="bg-text text-background w-fit px-2 font-bold">{time?.actualPlatform ?? ""}</span>
