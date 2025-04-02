@@ -26,7 +26,7 @@
 			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 		</div>
 		<a
-			class="flex w-fit basis-3/5 flex-row items-center font-bold"
+			class="flex w-fit basis-3/5 flex-row items-center font-bold self-start"
 			href={`/${leg?.origin?.evaNumber}/departures`}
 			target="_blank"
 		>
