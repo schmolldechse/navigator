@@ -92,10 +92,13 @@ const mapStops = (entry: any, parseFurtherInfo: boolean = false): Stop[] | null 
 	if (!entry) return null;
 	if (!Array.isArray(entry)) entry = [entry];
 
-	// when parsing further information, it skips the first & last element of viaStops
+	/**
+	 * when parsing further information (departure, arrival & messages), it skips the first & last element of viaStops
+	 * this is because HAFAS returns the origin & destination stops in viaStops
+	 */
 	if (parseFurtherInfo) {
-		if (entry?.length > 1 && entry?.length <= 2) entry.shift();
-		else if (entry?.length > 2) entry = entry.slice(1, -1);
+		entry?.shift(); // removes the origin stop
+		entry?.pop(); // removes the destination stop
 	}
 
 	return entry.map((rawStop: any) => ({
