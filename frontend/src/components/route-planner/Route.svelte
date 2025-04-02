@@ -68,12 +68,13 @@
 		<div class="flex flex-row">
 			<TimeInformation time={route?.legs[0]?.departure} direction="col" delayClass="text-lg" />
 			<Minus class="mx-2 mt-[0.25rem]" />
-			<TimeInformation time={route?.legs[route?.legs?.length - 1]?.arrival} direction="col" delayClass="text-lg" />
+			<TimeInformation time={route?.legs[route?.legs?.length - 1]?.arrival} direction="col"
+							 delayClass="text-lg" />
 		</div>
 
 		<span class="text-primary/90">|</span>
 		<span class="mt-[0.35rem] text-lg"
-			>{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}</span
+		>{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}</span
 		>
 	</div>
 
@@ -105,7 +106,17 @@
 			<span class="text-lg font-semibold">Route Details</span>
 
 			{#each route?.legs as leg, i}
-				{#if leg?.walking}<Changeover arrival={route?.legs[i - 1]?.arrival} departure={route?.legs[i + 1]?.departure} />
+				{#if leg?.walking}
+					<!--
+					firstIsWalking : i === 0
+					If true, it swaps the arrival & departure times.
+					-> Arrival is then the time at which you arrive at the stop[i + 1]
+					-> Departure is then the time at which you set off from the stop[i]
+					 -->
+					{@const firstIsWalking = i === 0}
+					<Changeover arrival={firstIsWalking ? route?.legs[i + 1]?.departure : route?.legs[i - 1]?.arrival}
+								departure={firstIsWalking ? leg?.departure : route?.legs[i + 1]?.departure}
+								{firstIsWalking} origin={firstIsWalking ? leg?.origin : undefined} />
 				{:else}
 					<LegInfo
 						{leg}
