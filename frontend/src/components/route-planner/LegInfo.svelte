@@ -70,7 +70,7 @@
 				class="flex w-fit basis-3/5 cursor-pointer flex-row items-center gap-x-2 text-left"
 				onclick={() => (showViaStops = !showViaStops)}
 			>
-				{leg?.viaStops?.length ?? 0} stop{(leg?.viaStops?.length ?? 0 > 1) ? "s" : ""}
+				{leg?.viaStops?.length ?? 0} stop{(leg?.viaStops?.length ?? 0) === 1 ? "" : "s"}
 
 				{#if !showViaStops}
 					<ChevronDown color="#ffda0a" />
