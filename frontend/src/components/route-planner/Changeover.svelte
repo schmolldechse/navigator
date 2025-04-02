@@ -14,19 +14,33 @@
 	 * if firstIsWalking is true, arrival & departure are swapped
 	 * this is because it uses the "departure" time from the stop where you start walking, and the "arrival" time at the stop where you stop walking
 	 */
-	let { arrival, departure, firstIsWalking = false, origin }: {
+	let {
+		arrival,
+		departure,
+		firstIsWalking = false,
+		origin
+	}: {
 		arrival?: Time;
-		departure?: Time,
-		firstIsWalking?: boolean,
-		origin?: Stop
+		departure?: Time;
+		firstIsWalking?: boolean;
+		origin?: Stop;
 	} = $props();
 	if (firstIsWalking && !origin) throw new Error("Origin is required when firstIsWalking is true");
 
-	const duration = () => calculateDuration(
-		DateTime.fromISO(firstIsWalking ? (arrival?.actualTime ?? arrival?.plannedTime ?? "") : (departure?.actualTime ?? departure?.plannedTime ?? "")),
-		DateTime.fromISO(firstIsWalking ? (departure?.actualTime ?? departure?.plannedTime ?? "") : (arrival?.actualTime ?? arrival?.plannedTime ?? "")),
-		["minutes"]
-	).as("minutes");
+	const duration = () =>
+		calculateDuration(
+			DateTime.fromISO(
+				firstIsWalking
+					? (arrival?.actualTime ?? arrival?.plannedTime ?? "")
+					: (departure?.actualTime ?? departure?.plannedTime ?? "")
+			),
+			DateTime.fromISO(
+				firstIsWalking
+					? (departure?.actualTime ?? departure?.plannedTime ?? "")
+					: (arrival?.actualTime ?? arrival?.plannedTime ?? "")
+			),
+			["minutes"]
+		).as("minutes");
 </script>
 
 {#if firstIsWalking}
@@ -39,35 +53,32 @@
 			class="basis-1/6 items-end text-base"
 			delayClass="text-sm md:text-base"
 		/>
-		<div class="relative flex basis-1/6 md:max-w-[5%] justify-center">
+		<div class="relative flex basis-1/6 justify-center md:max-w-[5%]">
 			<CircleDot class="bg-background absolute z-10 shrink-0 self-start" />
 			<span
-				class="bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)] absolute z-0 h-full w-[4px] self-end"></span>
+				class="absolute z-0 h-full w-[4px] self-end bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]"
+			></span>
 		</div>
-		<div class="flex flex-row basis-4/6 items-center justify-between">
-			<a
-				class="flex flex-row font-bold self-start"
-				href={`/${origin?.evaNumber}/departures`}
-				target="_blank"
-			>
+		<div class="flex basis-4/6 flex-row items-center justify-between">
+			<a class="flex flex-row self-start font-bold" href={`/${origin?.evaNumber}/departures`} target="_blank">
 				{origin?.name}
 				<ChevronRight color="#ffda0a" class="shrink-0" />
 			</a>
-			<Platform time={departure} class="basis-1/6 text-right self-start" direction="col" />
+			<Platform time={departure} class="basis-1/6 self-start text-right" direction="col" />
 		</div>
 	</div>
 {/if}
 
-<div class="relative flex flex-row text-base py-12">
+<div class="relative flex flex-row py-12 text-base">
 	<span class="text-text/65 basis-1/6 self-center text-right">
 		{duration() > 0 ? formatDuration(firstIsWalking ? arrival : departure, firstIsWalking ? departure : arrival) : ""}
 	</span>
-	<div class="flex basis-1/6 md:max-w-[5%] justify-center">
+	<div class="flex basis-1/6 justify-center md:max-w-[5%]">
 		<span
 			class="absolute inset-y-4 z-0 h-full w-[4px] self-center bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]"
 		></span>
 	</div>
-	<div class="flex flex-col basis-4/6 justify-center gap-y-2">
+	<div class="flex basis-4/6 flex-col justify-center gap-y-2">
 		<span class="flex items-center">
 			<Walking height="35px" width="35px" class="stroke-accent" />
 			Changeover

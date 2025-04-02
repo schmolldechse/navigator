@@ -17,12 +17,7 @@
 </script>
 
 {#if direction === "row"}
-	<span
-		class={[{ "bg-text text-background px-2 py-1 md:px-0": !samePlatform },
-			{ [changeClass]: !samePlatform },
-			className
-		]}
-	>
+	<span class={[{ "bg-text text-background px-2 py-1 md:px-0": !samePlatform }, { [changeClass]: !samePlatform }, className]}>
 		{!samePlatform ? time?.actualPlatform : time?.plannedPlatform}
 	</span>
 {:else}

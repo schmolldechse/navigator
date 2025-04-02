@@ -21,27 +21,23 @@
 			class="basis-1/6 items-end text-base"
 			delayClass="text-sm md:text-base"
 		/>
-		<div class="relative flex basis-1/6 md:max-w-[5%] justify-center">
+		<div class="relative flex basis-1/6 justify-center md:max-w-[5%]">
 			<CircleDot class="bg-background absolute z-10 shrink-0 self-start" />
 			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 		</div>
-		<div class="flex flex-row basis-4/6 items-center justify-between">
-			<a
-				class="flex flex-row font-bold self-start"
-				href={`/${leg?.origin?.evaNumber}/departures`}
-				target="_blank"
-			>
+		<div class="flex basis-4/6 flex-row items-center justify-between">
+			<a class="flex flex-row self-start font-bold" href={`/${leg?.origin?.evaNumber}/departures`} target="_blank">
 				{leg?.origin?.name}
 				<ChevronRight color="#ffda0a" class="shrink-0" />
 			</a>
-			<Platform time={leg?.departure} class="basis-1/6 text-right self-start" direction="col" />
+			<Platform time={leg?.departure} class="basis-1/6 self-start text-right" direction="col" />
 		</div>
 	</div>
 
 	<!-- Line Info -->
 	<div class="relative flex flex-row pt-6 md:pt-12">
 		<span class="basis-1/6 text-right text-sm">{formatDuration(leg?.arrival, leg?.departure)}</span>
-		<div class="flex basis-1/6 md:max-w-[5%] justify-center">
+		<div class="flex basis-1/6 justify-center md:max-w-[5%]">
 			<span class="bg-text absolute inset-y-4 z-0 h-full w-[4px] self-end"></span>
 		</div>
 		<div class="flex basis-4/6 flex-col">
@@ -64,7 +60,7 @@
 	{#if leg?.viaStops?.length ?? 0 > 0}
 		<div class="relative flex flex-row pt-6 md:pt-12">
 			<span class="basis-1/6"></span>
-			<div class="flex basis-1/6 md:max-w-[5%] justify-center">
+			<div class="flex basis-1/6 justify-center md:max-w-[5%]">
 				<span class="bg-text absolute inset-y-4 z-0 h-full w-[4px] self-end"></span>
 			</div>
 			<button
@@ -99,25 +95,16 @@
 						delayClass="text-sm md:text-base"
 					/>
 				</div>
-				<div class="flex basis-1/6 md:max-w-[5%] justify-center">
+				<div class="flex basis-1/6 justify-center md:max-w-[5%]">
 					<CircleDot class="bg-background absolute z-10 shrink-0 self-center" />
 					<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 				</div>
-				<div class="flex flex-row basis-4/6 items-center justify-between">
-					<a
-						class="flex flex-row font-bold"
-						href={`/${stop?.evaNumber}/departures`}
-						target="_blank"
-					>
+				<div class="flex basis-4/6 flex-row items-center justify-between">
+					<a class="flex flex-row font-bold" href={`/${stop?.evaNumber}/departures`} target="_blank">
 						{stop?.name}
 						<ChevronRight color="#ffda0a" class="shrink-0" />
 					</a>
-					<Platform
-						time={stop?.departure}
-						class="self-center text-right"
-						changeClass="font-bold"
-						direction="row"
-					/>
+					<Platform time={stop?.departure} class="self-center text-right" changeClass="font-bold" direction="row" />
 				</div>
 			</div>
 		{/each}
@@ -131,16 +118,12 @@
 			class="basis-1/6 items-end self-end text-base"
 			delayClass="text-sm md:text-base"
 		/>
-		<div class="flex basis-1/6 md:max-w-[5%] justify-center">
+		<div class="flex basis-1/6 justify-center md:max-w-[5%]">
 			<CircleDot class="bg-background absolute z-10 shrink-0 self-end" />
 			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 		</div>
-		<div class="flex basis-4/6 flex-row items-center self-end justify-between">
-			<a
-				class="flex flex-row font-bold"
-				href={`/${leg?.destination?.evaNumber}/departures`}
-				target="_blank"
-			>
+		<div class="flex basis-4/6 flex-row items-center justify-between self-end">
+			<a class="flex flex-row font-bold" href={`/${leg?.destination?.evaNumber}/departures`} target="_blank">
 				{leg?.destination?.name}
 				<ChevronRight color="#ffda0a" class="shrink-0" />
 			</a>
