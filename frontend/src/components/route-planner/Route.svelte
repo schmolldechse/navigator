@@ -72,9 +72,14 @@
 		</div>
 
 		<span class="text-primary/90">|</span>
-		<span class="mt-[0.35rem] text-lg"
-			>{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}</span
-		>
+		<span class="mt-[0.35rem] text-lg">
+			{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}
+		</span>
+
+		<span class="text-primary/90">|</span>
+		<span class="mt-[0.35rem] text-lg">
+			{route?.legs?.filter(leg => leg?.walking).length} Changeover{route?.legs?.filter(leg => leg?.walking).length === 1 ? "" : "s"}
+		</span>
 	</div>
 
 	<!-- Legs -->
