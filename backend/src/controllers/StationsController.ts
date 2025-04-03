@@ -72,7 +72,7 @@ const fetchStation = async (searchTerm: string): Promise<Station[]> => {
 			},
 			products: (data?.products || [])
 				.map(mapToProduct)
-				.filter((product: Product) => product != Products.UNKNOWN)
+				.filter((product: Product) => product.value !== Products.UNKNOWN.value)
 				.map((product: Product) => product.value)
 		}));
 };
