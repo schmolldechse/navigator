@@ -11,6 +11,7 @@
 	import LegInfo from "$components/route-planner/LegInfo.svelte";
 	import { onMount } from "svelte";
 	import Changeover from "$components/route-planner/Changeover.svelte";
+	import Walking from "$components/ui/icons/Walking.svelte";
 
 	let { route }: { route: Route } = $props();
 	let detailsOpen = $state<boolean>(false);
@@ -64,7 +65,7 @@
 
 <div class="border-primary-dark/75 space-y-2 rounded-lg border-2 px-4 py-2 text-2xl font-medium">
 	<!-- Time Info -->
-	<div class="flex flex-row gap-x-2">
+	<div class="flex flex-row gap-x-2 items-baseline">
 		<div class="flex flex-row">
 			<TimeInformation time={route?.legs[0]?.departure} direction="col" class="text-xl"
 							 delayClass="text-sm md:text-lg" />
@@ -78,13 +79,17 @@
 			{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}
 		</span>
 
-		<span class="text-primary/90">|</span>
-		<span class="mt-[0.35rem] text-lg">
-			{route?.legs?.filter((leg) => leg?.walking).length} Changeover{route?.legs?.filter((leg) => leg?.walking).length ===
-			1
-				? ""
-				: "s"}
-		</span>
+		{#if route?.legs?.filter(leg => leg?.walking).length > 0}
+			<span class="text-primary/90">|</span>
+			<div class="mt-[0.35rem] text-sm md:text-lg flex items-baseline">
+				<span>{route?.legs?.filter((leg) => leg?.walking).length}</span>
+
+				<div class="flex items-center">
+					<span>x</span>
+					<Walking height="25px" width="25px" class="stroke-accent" />
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Legs -->
