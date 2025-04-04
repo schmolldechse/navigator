@@ -56,16 +56,11 @@ const mapConnection = (
 const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	const isDeparture = type === "departure";
 
-	const delay = (): number =>
-		calculateDuration(
-			DateTime.fromISO(
-				entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen ?? (isDeparture ? entry?.departure : entry?.arrival)
-			),
-			DateTime.fromISO(
-				entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival)
-			),
-			"seconds"
-		);
+	const delay = (): number => calculateDuration(
+		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen ?? (isDeparture ? entry?.departure : entry?.arrival)),
+		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival)),
+		"seconds"
+	);
 
 	return {
 		plannedTime:
@@ -74,7 +69,7 @@ const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 			(isDeparture ? entry?.plannedDeparture : entry?.plannedArrival) ??
 			undefined,
 		actualTime: entry?.timeDelayed ?? entry?.when ?? (isDeparture ? entry?.departure : entry?.arrival) ?? undefined,
-		delay: !entry?.walking ? ((isDeparture ? entry?.departureDelay : entry?.arrivalDelay) ?? delay) : undefined,
+		delay: !entry?.walking ? ((isDeparture ? entry?.departureDelay : entry?.arrivalDelay) ?? delay()) : undefined,
 		plannedPlatform: !entry?.walking
 			? (entry?.platformSchedule ??
 				entry?.plannedPlatform ??
