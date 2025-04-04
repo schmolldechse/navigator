@@ -13,38 +13,45 @@ const mapConnection = (
 	type: "departures" | "arrivals" | "both",
 	queriedFromBahnhof: boolean = false,
 	parseStopovers: boolean = false,
-	parseTimesInStopovers: boolean = false,
+	parseTimesInStopovers: boolean = false
 ): Connection => {
 	const isIdentifiableAsHAFAS = (entry?.journeyID ?? entry?.tripId ?? "").startsWith("2|#");
 
 	return {
 		// journeyId
-		ris_journeyId: isIdentifiableAsHAFAS ? undefined : (entry?.journeyID ?? entry?.tripId) ?? undefined,
+		ris_journeyId: isIdentifiableAsHAFAS ? undefined : (entry?.journeyID ?? entry?.tripId ?? undefined),
 		hafas_journeyId: isIdentifiableAsHAFAS ? entry?.tripId : undefined,
 		// destination
 		destination: entry?.destination ? mapStops(entry?.destination)![0] : undefined,
 		actualDestination: entry?.actualDestination ? mapStops(entry?.actualDestination)![0] : undefined,
-		direction: queriedFromBahnhof ? undefined : entry?.direction ?? undefined, // somehow, "direction" shows either "departure" / "arrival" at the Bahnhof API
+		direction: queriedFromBahnhof ? undefined : (entry?.direction ?? undefined), // somehow, "direction" shows either "departure" / "arrival" at the Bahnhof API
 		// origin
 		origin: entry?.origin ? mapStops(entry?.origin)![0] : undefined,
 		provenance: entry?.provenance ?? undefined,
 		// departure/ arrival time
-		departure: (type === "both" || type === "departures") ? mapTime(entry, "departure") : undefined,
-		arrival: (type === "both" || type === "arrivals") ? mapTime(entry, "arrival") : undefined,
+		departure: type === "both" || type === "departures" ? mapTime(entry, "departure") : undefined,
+		arrival: type === "both" || type === "arrivals" ? mapTime(entry, "arrival") : undefined,
 		// lineInformation
-		lineInformation: !entry?.walking ? {
-			type: mapToProduct(entry?.type ?? entry?.line?.product).value ?? undefined,
-			replacementServiceType: entry?.replacementServiceType ?? undefined,
-			product: entry?.line?.productName ?? undefined,
-			lineName: entry?.lineName ?? entry?.line?.name,
-			additionalLineName: entry?.additionalLineName ?? undefined,
-			fahrtNr: entry?.line?.fahrtNr ?? undefined,
-			operator: {
-				id: entry?.line?.operator?.id ?? undefined,
-				name: entry?.line?.operator?.name ?? undefined
-			}
-		} : undefined,
-		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers ?? entry?.previousStopovers ?? entry?.stopovers, parseStopovers, (isIdentifiableAsHAFAS && parseTimesInStopovers)) ?? undefined,
+		lineInformation: !entry?.walking
+			? {
+					type: mapToProduct(entry?.type ?? entry?.line?.product).value ?? undefined,
+					replacementServiceType: entry?.replacementServiceType ?? undefined,
+					product: entry?.line?.productName ?? undefined,
+					lineName: entry?.lineName ?? entry?.line?.name,
+					additionalLineName: entry?.additionalLineName ?? undefined,
+					fahrtNr: entry?.line?.fahrtNr ?? undefined,
+					operator: {
+						id: entry?.line?.operator?.id ?? undefined,
+						name: entry?.line?.operator?.name ?? undefined
+					}
+				}
+			: undefined,
+		viaStops:
+			mapStops(
+				entry.viaStops ?? entry?.nextStopovers ?? entry?.previousStopovers ?? entry?.stopovers,
+				parseStopovers,
+				isIdentifiableAsHAFAS && parseTimesInStopovers
+			) ?? undefined,
 		// cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
 		// additionalStops: mapStops(entry?.additionalStops) ?? undefined,
 		// cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
@@ -60,11 +67,16 @@ const mapConnection = (
 const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	const isDeparture = type === "departure";
 
-	const delay = (): number => calculateDuration(
-		DateTime.fromISO(entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen ?? (isDeparture ? entry?.departure : entry?.arrival)),
-		DateTime.fromISO(entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival)),
-		"seconds"
-	);
+	const delay = (): number =>
+		calculateDuration(
+			DateTime.fromISO(
+				entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen ?? (isDeparture ? entry?.departure : entry?.arrival)
+			),
+			DateTime.fromISO(
+				entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival)
+			),
+			"seconds"
+		);
 
 	return {
 		plannedTime:
@@ -109,25 +121,28 @@ const mapStops = (entry: any, parseStopoversFromHAFAS: boolean = false, parseTim
 				type: rawPart?.type,
 				value: rawPart?.value
 			})) ?? undefined,
-		departure: (parseStopoversFromHAFAS && parseTimeInfo) ? mapTime(rawStop, "departure") : undefined,
-		arrival: (parseStopoversFromHAFAS && parseTimeInfo) ? mapTime(rawStop, "arrival") : undefined,
-		messages: (parseStopoversFromHAFAS && parseTimeInfo) ? mapMessages(rawStop?.remarks, true) : undefined
+		departure: parseStopoversFromHAFAS && parseTimeInfo ? mapTime(rawStop, "departure") : undefined,
+		arrival: parseStopoversFromHAFAS && parseTimeInfo ? mapTime(rawStop, "arrival") : undefined,
+		messages: parseStopoversFromHAFAS && parseTimeInfo ? mapMessages(rawStop?.remarks, true) : undefined
 	}));
 };
 
 const mapMessages = (entry: any, isIdentifiableAsHAFAS: boolean = false): Message[] | [] => {
 	if (!entry) return [];
 
-	if (isIdentifiableAsHAFAS) return entry.map((message: any) => {
-		let transformed = { ...message };
+	if (isIdentifiableAsHAFAS)
+		return entry
+			.map((message: any) => {
+				let transformed = { ...message };
 
-		// this ensures it matches the types used by RIS
-		if (transformed?.type === "warning" || transformed?.type === "status") transformed.type = "general-warning";
-		return transformed;
-	}).map((message: any) => ({
-		type: message?.type,
-		text: message?.text ?? message?.summary
-	}));
+				// this ensures it matches the types used by RIS
+				if (transformed?.type === "warning" || transformed?.type === "status") transformed.type = "general-warning";
+				return transformed;
+			})
+			.map((message: any) => ({
+				type: message?.type,
+				text: message?.text ?? message?.summary
+			}));
 
 	return (entry?.common || [])
 		.concat(entry?.delay || [])

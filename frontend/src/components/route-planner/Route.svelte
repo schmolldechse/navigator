@@ -65,13 +65,16 @@
 
 <div class="border-primary-dark/75 space-y-2 rounded-lg border-2 px-4 py-2 text-2xl font-medium">
 	<!-- Time Info -->
-	<div class="flex flex-row gap-x-2 items-baseline">
+	<div class="flex flex-row items-baseline gap-x-2">
 		<div class="flex flex-row">
-			<TimeInformation time={route?.legs[0]?.departure} direction="col" class="text-xl"
-							 delayClass="text-sm md:text-lg" />
+			<TimeInformation time={route?.legs[0]?.departure} direction="col" class="text-xl" delayClass="text-sm md:text-lg" />
 			<Minus class="mx-2 mt-[0.15rem]" />
-			<TimeInformation time={route?.legs[route?.legs?.length - 1]?.arrival} direction="col" class="text-xl"
-							 delayClass="text-sm md:text-lg" />
+			<TimeInformation
+				time={route?.legs[route?.legs?.length - 1]?.arrival}
+				direction="col"
+				class="text-xl"
+				delayClass="text-sm md:text-lg"
+			/>
 		</div>
 
 		<span class="text-primary/90">|</span>
@@ -79,9 +82,9 @@
 			{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}
 		</span>
 
-		{#if route?.legs?.filter(leg => leg?.walking).length > 0}
+		{#if route?.legs?.filter((leg) => leg?.walking).length > 0}
 			<span class="text-primary/90">|</span>
-			<div class="mt-[0.35rem] text-sm md:text-lg flex items-baseline">
+			<div class="mt-[0.35rem] flex items-baseline text-sm md:text-lg">
 				<span>{route?.legs?.filter((leg) => leg?.walking).length}</span>
 
 				<div class="flex items-center">

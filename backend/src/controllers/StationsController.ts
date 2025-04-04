@@ -82,7 +82,7 @@ const cacheStations = async (stations: Station[]): Promise<void> => {
 					name: station.name,
 					coordinates: station.coordinates,
 					ril100: station.ril100,
-					products: station.products,
+					products: station.products
 				}
 			},
 			upsert: true
