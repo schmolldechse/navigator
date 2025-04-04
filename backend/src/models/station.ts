@@ -10,11 +10,11 @@ interface Station {
 	 * @example 8000096
 	 */
 	evaNumber: number;
-	locationId?: string;
 	coordinates?: {
 		latitude: number;
 		longitude: number;
 	};
+	ril100?: string[];
 	products?: Product[];
 }
 
