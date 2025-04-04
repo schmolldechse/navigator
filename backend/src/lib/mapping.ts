@@ -11,40 +11,44 @@ import type { Time } from "../models/time.ts";
 const mapConnection = (
 	entry: any,
 	type: "departures" | "arrivals" | "both",
-	profile: "db" | "dbweb",
-	parseStopoversInfo: boolean = false
+	queriedFromBahnhof: boolean = false,
+	parseStopovers: boolean = false,
+	parseTimesInStopovers: boolean = false,
 ): Connection => {
-	const isDeparture = type === "departures";
-	const isRIS = profile === "db";
+	const isIdentifiableAsHAFAS = (entry?.journeyID ?? entry?.tripId ?? "").startsWith("2|#");
 
 	return {
-		ris_journeyId: isRIS ? (entry?.journeyID ?? entry?.tripId) : undefined,
-		hafas_journeyId: !isRIS ? entry?.tripId : undefined,
-		destination:
-			((isDeparture && isRIS) || type === "both") && entry?.destination ? mapStops(entry?.destination)![0] : undefined,
+		// journeyId
+		ris_journeyId: isIdentifiableAsHAFAS ? undefined : (entry?.journeyID ?? entry?.tripId) ?? undefined,
+		hafas_journeyId: isIdentifiableAsHAFAS ? entry?.tripId : undefined,
+		// destination
+		destination: entry?.destination ? mapStops(entry?.destination)![0] : undefined,
 		actualDestination: entry?.actualDestination ? mapStops(entry?.actualDestination)![0] : undefined,
-		direction: !isRIS ? entry?.direction : undefined,
-		origin: ((!isDeparture && isRIS) || type === "both") && entry?.origin ? mapStops(entry?.origin)![0] : undefined,
-		provenance: !isRIS ? entry?.provenance : undefined,
-		departure: type === "both" || isDeparture ? mapTime(entry, "departure") : undefined,
-		arrival: type === "both" || !isDeparture ? mapTime(entry, "arrival") : undefined,
+		direction: queriedFromBahnhof ? undefined : entry?.direction ?? undefined, // somehow, "direction" shows either "departure" / "arrival" at the Bahnhof API
+		// origin
+		origin: entry?.origin ? mapStops(entry?.origin)![0] : undefined,
+		provenance: entry?.provenance ?? undefined,
+		// departure/ arrival time
+		departure: (type === "both" || type === "departures") ? mapTime(entry, "departure") : undefined,
+		arrival: (type === "both" || type === "arrivals") ? mapTime(entry, "arrival") : undefined,
+		// lineInformation
 		lineInformation: !entry?.walking ? {
 			type: mapToProduct(entry?.type ?? entry?.line?.product).value ?? undefined,
 			replacementServiceType: entry?.replacementServiceType ?? undefined,
 			product: entry?.line?.productName ?? undefined,
 			lineName: entry?.lineName ?? entry?.line?.name,
-			additionalLineName: entry?.additionalLineName,
+			additionalLineName: entry?.additionalLineName ?? undefined,
 			fahrtNr: entry?.line?.fahrtNr ?? undefined,
 			operator: {
 				id: entry?.line?.operator?.id ?? undefined,
 				name: entry?.line?.operator?.name ?? undefined
 			}
 		} : undefined,
-		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers ?? entry?.stopovers, parseStopoversInfo) ?? undefined,
-		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
-		additionalStops: mapStops(entry?.additionalStops) ?? undefined,
-		cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
-		messages: mapMessages(entry?.messages ?? entry?.remarks, isRIS) ?? undefined,
+		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers ?? entry?.previousStopovers ?? entry?.stopovers, parseStopovers, (isIdentifiableAsHAFAS && parseTimesInStopovers)) ?? undefined,
+		// cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
+		// additionalStops: mapStops(entry?.additionalStops) ?? undefined,
+		// cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
+		messages: mapMessages(entry?.messages ?? entry?.remarks, isIdentifiableAsHAFAS) ?? undefined,
 		cancelled: !entry?.walking ? (entry?.canceled ?? entry?.cancelled ?? false) : undefined,
 		providesVehicleSequence: !entry?.walking ? (entry?.providesVehicleSequence ?? false) : undefined,
 		walking: entry?.walking ? entry?.walking : undefined,
@@ -81,7 +85,7 @@ const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	};
 };
 
-const mapStops = (entry: any, parseFurtherInfo: boolean = false): Stop[] | null => {
+const mapStops = (entry: any, parseStopoversFromHAFAS: boolean = false, parseTimeInfo: boolean = false): Stop[] | null => {
 	if (!entry) return null;
 	if (!Array.isArray(entry)) entry = [entry];
 
@@ -89,7 +93,7 @@ const mapStops = (entry: any, parseFurtherInfo: boolean = false): Stop[] | null 
 	 * when parsing further information (departure, arrival & messages), it skips the first & last element of viaStops
 	 * this is because HAFAS returns the origin & destination stops in viaStops
 	 */
-	if (parseFurtherInfo) {
+	if (parseStopoversFromHAFAS) {
 		entry?.shift(); // removes the origin stop
 		entry?.pop(); // removes the destination stop
 	}
@@ -105,31 +109,30 @@ const mapStops = (entry: any, parseFurtherInfo: boolean = false): Stop[] | null 
 				type: rawPart?.type,
 				value: rawPart?.value
 			})) ?? undefined,
-		departure: parseFurtherInfo ? mapTime(rawStop, "departure") : undefined,
-		arrival: parseFurtherInfo ? mapTime(rawStop, "arrival") : undefined,
-		messages: parseFurtherInfo ? mapMessages(rawStop?.remarks, false) : undefined
+		departure: (parseStopoversFromHAFAS && parseTimeInfo) ? mapTime(rawStop, "departure") : undefined,
+		arrival: (parseStopoversFromHAFAS && parseTimeInfo) ? mapTime(rawStop, "arrival") : undefined,
+		messages: (parseStopoversFromHAFAS && parseTimeInfo) ? mapMessages(rawStop?.remarks, true) : undefined
 	}));
 };
 
-const mapMessages = (entry: any, isRIS: boolean = false): Message[] | [] => {
+const mapMessages = (entry: any, isIdentifiableAsHAFAS: boolean = false): Message[] | [] => {
 	if (!entry) return [];
 
-	if (!isRIS)
-		return entry.map((message: any) => {
-			let transformed = { ...message };
+	if (isIdentifiableAsHAFAS) return entry.map((message: any) => {
+		let transformed = { ...message };
 
-			/**
-			 * this ensures it matches the types used by RIS
-			 * - "warning" is somehow for cancelled trips. why would you?
- 			 */
-			if (transformed?.type === "warning") transformed.type = "canceled-trip";
-			else if (transformed?.type === "status") transformed.type = "general-warning";
+		/**
+		 * this ensures it matches the types used by RIS
+		 * - "warning" is somehow for cancelled trips. why would you?
+		 */
+		if (transformed?.type === "warning") transformed.type = "canceled-trip";
+		else if (transformed?.type === "status") transformed.type = "general-warning";
 
-			return transformed;
-		}).map((message: any) => ({
-			type: message?.type,
-			text: message?.text ?? message?.summary
-		}));
+		return transformed;
+	}).map((message: any) => ({
+		type: message?.type,
+		text: message?.text ?? message?.summary
+	}));
 
 	return (entry?.common || [])
 		.concat(entry?.delay || [])
@@ -193,7 +196,7 @@ const mapToRoute = (entry: any): RouteData => ({
 	earlierRef: entry?.earlierRef,
 	laterRef: entry?.laterRef,
 	journeys: entry?.journeys?.map((rawJourney: any) => ({
-		legs: rawJourney?.legs?.map((rawLeg: any) => mapConnection(rawLeg, "both", "dbweb", true)),
+		legs: rawJourney?.legs?.map((rawLeg: any) => mapConnection(rawLeg, "both", false, true, true)),
 		refreshToken: rawJourney?.refreshToken
 	}))
 });
