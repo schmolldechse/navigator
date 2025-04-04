@@ -28,20 +28,18 @@ const mapConnection = (
 		provenance: !isRIS ? entry?.provenance : undefined,
 		departure: type === "both" || isDeparture ? mapTime(entry, "departure") : undefined,
 		arrival: type === "both" || !isDeparture ? mapTime(entry, "arrival") : undefined,
-		lineInformation: !entry?.walking
-			? {
-					type: mapToProduct(entry?.type ?? entry?.line?.product).value ?? undefined,
-					replacementServiceType: entry?.replacementServiceType ?? undefined,
-					product: entry?.line?.productName ?? undefined,
-					lineName: entry?.lineName ?? entry?.line?.name,
-					additionalLineName: entry?.additionalLineName,
-					fahrtNr: entry?.line?.fahrtNr ?? undefined,
-					operator: {
-						id: entry?.line?.operator?.id ?? undefined,
-						name: entry?.line?.operator?.name ?? undefined
-					}
-				}
-			: undefined,
+		lineInformation: !entry?.walking ? {
+			type: mapToProduct(entry?.type ?? entry?.line?.product).value ?? undefined,
+			replacementServiceType: entry?.replacementServiceType ?? undefined,
+			product: entry?.line?.productName ?? undefined,
+			lineName: entry?.lineName ?? entry?.line?.name,
+			additionalLineName: entry?.additionalLineName,
+			fahrtNr: entry?.line?.fahrtNr ?? undefined,
+			operator: {
+				id: entry?.line?.operator?.id ?? undefined,
+				name: entry?.line?.operator?.name ?? undefined
+			}
+		} : undefined,
 		viaStops: mapStops(entry.viaStops ?? entry?.nextStopovers ?? entry?.stopovers, parseStopoversInfo) ?? undefined,
 		cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
 		additionalStops: mapStops(entry?.additionalStops) ?? undefined,
@@ -122,7 +120,18 @@ const mapMessages = (entry: any, isRIS: boolean = false): Message[] | [] => {
 	if (!entry) return [];
 
 	if (!isRIS)
-		return entry.map((message: any) => ({
+		return entry.map((message: any) => {
+			let transformed = { ...message };
+
+			/**
+			 * this ensures it matches the types used by RIS
+			 * - "warning" is somehow for cancelled trips. why would you?
+ 			 */
+			if (transformed?.type === "warning") transformed.type = "canceled-trip";
+			else if (transformed?.type === "status") transformed.type = "general-warning";
+
+			return transformed;
+		}).map((message: any) => ({
 			type: message?.type,
 			text: message?.text ?? message?.summary
 		}));
