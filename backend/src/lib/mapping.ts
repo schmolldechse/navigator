@@ -121,10 +121,7 @@ const mapMessages = (entry: any, isIdentifiableAsHAFAS: boolean = false): Messag
 	if (isIdentifiableAsHAFAS) return entry.map((message: any) => {
 		let transformed = { ...message };
 
-		/**
-		 * this ensures it matches the types used by RIS
-		 * - "warning" is somehow for cancelled trips. why would you?
-		 */
+		// this ensures it matches the types used by RIS
 		if (transformed?.type === "warning" || transformed?.type === "status") transformed.type = "general-warning";
 		return transformed;
 	}).map((message: any) => ({
