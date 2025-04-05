@@ -3,8 +3,16 @@
 	import TimetableSearch from "$components/timetable/TimetableSearch.svelte";
 	import RoutePlannerSearch from "$components/route-planner/RoutePlannerSearch.svelte";
 	import { getContext } from "svelte";
+	import type { Snapshot } from "./$types";
 
 	let currentType = getContext<() => string>("currentType");
+
+	export const snapshot: Snapshot<string> = {
+		capture: currentType,
+		restore: (snapshot: string) => {
+			currentType = () => snapshot;
+		}
+	};
 </script>
 
 <MetaTags
