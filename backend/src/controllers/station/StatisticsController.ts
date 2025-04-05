@@ -6,12 +6,33 @@ import { getCachedStation } from "./request.ts";
 import * as fs from "node:fs";
 import path from "node:path";
 import { DateTime } from "luxon";
+import * as os from "node:os";
+import { rimraf } from "rimraf";
 
 @Route("stations")
 @Tags("Stations")
 export class StatisticsController extends Controller {
 	private readonly CHUNK_SIZE: number = 2500;
-	private readonly BASE_PATH: string = "/temp/query-station-stats/";
+	private readonly BASE_PATH: string = path.join(os.tmpdir(), "navigator", "query-station-stats");
+
+	private static cleanupTimers: Map<string, Timer> = new Map();
+
+	constructor() {
+		super();
+
+		const cleanup = () => {
+			console.log("Cleaning up tmp directory...");
+
+			if (fs.existsSync(this.BASE_PATH)) rimraf.sync(this.BASE_PATH);
+			console.log("Deleted tmp directory");
+
+			StatisticsController.cleanupTimers.values().forEach((timer) => clearTimeout(timer));
+			StatisticsController.cleanupTimers.clear();
+		}
+
+		process.on("SIGINT", () => cleanup());
+		process.on("SIGTERM", () => cleanup());
+	}
 
 	@Post("/stats/{evaNumber}")
 	async getStationStatistics(@Path() evaNumber: number): Promise<void> {
@@ -38,7 +59,25 @@ export class StatisticsController extends Controller {
 		}, null, 4));
 
 		console.log(`Completed processing all ${totalCount} connections and saved to ${saveDir}`);
+		this.scheduleDeletion(saveDir);
 	}
+
+	private scheduleDeletion = (dirPath: string): void => {
+		const cleanupTimer = StatisticsController.cleanupTimers.get(dirPath);
+		if (cleanupTimer) clearTimeout(cleanupTimer);
+
+		// 60min
+		const MAX_CACHE_TIME = 60 * 60 * 1000;
+		const timer: Timer = setTimeout(() => {
+			if (!fs.existsSync(dirPath)) return;
+			rimraf.sync(dirPath);
+
+			StatisticsController.cleanupTimers.delete(dirPath);
+			console.log(`Completed deletion of ${dirPath}`);
+		}, MAX_CACHE_TIME);
+
+		StatisticsController.cleanupTimers.set(dirPath, timer);
+	};
 
 	/**
 	 * since a station can have several evaNumbers, we try to access all evaNumbers using the "ril100" identifier
