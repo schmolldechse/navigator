@@ -24,7 +24,10 @@ export class StationController extends Controller {
 	@Get("/{evaNumber}")
 	async getStationByEvaNumber(@Path() evaNumber: number): Promise<Station> {
 		const cachedStation = await getCachedStation(evaNumber);
-		if (cachedStation) return cachedStation;
+		if (cachedStation) {
+			const { _id, lastQueried, queryingEnabled, ...extracted } = cachedStation;
+			return extracted as Station;
+		}
 
 		const stations = await fetchAndCacheStations(String(evaNumber));
 		if (!stations.length) throw new HttpError(400, "Station not found");
@@ -92,11 +95,7 @@ const cacheStations = async (stations: Station[]): Promise<void> => {
 	await collection.bulkWrite(bulkOps);
 };
 
-const getCachedStation = async (evaNumber: number): Promise<Station | null> => {
+const getCachedStation = async (evaNumber: number): Promise<StationDocument | null> => {
 	const collection = await getCollection("stations");
-	const station = (await collection.findOne({ evaNumber })) as StationDocument;
-	if (!station) return null;
-
-	const { _id, lastQueried, queryingEnabled, ...extracted } = station;
-	return extracted as Station;
+	return (await collection.findOne({ evaNumber })) as StationDocument;
 };
