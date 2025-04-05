@@ -5,8 +5,10 @@ interface Time {
 
 	// in sec
 	delay: number;
-	plannedPlatform: string;
-	actualPlatform: string;
+
+	// platform may be null, for example for buses
+	plannedPlatform?: string;
+	actualPlatform?: string;
 }
 
 export type { Time };
