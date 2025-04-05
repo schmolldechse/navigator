@@ -1,8 +1,9 @@
 import { Collection, Db, MongoClient } from "mongodb";
-import type { StationDocument } from "../../db/mongodb/station.schema.ts";
+import type { ConnectionDocument, StationDocument } from "../../db/mongodb/station.schema.ts";
 
-export interface Collections {
+interface Collections {
 	stations: StationDocument;
+	trips: ConnectionDocument;
 }
 
 let cachedDb: Db | null = null;
@@ -21,4 +22,4 @@ const getCollection = async <T extends keyof Collections>(name: T): Promise<Coll
 	return db.collection<Collections[T]>(name);
 };
 
-export { connectToDb, getCollection };
+export { type StationDocument, connectToDb, getCollection };

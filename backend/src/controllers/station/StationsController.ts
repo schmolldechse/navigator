@@ -1,9 +1,9 @@
 import { Controller, Get, Path, Query, Route, Tags } from "tsoa";
-import type { Station } from "../models/station.ts";
-import { mapToProduct, Products } from "../models/products.ts";
-import { getCollection } from "../lib/db/mongo-data-db.ts";
-import { HttpError } from "../lib/errors/HttpError.ts";
-import type { StationDocument } from "../db/mongodb/station.schema.ts";
+import type { Station } from "../../models/station.ts";
+import { mapToProduct, Products } from "../../models/products.ts";
+import { getCollection } from "../../lib/db/mongo-data-db.ts";
+import { HttpError } from "../../lib/errors/HttpError.ts";
+import { getCachedStation } from "./request.ts";
 
 @Route("stations")
 @Tags("Stations")
@@ -93,9 +93,4 @@ const cacheStations = async (stations: Station[]): Promise<void> => {
 	}));
 
 	await collection.bulkWrite(bulkOps);
-};
-
-const getCachedStation = async (evaNumber: number): Promise<StationDocument | null> => {
-	const collection = await getCollection("stations");
-	return (await collection.findOne({ evaNumber })) as StationDocument;
 };
