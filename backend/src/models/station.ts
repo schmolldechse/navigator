@@ -1,4 +1,3 @@
-import type { Product } from "./products.ts";
 import type { Time } from "./time.ts";
 import type { Message } from "./message.ts";
 
@@ -15,7 +14,11 @@ interface Station {
 		longitude: number;
 	};
 	ril100?: string[];
-	products?: Product[];
+
+	/**
+	 * contains a list of the values of products {@link Product} of the station
+	 */
+	products?: string[];
 }
 
 interface Stop extends Station {
