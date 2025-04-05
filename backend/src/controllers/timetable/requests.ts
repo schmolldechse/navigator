@@ -47,11 +47,8 @@ export const retrieveConnections = async (query: Query): Promise<Connection[]> =
 		const tripId = connectionRaw?.tripId;
 		if (!tripId || map.has(tripId)) return;
 
-		const connection: Connection = mapConnection(connectionRaw, query.type, query.profile!.toString() as "db" | "dbweb");
+		const connection: Connection = mapConnection(connectionRaw, query.type, false, true);
 		if (!connection) return;
-
-		// remove first stopover as it is the origin
-		connection?.viaStops?.shift();
 
 		map.set(tripId, connection);
 	});
@@ -95,6 +92,6 @@ export const retrieveBahnhofJourneys = async (query: Query): Promise<Journey[]> 
 		.map((journeyRaw) => ({
 			connections: journeyRaw
 				.filter((connectionRaw) => connectionRaw?.journeyID)
-				.map((connectionRaw) => mapConnection(connectionRaw, query.type, "db"))
+				.map((connectionRaw) => mapConnection(connectionRaw, query.type, true))
 		}));
 };

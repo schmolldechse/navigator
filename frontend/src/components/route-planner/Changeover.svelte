@@ -83,7 +83,7 @@
 			<Walking height="35px" width="35px" class="stroke-accent" />
 			Changeover
 		</span>
-		{#if duration() < 0}
+		{#if duration() <= 0}
 			<div class="text-background bg-white p-1">
 				<div class="flex flex-row gap-x-2">
 					<CancelledTrip />

@@ -29,9 +29,9 @@ interface Connection {
 			name?: string;
 		};
 	};
-	cancelledStopsAfterActualDestination?: Stop[];
-	additionalStops?: Stop[];
-	cancelledStops?: Stop[];
+	// cancelledStopsAfterActualDestination?: Stop[];
+	// additionalStops?: Stop[];
+	// cancelledStops?: Stop[];
 	messages?: Message[];
 	cancelled?: boolean;
 	providesVehicleSequence?: boolean;

@@ -1,6 +1,6 @@
 import { Controller, Get, Path, Query, Route, Tags } from "tsoa";
 import type { Station } from "../models/station.ts";
-import { mapToProduct, type Product, Products } from "../models/products.ts";
+import { mapToProduct, Products } from "../models/products.ts";
 import { getCollection } from "../lib/db/mongo-data-db.ts";
 import { HttpError } from "../lib/errors/HttpError.ts";
 import type { StationDocument } from "../db/mongodb/station.schema.ts";
@@ -24,7 +24,10 @@ export class StationController extends Controller {
 	@Get("/{evaNumber}")
 	async getStationByEvaNumber(@Path() evaNumber: number): Promise<Station> {
 		const cachedStation = await getCachedStation(evaNumber);
-		if (cachedStation) return cachedStation;
+		if (cachedStation) {
+			const { _id, lastQueried, queryingEnabled, ...extracted } = cachedStation;
+			return extracted as Station;
+		}
 
 		const stations = await fetchAndCacheStations(String(evaNumber));
 		if (!stations.length) throw new HttpError(400, "Station not found");
@@ -41,39 +44,33 @@ const fetchAndCacheStations = async (searchTerm: string): Promise<Station[]> => 
 };
 
 const fetchStation = async (searchTerm: string): Promise<Station[]> => {
-	const request = await fetch("https://app.vendo.noncd.db.de/mob/location/search", {
-		method: "POST",
-		headers: {
-			Accept: "application/x.db.vendo.mob.location.v3+json",
-			"Content-Type": "application/x.db.vendo.mob.location.v3+json",
-			"X-Correlation-ID": crypto.randomUUID() + "_" + crypto.randomUUID()
-		},
-		body: JSON.stringify({ locationTypes: ["ALL"], searchTerm })
+	const params = new URLSearchParams({
+		query: searchTerm,
+		limit: "10"
 	});
-
-	if (!request.ok) {
-		throw new Error(`Failed to fetch stations for ${searchTerm}`);
-	}
+	const request = await fetch(`https://vendo-prof-db.voldechse.wtf/locations?${params.toString()}`, { method: "GET" });
+	if (!request.ok) throw new Error(`Failed to fetch stations for ${searchTerm}`);
 
 	const response = await request.json();
-	if (!response || !Array.isArray(response)) {
+	if (!response || !Array.isArray(response))
 		throw new Error(`Response was expected to be an array, but got ${typeof response}`);
-	}
 
 	return response
-		.filter((data: any) => /^\d+$/.test(data?.evaNr))
+		.filter((data: any) => /^\d+$/.test(data?.id))
 		.map((data: any) => ({
 			name: data?.name,
-			locationId: data?.locationId,
-			evaNumber: Number(data?.evaNr),
+			evaNumber: Number(data?.id),
 			coordinates: {
-				latitude: data?.coordinates?.latitude,
-				longitude: data?.coordinates?.longitude
+				latitude: data?.location?.latitude,
+				longitude: data?.location?.longitude
 			},
-			products: (data?.products || [])
-				.map(mapToProduct)
-				.filter((product: Product) => product != Products.UNKNOWN)
-				.map((product: Product) => product.value)
+			// either "ril100Ids" is included directly in the object, or it is, for whatever reason, contained in a nested "station" object
+			ril100: (data?.ril100Ids || data?.station?.ril100Ids || []).map((ril100Id: string) => ril100Id),
+			products: Object.entries(data?.products || [])
+				.filter(([key, value]) => value === true)
+				.map(([key]) => mapToProduct(key))
+				.filter((product) => product.value !== Products.UNKNOWN.value)
+				.map((product) => product.value)
 		}));
 };
 
@@ -83,7 +80,14 @@ const cacheStations = async (stations: Station[]): Promise<void> => {
 	const bulkOps = stations.map((station) => ({
 		updateOne: {
 			filter: { evaNumber: station.evaNumber },
-			update: { $setOnInsert: station },
+			update: {
+				$set: {
+					name: station.name,
+					coordinates: station.coordinates,
+					ril100: station.ril100,
+					products: station.products
+				}
+			},
 			upsert: true
 		}
 	}));
@@ -91,11 +95,7 @@ const cacheStations = async (stations: Station[]): Promise<void> => {
 	await collection.bulkWrite(bulkOps);
 };
 
-const getCachedStation = async (evaNumber: number): Promise<Station | null> => {
+const getCachedStation = async (evaNumber: number): Promise<StationDocument | null> => {
 	const collection = await getCollection("stations");
-	const station = (await collection.findOne({ evaNumber })) as StationDocument;
-	if (!station) return null;
-
-	const { _id, lastQueried, queryingEnabled, ...extracted } = station;
-	return extracted as Station;
+	return (await collection.findOne({ evaNumber })) as StationDocument;
 };

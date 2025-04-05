@@ -11,6 +11,7 @@
 	import LegInfo from "$components/route-planner/LegInfo.svelte";
 	import { onMount } from "svelte";
 	import Changeover from "$components/route-planner/Changeover.svelte";
+	import Walking from "$components/ui/icons/Walking.svelte";
 
 	let { route }: { route: Route } = $props();
 	let detailsOpen = $state<boolean>(false);
@@ -64,25 +65,34 @@
 
 <div class="border-primary-dark/75 space-y-2 rounded-lg border-2 px-4 py-2 text-2xl font-medium">
 	<!-- Time Info -->
-	<div class="flex flex-row gap-x-2">
+	<div class="flex flex-row items-baseline gap-x-2">
 		<div class="flex flex-row">
-			<TimeInformation time={route?.legs[0]?.departure} direction="col" delayClass="text-lg" />
-			<Minus class="mx-2 mt-[0.25rem]" />
-			<TimeInformation time={route?.legs[route?.legs?.length - 1]?.arrival} direction="col" delayClass="text-lg" />
+			<TimeInformation time={route?.legs[0]?.departure} direction="col" class="text-xl" delayClass="text-sm md:text-lg" />
+			<Minus class="mx-2 mt-[0.15rem]" />
+			<TimeInformation
+				time={route?.legs[route?.legs?.length - 1]?.arrival}
+				direction="col"
+				class="text-xl"
+				delayClass="text-sm md:text-lg"
+			/>
 		</div>
 
 		<span class="text-primary/90">|</span>
-		<span class="mt-[0.35rem] text-lg">
+		<span class="mt-[0.35rem] text-sm md:text-lg">
 			{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}
 		</span>
 
-		<span class="text-primary/90">|</span>
-		<span class="mt-[0.35rem] text-lg">
-			{route?.legs?.filter((leg) => leg?.walking).length} Changeover{route?.legs?.filter((leg) => leg?.walking).length ===
-			1
-				? ""
-				: "s"}
-		</span>
+		{#if route?.legs?.filter((leg) => leg?.walking).length > 0}
+			<span class="text-primary/90">|</span>
+			<div class="mt-[0.35rem] flex items-baseline text-sm md:text-lg">
+				<span>{route?.legs?.filter((leg) => leg?.walking).length}</span>
+
+				<div class="flex items-center">
+					<span>x</span>
+					<Walking height="25px" width="25px" class="stroke-accent" />
+				</div>
+			</div>
+		{/if}
 	</div>
 
 	<!-- Legs -->
