@@ -8,10 +8,11 @@ import calculateDuration from "../../lib/time.ts";
 const analyzeStation = async (saveDir: string, evaNumbers: number[]): Promise<StopAnalytics> => {
 	if (!fs.existsSync(saveDir)) throw new Error(`Statistics for ${evaNumbers} do not exist`);
 
-	const files = fs.readdirSync(saveDir)
-		.filter(file => file.endsWith(".json"))
-		.filter(file => file !== "manifest.json")
-		.map(file => path.join(saveDir, file));
+	const files = fs
+		.readdirSync(saveDir)
+		.filter((file) => file.endsWith(".json"))
+		.filter((file) => file !== "manifest.json")
+		.map((file) => path.join(saveDir, file));
 	console.log(`Found ${files.length} JSON files to analyze in ${saveDir}`);
 
 	const filePromises = files.map(async (filePath) => {
@@ -20,40 +21,49 @@ const analyzeStation = async (saveDir: string, evaNumbers: number[]): Promise<St
 	});
 	const results: StopAnalytics[] = await Promise.all(filePromises);
 
-	const mergedProducts: Record<string, number> = { };
-	results.forEach((result) => Object.entries(result.products).forEach(([product, count]) => mergedProducts[product] = (mergedProducts[product] ?? 0) + count));
+	const mergedProducts: Record<string, number> = {};
+	results.forEach((result) =>
+		Object.entries(result.products).forEach(
+			([product, count]) => (mergedProducts[product] = (mergedProducts[product] ?? 0) + count)
+		)
+	);
 
 	const totalArrivals = results.reduce((sum, item) => sum + item.arrival.total, 0);
 	const totalDepartures = results.reduce((sum, item) => sum + item.departure.total, 0);
 
-	return new Promise((resolve, reject) => resolve({
-		relatedEvaNumbers: evaNumbers,
-		parsingSucceeded: results.reduce((sum, item) => sum + item.parsingSucceeded, 0),
-		parsingFailed: results.reduce((sum, item) => sum + item.parsingFailed, 0),
-		products: mergedProducts,
-		arrival: {
-			total: totalArrivals,
-			averageDelay: Math.round((results.reduce((sum, item) => sum + item.arrival.averageDelay, 0) / totalArrivals) * 100) / 100,
-			minimumDelay: Math.min(...results.flatMap(item => item.arrival.minimumDelay)),
-			maximumDelay: Math.max(...results.flatMap(item => item.arrival.maximumDelay)),
-			totalTooEarly: results.reduce((sum, item) => sum + item.arrival.totalTooEarly, 0),
-			totalPunctual: results.reduce((sum, item) => sum + item.arrival.totalPunctual, 0),
-			totalDelayed: results.reduce((sum, item) => sum + item.arrival.totalDelayed, 0),
-			totalPlatformChanges: results.reduce((sum, item) => sum + item.arrival.totalPlatformChanges, 0)
-		},
-		departure: {
-			total: totalDepartures,
-			averageDelay: Math.round((results.reduce((sum, item) => sum + item.departure.averageDelay, 0) / totalDepartures) * 100) / 100,
-			minimumDelay: Math.min(...results.flatMap(item => item.departure.minimumDelay)),
-			maximumDelay: Math.max(...results.flatMap(item => item.departure.maximumDelay)),
-			totalTooEarly: results.reduce((sum, item) => sum + item.departure.totalTooEarly, 0),
-			totalPunctual: results.reduce((sum, item) => sum + item.departure.totalPunctual, 0),
-			totalDelayed: results.reduce((sum, item) => sum + item.departure.totalDelayed, 0),
-			totalPlatformChanges: results.reduce((sum, item) => sum + item.departure.totalPlatformChanges, 0)
-		},
-		cancellations: results.reduce((sum, item) => sum + item.cancellations, 0)
-	}));
-}
+	return new Promise((resolve, reject) =>
+		resolve({
+			relatedEvaNumbers: evaNumbers,
+			parsingSucceeded: results.reduce((sum, item) => sum + item.parsingSucceeded, 0),
+			parsingFailed: results.reduce((sum, item) => sum + item.parsingFailed, 0),
+			products: mergedProducts,
+			arrival: {
+				total: totalArrivals,
+				averageDelay:
+					Math.round((results.reduce((sum, item) => sum + item.arrival.averageDelay, 0) / totalArrivals) * 100) / 100,
+				minimumDelay: Math.min(...results.flatMap((item) => item.arrival.minimumDelay)),
+				maximumDelay: Math.max(...results.flatMap((item) => item.arrival.maximumDelay)),
+				totalTooEarly: results.reduce((sum, item) => sum + item.arrival.totalTooEarly, 0),
+				totalPunctual: results.reduce((sum, item) => sum + item.arrival.totalPunctual, 0),
+				totalDelayed: results.reduce((sum, item) => sum + item.arrival.totalDelayed, 0),
+				totalPlatformChanges: results.reduce((sum, item) => sum + item.arrival.totalPlatformChanges, 0)
+			},
+			departure: {
+				total: totalDepartures,
+				averageDelay:
+					Math.round((results.reduce((sum, item) => sum + item.departure.averageDelay, 0) / totalDepartures) * 100) /
+					100,
+				minimumDelay: Math.min(...results.flatMap((item) => item.departure.minimumDelay)),
+				maximumDelay: Math.max(...results.flatMap((item) => item.departure.maximumDelay)),
+				totalTooEarly: results.reduce((sum, item) => sum + item.departure.totalTooEarly, 0),
+				totalPunctual: results.reduce((sum, item) => sum + item.departure.totalPunctual, 0),
+				totalDelayed: results.reduce((sum, item) => sum + item.departure.totalDelayed, 0),
+				totalPlatformChanges: results.reduce((sum, item) => sum + item.departure.totalPlatformChanges, 0)
+			},
+			cancellations: results.reduce((sum, item) => sum + item.cancellations, 0)
+		})
+	);
+};
 
 const analyzeConnections = async (relevantEvaNumbers: number[], connections: Connection[]): Promise<StopAnalytics> => {
 	const analytics: StopAnalytics = {
@@ -82,13 +92,15 @@ const analyzeConnections = async (relevantEvaNumbers: number[], connections: Con
 			totalPlatformChanges: 0
 		},
 		cancellations: 0
-	}
+	};
 
 	connections.forEach((connection: Connection) => {
 		const product = connection?.lineInformation?.type || "UNKNOWN";
 		analytics.products[product] = (analytics.products[product] ?? 0) + 1;
 
-		const relevantStop = connection?.viaStops?.find(stop => stop?.evaNumber && relevantEvaNumbers.includes(stop?.evaNumber));
+		const relevantStop = connection?.viaStops?.find(
+			(stop) => stop?.evaNumber && relevantEvaNumbers.includes(stop?.evaNumber)
+		);
 		if (!relevantStop) {
 			analytics.parsingFailed++;
 			return;
@@ -100,7 +112,11 @@ const analyzeConnections = async (relevantEvaNumbers: number[], connections: Con
 			return;
 		}
 
-		if (relevantStop?.arrival && (DateTime.fromISO(relevantStop?.arrival?.plannedTime).isValid || DateTime.fromISO(relevantStop?.arrival?.actualTime).isValid)) {
+		if (
+			relevantStop?.arrival &&
+			(DateTime.fromISO(relevantStop?.arrival?.plannedTime).isValid ||
+				DateTime.fromISO(relevantStop?.arrival?.actualTime).isValid)
+		) {
 			const delay = calculateDuration(
 				DateTime.fromISO(relevantStop?.arrival?.actualTime ?? relevantStop?.arrival?.plannedTime),
 				DateTime.fromISO(relevantStop?.arrival?.plannedTime),
@@ -114,12 +130,17 @@ const analyzeConnections = async (relevantEvaNumbers: number[], connections: Con
 			else if (delay <= 60) analytics.arrival.totalPunctual++;
 			else analytics.arrival.totalDelayed++;
 
-			if (relevantStop?.arrival?.plannedPlatform !== relevantStop?.arrival?.actualPlatform) analytics.arrival.totalPlatformChanges++;
+			if (relevantStop?.arrival?.plannedPlatform !== relevantStop?.arrival?.actualPlatform)
+				analytics.arrival.totalPlatformChanges++;
 
 			analytics.arrival.total++;
 		}
 
-		if (relevantStop?.departure && (DateTime.fromISO(relevantStop?.departure?.plannedTime).isValid || DateTime.fromISO(relevantStop?.departure?.actualTime).isValid)) {
+		if (
+			relevantStop?.departure &&
+			(DateTime.fromISO(relevantStop?.departure?.plannedTime).isValid ||
+				DateTime.fromISO(relevantStop?.departure?.actualTime).isValid)
+		) {
 			const plannedDeparture = DateTime.fromISO(relevantStop?.departure?.plannedTime);
 			const actualDeparture = DateTime.fromISO(relevantStop?.departure?.actualTime);
 			if (!plannedDeparture.isValid || !actualDeparture.isValid) return;
@@ -137,7 +158,8 @@ const analyzeConnections = async (relevantEvaNumbers: number[], connections: Con
 			else if (delay <= 60) analytics.departure.totalPunctual++;
 			else analytics.departure.totalDelayed++;
 
-			if (relevantStop?.departure?.plannedPlatform !== relevantStop?.departure?.actualPlatform) analytics.departure.totalPlatformChanges++;
+			if (relevantStop?.departure?.plannedPlatform !== relevantStop?.departure?.actualPlatform)
+				analytics.departure.totalPlatformChanges++;
 
 			analytics.departure.total++;
 		}
@@ -145,6 +167,6 @@ const analyzeConnections = async (relevantEvaNumbers: number[], connections: Con
 		analytics.parsingSucceeded++;
 	});
 	return analytics;
-}
+};
 
 export { analyzeStation };

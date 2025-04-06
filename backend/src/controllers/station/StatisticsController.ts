@@ -94,7 +94,9 @@ export class StatisticsController extends Controller {
 		fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 4));
 
 		analyzed.foundByQuery = totalCount;
-		analyzed.executionTime = Math.round(manifest.processFinishedAt?.diff(manifest.processStartedAt).as("milliseconds") ?? 0);
+		analyzed.executionTime = Math.round(
+			manifest.processFinishedAt?.diff(manifest.processStartedAt).as("milliseconds") ?? 0
+		);
 		return analyzed;
 	}
 
@@ -122,9 +124,9 @@ export class StatisticsController extends Controller {
 	private getRelatedEvaNumbers = async (station: StationDocument): Promise<number[]> => {
 		if ((station?.ril100 || []).length > 0) {
 			const collection = await getCollection("stations");
-			return (await collection.find({ ril100: { $in: station.ril100 } })
-				.toArray())
-				.map((station: StationDocument) => station?.evaNumber);
+			return (await collection.find({ ril100: { $in: station.ril100 } }).toArray()).map(
+				(station: StationDocument) => station?.evaNumber
+			);
 		}
 		return [station?.evaNumber];
 	};
@@ -133,7 +135,13 @@ export class StatisticsController extends Controller {
 		const totalChunks = Math.ceil(totalCount / this.CHUNK_SIZE);
 		let processedSoFar = 0;
 
-		const processChunk = async (evaNumbers: number[], chunkIndex: number, skip: number, saveDir: string, total: number): Promise<number> => {
+		const processChunk = async (
+			evaNumbers: number[],
+			chunkIndex: number,
+			skip: number,
+			saveDir: string,
+			total: number
+		): Promise<number> => {
 			const result = await acquireTrips(evaNumbers, this.CHUNK_SIZE, skip, total);
 
 			const chunkFile = path.join(saveDir, `chunk-${chunkIndex}.json`);
@@ -149,26 +157,29 @@ export class StatisticsController extends Controller {
 			processedSoFar += count;
 
 			console.log(`Saved chunk ${index} with ${count} connections`);
-			console.log(`Processed ${processedSoFar}/${totalCount} connections (${(processedSoFar / totalCount * 100).toFixed(2)}%)`);
+			console.log(
+				`Processed ${processedSoFar}/${totalCount} connections (${((processedSoFar / totalCount) * 100).toFixed(2)}%)`
+			);
 		}
 	};
 }
 
-const acquireTrips = async (evaNumbers: number[], limit: number = 2500, skip: number = 0, providedTotalCount?: number): Promise<{
-	connections: ConnectionDocument[],
-	hasMore: boolean,
-	total: number
+const acquireTrips = async (
+	evaNumbers: number[],
+	limit: number = 2500,
+	skip: number = 0,
+	providedTotalCount?: number
+): Promise<{
+	connections: ConnectionDocument[];
+	hasMore: boolean;
+	total: number;
 }> => {
 	const collection = await getCollection("trips");
 
 	const query = { "viaStops.evaNumber": { $in: evaNumbers } };
-	const total = providedTotalCount || await collection.countDocuments(query);
+	const total = providedTotalCount || (await collection.countDocuments(query));
 
-	const connections = await collection
-		.find(query)
-		.skip(skip)
-		.limit(limit)
-		.toArray() as ConnectionDocument[];
+	const connections = (await collection.find(query).skip(skip).limit(limit).toArray()) as ConnectionDocument[];
 
 	const hasMore = skip + connections.length < total;
 	return { connections, hasMore, total };
