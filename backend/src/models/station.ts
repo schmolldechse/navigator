@@ -32,9 +32,50 @@ interface Stop extends Station {
 	messages?: Message[];
 }
 
+interface StopAnalytics {
+	relatedEvaNumbers: number[];
+	// total number of connections found in the database
+	foundByQuery?: number;
+	// total number of connections found with filter being applied
+	foundByFilter?: number;
+	parsingSucceeded: number;
+	parsingFailed: number;
+	// how often a product has occurred
+	products: Record<string, number>;
+	arrival: {
+		total: number;
+
+		// in seconds
+		averageDelay: number;
+		minimumDelay: number;
+		maximumDelay: number;
+
+		totalTooEarly: number; // <0 sec
+		totalPunctual: number; // 0 - 60 sec
+		totalDelayed: number; // >60 sec
+
+		totalPlatformChanges: number;
+	};
+	departure: {
+		total: number;
+
+		// in seconds
+		averageDelay: number;
+		minimumDelay: number;
+		maximumDelay: number;
+
+		totalTooEarly: number; // <0 sec
+		totalPunctual: number; // 0 - 60 sec
+		totalDelayed: number; // >60 sec
+
+		totalPlatformChanges: number;
+	};
+	cancellations: number;
+}
+
 interface NamePart {
 	type: string;
 	value: string;
 }
 
-export type { Station, Stop, NamePart };
+export type { Station, Stop, StopAnalytics, NamePart };

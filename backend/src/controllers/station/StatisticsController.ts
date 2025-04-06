@@ -7,6 +7,8 @@ import * as fs from "node:fs";
 import path from "node:path";
 import { DateTime } from "luxon";
 import * as os from "node:os";
+import { analyzeStation } from "./analytics.ts";
+import type { StopAnalytics } from "../../models/station.ts";
 
 @Route("stations")
 @Tags("Stations")
@@ -34,7 +36,7 @@ export class StatisticsController extends Controller {
 	}
 
 	@Post("/stats/{evaNumber}")
-	async getStationStatistics(@Path() evaNumber: number): Promise<void> {
+	async getStationStatistics(@Path() evaNumber: number): Promise<StopAnalytics> {
 		const cachedStation = await getCachedStation(evaNumber);
 		if (!cachedStation) throw new HttpError(400, "Station not found");
 
@@ -59,6 +61,8 @@ export class StatisticsController extends Controller {
 
 		console.log(`Completed processing all ${totalCount} connections and saved to ${saveDir}`);
 		this.scheduleDeletion(saveDir);
+
+		return (await analyzeStation(saveDir, evaNumbers));
 	}
 
 	private scheduleDeletion = (dirPath: string): void => {
