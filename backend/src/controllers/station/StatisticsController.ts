@@ -7,7 +7,6 @@ import * as fs from "node:fs";
 import path from "node:path";
 import { DateTime } from "luxon";
 import * as os from "node:os";
-import { rimraf } from "rimraf";
 
 @Route("stations")
 @Tags("Stations")
@@ -23,7 +22,7 @@ export class StatisticsController extends Controller {
 		const cleanup = () => {
 			console.log("Cleaning up tmp directory...");
 
-			if (fs.existsSync(this.BASE_PATH)) rimraf.sync(this.BASE_PATH);
+			if (fs.existsSync(this.BASE_PATH)) fs.rmSync(this.BASE_PATH, { recursive: true });
 			console.log("Deleted tmp directory");
 
 			StatisticsController.cleanupTimers.values().forEach((timer) => clearTimeout(timer));
@@ -70,7 +69,7 @@ export class StatisticsController extends Controller {
 		const MAX_CACHE_TIME = 60 * 60 * 1000;
 		const timer: Timer = setTimeout(() => {
 			if (!fs.existsSync(dirPath)) return;
-			rimraf.sync(dirPath);
+			fs.rmSync(dirPath, { recursive: true });
 
 			StatisticsController.cleanupTimers.delete(dirPath);
 			console.log(`Completed deletion of ${dirPath}`);
