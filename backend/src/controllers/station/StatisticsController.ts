@@ -10,6 +10,14 @@ import * as os from "node:os";
 import { analyzeStation } from "./analytics.ts";
 import type { StopAnalytics } from "../../models/station.ts";
 
+interface StatisticManifest {
+	relatedEvaNumbers: number[];
+	finished: boolean;
+	totalCount?: number;
+	processStartedAt: DateTime;
+	processFinishedAt?: DateTime;
+}
+
 @Route("stations")
 @Tags("Stations")
 export class StatisticsController extends Controller {
@@ -29,7 +37,7 @@ export class StatisticsController extends Controller {
 
 			StatisticsController.cleanupTimers.values().forEach((timer) => clearTimeout(timer));
 			StatisticsController.cleanupTimers.clear();
-		}
+		};
 
 		process.on("SIGINT", () => cleanup());
 		process.on("SIGTERM", () => cleanup());
@@ -44,7 +52,27 @@ export class StatisticsController extends Controller {
 		if (evaNumbers.length === 0) throw new HttpError(400, "Station not found");
 
 		const saveDir = path.join(this.BASE_PATH, evaNumbers.join("-"));
-		if (!fs.existsSync(saveDir)) fs.mkdirSync(saveDir, { recursive: true });
+		const manifestPath = path.join(saveDir, "manifest.json");
+		if (fs.existsSync(saveDir)) {
+			const manifest = JSON.parse(fs.readFileSync(manifestPath, { encoding: "utf8" })) as StatisticManifest;
+			if (!manifest.finished) throw new HttpError(202, "Statistics are still being processed");
+
+			const startedAt = DateTime.now();
+
+			const analytics = await analyzeStation(saveDir, evaNumbers);
+			analytics.foundByQuery = manifest.totalCount;
+			analytics.executionTime = Math.round(DateTime.now().diff(startedAt).as("milliseconds") ?? 0);
+			return analytics;
+		}
+
+		let manifest: StatisticManifest = {
+			relatedEvaNumbers: evaNumbers,
+			finished: false,
+			processStartedAt: DateTime.now()
+		};
+
+		fs.mkdirSync(saveDir, { recursive: true });
+		fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 4));
 
 		const tripsCollection = await getCollection("trips");
 		const query = { "viaStops.evaNumber": { $in: evaNumbers } };
@@ -52,17 +80,22 @@ export class StatisticsController extends Controller {
 
 		await this.startProcess(evaNumbers, totalCount, saveDir);
 
-		const manifestPath = path.join(saveDir, "manifest.json");
-		fs.writeFileSync(manifestPath, JSON.stringify({
-			relatedEvaNumbers: evaNumbers,
-			totalCount: totalCount,
-			timestamp: DateTime.now()
-		}, null, 4));
-
 		console.log(`Completed processing all ${totalCount} connections and saved to ${saveDir}`);
 		this.scheduleDeletion(saveDir);
 
-		return (await analyzeStation(saveDir, evaNumbers));
+		const analyzed = await analyzeStation(saveDir, evaNumbers);
+
+		manifest = {
+			...manifest,
+			finished: true,
+			processFinishedAt: DateTime.now(),
+			totalCount
+		};
+		fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 4));
+
+		analyzed.foundByQuery = totalCount;
+		analyzed.executionTime = Math.round(manifest.processFinishedAt?.diff(manifest.processStartedAt).as("milliseconds") ?? 0);
+		return analyzed;
 	}
 
 	private scheduleDeletion = (dirPath: string): void => {

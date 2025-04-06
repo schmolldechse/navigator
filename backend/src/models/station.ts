@@ -33,6 +33,9 @@ interface Stop extends Station {
 }
 
 interface StopAnalytics {
+	// how long the analysis took in ms
+	executionTime?: number;
+
 	relatedEvaNumbers: number[];
 	// total number of connections found in the database
 	foundByQuery?: number;
