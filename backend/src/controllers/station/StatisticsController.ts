@@ -1,4 +1,4 @@
-import { Controller, Path, Post, Route, Tags } from "tsoa";
+import { Body, Controller, Path, Post, Route, Tags } from "tsoa";
 import { HttpError } from "../../lib/errors/HttpError.ts";
 import { getCollection, type StationDocument } from "../../lib/db/mongo-data-db.ts";
 import type { ConnectionDocument } from "../../db/mongodb/station.schema.ts";
@@ -24,6 +24,9 @@ export class StatisticsController extends Controller {
 	private readonly CHUNK_SIZE: number = 2500;
 	private readonly BASE_PATH: string = path.join(os.tmpdir(), "navigator", "query-station-stats");
 
+	// timetable change
+	private readonly START_DATE: DateTime = DateTime.fromObject({ day: 17, month: 12, year: 2024 }).startOf("day");
+
 	private static cleanupTimers: Map<string, Timer> = new Map();
 
 	constructor() {
@@ -44,7 +47,20 @@ export class StatisticsController extends Controller {
 	}
 
 	@Post("/stats/{evaNumber}")
-	async getStationStatistics(@Path() evaNumber: number): Promise<StopAnalytics> {
+	async getStationStatistics(@Path() evaNumber: number, @Body() body: {
+		/**
+		 * @format date
+		 */
+		startDate?: string,
+		/**
+		 * @format date
+		 */
+		endDate?: string
+	}): Promise<StopAnalytics> {
+		const startDate: DateTime = body?.startDate ? DateTime.fromISO(body.startDate).startOf("day") : this.START_DATE;
+		const endDate: DateTime = body?.endDate ? DateTime.fromISO(body.endDate).endOf("day") : DateTime.now().endOf("day");
+		if (startDate > endDate) throw new HttpError(400, "Invalid date range");
+
 		const cachedStation = await getCachedStation(evaNumber);
 		if (!cachedStation) throw new HttpError(400, "Station not found");
 
