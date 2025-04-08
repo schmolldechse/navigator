@@ -4,8 +4,13 @@ import type { Connection } from "../../models/connection.ts";
 import type { StopAnalytics } from "../../models/station.ts";
 import { DateTime } from "luxon";
 import calculateDuration from "../../lib/time.ts";
+import type { ConnectionDocument } from "../../db/mongodb/station.schema.ts";
 
-const analyzeStation = async (saveDir: string, evaNumbers: number[]): Promise<StopAnalytics> => {
+const analyzeStation = async (
+	saveDir: string,
+	evaNumbers: number[],
+	options: { startDate: DateTime; endDate: DateTime }
+): Promise<StopAnalytics> => {
 	if (!fs.existsSync(saveDir)) throw new Error(`Statistics for ${evaNumbers} do not exist`);
 
 	const files = fs
@@ -17,7 +22,7 @@ const analyzeStation = async (saveDir: string, evaNumbers: number[]): Promise<St
 
 	const filePromises = files.map(async (filePath) => {
 		const content = fs.readFileSync(filePath, { encoding: "utf8" });
-		return analyzeConnections(evaNumbers, JSON.parse(content) as Connection[]);
+		return analyzeConnections(evaNumbers, JSON.parse(content) as Connection[], options);
 	});
 	const results: StopAnalytics[] = await Promise.all(filePromises);
 
@@ -65,7 +70,11 @@ const analyzeStation = async (saveDir: string, evaNumbers: number[]): Promise<St
 	);
 };
 
-const analyzeConnections = async (relevantEvaNumbers: number[], connections: Connection[]): Promise<StopAnalytics> => {
+const analyzeConnections = async (
+	relevantEvaNumbers: number[],
+	connections: ConnectionDocument[],
+	options: { startDate: DateTime; endDate: DateTime }
+): Promise<StopAnalytics> => {
 	const analytics: StopAnalytics = {
 		products: {},
 		relatedEvaNumbers: relevantEvaNumbers,
@@ -94,7 +103,15 @@ const analyzeConnections = async (relevantEvaNumbers: number[], connections: Con
 		cancellations: 0
 	};
 
-	connections.forEach((connection: Connection) => {
+	const isInBetween = (check: DateTime, options: { startDate: DateTime; endDate: DateTime }): boolean => {
+		if (!check.isValid) return false;
+		return options.startDate <= check && check <= options.endDate;
+	};
+
+	connections.forEach((connection: ConnectionDocument) => {
+		const date = DateTime.fromFormat(connection?._id?.toString().split("-")[0] ?? "", "yyyyMMdd");
+		if (!isInBetween(date, options)) return;
+
 		const product = connection?.lineInformation?.type || "UNKNOWN";
 		analytics.products[product] = (analytics.products[product] ?? 0) + 1;
 

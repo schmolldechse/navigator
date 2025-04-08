@@ -47,19 +47,23 @@ export class StatisticsController extends Controller {
 	}
 
 	@Post("/stats/{evaNumber}")
-	async getStationStatistics(@Path() evaNumber: number, @Body() body: {
-		/**
-		 * @format date
-		 */
-		startDate?: string,
-		/**
-		 * @format date
-		 */
-		endDate?: string
-	}): Promise<StopAnalytics> {
+	async getStationStatistics(
+		@Path() evaNumber: number,
+		@Body()
+		body: {
+			/**
+			 * @format date
+			 */
+			startDate?: string;
+			/**
+			 * @format date
+			 */
+			endDate?: string;
+		}
+	): Promise<StopAnalytics> {
 		const startDate: DateTime = body?.startDate ? DateTime.fromISO(body.startDate).startOf("day") : this.START_DATE;
 		const endDate: DateTime = body?.endDate ? DateTime.fromISO(body.endDate).endOf("day") : DateTime.now().endOf("day");
-		if (startDate > endDate) throw new HttpError(400, "Invalid date range");
+		if (startDate > endDate) throw new HttpError(400, "Start date can't be after end date");
 
 		const cachedStation = await getCachedStation(evaNumber);
 		if (!cachedStation) throw new HttpError(400, "Station not found");
@@ -75,7 +79,7 @@ export class StatisticsController extends Controller {
 
 			const startedAt = DateTime.now();
 
-			const analytics = await analyzeStation(saveDir, evaNumbers);
+			const analytics = await analyzeStation(saveDir, evaNumbers, { startDate, endDate });
 			analytics.foundByQuery = manifest.totalCount;
 			analytics.executionTime = Math.round(DateTime.now().diff(startedAt).as("milliseconds") ?? 0);
 			return analytics;
@@ -99,7 +103,7 @@ export class StatisticsController extends Controller {
 		console.log(`Completed processing all ${totalCount} connections and saved to ${saveDir}`);
 		this.scheduleDeletion(saveDir);
 
-		const analyzed = await analyzeStation(saveDir, evaNumbers);
+		const analyzed = await analyzeStation(saveDir, evaNumbers, { startDate, endDate });
 
 		manifest = {
 			...manifest,
