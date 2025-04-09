@@ -10,22 +10,18 @@
 	import CircleDot from "lucide-svelte/icons/circle-dot";
 	import ChevronRight from "lucide-svelte/icons/chevron-right";
 
-	/**
-	 * if firstIsWalking is true, arrival & departure are swapped
-	 * this is because it uses the "departure" time from the stop where you start walking, and the "arrival" time at the stop where you stop walking
-	 */
 	let {
 		arrival,
 		departure,
-		firstIsWalking = false,
-		origin
+		firstIsWalking = undefined,
+		lastIsWalking = undefined
 	}: {
 		arrival?: Time;
 		departure?: Time;
-		firstIsWalking?: boolean;
-		origin?: Stop;
+		firstIsWalking?: Stop;
+		lastIsWalking?: Stop;
 	} = $props();
-	if (firstIsWalking && !origin) throw new Error("Origin is required when firstIsWalking is true");
+	if (firstIsWalking && lastIsWalking) throw new Error("firstIsWalking and lastIsWalking cannot be both set");
 
 	const duration = () =>
 		calculateDuration(
@@ -60,8 +56,8 @@
 			></span>
 		</div>
 		<div class="flex basis-4/6 flex-row items-center justify-between">
-			<a class="flex flex-row self-start font-bold" href={`/${origin?.evaNumber}/departures`} target="_blank">
-				{origin?.name}
+			<a class="flex flex-row self-start font-bold" href={`/${firstIsWalking?.evaNumber}/departures`} target="_blank">
+				{firstIsWalking?.name}
 				<ChevronRight color="#ffda0a" class="shrink-0" />
 			</a>
 			<Platform time={departure} class="basis-1/6 self-start text-right" direction="col" />
@@ -94,3 +90,28 @@
 		{/if}
 	</div>
 </div>
+
+{#if lastIsWalking}
+	<!-- Destination -->
+	<div class="flex flex-row text-base">
+		<TimeInformation
+			time={departure}
+			direction="col"
+			class="basis-1/6 items-end self-end text-base"
+			delayClass="text-sm md:text-base"
+		/>
+		<div class="relative flex basis-1/6 justify-center md:max-w-[5%]">
+			<CircleDot class="bg-background absolute z-10 shrink-0 self-start" />
+			<span
+				class="absolute z-0 h-full w-[4px] self-end bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]"
+			></span>
+		</div>
+		<div class="flex basis-4/6 flex-row items-center justify-between self-end">
+			<a class="flex flex-row font-bold self-end" href={`/${lastIsWalking?.evaNumber}/departures`} target="_blank">
+				{lastIsWalking?.name}
+				<ChevronRight color="#ffda0a" class="shrink-0 self-center" />
+			</a>
+			<Platform time={arrival} class="self-end text-right" direction="col" />
+		</div>
+	</div>
+{/if}
