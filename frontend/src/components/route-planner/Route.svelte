@@ -128,33 +128,33 @@
 					{@const lastIsWalking = i === route?.legs.length - 1}
 
 					{#if firstIsWalking}
-						<!-- Here, the arrival & departure times are swapped.
-						Arrival is the time at which you arrive at the stop[i + 1]
-						Departure is the time at which you set off from the stop[i]
+						<!--
+						startWalking is the time, at which you set off from the stop (leg?.departure)
+						stopWalking is the time, at which the next leg starts (route?.legs[i + 1]?.departure)
 						 -->
 						<Changeover
-							arrival={route?.legs[i + 1]?.departure}
-							departure={leg?.departure}
+							startWalking={leg?.departure}
+							stopWalking={route?.legs[i + 1]?.departure}
 							firstIsWalking={leg?.origin}
 						/>
 					{:else if lastIsWalking}
-						<!-- Here, the arrival & departure times are swapped.
-						Arrival is the time at which you arrive at the stop[i + 1]
-						Departure is the time at which you set off from the stop[i]
+						<!--
+						startWalking is the time, at which you set off from the stop (leg?.departure)
+						stopWalking is the time, at which you arrive at the destination (leg?.arrival)
 						 -->
 						<Changeover
-							arrival={leg?.departure}
-							departure={leg?.arrival}
+							startWalking={leg?.departure}
+							stopWalking={leg?.arrival}
 							lastIsWalking={leg?.destination}
 						/>
 					{:else}
 						<!--
-						Arrival is the time at which you arrive at the stop[i + 1]
-						Departure is the time at which you set off from the stop[i]
+						startWalking is the time at which you set off from the stop (route?.legs[i - 1]?.arrival)
+						stopWalking is the time at which you arrive at the stop (route?.legs[i + 1]?.departure)
 						 -->
 						<Changeover
-							arrival={route?.legs[i - 1]?.arrival}
-							departure={route?.legs[i + 1]?.departure}
+							startWalking={route?.legs[i - 1]?.arrival}
+							stopWalking={route?.legs[i + 1]?.departure}
 						/>
 					{/if}
 				{:else}
