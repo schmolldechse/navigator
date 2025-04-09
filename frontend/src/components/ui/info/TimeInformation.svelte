@@ -17,10 +17,10 @@
 		delayClass?: string;
 	} = $props();
 
-	const isDelayed = () =>
-		calculateDuration(DateTime.fromISO(time?.actualTime || time?.plannedTime!), DateTime.fromISO(time?.plannedTime!), [
-			"minutes"
-		])?.minutes ?? 0 >= 1;
+	const isDelayed = () => {
+		const delay = calculateDuration(DateTime.fromISO(time?.actualTime || time?.plannedTime!), DateTime.fromISO(time?.plannedTime!), "seconds").seconds ?? 0;
+		return delay < -60 || delay > 60;
+	};
 	const displayTime = (time: string) => DateTime.fromISO(time).setLocale("de-DE").toLocaleString(DateTime.TIME_24_SIMPLE);
 </script>
 
