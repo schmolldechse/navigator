@@ -123,9 +123,9 @@
 			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 		</div>
 		<div class="flex basis-4/6 flex-row items-center justify-between self-end">
-			<a class="flex flex-row font-bold" href={`/${leg?.destination?.evaNumber}/departures`} target="_blank">
+			<a class="flex flex-row font-bold self-end" href={`/${leg?.destination?.evaNumber}/departures`} target="_blank">
 				{leg?.destination?.name}
-				<ChevronRight color="#ffda0a" class="shrink-0" />
+				<ChevronRight color="#ffda0a" class="shrink-0 self-center" />
 			</a>
 			<Platform time={leg?.arrival} class="self-end text-right" direction="col" />
 		</div>
