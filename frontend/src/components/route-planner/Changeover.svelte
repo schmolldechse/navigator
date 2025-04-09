@@ -101,7 +101,7 @@
 			></span>
 		</div>
 		<div class="flex basis-4/6 flex-row items-center justify-between self-end">
-			<a class="flex flex-row font-bold self-end" href={`/${lastIsWalking?.evaNumber}/departures`} target="_blank">
+			<a class="flex flex-row self-end font-bold" href={`/${lastIsWalking?.evaNumber}/departures`} target="_blank">
 				{lastIsWalking?.name}
 				<ChevronRight color="#ffda0a" class="shrink-0 self-center" />
 			</a>

@@ -17,18 +17,21 @@
 		delayClass?: string;
 	} = $props();
 
-	const isDelayed = () => {
-		const delay = calculateDuration(DateTime.fromISO(time?.actualTime || time?.plannedTime!), DateTime.fromISO(time?.plannedTime!), "seconds").seconds ?? 0;
+	const isDelayed = $derived.by(() => {
+		const delay =
+			calculateDuration(
+				DateTime.fromISO(time?.actualTime || time?.plannedTime!),
+				DateTime.fromISO(time?.plannedTime!),
+				"seconds"
+			).seconds ?? 0;
 		return delay < -60 || delay > 60;
-	};
+	});
 	const displayTime = (time: string) => DateTime.fromISO(time).setLocale("de-DE").toLocaleString(DateTime.TIME_24_SIMPLE);
 </script>
 
 {#if noDoubleSpan}
-	<span
-		class={["w-fit", { "bg-text text-background px-2 font-bold": isDelayed() }, { [delayClass]: isDelayed() }, className]}
-	>
-		{displayTime(isDelayed() ? (time?.actualTime ?? "") : (time?.plannedTime ?? ""))}
+	<span class={["w-fit", { "bg-text text-background px-2 font-bold": isDelayed }, { [delayClass]: isDelayed }, className]}>
+		{displayTime(isDelayed ? (time?.actualTime ?? "") : (time?.plannedTime ?? ""))}
 	</span>
 {:else}
 	<div
@@ -40,7 +43,7 @@
 		]}
 	>
 		<span>{displayTime(time?.plannedTime ?? "")}</span>
-		{#if isDelayed()}
+		{#if isDelayed}
 			<span class={["bg-text text-background w-fit px-2 text-center font-bold", delayClass]}>
 				{displayTime(time?.actualTime ?? "")}
 			</span>

@@ -142,20 +142,13 @@
 						startWalking is the time, at which you set off from the stop (leg?.departure)
 						stopWalking is the time, at which you arrive at the destination (leg?.arrival)
 						 -->
-						<Changeover
-							startWalking={leg?.departure}
-							stopWalking={leg?.arrival}
-							lastIsWalking={leg?.destination}
-						/>
+						<Changeover startWalking={leg?.departure} stopWalking={leg?.arrival} lastIsWalking={leg?.destination} />
 					{:else}
 						<!--
 						startWalking is the time at which you set off from the stop (route?.legs[i - 1]?.arrival)
 						stopWalking is the time at which you arrive at the stop (route?.legs[i + 1]?.departure)
 						 -->
-						<Changeover
-							startWalking={route?.legs[i - 1]?.arrival}
-							stopWalking={route?.legs[i + 1]?.departure}
-						/>
+						<Changeover startWalking={route?.legs[i - 1]?.arrival} stopWalking={route?.legs[i + 1]?.departure} />
 					{/if}
 				{:else}
 					<LegInfo
