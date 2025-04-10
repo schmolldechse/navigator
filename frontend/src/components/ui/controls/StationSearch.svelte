@@ -3,25 +3,12 @@
 	import { onMount, type Snippet } from "svelte";
 	import { env } from "$env/dynamic/public";
 
-	let {
-		station = $bindable(undefined),
-		placeholder = "Search for a station",
-		children
-	}: {
-		station?: Station;
-		placeholder: string;
-		children: Snippet;
+	let { station = $bindable<Station | undefined>(undefined), placeholder = "Search a station...", children }: {
+		station?: Station,
+		placeholder: string,
+		children: Snippet
 	} = $props();
-
-	let open = $state<boolean>(false);
-	let selectedIndex = $state<number>(-1);
-	let stations: Station[] = $state([]);
 	let inputElement: HTMLInputElement;
-	const clickOutside = (event: MouseEvent) => {
-		if (inputElement && inputElement.contains(event.target as Node)) return;
-		open = false;
-		selectedIndex = -1;
-	};
 
 	// Synchronizes the input value with the station name.
 	$effect(() => {
@@ -30,76 +17,90 @@
 		inputElement.value = station.name;
 	});
 
-	const searchStations = async (query: string) => {
-		const searchParams = new URLSearchParams({ query }).toString();
+	let dropdownOpen = $state<boolean>(false);
+	let stationsQueried = $state<Station[]>([]);
 
-		const response = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/stations?${searchParams}`, { method: "GET" });
-		if (!response.ok) return;
+	const queryStations = async (query: string) => {
+		if (!query) return;
 
-		const jsonData = await response.json();
-		if (!Array.isArray(jsonData)) return;
+		const searchParams = new URLSearchParams({ query });
+		const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/stations?${searchParams.toString()}`);
+		if (!request.ok) return;
 
-		stations = jsonData as Station[];
-		open = stations.length > 0;
+		const response = await request.json();
+		if (!Array.isArray(response)) return;
+
+		stationsQueried = response as Station[];
+		dropdownOpen = stationsQueried.length > 0;
 	};
 
+	let selectedIndex = $state<number>(-1);
 	const selectStation = (index: number) => {
-		station = stations[index];
-		inputElement.value = station?.name ?? "";
-		open = false;
+		if (index < 0 || index > stationsQueried.length) return;
+		if (!stationsQueried[index]) return;
+
+		station = stationsQueried[index];
+		inputElement.value = station.name;
+		dropdownOpen = false;
+
 		selectedIndex = -1;
 	};
 
-	let debounce: number;
+	let debounceTimer = $state<number>();
 	const handleInput = () => {
 		if (!inputElement) return;
-		const value = inputElement.value;
-
-		if (value.length === 0) {
+		if (inputElement.value.length === 0) {
 			station = undefined;
 			return;
 		}
 
-		if (!station || value !== station?.name) {
-			clearTimeout(debounce);
-			debounce = setTimeout(() => {
-				if (value) {
-					searchStations(value);
-				} else {
-					open = false;
-				}
-			}, 500);
-		}
+		if (station?.name === inputElement.value) return;
+
+		if (debounceTimer) clearTimeout(debounceTimer);
+		debounceTimer = setTimeout(() => queryStations(inputElement.value), 500);
 	};
 
-	const handleKeyInput = (event: KeyboardEvent) => {
-		if (!open || inputElement.value.length === 0) return;
+	const handleNavigation = (event: KeyboardEvent) => {
+		if (!dropdownOpen) return;
+		if (inputElement.value.length === 0) return;
 
 		switch (event.key) {
 			case "ArrowDown":
 			case "Tab":
 				event.preventDefault();
-				selectedIndex = selectedIndex === stations.length - 1 ? 0 : selectedIndex + 1;
+				selectedIndex = selectedIndex === stationsQueried.length - 1 ? 0 : selectedIndex + 1;
 				break;
 			case "ArrowUp":
 				event.preventDefault();
-				selectedIndex = selectedIndex === 0 ? stations.length - 1 : selectedIndex - 1;
+				selectedIndex = selectedIndex === 0 ? stationsQueried.length - 1 : selectedIndex - 1;
 				break;
 			case "Enter":
-				if (selectedIndex < 0 || selectedIndex > stations.length) return;
+				event.preventDefault();
+				if (selectedIndex < 0 || selectedIndex > stationsQueried.length) return;
 				selectStation(selectedIndex);
 				break;
 			case "Escape":
-				open = false;
+				event.preventDefault();
+				dropdownOpen = false;
 				break;
 			default:
 				break;
 		}
 	};
 
+	/**
+	 * Registers an event handler.
+	 * Closes the dropdown when there's a click outside the input/ dropdown
+	 */
 	onMount(() => {
-		document.addEventListener("click", clickOutside);
-		return () => document.removeEventListener("click", clickOutside);
+		const onClickOutside = (event: MouseEvent) => {
+			if (!inputElement) return;
+			if (inputElement.contains(event.target as Node)) return;
+			dropdownOpen = false;
+		};
+
+		document.addEventListener("click", onClickOutside);
+		return () => document.removeEventListener("click", onClickOutside);
 	});
 </script>
 
@@ -113,17 +114,17 @@
 			type="text"
 			class="w-full border-none p-2 outline-hidden"
 			{placeholder}
-			onclick={() => (open = true)}
+			onclick={() => (dropdownOpen = true)}
 			oninput={handleInput}
-			onkeydown={handleKeyInput}
+			onkeydown={handleNavigation}
 		/>
 	</div>
 
-	{#if open && stations.length > 0}
+	{#if dropdownOpen && stationsQueried.length > 0}
 		<div
 			class="border-text bg-primary-dark absolute top-full left-0 z-50 mt-1 flex h-fit max-w-96 flex-col rounded-lg border p-2"
 		>
-			{#each stations as station, index (station)}
+			{#each stationsQueried as station, index (station)}
 				<button
 					tabindex="0"
 					onclick={() => selectStation(index)}
@@ -139,21 +140,21 @@
 </div>
 
 <style lang="postcss">
-	::placeholder {
-		color: var(--text);
-		opacity: 0.75;
-	}
+    ::placeholder {
+        color: var(--text);
+        opacity: 0.75;
+    }
 
-	::-webkit-input-placeholder {
-		color: var(--text);
-	}
+    ::-webkit-input-placeholder {
+        color: var(--text);
+    }
 
-	::-moz-placeholder {
-		color: var(--text);
-		opacity: 0.75;
-	}
+    ::-moz-placeholder {
+        color: var(--text);
+        opacity: 0.75;
+    }
 
-	:-ms-input-placeholder {
-		color: var(--text);
-	}
+    :-ms-input-placeholder {
+        color: var(--text);
+    }
 </style>
