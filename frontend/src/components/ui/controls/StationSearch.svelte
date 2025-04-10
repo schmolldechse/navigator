@@ -23,6 +23,13 @@
 		selectedIndex = -1;
 	};
 
+	// Synchronizes the input value with the station name.
+	$effect(() => {
+		if (!station) return;
+		if (!inputElement) return;
+		inputElement.value = station.name;
+	});
+
 	const searchStations = async (query: string) => {
 		const searchParams = new URLSearchParams({ query }).toString();
 
