@@ -5,6 +5,7 @@ import { mapToRoute } from "../../lib/mapping.ts";
 import { type RouteData } from "../../models/route.ts";
 import { fromLineName } from "../../lib/converter.ts";
 import type { LineColor } from "../../models/connection.ts";
+import { Products } from "../../models/products.ts";
 
 class RoutePlannerQuery {
 	/**
@@ -66,6 +67,9 @@ export class JourneyController extends Controller {
 		return (await Promise.all(pairs.map((pair) => fromLineName(pair.line, pair.operator)))).flat();
 	}
 
+	/**
+	 * Fetch a route based on the provided query parameters.
+	 */
 	@Get("route-planner")
 	async getRouteByDefinition(@Queries() query: RoutePlannerQuery): Promise<RouteData> {
 		if (query.to === query.from) throw new HttpError(400, "From and to cannot be the same station");
@@ -80,38 +84,39 @@ export class JourneyController extends Controller {
 		if (query.departure && !DateTime.fromISO(query.departure).isValid) throw new HttpError(400, "Invalid departure date");
 		if (query.arrival && !DateTime.fromISO(query.arrival).isValid) throw new HttpError(400, "Invalid arrival date");
 
-		return await fetchRoute(query);
+		return await this.fetchRoute(query);
 	}
+
+	fetchRoute = async (query: RoutePlannerQuery): Promise<RouteData> => {
+		const params = new URLSearchParams({
+			from: query.from.toString(),
+			to: query.to.toString(),
+			stopovers: "true"
+		});
+		if ((query?.disabledProducts?.length ?? 0) > 0) this.disallowProducts(query?.disabledProducts!)
+			.forEach((product) => params.append(Object.keys(product)[0], "false"));
+
+		if (query.earlierThan) params.set("earlierThan", query.earlierThan);
+		else if (query.laterThan) params.set("laterThan", query.laterThan);
+		else {
+			params.set("results", query.results!.toString());
+
+			if (query.departure) params.set("departure", query.departure);
+			else if (query.arrival) params.set("arrival", query.arrival);
+		}
+
+		const request = await fetch(`https://vendo-prof-db.voldechse.wtf/journeys?${params.toString()}`, { method: "GET" });
+		if (!request.ok) throw new Error("Failed to fetch route");
+
+		return mapToRoute(await request.json()) as RouteData;
+	};
+
+	disallowProducts = (input: string[]): { [product: string]: boolean }[] => {
+		return input.filter((product) => Object.values(Products).some((p) => p.value === product))
+			.map((product) => {
+				const object = Object.values(Products).find((p) => p.value === product);
+				return { [object?.possibilities?.slice(-1)[0]!]: false };
+			});
+	};
 }
 
-const fetchRoute = async (query: RoutePlannerQuery): Promise<RouteData> => {
-	const params = new URLSearchParams({
-		from: query.from.toString(),
-		to: query.to.toString(),
-		stopovers: "true"
-	});
-	if ((query?.disabledProducts?.length ?? 0) > 0) disallowProducts(query?.disabledProducts!)
-		.forEach((product) => params.append(Object.keys(product)[0], "false"));
-
-	if (query.earlierThan) params.set("earlierThan", query.earlierThan);
-	else if (query.laterThan) params.set("laterThan", query.laterThan);
-	else {
-		params.set("results", query.results!.toString());
-
-		if (query.departure) params.set("departure", query.departure);
-		else if (query.arrival) params.set("arrival", query.arrival);
-	}
-
-	const request = await fetch(`https://vendo-prof-db.voldechse.wtf/journeys?${params.toString()}`, { method: "GET" });
-	if (!request.ok) throw new Error("Failed to fetch route");
-
-	return mapToRoute(await request.json()) as RouteData;
-};
-
-const disallowProducts = (input: string[]): { [product: string]: boolean }[] => {
-	return input.filter((product) => Object.values(Products).some((p) => p.value === product))
-		.map((product) => {
-			const object = Object.values(Products).find((p) => p.value === product);
-			return { [object?.possibilities?.slice(-1)[0] ?? "ficken"]: false };
-		});
-};
