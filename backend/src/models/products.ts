@@ -13,6 +13,7 @@ interface Product {
 
 /**
  * A collection of Products that map a specific transportation category to its corresponding value
+ * Any uppercase possibilities are from RIS. Any lowercase possibilities are from vendo
  */
 const Products = {
 	HOCHGESCHWINDIGKEITSZUEGE: {
@@ -26,10 +27,10 @@ const Products = {
 		possibilities: ["REGIONAL_TRAIN", "regionalExpress", "regional"]
 	},
 	SBAHNEN: { value: "SBAHNEN", possibilities: ["CITY_TRAIN", "suburban"] },
-	BUSSE: { value: "BUSSE", possibilities: ["BUS"] },
-	SCHIFFE: { value: "SCHIFFE", possibilities: ["FERRY"] },
-	UBAHN: { value: "UBAHN", possibilities: ["SUBWAY"] },
-	STRASSENBAHN: { value: "STRASSENBAHN", possibilities: ["TRAM"] },
+	BUSSE: { value: "BUSSE", possibilities: ["BUS", "bus"] },
+	SCHIFFE: { value: "SCHIFFE", possibilities: ["FERRY", "ferry"] },
+	UBAHN: { value: "UBAHN", possibilities: ["SUBWAY", "subway"] },
+	STRASSENBAHN: { value: "STRASSENBAHN", possibilities: ["TRAM", "tram"] },
 	ANRUFPFLICHTIGEVERKEHRE: { value: "ANRUFPFLICHTIGEVERKEHRE", possibilities: ["SHUTTLE", "taxi"] },
 	UNKNOWN: { value: "UNKNOWN", possibilities: [] }
 } as const;
