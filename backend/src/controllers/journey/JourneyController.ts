@@ -112,7 +112,7 @@ export class JourneyController extends Controller {
 	};
 
 	disallowProducts = (input: string[]): { [product: string]: boolean }[] => {
-		return input.filter((product) => Object.values(Products).some((p) => p.value === product))
+		return input.filter((product) => Object.values(Products).filter(p => p.possibilities.length > 0).some((p) => p.value === product))
 			.map((product) => {
 				const object = Object.values(Products).find((p) => p.value === product);
 				return { [object?.possibilities?.slice(-1)[0]!]: false };
