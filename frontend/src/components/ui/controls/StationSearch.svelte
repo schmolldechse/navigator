@@ -3,10 +3,14 @@
 	import { onMount, type Snippet } from "svelte";
 	import { env } from "$env/dynamic/public";
 
-	let { station = $bindable<Station | undefined>(undefined), placeholder = "Search a station...", children }: {
-		station?: Station,
-		placeholder: string,
-		children: Snippet
+	let {
+		station = $bindable<Station | undefined>(undefined),
+		placeholder = "Search a station...",
+		children
+	}: {
+		station?: Station;
+		placeholder: string;
+		children: Snippet;
 	} = $props();
 	let inputElement: HTMLInputElement;
 
@@ -140,21 +144,21 @@
 </div>
 
 <style lang="postcss">
-    ::placeholder {
-        color: var(--text);
-        opacity: 0.75;
-    }
+	::placeholder {
+		color: var(--text);
+		opacity: 0.75;
+	}
 
-    ::-webkit-input-placeholder {
-        color: var(--text);
-    }
+	::-webkit-input-placeholder {
+		color: var(--text);
+	}
 
-    ::-moz-placeholder {
-        color: var(--text);
-        opacity: 0.75;
-    }
+	::-moz-placeholder {
+		color: var(--text);
+		opacity: 0.75;
+	}
 
-    :-ms-input-placeholder {
-        color: var(--text);
-    }
+	:-ms-input-placeholder {
+		color: var(--text);
+	}
 </style>

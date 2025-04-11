@@ -93,8 +93,10 @@ export class JourneyController extends Controller {
 			to: query.to.toString(),
 			stopovers: "true"
 		});
-		if ((query?.disabledProducts?.length ?? 0) > 0) this.disallowProducts(query?.disabledProducts!)
-			.forEach((product) => params.append(Object.keys(product)[0], "false"));
+		if ((query?.disabledProducts?.length ?? 0) > 0)
+			this.disallowProducts(query?.disabledProducts!).forEach((product) =>
+				params.append(Object.keys(product)[0], "false")
+			);
 
 		if (query.earlierThan) params.set("earlierThan", query.earlierThan);
 		else if (query.laterThan) params.set("laterThan", query.laterThan);
@@ -112,11 +114,15 @@ export class JourneyController extends Controller {
 	};
 
 	disallowProducts = (input: string[]): { [product: string]: boolean }[] => {
-		return input.filter((product) => Object.values(Products).filter(p => p.possibilities.length > 0).some((p) => p.value === product))
+		return input
+			.filter((product) =>
+				Object.values(Products)
+					.filter((p) => p.possibilities.length > 0)
+					.some((p) => p.value === product)
+			)
 			.map((product) => {
 				const object = Object.values(Products).find((p) => p.value === product);
 				return { [object?.possibilities?.slice(-1)[0]!]: false };
 			});
 	};
 }
-
