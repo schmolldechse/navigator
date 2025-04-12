@@ -1,13 +1,17 @@
 <script lang="ts">
-	import NationalExpress from "$components/timetable/filter/icons/NationalExpress.svelte";
-	import Regional from "$components/timetable/filter/icons/Regional.svelte";
-	import Suburban from "$components/timetable/filter/icons/Suburban.svelte";
-	import Subway from "$components/timetable/filter/icons/Subway.svelte";
-	import Tram from "$components/timetable/filter/icons/Tram.svelte";
-	import Bus from "$components/timetable/filter/icons/Bus.svelte";
-	import Ferry from "$components/timetable/filter/icons/Ferry.svelte";
 	import type { ProductType } from "$src/models/product";
+	import LongDistance from "$components/ui/transport-types/LongDistance.svelte";
+	import Regional from "$components/ui/transport-types/Regional.svelte";
+	import Suburban from "$components/ui/transport-types/Suburban.svelte";
+	import Bus from "$components/ui/transport-types/Bus.svelte";
+	import Ferry from "$components/ui/transport-types/Ferry.svelte";
+	import Subway from "$components/ui/transport-types/Subway.svelte";
+	import Tram from "$components/ui/transport-types/Tram.svelte";
 
+	/**
+	 * allowedProducts is a list of all products which are available at the station
+	 * selected is a list of all current selected products
+	 */
 	let {
 		allowedProducts,
 		selected = $bindable<string[]>(["*"])
@@ -26,7 +30,7 @@
 		{
 			key: "Longdistance",
 			name: "Long distance",
-			component: NationalExpress,
+			component: LongDistance,
 			values: ["HOCHGESCHWINDIGKEITSZUEGE", "INTERCITYUNDEUROCITYZUEGE"]
 		},
 		{
@@ -106,7 +110,7 @@
 		>
 			{#if type.component}
 				{@const Component = type.component}
-				<Component />
+				<Component type={type.key === "Subway" || type.key === "Tram" ? "rectangle" : "rounded-corners"} />
 			{/if}
 			<span>{type.name}</span>
 		</button>
