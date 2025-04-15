@@ -11,7 +11,7 @@
 	setContext("currentType", () => currentType);
 </script>
 
-<div class="flex min-h-screen w-full flex-col">
+<div class="relative flex min-h-screen w-full flex-col">
 	<Navbar bind:currentType dropdownEnabled={true} />
 	{@render children()}
 

@@ -30,6 +30,6 @@
 	{#if currentType() === "timetable"}
 		<Timetable />
 	{:else if currentType() === "route_planner"}
-		<RoutePlannerSearch />
+		<RoutePlanner />
 	{/if}
 </div>
