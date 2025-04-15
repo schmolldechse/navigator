@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { MetaTags } from "svelte-meta-tags";
-	import RoutePlannerSearch from "$components/route-planner/RoutePlannerSearch.svelte";
 	import Timetable from "./Timetable.svelte";
+	import RoutePlanner from "./RoutePlanner.svelte";
 	import { getContext } from "svelte";
 
 	let currentType = getContext<() => string>("currentType");
