@@ -112,7 +112,10 @@
 
 <div class="text-text placeholder:text-text relative flex w-full flex-col">
 	<div
-		class={["bg-input-background focus-within:ring-accent flex flex-row items-center gap-x-1 rounded-2xl px-2 font-medium focus-within:ring-2 md:text-2xl", className]}
+		class={[
+			"bg-input-background focus-within:ring-accent flex flex-row items-center gap-x-1 rounded-2xl px-2 font-medium focus-within:ring-2 md:text-2xl",
+			className
+		]}
 	>
 		{@render children?.()}
 		<input
@@ -146,21 +149,21 @@
 </div>
 
 <style lang="postcss">
-    ::placeholder {
-        color: var(--text);
-        opacity: 0.75;
-    }
+	::placeholder {
+		color: var(--text);
+		opacity: 0.75;
+	}
 
-    ::-webkit-input-placeholder {
-        color: var(--text);
-    }
+	::-webkit-input-placeholder {
+		color: var(--text);
+	}
 
-    ::-moz-placeholder {
-        color: var(--text);
-        opacity: 0.75;
-    }
+	::-moz-placeholder {
+		color: var(--text);
+		opacity: 0.75;
+	}
 
-    :-ms-input-placeholder {
-        color: var(--text);
-    }
+	:-ms-input-placeholder {
+		color: var(--text);
+	}
 </style>

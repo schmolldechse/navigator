@@ -21,7 +21,9 @@
 		};
 	}
 
-	let { disabledProducts = $bindable<string[]>([]) }: {
+	let {
+		disabledProducts = $bindable<string[]>([])
+	}: {
 		disabledProducts: string[];
 	} = $props();
 	let dropdownOpen = $state<boolean>(false);
@@ -48,35 +50,50 @@
 			}
 		},
 		{
-			key: "suburban", display: "Suburban", possibilities: ["SBAHNEN"], selected: true,
+			key: "suburban",
+			display: "Suburban",
+			possibilities: ["SBAHNEN"],
+			selected: true,
 			icon: {
 				component: Suburban,
 				type: "rounded-corners"
 			}
 		},
 		{
-			key: "bus", display: "Bus", possibilities: ["BUSSE"], selected: true,
+			key: "bus",
+			display: "Bus",
+			possibilities: ["BUSSE"],
+			selected: true,
 			icon: {
 				component: Bus,
 				type: "rounded-corners"
 			}
 		},
 		{
-			key: "ferry", display: "Ferry", possibilities: ["SCHIFFE"], selected: true,
+			key: "ferry",
+			display: "Ferry",
+			possibilities: ["SCHIFFE"],
+			selected: true,
 			icon: {
 				component: Ferry,
 				type: "rounded-corners"
 			}
 		},
 		{
-			key: "subway", display: "Subway", possibilities: ["UBAHN"], selected: true,
+			key: "subway",
+			display: "Subway",
+			possibilities: ["UBAHN"],
+			selected: true,
 			icon: {
 				component: Subway,
 				type: "rectangle"
 			}
 		},
 		{
-			key: "tram", display: "Tram", possibilities: ["STRASSENBAHN"], selected: true,
+			key: "tram",
+			display: "Tram",
+			possibilities: ["STRASSENBAHN"],
+			selected: true,
 			icon: {
 				component: Tram,
 				type: "rectangle"
@@ -87,31 +104,34 @@
 
 	onMount(() => {
 		availableProducts = availableProducts.map((product: Product) => ({ ...product, selected: true }));
-		disabledProducts = availableProducts.filter((product: Product) => !product.selected)
+		disabledProducts = availableProducts
+			.filter((product: Product) => !product.selected)
 			.flatMap((product: Product) => product.possibilities);
 	});
 
 	let selectedDisplay = $derived(() => {
-		const selectedProducts = availableProducts.filter(product => product.selected);
+		const selectedProducts = availableProducts.filter((product) => product.selected);
 		if (selectedProducts.length === availableProducts.length) return "Any";
 		if (selectedProducts.length >= 1) return `${selectedProducts.length} selected`;
 		return "None";
 	});
 </script>
 
-<button class="w-full bg-input-background cursor-pointer flex items-center justify-between rounded-2xl py-2 px-4"
-		onclick={() => (dropdownOpen = !dropdownOpen)}>
-	<div class="flex gap-x-2 items-center">
+<button
+	class="bg-input-background flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-2"
+	onclick={() => (dropdownOpen = !dropdownOpen)}
+>
+	<div class="flex items-center gap-x-2">
 		<LongDistance type="circle" />
 		<span>Transport products</span>
 	</div>
 
-	<span class="italic text-white/75">{selectedDisplay()}</span>
+	<span class="text-white/75 italic">{selectedDisplay()}</span>
 </button>
 
 {#snippet renderProduct(product: Product)}
 	<div class="flex justify-between">
-		<div class="flex gap-x-4 items-center text-lg">
+		<div class="flex items-center gap-x-4 text-lg">
 			{#if product?.icon}
 				{@const Icon = product.icon.component}
 				<Icon type={product.icon.type} />
@@ -124,26 +144,36 @@
 
 {#if dropdownOpen}
 	<div
-		class="absolute top-0 left-0 translate-y-1/2 z-999 bg-input-background flex flex-col gap-y-6 md:left-1/2 w-full md:w-[40%] md:-translate-x-1/2 px-4 py-3 md:rounded-2xl">
+		class="bg-input-background absolute top-0 left-0 z-999 flex w-full translate-y-1/2 flex-col gap-y-6 px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:rounded-2xl"
+	>
 		<div class="flex flex-row items-center justify-between">
-			<span class="font-bold text-xl">Choose transport type</span>
-			<X class="stroke-accent cursor-pointer" onclick={() => {
-				dropdownOpen = false;
-		disabledProducts = availableProducts.filter((product: Product) => !product.selected)
-			.flatMap((product: Product) => product.possibilities);
-			}} />
+			<span class="text-xl font-bold">Choose transport type</span>
+			<X
+				class="stroke-accent cursor-pointer"
+				onclick={() => {
+					dropdownOpen = false;
+					disabledProducts = availableProducts
+						.filter((product: Product) => !product.selected)
+						.flatMap((product: Product) => product.possibilities);
+				}}
+			/>
 		</div>
 
-		<div class="flex flex-col px-4 gap-y-2">
-			{#each availableProducts as product, index(product)}
+		<div class="flex flex-col gap-y-2 px-4">
+			{#each availableProducts as product, index (product)}
 				{@render renderProduct(product)}
 			{/each}
 		</div>
 
-		<button class="self-end cursor-pointer bg-accent px-4 rounded-sm py-2 text-black font-bold"
-				onclick={() => {dropdownOpen = false;
-		disabledProducts = availableProducts.filter((product: Product) => !product.selected)
-			.flatMap((product: Product) => product.possibilities);}}>Append
+		<button
+			class="bg-accent cursor-pointer self-end rounded-sm px-4 py-2 font-bold text-black"
+			onclick={() => {
+				dropdownOpen = false;
+				disabledProducts = availableProducts
+					.filter((product: Product) => !product.selected)
+					.flatMap((product: Product) => product.possibilities);
+			}}
+			>Append
 		</button>
 	</div>
 {/if}

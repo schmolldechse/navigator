@@ -21,7 +21,10 @@ const Products = {
 		possibilities: ["HIGH_SPEED_TRAIN", "nationalExpress"]
 	},
 	INTERCITYUNDEUROCITYZUEGE: { value: "INTERCITYUNDEUROCITYZUEGE", possibilities: ["INTERCITY_TRAIN", "national"] },
-	INTERREGIOUNDSCHNELLZUEGE: { value: "INTERREGIOUNDSCHNELLZUEGE", possibilities: ["INTER_REGIONAL_TRAIN", "regionalExpress"] },
+	INTERREGIOUNDSCHNELLZUEGE: {
+		value: "INTERREGIOUNDSCHNELLZUEGE",
+		possibilities: ["INTER_REGIONAL_TRAIN", "regionalExpress"]
+	},
 	NAHVERKEHRSONSTIGEZUEGE: {
 		value: "NAHVERKEHRSONSTIGEZUEGE",
 		possibilities: ["REGIONAL_TRAIN", "regional"]

@@ -75,7 +75,7 @@
 		type="button"
 		class:ring-2={isOpen}
 		class:ring-accent={isOpen}
-		class="bg-input-background hover:ring-accent flex cursor-pointer flex-row items-center gap-x-2 px-6 py-2 rounded-2xl hover:ring-2 md:text-2xl"
+		class="bg-input-background hover:ring-accent flex cursor-pointer flex-row items-center gap-x-2 rounded-2xl px-6 py-2 hover:ring-2 md:text-2xl"
 		onclick={() => (isOpen = true)}
 	>
 		<CalendarDays class="stroke-accent" />

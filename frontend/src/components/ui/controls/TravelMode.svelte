@@ -1,5 +1,11 @@
 <script lang="ts">
-	let { type = $bindable("departures"), class: classNames = "" }: { type: "departures" | "arrivals"; class?: string; } = $props();
+	let {
+		type = $bindable("departures"),
+		class: classNames = ""
+	}: {
+		type: "departures" | "arrivals";
+		class?: string
+	} = $props();
 </script>
 
 <div class={["flex flex-row items-center justify-end gap-x-2", classNames]}>
