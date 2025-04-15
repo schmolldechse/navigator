@@ -6,6 +6,7 @@
 	import Clock from "$components/ui/icons/Clock.svelte";
 	import { goto } from "$app/navigation";
 	import Search from "lucide-svelte/icons/search";
+	import TravelMode from "$components/ui/controls/TravelMode.svelte";
 
 	let typeSelected: "departures" | "arrivals" = $state("departures");
 
@@ -14,33 +15,7 @@
 </script>
 
 <div class="flex flex-col gap-y-2 md:w-[40%]">
-	<div class="flex flex-row items-center justify-end gap-x-2">
-		<button
-			type="button"
-			class="cursor-pointer font-bold"
-			class:underline={typeSelected === "departures"}
-			class:underline-offset-2={typeSelected === "departures"}
-			class:decoration-2={typeSelected === "departures"}
-			class:text-accent={typeSelected === "departures"}
-			class:text-text={typeSelected !== "departures"}
-			onclick={() => (typeSelected = "departures")}
-		>
-			Departures
-		</button>
-		<span class="nd-fg-white text-xl">|</span>
-		<button
-			type="button"
-			class="cursor-pointer font-bold"
-			class:underline={typeSelected === "arrivals"}
-			class:underline-offset-2={typeSelected === "arrivals"}
-			class:decoration-2={typeSelected === "arrivals"}
-			class:text-accent={typeSelected === "arrivals"}
-			class:text-text={typeSelected !== "arrivals"}
-			onclick={() => (typeSelected = "arrivals")}
-		>
-			Arrivals
-		</button>
-	</div>
+	<TravelMode type={typeSelected} />
 
 	<StationSearch bind:station={stationSelected} placeholder="Search your station...">
 		<Search size={44} />

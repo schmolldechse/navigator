@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { MetaTags } from "svelte-meta-tags";
-	import TimetableSearch from "$components/timetable/TimetableSearch.svelte";
 	import RoutePlannerSearch from "$components/route-planner/RoutePlannerSearch.svelte";
+	import Timetable from "./Timetable.svelte";
 	import { getContext } from "svelte";
 
 	let currentType = getContext<() => string>("currentType");
@@ -28,7 +28,7 @@
 
 <div class="flex flex-1 items-center justify-center">
 	{#if currentType() === "timetable"}
-		<TimetableSearch />
+		<Timetable />
 	{:else if currentType() === "route_planner"}
 		<RoutePlannerSearch />
 	{/if}
