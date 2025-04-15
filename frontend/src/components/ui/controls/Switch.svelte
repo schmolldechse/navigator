@@ -1,30 +1,18 @@
 <script lang="ts">
-	let { label = "", labelClass = "", checked = false, disabled = false, onchecked }: {
-		label?: string;
-		labelClass?: string;
+	let { checked = $bindable<boolean>(false), disabled = false }: {
 		checked?: boolean;
-		onchecked: (checked: boolean) => void;
 		disabled?: boolean;
 	} = $props();
-
-	const toggle = () => {
-		checked = !checked;
-		setTimeout(() => onchecked(checked), 200);
-	};
 </script>
 
 <div class="flex items-center gap-3">
-	{#if label}
-		<label for={label} class:disabled class={[labelClass]}>{label}</label>
-	{/if}
 	<button
-		id={label}
 		role="switch"
 		aria-label="switch"
 		aria-checked={checked}
 		class="switch"
 		class:disabled
-		onclick={toggle}
+		onclick={() => checked = !checked}
 		{disabled}
 	>
 		<span class="switch-track"></span>
@@ -33,17 +21,6 @@
 </div>
 
 <style>
-    label {
-        font-size: 0.875rem;
-        color: #fff;
-        cursor: pointer;
-    }
-
-    label.disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
     .switch {
         position: relative;
         width: 2.75rem;
