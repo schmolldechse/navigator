@@ -69,15 +69,16 @@
 	};
 </script>
 
-<div bind:this={inputElement} class="relative w-fit">
+<!-- TODO: rewrite -->
+<div bind:this={inputElement} class="relative w-full">
 	<button
 		type="button"
 		class:ring-2={isOpen}
 		class:ring-accent={isOpen}
-		class="hover:ring-accent flex cursor-pointer flex-row items-center gap-x-2 rounded-md p-0.5 text-center hover:ring-2 md:p-2 md:text-2xl"
+		class="bg-input-background hover:ring-accent flex cursor-pointer flex-row items-center gap-x-2 px-6 py-2 rounded-2xl hover:ring-2 md:text-2xl"
 		onclick={() => (isOpen = true)}
 	>
-		<CalendarDays />
+		<CalendarDays class="stroke-accent" />
 		<span>{selectedDate.toFormat("dd.MM.yyyy - HH:mm")}</span>
 	</button>
 

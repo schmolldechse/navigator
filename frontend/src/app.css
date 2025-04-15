@@ -18,6 +18,9 @@
 	--color-secondary: var(--secondary);
 	--color-accent: var(--accent);
 
+	--color-input-background: var(--input-background);
+	--color-titlebar-background: var(--titlebar-background);
+
 	--font-montserrat: Montserrat, sans-serif;
 }
 
@@ -46,6 +49,9 @@
 		--primary-darker: #121212;
 		--secondary: #7b2e2e;
 		--accent: #ffda0a;
+
+		--input-background: #151515;
+		--titlebar-background: #0f0f0f;
 	}
 }
 
