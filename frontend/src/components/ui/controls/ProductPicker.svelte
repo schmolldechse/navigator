@@ -144,7 +144,7 @@
 </script>
 
 <button
-	class="bg-input-background flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-3 shadow-sm relative group"
+	class="bg-input-background group relative flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-3 shadow-sm"
 	onclick={(event: MouseEvent) => {
 		event.stopPropagation();
 		dropdownOpen = !dropdownOpen;
@@ -153,21 +153,21 @@
 	aria-haspopup="true"
 >
 	<!-- highlight effect on hover -->
-	<div class="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+	<div class="bg-accent/5 absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"></div>
 
-	<div class="flex items-center gap-x-2 z-10">
+	<div class="z-10 flex items-center gap-x-2">
 		<LongDistance type="circle" />
 		<span class="font-medium">Transport products</span>
 	</div>
 
-	<div class="flex items-center gap-x-2 z-10">
+	<div class="z-10 flex items-center gap-x-2">
 		<span class="text-white/75 italic">{selectedDisplay()}</span>
 		<ChevronDown class={`stroke-accent transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
 	</div>
 </button>
 
 {#snippet renderProduct(product: Product)}
-	<div class="flex justify-between hover:bg-accent/10 px-4 py-2 rounded-lg transition-colors">
+	<div class="hover:bg-accent/10 flex justify-between rounded-lg px-4 py-2 transition-colors">
 		<div class="flex items-center gap-x-4 text-lg">
 			{#if product?.icon}
 				{@const Icon = product.icon.component}
@@ -182,14 +182,14 @@
 {#if dropdownOpen}
 	<div
 		bind:this={dropdownElement}
-		class="bg-input-background absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl border border-primary"
+		class="bg-input-background border-primary absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 border px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl"
 		role="menu"
 		aria-orientation="vertical"
 	>
 		<div class="flex flex-row items-center justify-between">
 			<span class="text-xl font-bold">Choose transport type</span>
 			<X
-				class="cursor-pointer hover:stroke-accent transition-colors"
+				class="hover:stroke-accent cursor-pointer transition-colors"
 				onclick={() => {
 					dropdownOpen = false;
 					disabledProducts = availableProducts
@@ -206,7 +206,7 @@
 		</div>
 
 		<button
-			class="bg-accent hover:bg-accent/90 transition-colors cursor-pointer self-end rounded-md px-5 py-2 font-bold text-black"
+			class="bg-accent hover:bg-accent/90 cursor-pointer self-end rounded-md px-5 py-2 font-bold text-black transition-colors"
 			onclick={() => {
 				dropdownOpen = false;
 				disabledProducts = availableProducts

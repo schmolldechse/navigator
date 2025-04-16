@@ -4,7 +4,7 @@
 		class: classNames = ""
 	}: {
 		type: "departures" | "arrivals";
-		class?: string
+		class?: string;
 	} = $props();
 </script>
 
