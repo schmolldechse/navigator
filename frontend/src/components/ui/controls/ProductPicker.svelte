@@ -130,7 +130,7 @@
 </button>
 
 {#snippet renderProduct(product: Product)}
-	<div class="flex justify-between">
+	<div class="flex justify-between hover:bg-accent/10 px-4 py-2 rounded-lg transition-colors">
 		<div class="flex items-center gap-x-4 text-lg">
 			{#if product?.icon}
 				{@const Icon = product.icon.component}
@@ -159,7 +159,7 @@
 			/>
 		</div>
 
-		<div class="flex flex-col gap-y-2 px-4">
+		<div class="flex flex-col gap-y-2">
 			{#each availableProducts as product, index (product)}
 				{@render renderProduct(product)}
 			{/each}
