@@ -31,6 +31,7 @@ const fetchRoutes = async (url: URL, to: string, from: string): Promise<RouteDat
 		to,
 		...(url.searchParams.has("departure") && { departure: url.searchParams.get("departure")! }),
 		...(url.searchParams.has("arrival") && { arrival: url.searchParams.get("arrival")! }),
+		...(url.searchParams.has("disabledProducts") && { disabledProducts: url.searchParams.get("disabledProducts")! }),
 		...(url.searchParams.has("results") && { results: url.searchParams.get("results")! }),
 		...(url.searchParams.has("earlierThan") && { earlierThan: url.searchParams.get("earlierThan")! }),
 		...(url.searchParams.has("laterThan") && { laterThan: url.searchParams.get("laterThan")! })
