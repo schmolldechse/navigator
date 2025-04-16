@@ -11,7 +11,9 @@
 	import Button from "$components/ui/interactive/Button.svelte";
 	import { onMount } from "svelte";
 
-	let { date = $bindable<DateTime>(DateTime.now().set({ second: 0, millisecond: 0 })) }: {
+	let {
+		date = $bindable<DateTime>(DateTime.now().set({ second: 0, millisecond: 0 }))
+	}: {
 		date: DateTime;
 	} = $props();
 	let dropdownOpen: boolean = $state<boolean>(false);
@@ -81,7 +83,7 @@
 
 <!-- overflow-hidden needed for highlight effect! -->
 <button
-	class="bg-input-background group relative flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-3 shadow-sm overflow-hidden"
+	class="bg-input-background group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-2xl px-4 py-3 shadow-sm"
 	onclick={(event: MouseEvent) => {
 		event.stopPropagation();
 		dropdownOpen = !dropdownOpen;
@@ -92,7 +94,7 @@
 	<!-- highlight effect on hover -->
 	<div class="bg-accent/5 absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"></div>
 
-	<div class="flex items-center gap-x-2 mr-14">
+	<div class="mr-14 flex items-center gap-x-2">
 		<Clock class="stroke-accent" size="30" />
 		<span class="font-medium">Date</span>
 	</div>
@@ -112,27 +114,26 @@
 		<!-- Header -->
 		<div class="flex flex-row items-center justify-between">
 			<span class="text-xl font-bold">Choose date & time</span>
-			<X
-				class="hover:stroke-accent cursor-pointer transition-colors"
-				onclick={() => dropdownOpen = false}
-			/>
+			<X class="hover:stroke-accent cursor-pointer transition-colors" onclick={() => (dropdownOpen = false)} />
 		</div>
 
 		<!-- Month navigation -->
 		<div class="flex items-center justify-between px-2">
-			<button class="flex items-center gap-x-2 text-white/75 hover:text-accent transition-colors duration-200"
-					onclick={() => date = date.minus({ month: 1 })}
-					aria-label="One month back"
+			<button
+				class="hover:text-accent flex items-center gap-x-2 text-white/75 transition-colors duration-200"
+				onclick={() => (date = date.minus({ month: 1 }))}
+				aria-label="One month back"
 			>
 				<ChevronLeft />
 				<span>{date.minus({ month: 1 }).toFormat("MMM")}</span>
 			</button>
 
-			<span class="font-bold text-lg">{date.toFormat("MMMM yyyy")}</span>
+			<span class="text-lg font-bold">{date.toFormat("MMMM yyyy")}</span>
 
-			<button class="flex items-center gap-x-2 text-white/75 hover:text-accent transition-colors duration-200"
-					onclick={() => date = date.plus({ month: 1 })}
-					aria-label="One month forward"
+			<button
+				class="hover:text-accent flex items-center gap-x-2 text-white/75 transition-colors duration-200"
+				onclick={() => (date = date.plus({ month: 1 }))}
+				aria-label="One month forward"
 			>
 				<ChevronRight />
 				<span>{date.plus({ month: 1 }).toFormat("MMM")}</span>
@@ -142,19 +143,19 @@
 		<!-- Calendar -->
 		<div class="grid grid-cols-7 gap-y-1 text-center">
 			{#each weekdays as day}
-				<div class="text-white/75 font-medium py-1">{day}</div>
+				<div class="py-1 font-medium text-white/75">{day}</div>
 			{/each}
 
 			{#each getCalendarDays as day}
 				<button
 					class={[
-						{ "border border-accent/75": day.hasSame(DateTime.now(), "day") }, // day is current Date
-						{ "bg-accent text-black font-bold": day.hasSame(date, "day") }, // day is selected Date
+						{ "border-accent/75 border": day.hasSame(DateTime.now(), "day") }, // day is current Date
+						{ "bg-accent font-bold text-black": day.hasSame(date, "day") }, // day is selected Date
 						{ "text-white/30": !day.hasSame(date, "month") }, // day has not the same month as selected Date
 						{ "hover:bg-accent/20 transition-colors": !day.hasSame(date, "day") }, // day is not selected Date
-						"rounded-full mx-auto w-9 h-9 cursor-pointer",
-						]}
-					onclick={() => date = day}
+						"mx-auto h-9 w-9 cursor-pointer rounded-full"
+					]}
+					onclick={() => (date = day)}
 				>
 					{day.toFormat("dd")}
 				</button>
@@ -168,8 +169,8 @@
 			<!-- hours/ minutes inputs -->
 			<div class="flex items-center gap-x-8">
 				<button
-					class="bg-input-background border border-accent/30 hover:border-accent rounded-md p-2 text-white/75 hover:text-accent transition-colors"
-					onclick={() => date = date.minus({ minutes: 15 })}
+					class="bg-input-background border-accent/30 hover:border-accent hover:text-accent rounded-md border p-2 text-white/75 transition-colors"
+					onclick={() => (date = date.minus({ minutes: 15 }))}
 					aria-label="Decrease date by 15 minutes"
 					title="-15min"
 				>
@@ -177,28 +178,30 @@
 				</button>
 
 				<div class="flex items-center gap-x-4">
-					<input type="text"
-						   class="bg-input-background border border-accent/30 rounded-md w-16 px-3 py-2 text-center focus:border-accent focus:outline-none"
-						   aria-label="Hours"
-						   data-buffertype="hours"
-						   value={date.toFormat("HH").padStart(2, "0")}
-						   onkeydown={handleInput}
-						   maxlength={2}
+					<input
+						type="text"
+						class="bg-input-background border-accent/30 focus:border-accent w-16 rounded-md border px-3 py-2 text-center focus:outline-none"
+						aria-label="Hours"
+						data-buffertype="hours"
+						value={date.toFormat("HH").padStart(2, "0")}
+						onkeydown={handleInput}
+						maxlength={2}
 					/>
 					<span class="text-xl font-bold">:</span>
-					<input type="text"
-						   class="bg-input-background border border-accent/30 rounded-md w-16 px-3 py-2 text-center focus:border-accent focus:outline-none"
-						   aria-label="Minutes"
-						   data-buffertype="minutes"
-						   value={date.toFormat("mm").padStart(2, "0")}
-						   onkeydown={handleInput}
-						   maxlength={2}
+					<input
+						type="text"
+						class="bg-input-background border-accent/30 focus:border-accent w-16 rounded-md border px-3 py-2 text-center focus:outline-none"
+						aria-label="Minutes"
+						data-buffertype="minutes"
+						value={date.toFormat("mm").padStart(2, "0")}
+						onkeydown={handleInput}
+						maxlength={2}
 					/>
 				</div>
 
 				<button
-					class="bg-input-background border border-accent/30 hover:border-accent rounded-md p-2 text-white/75 hover:text-accent transition-colors"
-					onclick={() => date = date.plus({ minutes: 15 })}
+					class="bg-input-background border-accent/30 hover:border-accent hover:text-accent rounded-md border p-2 text-white/75 transition-colors"
+					onclick={() => (date = date.plus({ minutes: 15 }))}
 					aria-label="Increase date by 15 minutes"
 					title="+15min"
 				>
@@ -208,13 +211,17 @@
 		</div>
 
 		<!-- Control buttons -->
-		<div class="flex items-center self-end gap-x-2">
-			<Button class="px-4 py-2 flex items-center gap-x-2 w-fit rounded-md text-background"
-					onclick={() => date = DateTime.now().set({ second: 0, millisecond: 0 })}>
+		<div class="flex items-center gap-x-2 self-end">
+			<Button
+				class="text-background flex w-fit items-center gap-x-2 rounded-md px-4 py-2"
+				onclick={() => (date = DateTime.now().set({ second: 0, millisecond: 0 }))}
+			>
 				<TrashIcon size="22" />
 			</Button>
-			<Button class="px-4 py-2 flex items-center gap-x-2 w-fit rounded-md text-background font-bold"
-					onclick={() => dropdownOpen = false}>
+			<Button
+				class="text-background flex w-fit items-center gap-x-2 rounded-md px-4 py-2 font-bold"
+				onclick={() => (dropdownOpen = false)}
+			>
 				Select
 			</Button>
 		</div>

@@ -146,7 +146,7 @@
 
 <!-- overflow-hidden needed for highlight effect! -->
 <button
-	class="bg-input-background group relative flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-3 shadow-sm overflow-hidden"
+	class="bg-input-background group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-2xl px-4 py-3 shadow-sm"
 	onclick={(event: MouseEvent) => {
 		event.stopPropagation();
 		dropdownOpen = !dropdownOpen;

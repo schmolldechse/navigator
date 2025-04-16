@@ -56,7 +56,7 @@
 	</div>
 
 	<!-- Time picker, Producttypes -->
-	<div class="flex flex-col px-2 gap-y-2 md:gap-0 md:gap-x-2 md:flex-row">
+	<div class="flex flex-col gap-y-2 px-2 md:flex-row md:gap-0 md:gap-x-2">
 		<TimePicker bind:date={dateSelected} />
 		<ProductPicker bind:disabledProducts />
 	</div>
