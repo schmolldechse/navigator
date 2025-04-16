@@ -156,12 +156,12 @@
 	<!-- highlight effect on hover -->
 	<div class="bg-accent/5 absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"></div>
 
-	<div class="z-10 flex items-center gap-x-2">
+	<div class="flex items-center gap-x-2">
 		<LongDistance type="circle" />
 		<span class="font-medium">Transport products</span>
 	</div>
 
-	<div class="z-10 flex items-center gap-x-2">
+	<div class="flex items-center gap-x-2">
 		<span class="text-white/75 italic">{selectedDisplay()}</span>
 		<ChevronDown class={`stroke-accent transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
 	</div>
