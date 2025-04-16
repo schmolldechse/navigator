@@ -182,7 +182,7 @@
 {#if dropdownOpen}
 	<div
 		bind:this={dropdownElement}
-		class="bg-input-background absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/2 md:rounded-2xl border border-primary"
+		class="bg-input-background absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl border border-primary"
 		role="menu"
 		aria-orientation="vertical"
 	>
