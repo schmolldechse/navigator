@@ -27,6 +27,7 @@
 		disabledProducts: string[];
 	} = $props();
 	let dropdownOpen = $state<boolean>(false);
+	let dropdownElement: HTMLDivElement | undefined = $state<HTMLDivElement | undefined>(undefined);
 
 	let availableProducts = $state<Product[]>([
 		{
@@ -103,10 +104,24 @@
 	]);
 
 	onMount(() => {
+		const clickOutside = (event: MouseEvent) => {
+			if (!dropdownElement) return;
+			if (dropdownElement.contains(event.target as Node)) return;
+			dropdownOpen = false;
+		};
+
+		// select all products by default
+		// TODO: save in localStorage
 		availableProducts = availableProducts.map((product: Product) => ({ ...product, selected: true }));
+
+		// send update
 		disabledProducts = availableProducts
 			.filter((product: Product) => !product.selected)
 			.flatMap((product: Product) => product.possibilities);
+
+		// register events
+		document.addEventListener("click", clickOutside);
+		return () => document.removeEventListener("click", clickOutside);
 	});
 
 	let selectedDisplay = $derived(() => {
@@ -119,7 +134,10 @@
 
 <button
 	class="bg-input-background flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-2"
-	onclick={() => (dropdownOpen = !dropdownOpen)}
+	onclick={(event: MouseEvent) => {
+		event.stopPropagation();
+		dropdownOpen = !dropdownOpen;
+	}}
 >
 	<div class="flex items-center gap-x-2">
 		<LongDistance type="circle" />
@@ -144,7 +162,10 @@
 
 {#if dropdownOpen}
 	<div
-		class="bg-input-background absolute top-0 left-0 z-999 flex w-full translate-y-1/2 flex-col gap-y-6 px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:rounded-2xl"
+		bind:this={dropdownElement}
+		class="bg-input-background absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/2 md:rounded-2xl border border-primary"
+		role="menu"
+		aria-orientation="vertical"
 	>
 		<div class="flex flex-row items-center justify-between">
 			<span class="text-xl font-bold">Choose transport type</span>
