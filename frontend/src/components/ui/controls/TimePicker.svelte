@@ -7,7 +7,7 @@
 	import X from "lucide-svelte/icons/x";
 	import Minus from "lucide-svelte/icons/minus";
 	import Plus from "lucide-svelte/icons/plus";
-	import TrashIcon from "lucide-svelte/icons/trash";
+	import TimerReset from "lucide-svelte/icons/timer-reset";
 	import Button from "$components/ui/interactive/Button.svelte";
 	import { onMount } from "svelte";
 
@@ -216,7 +216,7 @@
 				class="text-background flex w-fit items-center gap-x-2 rounded-md px-4 py-2"
 				onclick={() => (date = DateTime.now().set({ second: 0, millisecond: 0 }))}
 			>
-				<TrashIcon size="22" />
+				<TimerReset size="22" />
 			</Button>
 			<Button
 				class="text-background flex w-fit items-center gap-x-2 rounded-md px-4 py-2 font-bold"
