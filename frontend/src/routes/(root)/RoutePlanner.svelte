@@ -50,7 +50,7 @@
 	</div>
 
 	<!-- Time picker, Producttypes -->
-	<div class="flex flex-row px-2">
+	<div class="flex flex-col md:flex-row px-2">
 		<TimePicker bind:selectedDate={dateSelected} />
 		<ProductPicker bind:disabledProducts />
 	</div>
