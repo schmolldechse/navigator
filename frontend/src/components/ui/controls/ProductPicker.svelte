@@ -8,9 +8,10 @@
 	import Ferry from "$components/ui/transport-types/Ferry.svelte";
 	import Subway from "$components/ui/transport-types/Subway.svelte";
 	import Tram from "$components/ui/transport-types/Tram.svelte";
-	import Switch from "$components/ui/controls/Switch.svelte";
+	import Switch from "$components/ui/interactive/Switch.svelte";
 	import Taxi from "$components/ui/transport-types/Taxi.svelte";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
+	import Button from "$components/ui/interactive/Button.svelte";
 
 	export interface Product {
 		key: string;
@@ -205,9 +206,8 @@
 			{/each}
 		</div>
 
-		<button
-			class="bg-accent hover:bg-accent/90 cursor-pointer self-end rounded-md px-5 py-2 font-bold text-black transition-colors"
-			onclick={() => {
+		<Button class="self-end rounded-md px-5 py-2 text-black font-bold"
+				onclick={() => {
 				dropdownOpen = false;
 				disabledProducts = availableProducts
 					.filter((product: Product) => !product.selected)
@@ -215,6 +215,6 @@
 			}}
 		>
 			Append
-		</button>
+		</Button>
 	</div>
 {/if}
