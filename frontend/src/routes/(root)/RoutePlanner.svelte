@@ -14,7 +14,7 @@
 	let start: Station | undefined = $state(undefined);
 	let destination: Station | undefined = $state(undefined);
 
-	let dateSelected = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
+	let date = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 
 	let disabledProducts = $state<string[]>([]);
 </script>
@@ -23,7 +23,7 @@
 	<!-- Titlebar -->
 	<header class="bg-titlebar-background flex items-center justify-between rounded-t-2xl p-4">
 		<span class="text-accent text-base font-bold md:text-3xl">Route Planner</span>
-		<TravelMode {type} class="text-xs md:text-base" />
+		<TravelMode bind:type class="text-xs md:text-base" />
 	</header>
 
 	<!-- Start/ Destination -->
@@ -57,7 +57,7 @@
 
 	<!-- Time picker, Producttypes -->
 	<div class="flex flex-col gap-y-2 px-2 md:flex-row md:gap-0 md:gap-x-2">
-		<TimePicker bind:date={dateSelected} />
+		<TimePicker bind:date />
 		<ProductPicker bind:disabledProducts />
 	</div>
 
@@ -68,7 +68,7 @@
 			if (disabledProducts.length === 10) return;
 			if (!start || !destination) return;
 			if (start.evaNumber === destination.evaNumber) return;
-			if (!dateSelected) return;
+			if (!date) return;
 
 			const params = new URLSearchParams({
 				from: String(start.evaNumber),
@@ -77,10 +77,10 @@
 			if (disabledProducts.length > 0) params.set("disabledProducts", disabledProducts.join(","));
 			switch (type) {
 				case "departures":
-					params.set("departure", dateSelected.toISO());
+					params.set("departure", date.toISO());
 					break;
 				case "arrivals":
-					params.set("arrival", dateSelected.toISO());
+					params.set("arrival", date.toISO());
 					break;
 			}
 
