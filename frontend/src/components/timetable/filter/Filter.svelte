@@ -7,6 +7,7 @@
 	import Ferry from "$components/ui/transport-types/Ferry.svelte";
 	import Subway from "$components/ui/transport-types/Subway.svelte";
 	import Tram from "$components/ui/transport-types/Tram.svelte";
+	import Taxi from "$components/ui/transport-types/Taxi.svelte";
 
 	/**
 	 * allowedProducts is a list of all products which are available at the station
@@ -68,6 +69,12 @@
 			name: "Tram",
 			component: Tram,
 			values: ["STRASSENBAHN"]
+		},
+		{
+			key: "Taxi/ Shuttle",
+			name: "Taxi/ Shuttle",
+			component: Taxi,
+			values: ["ANRUFPFLICHTIGEVERKEHRE"]
 		}
 	]);
 

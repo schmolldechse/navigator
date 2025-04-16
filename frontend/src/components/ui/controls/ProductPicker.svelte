@@ -9,6 +9,7 @@
 	import Subway from "$components/ui/transport-types/Subway.svelte";
 	import Tram from "$components/ui/transport-types/Tram.svelte";
 	import Switch from "$components/ui/controls/Switch.svelte";
+	import Taxi from "$components/ui/transport-types/Taxi.svelte";
 
 	export interface Product {
 		key: string;
@@ -100,7 +101,16 @@
 				type: "rectangle"
 			}
 		},
-		{ key: "taxi", display: "Taxi/ Shuttle", possibilities: ["ANRUFPFLICHTIGEVERKEHRE"], selected: true }
+		{
+			key: "taxi",
+			display: "Taxi/ Shuttle",
+			possibilities: ["ANRUFPFLICHTIGEVERKEHRE"],
+			selected: true,
+			icon: {
+				component: Taxi,
+				type: "rectangle"
+			}
+		}
 	]);
 
 	onMount(() => {
@@ -133,11 +143,13 @@
 </script>
 
 <button
-	class="bg-input-background flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-2"
+	class="bg-input-background flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-3 border border-accent/30 hover:border-accent transition-colors shadow-sm relative overflow-hidden group"
 	onclick={(event: MouseEvent) => {
 		event.stopPropagation();
 		dropdownOpen = !dropdownOpen;
 	}}
+	aria-expanded={dropdownOpen}
+	aria-haspopup="true"
 >
 	<div class="flex items-center gap-x-2">
 		<LongDistance type="circle" />
