@@ -158,7 +158,7 @@
 	<div class="bg-accent/5 absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"></div>
 
 	<div class="flex items-center gap-x-2">
-		<LongDistance type="circle" />
+		<LongDistance type="circle" width="30px" height="30px" />
 		<span class="font-medium">Transport products</span>
 	</div>
 
