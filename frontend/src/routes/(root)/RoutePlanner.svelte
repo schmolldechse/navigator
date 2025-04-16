@@ -6,8 +6,10 @@
 	import ArrowUpDown from "lucide-svelte/icons/arrow-up-down";
 	import TimePicker from "$components/ui/controls/TimePicker.svelte";
 	import ProductPicker from "$components/ui/controls/ProductPicker.svelte";
+	import Button from "$components/ui/interactive/Button.svelte";
+	import { goto } from "$app/navigation";
 
-	let type: "departures" | "arrivals" = $state("departures");
+	let type: "departures" | "arrivals" = $state<"departures" | "arrivals">("departures");
 
 	let start: Station | undefined = $state(undefined);
 	let destination: Station | undefined = $state(undefined);
@@ -15,10 +17,6 @@
 	let dateSelected = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 
 	let disabledProducts = $state<string[]>([]);
-
-	const queryReady = (): boolean => {
-		return !!start && !!destination && !!dateSelected;
-	};
 </script>
 
 <div class="mx-4 flex w-full flex-col gap-y-4 text-base md:w-[45%]">
@@ -54,4 +52,30 @@
 		<TimePicker bind:selectedDate={dateSelected} />
 		<ProductPicker bind:disabledProducts />
 	</div>
+
+	<!-- Search button -->
+	<Button class="rounded-md px-5 py-2 text-black font-bold" onclick={async () => {
+		if (disabledProducts.length === 10) return;
+		if (!start || !destination) return;
+		if (start.evaNumber === destination.evaNumber) return;
+		if (!dateSelected) return;
+
+		const params = new URLSearchParams({
+			from: String(start.evaNumber),
+			to: String(destination.evaNumber)
+		});
+		if (disabledProducts.length > 0) params.set("disabledProducts", disabledProducts.join(","));
+		switch (type) {
+			case "departures":
+				params.set("departure", dateSelected.toISO());
+				break;
+			case "arrivals":
+				params.set("arrival", dateSelected.toISO());
+				break;
+		}
+
+		await goto(`journey/planned?${params.toString()}`);
+	}}>
+		Search
+	</Button>
 </div>
