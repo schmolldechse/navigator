@@ -39,6 +39,14 @@
 
 			<button
 				class="group bg-accent hover:bg-accent absolute top-1/2 z-10 mr-4 -translate-y-1/2 cursor-pointer self-end rounded-full p-2"
+				onclick={() => {
+					if (!start || !destination) return;
+					if (start.evaNumber === destination.evaNumber) return;
+
+					const temp = start;
+					start = destination;
+					destination = temp;
+				}}
 			>
 				<ArrowUpDown class="stroke-background stroke-3 transition-transform duration-300 group-hover:rotate-180" />
 			</button>
