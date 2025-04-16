@@ -16,8 +16,36 @@
 	let dropdownOpen: boolean = $state<boolean>(false);
 	let dropdownElement: HTMLDivElement | undefined = $state<HTMLDivElement | undefined>(undefined);
 
-	let hoursInputTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
-	let minutesInputTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
+	let inputTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
+	let inputBuffer = $state({ hours: "", minutes: "" });
+
+	const handleInput = (event: KeyboardEvent) => {
+		event.stopPropagation();
+
+		const bufferType: "hours" | "minutes" = (event.target as HTMLInputElement).dataset.buffertype as "hours" | "minutes";
+		if (!bufferType || (bufferType !== "hours" && bufferType !== "minutes")) return;
+		if (!/^\d+$/.test(event.key)) return;
+
+		if (inputTimeout) clearTimeout(inputTimeout);
+		inputBuffer[bufferType] += event.key;
+
+		if (inputBuffer[bufferType].length !== 2) {
+			date = date.set({ [bufferType]: parseInt(inputBuffer[bufferType], 10) });
+			inputTimeout = setTimeout(() => {
+				inputBuffer[bufferType] = "";
+				inputTimeout = null;
+			}, 500);
+			return;
+		}
+
+		// set the input value if the buffer has 2 values
+
+		const maxValue = bufferType === "hours" ? 23 : 59;
+		const value = Math.min(parseInt(inputBuffer[bufferType], 10), maxValue);
+
+		date = date.set({ [bufferType]: value });
+		inputBuffer[bufferType] = "";
+	};
 
 	const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -47,7 +75,7 @@
 		// register events
 		document.addEventListener("click", clickOutside);
 		return () => document.removeEventListener("click", clickOutside);
-	})
+	});
 </script>
 
 <!-- overflow-hidden needed for highlight effect! -->
@@ -150,11 +178,21 @@
 				<div class="flex items-center gap-x-4">
 					<input type="text"
 						   class="bg-input-background border border-accent/30 rounded-md w-16 px-3 py-2 text-center focus:border-accent focus:outline-none"
-						   aria-label="Hours" />
+						   aria-label="Hours"
+						   data-buffertype="hours"
+						   value={date.toFormat("HH").padStart(2, "0")}
+						   onkeydown={handleInput}
+						   maxlength={2}
+					/>
 					<span class="text-xl font-bold">:</span>
 					<input type="text"
 						   class="bg-input-background border border-accent/30 rounded-md w-16 px-3 py-2 text-center focus:border-accent focus:outline-none"
-						   aria-label="Minutes" />
+						   aria-label="Minutes"
+						   data-buffertype="minutes"
+						   value={date.toFormat("mm").padStart(2, "0")}
+						   onkeydown={handleInput}
+						   maxlength={2}
+					/>
 				</div>
 
 				<button
