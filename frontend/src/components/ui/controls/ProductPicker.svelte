@@ -144,7 +144,7 @@
 </script>
 
 <button
-	class="bg-input-background flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-3 border border-accent/30 hover:border-accent transition-colors shadow-sm relative overflow-hidden group"
+	class="bg-input-background flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-3 shadow-sm relative group"
 	onclick={(event: MouseEvent) => {
 		event.stopPropagation();
 		dropdownOpen = !dropdownOpen;
@@ -152,9 +152,12 @@
 	aria-expanded={dropdownOpen}
 	aria-haspopup="true"
 >
-	<div class="flex items-center gap-x-2">
+	<!-- highlight effect on hover -->
+	<div class="absolute inset-0 bg-accent/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+
+	<div class="flex items-center gap-x-2 z-10">
 		<LongDistance type="circle" />
-		<span>Transport products</span>
+		<span class="font-medium">Transport products</span>
 	</div>
 
 	<div class="flex items-center gap-x-2 z-10">
@@ -186,7 +189,7 @@
 		<div class="flex flex-row items-center justify-between">
 			<span class="text-xl font-bold">Choose transport type</span>
 			<X
-				class="stroke-accent cursor-pointer"
+				class="cursor-pointer hover:stroke-accent transition-colors"
 				onclick={() => {
 					dropdownOpen = false;
 					disabledProducts = availableProducts
