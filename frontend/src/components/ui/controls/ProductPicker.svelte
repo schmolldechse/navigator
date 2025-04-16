@@ -206,8 +206,9 @@
 			{/each}
 		</div>
 
-		<Button class="self-end rounded-md px-5 py-2 text-black font-bold"
-				onclick={() => {
+		<Button
+			class="self-end rounded-md px-5 py-2 font-bold text-black"
+			onclick={() => {
 				dropdownOpen = false;
 				disabledProducts = availableProducts
 					.filter((product: Product) => !product.selected)

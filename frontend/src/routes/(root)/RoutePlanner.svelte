@@ -54,28 +54,31 @@
 	</div>
 
 	<!-- Search button -->
-	<Button class="rounded-md px-5 py-2 text-black font-bold" onclick={async () => {
-		if (disabledProducts.length === 10) return;
-		if (!start || !destination) return;
-		if (start.evaNumber === destination.evaNumber) return;
-		if (!dateSelected) return;
+	<Button
+		class="rounded-md px-5 py-2 font-bold text-black"
+		onclick={async () => {
+			if (disabledProducts.length === 10) return;
+			if (!start || !destination) return;
+			if (start.evaNumber === destination.evaNumber) return;
+			if (!dateSelected) return;
 
-		const params = new URLSearchParams({
-			from: String(start.evaNumber),
-			to: String(destination.evaNumber)
-		});
-		if (disabledProducts.length > 0) params.set("disabledProducts", disabledProducts.join(","));
-		switch (type) {
-			case "departures":
-				params.set("departure", dateSelected.toISO());
-				break;
-			case "arrivals":
-				params.set("arrival", dateSelected.toISO());
-				break;
-		}
+			const params = new URLSearchParams({
+				from: String(start.evaNumber),
+				to: String(destination.evaNumber)
+			});
+			if (disabledProducts.length > 0) params.set("disabledProducts", disabledProducts.join(","));
+			switch (type) {
+				case "departures":
+					params.set("departure", dateSelected.toISO());
+					break;
+				case "arrivals":
+					params.set("arrival", dateSelected.toISO());
+					break;
+			}
 
-		await goto(`journey/planned?${params.toString()}`);
-	}}>
+			await goto(`journey/planned?${params.toString()}`);
+		}}
+	>
 		Search
 	</Button>
 </div>
