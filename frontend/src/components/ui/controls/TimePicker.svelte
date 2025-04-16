@@ -6,7 +6,8 @@
 	import ChevronRight from "lucide-svelte/icons/chevron-right";
 	import X from "lucide-svelte/icons/x";
 	import Minus from "lucide-svelte/icons/minus";
-	import { Plus, RefreshCw } from "lucide-svelte";
+	import Plus from "lucide-svelte/icons/plus";
+	import TrashIcon from "lucide-svelte/icons/trash";
 	import Button from "$components/ui/interactive/Button.svelte";
 	import { onMount } from "svelte";
 
@@ -210,7 +211,7 @@
 		<div class="flex items-center self-end gap-x-2">
 			<Button class="px-4 py-2 flex items-center gap-x-2 w-fit rounded-md text-background"
 					onclick={() => date = DateTime.now().set({ second: 0, millisecond: 0 })}>
-				<RefreshCw class="" size="22" />
+				<TrashIcon size="22" />
 			</Button>
 			<Button class="px-4 py-2 flex items-center gap-x-2 w-fit rounded-md text-background font-bold"
 					onclick={() => dropdownOpen = false}>
