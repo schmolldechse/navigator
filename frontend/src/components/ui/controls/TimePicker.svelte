@@ -8,11 +8,13 @@
 	import Minus from "lucide-svelte/icons/minus";
 	import { Plus, RefreshCw } from "lucide-svelte";
 	import Button from "$components/ui/interactive/Button.svelte";
+	import { onMount } from "svelte";
 
 	let { date = $bindable<DateTime>(DateTime.now().set({ second: 0, millisecond: 0 })) }: {
 		date: DateTime;
 	} = $props();
 	let dropdownOpen: boolean = $state<boolean>(false);
+	let dropdownElement: HTMLDivElement | undefined = $state<HTMLDivElement | undefined>(undefined);
 
 	let hoursInputTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
 	let minutesInputTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
@@ -34,6 +36,18 @@
 	});
 
 	const selectedDisplay = $derived(() => date.toFormat("dd.MM.yyyy - HH:mm"));
+
+	onMount(() => {
+		const clickOutside = (event: MouseEvent) => {
+			if (!dropdownElement) return;
+			if (dropdownElement.contains(event.target as Node)) return;
+			dropdownOpen = false;
+		};
+
+		// register events
+		document.addEventListener("click", clickOutside);
+		return () => document.removeEventListener("click", clickOutside);
+	})
 </script>
 
 <!-- overflow-hidden needed for highlight effect! -->
@@ -62,6 +76,7 @@
 
 {#if dropdownOpen}
 	<div
+		bind:this={dropdownElement}
 		class="bg-input-background border-primary absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 border px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl"
 		role="dialog"
 	>
