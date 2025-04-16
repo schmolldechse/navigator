@@ -3,51 +3,39 @@
 	import StationSearch from "$components/ui/controls/StationSearch.svelte";
 	import type { Station } from "$models/station";
 	import TimePicker from "$components/ui/controls/TimePicker.svelte";
-	import Clock from "$components/ui/icons/Clock.svelte";
 	import { goto } from "$app/navigation";
 	import Search from "lucide-svelte/icons/search";
 	import TravelMode from "$components/ui/controls/TravelMode.svelte";
+	import Button from "$components/ui/interactive/Button.svelte";
 
-	let typeSelected: "departures" | "arrivals" = $state("departures");
-
-	let stationSelected: Station | undefined = $state();
-	let dateSelected = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
+	let type: "departures" | "arrivals" = $state<"departures" | "arrivals">("departures");
+	let station: Station | undefined = $state(undefined);
+	let date = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 </script>
 
-<div class="flex flex-col gap-y-2 md:w-[40%]">
-	<TravelMode type={typeSelected} />
+<div class="mx-4 flex w-full flex-col gap-y-4 text-base md:w-[45%]">
+	<!-- Titlebar -->
+	<header class="bg-titlebar-background flex items-center justify-between rounded-t-2xl p-4">
+		<span class="text-accent text-base font-bold md:text-3xl">Timetable</span>
+		<TravelMode bind:type class="text-xs md:text-base" />
+	</header>
 
-	<StationSearch bind:station={stationSelected} placeholder="Search your station...">
+	<!-- Station -->
+	<StationSearch bind:station placeholder="Search your station...">
 		<Search size={44} />
 	</StationSearch>
 
-	<div class="flex flex-row">
-		<TimePicker bind:selectedDate={dateSelected} />
+	<TimePicker bind:date />
 
-		<div class="ml-auto flex gap-x-1 md:gap-x-3">
-			<!-- Reset time -->
-			<button
-				class="bg-primary-dark flex cursor-pointer flex-row items-center rounded-3xl px-2 md:gap-x-1 md:px-4"
-				onclick={() => (dateSelected = DateTime.now().set({ second: 0, millisecond: 0 }))}
-			>
-				<Clock height="25px" width="25px" />
-				<span class="hidden text-xl md:block">Now</span>
-			</button>
+	<Button
+		class="rounded-md px-5 py-2 font-bold text-black md:w-fit md:self-end"
+		onclick={async () => {
+			if (!station) return;
+			if (!date) return;
 
-			<!-- Query departures/ arrivals of a station -->
-			<button
-				class="{stationSelected && dateSelected
-					? 'bg-accent text-black'
-					: 'bg-primary-dark text-text hover:bg-secondary'} text-background cursor-pointer rounded-3xl px-4 font-bold md:text-2xl"
-				onclick={async () => {
-					if (!stationSelected || !dateSelected) return;
-					await goto(
-						`/${stationSelected?.evaNumber}/${typeSelected}?startDate=${encodeURIComponent(dateSelected.toISO())}`
-					);
-				}}
-			>
-				Search
-			</button>
-		</div>
-	</div>
+			await goto(`/${station?.evaNumber}/${type}?startDate=${encodeURIComponent(date.toISO())}`);
+		}}
+	>
+		Search
+	</Button>
 </div>
