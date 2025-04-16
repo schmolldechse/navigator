@@ -25,7 +25,7 @@ class RoutePlannerQuery {
 	 * @maxItems 10 maximum of 10 products can be disabled
 	 * @uniqueItems Only unique values are allowed
 	 */
-	disabledProducts?: string[];
+	disabledProducts?: string;
 
 	departure?: string;
 	arrival?: string;
@@ -93,10 +93,9 @@ export class JourneyController extends Controller {
 			to: query.to.toString(),
 			stopovers: "true"
 		});
+
 		if ((query?.disabledProducts?.length ?? 0) > 0)
-			this.disallowProducts(query?.disabledProducts!).forEach((product) =>
-				params.append(Object.keys(product)[0], "false")
-			);
+			this.disallowProducts(query?.disabledProducts!).forEach((product) => params.set(Object.keys(product)[0], "false"));
 
 		if (query.earlierThan) params.set("earlierThan", query.earlierThan);
 		else if (query.laterThan) params.set("laterThan", query.laterThan);
@@ -113,8 +112,10 @@ export class JourneyController extends Controller {
 		return mapToRoute(await request.json()) as RouteData;
 	};
 
-	disallowProducts = (input: string[]): { [product: string]: boolean }[] => {
+	disallowProducts = (input: string): { [product: string]: boolean }[] => {
 		return input
+			.split(",")
+			.map((line) => line.trim())
 			.filter((product) =>
 				Object.values(Products)
 					.filter((p) => p.possibilities.length > 0)
