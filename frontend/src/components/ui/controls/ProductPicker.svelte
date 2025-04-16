@@ -10,6 +10,7 @@
 	import Tram from "$components/ui/transport-types/Tram.svelte";
 	import Switch from "$components/ui/controls/Switch.svelte";
 	import Taxi from "$components/ui/transport-types/Taxi.svelte";
+	import ChevronDown from "lucide-svelte/icons/chevron-down";
 
 	export interface Product {
 		key: string;
@@ -156,7 +157,10 @@
 		<span>Transport products</span>
 	</div>
 
-	<span class="text-white/75 italic">{selectedDisplay()}</span>
+	<div class="flex items-center gap-x-2 z-10">
+		<span class="text-white/75 italic">{selectedDisplay()}</span>
+		<ChevronDown class={`stroke-accent transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+	</div>
 </button>
 
 {#snippet renderProduct(product: Product)}
