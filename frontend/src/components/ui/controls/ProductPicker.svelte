@@ -166,14 +166,15 @@
 		</div>
 
 		<button
-			class="bg-accent cursor-pointer self-end rounded-sm px-4 py-2 font-bold text-black"
+			class="bg-accent hover:bg-accent/90 transition-colors cursor-pointer self-end rounded-md px-5 py-2 font-bold text-black"
 			onclick={() => {
 				dropdownOpen = false;
 				disabledProducts = availableProducts
 					.filter((product: Product) => !product.selected)
 					.flatMap((product: Product) => product.possibilities);
 			}}
-			>Append
+		>
+			Append
 		</button>
 	</div>
 {/if}
