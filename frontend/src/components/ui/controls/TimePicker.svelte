@@ -1,165 +1,168 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import { DateTime } from "luxon";
-	import CalendarDays from "lucide-svelte/icons/calendar-days";
+	import Clock from "lucide-svelte/icons/clock";
+	import ChevronDown from "lucide-svelte/icons/chevron-down";
+	import ChevronLeft from "lucide-svelte/icons/chevron-left";
+	import ChevronRight from "lucide-svelte/icons/chevron-right";
+	import X from "lucide-svelte/icons/x";
+	import Minus from "lucide-svelte/icons/minus";
+	import { Plus, RefreshCw } from "lucide-svelte";
+	import Button from "$components/ui/interactive/Button.svelte";
 
-	let { selectedDate = $bindable(DateTime.now().set({ second: 0, millisecond: 0 })) } = $props();
+	let { date = $bindable<DateTime>(DateTime.now().set({ second: 0, millisecond: 0 })) }: {
+		date: DateTime;
+	} = $props();
+	let dropdownOpen: boolean = $state<boolean>(false);
 
-	let isOpen: boolean = $state(false);
-	let inputElement: HTMLDivElement;
+	let hoursInputTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
+	let minutesInputTimeout = $state<ReturnType<typeof setTimeout> | null>(null);
 
-	let inputTimeout: number;
-	let buffer = { current: { hours: "", minutes: "" } };
+	const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-	function clickOutside(event: MouseEvent) {
-		if (inputElement.contains(event.target as Node)) return;
-		isOpen = false;
-	}
+	const getCalendarDays: DateTime[] = $derived.by(() => {
+		const startDate = date.startOf("month").startOf("week");
+		const endDate = date.endOf("month").endOf("week");
 
-	onMount(() => {
-		document.addEventListener("click", clickOutside);
-		return () => document.removeEventListener("click", clickOutside);
+		const days: DateTime[] = [];
+		let currentDate = startDate;
+
+		while (currentDate <= endDate) {
+			days.push(currentDate);
+			currentDate = currentDate.plus({ day: 1 });
+		}
+		return days;
 	});
 
-	const getDays = (): DateTime[] => {
-		const startDate = selectedDate.startOf("month").startOf("week");
-		const endDate = selectedDate.endOf("month").endOf("week");
-
-		let days: DateTime[] = [];
-		let day = startDate;
-
-		while (day <= endDate) {
-			days.push(day);
-			day = day.plus({ days: 1 });
-		}
-
-		return days;
-	};
-
-	const adjustTimeByMinutes = (amount: number) => {
-		selectedDate = selectedDate.plus({ minutes: amount });
-	};
-
-	const handleKeyPress = (e: KeyboardEvent) => {
-		const part = (e.target as HTMLInputElement).dataset.part;
-		if (!part || (part !== "minutes" && part !== "hours")) return;
-		if (!/^\d+$/.test(e.key)) return;
-
-		clearTimeout(inputTimeout);
-		buffer.current[part] += e.key;
-
-		if (buffer.current[part].length === 2) {
-			// validate if two digits are entered
-			const maxValue = part === "hours" ? 23 : 59;
-			const validatedValue = Math.min(parseInt(buffer.current[part], 10), maxValue);
-
-			selectedDate =
-				part === "hours" ? selectedDate.set({ hour: validatedValue }) : selectedDate.set({ minute: validatedValue });
-
-			// reset buffer
-			buffer.current[part] = "";
-		} else {
-			selectedDate =
-				part === "hours"
-					? selectedDate.set({ hour: parseInt(e.key, 10) || 0 })
-					: selectedDate.set({ minute: parseInt(e.key, 10) || 0 });
-
-			inputTimeout = setTimeout(() => (buffer.current[part] = ""), 500);
-		}
-	};
+	const selectedDisplay = $derived(() => date.toFormat("dd.MM.yyyy - HH:mm"));
 </script>
 
-<!-- TODO: rewrite -->
-<div bind:this={inputElement} class="relative w-full">
-	<button
-		type="button"
-		class:ring-2={isOpen}
-		class:ring-accent={isOpen}
-		class="bg-input-background hover:ring-accent flex cursor-pointer flex-row items-center gap-x-2 rounded-2xl px-6 py-2 hover:ring-2 md:text-2xl"
-		onclick={() => (isOpen = true)}
+<!-- overflow-hidden needed for highlight effect! -->
+<button
+	class="bg-input-background group relative flex w-full cursor-pointer items-center justify-between rounded-2xl px-4 py-3 shadow-sm overflow-hidden"
+	onclick={(event: MouseEvent) => {
+		event.stopPropagation();
+		dropdownOpen = !dropdownOpen;
+	}}
+	aria-expanded={dropdownOpen}
+	aria-haspopup="true"
+>
+	<!-- highlight effect on hover -->
+	<div class="bg-accent/5 absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"></div>
+
+	<div class="flex items-center gap-x-2 mr-14">
+		<Clock class="stroke-accent" size="30" />
+		<span class="font-medium">Date</span>
+	</div>
+
+	<div class="flex items-center gap-x-2">
+		<span class="text-white/75 italic">{selectedDisplay()}</span>
+		<ChevronDown class={`stroke-accent transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
+	</div>
+</button>
+
+{#if dropdownOpen}
+	<div
+		class="bg-input-background border-primary absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 border px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl"
+		role="dialog"
 	>
-		<CalendarDays class="stroke-accent" />
-		<span>{selectedDate.toFormat("dd.MM.yyyy - HH:mm")}</span>
-	</button>
+		<!-- Header -->
+		<div class="flex flex-row items-center justify-between">
+			<span class="text-xl font-bold">Choose date & time</span>
+			<X
+				class="hover:stroke-accent cursor-pointer transition-colors"
+				onclick={() => dropdownOpen = false}
+			/>
+		</div>
 
-	{#if isOpen}
-		<div
-			class="bg-primary absolute top-1/2 left-1/2 z-10 mt-8 w-80 -translate-x-1/4 transform rounded-sm p-4 shadow-lg md:top-full md:left-auto md:mt-2 md:w-128 md:transform-none"
-		>
-			<!-- header -->
-			<div class="mb-4 flex items-center justify-between">
-				<button onclick={() => (selectedDate = selectedDate.minus({ months: 1 }))}>
-					&lt; {selectedDate.minus({ months: 1 }).toFormat("MMM")}</button
-				>
-				<div class={"font-bold"}>{selectedDate.toFormat("MMMM yyyy")}</div>
-				<button onclick={() => (selectedDate = selectedDate.plus({ months: 1 }))}
-					>{selectedDate.plus({ months: 1 }).toFormat("MMM")}
-					&gt;
-				</button>
-			</div>
+		<!-- Month navigation -->
+		<div class="flex items-center justify-between px-2">
+			<button class="flex items-center gap-x-2 text-white/75 hover:text-accent transition-colors duration-200"
+					onclick={() => date = date.minus({ month: 1 })}
+					aria-label="One month back"
+			>
+				<ChevronLeft />
+				<span>{date.minus({ month: 1 }).toFormat("MMM")}</span>
+			</button>
 
-			<!-- calendar grid -->
-			<div class="grid grid-cols-7 gap-1 text-sm">
-				{#each ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"] as day}
-					<div class="text-center font-bold">
-						{day}
-					</div>
-				{/each}
+			<span class="font-bold text-lg">{date.toFormat("MMMM yyyy")}</span>
 
-				{#each getDays() as day}
-					<button
-						class="p-2 text-center {day.hasSame(selectedDate, 'month') ? '' : 'text-gray-400'} {day.hasSame(
-							selectedDate,
-							'day'
-						)
-							? 'bg-accent rounded-md font-bold text-black'
-							: ''}"
-						onclick={() => (selectedDate = day.set({ hour: selectedDate.hour, minute: selectedDate.minute }))}
-					>
-						{day.day}
-					</button>
-				{/each}
-			</div>
-
-			<!-- time inputs -->
-			<div class="mt-4 flex items-center justify-between space-x-2 font-bold">
-				<button class="bg-accent rounded-sm px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(-15)}>
-					-
-				</button>
-
-				<div class="flex items-center space-x-2">
-					<input
-						type="text"
-						name="hours"
-						data-part="hours"
-						value={String(selectedDate.hour).padStart(2, "0")}
-						onkeydown={handleKeyPress}
-						maxLength={2}
-						readOnly={true}
-						class="text-text w-full rounded-sm border border-none bg-transparent text-center text-xl focus:outline-hidden"
-					/>
-					<span>:</span>
-					<input
-						type="text"
-						name="minutes"
-						data-part="minutes"
-						value={String(selectedDate.minute).padStart(2, "0")}
-						onkeydown={handleKeyPress}
-						maxLength={2}
-						readOnly={true}
-						class="text-text w-full rounded-sm border border-none bg-transparent text-center text-xl focus:outline-hidden"
-					/>
-				</div>
-
-				<button class="bg-accent rounded-sm px-4 py-1 text-black md:px-3" onclick={() => adjustTimeByMinutes(15)}>
-					+
-				</button>
-			</div>
-
-			<!-- select button -->
-			<button class="bg-accent mt-4 w-full rounded-sm py-2 font-bold text-black" onclick={() => (isOpen = false)}>
-				Select
+			<button class="flex items-center gap-x-2 text-white/75 hover:text-accent transition-colors duration-200"
+					onclick={() => date = date.plus({ month: 1 })}
+					aria-label="One month forward"
+			>
+				<ChevronRight />
+				<span>{date.plus({ month: 1 }).toFormat("MMM")}</span>
 			</button>
 		</div>
-	{/if}
-</div>
+
+		<!-- Calendar -->
+		<div class="grid grid-cols-7 gap-y-1 text-center">
+			{#each weekdays as day}
+				<div class="text-white/75 font-medium py-1">{day}</div>
+			{/each}
+
+			{#each getCalendarDays as day}
+				<button
+					class={[
+						{ "border border-accent/75": day.hasSame(DateTime.now(), "day") }, // day is current Date
+						{ "bg-accent text-black font-bold": day.hasSame(date, "day") }, // day is selected Date
+						{ "text-white/30": !day.hasSame(date, "month") }, // day has not the same month as selected Date
+						{ "hover:bg-accent/20 transition-colors": !day.hasSame(date, "day") }, // day is not selected Date
+						"rounded-full mx-auto w-9 h-9 cursor-pointer",
+						]}
+					onclick={() => date = day}
+				>
+					{day.toFormat("dd")}
+				</button>
+			{/each}
+		</div>
+
+		<!-- Time picker -->
+		<div class="flex flex-col gap-y-2">
+			<span class="text-white/75">Pick your time</span>
+
+			<!-- hours/ minutes inputs -->
+			<div class="flex items-center gap-x-8">
+				<button
+					class="bg-input-background border border-accent/30 hover:border-accent rounded-md p-2 text-white/75 hover:text-accent transition-colors"
+					onclick={() => date = date.minus({ minutes: 15 })}
+					aria-label="Decrease date by 15 minutes"
+					title="-15min"
+				>
+					<Minus />
+				</button>
+
+				<div class="flex items-center gap-x-4">
+					<input type="text"
+						   class="bg-input-background border border-accent/30 rounded-md w-16 px-3 py-2 text-center focus:border-accent focus:outline-none"
+						   aria-label="Hours" />
+					<span class="text-xl font-bold">:</span>
+					<input type="text"
+						   class="bg-input-background border border-accent/30 rounded-md w-16 px-3 py-2 text-center focus:border-accent focus:outline-none"
+						   aria-label="Minutes" />
+				</div>
+
+				<button
+					class="bg-input-background border border-accent/30 hover:border-accent rounded-md p-2 text-white/75 hover:text-accent transition-colors"
+					onclick={() => date = date.plus({ minutes: 15 })}
+					aria-label="Increase date by 15 minutes"
+					title="+15min"
+				>
+					<Plus />
+				</button>
+			</div>
+		</div>
+
+		<!-- Control buttons -->
+		<div class="flex items-center self-end gap-x-2">
+			<Button class="px-4 py-2 flex items-center gap-x-2 w-fit rounded-md text-background"
+					onclick={() => date = DateTime.now().set({ second: 0, millisecond: 0 })}>
+				<RefreshCw class="" size="22" />
+			</Button>
+			<Button class="px-4 py-2 flex items-center gap-x-2 w-fit rounded-md text-background font-bold"
+					onclick={() => dropdownOpen = false}>
+				Select
+			</Button>
+		</div>
+	</div>
+{/if}
