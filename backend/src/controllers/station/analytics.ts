@@ -9,7 +9,8 @@ import type { ConnectionDocument } from "../../db/mongodb/station.schema.ts";
 const analyzeStation = async (
 	saveDir: string,
 	evaNumbers: number[],
-	options: { startDate: DateTime; endDate: DateTime }
+	options: { startDate: DateTime; endDate: DateTime },
+	filter: { products: string[]; lineName: string[]; lineNumber: string[] }
 ): Promise<StopAnalytics> => {
 	if (!fs.existsSync(saveDir)) throw new Error(`Statistics for ${evaNumbers} do not exist`);
 
@@ -22,7 +23,7 @@ const analyzeStation = async (
 
 	const filePromises = files.map(async (filePath) => {
 		const content = fs.readFileSync(filePath, { encoding: "utf8" });
-		return analyzeConnections(evaNumbers, JSON.parse(content) as Connection[], options);
+		return analyzeConnections(evaNumbers, JSON.parse(content) as Connection[], options, filter);
 	});
 	const results: StopAnalytics[] = await Promise.all(filePromises);
 
@@ -73,7 +74,8 @@ const analyzeStation = async (
 const analyzeConnections = async (
 	relevantEvaNumbers: number[],
 	connections: ConnectionDocument[],
-	options: { startDate: DateTime; endDate: DateTime }
+	options: { startDate: DateTime; endDate: DateTime },
+	filter: { products: string[]; lineName: string[]; lineNumber: string[] }
 ): Promise<StopAnalytics> => {
 	const analytics: StopAnalytics = {
 		products: {},
@@ -113,6 +115,11 @@ const analyzeConnections = async (
 		if (!isInBetween(date, options)) return;
 
 		const product = connection?.lineInformation?.type || "UNKNOWN";
+
+		if (filter.products.length > 0 && !filter.products.includes(product)) return;
+		if (filter.lineName.length > 0 && !filter.lineName.includes(connection?.lineInformation?.lineName ?? "")) return;
+		if (filter.lineNumber.length > 0 && !filter.lineNumber.includes(connection?.lineInformation?.fahrtNr ?? "")) return;
+
 		analytics.products[product] = (analytics.products[product] ?? 0) + 1;
 
 		const relevantStop = connection?.viaStops?.find(
