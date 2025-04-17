@@ -39,8 +39,6 @@ interface StopAnalytics {
 	relatedEvaNumbers: number[];
 	// total number of connections found in the database
 	foundByQuery?: number;
-	// total number of connections found with filter being applied
-	foundByFilter?: number;
 	parsingSucceeded: number;
 	parsingFailed: number;
 	// how often a product has occurred
