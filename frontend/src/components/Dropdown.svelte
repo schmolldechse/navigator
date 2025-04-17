@@ -31,7 +31,7 @@
 
 	{#if isOpen}
 		<div
-			class="bg-primary-darker absolute right-0 top-full z-10 mt-2 w-48 rounded-md p-2 shadow-lg"
+			class="bg-primary-darker absolute top-full right-0 z-10 mt-2 w-48 rounded-md p-2 shadow-lg"
 			bind:this={dropdownContainer}
 		>
 			{#each dropdownElements as element}

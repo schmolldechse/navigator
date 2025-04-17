@@ -153,7 +153,7 @@
 	</div>
 
 	<div class="flex items-center gap-x-2">
-		<span class="italic text-white/75">{selectedDisplay()}</span>
+		<span class="text-white/75 italic">{selectedDisplay()}</span>
 		<ChevronDown class={`stroke-accent transition-transform duration-200 ${dropdownOpen ? "rotate-180" : ""}`} />
 	</div>
 </button>
@@ -177,7 +177,7 @@
 {#if dropdownOpen}
 	<div
 		bind:this={dropdownElement}
-		class="bg-input-background border-primary z-999 absolute left-0 top-0 flex w-full flex-col gap-y-6 border px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl"
+		class="bg-input-background border-primary absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 border px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl"
 		role="menu"
 		aria-orientation="vertical"
 	>

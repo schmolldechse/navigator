@@ -54,7 +54,7 @@
 			<div class="bg-accent z-1 h-[12px] w-[12px] self-end rounded-full"></div>
 		</div>
 
-		<div class="bg-input-background z-1 relative flex w-full flex-col gap-y-0.5 rounded-2xl">
+		<div class="bg-input-background relative z-1 flex w-full flex-col gap-y-0.5 rounded-2xl">
 			<StationSearch bind:station={start} placeholder="Start" class="z-0 md:text-xl" />
 
 			<button
