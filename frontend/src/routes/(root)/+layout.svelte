@@ -4,6 +4,7 @@
 	import { setContext } from "svelte";
 	import { DateTime } from "luxon";
 	import GitHub from "$components/ui/icons/GitHub.svelte";
+	import { MetaTags } from "svelte-meta-tags";
 
 	let { children }: LayoutProps = $props();
 	let currentType = $state("timetable");
@@ -11,9 +12,31 @@
 	setContext("currentType", () => currentType);
 </script>
 
+<MetaTags
+	title="Navigator"
+	description="The Navigator for your train journeys."
+	openGraph={{
+		url: "https://navigator.voldechse.wtf",
+		title: "Navigator",
+		siteName: "Navigator",
+		description: "The Navigator for your train journeys.",
+		images: [
+			{
+				url: "https://navigator.voldechse.wtf/logo.png",
+				width: 1024,
+				height: 1024,
+				alt: "Navigator Logo"
+			}
+		]
+	}}
+/>
+
 <div class="relative flex min-h-screen w-full flex-col">
-	<Navbar bind:currentType dropdownEnabled={true} />
-	{@render children()}
+	<Navbar dropdownEnabled={true} />
+
+	<div class="flex flex-1 items-center justify-center">
+		{@render children()}
+	</div>
 
 	<footer
 		class="bg-primary-darker sticky bottom-0 flex w-full flex-row items-center justify-between p-4 text-xs md:text-base"
