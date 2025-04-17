@@ -5,6 +5,7 @@
 	import { DateTime } from "luxon";
 	import GitHub from "$components/ui/icons/GitHub.svelte";
 	import { MetaTags } from "svelte-meta-tags";
+	import ServerCog from "lucide-svelte/icons/server-cog";
 
 	let { children }: LayoutProps = $props();
 	let currentType = $state("timetable");
@@ -43,9 +44,15 @@
 	>
 		<span>&copy; {DateTime.now().year} - Schmolldechse & Contributors</span>
 
-		<a class="flex flex-row items-center gap-2" href="https://github.com/schmolldechse/navigator">
-			GitHub
-			<GitHub width="24px" height="24px" />
-		</a>
+		<div class="flex flex-row gap-4 items-center justify-center">
+			<a class="flex flex-row items-center gap-2" href="/api-docs" title="API Docs">
+				<ServerCog size="24" class="hover:stroke-accent transition-colors duration-200" />
+			</a>
+
+			<a class="flex flex-row items-center gap-2" href="https://github.com/schmolldechse/navigator" title="GitHub Repository">
+				GitHub
+				<GitHub width="24px" height="24px" />
+			</a>
+		</div>
 	</footer>
 </div>
