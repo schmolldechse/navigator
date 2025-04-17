@@ -8,15 +8,35 @@
 	import ProductPicker from "$components/ui/controls/ProductPicker.svelte";
 	import Button from "$components/ui/interactive/Button.svelte";
 	import { goto } from "$app/navigation";
+	import type { Snapshot } from "../$types";
 
 	let type: "departures" | "arrivals" = $state<"departures" | "arrivals">("departures");
 
 	let start: Station | undefined = $state(undefined);
 	let destination: Station | undefined = $state(undefined);
 
-	let date = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
+	let date: DateTime<true> = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 
-	let disabledProducts = $state<string[]>([]);
+	let disabledProducts = $state<string[]>(["SBAHNEN"]);
+
+	interface SnapshotData {
+		start: Station | undefined;
+		destination: Station | undefined;
+		type: "departures" | "arrivals";
+		date: string;
+		disabledProducts: string[];
+	}
+
+	export const snapshot: Snapshot<SnapshotData> = {
+		capture: () => ({ start, destination, type, date: date.toISO(), disabledProducts }),
+		restore: (value) => {
+			start = value.start;
+			destination = value.destination;
+			type = value.type;
+			date = DateTime.fromISO(value.date) as DateTime<true>;
+			disabledProducts = value.disabledProducts;
+		}
+	};
 </script>
 
 <div class="mx-4 flex w-full flex-col gap-y-4 text-base md:w-[45%]">
@@ -34,11 +54,11 @@
 			<div class="bg-accent z-1 h-[12px] w-[12px] self-end rounded-full"></div>
 		</div>
 
-		<div class="bg-input-background relative z-1 flex w-full flex-col gap-y-0.5 rounded-2xl">
+		<div class="bg-input-background z-1 relative flex w-full flex-col gap-y-0.5 rounded-2xl">
 			<StationSearch bind:station={start} placeholder="Start" class="z-0 md:text-xl" />
 
 			<button
-				class="group bg-accent hover:bg-accent absolute top-1/2 z-10 mr-4 -translate-y-1/2 cursor-pointer self-end rounded-full p-2"
+				class="bg-accent hover:bg-accent group absolute top-1/2 z-10 mr-4 -translate-y-1/2 cursor-pointer self-end rounded-full p-2"
 				onclick={() => {
 					if (!start || !destination) return;
 					if (start.evaNumber === destination.evaNumber) return;

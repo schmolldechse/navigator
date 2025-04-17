@@ -1,11 +1,5 @@
 <script lang="ts">
-	let {
-		checked = $bindable<boolean>(false),
-		disabled = false
-	}: {
-		checked?: boolean;
-		disabled?: boolean;
-	} = $props();
+	let { checked = false, onchecked }: { checked?: boolean; onchecked?: (checked: boolean) => void } = $props();
 </script>
 
 <div class="flex items-center gap-3">
@@ -14,9 +8,10 @@
 		aria-label="switch"
 		aria-checked={checked}
 		class="switch"
-		class:disabled
-		onclick={() => (checked = !checked)}
-		{disabled}
+		onclick={() => {
+			checked = !checked;
+			if (onchecked) onchecked(checked);
+		}}
 	>
 		<span class="switch-track"></span>
 		<span class="switch-thumb"></span>
@@ -32,11 +27,6 @@
 		background: transparent;
 		padding: 0;
 		cursor: pointer;
-	}
-
-	.switch.disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
 	}
 
 	.switch-track {
