@@ -6,6 +6,7 @@
 	import ArrowUp from "lucide-svelte/icons/arrow-up";
 	import RouteSkeleton from "$components/route-planner/RouteSkeleton.svelte";
 	import RouteRequest from "$components/route-planner/RouteRequest.svelte";
+	import WarningNoRoutes from "$components/route-planner/WarningNoRoutes.svelte";
 
 	let { data }: PageProps = $props();
 </script>
@@ -33,26 +34,29 @@
 	<!-- Route Request Info -->
 	<RouteRequest stations={data.stations} />
 
-	<!-- Routes -->
-	<div class="flex flex-col gap-y-2">
-		<div class="flex flex-row items-center gap-x-2">
-			<span class="text-lg">Earlier connections</span>
-			<ArrowUp color="#ffda0a" />
-		</div>
-		<div class="space-y-2">
-			{#await data.plannedRoute}
-				{#each Array(5) as _, i}
-					<RouteSkeleton />
-				{/each}
-			{:then plannedRoute}
+	<div class="flex flex-row items-center gap-x-2">
+		<span class="text-lg">Earlier connections</span>
+		<ArrowUp color="#ffda0a" />
+	</div>
+
+	<div class="space-y-2 flex-grow">
+		{#await data.plannedRoute}
+			{#each Array(5) as _, i}
+				<RouteSkeleton />
+			{/each}
+		{:then plannedRoute}
+			{#if plannedRoute?.journeys.length === 0}
+				<WarningNoRoutes />
+			{:else}
 				{#each plannedRoute?.journeys as route}
 					<Route {route} />
 				{/each}
-			{/await}
-		</div>
-		<div class="flex flex-row items-center gap-x-2">
-			<span class="text-lg">Later connections</span>
-			<ArrowDown color="#ffda0a" />
-		</div>
+			{/if}
+		{/await}
+	</div>
+
+	<div class="flex flex-row items-center gap-x-2 mt-auto">
+		<span class="text-lg">Later connections</span>
+		<ArrowDown color="#ffda0a" />
 	</div>
 </div>
