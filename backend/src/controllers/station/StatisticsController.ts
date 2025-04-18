@@ -32,6 +32,11 @@ interface StatsInDto {
 	 * filter options
 	 */
 	filter?: {
+		/**
+		 * defines the threshold in seconds after which a delay is considered
+		 */
+		delayThreshold?: number;
+
 		products?: string[];
 		lineName?: string[];
 		lineNumber?: string[];
@@ -82,11 +87,13 @@ export class StatisticsController extends Controller {
 		if (evaNumbers.length === 0) throw new HttpError(400, "Station not found");
 
 		const filter = {
+			delayThreshold: 60,
 			products: [],
 			lineName: [],
 			lineNumber: [],
 			...body.filter
 		}
+		if (filter.delayThreshold < 60) filter.delayThreshold = 60;
 
 		const saveDir = path.join(this.BASE_PATH, evaNumbers.join("-"));
 		const manifestPath = path.join(saveDir, "manifest.json");

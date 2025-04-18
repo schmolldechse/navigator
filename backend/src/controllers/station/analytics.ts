@@ -10,7 +10,7 @@ const analyzeStation = async (
 	saveDir: string,
 	evaNumbers: number[],
 	options: { startDate: DateTime; endDate: DateTime },
-	filter: { products: string[]; lineName: string[]; lineNumber: string[] }
+	filter: { delayThreshold: number, products: string[]; lineName: string[]; lineNumber: string[] }
 ): Promise<StopAnalytics> => {
 	if (!fs.existsSync(saveDir)) throw new Error(`Statistics for ${evaNumbers} do not exist`);
 
@@ -75,7 +75,7 @@ const analyzeConnections = async (
 	relevantEvaNumbers: number[],
 	connections: ConnectionDocument[],
 	options: { startDate: DateTime; endDate: DateTime },
-	filter: { products: string[]; lineName: string[]; lineNumber: string[] }
+	filter: { delayThreshold: number, products: string[]; lineName: string[]; lineNumber: string[] }
 ): Promise<StopAnalytics> => {
 	const analytics: StopAnalytics = {
 		products: {},
@@ -152,7 +152,8 @@ const analyzeConnections = async (
 
 			if (delay < 0) analytics.arrival.totalTooEarly++;
 			else if (delay <= 60) analytics.arrival.totalPunctual++;
-			else analytics.arrival.totalDelayed++;
+			else if (delay > filter.delayThreshold) analytics.arrival.totalDelayed++;
+			else analytics.arrival.totalPunctual++;
 
 			if (relevantStop?.arrival?.plannedPlatform !== relevantStop?.arrival?.actualPlatform)
 				analytics.arrival.totalPlatformChanges++;
@@ -180,7 +181,8 @@ const analyzeConnections = async (
 
 			if (delay < 0) analytics.departure.totalTooEarly++;
 			else if (delay <= 60) analytics.departure.totalPunctual++;
-			else analytics.departure.totalDelayed++;
+			else if (delay > filter.delayThreshold) analytics.departure.totalDelayed++;
+			else analytics.departure.totalPunctual++;
 
 			if (relevantStop?.departure?.plannedPlatform !== relevantStop?.departure?.actualPlatform)
 				analytics.departure.totalPlatformChanges++;
