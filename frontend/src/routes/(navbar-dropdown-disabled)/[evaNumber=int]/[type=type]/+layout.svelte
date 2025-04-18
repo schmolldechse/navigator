@@ -76,7 +76,7 @@
 />
 
 <div class="bg-background sticky top-20 z-10 container mx-auto w-full flex-col px-6 pt-4">
-	<div class="flex justify-between">
+	<div class="flex justify-between items-start">
 		<div class="flex flex-row items-baseline gap-x-2 break-all">
 			{#if $session.data}
 				<Star
