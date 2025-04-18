@@ -86,7 +86,7 @@
 					onclick={toggleFavour}
 				/>
 			{/if}
-			<span class="text-xl font-semibold break-words whitespace-normal md:text-4xl">{station.name}</span>
+			<span class="text-xl font-semibold break-normal whitespace-normal md:text-4xl">{station.name}</span>
 		</div>
 		<Clock />
 	</div>
