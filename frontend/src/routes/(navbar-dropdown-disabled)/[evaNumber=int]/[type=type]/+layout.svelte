@@ -77,21 +77,17 @@
 
 <div class="bg-background sticky top-20 z-10 container mx-auto w-full flex-col px-6 pt-4">
 	<div class="flex justify-between">
-		{#snippet favoriteStation()}
-			<div class="flex flex-row items-baseline gap-x-2 break-all">
-				{#if $session.data}
-					<Star
-						class="shrink-0 cursor-pointer transition-all duration-300 {favor
+		<div class="flex flex-row items-baseline gap-x-2 break-all">
+			{#if $session.data}
+				<Star
+					class="shrink-0 cursor-pointer transition-all duration-300 {favor
 							? 'fill-accent stroke-yellow-400'
 							: 'hover:stroke-accent fill-transparent'}"
-						onclick={toggleFavour}
-					/>
-				{/if}
-				<span class="text-xl font-semibold break-words whitespace-normal md:text-4xl">{station.name}</span>
-			</div>
-		{/snippet}
-
-		{@render favoriteStation()}
+					onclick={toggleFavour}
+				/>
+			{/if}
+			<span class="text-xl font-semibold break-words whitespace-normal md:text-4xl">{station.name}</span>
+		</div>
 		<Clock />
 	</div>
 
