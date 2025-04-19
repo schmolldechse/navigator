@@ -8,9 +8,9 @@
 	import { env } from "$env/dynamic/public";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
-	import LegInfo from "$components/route-planner/LegInfo.svelte";
+	import LegInfo from "$components/route-planner/details/LegInfo.svelte";
 	import { onMount } from "svelte";
-	import Changeover from "$components/route-planner/Changeover.svelte";
+	import Changeover from "$components/route-planner/details/Changeover.svelte";
 	import Walking from "$components/ui/icons/Walking.svelte";
 
 	let { route }: { route: Route } = $props();
