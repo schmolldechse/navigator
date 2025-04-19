@@ -135,8 +135,8 @@
 				onclick={() => (date = date.plus({ month: 1 }))}
 				aria-label="One month forward"
 			>
-				<ChevronRight />
 				<span>{date.plus({ month: 1 }).toFormat("MMM")}</span>
+				<ChevronRight />
 			</button>
 		</div>
 
