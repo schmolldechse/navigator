@@ -76,13 +76,13 @@
 />
 
 <div class="bg-background sticky top-20 z-10 container mx-auto w-full flex-col px-6 pt-4">
-	<div class="flex justify-between items-start">
+	<div class="flex items-start justify-between">
 		<div class="flex flex-row items-baseline gap-x-2 break-all">
 			{#if $session.data}
 				<Star
 					class="shrink-0 cursor-pointer transition-all duration-300 {favor
-							? 'fill-accent stroke-yellow-400'
-							: 'hover:stroke-accent fill-transparent'}"
+						? 'fill-accent stroke-yellow-400'
+						: 'hover:stroke-accent fill-transparent'}"
 					onclick={toggleFavour}
 				/>
 			{/if}

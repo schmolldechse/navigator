@@ -44,12 +44,16 @@
 	>
 		<span>&copy; {DateTime.now().year} - Schmolldechse & Contributors</span>
 
-		<div class="flex flex-row gap-4 items-center justify-center">
+		<div class="flex flex-row items-center justify-center gap-4">
 			<a class="flex flex-row items-center gap-2" href="/api-docs" title="API Docs">
 				<ServerCog size="24" class="hover:stroke-accent transition-colors duration-200" />
 			</a>
 
-			<a class="flex flex-row items-center gap-2" href="https://github.com/schmolldechse/navigator" title="GitHub Repository">
+			<a
+				class="flex flex-row items-center gap-2"
+				href="https://github.com/schmolldechse/navigator"
+				title="GitHub Repository"
+			>
 				GitHub
 				<GitHub width="24px" height="24px" />
 			</a>
