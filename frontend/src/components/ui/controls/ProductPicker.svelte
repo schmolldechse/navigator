@@ -1,7 +1,7 @@
 <script lang="ts">
 	import LongDistance from "$components/ui/transport-types/LongDistance.svelte";
 	import { type Component, onMount } from "svelte";
-	import { X } from "lucide-svelte";
+	import X from "lucide-svelte/icons/x";
 	import Regional from "$components/ui/transport-types/Regional.svelte";
 	import Suburban from "$components/ui/transport-types/Suburban.svelte";
 	import Bus from "$components/ui/transport-types/Bus.svelte";
@@ -17,27 +17,21 @@
 		key: string;
 		display: string;
 		possibilities: string[];
-		selected: boolean;
 		icon?: {
 			component: Component;
 			type: string;
 		};
 	}
 
-	let {
-		disabledProducts = $bindable<string[]>([])
-	}: {
-		disabledProducts: string[];
-	} = $props();
+	let { disabledProducts = $bindable<string[]>([]) }: { disabledProducts: string[] } = $props();
 	let dropdownOpen = $state<boolean>(false);
 	let dropdownElement: HTMLDivElement | undefined = $state<HTMLDivElement | undefined>(undefined);
 
-	let availableProducts = $state<Product[]>([
+	const availableProducts: Product[] = [
 		{
 			key: "long-distance",
 			display: "Long Distance",
 			possibilities: ["HOCHGESCHWINDIGKEITSZUEGE", "INTERCITYUNDEUROCITYZUEGE"],
-			selected: true,
 			icon: {
 				component: LongDistance,
 				type: "rounded-corners"
@@ -47,7 +41,6 @@
 			key: "regional",
 			display: "Regional",
 			possibilities: ["INTERREGIOUNDSCHNELLZUEGE", "NAHVERKEHRSONSTIGEZUEGE"],
-			selected: true,
 			icon: {
 				component: Regional,
 				type: "rounded-corners"
@@ -57,7 +50,6 @@
 			key: "suburban",
 			display: "Suburban",
 			possibilities: ["SBAHNEN"],
-			selected: true,
 			icon: {
 				component: Suburban,
 				type: "rounded-corners"
@@ -67,7 +59,6 @@
 			key: "bus",
 			display: "Bus",
 			possibilities: ["BUSSE"],
-			selected: true,
 			icon: {
 				component: Bus,
 				type: "rounded-corners"
@@ -77,7 +68,6 @@
 			key: "ferry",
 			display: "Ferry",
 			possibilities: ["SCHIFFE"],
-			selected: true,
 			icon: {
 				component: Ferry,
 				type: "rounded-corners"
@@ -87,7 +77,6 @@
 			key: "subway",
 			display: "Subway",
 			possibilities: ["UBAHN"],
-			selected: true,
 			icon: {
 				component: Subway,
 				type: "rectangle"
@@ -97,7 +86,6 @@
 			key: "tram",
 			display: "Tram",
 			possibilities: ["STRASSENBAHN"],
-			selected: true,
 			icon: {
 				component: Tram,
 				type: "rectangle"
@@ -107,13 +95,12 @@
 			key: "taxi",
 			display: "Taxi/ Shuttle",
 			possibilities: ["ANRUFPFLICHTIGEVERKEHRE"],
-			selected: true,
 			icon: {
 				component: Taxi,
 				type: "rectangle"
 			}
 		}
-	]);
+	];
 
 	onMount(() => {
 		const clickOutside = (event: MouseEvent) => {
@@ -121,27 +108,30 @@
 			if (dropdownElement.contains(event.target as Node)) return;
 			dropdownOpen = false;
 		};
-
-		// select all products by default
-		// TODO: save in localStorage
-		availableProducts = availableProducts.map((product: Product) => ({ ...product, selected: true }));
-
-		// send update
-		disabledProducts = availableProducts
-			.filter((product: Product) => !product.selected)
-			.flatMap((product: Product) => product.possibilities);
-
-		// register events
 		document.addEventListener("click", clickOutside);
 		return () => document.removeEventListener("click", clickOutside);
 	});
 
 	let selectedDisplay = $derived(() => {
-		const selectedProducts = availableProducts.filter((product) => product.selected);
+		const selectedProducts = availableProducts.filter(
+			(product) => !disabledProducts.some((p) => product.possibilities.includes(p))
+		);
 		if (selectedProducts.length === availableProducts.length) return "Any";
 		if (selectedProducts.length >= 1) return `${selectedProducts.length} selected`;
 		return "None";
 	});
+
+	const toggleProduct = (product: Product) => {
+		const anyDisabled = product.possibilities.some((p) => disabledProducts.includes(p));
+		if (anyDisabled) {
+			// remove all product.possibilities from disabledProducts
+			disabledProducts = disabledProducts.filter((p) => !product.possibilities.includes(p));
+			return;
+		}
+
+		// add all product.possibilities to disabledProducts (if not already present)
+		disabledProducts = [...disabledProducts, ...product.possibilities.filter((p) => !disabledProducts.includes(p))];
+	};
 </script>
 
 <!-- overflow-hidden needed for highlight effect! -->
@@ -177,7 +167,10 @@
 			{/if}
 			<span>{product?.display}</span>
 		</div>
-		<Switch bind:checked={product.selected} />
+		<Switch
+			checked={!product.possibilities.some((p) => disabledProducts.includes(p))}
+			onchecked={() => toggleProduct(product)}
+		/>
 	</div>
 {/snippet}
 
@@ -194,9 +187,6 @@
 				class="hover:stroke-accent cursor-pointer transition-colors"
 				onclick={() => {
 					dropdownOpen = false;
-					disabledProducts = availableProducts
-						.filter((product: Product) => !product.selected)
-						.flatMap((product: Product) => product.possibilities);
 				}}
 			/>
 		</div>
@@ -211,9 +201,6 @@
 			class="self-end rounded-md px-5 py-2 font-bold text-black"
 			onclick={() => {
 				dropdownOpen = false;
-				disabledProducts = availableProducts
-					.filter((product: Product) => !product.selected)
-					.flatMap((product: Product) => product.possibilities);
 			}}
 		>
 			Append

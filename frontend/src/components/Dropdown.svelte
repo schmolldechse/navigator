@@ -4,10 +4,10 @@
 
 	export interface DropdownElement {
 		name: string;
-		type: string;
+		href: string;
 	}
 
-	let { dropdownElements, setType }: { dropdownElements: DropdownElement[]; setType: (type: string) => void } = $props();
+	let { dropdownElements }: { dropdownElements: DropdownElement[] } = $props();
 
 	let isOpen = $state(false);
 	let menuTriggerElement = $state<HTMLElement | null>(null);
@@ -35,15 +35,13 @@
 			bind:this={dropdownContainer}
 		>
 			{#each dropdownElements as element}
-				<button
+				<a
 					class="text-text hover:bg-primary-dark block w-full cursor-pointer rounded-md px-4 py-2 text-left text-base"
-					onclick={() => {
-						isOpen = false;
-						setType(element.type);
-					}}
+					href={element.href}
+					onclick={() => (isOpen = false)}
 				>
 					{element.name}
-				</button>
+				</a>
 			{/each}
 		</div>
 	{/if}

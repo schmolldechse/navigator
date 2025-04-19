@@ -8,7 +8,7 @@
 	}: {
 		class?: string;
 		onclick?: () => void;
-		children: Snippet;
+		children?: Snippet;
 	} = $props();
 </script>
 

@@ -18,6 +18,32 @@ interface StatisticManifest {
 	processFinishedAt?: DateTime;
 }
 
+interface StatsInDto {
+	/**
+	 * @format date
+	 */
+	startDate?: string;
+	/**
+	 * @format date
+	 */
+	endDate?: string;
+
+	/**
+	 * filter options
+	 */
+	filter?: {
+		/**
+		 * defines the threshold in seconds after which a delay is considered
+		 * @example 60
+		 */
+		delayThreshold?: number;
+
+		products?: string[];
+		lineName?: string[];
+		lineNumber?: string[];
+	};
+}
+
 @Route("stations")
 @Tags("Stations")
 export class StatisticsController extends Controller {
@@ -47,20 +73,7 @@ export class StatisticsController extends Controller {
 	}
 
 	@Post("/stats/{evaNumber}")
-	async getStationStatistics(
-		@Path() evaNumber: number,
-		@Body()
-		body: {
-			/**
-			 * @format date
-			 */
-			startDate?: string;
-			/**
-			 * @format date
-			 */
-			endDate?: string;
-		}
-	): Promise<StopAnalytics> {
+	async getStationStatistics(@Path() evaNumber: number, @Body() body: StatsInDto): Promise<StopAnalytics> {
 		const startDate: DateTime = body?.startDate ? DateTime.fromISO(body.startDate).startOf("day") : this.START_DATE;
 		const endDate: DateTime = body?.endDate ? DateTime.fromISO(body.endDate).endOf("day") : DateTime.now().endOf("day");
 		if (startDate > endDate) throw new HttpError(400, "Start date can't be after end date");
@@ -71,6 +84,15 @@ export class StatisticsController extends Controller {
 		const evaNumbers = await this.getRelatedEvaNumbers(cachedStation);
 		if (evaNumbers.length === 0) throw new HttpError(400, "Station not found");
 
+		const filter = {
+			delayThreshold: 60,
+			products: [],
+			lineName: [],
+			lineNumber: [],
+			...body.filter
+		};
+		if (filter.delayThreshold < 60) filter.delayThreshold = 60;
+
 		const saveDir = path.join(this.BASE_PATH, evaNumbers.join("-"));
 		const manifestPath = path.join(saveDir, "manifest.json");
 		if (fs.existsSync(saveDir)) {
@@ -79,7 +101,7 @@ export class StatisticsController extends Controller {
 
 			const startedAt = DateTime.now();
 
-			const analytics = await analyzeStation(saveDir, evaNumbers, { startDate, endDate });
+			const analytics = await analyzeStation(saveDir, evaNumbers, { startDate, endDate }, filter);
 			analytics.foundByQuery = manifest.totalCount;
 			analytics.executionTime = Math.round(DateTime.now().diff(startedAt).as("milliseconds") ?? 0);
 			return analytics;
@@ -103,7 +125,7 @@ export class StatisticsController extends Controller {
 		console.log(`Completed processing all ${totalCount} connections and saved to ${saveDir}`);
 		this.scheduleDeletion(saveDir);
 
-		const analyzed = await analyzeStation(saveDir, evaNumbers, { startDate, endDate });
+		const analyzed = await analyzeStation(saveDir, evaNumbers, { startDate, endDate }, filter);
 
 		manifest = {
 			...manifest,

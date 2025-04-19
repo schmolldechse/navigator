@@ -10,7 +10,7 @@
 	import Taxi from "$components/ui/transport-types/Taxi.svelte";
 
 	/**
-	 * allowedProducts is a list of all products which are available at the station
+	 * allowedProducts is a list of all products that are available at the station
 	 * selected is a list of all current selected products
 	 */
 	let {
@@ -21,7 +21,7 @@
 		selected: string[];
 	} = $props();
 
-	const types = $state<ProductType[]>([
+	const types: ProductType[] = [
 		{
 			key: "*",
 			name: "Every connection",
@@ -76,35 +76,35 @@
 			component: Taxi,
 			values: ["ANRUFPFLICHTIGEVERKEHRE"]
 		}
-	]);
+	];
 
 	const filteredTypes = $derived(
 		types.filter((type) => type.key === "*" || type.values.some((value) => allowedProducts.includes(value)))
 	);
 
 	const toggleType = (type: ProductType) => {
+		// deselect all types if "*" is selected
 		if (type.key === "*") {
-			// deselect all other types if "*" is selected
 			selected.splice(0, selected.length, "*");
-		} else {
-			// remove "*" if selected
-			const starIndex = selected.indexOf("*");
-			if (starIndex > -1) selected.splice(starIndex, 1);
-
-			// check if any value is already selected
-			const hasAnyValue = type.values.some((v) => selected.includes(v));
-
-			if (hasAnyValue) {
-				// remove all type values
-				selected.splice(0, selected.length, ...selected.filter((v) => !type.values.includes(v)));
-			} else {
-				// add all type values
-				selected.push(...type.values);
-			}
-
-			// add "*" if no type is selected
-			if (selected.length === 0) selected.push("*");
+			return;
 		}
+
+		// remove "*" if selected
+		const allTypesIndex = selected.indexOf("*");
+		if (allTypesIndex !== -1) selected.splice(allTypesIndex, 1);
+
+		// check if any value of the specific type is already selected
+		const hasAnyValue = type.values.some((v) => selected.includes(v));
+		if (hasAnyValue) {
+			// remove all possible type values
+			selected.splice(0, selected.length, ...selected.filter((v) => !type.values.includes(v)));
+		} else {
+			// add all possible type values
+			selected.push(...type.values);
+		}
+
+		// add "*" if no type is selected
+		if (selected.length === 0) selected.push("*");
 	};
 </script>
 

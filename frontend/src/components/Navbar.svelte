@@ -5,17 +5,15 @@
 
 	let {
 		userInfo = true,
-		dropdownEnabled = false,
-		currentType = $bindable("timetable")
+		dropdownEnabled = false
 	}: {
 		userInfo?: boolean;
 		dropdownEnabled?: boolean;
-		currentType?: string;
 	} = $props();
 
 	let dropdownElements = $state<DropdownElement[]>([
-		{ name: "Timetable", type: "timetable" },
-		{ name: "Route Planner", type: "route_planner" }
+		{ name: "Timetable", href: "timetable" },
+		{ name: "Route Planner", href: "route-planner" }
 	]);
 </script>
 
@@ -27,7 +25,7 @@
 			<UserInfo />
 		{/if}
 		{#if dropdownEnabled}
-			<Dropdown {dropdownElements} setType={(type) => (currentType = type)} />
+			<Dropdown {dropdownElements} />
 		{/if}
 	</div>
 </div>

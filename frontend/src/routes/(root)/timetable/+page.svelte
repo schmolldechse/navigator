@@ -7,10 +7,24 @@
 	import Search from "lucide-svelte/icons/search";
 	import TravelMode from "$components/ui/controls/TravelMode.svelte";
 	import Button from "$components/ui/interactive/Button.svelte";
+	import type { Snapshot } from "../$types";
 
 	let type: "departures" | "arrivals" = $state<"departures" | "arrivals">("departures");
 	let station: Station | undefined = $state(undefined);
 	let date = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
+
+	interface SnapshotData {
+		station: Station | undefined;
+		type: "departures" | "arrivals";
+	}
+
+	export const snapshot: Snapshot<SnapshotData> = {
+		capture: () => ({ station, type }),
+		restore: (value) => {
+			station = value.station;
+			type = value.type;
+		}
+	};
 </script>
 
 <div class="mx-4 flex w-full flex-col gap-y-4 text-base md:w-[45%]">
