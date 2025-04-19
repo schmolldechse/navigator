@@ -155,7 +155,11 @@
 						{ "hover:bg-accent/20 transition-colors": !day.hasSame(date, "day") }, // day is not selected Date
 						"mx-auto h-9 w-9 cursor-pointer rounded-full"
 					]}
-					onclick={() => (date = day)}
+					onclick={() => (date = date.set({
+							day: day.day,
+							month: day.month,
+							year: day.year
+						}))}
 				>
 					{day.toFormat("dd")}
 				</button>
