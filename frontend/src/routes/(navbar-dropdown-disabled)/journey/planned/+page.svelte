@@ -4,7 +4,7 @@
 	import { MetaTags } from "svelte-meta-tags";
 	import ArrowDown from "lucide-svelte/icons/arrow-down";
 	import ArrowUp from "lucide-svelte/icons/arrow-up";
-	import RouteSkeleton from "$components/route-planner/RouteSkeleton.svelte";
+	import Skeleton from "$components/route-planner/Skeleton.svelte";
 	import RouteRequest from "$components/route-planner/RouteRequest.svelte";
 	import WarningNoRoutes from "$components/route-planner/WarningNoRoutes.svelte";
 
@@ -42,7 +42,7 @@
 	<div class="space-y-2 flex-grow">
 		{#await data.plannedRoute}
 			{#each Array(5) as _, i}
-				<RouteSkeleton />
+				<Skeleton />
 			{/each}
 		{:then plannedRoute}
 			{#if plannedRoute?.journeys.length === 0}
