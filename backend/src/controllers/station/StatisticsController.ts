@@ -34,6 +34,7 @@ interface StatsInDto {
 	filter?: {
 		/**
 		 * defines the threshold in seconds after which a delay is considered
+		 * @example 60
 		 */
 		delayThreshold?: number;
 
