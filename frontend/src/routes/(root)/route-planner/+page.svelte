@@ -17,7 +17,7 @@
 
 	let date: DateTime<true> = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 
-	let disabledProducts = $state<string[]>(["SBAHNEN"]);
+	let disabledProducts = $state<string[]>([]);
 
 	interface SnapshotData {
 		start: Station | undefined;
