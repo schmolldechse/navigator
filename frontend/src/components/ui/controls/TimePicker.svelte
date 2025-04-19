@@ -147,22 +147,44 @@
 			{/each}
 
 			{#each getCalendarDays as day}
-				<button
-					class={[
-						{ "border-accent/75 border": day.hasSame(DateTime.now(), "day") }, // day is current Date
-						{ "bg-accent font-bold text-black": day.hasSame(date, "day") }, // day is selected Date
-						{ "text-white/30": !day.hasSame(date, "month") }, // day has not the same month as selected Date
-						{ "hover:bg-accent/20 transition-colors": !day.hasSame(date, "day") }, // day is not selected Date
-						"mx-auto h-9 w-9 cursor-pointer rounded-full"
-					]}
-					onclick={() => (date = date.set({
-							day: day.day,
-							month: day.month,
-							year: day.year
-						}))}
+				{@const isToday = day.hasSame(DateTime.now(), "day")}
+				{@const isSelected = day.hasSame(date, "day")}
+				{@const isCurrentMonth = day.hasSame(date, "month")}
+
+				<!-- clickable wrapper; provides a larger hitbox -->
+				<div
+					class="group flex cursor-pointer items-center justify-center p-1"
+					role="button"
+					tabindex="0"
+					aria-label={`Select date ${day.toFormat("DDD")}`}
+					aria-pressed={isSelected}
+					onclick={() => date = date.set({
+								day: day.day,
+								month: day.month,
+								year: day.year
+							})}
+					onkeydown={(e) => {
+						if (e.key !== "Enter" && e.key !== " ") return;
+								e.preventDefault();
+								date = date.set({
+									day: day.day,
+									month: day.month,
+									year: day.year
+								});
+						}}
 				>
-					{day.toFormat("dd")}
-				</button>
+					<!-- visual appearance -->
+					<div class={[
+								"flex items-center justify-center h-9 w-9 rounded-full transition-colors duration-150 ease-in-out",
+								{ "border-accent/75 border": isToday },
+								{ "bg-accent font-bold text-black": isSelected },
+								{ "text-white/30": !isCurrentMonth },
+								{ "group-hover:bg-accent/20": !isSelected }
+							]}
+					>
+						{day.toFormat("dd")}
+					</div>
+				</div>
 			{/each}
 		</div>
 
