@@ -12,15 +12,16 @@
 	let currentFilter = $state<string[]>(["*"]);
 	const matchesFilter = (journey: Journey) => {
 		if (currentFilter.length === 0 || currentFilter.includes("*")) return true;
-		return journey?.connections?.some(connection => currentFilter.includes(connection?.lineInformation?.type ?? "UNKNOWN"));
+		return journey?.connections?.some((connection) =>
+			currentFilter.includes(connection?.lineInformation?.type ?? "UNKNOWN")
+		);
 	};
 
 	// returns all products that are used in the Connections
 	const allowedProducts = (journeys: Journey[]): string[] => {
 		const availableProducts = data.station?.products || [];
-		const connectionProducts = journeys.flatMap(journey => journey.connections
-			.flatMap(connection => connection.lineInformation?.type)
-			.filter(Boolean)
+		const connectionProducts = journeys.flatMap((journey) =>
+			journey.connections.flatMap((connection) => connection.lineInformation?.type).filter(Boolean)
 		);
 		return availableProducts.filter((product: string) => connectionProducts.includes(product));
 	};
@@ -32,9 +33,9 @@
 		<Loader />
 	</div>
 {:then journeys}
-	<div class="container mx-auto flex flex-1 flex-col pt-2 divide-y-2 md:divide-y-0">
+	<div class="container mx-auto flex flex-1 flex-col divide-y-2 pt-2 md:divide-y-0">
 		{#if journeys?.length === 0 || !journeys.some(matchesFilter)}
-			<div class="flex-1 flex flex-col justify-end md:justify-center md:items-center min-h-[300px]">
+			<div class="flex min-h-[300px] flex-1 flex-col justify-end md:items-center md:justify-center">
 				<WarningNoConnections />
 			</div>
 		{:else}
@@ -42,8 +43,7 @@
 				{#if !matchesFilter(journey)}{:else if journey.connections.length > 1}
 					<WingTrain {journey} />
 				{:else}
-					<ConnectionComponent connection={journey.connections[0]} renderInformation={true}
-										 renderBorder={true} />
+					<ConnectionComponent connection={journey.connections[0]} renderInformation={true} renderBorder={true} />
 				{/if}
 			{/each}
 		{/if}

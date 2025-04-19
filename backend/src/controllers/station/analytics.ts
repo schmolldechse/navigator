@@ -10,7 +10,7 @@ const analyzeStation = async (
 	saveDir: string,
 	evaNumbers: number[],
 	options: { startDate: DateTime; endDate: DateTime },
-	filter: { delayThreshold: number, products: string[]; lineName: string[]; lineNumber: string[] }
+	filter: { delayThreshold: number; products: string[]; lineName: string[]; lineNumber: string[] }
 ): Promise<StopAnalytics> => {
 	if (!fs.existsSync(saveDir)) throw new Error(`Statistics for ${evaNumbers} do not exist`);
 
@@ -75,7 +75,7 @@ const analyzeConnections = async (
 	relevantEvaNumbers: number[],
 	connections: ConnectionDocument[],
 	options: { startDate: DateTime; endDate: DateTime },
-	filter: { delayThreshold: number, products: string[]; lineName: string[]; lineNumber: string[] }
+	filter: { delayThreshold: number; products: string[]; lineName: string[]; lineNumber: string[] }
 ): Promise<StopAnalytics> => {
 	const analytics: StopAnalytics = {
 		products: {},

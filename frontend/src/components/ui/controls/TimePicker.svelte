@@ -158,29 +158,31 @@
 					tabindex="0"
 					aria-label={`Select date ${day.toFormat("DDD")}`}
 					aria-pressed={isSelected}
-					onclick={() => date = date.set({
-								day: day.day,
-								month: day.month,
-								year: day.year
-							})}
+					onclick={() =>
+						(date = date.set({
+							day: day.day,
+							month: day.month,
+							year: day.year
+						}))}
 					onkeydown={(e) => {
 						if (e.key !== "Enter" && e.key !== " ") return;
-								e.preventDefault();
-								date = date.set({
-									day: day.day,
-									month: day.month,
-									year: day.year
-								});
-						}}
+						e.preventDefault();
+						date = date.set({
+							day: day.day,
+							month: day.month,
+							year: day.year
+						});
+					}}
 				>
 					<!-- visual appearance -->
-					<div class={[
-								"flex items-center justify-center h-9 w-9 rounded-full transition-colors duration-150 ease-in-out",
-								{ "border-accent/75 border": isToday },
-								{ "bg-accent font-bold text-black": isSelected },
-								{ "text-white/30": !isCurrentMonth },
-								{ "group-hover:bg-accent/20": !isSelected }
-							]}
+					<div
+						class={[
+							"flex h-9 w-9 items-center justify-center rounded-full transition-colors duration-150 ease-in-out",
+							{ "border-accent/75 border": isToday },
+							{ "bg-accent font-bold text-black": isSelected },
+							{ "text-white/30": !isCurrentMonth },
+							{ "group-hover:bg-accent/20": !isSelected }
+						]}
 					>
 						{day.toFormat("dd")}
 					</div>
