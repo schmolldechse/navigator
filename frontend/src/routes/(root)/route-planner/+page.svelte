@@ -23,17 +23,15 @@
 		start: Station | undefined;
 		destination: Station | undefined;
 		type: "departures" | "arrivals";
-		date: string;
 		disabledProducts: string[];
 	}
 
 	export const snapshot: Snapshot<SnapshotData> = {
-		capture: () => ({ start, destination, type, date: date.toISO(), disabledProducts }),
+		capture: () => ({ start, destination, type, disabledProducts }),
 		restore: (value) => {
 			start = value.start;
 			destination = value.destination;
 			type = value.type;
-			date = DateTime.fromISO(value.date) as DateTime<true>;
 			disabledProducts = value.disabledProducts;
 		}
 	};

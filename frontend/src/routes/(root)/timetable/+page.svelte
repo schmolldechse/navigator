@@ -16,15 +16,13 @@
 	interface SnapshotData {
 		station: Station | undefined;
 		type: "departures" | "arrivals";
-		date: DateTime;
 	}
 
 	export const snapshot: Snapshot<SnapshotData> = {
-		capture: () => ({ station, type, date }),
+		capture: () => ({ station, type }),
 		restore: (value) => {
 			station = value.station;
 			type = value.type;
-			date = value.date;
 		}
 	};
 </script>
