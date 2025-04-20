@@ -57,11 +57,13 @@
 			});
 			if (!request.ok) throw error(400, "Failed to fetch route");
 			return (await request.json()) as RouteData;
-		})(urlParams, to, from).then((routeData) => {
-			plannedRoute = routeData;
-		}).finally(() => {
-			loading = false;
-		});
+		})(urlParams, to, from)
+			.then((routeData) => {
+				plannedRoute = routeData;
+			})
+			.finally(() => {
+				loading = false;
+			});
 	});
 
 	const requestRoutes = async (earlier: boolean) => {
@@ -87,14 +89,15 @@
 			loading = false;
 			return;
 		}
-		const result = await request.json() as RouteData;
+		const result = (await request.json()) as RouteData;
 
 		if (earlier) plannedRoute.earlierRef = result.earlierRef;
 		else plannedRoute.laterRef = result.laterRef;
 
 		// update journeys by taking a snapshot of the current journeys and appending the new ones
 		const seenTokens = new Set<string>();
-		plannedRoute.journeys = $state.snapshot(plannedRoute.journeys)
+		plannedRoute.journeys = $state
+			.snapshot(plannedRoute.journeys)
 			.concat(result.journeys)
 			.filter((routeInfo: RouteInfo) => {
 				if (!routeInfo.refreshToken) return false;
@@ -139,8 +142,11 @@
 			<Skeleton />
 		{/each}
 	{:else}
-		<button class="flex cursor-pointer flex-row items-center gap-x-2" disabled={loading}
-				onclick={async () => await requestRoutes(true)}>
+		<button
+			class="flex cursor-pointer flex-row items-center gap-x-2"
+			disabled={loading}
+			onclick={async () => await requestRoutes(true)}
+		>
 			<span class="text-lg">Earlier connections</span>
 			<ArrowUp color="#ffda0a" />
 		</button>
@@ -155,8 +161,11 @@
 			</div>
 		{/if}
 
-		<button class="flex cursor-pointer flex-row items-center gap-x-2" disabled={loading}
-				onclick={async () => await requestRoutes(false)}>
+		<button
+			class="flex cursor-pointer flex-row items-center gap-x-2"
+			disabled={loading}
+			onclick={async () => await requestRoutes(false)}
+		>
 			<span class="text-lg">Later connections</span>
 			<ArrowDown color="#ffda0a" />
 		</button>
