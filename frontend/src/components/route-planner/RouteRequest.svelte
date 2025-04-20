@@ -3,8 +3,11 @@
 	import CornerDownRight from "lucide-svelte/icons/corner-down-right";
 	import type { Station } from "$models/station";
 
-	let { from, to }: {
-		from: Station | undefined,
+	let {
+		from,
+		to
+	}: {
+		from: Station | undefined;
 		to: Station | undefined;
 	} = $props();
 </script>
