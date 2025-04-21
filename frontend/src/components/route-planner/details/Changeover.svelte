@@ -65,7 +65,7 @@
 	</span>
 	<div class="flex basis-1/6 justify-center md:max-w-[5%]">
 		<span
-			class="absolute inset-y-4 z-0 h-full w-[4px] self-center bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]"
+			class="absolute z-0 h-full w-[4px] self-center bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]"
 		></span>
 	</div>
 	<div class="flex basis-4/6 flex-col justify-center gap-y-2">

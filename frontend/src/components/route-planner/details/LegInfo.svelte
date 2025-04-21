@@ -38,7 +38,7 @@
 	<div class="relative flex flex-row pt-6 md:pt-12">
 		<span class="basis-1/6 text-right text-sm">{formatDuration(leg?.arrival, leg?.departure)}</span>
 		<div class="flex basis-1/6 justify-center md:max-w-[5%]">
-			<span class="bg-text absolute inset-y-4 z-0 h-full w-[4px] self-end"></span>
+			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 		</div>
 		<div class="flex basis-4/6 flex-col">
 			<div class="flex flex-row items-baseline gap-x-2">
@@ -61,7 +61,7 @@
 		<div class="relative flex flex-row pt-6 md:pt-12">
 			<span class="basis-1/6"></span>
 			<div class="flex basis-1/6 justify-center md:max-w-[5%]">
-				<span class="bg-text absolute inset-y-4 z-0 h-full w-[4px] self-end"></span>
+				<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
 			</div>
 			<button
 				class="flex basis-4/6 cursor-pointer flex-row items-center gap-x-2 text-left"
