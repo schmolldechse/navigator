@@ -5,9 +5,7 @@ const calculateDuration = (
 	endDate: DateTime,
 	unit: "milliseconds" | "seconds" | "minutes" | "hours" | "days"
 ): number => {
-	if (!startDate.isValid || !endDate.isValid) {
-		throw new Error("Invalid DateTime objects provided");
-	}
+	if (!startDate.isValid || !endDate.isValid) return -1;
 	return startDate.diff(endDate).as(unit);
 };
 
