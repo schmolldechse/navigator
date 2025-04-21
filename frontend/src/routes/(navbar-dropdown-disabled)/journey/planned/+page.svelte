@@ -1,9 +1,8 @@
 <script lang="ts">
+	import type { PageProps } from "./$types";
 	import { MetaTags } from "svelte-meta-tags";
 	import type { Station } from "$models/station";
 	import type { Route as RouteInfo, RouteData } from "$models/route";
-	import { onMount } from "svelte";
-	import { error } from "@sveltejs/kit";
 	import { env } from "$env/dynamic/public";
 	import RouteRequest from "$components/route-planner/RouteRequest.svelte";
 	import Skeleton from "$components/route-planner/Skeleton.svelte";
@@ -13,70 +12,25 @@
 	import Route from "$components/route-planner/Route.svelte";
 	import { DateTime } from "luxon";
 
-	let stations = $state<{ from?: Station; to?: Station }>({ from: undefined, to: undefined });
+	let { data }: PageProps = $props();
+
+	let plannedStations = $state<{ from?: Station; to?: Station }>({ from: undefined, to: undefined });
+	data.stations.then((stations) => plannedStations = stations);
+
 	let plannedRoute = $state<RouteData | undefined>(undefined);
-
-	let loading = $state<boolean>(true);
-	onMount(() => {
-		const urlParams = new URLSearchParams(window.location.search);
-
-		const from = urlParams.get("from");
-		const to = urlParams.get("to");
-
-		if (!from || !to) {
-			throw error(400, "Missing required parameters");
-		}
-
-		const fetchStation = async (evaNumber: number): Promise<Station> => {
-			const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/stations/${evaNumber}`, {
-				method: "GET"
-			});
-			if (!request.ok) throw error(400, "Failed to fetch station");
-			return (await request.json()) as Station;
-		};
-		Promise.all([fetchStation(Number(from)), fetchStation(Number(to))]).then(([fromStation, toStation]) => {
-			stations = {
-				from: fromStation,
-				to: toStation
-			};
-		});
-
-		(async (urlParams: URLSearchParams, to: string, from: string): Promise<RouteData> => {
-			const params = new URLSearchParams({
-				from,
-				to,
-				...(urlParams.has("departure") && { departure: urlParams.get("departure")! }),
-				...(urlParams.has("arrival") && { arrival: urlParams.get("arrival")! }),
-				...(urlParams.has("disabledProducts") && { disabledProducts: urlParams.get("disabledProducts")! }),
-				...(urlParams.has("results") && { results: urlParams.get("results")! }),
-				...(urlParams.has("earlierThan") && { earlierThan: urlParams.get("earlierThan")! }),
-				...(urlParams.has("laterThan") && { laterThan: urlParams.get("laterThan")! })
-			});
-			const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/journey/route-planner?${params.toString()}`, {
-				method: "GET"
-			});
-			if (!request.ok) throw error(400, "Failed to fetch route");
-			return (await request.json()) as RouteData;
-		})(urlParams, to, from)
-			.then((routeData) => {
-				plannedRoute = routeData;
-			})
-			.finally(() => {
-				loading = false;
-			});
-	});
+	data.route.then((route) => plannedRoute = route);
 
 	const requestRoutes = async (earlier: boolean) => {
-		if (!stations?.from || !stations?.to) return;
+		if (!plannedStations?.from || !plannedStations?.to) return;
 		if (!plannedRoute?.earlierRef || !plannedRoute?.laterRef) return;
 
-		loading = true;
+		// loading = true;
 		const urlParams = new URLSearchParams(window.location.search);
 
 		const params = new URLSearchParams({
 			results: "5",
-			from: String(stations.from.evaNumber),
-			to: String(stations.to.evaNumber),
+			from: String(plannedStations.from.evaNumber),
+			to: String(plannedStations.to.evaNumber),
 			...(urlParams.has("disabledProducts") && { disabledProducts: urlParams.get("disabledProducts")! }),
 			...(earlier && { earlierThan: plannedRoute.earlierRef }),
 			...(!earlier && { laterThan: plannedRoute.laterRef })
@@ -86,7 +40,7 @@
 			method: "GET"
 		});
 		if (!request.ok) {
-			loading = false;
+			// loading = false;
 			return;
 		}
 		const result = (await request.json()) as RouteData;
@@ -110,7 +64,7 @@
 				const bDeparture = DateTime.fromISO(b.legs[0].departure!.actualTime);
 				return aDeparture.valueOf() - bDeparture.valueOf();
 			});
-		loading = false;
+		// loading = false;
 	};
 </script>
 
@@ -135,23 +89,23 @@
 
 <div class="mx-auto flex min-h-full w-full flex-1 flex-col gap-y-4 px-2 my-4 md:max-w-[65%] md:px-0">
 	<!-- Route Request Info -->
-	<RouteRequest from={stations.from} to={stations.to} />
+	<RouteRequest stations={data?.stations} />
 
-	{#if (plannedRoute?.journeys.length ?? 0) === 0 && loading}
+	{#await data.route}
 		{#each Array(5) as _, i}
 			<Skeleton />
 		{/each}
-	{:else}
+	{:then route}
 		<button
 			class="flex cursor-pointer flex-row items-center gap-x-2"
-			disabled={loading}
+			disabled={false}
 			onclick={async () => await requestRoutes(true)}
 		>
 			<span class="text-lg">Earlier connections</span>
 			<ArrowUp color="#ffda0a" />
 		</button>
 
-		{#if (plannedRoute?.journeys?.length ?? 0) === 0 && !loading}
+		{#if (plannedRoute?.journeys?.length ?? 0) === 0}
 			<WarningNoRoutes />
 		{:else}
 			<div class="space-y-2">
@@ -163,11 +117,11 @@
 
 		<button
 			class="flex cursor-pointer flex-row items-center gap-x-2"
-			disabled={loading}
+			disabled={false}
 			onclick={async () => await requestRoutes(false)}
 		>
 			<span class="text-lg">Later connections</span>
 			<ArrowDown color="#ffda0a" />
 		</button>
-	{/if}
+	{/await}
 </div>
