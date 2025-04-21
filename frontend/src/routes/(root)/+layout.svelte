@@ -1,16 +1,12 @@
 <script lang="ts">
 	import Navbar from "$components/Navbar.svelte";
 	import type { LayoutProps } from "./$types";
-	import { setContext } from "svelte";
 	import { DateTime } from "luxon";
 	import GitHub from "$components/ui/icons/GitHub.svelte";
 	import { MetaTags } from "svelte-meta-tags";
 	import ServerCog from "lucide-svelte/icons/server-cog";
 
 	let { children }: LayoutProps = $props();
-	let currentType = $state("timetable");
-
-	setContext("currentType", () => currentType);
 </script>
 
 <MetaTags
