@@ -11,6 +11,7 @@
 	import WarningNoRoutes from "$components/route-planner/WarningNoRoutes.svelte";
 	import Route from "$components/route-planner/Route.svelte";
 	import { DateTime } from "luxon";
+	import SpinningCircle from "$components/ui/icons/SpinningCircle.svelte";
 
 	let { data }: PageProps = $props();
 
@@ -20,11 +21,15 @@
 	let plannedRoute = $state<RouteData | undefined>(undefined);
 	data.route.then((route) => plannedRoute = route);
 
+	let loadingEarlier = $state<boolean>(false);
+	let loadingLater = $state<boolean>(false);
+
 	const requestRoutes = async (earlier: boolean) => {
 		if (!plannedStations?.from || !plannedStations?.to) return;
 		if (!plannedRoute?.earlierRef || !plannedRoute?.laterRef) return;
 
-		// loading = true;
+		if (earlier) loadingEarlier = true;
+		else loadingLater = true;
 		const urlParams = new URLSearchParams(window.location.search);
 
 		const params = new URLSearchParams({
@@ -40,7 +45,8 @@
 			method: "GET"
 		});
 		if (!request.ok) {
-			// loading = false;
+			if (earlier) loadingEarlier = false;
+			else loadingLater = false;
 			return;
 		}
 		const result = (await request.json()) as RouteData;
@@ -64,7 +70,9 @@
 				const bDeparture = DateTime.fromISO(b.legs[0].departure!.actualTime);
 				return aDeparture.valueOf() - bDeparture.valueOf();
 			});
-		// loading = false;
+
+		if (earlier) loadingEarlier = false;
+		else loadingLater = false;
 	};
 </script>
 
@@ -95,14 +103,15 @@
 		{#each Array(5) as _, i}
 			<Skeleton />
 		{/each}
-	{:then route}
+	{:then _}
 		<button
 			class="flex cursor-pointer flex-row items-center gap-x-2"
-			disabled={false}
+			disabled={loadingEarlier}
 			onclick={async () => await requestRoutes(true)}
 		>
 			<span class="text-lg">Earlier connections</span>
-			<ArrowUp color="#ffda0a" />
+			{#if loadingEarlier}<SpinningCircle height="20px" width="20px" />
+			{:else}<ArrowUp color="#ffda0a" />{/if}
 		</button>
 
 		{#if (plannedRoute?.journeys?.length ?? 0) === 0}
@@ -117,11 +126,12 @@
 
 		<button
 			class="flex cursor-pointer flex-row items-center gap-x-2"
-			disabled={false}
+			disabled={loadingLater}
 			onclick={async () => await requestRoutes(false)}
 		>
 			<span class="text-lg">Later connections</span>
-			<ArrowDown color="#ffda0a" />
+			{#if loadingLater}<SpinningCircle height="20px" width="20px" />
+			{:else}<ArrowDown color="#ffda0a" />{/if}
 		</button>
 	{/await}
 </div>
