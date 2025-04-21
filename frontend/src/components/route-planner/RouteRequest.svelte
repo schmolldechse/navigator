@@ -3,7 +3,7 @@
 	import CornerDownRight from "lucide-svelte/icons/corner-down-right";
 	import type { Station } from "$models/station";
 
-	let { stations }: { stations: Promise<{ from: Station; to: Station; }> } = $props();
+	let { stations }: { stations: Promise<{ from: Station; to: Station }> } = $props();
 </script>
 
 <div class="flex flex-col items-start gap-y-1">
