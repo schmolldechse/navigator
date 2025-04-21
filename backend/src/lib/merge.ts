@@ -36,10 +36,10 @@ const merge = (connectionA: Connection, connectionB: Connection, type: RequestTy
 			}
 		},
 		viaStops: connectionA?.viaStops ?? connectionB?.viaStops ?? undefined,
-		cancelledStopsAfterActualDestination:
-			connectionA?.cancelledStopsAfterActualDestination ?? connectionB?.cancelledStopsAfterActualDestination ?? undefined,
-		additionalStops: connectionA?.additionalStops ?? connectionB?.additionalStops ?? undefined,
-		cancelledStops: connectionA?.cancelledStops ?? connectionB?.cancelledStops ?? undefined,
+		// cancelledStopsAfterActualDestination:
+		// 	connectionA?.cancelledStopsAfterActualDestination ?? connectionB?.cancelledStopsAfterActualDestination ?? undefined,
+		// additionalStops: connectionA?.additionalStops ?? connectionB?.additionalStops ?? undefined,
+		// cancelledStops: connectionA?.cancelledStops ?? connectionB?.cancelledStops ?? undefined,
 		messages: connectionA?.messages ?? connectionB?.messages ?? undefined,
 		cancelled: connectionA?.cancelled ?? connectionB?.cancelled ?? false,
 		providesVehicleSequence: connectionA?.providesVehicleSequence ?? connectionB?.providesVehicleSequence ?? false
@@ -47,9 +47,7 @@ const merge = (connectionA: Connection, connectionB: Connection, type: RequestTy
 };
 
 const mergeConnections = (
-	// connections from `db` profile
 	connectionsA: Connection[],
-	// connections from `dbweb` profile
 	connectionsB: Connection[],
 	type: RequestType,
 	destinationOriginCriteria: boolean = false
