@@ -75,14 +75,14 @@ export class JourneyController extends Controller {
 		if (query.to === query.from) throw new HttpError(400, "From and to cannot be the same station");
 
 		if (!query.departure && !query.arrival && !query.earlierThan && !query.laterThan)
-			throw new HttpError(400, "Missing either 'departure', 'arrival', 'earlierThan' or 'laterThan'");
+			query.departure = DateTime.now().toISO();
 
 		if (query.departure && query.arrival) throw new HttpError(400, "Either departure or arrival can be set, not both");
 		if (query.earlierThan && query.laterThan)
 			throw new HttpError(400, "Either earlierThan or laterThan can be set, not both");
 
-		if (query.departure && !DateTime.fromISO(query.departure).isValid) throw new HttpError(400, "Invalid departure date");
-		if (query.arrival && !DateTime.fromISO(query.arrival).isValid) throw new HttpError(400, "Invalid arrival date");
+		if (query.departure && !DateTime.fromISO(query.departure).isValid) query.departure = DateTime.now().toISO();
+		if (query.arrival && !DateTime.fromISO(query.arrival).isValid) query.arrival = DateTime.now().toISO();
 
 		return await this.fetchRoute(query);
 	}
