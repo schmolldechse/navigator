@@ -12,6 +12,7 @@
 	import Route from "$components/route-planner/Route.svelte";
 	import { DateTime } from "luxon";
 	import SpinningCircle from "$components/ui/icons/SpinningCircle.svelte";
+	import DateHeader from "$components/ui/info/DateHeader.svelte";
 
 	let { data }: PageProps = $props();
 
@@ -74,6 +75,21 @@
 		if (earlier) loadingEarlier = false;
 		else loadingLater = false;
 	};
+
+	const isDayDifferent = (index: number): boolean => {
+		if (index <= 0) return false;
+
+		const prevJourney = plannedRoute?.journeys[index - 1];
+		const currentJourney = plannedRoute?.journeys[index];
+
+		if (!prevJourney || !currentJourney) return false;
+
+		const prevDeparture = DateTime.fromISO(prevJourney.legs[0].departure?.actualTime ?? prevJourney.legs[0].departure?.plannedTime ?? "");
+		const departure = DateTime.fromISO(currentJourney.legs[0].departure?.actualTime ?? currentJourney.legs[0].departure?.plannedTime ?? "");
+
+		if (!prevDeparture || !departure) return false;
+		return prevDeparture.day !== departure.day;
+	}
 </script>
 
 <MetaTags
@@ -100,7 +116,7 @@
 	<RouteRequest stations={data?.stations} />
 
 	{#await data.route}
-		{#each Array(5) as _, i}
+		{#each Array(5) as _}
 			<Skeleton />
 		{/each}
 	{:then _}
@@ -118,7 +134,11 @@
 			<WarningNoRoutes />
 		{:else}
 			<div class="space-y-2">
-				{#each plannedRoute?.journeys ?? [] as route}
+				{#each plannedRoute?.journeys ?? [] as route, index}
+					{#if isDayDifferent(index)}
+						{@const date = DateTime.fromISO(route.legs[0].departure?.actualTime ?? route.legs[0].departure?.plannedTime ?? "")}
+						<DateHeader {date} />
+					{/if}
 					<Route {route} />
 				{/each}
 			</div>
