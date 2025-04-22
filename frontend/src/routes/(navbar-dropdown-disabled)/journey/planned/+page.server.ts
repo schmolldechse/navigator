@@ -35,12 +35,11 @@ const loadRoute = async (from: string, to: string, urlParams: URLSearchParams): 
 	const params = new URLSearchParams({
 		from,
 		to,
-		...(urlParams.has("departure") && { departure: urlParams.get("departure")! }),
-		...(urlParams.has("arrival") && { arrival: urlParams.get("arrival")! }),
-		...(urlParams.has("disabledProducts") && { disabledProducts: urlParams.get("disabledProducts")! }),
-		...(urlParams.has("results") && { results: urlParams.get("results")! }),
-		...(urlParams.has("earlierThan") && { earlierThan: urlParams.get("earlierThan")! }),
-		...(urlParams.has("laterThan") && { laterThan: urlParams.get("laterThan")! })
+		...Object.fromEntries(
+			["departure", "arrival", "disabledProducts", "results", "earlierThan", "laterThan"]
+				.filter((key) => urlParams.has(key))
+				.map((key) => [key, urlParams.get(key)!])
+		)
 	});
 	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/journey/route-planner?${params.toString()}`, {
 		method: "GET"
