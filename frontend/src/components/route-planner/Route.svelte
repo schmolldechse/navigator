@@ -145,8 +145,8 @@
 						<Changeover startWalking={leg?.departure} stopWalking={leg?.arrival} lastIsWalking={leg?.destination} />
 					{:else}
 						<!--
-						startWalking is the time at which you set off from the stop (route?.legs[i - 1]?.arrival)
-						stopWalking is the time at which you arrive at the stop (route?.legs[i + 1]?.departure)
+						startWalking is the time at which you arrive at the last stop (route?.legs[i - 1]?.arrival)
+						stopWalking is the time at which you depart at the next stop (route?.legs[i + 1]?.departure)
 						 -->
 						<Changeover startWalking={route?.legs[i - 1]?.arrival} stopWalking={route?.legs[i + 1]?.departure} />
 					{/if}
