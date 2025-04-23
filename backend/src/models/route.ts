@@ -1,4 +1,5 @@
 import type { Connection } from "./connection.ts";
+import type { Message } from "./message.ts";
 
 interface RouteData {
 	earlierRef: string;
@@ -8,6 +9,7 @@ interface RouteData {
 
 interface Route {
 	legs: Connection[];
+	messages: Message[];
 	refreshToken?: string;
 }
 
