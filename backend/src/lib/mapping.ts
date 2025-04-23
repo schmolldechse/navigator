@@ -150,7 +150,11 @@ const mapMessages = (entry: any, isIdentifiableAsHAFAS: boolean = false): Messag
 		.concat(entry?.cancelation || [])
 		.concat(entry?.destination || [])
 		.concat(entry?.via || [])
-		.map((message: any) => message as Message);
+		.map((message: any) => ({
+			type: message?.type,
+			text: message?.text,
+			links: message?.links ?? undefined,
+		}));
 };
 
 const mapCoachSequence = (entry: any): Sequence => {
