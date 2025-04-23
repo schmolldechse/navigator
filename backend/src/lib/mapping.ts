@@ -212,6 +212,7 @@ const mapToRoute = (entry: any): RouteData => ({
 	laterRef: entry?.laterRef,
 	journeys: entry?.journeys?.map((rawJourney: any) => ({
 		legs: rawJourney?.legs?.map((rawLeg: any) => mapConnection(rawLeg, "both", false, true, true)),
+		messages: mapMessages(rawJourney?.remarks, true),
 		refreshToken: rawJourney?.refreshToken
 	}))
 });
