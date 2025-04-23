@@ -1,9 +1,7 @@
 export interface Message {
 	type: string; // e.g. "bicycle-transport", "canceled-stops", "additional-stops", ...
 	text?: string;
-	change?: boolean;
-	important?: boolean;
-	open?: boolean;
+	summary?: string;
 	links?: any[];
 }
 

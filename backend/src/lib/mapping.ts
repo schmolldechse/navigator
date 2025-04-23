@@ -141,7 +141,8 @@ const mapMessages = (entry: any, isIdentifiableAsHAFAS: boolean = false): Messag
 			})
 			.map((message: any) => ({
 				type: message?.type,
-				text: message?.text ?? message?.summary
+				text: message?.text,
+				summary: message?.summary
 			}));
 
 	return (entry?.common || [])
