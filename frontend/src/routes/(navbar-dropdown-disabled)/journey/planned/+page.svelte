@@ -13,7 +13,7 @@
 	import { DateTime } from "luxon";
 	import SpinningCircle from "$components/ui/icons/SpinningCircle.svelte";
 	import DateHeader from "$components/ui/info/DateHeader.svelte";
-	import type {Connection, LineColor} from "$models/connection";
+	import type { Connection, LineColor } from "$models/connection";
 
 	let { data }: PageProps = $props();
 
@@ -31,8 +31,9 @@
 
 	let lineColors = $state<LineColor[]>([]);
 	const fetchLineColors = async () => {
-		const legs = (plannedRoute?.journeys ?? [])
-			.filter((route: RouteInfo) => route?.legs?.some((leg: Connection) => !leg?.walking));
+		const legs = (plannedRoute?.journeys ?? []).filter((route: RouteInfo) =>
+			route?.legs?.some((leg: Connection) => !leg?.walking)
+		);
 		if (legs.length === 0) return [];
 
 		const params = new URLSearchParams({
@@ -40,7 +41,7 @@
 			hafasOperatorCode: legs.map((leg: Connection) => leg?.lineInformation?.operator?.id).join(";")
 		});
 
-		const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/journey/color?${params}`)
+		const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/journey/color?${params}`);
 		if (!request.ok) return [];
 
 		lineColors = (await request.json()) as LineColor[];
@@ -107,12 +108,16 @@
 
 		if (!prevJourney || !currentJourney) return false;
 
-		const prevDeparture = DateTime.fromISO(prevJourney.legs[0].departure?.actualTime ?? prevJourney.legs[0].departure?.plannedTime ?? "");
-		const departure = DateTime.fromISO(currentJourney.legs[0].departure?.actualTime ?? currentJourney.legs[0].departure?.plannedTime ?? "");
+		const prevDeparture = DateTime.fromISO(
+			prevJourney.legs[0].departure?.actualTime ?? prevJourney.legs[0].departure?.plannedTime ?? ""
+		);
+		const departure = DateTime.fromISO(
+			currentJourney.legs[0].departure?.actualTime ?? currentJourney.legs[0].departure?.plannedTime ?? ""
+		);
 
 		if (!prevDeparture || !departure) return false;
 		return prevDeparture.day !== departure.day;
-	}
+	};
 </script>
 
 <MetaTags
@@ -159,7 +164,9 @@
 			<div class="space-y-2">
 				{#each plannedRoute?.journeys ?? [] as route, index}
 					{#if isDayDifferent(index)}
-						{@const date = DateTime.fromISO(route.legs[0].departure?.actualTime ?? route.legs[0].departure?.plannedTime ?? "")}
+						{@const date = DateTime.fromISO(
+							route.legs[0].departure?.actualTime ?? route.legs[0].departure?.plannedTime ?? ""
+						)}
 						<DateHeader {date} />
 					{/if}
 					<Route {route} {lineColors} />

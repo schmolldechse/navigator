@@ -3,7 +3,7 @@
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
 	import { calculateDuration, durationOfConnection, formatDuration } from "$lib";
 	import { DateTime } from "luxon";
-	import type {Connection, LineColor} from "$models/connection";
+	import type { Connection, LineColor } from "$models/connection";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
 	import Ban from "lucide-svelte/icons/ban";
@@ -12,7 +12,7 @@
 	import Changeover from "$components/route-planner/details/Changeover.svelte";
 	import Walking from "$components/ui/icons/Walking.svelte";
 
-	let { route, lineColors }: { route: Route, lineColors: LineColor[] } = $props();
+	let { route, lineColors }: { route: Route; lineColors: LineColor[] } = $props();
 	let detailsOpen = $state<boolean>(false);
 
 	const durationWithoutWalking = $derived(() => {
@@ -41,113 +41,125 @@
 	const normalize = (value: string): string => value.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
 </script>
 
-<div class="border-primary-dark/75 rounded-lg border-2 text-2xl font-medium overflow-hidden"
-	 class:opacity-65={isCancelled}
->
+<div class="border-primary-dark/75 overflow-hidden rounded-lg border-2 text-2xl font-medium" class:opacity-65={isCancelled}>
 	<!-- Cancelled Header -->
 	{#if isCancelled}
-		<div class="bg-secondary/25 flex flex-row items-center gap-x-2 py-1 px-3">
+		<div class="bg-secondary/25 flex flex-row items-center gap-x-2 px-3 py-1">
 			<Ban size="20" />
-			<span class="text-sm md:text-lg font-semibold">Route not possible</span>
+			<span class="text-sm font-semibold md:text-lg">Route not possible</span>
 		</div>
 	{/if}
 
-	<div class="px-4 py-2 space-y-2">
-	<!-- Time Info -->
-	<div class="flex flex-row items-baseline gap-x-2">
-		<div class="flex flex-row">
-			<TimeInformation time={route?.legs[0]?.departure} direction="col" class="text-xl" delayClass="text-sm md:text-lg" />
-			<Minus class="mx-2 mt-[0.15rem]" />
-			<TimeInformation
+	<div class="space-y-2 px-4 py-2">
+		<!-- Time Info -->
+		<div class="flex flex-row items-baseline gap-x-2">
+			<div class="flex flex-row">
+				<TimeInformation
+					time={route?.legs[0]?.departure}
+					direction="col"
+					class="text-xl"
+					delayClass="text-sm md:text-lg"
+				/>
+				<Minus class="mx-2 mt-[0.15rem]" />
+				<TimeInformation
 					time={route?.legs[route?.legs?.length - 1]?.arrival}
 					direction="col"
 					class="text-xl"
 					delayClass="text-sm md:text-lg"
-			/>
+				/>
+			</div>
+
+			<span class="text-primary/90">|</span>
+			<span class="mt-[0.35rem] text-sm md:text-lg">
+				{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}
+			</span>
+
+			{#if route?.legs?.filter((leg) => leg?.walking).length > 0}
+				<span class="text-primary/90">|</span>
+				<div class="mt-[0.35rem] flex items-baseline text-sm md:text-lg">
+					<span>{route?.legs?.filter((leg) => leg?.walking).length}</span>
+
+					<div class="flex items-center">
+						<span>x</span>
+						<Walking height="25px" width="25px" class="stroke-accent" />
+					</div>
+				</div>
+			{/if}
 		</div>
 
-		<span class="text-primary/90">|</span>
-		<span class="mt-[0.35rem] text-sm md:text-lg">
-			{formatDuration(route?.legs[route?.legs?.length - 1]?.arrival, route?.legs[0]?.departure)}
-		</span>
-
-		{#if route?.legs?.filter((leg) => leg?.walking).length > 0}
-			<span class="text-primary/90">|</span>
-			<div class="mt-[0.35rem] flex items-baseline text-sm md:text-lg">
-				<span>{route?.legs?.filter((leg) => leg?.walking).length}</span>
-
-				<div class="flex items-center">
-					<span>x</span>
-					<Walking height="25px" width="25px" class="stroke-accent" />
-				</div>
-			</div>
-		{/if}
-	</div>
-
-	<!-- Legs -->
-	<div class="accent-scrollbar flex w-full flex-row gap-x-2 overflow-x-auto">
-		{#each route?.legs.filter((leg) => !leg?.walking) as leg}
-			<span
+		<!-- Legs -->
+		<div class="accent-scrollbar flex w-full flex-row gap-x-2 overflow-x-auto">
+			{#each route?.legs.filter((leg) => !leg?.walking) as leg}
+				<span
 					class="bg-primary-darker line-clamp-1 min-w-fit truncate rounded-lg px-2 py-1 text-center text-base md:line-clamp-none md:text-lg"
 					style:width={getWidthRatio(durationOfConnection(leg), durationWithoutWalking())}
-			>
-				{leg?.lineInformation?.lineName}
-			</span>
-		{/each}
-	</div>
+				>
+					{leg?.lineInformation?.lineName}
+				</span>
+			{/each}
+		</div>
 
-	<div class="flex justify-center">
-		<button class="flex cursor-pointer flex-row items-center gap-x-2" onclick={() => (detailsOpen = !detailsOpen)}>
-			<span class="text-sm md:text-lg">Details</span>
-			{#if !detailsOpen}
-				<ChevronDown color="#ffda0a" />
-			{:else}
-				<ChevronUp color="#ffda0a" />
-			{/if}
-		</button>
-	</div>
+		<div class="flex justify-center">
+			<button class="flex cursor-pointer flex-row items-center gap-x-2" onclick={() => (detailsOpen = !detailsOpen)}>
+				<span class="text-sm md:text-lg">Details</span>
+				{#if !detailsOpen}
+					<ChevronDown color="#ffda0a" />
+				{:else}
+					<ChevronUp color="#ffda0a" />
+				{/if}
+			</button>
+		</div>
 
-	{#if detailsOpen}
-		<div class="border-primary-dark/75 flex flex-col border-t">
-			<span class="text-lg font-semibold">Route Details</span>
+		{#if detailsOpen}
+			<div class="border-primary-dark/75 flex flex-col border-t">
+				<span class="text-lg font-semibold">Route Details</span>
 
-			{#each route?.legs as leg, i}
-				{#if leg?.walking}
-					{@const firstIsWalking = i === 0}
-					{@const lastIsWalking = i === route?.legs.length - 1}
+				{#each route?.legs as leg, i}
+					{#if leg?.walking}
+						{@const firstIsWalking = i === 0}
+						{@const lastIsWalking = i === route?.legs.length - 1}
 
-					{#if firstIsWalking}
-						<!--
+						{#if firstIsWalking}
+							<!--
 						startWalking is the time, at which you set off from the stop (leg?.departure)
 						stopWalking is the time, at which the next leg starts (route?.legs[i + 1]?.departure)
 						 -->
-						<Changeover
+							<Changeover
 								startWalking={leg?.departure}
 								stopWalking={route?.legs[i + 1]?.departure}
 								firstIsWalking={leg?.origin}
-						/>
-					{:else if lastIsWalking}
-						<!--
+							/>
+						{:else if lastIsWalking}
+							<!--
 						startWalking is the time, at which you set off from the stop (leg?.departure)
 						stopWalking is the time, at which you arrive at the destination (leg?.arrival)
 						 -->
-						<Changeover startWalking={leg?.departure} stopWalking={leg?.arrival} lastIsWalking={leg?.destination} />
-					{:else}
-						<!--
+							<Changeover
+								startWalking={leg?.departure}
+								stopWalking={leg?.arrival}
+								lastIsWalking={leg?.destination}
+							/>
+						{:else}
+							<!--
 						startWalking is the time at which you arrive at the last stop (route?.legs[i - 1]?.arrival)
 						stopWalking is the time at which you depart at the next stop (route?.legs[i + 1]?.departure)
 						 -->
-						<Changeover startWalking={route?.legs[i - 1]?.arrival} stopWalking={route?.legs[i + 1]?.departure} />
-					{/if}
-				{:else}
-					<LegInfo
+							<Changeover
+								startWalking={route?.legs[i - 1]?.arrival}
+								stopWalking={route?.legs[i + 1]?.departure}
+							/>
+						{/if}
+					{:else}
+						<LegInfo
 							{leg}
-							lineColor={lineColors.find((color: LineColor) => normalize(color.lineName) === normalize(leg?.lineInformation?.lineName ?? "")
-						)}
-					/>
-				{/if}
-			{/each}
-		</div>
-	{/if}
+							lineColor={lineColors.find(
+								(color: LineColor) =>
+									normalize(color.lineName) === normalize(leg?.lineInformation?.lineName ?? "")
+							)}
+						/>
+					{/if}
+				{/each}
+			</div>
+		{/if}
 	</div>
 </div>
