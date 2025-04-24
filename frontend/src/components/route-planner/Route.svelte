@@ -3,18 +3,16 @@
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
 	import { calculateDuration, durationOfConnection, formatDuration } from "$lib";
 	import { DateTime } from "luxon";
-	import type { Connection, LineColor } from "$models/connection";
-	import { env } from "$env/dynamic/public";
+	import type {Connection, LineColor} from "$models/connection";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
 	import Ban from "lucide-svelte/icons/ban";
 	import Minus from "lucide-svelte/icons/minus";
 	import LegInfo from "$components/route-planner/details/LegInfo.svelte";
-	import { onMount } from "svelte";
 	import Changeover from "$components/route-planner/details/Changeover.svelte";
 	import Walking from "$components/ui/icons/Walking.svelte";
 
-	let { route }: { route: Route } = $props();
+	let { route, lineColors }: { route: Route, lineColors: LineColor[] } = $props();
 	let detailsOpen = $state<boolean>(false);
 
 	const durationWithoutWalking = $derived(() => {
@@ -39,25 +37,6 @@
 		if (maxDuration <= 0) return "0%";
 		return `${(duration / maxDuration) * 100}%`;
 	};
-
-	let legColors = $state<LineColor[]>([]);
-	onMount(() => (async () => {
-			const params = new URLSearchParams({
-				line: route?.legs
-					.filter((leg) => !leg?.walking)
-					.map((leg) => leg?.lineInformation?.lineName)
-					.join(";"),
-				hafasOperatorCode: route?.legs
-					.filter((leg) => !leg?.walking)
-					.map((leg) => leg?.lineInformation?.operator?.id)
-					.join(";")
-			});
-
-			const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/journey/color?${params}`);
-			if (!request.ok) return;
-
-			legColors = (await request.json()) as LineColor[];
-		})());
 
 	const normalize = (value: string): string => value.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
 </script>
@@ -163,8 +142,7 @@
 				{:else}
 					<LegInfo
 							{leg}
-							lineColor={legColors.find(
-							(color) => normalize(color.lineName) === normalize(leg?.lineInformation?.lineName ?? "")
+							lineColor={lineColors.find((color: LineColor) => normalize(color.lineName) === normalize(leg?.lineInformation?.lineName ?? "")
 						)}
 					/>
 				{/if}
