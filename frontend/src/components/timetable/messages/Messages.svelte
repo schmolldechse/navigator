@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Message } from "$models/message";
-	import { type Component, onMount } from "svelte";
+	import { onMount } from "svelte";
 	import type { Connection } from "$models/connection";
 	import { DateTime } from "luxon";
 	import type { Stop } from "$models/station";
@@ -30,6 +30,7 @@
 	import ReservationsMissing from "$components/timetable/messages/icons/ReservationsMissing.svelte";
 	import NoBicycleTransport from "$components/timetable/messages/icons/NoBicycleTransport.svelte";
 	import ShowMore from "$components/timetable/info/ShowMore.svelte";
+	import type {ValidMessage} from "$lib/models";
 
 	let { connection }: { connection?: Connection } = $props();
 	let expanded = $state<boolean>(false);
@@ -37,11 +38,6 @@
 		if (!connection?.cancelled) return;
 		expanded = true;
 	});
-
-	type ValidMessage = {
-		type: string;
-		component?: Component;
-	};
 
 	const validMessages: ValidMessage[] = [
 		{ type: "bicycle-transport", component: BicycleTransport },
@@ -69,17 +65,6 @@
 		{ type: "reservations-missing", component: ReservationsMissing },
 		{ type: "no-bicycle-transport", component: NoBicycleTransport }
 	];
-
-	/**
-	 * Filter messages based on their importance
-	 * @deprecated
-	 */
-	const filteredMessages: Message[] = $derived(
-		(connection?.messages || []).filter((message) => {
-			const isValid = validMessages.some((validMessage) => validMessage.type === message.type);
-			return connection?.cancelled ? isValid && message?.important : isValid;
-		})
-	);
 
 	const formatMessage = (message: Message): string => {
 		if (!message?.type || !message?.text) return "Invalid message object";
