@@ -158,21 +158,18 @@
 			{:else}<ArrowUp color="#ffda0a" />{/if}
 		</button>
 
-		{#if (plannedRoute?.journeys?.length ?? 0) === 0}
-			<WarningNoRoutes />
-		{:else}
-			<div class="space-y-2">
-				{#each plannedRoute?.journeys ?? [] as route, index}
-					{#if isDayDifferent(index)}
-						{@const date = DateTime.fromISO(
-							route.legs[0].departure?.actualTime ?? route.legs[0].departure?.plannedTime ?? ""
-						)}
-						<DateHeader {date} />
-					{/if}
-					<Route {route} {lineColors} />
-				{/each}
-			</div>
-		{/if}
+		<div class="space-y-2">
+			{#each plannedRoute?.journeys ?? [] as route, index}
+				{#if isDayDifferent(index)}
+					{@const date = DateTime.fromISO(
+						route.legs[0].departure?.actualTime ?? route.legs[0].departure?.plannedTime ?? ""
+					)}
+					<DateHeader {date} />
+				{/if}
+				<Route {route} {lineColors} />
+			{:else}<WarningNoRoutes />
+			{/each}
+		</div>
 
 		<button
 			class="flex cursor-pointer flex-row items-center gap-x-2"
