@@ -30,7 +30,7 @@
 	import ReservationsMissing from "$components/timetable/messages/icons/ReservationsMissing.svelte";
 	import NoBicycleTransport from "$components/timetable/messages/icons/NoBicycleTransport.svelte";
 	import ShowMore from "$components/timetable/info/ShowMore.svelte";
-	import type {ValidMessage} from "$lib/models";
+	import type { ValidMessage } from "$lib/models";
 
 	let { connection }: { connection?: Connection } = $props();
 	let expanded = $state<boolean>(false);
