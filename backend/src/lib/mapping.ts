@@ -57,7 +57,7 @@ const mapConnection = (
 		// cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
 		messages: mapMessages(entry?.messages ?? entry?.remarks, isIdentifiableAsHAFAS) ?? undefined,
 		cancelled: !entry?.walking ? (entry?.canceled ?? entry?.cancelled ?? false) : undefined,
-		providesVehicleSequence: !entry?.walking ? (entry?.providesVehicleSequence ?? false) : undefined,
+		providesVehicleSequence: entry?.walking ? undefined : entry?.providesVehicleSequence,
 		walking: entry?.walking ? entry?.walking : undefined,
 		distance: entry?.walking ? entry?.distance : undefined,
 		loadFactor: entry?.loadFactor ?? undefined
