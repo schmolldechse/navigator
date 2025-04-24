@@ -38,8 +38,7 @@
 	};
 
 	let legColors = $state<LineColor[]>([]);
-	onMount(() => {
-		const fetchLineColors = async () => {
+	onMount(() => (async () => {
 			const params = new URLSearchParams({
 				line: route?.legs
 					.filter((leg) => !leg?.walking)
@@ -55,10 +54,7 @@
 			if (!request.ok) return;
 
 			legColors = (await request.json()) as LineColor[];
-		};
-
-		fetchLineColors();
-	});
+		})());
 
 	const normalize = (value: string): string => value.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
 </script>
