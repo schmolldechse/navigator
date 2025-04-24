@@ -13,6 +13,7 @@
 	import { DateTime } from "luxon";
 	import SpinningCircle from "$components/ui/icons/SpinningCircle.svelte";
 	import DateHeader from "$components/ui/info/DateHeader.svelte";
+	import type {Connection, LineColor} from "$models/connection";
 
 	let { data }: PageProps = $props();
 
@@ -20,10 +21,30 @@
 	data.stations.then((stations) => (plannedStations = stations));
 
 	let plannedRoute = $state<RouteData | undefined>(undefined);
-	data.route.then((route) => (plannedRoute = route));
+	data.route.then((route) => {
+		plannedRoute = route;
+		fetchLineColors();
+	});
 
 	let loadingEarlier = $state<boolean>(false);
 	let loadingLater = $state<boolean>(false);
+
+	let lineColors = $state<LineColor[]>([]);
+	const fetchLineColors = async () => {
+		const legs = (plannedRoute?.journeys ?? [])
+			.filter((route: RouteInfo) => route?.legs?.some((leg: Connection) => !leg?.walking));
+		if (legs.length === 0) return [];
+
+		const params = new URLSearchParams({
+			line: legs.map((leg: Connection) => leg?.lineInformation?.lineName).join(";"),
+			hafasOperatorCode: legs.map((leg: Connection) => leg?.lineInformation?.operator?.id).join(";")
+		});
+
+		const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/journey/color?${params}`)
+		if (!request.ok) return [];
+
+		lineColors = (await request.json()) as LineColor[];
+	};
 
 	const requestRoutes = async (earlier: boolean) => {
 		if (!plannedStations?.from || !plannedStations?.to) return;
@@ -74,6 +95,8 @@
 
 		if (earlier) loadingEarlier = false;
 		else loadingLater = false;
+
+		await fetchLineColors();
 	};
 
 	const isDayDifferent = (index: number): boolean => {
@@ -139,7 +162,7 @@
 						{@const date = DateTime.fromISO(route.legs[0].departure?.actualTime ?? route.legs[0].departure?.plannedTime ?? "")}
 						<DateHeader {date} />
 					{/if}
-					<Route {route} />
+					<Route {route} {lineColors} />
 				{/each}
 			</div>
 		{/if}
