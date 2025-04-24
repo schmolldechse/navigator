@@ -41,16 +41,16 @@
 	const normalize = (value: string): string => value.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
 </script>
 
-<div class="border-primary-dark/75 overflow-hidden rounded-lg border-2 text-2xl font-medium" class:opacity-65={isCancelled}>
+<div class="border-primary-dark/75 overflow-hidden rounded-lg border-2 text-2xl font-medium">
 	<!-- Cancelled Header -->
 	{#if isCancelled}
-		<div class="bg-secondary/25 flex flex-row items-center gap-x-2 px-3 py-1">
+		<div class="bg-secondary/35 flex flex-row items-center gap-x-2 px-3 py-1">
 			<Ban size="20" />
 			<span class="text-sm font-semibold md:text-lg">Route not possible</span>
 		</div>
 	{/if}
 
-	<div class="space-y-2 px-4 py-2">
+	<div class="space-y-2 px-4 py-2" class:opacity-65={isCancelled}>
 		<!-- Time Info -->
 		<div class="flex flex-row items-baseline gap-x-2">
 			<div class="flex flex-row">
