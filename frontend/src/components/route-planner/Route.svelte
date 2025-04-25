@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Route } from "$models/route";
 	import TimeInformation from "$components/ui/info/TimeInformation.svelte";
-	import { calculateDuration, durationOfConnection, formatDuration } from "$lib";
+	import { calculateDuration, formatDuration } from "$lib";
 	import { DateTime } from "luxon";
 	import type { Connection, LineColor } from "$models/connection";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
@@ -15,23 +15,21 @@
 	let { route, lineColors }: { route: Route; lineColors: LineColor[] } = $props();
 	let detailsOpen = $state<boolean>(false);
 
-	const durationWithoutWalking = $derived(() => {
+	const durationOfConnection = (connection: Connection): number => calculateDuration(
+		DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
+		DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
+		["minutes"]
+	).minutes;
+
+	const durationWithoutWalking = $derived.by(() => {
 		// remove legs with "walking" property
 		const legs = (route?.legs || []).filter((leg) => !leg?.walking);
 		if (legs.length === 0) return 0;
 
-		return legs
-			.flatMap((leg) =>
-				calculateDuration(
-					DateTime.fromISO(leg?.arrival?.actualTime ?? leg?.arrival?.plannedTime ?? ""),
-					DateTime.fromISO(leg?.departure?.actualTime ?? leg?.departure?.plannedTime ?? ""),
-					["minutes"]
-				).as("minutes")
-			)
-			.reduce((acc, el) => acc + el);
+		return legs.flatMap((leg) => durationOfConnection(leg)).reduce((acc, el) => acc + el);
 	});
 
-	const isCancelled: boolean = $derived.by(() => route?.legs?.some((leg: Connection) => leg?.cancelled));
+	const isCancelled: boolean = $derived(route?.legs?.some((leg: Connection) => leg?.cancelled));
 
 	const getWidthRatio = (duration: number, maxDuration: number) => {
 		if (maxDuration <= 0) return "0%";
@@ -92,7 +90,7 @@
 			{#each route?.legs.filter((leg) => !leg?.walking) as leg}
 				<span
 					class="bg-primary-darker line-clamp-1 min-w-fit truncate rounded-lg px-2 py-1 text-center text-base md:line-clamp-none md:text-lg"
-					style:width={getWidthRatio(durationOfConnection(leg), durationWithoutWalking())}
+					style:width={getWidthRatio(durationOfConnection(leg), durationWithoutWalking)}
 				>
 					{leg?.lineInformation?.lineName}
 				</span>
