@@ -1,10 +1,11 @@
 using System.Globalization;
 using Daemon.Models;
+using Daemon.Models.Station;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Newtonsoft.Json.Linq;
 
-namespace Daemon.System.Impl;
+namespace Daemon.Manager.Impl;
 
 public class MonitorStations : Daemon
 {
@@ -53,7 +54,8 @@ public class MonitorStations : Daemon
                 CallApi(station.EvaNumber, start.Date.AddHours(12), 720)
             ).GetAwaiter().GetResult().Sum();
 
-            _logger.LogInformation($"{station.Name} had no saved result's yet! Set 'LastQueried' for station {station.Name}: {start} (7 days ago)");
+            _logger.LogInformation(
+                $"{station.Name} had no saved result's yet! Set 'LastQueried' for station {station.Name}: {start} (7 days ago)");
             _logger.LogInformation($"Queried {upsertCount} new RIS id's");
         }
         else if (station.LastQueried.Value.Date < date.Date)
@@ -76,7 +78,8 @@ public class MonitorStations : Daemon
                 CallApi(station.EvaNumber, newLastQueried.Date.AddHours(12), 720)
             ).GetAwaiter().GetResult().Sum();
 
-            _logger.LogInformation($"Queried {upsertCount} new RIS id's & incremented 'LastQueried' for station {station.Name}: {newLastQueried}");
+            _logger.LogInformation(
+                $"Queried {upsertCount} new RIS id's & incremented 'LastQueried' for station {station.Name}: {newLastQueried}");
         }
     }
 
@@ -89,7 +92,7 @@ public class MonitorStations : Daemon
         response.EnsureSuccessStatusCode();
 
         var content = JObject.Parse(await response.Content.ReadAsStringAsync());
-        List<RisDocument> journeys = content["arrivals"]!.Select(arrival =>
+        List<IdentifiedRisId> journeys = content["arrivals"]!.Select(arrival =>
             {
                 string fullTripId = arrival["tripId"]!.ToString();
                 string datePart = fullTripId.Substring(0, 8);
@@ -108,17 +111,17 @@ public class MonitorStations : Daemon
                     ).ToLocalTime();
                 }
 
-                return new RisDocument() { risId = fullTripId, DiscoveredAt = discoveredAt };
+                return new IdentifiedRisId() { risId = fullTripId, DiscoveredAt = discoveredAt };
             })
             .ToList();
         if (!journeys.Any()) return 0;
 
-        var collection = await MongoDriver.GetCollectionAsync<RisDocument>("ris-ids");
-        var bulkOps = journeys.Select(journey => new UpdateOneModel<RisDocument>(
-                Builders<RisDocument>.Filter.Eq(j => j.risId, journey.risId),
-                Builders<RisDocument>.Update.SetOnInsert(j => j.risId, journey.risId)
+        var collection = await MongoDriver.GetCollectionAsync<IdentifiedRisId>("ris-ids");
+        var bulkOps = journeys.Select(journey => new UpdateOneModel<IdentifiedRisId>(
+                Builders<IdentifiedRisId>.Filter.Eq(j => j.risId, journey.risId),
+                Builders<IdentifiedRisId>.Update.SetOnInsert(j => j.risId, journey.risId)
                     .SetOnInsert(j => j.DiscoveredAt, journey.DiscoveredAt))
-            { IsUpsert = true }).ToList<WriteModel<RisDocument>>();
+            { IsUpsert = true }).ToList<WriteModel<IdentifiedRisId>>();
 
         var result = await collection.BulkWriteAsync(bulkOps);
         return result.Upserts.Count;

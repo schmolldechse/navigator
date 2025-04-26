@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 
-namespace Daemon.System;
+namespace Daemon.Manager;
 
 public abstract class Daemon : IDisposable
 {
