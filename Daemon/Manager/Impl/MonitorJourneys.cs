@@ -58,16 +58,16 @@ public class MonitorJourneys : Daemon
             DateOnly.FromDateTime(_startTime),
             TimeOnly.FromTimeSpan(date.TimeOfDay)
         );
+
+        TripResult result = await CallApi(risDocument.risId, newLastQueried, cancellationToken);
+        if (result.ParsingError) return;
+
         await risCollection.FindOneAndUpdateAsync(
             Builders<IdentifiedRisId>.Filter.Eq(x => x.risId, risDocument.risId),
             Builders<IdentifiedRisId>.Update.Set(x => x.LastSuccessfulQueried, newLastQueried),
             cancellationToken: cancellationToken
         );
-
-        Trip trip = await CallApi(risDocument.risId, _startTime, cancellationToken);
-        if (trip == null) return;
-
-        await StoreTrip(trip, cancellationToken);
+        if (result.Trip != null) await StoreTrip(result.Trip, cancellationToken);
     }
 
     private async Task ProcessExistingDocument(
@@ -80,34 +80,49 @@ public class MonitorJourneys : Daemon
             DateOnly.FromDateTime(risDocument.LastSuccessfulQueried!.Value.Date.AddDays(1)),
             TimeOnly.FromTimeSpan(date.TimeOfDay)
         );
+
+        TripResult result = await CallApi(risDocument.risId, newLastQueried, cancellationToken);
+        if (result.ParsingError) return;
+
         await risCollection.FindOneAndUpdateAsync(
             Builders<IdentifiedRisId>.Filter.Eq(x => x.risId, risDocument.risId),
             Builders<IdentifiedRisId>.Update.Set(x => x.LastSuccessfulQueried, newLastQueried),
             cancellationToken: cancellationToken
         );
-
-        Trip trip = await CallApi(risDocument.risId, newLastQueried, cancellationToken);
-        if (trip == null) return;
-
-        await StoreTrip(trip, cancellationToken);
+        if (result.Trip != null) await StoreTrip(result.Trip, cancellationToken);
     }
 
-    private async Task<Trip> CallApi(string risId, DateTime when, CancellationToken cancellationToken)
+    private async Task<TripResult> CallApi(string risId, DateTime when, CancellationToken cancellationToken)
     {
         string formattedId = when.ToString("yyyyMMdd") + "-" + risId;
 
         _logger.LogDebug($"Calling Trip API for: {formattedId}");
         var response = await _httpClient.GetAsync(string.Format(_apiUrl, formattedId), cancellationToken);
-        if (!response.IsSuccessStatusCode) return null;
+
+        // 500 code is thrown if trip does not exist
+        if (!response.IsSuccessStatusCode)
+            return new TripResult()
+            {
+                Trip = null,
+                ParsingError = false
+            };
 
         var content = JObject.Parse(await response.Content.ReadAsStringAsync(cancellationToken));
         if (content["trip"] == null)
         {
             _logger.LogDebug($"No response from Trip API for: {formattedId}");
-            return null;
+            return new TripResult()
+            {
+                Trip = null,
+                ParsingError = true
+            };
         }
 
-        return Trip.FromJson(content["trip"]!);
+        return new TripResult()
+        {
+            Trip = Trip.FromJson(content["trip"]!),
+            ParsingError = false,
+        };
     }
 
     private async Task StoreTrip(Trip trip, CancellationToken cancellationToken)
@@ -121,4 +136,10 @@ public class MonitorJourneys : Daemon
         _httpClient?.Dispose();
         base.Dispose();
     }
+}
+
+class TripResult
+{
+    public Trip? Trip { get; set; }
+    public bool ParsingError { get; set; } = false;
 }
