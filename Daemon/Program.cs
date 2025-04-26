@@ -1,5 +1,5 @@
-﻿using Daemon.System;
-using Daemon.System.Impl;
+﻿using Daemon.Manager;
+using Daemon.Manager.Impl;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using MongoDB.Bson.Serialization.Conventions;
