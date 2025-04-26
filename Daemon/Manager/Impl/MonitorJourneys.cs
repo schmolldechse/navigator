@@ -39,54 +39,35 @@ public class MonitorJourneys : Daemon
 
         if (risDocument.LastSuccessfulQueried == null)
         {
-            await ProcessNewDocument(risDocument, date, risCollection, cancellationToken);
+            date = new DateTime(
+                DateOnly.FromDateTime(_startTime),
+                TimeOnly.FromTimeSpan(date.TimeOfDay)
+            );
+            await ProcessTrip(risDocument, date, risCollection, cancellationToken);
         }
         // do not fetch connections for the same day, as the connection may not reach their destination
         else if (risDocument.LastSuccessfulQueried.Value.Date < date.Date)
         {
-            await ProcessExistingDocument(risDocument, date, risCollection, cancellationToken);
+            date = new DateTime(
+                DateOnly.FromDateTime(risDocument.LastSuccessfulQueried!.Value.Date.AddDays(1)),
+                TimeOnly.FromTimeSpan(date.TimeOfDay)
+            );
+            await ProcessTrip(risDocument, date, risCollection, cancellationToken);
         }
     }
 
-    private async Task ProcessNewDocument(
+    private async Task ProcessTrip(
         IdentifiedRisId risDocument,
         DateTime date,
         IMongoCollection<IdentifiedRisId> risCollection,
         CancellationToken cancellationToken)
     {
-        var newLastQueried = new DateTime(
-            DateOnly.FromDateTime(_startTime),
-            TimeOnly.FromTimeSpan(date.TimeOfDay)
-        );
-
-        TripResult result = await CallApi(risDocument.risId, newLastQueried, cancellationToken);
+        TripResult result = await CallApi(risDocument.risId, date, cancellationToken);
         if (result.ParsingError) return;
 
         await risCollection.FindOneAndUpdateAsync(
             Builders<IdentifiedRisId>.Filter.Eq(x => x.risId, risDocument.risId),
-            Builders<IdentifiedRisId>.Update.Set(x => x.LastSuccessfulQueried, newLastQueried),
-            cancellationToken: cancellationToken
-        );
-        if (result.Trip != null) await StoreTrip(result.Trip, cancellationToken);
-    }
-
-    private async Task ProcessExistingDocument(
-        IdentifiedRisId risDocument,
-        DateTime date,
-        IMongoCollection<IdentifiedRisId> risCollection,
-        CancellationToken cancellationToken)
-    {
-        var newLastQueried = new DateTime(
-            DateOnly.FromDateTime(risDocument.LastSuccessfulQueried!.Value.Date.AddDays(1)),
-            TimeOnly.FromTimeSpan(date.TimeOfDay)
-        );
-
-        TripResult result = await CallApi(risDocument.risId, newLastQueried, cancellationToken);
-        if (result.ParsingError) return;
-
-        await risCollection.FindOneAndUpdateAsync(
-            Builders<IdentifiedRisId>.Filter.Eq(x => x.risId, risDocument.risId),
-            Builders<IdentifiedRisId>.Update.Set(x => x.LastSuccessfulQueried, newLastQueried),
+            Builders<IdentifiedRisId>.Update.Set(x => x.LastSuccessfulQueried, date),
             cancellationToken: cancellationToken
         );
         if (result.Trip != null) await StoreTrip(result.Trip, cancellationToken);
