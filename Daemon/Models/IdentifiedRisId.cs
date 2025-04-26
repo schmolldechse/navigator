@@ -4,7 +4,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Daemon.Models;
 
 [BsonIgnoreExtraElements]
-public class RisDocument
+public class IdentifiedRisId
 {
     [Required]
     [BsonId]
