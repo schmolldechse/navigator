@@ -139,7 +139,7 @@
 	}}
 />
 
-<div class="mx-auto my-4 flex min-h-full w-full flex-1 flex-col gap-y-4 px-2 md:max-w-[65%] md:px-0">
+<div class="mx-auto mb-2 flex flex-1 flex-col gap-y-4 w-full px-2 md:px-4 md:max-w-[960px]">
 	<!-- Route Request Info -->
 	<RouteRequest stations={data?.stations} />
 
@@ -153,12 +153,12 @@
 			disabled={loadingEarlier}
 			onclick={async () => await requestRoutes(true)}
 		>
-			<span class="text-lg">Earlier connections</span>
+			<span class="text-base md:text-lg">Earlier connections</span>
 			{#if loadingEarlier}<SpinningCircle height="20px" width="20px" />
 			{:else}<ArrowUp color="#ffda0a" />{/if}
 		</button>
 
-		<div class="space-y-2">
+		<div class="gap-y-2">
 			{#each plannedRoute?.journeys ?? [] as route, index}
 				{#if isDayDifferent(index)}
 					{@const date = DateTime.fromISO(
@@ -176,7 +176,7 @@
 			disabled={loadingLater}
 			onclick={async () => await requestRoutes(false)}
 		>
-			<span class="text-lg">Later connections</span>
+			<span class="text-base md:text-lg">Later connections</span>
 			{#if loadingLater}<SpinningCircle height="20px" width="20px" />
 			{:else}<ArrowDown color="#ffda0a" />{/if}
 		</button>
