@@ -7,6 +7,7 @@
 	import { formatDuration } from "$lib";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
+	import StopChild from "$components/route-planner/details/StopChild.svelte";
 
 	let { leg, lineColor }: { leg: Connection; lineColor?: LineColor } = $props();
 	let showViaStops = $state<boolean>(false);
@@ -14,31 +15,16 @@
 
 <div class="flex flex-col text-base">
 	<!-- Origin -->
-	<div class="flex flex-row">
-		<TimeInformation
-			time={leg?.departure}
-			direction="col"
-			class="basis-1/6 items-end text-base"
-			delayClass="text-sm md:text-base"
-		/>
-		<div class="relative flex basis-1/6 justify-center md:max-w-[5%]">
-			<CircleDot class="bg-background absolute z-10 shrink-0 self-start" />
-			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
-		</div>
-		<div class="flex basis-4/6 flex-row items-center justify-between">
-			<a class="flex flex-row self-start font-bold" href={`/${leg?.origin?.evaNumber}/departures`} target="_blank">
-				{leg?.origin?.name}
-				<ChevronRight color="#ffda0a" class="shrink-0" />
-			</a>
-			<Platform time={leg?.departure} class="basis-1/6 self-start text-right" direction="col" />
-		</div>
-	</div>
+	<StopChild time={leg?.arrival} stop={leg?.origin} />
 
 	<!-- Line Info -->
-	<div class="relative flex flex-row pt-6 md:pt-12">
+	<div class="flex flex-row">
+		<!-- 1/6 Time -->
 		<span class="basis-1/6 text-right text-sm">{formatDuration(leg?.arrival, leg?.departure)}</span>
-		<div class="flex basis-1/6 justify-center md:max-w-[5%]">
-			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
+
+		<!-- Connecting Line -->
+		<div class="relative flex basis-1/6 justify-center md:max-w-[5%]">
+			<span class="bg-text absolute z-0 h-full w-[4px]"></span>
 		</div>
 		<div class="flex basis-4/6 flex-col">
 			<div class="flex flex-row items-baseline gap-x-2">
