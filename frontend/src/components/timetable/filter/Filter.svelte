@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { ProductType } from "$src/models/product";
+	import type { Component } from "svelte";
 	import LongDistance from "$components/ui/transport-types/LongDistance.svelte";
 	import Regional from "$components/ui/transport-types/Regional.svelte";
 	import Suburban from "$components/ui/transport-types/Suburban.svelte";
@@ -20,6 +20,13 @@
 		allowedProducts: string[];
 		selected: string[];
 	} = $props();
+
+	interface ProductType {
+		key: string;
+		name: string;
+		component?: Component;
+		values: string[];
+	}
 
 	const types: ProductType[] = [
 		{
