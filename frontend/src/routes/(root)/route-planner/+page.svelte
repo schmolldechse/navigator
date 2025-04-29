@@ -66,7 +66,7 @@
 					destination = temp;
 				}}
 			>
-				<ArrowUpDown class="stroke-background stroke-3 transition-transform duration-300 group-hover:rotate-180" />
+				<ArrowUpDown class="stroke-background stroke-3 transition-transform duration-300 hover:rotate-180" />
 			</button>
 
 			<StationSearch bind:station={destination} placeholder="Destination" class="z-0 md:text-xl" />
