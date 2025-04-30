@@ -42,22 +42,10 @@ public class MonitorStations : Daemon
         {
             // RIS saves it up to 7 days retroactively
             var start = date.AddDays(-7);
-            var update = Builders<StationDocument>.Update.Set(x => x.LastQueried, start);
-
-            await collection.UpdateOneAsync(
-                Builders<StationDocument>.Filter.Eq(x => x.EvaNumber, station.EvaNumber),
-                update,
-                cancellationToken: cancellationToken
-            );
-
-            int upsertCount = Task.WhenAll(
-                CallApi(station.EvaNumber, start.Date, 720),
-                CallApi(station.EvaNumber, start.Date.AddHours(12), 720)
-            ).GetAwaiter().GetResult().Sum();
-
             _logger.LogInformation(
                 $"{station.Name} had no saved result's yet! Set 'LastQueried' for station {station.Name}: {start} (7 days ago)");
-            _logger.LogInformation($"Queried {upsertCount} new RIS id's");
+
+            await ProcessStation(station, start, cancellationToken);
         }
         else if (station.LastQueried.Value.Date < date.Date)
         {
@@ -65,23 +53,27 @@ public class MonitorStations : Daemon
                 DateOnly.FromDateTime(station.LastQueried.Value.Date.AddDays(1)),
                 TimeOnly.FromTimeSpan(date.TimeOfDay)
             );
-
-            var update = Builders<StationDocument>.Update.Set(x => x.LastQueried, newLastQueried);
-
-            await collection.UpdateOneAsync(
-                Builders<StationDocument>.Filter.Eq(x => x.EvaNumber, station.EvaNumber),
-                update,
-                cancellationToken: cancellationToken
-            );
-
-            int upsertCount = Task.WhenAll(
-                CallApi(station.EvaNumber, newLastQueried.Date, 720),
-                CallApi(station.EvaNumber, newLastQueried.Date.AddHours(12), 720)
-            ).GetAwaiter().GetResult().Sum();
-
-            _logger.LogInformation(
-                $"Queried {upsertCount} new RIS id's & incremented 'LastQueried' for station {station.Name}: {newLastQueried}");
+            await ProcessStation(station, newLastQueried, cancellationToken);
         }
+    }
+
+    private async Task ProcessStation(Station station, DateTime date, CancellationToken cancellationToken)
+    {
+        var update = Builders<StationDocument>.Update.Set(x => x.LastQueried, date);
+
+        var collection = await MongoDriver.GetCollectionAsync<StationDocument>("stations");
+        await collection.UpdateOneAsync(
+            Builders<StationDocument>.Filter.Eq(x => x.EvaNumber, station.EvaNumber),
+            update,
+            cancellationToken: cancellationToken
+        );
+
+        int upsertCount = Task.WhenAll(
+            CallApi(station.EvaNumber, date.Date, 720),
+            CallApi(station.EvaNumber, date.Date.AddHours(12), 720)
+        ).GetAwaiter().GetResult().Sum();
+        _logger.LogInformation(
+            $"Queried {upsertCount} new RIS id's & incremented 'LastQueried' for station {station.Name}: {date}");
     }
 
     private async Task<int> CallApi(int evaNumber, DateTime when, int duration)
