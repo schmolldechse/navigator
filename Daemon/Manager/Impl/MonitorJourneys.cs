@@ -26,8 +26,8 @@ public class MonitorJourneys : Daemon
 
         var risCollection = await MongoDriver.GetCollectionAsync<IdentifiedRisId>("ris-ids");
         var lastSuccessfulQueriedFilter = Builders<IdentifiedRisId>.Filter.Or(
-            Builders<IdentifiedRisId>.Filter.Exists(x => x.LastSuccessfulQueried, false),
-            Builders<IdentifiedRisId>.Filter.Lt(x => x.LastSuccessfulQueried, date.Date.AddDays(-1))
+            Builders<IdentifiedRisId>.Filter.Exists(x => x.LastSuccessfulQueried, false), // lastSuccessfulQueried is null
+            Builders<IdentifiedRisId>.Filter.Lt(x => x.LastSuccessfulQueried, date.Date.AddDays(-1)) // lastSuccessfulQueried is older than current date at Midnight
         );
 
         var risDocument = await risCollection
@@ -43,7 +43,7 @@ public class MonitorJourneys : Daemon
                 DateOnly.FromDateTime(_startTime),
                 TimeOnly.FromTimeSpan(date.TimeOfDay)
             );
-            await ProcessTrip(risDocument, date, risCollection, cancellationToken);
+            await ProcessTrip(risDocument, date, cancellationToken);
         }
         // do not fetch connections for the same day, as the connection may not reach their destination
         else if (risDocument.LastSuccessfulQueried.Value.Date < date.Date)
@@ -52,24 +52,28 @@ public class MonitorJourneys : Daemon
                 DateOnly.FromDateTime(risDocument.LastSuccessfulQueried!.Value.Date.AddDays(1)),
                 TimeOnly.FromTimeSpan(date.TimeOfDay)
             );
-            await ProcessTrip(risDocument, date, risCollection, cancellationToken);
+            await ProcessTrip(risDocument, date, cancellationToken);
         }
     }
 
     private async Task ProcessTrip(
         IdentifiedRisId risDocument,
         DateTime date,
-        IMongoCollection<IdentifiedRisId> risCollection,
         CancellationToken cancellationToken)
     {
-        TripResult result = await CallApi(risDocument.risId, date, cancellationToken);
+        TripResult result = await CallApi(risDocument.RisId, date, cancellationToken);
         if (result.ParsingError) return;
 
-        await risCollection.FindOneAndUpdateAsync(
+        var collection = await MongoDriver.GetCollectionAsync<IdentifiedRisId>("ris-ids");
+        
+        // first update lastQueried
+        await collection.FindOneAndUpdateAsync(
             Builders<IdentifiedRisId>.Filter.Eq(x => x.RisId, risDocument.RisId),
             Builders<IdentifiedRisId>.Update.Set(x => x.LastSuccessfulQueried, date),
             cancellationToken: cancellationToken
         );
+        
+        // then insert the Trip
         if (result.Trip != null) await StoreTrip(result.Trip, cancellationToken);
     }
 
