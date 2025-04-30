@@ -23,15 +23,17 @@ public class MonitorStations : Daemon
 
         var collection = await MongoDriver.GetCollectionAsync<StationDocument>("stations");
 
-        var queryingEnabledFilter = Builders<StationDocument>.Filter.Eq(x => x.QueryingEnabled, true);
-        var lastQueriedFilter = Builders<StationDocument>.Filter.Or(
-            Builders<StationDocument>.Filter.Exists(x => x.LastQueried, false),
-            Builders<StationDocument>.Filter.Lt(x => x.LastQueried, date)
+        var filter = Builders<StationDocument>.Filter.And(
+            Builders<StationDocument>.Filter.Eq(x => x.QueryingEnabled, true), // queryingEnabled is true
+            Builders<StationDocument>.Filter
+                .Or( // lastQueried is null or lastQueried is older than current date at Midnight
+                    Builders<StationDocument>.Filter.Exists(x => x.LastQueried, false),
+                    Builders<StationDocument>.Filter.Lt(x => x.LastQueried, date.Date.AddDays(-1)))
         );
 
         var station = await collection
             .Aggregate()
-            .Match(Builders<StationDocument>.Filter.And(queryingEnabledFilter, lastQueriedFilter))
+            .Match(filter)
             .Sample(1)
             .FirstOrDefaultAsync(cancellationToken);
         if (station == null) return;
