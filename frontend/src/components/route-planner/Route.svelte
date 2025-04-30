@@ -39,7 +39,7 @@
 	const normalize = (value: string): string => value.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "");
 </script>
 
-<div class="border-primary/45 overflow-hidden rounded-lg border-2 py-2">
+<div class="border-primary/45 overflow-hidden rounded-lg border-2">
 	<!-- Cancelled Header -->
 	{#if isCancelled}
 		<div class="bg-secondary/50 flex flex-row items-center gap-x-2 px-3 py-1">
@@ -48,7 +48,7 @@
 		</div>
 	{/if}
 
-	<div class="px-4 space-y-2" class:opacity-65={isCancelled}>
+	<div class="py-2 px-4 space-y-2" class:opacity-65={isCancelled}>
 		<!-- Time Info -->
 		<div class="flex flex-row items-baseline gap-x-2 tracking-tight">
 			<div class="flex flex-row gap-x-1">
@@ -111,8 +111,8 @@
 	</div>
 
 	{#if detailsOpen}
-		<div class="md:px-2 border-primary-dark/75 flex flex-col border-t">
-			<span class="text-lg font-semibold p-4 pb-8 tracking-tighter">Route Details</span>
+		<div class="py-4 md:px-2 border-primary/85 flex flex-col border-t">
+			<span class="text-lg font-semibold px-4 pb-4 md:pb-8 tracking-tighter">Route Details</span>
 
 			{#each route?.legs as leg, i}
 				{#if leg?.walking}
