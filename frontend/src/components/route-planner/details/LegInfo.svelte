@@ -15,7 +15,7 @@
 
 <div class="flex flex-col text-base">
 	<!-- Origin -->
-	<StopChild time={leg?.arrival} stop={leg?.origin} />
+	<StopChild time={leg?.departure} stop={leg?.origin} />
 
 	<!-- Line Info -->
 	<div class="flex flex-row">
