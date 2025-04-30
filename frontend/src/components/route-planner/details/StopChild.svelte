@@ -27,20 +27,18 @@
 	{/if}
 
 	<!-- 1/6 Connecting Line -->
-	<div class="relative flex justify-center basis-1/6 lg:max-w-[5%]">
+	<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
 		<CircleDot class="bg-background absolute z-1 shrink-0" />
 		<span class="bg-text absolute z-0 h-full w-[4px]"></span>
 	</div>
 
 	<!-- 4/6 Stop Info -->
-	<div class="flex basis-4/6 flex-row justify-between">
-		<div class="flex flex-row items-center">
-			<a class="font-bold break-words hyphens-auto" href={`/${stop?.evaNumber}/departures`} target="_blank">
-				{stop?.name}
-			</a>
-			<ChevronRight color="#ffda0a" class="shrink-0" />
-		</div>
-
-		<Platform {time} class="text-right" direction="col" />
+	<div class="flex basis-4/6 flex-row items-center self-start">
+		<a class="font-bold break-words hyphens-auto" href={`/${stop?.evaNumber}/departures`} target="_blank">
+			{stop?.name}
+		</a>
+		<ChevronRight color="#ffda0a" class="shrink-0" />
 	</div>
+
+	<Platform {time} class="md:pr-24 pr-1 basis-1/6 text-right" direction="col" />
 </div>
