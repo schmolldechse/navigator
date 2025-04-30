@@ -55,14 +55,14 @@
 				<TimeInformation
 					time={route?.legs[0]?.departure}
 					direction="col"
-					class="font-bold text-base md:text-xl"
+					class="font-semibold text-base md:text-xl"
 					delayClass="text-sm md:text-base"
 				/>
 				<Minus class="mt-[0.05rem] md:mt-[0.15rem]" />
 				<TimeInformation
 					time={route?.legs[route?.legs?.length - 1]?.arrival}
 					direction="col"
-					class="font-bold text-base md:text-xl"
+					class="font-semibold text-base md:text-xl"
 					delayClass="text-sm md:text-base"
 				/>
 			</div>
