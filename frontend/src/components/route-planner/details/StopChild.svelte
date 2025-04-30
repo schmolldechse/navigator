@@ -22,13 +22,13 @@
 						 class={`items-end basis-1/6 text-base ${position === "end" ? "self-end" : ""}`}
 						 delayClass="text-sm md:text-base" />
 	{:else}
-		<div class="flex items-end basis-1/6">
+		<div class="flex flex-col items-end basis-1/6">
 			<TimeInformation time={stop?.arrival} class="text-base" delayClass="text-sm md:text-base" />
 			<TimeInformation time={stop?.departure} class="text-base" delayClass="text-sm md:text-base" />
 		</div>
 	{/if}
 
-	<!-- 1/6 Connecting Line -->
+	<!-- Connecting Line -->
 	<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500"
 		 class:items-end={position === "end"}>
 		<CircleDot class="bg-background absolute z-1 shrink-0" />
@@ -43,6 +43,7 @@
 		<ChevronRight color="#ffda0a" class="shrink-0" />
 	</div>
 
+	<!-- 1/6 Platform -->
 	<Platform {time} class={`md:pr-24 pr-1 basis-1/6 text-right ${position === "end" ? "self-end" : ""}`}
 			  direction="col" />
 </div>
