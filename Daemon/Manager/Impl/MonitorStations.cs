@@ -1,4 +1,3 @@
-using System.Globalization;
 using Daemon.Models;
 using Daemon.Models.Station;
 using Microsoft.Extensions.Logging;
@@ -92,34 +91,14 @@ public class MonitorStations : Daemon
         response.EnsureSuccessStatusCode();
 
         var content = JObject.Parse(await response.Content.ReadAsStringAsync());
-        List<IdentifiedRisId> journeys = content["arrivals"]!.Select(arrival =>
-            {
-                string fullTripId = arrival["tripId"]!.ToString();
-                string datePart = fullTripId.Substring(0, 8);
-
-                if (DateTime.TryParseExact(datePart, "yyyyMMdd", null, DateTimeStyles.None, out DateTime _))
-                {
-                    fullTripId = fullTripId.Substring(9);
-                }
-
-                DateTime? discoveredAt = null;
-                if (arrival["plannedWhen"] != null)
-                {
-                    discoveredAt = new DateTime(
-                        DateOnly.FromDateTime(DateTime.Parse(arrival["plannedWhen"]!.ToString()).Date),
-                        TimeOnly.FromTimeSpan(DateTime.Now.Date.TimeOfDay)
-                    ).ToLocalTime();
-                }
-
-                return new IdentifiedRisId() { risId = fullTripId, DiscoveredAt = discoveredAt };
-            })
-            .ToList();
+        List<IdentifiedRisId> journeys = content["arrivals"]!.Select(IdentifiedRisId.FromJson).ToList();
         if (!journeys.Any()) return 0;
 
         var collection = await MongoDriver.GetCollectionAsync<IdentifiedRisId>("ris-ids");
         var bulkOps = journeys.Select(journey => new UpdateOneModel<IdentifiedRisId>(
-                Builders<IdentifiedRisId>.Filter.Eq(j => j.risId, journey.risId),
-                Builders<IdentifiedRisId>.Update.SetOnInsert(j => j.risId, journey.risId)
+                Builders<IdentifiedRisId>.Filter.Eq(j => j.RisId, journey.RisId),
+                Builders<IdentifiedRisId>.Update
+                    .SetOnInsert(j => j.RisId, journey.RisId)
                     .SetOnInsert(j => j.DiscoveredAt, journey.DiscoveredAt))
             { IsUpsert = true }).ToList<WriteModel<IdentifiedRisId>>();
 

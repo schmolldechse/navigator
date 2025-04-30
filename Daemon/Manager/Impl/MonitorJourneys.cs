@@ -66,7 +66,7 @@ public class MonitorJourneys : Daemon
         if (result.ParsingError) return;
 
         await risCollection.FindOneAndUpdateAsync(
-            Builders<IdentifiedRisId>.Filter.Eq(x => x.risId, risDocument.risId),
+            Builders<IdentifiedRisId>.Filter.Eq(x => x.RisId, risDocument.RisId),
             Builders<IdentifiedRisId>.Update.Set(x => x.LastSuccessfulQueried, date),
             cancellationToken: cancellationToken
         );
