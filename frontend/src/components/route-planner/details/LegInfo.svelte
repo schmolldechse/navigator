@@ -13,7 +13,7 @@
 	let showViaStops = $state<boolean>(false);
 </script>
 
-<div class="flex flex-col text-base">
+<div class="flex flex-col">
 	<!-- Origin -->
 	<StopChild time={leg?.departure} stop={leg?.origin} />
 
@@ -97,23 +97,5 @@
 	{/if}
 
 	<!-- Destination -->
-	<div class="relative flex flex-row pt-4 md:pt-6">
-		<TimeInformation
-			time={leg?.arrival}
-			direction="col"
-			class="basis-1/6 items-end self-end text-base"
-			delayClass="text-sm md:text-base"
-		/>
-		<div class="flex basis-1/6 justify-center md:max-w-[5%]">
-			<CircleDot class="bg-background absolute z-10 shrink-0 self-end" />
-			<span class="bg-text absolute z-0 h-full w-[4px] self-end"></span>
-		</div>
-		<div class="flex basis-4/6 flex-row items-center justify-between self-end">
-			<a class="flex flex-row self-end font-bold" href={`/${leg?.destination?.evaNumber}/departures`} target="_blank">
-				{leg?.destination?.name}
-				<ChevronRight color="#ffda0a" class="shrink-0 self-center" />
-			</a>
-			<Platform time={leg?.arrival} class="self-end text-right" direction="col" />
-		</div>
-	</div>
+	<StopChild time={leg?.arrival} stop={leg?.destination} position="end" />
 </div>
