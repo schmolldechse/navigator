@@ -35,20 +35,27 @@
 	<StopChild time={startWalking} stop={firstIsWalking} isChangeover={true} />
 {/if}
 
-<div class="relative flex flex-row py-12 text-base">
+<div class="flex flex-row">
+	<!-- 1/6 Time -->
 	<span class="text-text/65 basis-1/6 self-center text-right">
 		{walkingDuration > 0 ? formatDuration(stopWalking, startWalking) : ""}
 	</span>
-	<div class="flex basis-1/6 justify-center md:max-w-[5%]">
+
+	<!-- Connecting Line -->
+	<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
 		<span
-			class="absolute z-0 h-full w-[4px] self-center bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]"
+			class="absolute z-0 h-full w-[4px] bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]"
 		></span>
 	</div>
-	<div class="flex basis-4/6 flex-col justify-center gap-y-2">
+
+	<!-- 5/6 Changeover Info; Padding only to compensate Platform -->
+	<div class="flex basis-5/6 flex-col justify-center gap-y-2 md:pr-24 pr-1">
 		<span class="flex items-center">
 			<Walking height="35px" width="35px" class="stroke-accent" />
 			Changeover
 		</span>
+
+		<!-- Warning -->
 		{#if walkingDuration <= 0}
 			<div class="text-background bg-white p-1">
 				<div class="flex flex-row gap-x-2">
