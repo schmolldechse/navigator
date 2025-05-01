@@ -27,7 +27,7 @@
 	};
 </script>
 
-<div class="mx-4 flex w-full flex-col gap-y-4 text-base md:w-[45%]">
+<div class="mx-4 flex w-full flex-col gap-y-4 text-base md:w-[720px]">
 	<!-- Titlebar -->
 	<header class="bg-titlebar-background flex items-center justify-between rounded-t-2xl p-4">
 		<span class="text-accent text-base font-bold md:text-3xl">Timetable</span>
