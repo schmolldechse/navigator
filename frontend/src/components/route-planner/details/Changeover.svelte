@@ -43,9 +43,7 @@
 
 	<!-- Connecting Line -->
 	<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
-		<span
-			class="absolute z-0 h-full w-[4px] bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]"
-		></span>
+		<span class="absolute z-0 h-full w-[4px] changeover"></span>
 	</div>
 
 	<!-- 5/6 Changeover Info -->
