@@ -46,6 +46,6 @@
 	</div>
 
 	<!-- 1/6 Platform -->
-	<Platform {time} class={`md:pr-24 pr-1 basis-1/6 text-right ${position === "end" ? "self-end" : ""}`}
+	<Platform {time} class={`basis-1/6 md:items-start ${position === "end" ? "self-end" : ""}`}
 			  direction="col" />
 </div>

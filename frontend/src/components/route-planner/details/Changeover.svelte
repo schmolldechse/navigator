@@ -48,8 +48,8 @@
 		></span>
 	</div>
 
-	<!-- 5/6 Changeover Info; Padding only to compensate Platform -->
-	<div class="flex basis-5/6 flex-col justify-center gap-y-2 md:pr-24 pr-1">
+	<!-- 5/6 Changeover Info -->
+	<div class="flex basis-5/6 flex-col justify-center gap-y-2">
 		<span class="flex items-center">
 			<Walking height="35px" width="35px" class="stroke-accent" />
 			Changeover
