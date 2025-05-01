@@ -72,7 +72,7 @@
 
 	{#if showViaStops}
 		{#each leg?.viaStops ?? [] as stop, i}
-			<StopChild {stop} showBothTimes={true} position="center" />
+			<StopChild time={stop?.departure} {stop} showBothTimes={true} position="center" />
 		{/each}
 	{/if}
 
