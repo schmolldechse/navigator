@@ -111,7 +111,7 @@
 	</div>
 
 	{#if detailsOpen}
-		<div class="py-4 md:px-2 border-primary/85 flex flex-col border-t">
+		<div class="py-4 border-primary/85 flex flex-col border-t px-1">
 			<span class="text-lg font-semibold px-4 pb-4 md:pb-8 tracking-tighter">Route Details</span>
 
 			{#each route?.legs as leg, i}
