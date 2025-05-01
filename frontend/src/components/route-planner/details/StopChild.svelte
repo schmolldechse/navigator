@@ -30,7 +30,8 @@
 
 	<!-- Connecting Line -->
 	<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500"
-		 class:items-end={position === "end"}>
+		 class:items-end={position === "end"}
+		 class:items-center={position === "center"}>
 		<CircleDot class="bg-background absolute z-1 shrink-0" />
 		<span class="bg-text absolute z-0 h-full w-[4px]"></span>
 	</div>
