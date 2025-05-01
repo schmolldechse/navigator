@@ -23,8 +23,8 @@
 			<span class="bg-text absolute z-0 h-full w-[4px]"></span>
 		</div>
 
-		<!-- 5/6 -->
-		<div class="flex basis-5/6 flex-col">
+		<!-- 5/6; Padding only to compensate Platform -->
+		<div class="flex basis-5/6 flex-col pr-1 md:pr-24">
 			<!-- LineColor -->
 			<div class="flex flex-row items-baseline gap-x-2">
 				<span
@@ -54,9 +54,9 @@
 				<span class="bg-text absolute z-0 h-full w-[4px]"></span>
 			</div>
 
-			<!-- 5/6 Button -->
+			<!-- 5/6 Button; Padding only to compensate Platform -->
 			<button
-				class="basis-5/6 flex w-full cursor-pointer flex-row items-center gap-x-2 text-left"
+				class="basis-5/6 flex w-full cursor-pointer flex-row items-center gap-x-2 text-left pr-1 md:pr-24"
 				onclick={() => (showViaStops = !showViaStops)}
 			>
 				{leg?.viaStops?.length ?? 0} stop{(leg?.viaStops?.length ?? 0) === 1 ? "" : "s"}
