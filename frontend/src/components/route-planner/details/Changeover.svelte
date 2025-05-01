@@ -32,7 +32,7 @@
 
 {#if firstIsWalking}
 	<!-- Origin -->
-	<StopChild time={startWalking} stop={firstIsWalking} isChangeover={true} />
+	<StopChild time={startWalking} stop={firstIsWalking} isChangeover={true} position="start" />
 {/if}
 
 <div class="flex flex-row">
@@ -70,5 +70,5 @@
 
 {#if lastIsWalking}
 	<!-- Destination -->
-	<StopChild time={stopWalking} stop={lastIsWalking} isChangeover={true} />
+	<StopChild time={stopWalking} stop={lastIsWalking} isChangeover={true} position="end" />
 {/if}
