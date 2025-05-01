@@ -6,10 +6,11 @@
 	import ChevronRight from "lucide-svelte/icons/chevron-right";
 	import Platform from "$components/ui/info/Platform.svelte";
 
-	let { time, stop, showBothTimes = false, position = "start", class: className = "" }: {
+	let { time, stop, showBothTimes = false, isChangeover = false, position = "start", class: className = "" }: {
 		time?: Time,
 		stop?: Stop,
 		showBothTimes?: boolean,
+		isChangeover?: boolean,
 		position?: "start" | "center" | "end",
 		class?: string
 	} = $props();
@@ -33,7 +34,7 @@
 		 class:items-end={position === "end"}
 		 class:items-center={position === "center"}>
 		<CircleDot class="bg-background absolute z-1 shrink-0" />
-		<span class="bg-text absolute z-0 h-full w-[4px]"></span>
+		<span class="bg-text absolute z-0 h-full w-[4px]" class:bg-text={!isChangeover} class:bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]={isChangeover}></span>
 	</div>
 
 	<!-- 4/6 Stop Info -->
