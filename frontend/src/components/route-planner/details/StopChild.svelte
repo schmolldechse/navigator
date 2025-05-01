@@ -34,7 +34,8 @@
 		 class:items-end={position === "end"}
 		 class:items-center={position === "center"}>
 		<CircleDot class="bg-background absolute z-1 shrink-0" />
-		<span class="bg-text absolute z-0 h-full w-[4px]" class:bg-text={!isChangeover} class:bg-[repeating-linear-gradient(0deg,_#9ca3af_0px,_#9ca3af_2px,_transparent_0px,_transparent_5px)]={isChangeover}></span>
+		<span class="bg-text absolute z-0 h-full w-[4px]" class:bg-text={!isChangeover}
+			  class:changeover={isChangeover}></span>
 	</div>
 
 	<!-- 4/6 Stop Info -->
