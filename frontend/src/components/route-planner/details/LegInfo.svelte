@@ -11,15 +11,15 @@
 
 <div class="flex flex-col">
 	<!-- Origin -->
-	<StopChild time={leg?.departure} stop={leg?.origin} />
+	<StopChild class="pb-8" time={leg?.departure} stop={leg?.origin} />
 
 	<!-- Line Info -->
-	<div class="flex flex-row">
+	<div class="relative flex flex-row pb-6">
 		<!-- 1/6 Time -->
 		<span class="basis-1/6 text-right text-sm">{formatDuration(leg?.arrival, leg?.departure)}</span>
 
 		<!-- Connecting Line -->
-		<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
+		<div class="flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
 			<span class="bg-text absolute z-0 h-full w-[4px]"></span>
 		</div>
 
@@ -45,12 +45,12 @@
 
 	<!-- ViaStops -->
 	{#if leg?.viaStops?.length ?? 0 > 0}
-		<div class="flex flex-row">
+		<div class="relative flex flex-row min-h-fit pb-4">
 			<!-- 1/6 Time -->
 			<span class="basis-1/6"></span>
 
 			<!-- Connecting Line -->
-			<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
+			<div class="flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
 				<span class="bg-text absolute z-0 h-full w-[4px]"></span>
 			</div>
 
@@ -77,5 +77,5 @@
 	{/if}
 
 	<!-- Destination -->
-	<StopChild time={leg?.arrival} stop={leg?.destination} position="end" />
+	<StopChild class="pt-4" time={leg?.arrival} stop={leg?.destination} position="end" />
 </div>
