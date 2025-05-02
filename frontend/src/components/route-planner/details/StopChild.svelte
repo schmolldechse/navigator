@@ -16,7 +16,7 @@
 	} = $props();
 </script>
 
-<div class={["flex flex-row", className]}>
+<div class={["relative flex flex-row min-h-fit", className]}>
 	<!-- 1/6 Time -->
 	{#if !showBothTimes}
 		<TimeInformation {time} direction="col"
@@ -30,7 +30,7 @@
 	{/if}
 
 	<!-- Connecting Line -->
-	<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500"
+	<div class="flex justify-center w-[50px] md:w-[75px] transition-all duration-500"
 		 class:items-end={position === "end"}
 		 class:items-center={position === "center"}
 	>
