@@ -22,12 +22,12 @@
 	}}
 />
 
-<div class="text-center md:text-left mx-12 flex-1 flex justify-center items-center flex-col md:flex-row md:gap-x-4">
-	<span class="font-[JetBrains_Mono] text-[8rem] text-text/85 font-extrabold">
+<div class="mx-12 flex flex-1 flex-col items-center justify-center text-center md:flex-row md:gap-x-4 md:text-left">
+	<span class="text-text/85 font-[JetBrains_Mono] text-[8rem] font-extrabold">
 		{page.status}
 	</span>
 	<div class="flex flex-col md:gap-y-2">
-		<span class="text-lg md:text-2xl font-semibold">Something went wrong</span>
+		<span class="text-lg font-semibold md:text-2xl">Something went wrong</span>
 		<span class="text-text/65">{page.error?.message}</span>
 	</div>
 </div>
