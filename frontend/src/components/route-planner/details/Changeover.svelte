@@ -35,15 +35,15 @@
 	<StopChild time={startWalking} stop={firstIsWalking} isChangeover={true} position="start" />
 {/if}
 
-<div class="flex flex-row min-h-fit">
+<div class="flex min-h-fit flex-row">
 	<!-- 1/6 Time -->
 	<span class="text-text/65 basis-1/6 self-center text-right">
 		{walkingDuration > 0 ? formatDuration(stopWalking, startWalking) : ""}
 	</span>
 
 	<!-- Connecting Line -->
-	<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
-		<span class="absolute z-0 h-full w-[4px] changeover"></span>
+	<div class="relative flex w-[50px] justify-center transition-all duration-500 md:w-[75px]">
+		<span class="changeover absolute z-0 h-full w-[4px]"></span>
 	</div>
 
 	<!-- 5/6 Changeover Info -->

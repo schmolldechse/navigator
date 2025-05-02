@@ -139,7 +139,7 @@
 	}}
 />
 
-<div class="mx-auto mb-2 flex flex-1 flex-col gap-y-4 w-full px-2 md:px-4 md:max-w-[1060px]">
+<div class="mx-auto mb-2 flex w-full flex-1 flex-col gap-y-4 px-2 md:max-w-[1060px] md:px-4">
 	<!-- Route Request Info -->
 	<RouteRequest stations={data?.stations} />
 

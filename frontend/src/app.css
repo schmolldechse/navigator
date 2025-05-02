@@ -93,15 +93,9 @@
 }
 
 @layer changeover-gradient {
-    .changeover {
-        background: repeating-linear-gradient(
-                0deg,
-                #717379 0px,
-                #717379 2px,
-                transparent 0px,
-                transparent 5px
-        )
-    }
+	.changeover {
+		background: repeating-linear-gradient(0deg, #717379 0px, #717379 2px, transparent 0px, transparent 5px);
+	}
 }
 
 body {
