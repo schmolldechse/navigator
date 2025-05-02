@@ -98,6 +98,7 @@
 			{/each}
 		</div>
 
+
 		<div class="flex justify-center">
 			<button class="flex cursor-pointer flex-row items-center gap-x-2" onclick={() => (detailsOpen = !detailsOpen)}>
 				<span class="text-sm md:text-lg">Details</span>
@@ -114,13 +115,13 @@
 		<div class="border-primary/85 flex flex-col border-t px-1 py-4">
 			<span class="px-4 pb-4 text-lg font-semibold tracking-tighter md:pb-8">Route Details</span>
 
-			{#each route?.legs as leg, i}
-				{#if leg?.walking}
-					{@const firstIsWalking = i === 0}
-					{@const lastIsWalking = i === route?.legs.length - 1}
+				{#each route?.legs as leg, i}
+					{#if leg?.walking}
+						{@const firstIsWalking = i === 0}
+						{@const lastIsWalking = i === route?.legs.length - 1}
 
-					{#if firstIsWalking}
-						<!--
+						{#if firstIsWalking}
+							<!--
 						startWalking is the time, at which you set off from the stop (leg?.departure)
 						stopWalking is the time, at which the next leg starts (route?.legs[i + 1]?.departure)
 						-->
