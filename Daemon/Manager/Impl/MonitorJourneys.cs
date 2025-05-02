@@ -12,12 +12,24 @@ public class MonitorJourneys : Daemon
     private readonly string _apiUrl = "https://vendo-prof-db.voldechse.wtf/trips/{0}?stopovers=true";
 
     // timetable change
-    private readonly DateTime _startTime = new(2024, 12, 17, 0, 0, 0);
+    private readonly DateTime[] _timetableChanges =
+    {
+        new(2024, 12, 17, 0, 0, 0),
+        new(2025, 6, 9, 0, 0, 0)
+    };
 
     public MonitorJourneys(ILogger<MonitorJourneys> logger) : base("MonitorJourneys", TimeSpan.FromSeconds(5),
         TimeSpan.FromSeconds(5), logger)
     {
         _httpClient = new HttpClient();
+    }
+    
+    private DateTime GetLastTimetableChange(DateTime? compareTo = null)
+    {
+        compareTo ??= DateTime.Now;
+        return _timetableChanges.Where(change => change <= compareTo)
+            .DefaultIfEmpty(_timetableChanges.Min())
+            .Max();
     }
 
     protected override async Task ExecuteCoreAsync(CancellationToken cancellationToken)
@@ -40,7 +52,7 @@ public class MonitorJourneys : Daemon
         if (risDocument.LastSuccessfulQueried == null)
         {
             date = new DateTime(
-                DateOnly.FromDateTime(_startTime),
+                DateOnly.FromDateTime(GetLastTimetableChange()),
                 TimeOnly.FromTimeSpan(date.TimeOfDay)
             );
             await ProcessTrip(risDocument, date, cancellationToken);
