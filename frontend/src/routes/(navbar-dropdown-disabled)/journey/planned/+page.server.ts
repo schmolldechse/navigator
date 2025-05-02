@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({
 	const from = urlParams.get("from");
 	const to = urlParams.get("to");
 
-	if (!from || !to) throw error(400, "Missing required parameters");
+	if (!from || !to) throw error(400, "Missing required 'from' or 'to' parameter");
 
 	return {
 		stations: Promise.all([loadStation(from), loadStation(to)]).then(([from, to]) => ({ from, to })),
@@ -27,7 +27,7 @@ const loadStation = async (evaNumber: string): Promise<Station> => {
 	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/stations/${evaNumber}`, {
 		method: "GET"
 	});
-	if (!request.ok) throw error(400, "Failed to fetch station");
+	if (!request.ok) throw error(400, `Could not load the station: ${evaNumber}`);
 	return (await request.json()) as Station;
 };
 
@@ -44,6 +44,6 @@ const loadRoute = async (from: string, to: string, urlParams: URLSearchParams): 
 	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/journey/route-planner?${params.toString()}`, {
 		method: "GET"
 	});
-	if (!request.ok) throw error(400, "Failed to fetch route");
+	if (!request.ok) throw error(400, "There was an error while loading the route data");
 	return (await request.json()) as RouteData;
 };
