@@ -23,14 +23,10 @@ const loadJourneys = async (evaNumber: string, type: string, startDate: string):
 	const response = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/timetable/combined?${queryString}`, {
 		method: "GET"
 	});
-	if (!response.ok) {
-		throw error(404, `No journeys found for ${evaNumber}`);
-	}
+	if (!response.ok) throw error(404, `No journeys found for ${evaNumber}.`);
 
 	const jsonData = await response.json();
-	if (!Array.isArray(jsonData)) {
-		throw error(500, `No journeys found for ${evaNumber}`);
-	}
+	if (!Array.isArray(jsonData)) throw error(500, `No journeys found for ${evaNumber}.`);
 
 	return jsonData as Journey[];
 };

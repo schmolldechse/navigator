@@ -1,9 +1,12 @@
 @import "tailwindcss";
-@import "@fontsource/montserrat" layer(utilities);
-@import "@fontsource/montserrat/400.css" layer(utilities);
-@import "@fontsource/montserrat/500.css" layer(utilities);
-@import "@fontsource/montserrat/600.css" layer(utilities);
-@import "@fontsource/montserrat/700.css" layer(utilities);
+@import "@fontsource/montserrat";
+@import "@fontsource/montserrat/400.css";
+@import "@fontsource/montserrat/500.css";
+@import "@fontsource/montserrat/600.css";
+@import "@fontsource/montserrat/700.css";
+@import "@fontsource/jetbrains-mono";
+@import "@fontsource/jetbrains-mono/600.css";
+@import "@fontsource/jetbrains-mono/800.css";
 
 @plugin 'tailwind-scrollbar' {
 	nocompatible: true;

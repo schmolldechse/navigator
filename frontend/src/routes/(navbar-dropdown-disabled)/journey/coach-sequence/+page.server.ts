@@ -9,11 +9,11 @@ export const load = async ({ url }): Promise<{ sequence: Sequence }> => {
 	const date = url.searchParams.get("date");
 
 	if (!lineDetails || !evaNumber || !date) {
-		throw error(400, "Missing required parameters");
+		throw error(400, "Missing required 'lineDetails', 'evaNumber' or 'date' parameter.");
 	}
 
 	if (!/^\d+$/.test(evaNumber)) {
-		throw error(400, "evaNumber is not an integer");
+		throw error(400, "Your provided evaNumber is not a number.");
 	}
 
 	const dateValidation = DateTime.fromFormat(date, "yyyyMMdd");
@@ -28,7 +28,7 @@ export const load = async ({ url }): Promise<{ sequence: Sequence }> => {
 		}
 	);
 	if (!request.ok) {
-		throw error(400, "Failed to fetch coach sequence");
+		throw error(400, "This coach sequence does not exist.");
 	}
 
 	return { sequence: (await request.json()) as Sequence };
