@@ -23,7 +23,7 @@
 						 class={`items-end basis-1/6 text-base ${position === "end" ? "self-end" : ""}`}
 						 delayClass="text-sm md:text-base" />
 	{:else}
-		<div class="flex flex-col items-end basis-1/6">
+		<div class="flex flex-col items-end basis-1/6 self-center">
 			<TimeInformation time={stop?.arrival} class="text-base" delayClass="text-sm md:text-base" />
 			<TimeInformation time={stop?.departure} class="text-base" delayClass="text-sm md:text-base" />
 		</div>
@@ -32,7 +32,8 @@
 	<!-- Connecting Line -->
 	<div class="relative flex justify-center w-[50px] md:w-[75px] transition-all duration-500"
 		 class:items-end={position === "end"}
-		 class:items-center={position === "center"}>
+		 class:items-center={position === "center"}
+	>
 		<CircleDot class="bg-background absolute z-1 shrink-0" />
 		<span class="bg-text absolute z-0 h-full w-[4px]" class:bg-text={!isChangeover}
 			  class:changeover={isChangeover}></span>
