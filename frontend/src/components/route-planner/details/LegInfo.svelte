@@ -19,7 +19,7 @@
 		<span class="basis-1/6 text-right text-sm">{formatDuration(leg?.arrival, leg?.departure)}</span>
 
 		<!-- Connecting Line -->
-		<div class="flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
+		<div class="flex w-[50px] justify-center transition-all duration-500 md:w-[75px]">
 			<span class="bg-text absolute z-0 h-full w-[4px]"></span>
 		</div>
 
@@ -45,18 +45,18 @@
 
 	<!-- ViaStops -->
 	{#if leg?.viaStops?.length ?? 0 > 0}
-		<div class="relative flex flex-row min-h-fit pb-4">
+		<div class="relative flex min-h-fit flex-row pb-4">
 			<!-- 1/6 Time -->
 			<span class="basis-1/6"></span>
 
 			<!-- Connecting Line -->
-			<div class="flex justify-center w-[50px] md:w-[75px] transition-all duration-500">
+			<div class="flex w-[50px] justify-center transition-all duration-500 md:w-[75px]">
 				<span class="bg-text absolute z-0 h-full w-[4px]"></span>
 			</div>
 
 			<!-- 5/6 Button -->
 			<button
-				class="basis-5/6 flex w-full cursor-pointer flex-row items-center gap-x-2 text-left"
+				class="flex w-full basis-5/6 cursor-pointer flex-row items-center gap-x-2 text-left"
 				onclick={() => (showViaStops = !showViaStops)}
 			>
 				{leg?.viaStops?.length ?? 0} stop{(leg?.viaStops?.length ?? 0) === 1 ? "" : "s"}
