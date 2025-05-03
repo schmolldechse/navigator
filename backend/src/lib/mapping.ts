@@ -52,9 +52,6 @@ const mapConnection = (
 				parseStopovers,
 				isIdentifiableAsHAFAS && parseTimesInStopovers
 			) ?? undefined,
-		// cancelledStopsAfterActualDestination: mapStops(entry?.canceledStopsAfterActualDestination) ?? undefined,
-		// additionalStops: mapStops(entry?.additionalStops) ?? undefined,
-		// cancelledStops: mapStops(entry?.canceledStops) ?? undefined,
 		messages: mapMessages(entry?.messages ?? entry?.remarks, isIdentifiableAsHAFAS) ?? undefined,
 		cancelled: !entry?.walking ? (entry?.canceled ?? entry?.cancelled ?? false) : undefined,
 		providesVehicleSequence: entry?.walking ? undefined : entry?.providesVehicleSequence,
