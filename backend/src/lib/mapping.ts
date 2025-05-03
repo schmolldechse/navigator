@@ -12,12 +12,11 @@ const mapConnection = (
 	entry: any,
 	type: "departures" | "arrivals" | "both",
 	queriedFromBahnhof: boolean = false,
-	parseStopovers: boolean = false,
 	parseTimesInStopovers: boolean = false
 ): Connection => {
 	const isIdentifiableAsHAFAS = (entry?.journeyID ?? entry?.tripId ?? "").startsWith("2|#");
 
-	return {
+	const connection: Connection = {
 		// journeyId
 		ris_journeyId: isIdentifiableAsHAFAS ? undefined : (entry?.journeyID ?? entry?.tripId ?? undefined),
 		hafas_journeyId: isIdentifiableAsHAFAS ? entry?.tripId : undefined,
@@ -49,7 +48,6 @@ const mapConnection = (
 		viaStops:
 			mapStops(
 				entry.viaStops ?? entry?.nextStopovers ?? entry?.previousStopovers ?? entry?.stopovers,
-				parseStopovers,
 				isIdentifiableAsHAFAS && parseTimesInStopovers
 			) ?? undefined,
 		messages: mapMessages(entry?.messages ?? entry?.remarks, isIdentifiableAsHAFAS) ?? undefined,
@@ -59,6 +57,26 @@ const mapConnection = (
 		distance: entry?.walking ? entry?.distance : undefined,
 		loadFactor: entry?.loadFactor ?? undefined
 	};
+
+	/**
+	 * as our viaStops entry may contain the destination and origin as well, we need to remove them from the viaStops
+	 * in addition, we update the cancelled status of the destination and origin
+	 */
+	if ((connection?.viaStops ?? []).length > 0) {
+		const matchingDestination: Stop | undefined = connection?.viaStops?.find((stop: Stop) => stop?.evaNumber === connection?.destination?.evaNumber);
+		const matchingOrigin: Stop | undefined = connection?.viaStops?.find((stop: Stop) => stop?.evaNumber === connection?.origin?.evaNumber);
+
+		if (matchingDestination) {
+			connection.destination!.cancelled = matchingDestination?.cancelled ?? false;
+			connection.viaStops = connection?.viaStops?.filter((stop: Stop) => stop !== matchingDestination);
+		}
+		if (matchingOrigin) {
+			connection.origin!.cancelled = matchingOrigin?.cancelled ?? false;
+			connection.viaStops = connection?.viaStops?.filter((stop: Stop) => stop !== matchingOrigin);
+		}
+	}
+
+	return connection;
 };
 
 const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
@@ -94,18 +112,9 @@ const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	};
 };
 
-const mapStops = (entry: any, parseStopoversFromHAFAS: boolean = false, parseTimeInfo: boolean = false): Stop[] | null => {
+const mapStops = (entry: any, parseTimeInfo: boolean = false): Stop[] | null => {
 	if (!entry) return null;
 	if (!Array.isArray(entry)) entry = [entry];
-
-	/**
-	 * when parsing further information (departure, arrival & messages), it skips the first & last element of viaStops
-	 * this is because HAFAS returns the origin & destination stops in viaStops
-	 */
-	if (parseStopoversFromHAFAS) {
-		entry?.shift(); // removes the origin stop
-		entry?.pop(); // removes the destination stop
-	}
 
 	return entry.map((rawStop: any) => ({
 		evaNumber: rawStop?.evaNumber ?? rawStop?.id ?? rawStop?.stop?.id,
@@ -118,9 +127,9 @@ const mapStops = (entry: any, parseStopoversFromHAFAS: boolean = false, parseTim
 				type: rawPart?.type,
 				value: rawPart?.value
 			})) ?? undefined,
-		departure: parseStopoversFromHAFAS && parseTimeInfo ? mapTime(rawStop, "departure") : undefined,
-		arrival: parseStopoversFromHAFAS && parseTimeInfo ? mapTime(rawStop, "arrival") : undefined,
-		messages: parseStopoversFromHAFAS && parseTimeInfo ? mapMessages(rawStop?.remarks, true) : undefined
+		departure: parseTimeInfo ? mapTime(rawStop, "departure") : undefined,
+		arrival: parseTimeInfo ? mapTime(rawStop, "arrival") : undefined,
+		messages: parseTimeInfo ? mapMessages(rawStop?.remarks, true) : undefined
 	}));
 };
 
@@ -208,7 +217,7 @@ const mapToRoute = (entry: any): RouteData => ({
 	earlierRef: entry?.earlierRef,
 	laterRef: entry?.laterRef,
 	journeys: entry?.journeys?.map((rawJourney: any) => ({
-		legs: rawJourney?.legs?.map((rawLeg: any) => mapConnection(rawLeg, "both", false, true, true)),
+		legs: rawJourney?.legs?.map((rawLeg: any) => mapConnection(rawLeg, "both", false, true)),
 		messages: mapMessages(rawJourney?.remarks, true),
 		refreshToken: rawJourney?.refreshToken
 	}))

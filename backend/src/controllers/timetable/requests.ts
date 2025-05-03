@@ -47,7 +47,7 @@ export const retrieveConnections = async (query: Query): Promise<Connection[]> =
 		const tripId = connectionRaw?.tripId;
 		if (!tripId || map.has(tripId)) return;
 
-		const connection: Connection = mapConnection(connectionRaw, query.type, false, true);
+		const connection: Connection = mapConnection(connectionRaw, query.type, false);
 		if (!connection) return;
 
 		map.set(tripId, connection);
