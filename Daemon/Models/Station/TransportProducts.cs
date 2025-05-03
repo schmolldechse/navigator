@@ -61,7 +61,8 @@ public class TransportProductMapper
         if (string.IsNullOrEmpty(transport))
             return TransportProducts.Unknown;
         return Possibilities
-            .Where(entry => entry.Value.Contains(transport))
+            .Where(entry =>
+                entry.Value.Any(value => string.Equals(value, transport, StringComparison.OrdinalIgnoreCase)))
             .Select(entry => entry.Key)
             .FirstOrDefault(TransportProducts.Unknown);
     }
