@@ -63,7 +63,7 @@
 				<TimeInformation
 					time={route?.legs[route?.legs?.length - 1]?.arrival}
 					direction="col"
-					class="text-base font-semibold md:text-xl"
+					class="text-base font-semibold md:text-xl text-right"
 					delayClass="text-sm md:text-base"
 				/>
 			</div>
