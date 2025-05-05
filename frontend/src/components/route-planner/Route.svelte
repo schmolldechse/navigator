@@ -15,12 +15,11 @@
 	let { route, lineColors }: { route: Route; lineColors: LineColor[] } = $props();
 	let detailsOpen = $state<boolean>(false);
 
-	const durationOfConnection = (connection: Connection): number =>
-		calculateDuration(
-			DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
-			DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
-			["minutes"]
-		).minutes;
+	const durationOfConnection = (connection: Connection): number => calculateDuration(
+		DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
+		DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
+		["minutes"]
+	).minutes;
 
 	const durationWithoutWalking = $derived.by(() => {
 		// remove legs with "walking" property
@@ -31,6 +30,28 @@
 	});
 
 	const isCancelled: boolean = $derived(route?.legs?.some((leg: Connection) => leg?.cancelled));
+
+	const isChangeoverPossible: boolean = $derived.by(() => {
+		if (route?.legs?.length === 0) return true;
+
+		// skip if any leg is cancelled, or no changeovers are available
+		if (route?.legs?.some((leg: Connection) => leg?.cancelled)) return true;
+		if (!route?.legs?.some((leg: Connection) => leg?.walking)) return true;
+
+		return route?.legs?.every((leg: Connection, index: number) => {
+			if (!leg?.walking) return true;
+
+			const startWalking = route?.legs[index - 1]?.arrival;
+			const stopWalking = route?.legs[index + 1]?.departure;
+
+			if (!startWalking || !stopWalking) return true;
+			return calculateDuration(
+				DateTime.fromISO(stopWalking?.actualTime ?? stopWalking?.plannedTime ?? ""),
+				DateTime.fromISO(startWalking?.actualTime ?? startWalking?.plannedTime ?? ""),
+				"minutes"
+			).minutes >= 0;
+		});
+	});
 
 	const getWidthRatio = (duration: number, maxDuration: number) => {
 		if (maxDuration <= 0) return "0%";
@@ -45,7 +66,15 @@
 	{#if isCancelled}
 		<div class="bg-secondary/50 flex flex-row items-center gap-x-2 px-3 py-1">
 			<Ban size="20" />
-			<span class="text-sm font-semibold md:text-lg">Route not possible</span>
+			<span class="text-sm font-semibold md:text-lg">Route is not possible</span>
+		</div>
+	{/if}
+
+	<!-- Changeover Header -->
+	{#if !isChangeoverPossible}
+		<div class="bg-secondary/50 flex flex-row items-center gap-x-2 px-3 py-1">
+			<Ban size="20" />
+			<span class="text-sm font-semibold md:text-lg">Changeover is not possible</span>
 		</div>
 	{/if}
 
