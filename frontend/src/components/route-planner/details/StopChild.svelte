@@ -55,7 +55,7 @@
 	</div>
 
 	<!-- 4/6 Stop Info -->
-	<div class={["flex basis-4/6 flex-col", { "self-center": position === "center" }]}>
+	<div class={["flex basis-4/6 flex-col leading-none", { "self-center": position === "center" }]}>
 		<div class="flex flex-row items-center">
 			<a class="font-bold break-words hyphens-auto" href={`/${stop?.evaNumber}/departures`} target="_blank">
 				{stop?.name}
