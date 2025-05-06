@@ -50,8 +50,9 @@
 				"absolute z-0 w-[4px]",
 				{ "-top-0.25 h-full": position === "end" && !isLastStop },
 				{ "h-full": position !== "end" },
-				{ "h-10 -top-1": isLastStop },
+				{ "-top-1 h-10": isLastStop },
 				{ "bg-text": !isChangeover },
+				// prettier-ignore
 				{ "changeover": isChangeover }
 			]}
 		></span>
@@ -67,7 +68,7 @@
 		</div>
 
 		{#if stop?.cancelled}
-			<div class="w-full bg-text text-background p-1 flex flex-row items-center gap-x-2">
+			<div class="bg-text text-background flex w-full flex-row items-center gap-x-2 p-1">
 				<CancelledTrip />
 				<span class="text-sm font-semibold">Stop cancelled</span>
 			</div>

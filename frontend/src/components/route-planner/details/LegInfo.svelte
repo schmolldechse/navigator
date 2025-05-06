@@ -5,7 +5,7 @@
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
 	import StopChild from "$components/route-planner/details/StopChild.svelte";
 
-	let { leg, lineColor, hasLastStop = false }: { leg: Connection; lineColor?: LineColor, hasLastStop?: boolean } = $props();
+	let { leg, lineColor, hasLastStop = false }: { leg: Connection; lineColor?: LineColor; hasLastStop?: boolean } = $props();
 	let showViaStops = $state<boolean>(false);
 </script>
 
