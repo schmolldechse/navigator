@@ -24,7 +24,7 @@
 	} = $props();
 </script>
 
-<div class={["relative flex min-h-fit flex-row", { "items-end": position === "end" }, className]}>
+<div class={["relative flex min-h-fit flex-row", { "items-end": position === "end" }, { "py-0.75": position === "center" }, className]}>
 	<!-- 1/6 Time -->
 	{#if !showBothTimes}
 		<TimeInformation {time} direction="col" class="basis-1/6 items-end text-base" delayClass="text-sm md:text-base" />
