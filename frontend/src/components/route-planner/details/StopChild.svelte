@@ -28,7 +28,7 @@
 	class={[
 		"relative flex min-h-fit flex-row",
 		{ "items-end": position === "end" },
-		{ "py-0.75": position === "center" },
+		{ "py-0.75 items-center": position === "center" },
 		className
 	]}
 >
