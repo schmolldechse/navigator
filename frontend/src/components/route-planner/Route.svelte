@@ -15,11 +15,12 @@
 	let { route, lineColors }: { route: Route; lineColors: LineColor[] } = $props();
 	let detailsOpen = $state<boolean>(false);
 
-	const durationOfConnection = (connection: Connection): number => calculateDuration(
-		DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
-		DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
-		["minutes"]
-	).minutes;
+	const durationOfConnection = (connection: Connection): number =>
+		calculateDuration(
+			DateTime.fromISO(connection?.arrival?.actualTime ?? connection?.arrival?.plannedTime ?? ""),
+			DateTime.fromISO(connection?.departure?.actualTime ?? connection?.departure?.plannedTime ?? ""),
+			["minutes"]
+		).minutes;
 
 	const durationWithoutWalking = $derived.by(() => {
 		// remove legs with "walking" property
@@ -45,11 +46,13 @@
 			const stopWalking = route?.legs[index + 1]?.departure;
 
 			if (!startWalking || !stopWalking) return true;
-			return calculateDuration(
-				DateTime.fromISO(stopWalking?.actualTime ?? stopWalking?.plannedTime ?? ""),
-				DateTime.fromISO(startWalking?.actualTime ?? startWalking?.plannedTime ?? ""),
-				"minutes"
-			).minutes >= 0;
+			return (
+				calculateDuration(
+					DateTime.fromISO(stopWalking?.actualTime ?? stopWalking?.plannedTime ?? ""),
+					DateTime.fromISO(startWalking?.actualTime ?? startWalking?.plannedTime ?? ""),
+					"minutes"
+				).minutes >= 0
+			);
 		});
 	});
 
@@ -92,7 +95,7 @@
 				<TimeInformation
 					time={route?.legs[route?.legs?.length - 1]?.arrival}
 					direction="col"
-					class="text-base font-semibold md:text-xl text-right"
+					class="text-right text-base font-semibold md:text-xl"
 					delayClass="text-sm md:text-base"
 				/>
 			</div>
@@ -174,6 +177,7 @@
 				{:else}
 					<LegInfo
 						{leg}
+						hasLastStop={i === route?.legs.length - 1}
 						lineColor={lineColors.find(
 							(color: LineColor) => normalize(color.lineName) === normalize(leg?.lineInformation?.lineName ?? "")
 						)}

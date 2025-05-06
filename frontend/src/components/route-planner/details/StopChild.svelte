@@ -5,12 +5,14 @@
 	import CircleDot from "lucide-svelte/icons/circle-dot";
 	import ChevronRight from "lucide-svelte/icons/chevron-right";
 	import Platform from "$components/ui/info/Platform.svelte";
+	import CancelledTrip from "$components/timetable/messages/icons/CancelledTrip.svelte";
 
 	let {
 		time,
 		stop,
 		showBothTimes = false,
 		isChangeover = false,
+		isLastStop = false,
 		position = "start",
 		class: className = ""
 	}: {
@@ -18,6 +20,7 @@
 		stop?: Stop;
 		showBothTimes?: boolean;
 		isChangeover?: boolean;
+		isLastStop?: boolean;
 		position?: "start" | "center" | "end";
 		class?: string;
 	} = $props();
@@ -26,12 +29,7 @@
 <div class={["relative flex min-h-fit flex-row", className]}>
 	<!-- 1/6 Time -->
 	{#if !showBothTimes}
-		<TimeInformation
-			{time}
-			direction="col"
-			class={`basis-1/6 items-end text-base ${position === "end" ? "self-end" : ""}`}
-			delayClass="text-sm md:text-base"
-		/>
+		<TimeInformation {time} direction="col" class="basis-1/6 items-end text-base" delayClass="text-sm md:text-base" />
 	{:else}
 		<div class="flex basis-1/6 flex-col items-end self-center">
 			<TimeInformation time={stop?.arrival} class="text-base" delayClass="text-sm md:text-base" />
@@ -41,22 +39,41 @@
 
 	<!-- Connecting Line -->
 	<div
-		class="flex w-[50px] justify-center transition-all duration-500 md:w-[75px]"
-		class:items-end={position === "end"}
-		class:items-center={position === "center"}
+		class={[
+			"flex w-[50px] justify-center transition-all duration-500 md:w-[75px]",
+			{ "items-center": position === "center" }
+		]}
 	>
 		<CircleDot class="bg-background absolute z-1 shrink-0" />
-		<span class="bg-text absolute z-0 h-full w-[4px]" class:bg-text={!isChangeover} class:changeover={isChangeover}></span>
+		<span
+			class={[
+				"absolute z-0 w-[4px]",
+				{ "-top-0.25 h-full": position === "end" && !isLastStop },
+				{ "h-full": position !== "end" },
+				{ "h-10 -top-1": isLastStop },
+				{ "bg-text": !isChangeover },
+				{ "changeover": isChangeover }
+			]}
+		></span>
 	</div>
 
 	<!-- 4/6 Stop Info -->
-	<div class="flex basis-4/6 flex-row items-center">
-		<a class="font-bold break-words hyphens-auto" href={`/${stop?.evaNumber}/departures`} target="_blank">
-			{stop?.name}
-		</a>
-		<ChevronRight color="#ffda0a" class="shrink-0" />
+	<div class="flex basis-4/6 flex-col self-start">
+		<div class="flex flex-row items-center">
+			<a class="font-bold break-words hyphens-auto" href={`/${stop?.evaNumber}/departures`} target="_blank">
+				{stop?.name}
+			</a>
+			<ChevronRight color="#ffda0a" class="ml-1 shrink-0" />
+		</div>
+
+		{#if stop?.cancelled}
+			<div class="w-full bg-text text-background p-1 flex flex-row items-center gap-x-2">
+				<CancelledTrip />
+				<span class="text-sm font-semibold">Stop cancelled</span>
+			</div>
+		{/if}
 	</div>
 
 	<!-- 1/6 Platform -->
-	<Platform {time} class={`basis-1/6 md:items-start ${position === "end" ? "self-end" : ""}`} direction="col" />
+	<Platform {time} class="basis-1/6 md:items-start" direction="col" />
 </div>
