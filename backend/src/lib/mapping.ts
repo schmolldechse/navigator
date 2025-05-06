@@ -63,8 +63,12 @@ const mapConnection = (
 	 * in addition, we update the cancelled status of the destination and origin
 	 */
 	if ((connection?.viaStops ?? []).length > 0) {
-		const matchingDestination: Stop | undefined = connection?.viaStops?.find((stop: Stop) => stop?.evaNumber === connection?.destination?.evaNumber);
-		const matchingOrigin: Stop | undefined = connection?.viaStops?.find((stop: Stop) => stop?.evaNumber === connection?.origin?.evaNumber);
+		const matchingDestination: Stop | undefined = connection?.viaStops?.find(
+			(stop: Stop) => stop?.evaNumber === connection?.destination?.evaNumber
+		);
+		const matchingOrigin: Stop | undefined = connection?.viaStops?.find(
+			(stop: Stop) => stop?.evaNumber === connection?.origin?.evaNumber
+		);
 
 		if (matchingDestination) {
 			connection.destination!.cancelled = matchingDestination?.cancelled ?? false;
