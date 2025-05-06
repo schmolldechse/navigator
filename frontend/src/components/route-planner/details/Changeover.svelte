@@ -37,7 +37,7 @@
 
 <div class="flex min-h-fit flex-row">
 	<!-- 1/6 Time -->
-	<span class="min-w-1 text-text/65 basis-1/6 self-center text-right">
+	<span class="text-text/65 min-w-1 basis-1/6 self-center text-right">
 		{walkingDuration > 0 ? formatDuration(stopWalking, startWalking) : ""}
 	</span>
 
