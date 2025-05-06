@@ -27,11 +27,11 @@
 <div class={["relative flex min-h-fit flex-row", { "items-end": position === "end" }, { "py-0.75": position === "center" }, className]}>
 	<!-- 1/6 Time -->
 	{#if !showBothTimes}
-		<TimeInformation {time} direction="col" class="basis-1/6 items-end text-base" delayClass="text-sm md:text-base" />
+		<TimeInformation {time} direction="col" class="min-w-1 basis-1/6 items-end text-base" delayClass="text-sm md:text-base" />
 	{:else}
 		<div class="flex basis-1/6 flex-col items-end self-center">
-			<TimeInformation time={stop?.arrival} class="text-base" delayClass="text-sm md:text-base" />
-			<TimeInformation time={stop?.departure} class="text-base" delayClass="text-sm md:text-base" />
+			<TimeInformation time={stop?.arrival} class="text-base" delayClass="text-sm md:text-base" noDoubleSpan={true} />
+			<TimeInformation time={stop?.departure} class="text-base" delayClass="text-sm md:text-base" noDoubleSpan={true} />
 		</div>
 	{/if}
 
