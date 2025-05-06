@@ -16,7 +16,7 @@
 	<!-- Line Info -->
 	<div class="relative flex flex-row pb-6">
 		<!-- 1/6 Time -->
-		<span class="basis-1/6 text-right text-sm">{formatDuration(leg?.arrival, leg?.departure)}</span>
+		<span class="min-w-1 basis-1/6 text-right text-sm">{formatDuration(leg?.arrival, leg?.departure)}</span>
 
 		<!-- Connecting Line -->
 		<div class="flex w-[50px] justify-center transition-all duration-500 md:w-[75px]">
@@ -47,7 +47,7 @@
 	{#if leg?.viaStops?.length ?? 0 > 0}
 		<div class="relative flex min-h-fit flex-row pb-4">
 			<!-- 1/6 Time -->
-			<span class="basis-1/6"></span>
+			<span class="min-w-1 basis-1/6"></span>
 
 			<!-- Connecting Line -->
 			<div class="flex w-[50px] justify-center transition-all duration-500 md:w-[75px]">
