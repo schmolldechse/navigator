@@ -46,7 +46,7 @@
 		<CircleDot class="bg-background absolute z-1 shrink-0" />
 		<span
 			class={[
-				"absolute z-0 w-[4px] h-full",
+				"absolute z-0 h-full w-[4px]",
 				{ "bg-text": !isChangeover },
 				// prettier-ignore
 				{ "changeover": isChangeover }
