@@ -12,7 +12,6 @@
 		stop,
 		showBothTimes = false,
 		isChangeover = false,
-		isLastStop = false,
 		position = "start",
 		class: className = ""
 	}: {
@@ -20,13 +19,12 @@
 		stop?: Stop;
 		showBothTimes?: boolean;
 		isChangeover?: boolean;
-		isLastStop?: boolean;
 		position?: "start" | "center" | "end";
 		class?: string;
 	} = $props();
 </script>
 
-<div class={["relative flex min-h-fit flex-row", className]}>
+<div class={["relative flex min-h-fit flex-row", { "items-end": position === "end" }, className]}>
 	<!-- 1/6 Time -->
 	{#if !showBothTimes}
 		<TimeInformation {time} direction="col" class="basis-1/6 items-end text-base" delayClass="text-sm md:text-base" />
@@ -41,16 +39,14 @@
 	<div
 		class={[
 			"flex w-[50px] justify-center transition-all duration-500 md:w-[75px]",
-			{ "items-center": position === "center" }
+			{ "items-center": position === "center" },
+			{ "items-end": position === "end" }
 		]}
 	>
 		<CircleDot class="bg-background absolute z-1 shrink-0" />
 		<span
 			class={[
-				"absolute z-0 w-[4px]",
-				{ "-top-0.25 h-full": position === "end" && !isLastStop },
-				{ "h-full": position !== "end" },
-				{ "-top-1 h-10": isLastStop },
+				"absolute z-0 w-[4px] h-full",
 				{ "bg-text": !isChangeover },
 				// prettier-ignore
 				{ "changeover": isChangeover }
@@ -59,7 +55,7 @@
 	</div>
 
 	<!-- 4/6 Stop Info -->
-	<div class="flex basis-4/6 flex-col self-start">
+	<div class="flex basis-4/6 flex-col">
 		<div class="flex flex-row items-center">
 			<a class="font-bold break-words hyphens-auto" href={`/${stop?.evaNumber}/departures`} target="_blank">
 				{stop?.name}

@@ -177,7 +177,6 @@
 				{:else}
 					<LegInfo
 						{leg}
-						hasLastStop={i === route?.legs.length - 1}
 						lineColor={lineColors.find(
 							(color: LineColor) => normalize(color.lineName) === normalize(leg?.lineInformation?.lineName ?? "")
 						)}
