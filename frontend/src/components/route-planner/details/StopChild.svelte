@@ -6,6 +6,9 @@
 	import ChevronRight from "lucide-svelte/icons/chevron-right";
 	import Platform from "$components/ui/info/Platform.svelte";
 	import GeneralWarning from "$components/timetable/messages/icons/GeneralWarning.svelte";
+	import NoOnwardJourney from "$components/timetable/messages/icons/NoOnwardJourney.svelte";
+	import type { Component } from "svelte";
+	import type { Message } from "$models/message";
 
 	let {
 		time,
@@ -22,6 +25,13 @@
 		position?: "start" | "center" | "end";
 		class?: string;
 	} = $props();
+
+	// TODO: investigate, if it's possible to check by message's type instead of checking linguistic summaries
+	const getMessageComponent = (message: Message): Component => {
+		if (message?.summary === "Stop cancelled" || message?.summary === "Halt entfällt")
+			return NoOnwardJourney;
+		return GeneralWarning;
+	}
 </script>
 
 <div
@@ -77,8 +87,9 @@
 
 		<div class="flex flex-col">
 			{#each stop?.messages ?? [] as message}
+				{@const MessageComponent = getMessageComponent(message)}
 				<div class="flex items-center gap-x-2">
-					<GeneralWarning />
+					<MessageComponent />
 					<span class="text-sm font-semibold">{message?.text}</span>
 				</div>
 			{/each}
