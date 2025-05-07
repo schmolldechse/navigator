@@ -76,7 +76,7 @@
 		</div>
 
 		<div class="flex flex-col">
-			{#each (stop?.messages ?? []) as message}
+			{#each stop?.messages ?? [] as message}
 				<div class="flex items-center gap-x-2">
 					<GeneralWarning />
 					<span class="text-sm font-semibold">{message?.text}</span>
