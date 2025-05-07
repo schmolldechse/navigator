@@ -11,6 +11,8 @@
 	import LegInfo from "$components/route-planner/details/LegInfo.svelte";
 	import Changeover from "$components/route-planner/details/Changeover.svelte";
 	import Walking from "$components/ui/icons/Walking.svelte";
+	import type { Message } from "$models/message";
+	import GeneralWarning from "$components/timetable/messages/icons/GeneralWarning.svelte";
 
 	let { route, lineColors }: { route: Route; lineColors: LineColor[] } = $props();
 	let detailsOpen = $state<boolean>(false);
@@ -56,6 +58,12 @@
 		});
 	});
 
+	const messagesAvailable: boolean = $derived.by(() => {
+		const generalMessages: boolean = route?.messages?.filter((message: Message) => message?.type !== "hint")?.length > 0;
+		const legMessages: boolean = route?.legs?.some((leg: Connection) => (leg?.messages ?? []).filter((message: Message) => message?.type !== "hint")?.length > 0);
+		return generalMessages || legMessages;
+	});
+
 	const getWidthRatio = (duration: number, maxDuration: number) => {
 		if (maxDuration <= 0) return "0%";
 		return `${(duration / maxDuration) * 100}%`;
@@ -70,6 +78,14 @@
 		<div class="bg-secondary/50 flex flex-row items-center gap-x-2 px-3 py-1">
 			<Ban size="20" />
 			<span class="text-sm font-semibold md:text-lg">Route is not possible</span>
+		</div>
+	{/if}
+
+	<!-- Header -->
+	{#if messagesAvailable}
+		<div class="bg-secondary/50 flex flex-row items-center gap-x-2 px-3 py-1">
+			<GeneralWarning height="20px" width="20px" />
+			<span class="text-sm font-semibold md:text-lg">There are warnings on this route</span>
 		</div>
 	{/if}
 
