@@ -72,10 +72,14 @@ const mapConnection = (
 
 		if (matchingDestination) {
 			connection.destination!.cancelled = matchingDestination?.cancelled ?? false;
+			connection.destination!.messages = matchingDestination?.messages ?? undefined;
+
 			connection.viaStops = connection?.viaStops?.filter((stop: Stop) => stop !== matchingDestination);
 		}
 		if (matchingOrigin) {
 			connection.origin!.cancelled = matchingOrigin?.cancelled ?? false;
+			connection.origin!.messages = matchingOrigin?.messages ?? undefined;
+
 			connection.viaStops = connection?.viaStops?.filter((stop: Stop) => stop !== matchingOrigin);
 		}
 	}
