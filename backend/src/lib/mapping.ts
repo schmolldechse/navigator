@@ -145,19 +145,11 @@ const mapMessages = (entry: any, isIdentifiableAsHAFAS: boolean = false): Messag
 	if (!entry) return [];
 
 	if (isIdentifiableAsHAFAS)
-		return entry
-			.map((message: any) => {
-				let transformed = { ...message };
-
-				// this ensures it matches the types used by RIS
-				if (transformed?.type === "warning" || transformed?.type === "status") transformed.type = "general-warning";
-				return transformed;
-			})
-			.map((message: any) => ({
-				type: message?.type,
-				text: message?.text,
-				summary: message?.summary
-			}));
+		return entry.map((message: any) => ({
+			type: message?.type,
+			text: message?.text,
+			summary: message?.summary
+		}));
 
 	return (entry?.common || [])
 		.concat(entry?.delay || [])
