@@ -5,7 +5,7 @@
 	import CircleDot from "lucide-svelte/icons/circle-dot";
 	import ChevronRight from "lucide-svelte/icons/chevron-right";
 	import Platform from "$components/ui/info/Platform.svelte";
-	import CancelledTrip from "$components/timetable/messages/icons/CancelledTrip.svelte";
+	import GeneralWarning from "$components/timetable/messages/icons/GeneralWarning.svelte";
 
 	let {
 		time,
@@ -75,12 +75,14 @@
 			<ChevronRight color="#ffda0a" class="ml-1 shrink-0" />
 		</div>
 
-		{#if stop?.cancelled}
-			<div class="bg-text text-background flex w-full flex-row items-center gap-x-2 p-1">
-				<CancelledTrip />
-				<span class="text-sm font-semibold">Stop cancelled</span>
-			</div>
-		{/if}
+		<div class="flex flex-col">
+			{#each (stop?.messages ?? []) as message}
+				<div class="flex items-center gap-x-2">
+					<GeneralWarning />
+					<span class="text-sm font-semibold">{message?.text}</span>
+				</div>
+			{/each}
+		</div>
 	</div>
 
 	<!-- 1/6 Platform -->
