@@ -60,7 +60,7 @@
 			<div class="flex basis-5/6 flex-col">
 				<span class="text-base font-bold">Warnings:</span>
 				{#each (leg?.messages ?? []).filter((message: Message) => message.type !== "hint") as message}
-					<div class="flex gap-x-2 items-center">
+					<div class="flex items-center gap-x-2">
 						<GeneralWarning />
 						<span class="text-sm font-semibold">{message?.text}</span>
 					</div>

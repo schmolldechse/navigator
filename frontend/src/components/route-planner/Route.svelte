@@ -60,7 +60,9 @@
 
 	const messagesAvailable: boolean = $derived.by(() => {
 		const generalMessages: boolean = route?.messages?.filter((message: Message) => message?.type !== "hint")?.length > 0;
-		const legMessages: boolean = route?.legs?.some((leg: Connection) => (leg?.messages ?? []).filter((message: Message) => message?.type !== "hint")?.length > 0);
+		const legMessages: boolean = route?.legs?.some(
+			(leg: Connection) => (leg?.messages ?? []).filter((message: Message) => message?.type !== "hint")?.length > 0
+		);
 		return generalMessages || legMessages;
 	});
 

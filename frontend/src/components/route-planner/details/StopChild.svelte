@@ -28,10 +28,9 @@
 
 	// TODO: investigate, if it's possible to check by message's type instead of checking linguistic summaries
 	const getMessageComponent = (message: Message): Component => {
-		if (message?.summary === "Stop cancelled" || message?.summary === "Halt entfällt")
-			return NoOnwardJourney;
+		if (message?.summary === "Stop cancelled" || message?.summary === "Halt entfällt") return NoOnwardJourney;
 		return GeneralWarning;
-	}
+	};
 </script>
 
 <div
