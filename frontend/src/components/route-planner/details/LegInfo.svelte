@@ -4,6 +4,8 @@
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
 	import StopChild from "$components/route-planner/details/StopChild.svelte";
+	import type { Message } from "$models/message";
+	import GeneralWarning from "$components/timetable/messages/icons/GeneralWarning.svelte";
 
 	let { leg, lineColor }: { leg: Connection; lineColor?: LineColor } = $props();
 	let showViaStops = $state<boolean>(false);
@@ -42,6 +44,30 @@
 			<span class="text-text/65">{leg?.direction ? `Continues to ${leg.direction}` : ""}</span>
 		</div>
 	</div>
+
+	<!-- (Warning-)Messages, that are not type of "hint" (<- only information regarding the Connection) -->
+	{#if leg?.messages?.filter((message: Message) => message.type !== "hint").length ?? 0 > 0}
+		<div class="relative flex flex-row pb-6">
+			<!-- 1/6 Time -->
+			<span class="min-w-1 basis-1/6"></span>
+
+			<!-- Connecting Line -->
+			<div class="flex w-[50px] justify-center transition-all duration-500 md:w-[75px]">
+				<span class="bg-text absolute z-0 h-full w-[4px]"></span>
+			</div>
+
+			<!-- 5/6 -->
+			<div class="flex basis-5/6 flex-col">
+				<span class="text-base font-bold">Warnings:</span>
+				{#each (leg?.messages ?? []).filter((message: Message) => message.type !== "hint") as message}
+					<div class="flex gap-x-2 items-center">
+						<GeneralWarning />
+						<span class="text-sm font-semibold">{message?.text}</span>
+					</div>
+				{/each}
+			</div>
+		</div>
+	{/if}
 
 	<!-- ViaStops -->
 	{#if leg?.viaStops?.length ?? 0 > 0}
