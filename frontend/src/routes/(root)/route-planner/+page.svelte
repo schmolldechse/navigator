@@ -56,7 +56,7 @@
 			<StationSearch bind:station={start} placeholder="Start" class="z-0 md:text-xl" />
 
 			<button
-				class="bg-accent hover:bg-accent group absolute top-1/2 z-10 mr-4 -translate-y-1/2 cursor-pointer self-end rounded-full p-2"
+				class="bg-accent hover:bg-accent absolute top-1/2 z-10 mr-4 -translate-y-1/2 cursor-pointer self-end rounded-full p-2 transition-transform duration-300 hover:rotate-180"
 				onclick={() => {
 					if (!start || !destination) return;
 					if (start.evaNumber === destination.evaNumber) return;
@@ -66,7 +66,7 @@
 					destination = temp;
 				}}
 			>
-				<ArrowUpDown class="stroke-background stroke-3 transition-transform duration-300 hover:rotate-180" />
+				<ArrowUpDown class="stroke-background stroke-3" />
 			</button>
 
 			<StationSearch bind:station={destination} placeholder="Destination" class="z-0 md:text-xl" />
