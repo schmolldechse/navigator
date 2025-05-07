@@ -65,19 +65,11 @@
 </script>
 
 <div class="border-primary/45 overflow-hidden rounded-lg border-2">
-	<!-- Cancelled Header -->
-	{#if isCancelled}
+	<!-- Header -->
+	{#if isCancelled || !isChangeoverPossible}
 		<div class="bg-secondary/50 flex flex-row items-center gap-x-2 px-3 py-1">
 			<Ban size="20" />
 			<span class="text-sm font-semibold md:text-lg">Route is not possible</span>
-		</div>
-	{/if}
-
-	<!-- Changeover Header -->
-	{#if !isChangeoverPossible}
-		<div class="bg-secondary/50 flex flex-row items-center gap-x-2 px-3 py-1">
-			<Ban size="20" />
-			<span class="text-sm font-semibold md:text-lg">Changeover is not possible</span>
 		</div>
 	{/if}
 
