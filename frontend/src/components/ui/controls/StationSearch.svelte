@@ -113,7 +113,7 @@
 
 <div class="relative">
 	<button
-		class="bg-input-background group py-1 relative w-full cursor-text overflow-hidden rounded-2xl px-4 shadow-sm"
+		class="bg-input-background group relative w-full cursor-text overflow-hidden rounded-2xl px-4 py-1 shadow-sm"
 		onclick={(event) => {
 			event.stopPropagation();
 			inputElement.focus();
