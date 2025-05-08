@@ -59,12 +59,14 @@
 			<!-- 5/6 -->
 			<div class="flex basis-5/6 flex-col">
 				<span class="text-base font-bold">Warnings:</span>
-				{#each (leg?.messages ?? []).filter((message: Message) => message.type !== "hint") as message}
-					<div class="flex items-center gap-x-2">
-						<GeneralWarning />
-						<span class="text-sm font-semibold">{message?.text}</span>
-					</div>
-				{/each}
+				<div class="flex flex-col gap-y-1">
+					{#each (leg?.messages ?? []).filter((message: Message) => message.type !== "hint") as message}
+						<div class="flex items-center gap-x-2">
+							<GeneralWarning />
+							<span class="text-sm font-semibold">{message?.text}</span>
+						</div>
+					{/each}
+				</div>
 			</div>
 		</div>
 	{/if}
