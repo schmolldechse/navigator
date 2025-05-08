@@ -36,7 +36,7 @@
 
 	<!-- Station -->
 	<StationSearch bind:station placeholder="Search your station...">
-		<Search size={44} />
+		<Search size={30} color="#ffda0a" class="shrink-0" />
 	</StationSearch>
 
 	<TimePicker bind:date />
