@@ -6,12 +6,10 @@
 	let {
 		station = $bindable<Station | undefined>(undefined),
 		placeholder = "Search a station...",
-		class: className = "",
 		children
 	}: {
 		station?: Station;
 		placeholder: string;
-		class?: string;
 		children?: Snippet;
 	} = $props();
 	let inputElement: HTMLInputElement;
@@ -24,8 +22,9 @@
 	});
 
 	let dropdownOpen = $state<boolean>(false);
-	let stationsQueried = $state<Station[]>([]);
+	let dropdownElement: HTMLDivElement | undefined = $state<HTMLDivElement | undefined>(undefined);
 
+	let stationsQueried = $state<Station[]>([]);
 	const queryStations = async (query: string) => {
 		if (!query) return;
 
@@ -99,47 +98,60 @@
 	 * Closes the dropdown when there's a click outside the input/ dropdown
 	 */
 	onMount(() => {
-		const onClickOutside = (event: MouseEvent) => {
-			if (!inputElement) return;
-			if (inputElement.contains(event.target as Node)) return;
+		const clickOutside = (event: MouseEvent) => {
+			if (!dropdownElement) return;
+			if (dropdownElement.contains(event.target as Node)) return;
+			if (inputElement && inputElement.contains(event.target as Node)) return;
+
 			dropdownOpen = false;
 		};
 
-		document.addEventListener("click", onClickOutside);
-		return () => document.removeEventListener("click", onClickOutside);
+		document.addEventListener("click", clickOutside);
+		return () => document.removeEventListener("click", clickOutside);
 	});
 </script>
 
-<div class="text-text placeholder:text-text relative flex w-full flex-col">
-	<div
-		class={[
-			"bg-input-background focus-within:ring-accent flex flex-row items-center gap-x-1 rounded-2xl px-2 font-medium focus-within:ring-2 md:text-2xl",
-			className
-		]}
+<div class="relative">
+	<button
+		class="bg-input-background group py-1 relative w-full cursor-text overflow-hidden rounded-2xl px-4 shadow-sm"
+		onclick={(event) => {
+			event.stopPropagation();
+			inputElement.focus();
+			dropdownOpen = true;
+		}}
+		aria-expanded={dropdownOpen}
+		aria-haspopup="true"
 	>
-		{@render children?.()}
-		<input
-			bind:this={inputElement}
-			type="text"
-			class="w-full border-none p-2 outline-hidden"
-			{placeholder}
-			onclick={() => (dropdownOpen = true)}
-			oninput={handleInput}
-			onkeydown={handleNavigation}
-		/>
-	</div>
+		<!-- highlight effect on hover -->
+		<div class="bg-accent/5 absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"></div>
 
-	{#if dropdownOpen && stationsQueried.length > 0}
+		<div class="flex items-center">
+			{@render children?.()}
+			<input
+				bind:this={inputElement}
+				type="text"
+				class="w-full border-none bg-transparent p-2 font-medium outline-none md:text-lg"
+				{placeholder}
+				oninput={handleInput}
+				onkeydown={handleNavigation}
+			/>
+		</div>
+	</button>
+
+	{#if dropdownOpen && stationsQueried?.length > 0}
 		<div
-			class="border-text bg-primary-dark absolute top-full left-0 z-50 mt-1 flex h-fit max-w-96 flex-col rounded-lg border p-2"
+			bind:this={dropdownElement}
+			class="border-primary bg-input-background absolute top-full z-50 mt-1 flex w-full flex-col gap-y-1 rounded-2xl border p-3 shadow-md"
 		>
 			{#each stationsQueried as station, index (station)}
 				<button
 					tabindex="0"
 					onclick={() => selectStation(index)}
 					onfocus={() => (selectedIndex = index)}
-					class:bg-secondary={selectedIndex === index}
-					class="w-full cursor-pointer rounded-md p-1 text-left"
+					class={[
+						"hover:bg-secondary/25 w-full cursor-pointer rounded-md px-2 py-1 text-left",
+						{ "bg-secondary/25": selectedIndex === index }
+					]}
 				>
 					{station?.name}
 				</button>

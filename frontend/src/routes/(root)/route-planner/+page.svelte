@@ -53,7 +53,7 @@
 		</div>
 
 		<div class="bg-input-background relative z-1 flex w-full flex-col gap-y-0.5 rounded-2xl">
-			<StationSearch bind:station={start} placeholder="Start" class="z-0 md:text-xl" />
+			<StationSearch bind:station={start} placeholder="Start" />
 
 			<button
 				class="bg-accent hover:bg-accent absolute top-1/2 z-10 mr-4 -translate-y-1/2 cursor-pointer self-end rounded-full p-2 transition-transform duration-300 hover:rotate-180"
@@ -69,7 +69,7 @@
 				<ArrowUpDown class="stroke-background stroke-3" />
 			</button>
 
-			<StationSearch bind:station={destination} placeholder="Destination" class="z-0 md:text-xl" />
+			<StationSearch bind:station={destination} placeholder="Destination" />
 		</div>
 	</div>
 

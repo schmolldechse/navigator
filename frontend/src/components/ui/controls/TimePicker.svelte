@@ -75,7 +75,6 @@
 			dropdownOpen = false;
 		};
 
-		// register events
 		document.addEventListener("click", clickOutside);
 		return () => document.removeEventListener("click", clickOutside);
 	});
