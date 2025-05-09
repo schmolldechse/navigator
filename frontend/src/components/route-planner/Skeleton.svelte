@@ -2,7 +2,7 @@
 	import Minus from "lucide-svelte/icons/minus";
 </script>
 
-<div class="border-primary-dark/75 space-y-2 rounded-lg border-2 px-4 py-2 text-2xl font-medium">
+<div class="border-primary/45 space-y-2 rounded-lg border-2 px-4 py-2 text-2xl font-medium">
 	<!-- Time Info -->
 	<div class="flex flex-row gap-x-2">
 		<div class="flex flex-row">

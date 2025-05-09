@@ -158,7 +158,7 @@
 			{:else}<ArrowUp color="#ffda0a" />{/if}
 		</button>
 
-		<div class="flex flex-col gap-y-1">
+		<div class="flex flex-col gap-y-2">
 			{#each plannedRoute?.journeys ?? [] as route, index}
 				{#if isDayDifferent(index)}
 					{@const date = DateTime.fromISO(
