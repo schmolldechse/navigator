@@ -1,9 +1,9 @@
 FROM oven/bun:latest
 WORKDIR /app
 
-COPY package.json bun.lockb* ./
+COPY package.json bun.lock* ./
 
-RUN bun install
+RUN bun install --production
 COPY . .
 
 # MongoDB
@@ -19,6 +19,6 @@ ENV GITHUB_CLIENT_SECRET=github-client-secret
 
 RUN bun tsoa
 
-EXPOSE 8000
+EXPOSE 3000
 
 CMD ["sh", "-c", "bun drizzle:generate && bun run drizzle:migrate && bun run src/server.ts"]

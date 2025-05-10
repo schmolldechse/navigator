@@ -1,34 +1,20 @@
-import cors from "cors";
-import { RegisterRoutes } from "../build/routes.ts";
-import express from "express";
-import * as path from "node:path";
-import { toNodeHandler } from "better-auth/node";
-import { auth } from "./lib/auth/auth.ts";
-import { errorHandler } from "./lib/auth/errorHandler.ts";
-import { apiReference } from "@scalar/express-api-reference";
+import Elysia from "elysia";
+import swagger from "@elysiajs/swagger";
+import { authApp } from "./lib/auth/auth";
+import stationController from "./controllers/station.controller";
+import { HttpStatus } from "./response/HttpStatus";
 
-const app = express();
+const restApi = new Elysia({ prefix: "/api" })
+	.decorate({ httpStatus: HttpStatus })
+	.get("/test", () => "Hello World")
+	.use(stationController);
 
-app.all("/auth/*", toNodeHandler(auth));
+const app = new Elysia()
+	.use(swagger({
+		path: "/api",
+	}))
+	.use(authApp)
+	.use(restApi)
+	.listen(3000);
 
-app.use(express.json());
-app.use(cors({ origin: "*" }));
-
-app.get("/openapi.json", (req, res) => res.sendFile(path.join(__dirname, "..", "build", "openapi.json")));
-app.use(
-	"/api-docs",
-	// TODO: multiple OpenAPI specs; auth & navigator api; see https://github.com/scalar/scalar/pull/4872
-	apiReference({
-		theme: "purple",
-		spec: {
-			url: "/openapi.json"
-		}
-	})
-);
-app.get("/api", (req, res) => res.redirect("/api-docs"));
-
-RegisterRoutes(app);
-
-app.use(errorHandler);
-
-app.listen(8000, () => console.log("Server is running on port 8000"));
+console.log(`Elysia server is running at ${app.server?.hostname}:${app.server?.port}`);

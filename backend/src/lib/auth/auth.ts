@@ -1,11 +1,11 @@
 import { betterAuth } from "better-auth";
-import { usernamePlugin } from "../plugins/username.ts";
+import { usernamePlugin } from "../plugins/username";
 import type { GithubProfile } from "better-auth/social-providers";
 import { Pool } from "pg";
-import { rolePlugin } from "../plugins/role.ts";
-import { openAPI } from "better-auth/plugins";
+import { rolePlugin } from "../plugins/role";
+import Elysia, { Context, error } from "elysia";
 
-export const auth = betterAuth({
+const auth = betterAuth({
 	database: new Pool({
 		connectionString: process.env.AUTH_POSTGRES_URL! + "?options=-csearch_path=auth"
 	}),
@@ -17,10 +17,19 @@ export const auth = betterAuth({
 			mapProfileToUser: (profile: GithubProfile) => ({ username: profile.login })
 		}
 	},
-	basePath: "/auth",
+	basePath: "/api/auth",
 	trustedOrigins: ["http://localhost:5173"],
 	secret: process.env.AUTH_SECRET!,
 
 	// TODO: extract plugins into a separate repo
-	plugins: [usernamePlugin(), rolePlugin(), openAPI()]
+	plugins: [usernamePlugin(), rolePlugin()]
 });
+
+const authApp = new Elysia().all("/api/auth/*", (context: Context) => {
+	const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
+	// validate request method
+	if (BETTER_AUTH_ACCEPT_METHODS.includes(context.request.method)) return auth.handler(context.request);
+	else error(405, "Method Not Allowed");
+});
+
+export { auth, authApp };
