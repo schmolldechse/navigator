@@ -1,8 +1,9 @@
 import Elysia from "elysia";
 import swagger from "@elysiajs/swagger";
-import { authApp } from "./lib/auth/auth";
+import { authApp } from "./auth/auth";
 import stationController from "./controllers/station.controller";
 import { HttpStatus } from "./response/HttpStatus";
+import { OpenAPI } from "./auth/auth.controller";
 
 const restApi = new Elysia({ prefix: "/api" })
 	.decorate({ httpStatus: HttpStatus })
@@ -12,6 +13,10 @@ const restApi = new Elysia({ prefix: "/api" })
 const app = new Elysia()
 	.use(swagger({
 		path: "/api",
+		documentation: {
+			components: await OpenAPI.components,
+			paths: await OpenAPI.getPaths()
+		}
 	}))
 	.use(authApp)
 	.use(restApi)

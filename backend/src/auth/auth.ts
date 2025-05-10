@@ -1,9 +1,10 @@
 import { betterAuth } from "better-auth";
-import { usernamePlugin } from "../plugins/username";
+import { usernamePlugin } from "../lib/plugins/username";
 import type { GithubProfile } from "better-auth/social-providers";
 import { Pool } from "pg";
-import { rolePlugin } from "../plugins/role";
+import { rolePlugin } from "../lib/plugins/role";
 import Elysia, { Context, error } from "elysia";
+import { openAPI } from "better-auth/plugins";
 
 const auth = betterAuth({
 	database: new Pool({
@@ -22,7 +23,7 @@ const auth = betterAuth({
 	secret: process.env.AUTH_SECRET!,
 
 	// TODO: extract plugins into a separate repo
-	plugins: [usernamePlugin(), rolePlugin()]
+	plugins: [usernamePlugin(), rolePlugin(), openAPI()]
 });
 
 const authApp = new Elysia().all("/api/auth/*", (context: Context) => {
