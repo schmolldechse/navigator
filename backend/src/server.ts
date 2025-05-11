@@ -2,10 +2,24 @@ import Elysia from "elysia";
 import swagger from "@elysiajs/swagger";
 import { authApp } from "./auth/auth";
 import stationController from "./controllers/station.controller";
-import { HttpStatus } from "./response/HttpStatus";
+import { HttpStatus } from "./response/status";
+import { HttpError } from "./response/error";
 
 const restApi = new Elysia({ prefix: "/api" })
-	.decorate({ httpStatus: HttpStatus })
+	.error({ HttpError })
+	.onError({ as: 'global' }, ({ error, set, code }) => {
+		let message = "Internal Server Error";
+		set.status = HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR;
+
+		switch (code) {
+			case "HttpError":
+				set.status = error.httpStatus;
+				message = error.message;
+				break;
+		}
+
+		return Response.json({ error: message, status: set.status });
+	})
 	.use(stationController);
 
 const app = new Elysia()

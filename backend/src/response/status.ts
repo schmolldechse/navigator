@@ -1,4 +1,4 @@
-export enum HttpStatus {
+enum HttpStatus {
 	// Informational responses (100 – 199)
 	HTTP_100_CONTINUE = 100,
 	HTTP_101_SWITCHING_PROTOCOLS = 101,
@@ -71,3 +71,5 @@ export enum HttpStatus {
 	HTTP_510_NOT_EXTENDED = 510,
 	HTTP_511_NETWORK_AUTHENTICATION_REQUIRED = 511
 }
+
+export { HttpStatus };
