@@ -1,6 +1,6 @@
 /**
  * A Product represents a specific type of transportation.
- * It is used by both {@link Connection} and {@link Station} to specify the type of transportation.
+ * It is used by both {@link Coonection} and {@link Station} to specify the type of transportation.
  *
  * The Product consists of:
  * - value: The name of the product obtained from the Vendo DeutscheBahn API
@@ -45,7 +45,7 @@ const mapToProduct = (input?: string): ProductType => {
 	const matchedProduct = Object.values(Products).find(
 		(product) =>
 			product.value.toLowerCase() === input.toLowerCase() ||
-			product.possibilities.some((possibility) => possibility.toLowerCase() === input.toLowerCase())
+			product.possibilities.some((possibility: string) => possibility.toLowerCase() === input.toLowerCase())
 	);
 	return matchedProduct || Products.UNKNOWN;
 };

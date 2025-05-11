@@ -6,7 +6,6 @@ import { HttpStatus } from "./response/HttpStatus";
 
 const restApi = new Elysia({ prefix: "/api" })
 	.decorate({ httpStatus: HttpStatus })
-	.get("/test", () => "Hello World")
 	.use(stationController);
 
 const app = new Elysia()
@@ -14,7 +13,7 @@ const app = new Elysia()
 		path: "/api",
 		scalarConfig: {
 			hideDarkModeToggle: true,
-			// needs to be empty, that the theme is changeable: {@link https://github.com/elysiajs/elysia-swagger/issues/194}
+			// needs to be empty that the theme is changeable: {@link https://github.com/elysiajs/elysia-swagger/issues/194}
 			customCss: "",
 		},
 		documentation: {
