@@ -9,17 +9,18 @@ interface Collections {
 let cachedDb: Db | null = null;
 
 const connectToDb = async (): Promise<Db> => {
-	if (cachedDb) return cachedDb;
+	if (!Bun.env.MONGO_URL) throw new Error("Could not establish a connection to the database");
 
-	const client = await MongoClient.connect(process.env.MONGO_URL!);
-	cachedDb = client.db("data");
-
+	cachedDb ??= (await MongoClient.connect(Bun.env.MONGO_URL)).db("data");
 	return cachedDb;
 };
 
 const getCollection = async <T extends keyof Collections>(name: T): Promise<Collection<Collections[T]>> => {
 	const db = await connectToDb();
-	return db.collection<Collections[T]>(name);
+	const collection = db.collection<Collections[T]>(name);
+
+	if (!collection) throw new Error(`Failed to resolve collection: ${name}`);
+	return collection;
 };
 
 export { type StationDocument, connectToDb, getCollection };
