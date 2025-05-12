@@ -4,14 +4,14 @@ import { HttpStatus } from "../response/status";
 import { type Station } from "navigator-core/src/models/station";
 import { HttpError } from "../response/error";
 import { DateTime } from "luxon";
+import { StatistisService } from "../services/statistis.service";
 
-const service = new StationService();
-
-const START_DATE = DateTime.fromObject({ day: 17, month: 12, year: 2024 }).startOf("day");
+const stationService = new StationService();
+const statisticsService = new StatistisService();
 
 const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 	.decorate({ httpStatus: HttpStatus })
-	.get("/", ({ query }) => service.fetchAndCacheStations(query.query), {
+	.get("/", ({ query }) => stationService.fetchAndCacheStations(query.query), {
 		query: t.Object({
 			query: t.String({ required: true })
 		}),
@@ -23,13 +23,13 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 	.get(
 		"/:evaNumber",
 		async ({ params: { evaNumber } }) => {
-			const cachedStation = await service.getCachedStation(evaNumber);
+			const cachedStation = await stationService.getCachedStation(evaNumber);
 			if (cachedStation) {
 				const { _id, lastQueried, queryingEnabled, ...extracted } = cachedStation;
 				return extracted as Station;
 			}
 
-			const stations = await service.fetchAndCacheStations(String(evaNumber));
+			const stations = await stationService.fetchAndCacheStations(String(evaNumber));
 			if (!stations.length) throw new HttpError(HttpStatus.HTTP_400_BAD_REQUEST, "Station not found");
 
 			return stations[0];
@@ -47,7 +47,10 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 	)
 	.post("/stats/:evaNumber", ({ params: { evaNumber } }) => {}, {
 		body: t.Object({
-			startDate: t.Date({ default: START_DATE.toFormat("yyyy-MM-dd"), description: "Start date of the filter" }),
+			startDate: t.Date({
+				default: statisticsService.START_DATE.toFormat("yyyy-MM-dd"),
+				description: "Start date of the filter"
+			}),
 			endDate: t.Date({ default: DateTime.now().toFormat("yyyy-MM-dd"), description: "End date of the filter" }),
 			filter: t.Object({
 				delayThreshold: t.Number({

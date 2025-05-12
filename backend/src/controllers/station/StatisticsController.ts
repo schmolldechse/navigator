@@ -50,9 +50,6 @@ export class StatisticsController extends Controller {
 	private readonly CHUNK_SIZE: number = 2500;
 	private readonly BASE_PATH: string = path.join(os.tmpdir(), "navigator", "query-station-stats");
 
-	// timetable change
-	private readonly START_DATE: DateTime = DateTime.fromObject({ day: 17, month: 12, year: 2024 }).startOf("day");
-
 	private static cleanupTimers: Map<string, Timer> = new Map();
 
 	constructor() {
