@@ -45,27 +45,43 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 			}
 		}
 	)
-	.post("/stats/:evaNumber", ({ params: { evaNumber } }) => {}, {
-		body: t.Object({
-			startDate: t.Date({
-				default: statisticsService.START_DATE.toFormat("yyyy-MM-dd"),
-				description: "Start date of the filter"
-			}),
-			endDate: t.Date({ default: DateTime.now().toFormat("yyyy-MM-dd"), description: "End date of the filter" }),
-			filter: t.Object({
-				delayThreshold: t.Number({
-					default: 60,
-					description: "Defines the threshold in seconds after which a delay is considered",
-					minimum: 0,
-					maximum: Number.MAX_SAFE_INTEGER
-				}),
-				products: t.Array(t.String(), { default: [], description: "The products to look for" }),
-				lineName: t.Array(t.String(), { default: [], description: "The lineName to look for, e.g. ´MEX 12´" }),
-				lineNumber: t.Array(t.String(), {
-					default: [],
-					description: "The exact lineNumber to look for, e.g. ´19974´"
+	.post(
+		"/stats/:evaNumber",
+		({ params: { evaNumber }, body }) => {
+			console.log(body);
+		},
+		{
+			body: t.Object({
+				startDate: t.Optional(
+					t.Date({
+						default: statisticsService.START_DATE.toFormat("yyyy-MM-dd"),
+						description: "Start date of the filter"
+					})
+				),
+				endDate: t.Optional(
+					t.Date({
+						default: DateTime.now().toFormat("yyyy-MM-dd"),
+						description: "End date of the filter"
+					})
+				),
+				filter: t.Object({
+					delayThreshold: t.Number({
+						default: 60,
+						description: "Defines the threshold in seconds after which a delay is considered",
+						minimum: 0,
+						maximum: Number.MAX_SAFE_INTEGER
+					}),
+					products: t.Array(t.String(), { default: [], description: "The products to look for" }),
+					lineName: t.Array(t.String(), {
+						default: [],
+						description: "The lineName to look for, e.g. ´MEX 12´"
+					}),
+					lineNumber: t.Array(t.String(), {
+						default: [],
+						description: "The exact lineNumber to look for, e.g. ´19974´"
+					})
 				})
 			})
-		})
-	});
+		}
+	);
 export default stationController;
