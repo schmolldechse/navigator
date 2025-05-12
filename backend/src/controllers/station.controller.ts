@@ -51,6 +51,11 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 			console.log(body);
 		},
 		{
+			detail: {
+				summary: "Get statistics for a station",
+				description:
+					"Get statistics for a station by its evaNumber."
+			},
 			params: t.Object({
 				evaNumber: t.Number({ error: "Parameter 'evaNumber' is required and must be a number." })
 			}),
