@@ -2,8 +2,7 @@ import { type Station } from "navigator-core/src/models/station";
 import { mapToProduct, Products } from "navigator-core/src/models/products";
 import { HttpError } from "../response/error";
 import { HttpStatus } from "../response/status";
-import type { StationDocument } from "../db/mongodb/station.schema";
-import { getCollection } from "../lib/db/mongo-data-db";
+import { getCollection, StationDocument } from "../db/mongodb/mongodb";
 
 class StationService {
 	fetchStations = async (searchTerm: string): Promise<Station[]> => {

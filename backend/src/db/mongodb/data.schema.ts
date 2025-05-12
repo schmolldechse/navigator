@@ -1,7 +1,7 @@
 import type { DateTime } from "luxon";
-import type { Station } from "../../models/station.ts";
 import type { ObjectId } from "mongodb";
-import type { Connection } from "../../models/connection.ts";
+import type { Station } from "navigator-core/src/models/station";
+import type { Connection } from "navigator-core/src/models/connection";
 
 interface StationDocument extends Station {
 	_id?: ObjectId;

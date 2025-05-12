@@ -1,5 +1,5 @@
 import { Collection, Db, MongoClient } from "mongodb";
-import type { ConnectionDocument, StationDocument } from "../../db/mongodb/station.schema.ts";
+import type { ConnectionDocument, StationDocument } from "./data.schema.ts";
 
 interface Collections {
 	stations: StationDocument;
