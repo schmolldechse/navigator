@@ -16,6 +16,10 @@ const restApi = new Elysia({ prefix: "/api" })
 				set.status = error.httpStatus;
 				message = error.message;
 				break;
+			case "VALIDATION":
+				set.status = error.status;
+				message = error.all.map((e) => e.summary).join(". ");
+				break;
 		}
 
 		return Response.json({ error: message, status: set.status });

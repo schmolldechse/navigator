@@ -13,7 +13,7 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 	.decorate({ httpStatus: HttpStatus })
 	.get("/", ({ query }) => stationService.fetchAndCacheStations(query.query), {
 		query: t.Object({
-			query: t.String({ required: true })
+			query: t.String()
 		}),
 		detail: {
 			summary: "Query stations",
@@ -36,7 +36,7 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 		},
 		{
 			params: t.Object({
-				evaNumber: t.Number({ required: true })
+				evaNumber: t.Number({ error: "Parameter 'evaNumber' is required and must be a number." })
 			}),
 			detail: {
 				summary: "Station by evaNumber",
@@ -51,17 +51,22 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 			console.log(body);
 		},
 		{
+			params: t.Object({
+				evaNumber: t.Number({ error: "Parameter 'evaNumber' is required and must be a number." })
+			}),
 			body: t.Object({
 				startDate: t.Optional(
 					t.Date({
 						default: statisticsService.START_DATE.toFormat("yyyy-MM-dd"),
-						description: "Start date of the filter"
+						description: "Start date of the filter",
+						error: "Parameter 'startDate' could not be parsed as a date."
 					})
 				),
 				endDate: t.Optional(
 					t.Date({
 						default: DateTime.now().toFormat("yyyy-MM-dd"),
-						description: "End date of the filter"
+						description: "End date of the filter",
+						error: "Parameter 'endDate' could not be parsed as a date."
 					})
 				),
 				filter: t.Object({
