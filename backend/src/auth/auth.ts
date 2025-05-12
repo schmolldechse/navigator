@@ -1,8 +1,8 @@
 import { betterAuth } from "better-auth";
-import { usernamePlugin } from "../lib/plugins/username";
+import { usernamePlugin } from "./plugins/username";
 import type { GithubProfile } from "better-auth/social-providers";
 import { Pool } from "pg";
-import { rolePlugin } from "../lib/plugins/role";
+import { rolePlugin } from "./plugins/role";
 import Elysia, { Context, error } from "elysia";
 import { openAPI } from "better-auth/plugins";
 
