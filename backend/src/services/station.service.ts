@@ -75,6 +75,22 @@ class StationService {
 		const collection = await getCollection("stations");
 		return (await collection.findOne({ evaNumber })) as StationDocument;
 	};
+
+	/**
+	 * Since a station can have multiple ril100 identifiers, we try to gather all `evaNumber`'s from a station
+	 * This may happen at larger stations, for example:
+	 * - Stuttgart Hbf
+	 * - Hauptbf (Arnulf-Klett-Platz), Stuttgart
+	 */
+	getRelatedEvaNumbers = async (station: Station): Promise<number[]> => {
+		if ((station?.ril100 || []).length > 0) {
+			const collection = await getCollection("stations");
+			return (await collection.find({ ril100: { $in: station.ril100 } }).toArray()).map(
+				(station: Station) => station?.evaNumber
+			);
+		}
+		return [station?.evaNumber];
+	};
 }
 
 export { StationService };
