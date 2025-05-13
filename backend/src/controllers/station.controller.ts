@@ -48,8 +48,18 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 	)
 	.post(
 		"/stats/:evaNumber",
-		({ params: { evaNumber }, body }) => {
-			console.log(body);
+		async ({ params: { evaNumber }, body }) => {
+			body.startDate = (body.startDate || statisticsService.START_DATE).startOf("day");
+			body.endDate = (body.endDate || DateTime.now()).endOf("day");
+			if (body.startDate > body.endDate) throw new HttpError(400, "Start date can't be after end date");
+
+			const cachedStation = await stationService.getCachedStation(evaNumber);
+			if (!cachedStation) throw new HttpError(400, "Station not found");
+
+			const evaNumbers = await stationService.getRelatedEvaNumbers(cachedStation);
+			if (evaNumbers.length === 0) throw new HttpError(400, "Station not found");
+
+			return evaNumbers;
 		},
 		{
 			detail: {
