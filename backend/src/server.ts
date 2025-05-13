@@ -17,8 +17,8 @@ const restApi = new Elysia({ prefix: "/api" })
 				message = error.message;
 				break;
 			case "VALIDATION":
-				set.status = error.status;
-				message = error.all.map((e) => e.summary).join(". ");
+				set.status = error.status ?? HttpStatus.HTTP_422_UNPROCESSABLE_ENTITY;
+				message = error.all?.map((e) => e.summary).join(". ") ?? error.message;
 				break;
 			case "NOT_FOUND":
 				set.status = error.status;
