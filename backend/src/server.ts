@@ -20,6 +20,10 @@ const restApi = new Elysia({ prefix: "/api" })
 				set.status = error.status;
 				message = error.all.map((e) => e.summary).join(". ");
 				break;
+			case "NOT_FOUND":
+				set.status = error.status;
+				message = "Route does not exist";
+				break;
 		}
 
 		return Response.json({ error: message, status: set.status });
