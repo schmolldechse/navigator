@@ -58,9 +58,7 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 			const evaNumbers = await stationService.getRelatedEvaNumbers(cachedStation);
 			if (evaNumbers.length === 0) throw new HttpError(400, "Station not found");
 
-			await statisticsService.startEvaluation(body, evaNumbers);
-
-			return evaNumbers;
+			return await statisticsService.startEvaluation(body, evaNumbers);
 		},
 		{
 			detail: {
