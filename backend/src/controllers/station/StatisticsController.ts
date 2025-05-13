@@ -18,78 +18,13 @@ interface StatisticManifest {
 	processFinishedAt?: DateTime;
 }
 
-interface StatsInDto {
-	/**
-	 * @format date
-	 */
-	startDate?: string;
-	/**
-	 * @format date
-	 */
-	endDate?: string;
-
-	/**
-	 * filter options
-	 */
-	filter?: {
-		/**
-		 * defines the threshold in seconds after which a delay is considered
-		 * @example 60
-		 */
-		delayThreshold?: number;
-
-		products?: string[];
-		lineName?: string[];
-		lineNumber?: string[];
-	};
-}
-
 @Route("stations")
 @Tags("Stations")
 export class StatisticsController extends Controller {
 	private readonly CHUNK_SIZE: number = 2500;
-	private readonly BASE_PATH: string = path.join(os.tmpdir(), "navigator", "query-station-stats");
-
-	private static cleanupTimers: Map<string, Timer> = new Map();
-
-	constructor() {
-		super();
-
-		const cleanup = () => {
-			console.log("Cleaning up tmp directory...");
-
-			if (fs.existsSync(this.BASE_PATH)) fs.rmSync(this.BASE_PATH, { recursive: true });
-			console.log("Deleted tmp directory");
-
-			StatisticsController.cleanupTimers.values().forEach((timer) => clearTimeout(timer));
-			StatisticsController.cleanupTimers.clear();
-		};
-
-		process.on("SIGINT", () => cleanup());
-		process.on("SIGTERM", () => cleanup());
-	}
 
 	@Post("/stats/{evaNumber}")
 	async getStationStatistics(@Path() evaNumber: number, @Body() body: StatsInDto): Promise<StopAnalytics> {
-		const startDate: DateTime = body?.startDate ? DateTime.fromISO(body.startDate).startOf("day") : this.START_DATE;
-		const endDate: DateTime = body?.endDate ? DateTime.fromISO(body.endDate).endOf("day") : DateTime.now().endOf("day");
-		if (startDate > endDate) throw new HttpError(400, "Start date can't be after end date");
-
-		const cachedStation = await getCachedStation(evaNumber);
-		if (!cachedStation) throw new HttpError(400, "Station not found");
-
-		const evaNumbers = await this.getRelatedEvaNumbers(cachedStation);
-		if (evaNumbers.length === 0) throw new HttpError(400, "Station not found");
-
-		const filter = {
-			delayThreshold: 60,
-			products: [],
-			lineName: [],
-			lineNumber: [],
-			...body.filter
-		};
-		if (filter.delayThreshold < 60) filter.delayThreshold = 60;
-
 		const saveDir = path.join(this.BASE_PATH, evaNumbers.join("-"));
 		const manifestPath = path.join(saveDir, "manifest.json");
 		if (fs.existsSync(saveDir)) {
@@ -154,20 +89,6 @@ export class StatisticsController extends Controller {
 		}, MAX_CACHE_TIME);
 
 		StatisticsController.cleanupTimers.set(dirPath, timer);
-	};
-
-	/**
-	 * since a station can have several evaNumbers, we try to access all evaNumbers using the "ril100" identifier
-	 * this can occur at larger stations, for example "Stuttgart Hbf" & "Hauptbf (Arnulf-Klett-Platz), Stuttgart"
-	 */
-	private getRelatedEvaNumbers = async (station: StationDocument): Promise<number[]> => {
-		if ((station?.ril100 || []).length > 0) {
-			const collection = await getCollection("stations");
-			return (await collection.find({ ril100: { $in: station.ril100 } }).toArray()).map(
-				(station: StationDocument) => station?.evaNumber
-			);
-		}
-		return [station?.evaNumber];
 	};
 
 	private startProcess = async (evaNumbers: number[], totalCount: number, saveDir: string): Promise<void> => {
