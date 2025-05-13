@@ -176,7 +176,11 @@ class StatisticsService {
 		console.log(`Completed processing all ${totalCount} connections and saved to ${saveDir}`);
 	};
 
-	private analyzeStation = async (evaNumbers: number[], saveDir: string, body: typeof this.statsBody.static): Promise<StopAnalytics> => {
+	private analyzeStation = async (
+		evaNumbers: number[],
+		saveDir: string,
+		body: typeof this.statsBody.static
+	): Promise<StopAnalytics> => {
 		if (!fs.existsSync(saveDir)) throw new Error(`Statistics for ${evaNumbers} do not exist`);
 
 		const files = fs
@@ -184,7 +188,8 @@ class StatisticsService {
 			.filter((file) => file.endsWith(".json"))
 			.filter((file) => file !== "manifest.json")
 			.map((file) => path.join(saveDir, file));
-		console.log(`Found ${files.length} JSON files to analyze in ${saveDir}`);const filePromises = files.map(async (filePath) => {
+		console.log(`Found ${files.length} JSON files to analyze in ${saveDir}`);
+		const filePromises = files.map(async (filePath) => {
 			const content = fs.readFileSync(filePath, { encoding: "utf8" });
 			return this.analyzeConnections(evaNumbers, JSON.parse(content) as Connection[], body);
 		});
@@ -209,7 +214,8 @@ class StatisticsService {
 				arrival: {
 					total: totalArrivals,
 					averageDelay:
-						Math.round((results.reduce((sum, item) => sum + item.arrival.averageDelay, 0) / totalArrivals) * 100) / 100,
+						Math.round((results.reduce((sum, item) => sum + item.arrival.averageDelay, 0) / totalArrivals) * 100) /
+						100,
 					minimumDelay: Math.min(...results.flatMap((item) => item.arrival.minimumDelay)),
 					maximumDelay: Math.max(...results.flatMap((item) => item.arrival.maximumDelay)),
 					totalTooEarly: results.reduce((sum, item) => sum + item.arrival.totalTooEarly, 0),
@@ -220,8 +226,9 @@ class StatisticsService {
 				departure: {
 					total: totalDepartures,
 					averageDelay:
-						Math.round((results.reduce((sum, item) => sum + item.departure.averageDelay, 0) / totalDepartures) * 100) /
-						100,
+						Math.round(
+							(results.reduce((sum, item) => sum + item.departure.averageDelay, 0) / totalDepartures) * 100
+						) / 100,
 					minimumDelay: Math.min(...results.flatMap((item) => item.departure.minimumDelay)),
 					maximumDelay: Math.max(...results.flatMap((item) => item.departure.maximumDelay)),
 					totalTooEarly: results.reduce((sum, item) => sum + item.departure.totalTooEarly, 0),
@@ -237,7 +244,7 @@ class StatisticsService {
 	private analyzeConnections = async (
 		relevantEvaNumbers: number[],
 		connections: ConnectionDocument[],
-		body: typeof this.statsBody.static,
+		body: typeof this.statsBody.static
 	): Promise<StopAnalytics> => {
 		const analytics: StopAnalytics = {
 			products: {},
@@ -279,8 +286,13 @@ class StatisticsService {
 			const product = connection?.lineInformation?.type || "UNKNOWN";
 
 			if (body.filter.products.length > 0 && !body.filter.products.includes(product)) return;
-			if (body.filter.lineName.length > 0 && !body.filter.lineName.includes(connection?.lineInformation?.lineName ?? "")) return;
-			if (body.filter.lineNumber.length > 0 && !body.filter.lineNumber.includes(connection?.lineInformation?.fahrtNr ?? "")) return;
+			if (body.filter.lineName.length > 0 && !body.filter.lineName.includes(connection?.lineInformation?.lineName ?? ""))
+				return;
+			if (
+				body.filter.lineNumber.length > 0 &&
+				!body.filter.lineNumber.includes(connection?.lineInformation?.fahrtNr ?? "")
+			)
+				return;
 
 			analytics.products[product] = (analytics.products[product] ?? 0) + 1;
 

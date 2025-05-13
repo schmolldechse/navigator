@@ -48,7 +48,7 @@ class StationService {
 		if (stations.length > 0) await this.cacheStations(stations);
 
 		return stations;
-	}
+	};
 
 	private cacheStations = async (stations: Station[]): Promise<void> => {
 		const collection = await getCollection("stations");

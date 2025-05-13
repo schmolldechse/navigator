@@ -1,5 +1,4 @@
 class HttpError extends Error {
-
 	public readonly httpStatus: number;
 	public readonly message: string;
 
@@ -10,7 +9,7 @@ class HttpError extends Error {
 		this.message = message;
 
 		Object.setPrototypeOf(this, HttpError.prototype);
-		Error.captureStackTrace(this)
+		Error.captureStackTrace(this);
 	}
 }
 
