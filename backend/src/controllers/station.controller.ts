@@ -5,6 +5,7 @@ import { type Station } from "navigator-core/src/models/station";
 import { HttpError } from "../response/error";
 import { DateTime } from "luxon";
 import { StatistisService } from "../services/statistis.service";
+import { DateTimeObject } from "../types/datetime";
 
 const stationService = new StationService();
 const statisticsService = new StatistisService();
@@ -53,22 +54,23 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 		{
 			detail: {
 				summary: "Get statistics for a station",
-				description:
-					"Get statistics for a station by its evaNumber."
+				description: "Get statistics for a station by its evaNumber."
 			},
 			params: t.Object({
 				evaNumber: t.Number({ error: "Parameter 'evaNumber' is required and must be a number." })
 			}),
 			body: t.Object({
 				startDate: t.Optional(
-					t.Date({
+					DateTimeObject({
+						fieldName: "startDate",
 						default: statisticsService.START_DATE.toFormat("yyyy-MM-dd"),
 						description: "Start date of the filter",
 						error: "Parameter 'startDate' could not be parsed as a date."
 					})
 				),
 				endDate: t.Optional(
-					t.Date({
+					DateTimeObject({
+						fieldName: "endDate",
 						default: DateTime.now().toFormat("yyyy-MM-dd"),
 						description: "End date of the filter",
 						error: "Parameter 'endDate' could not be parsed as a date."
