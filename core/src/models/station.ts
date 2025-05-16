@@ -1,5 +1,6 @@
 import type { Time } from "./time.ts";
 import type { Message } from "./message.ts";
+import { t } from "elysia";
 
 interface Station {
 	name: string;
@@ -32,51 +33,42 @@ interface Stop extends Station {
 	messages?: Message[];
 }
 
-interface StopAnalytics {
-	// how long the analysis took in ms
-	executionTime?: number;
+const StopAnalyticsSchema = t.Object({
+	executionTime: t.Optional(t.Number({ description: "Specifies the time in ms how long the analysis took" })),
+	relatedEvaNumbers: t.Array(t.Number(), { description: "An array of related evaNumbers which where considered in the analysis" }),
+	foundByQuery: t.Optional(t.Number({ description: "Amount of connections found in the database" })),
+	parsingSucceeded: t.Number({ description: "Amount of connections which could be parsed" }),
+	parsingFailed: t.Number({ description: "Amount of connections which could not be parsed" }),
+	products: t.Record(t.String(), t.Number(), { examples: [{ "Busse": 1, "NahverkehrsonstigeZuege": 2 }], description: "Specifies how often a product has occurred" }),
+	arrival: t.Object({
+		total: t.Number({ description: "Specifies the total number of arrivals" }),
+		averageDelay: t.Number({ description: "Specifies the average delay in seconds" }),
+		minimumDelay: t.Number({ description: "Specifies the minimum delay in seconds" }),
+		maximumDelay: t.Number({ description: "Specifies the maximum delay in seconds" }),
+		totalTooEarly: t.Number({ description: "Specifies the total number of arrivals which were too early" }),
+		totalPunctual: t.Number({ description: "Specifies the total number of arrivals which were punctual" }),
+		totalDelayed: t.Number({ description: "Specifies the total number of arrivals which were delayed" }),
+		totalPlatformChanges: t.Number({ description: "Specifies the total number of arrivals which had a platform change" })
+	}),
+	departure: t.Object({
+		total: t.Number({ description: "Specifies the total number of departures" }),
+		averageDelay: t.Number({ description: "Specifies the average delay in seconds" }),
+		minimumDelay: t.Number({ description: "Specifies the minimum delay in seconds" }),
+		maximumDelay: t.Number({ description: "Specifies the maximum delay in seconds" }),
+		totalTooEarly: t.Number({ description: "Specifies the total number of departures which were too early" }),
+		totalPunctual: t.Number({ description: "Specifies the total number of departures which were punctual" }),
+		totalDelayed: t.Number({ description: "Specifies the total number of departures which were delayed" }),
+		totalPlatformChanges: t.Number({ description: "Specifies the total number of departures which had a platform change" })
+	}),
+	cancellations: t.Number({ description: "Specifies the total number of cancellations" })
+});
+type StopAnalytics = typeof StopAnalyticsSchema.static;
 
-	relatedEvaNumbers: number[];
-	// total number of connections found in the database
-	foundByQuery?: number;
-	parsingSucceeded: number;
-	parsingFailed: number;
-	// how often a product has occurred
-	products: Record<string, number>;
-	arrival: {
-		total: number;
-
-		// in seconds
-		averageDelay: number;
-		minimumDelay: number;
-		maximumDelay: number;
-
-		totalTooEarly: number; // <0 sec
-		totalPunctual: number; // 0 - 60 sec
-		totalDelayed: number; // >60 sec
-
-		totalPlatformChanges: number;
-	};
-	departure: {
-		total: number;
-
-		// in seconds
-		averageDelay: number;
-		minimumDelay: number;
-		maximumDelay: number;
-
-		totalTooEarly: number; // <0 sec
-		totalPunctual: number; // 0 - 60 sec
-		totalDelayed: number; // >60 sec
-
-		totalPlatformChanges: number;
-	};
-	cancellations: number;
-}
+export { StopAnalyticsSchema, type StopAnalytics };
 
 interface NamePart {
 	type: string;
 	value: string;
 }
 
-export type { Station, Stop, StopAnalytics, NamePart };
+export type { Station, Stop, NamePart };

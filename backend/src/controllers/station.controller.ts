@@ -1,7 +1,7 @@
 import Elysia, { t } from "elysia";
 import { StationService } from "../services/station.service";
 import { HttpStatus } from "../response/status";
-import { type Station } from "navigator-core/src/models/station";
+import { type Station, StopAnalyticsSchema } from "navigator-core/src/models/station";
 import { HttpError } from "../response/error";
 import { DateTime } from "luxon";
 import { StatisticsService } from "../services/statistics.service";
@@ -68,7 +68,8 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 			params: t.Object({
 				evaNumber: t.Number({ error: "Parameter 'evaNumber' is required and must be a number." })
 			}),
-			body: statisticsService.statsBody
+			body: statisticsService.statsBody,
+			response: StopAnalyticsSchema
 		}
 	);
 export default stationController;
