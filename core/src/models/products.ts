@@ -1,20 +1,11 @@
-/**
- * A Product represents a specific type of transportation.
- * It is used by both {@link Coonection} and {@link Station} to specify the type of transportation.
- *
- * The Product consists of:
- * - value: The name of the product obtained from the Vendo DeutscheBahn API
- * - possibilities: An array of product names that can be matched to the value. For example, if the API returns "HIGH_SPEED_TRAIN", it maps to HOCHGESCHWINDIGKEITSZUEGE
- */
-interface Product {
-	value: string;
-	possibilities: string[];
-}
+import { t } from "elysia";
 
-/**
- * A collection of Products that map a specific transportation category to its corresponding value
- * Any uppercase possibilities are from RIS. Any lowercase possibilities are from vendo
- */
+const ProductSchema = t.Object({
+	value: t.String({ description: "The name of the product, obtained from Vendo DB API." }),
+	possibilities: t.Array(t.String(), { description: "An array of product names that can be matched to the value." })
+}, { description: "A Product represents a specific type of transportation." });
+type Product = typeof ProductSchema.static;
+
 const Products = {
 	HOCHGESCHWINDIGKEITSZUEGE: {
 		value: "HOCHGESCHWINDIGKEITSZUEGE",
@@ -38,16 +29,17 @@ const Products = {
 	UNKNOWN: { value: "UNKNOWN", possibilities: [] }
 } as const;
 
-type ProductType = (typeof Products)[keyof typeof Products];
-const mapToProduct = (input?: string): ProductType => {
-	if (!input) return Products.UNKNOWN;
+export { ProductSchema, Product, Products };
+
+const mapToProduct = (input?: string): Product => {
+	if (!input) return Products.UNKNOWN as unknown as Product;
 
 	const matchedProduct = Object.values(Products).find(
 		(product) =>
 			product.value.toLowerCase() === input.toLowerCase() ||
 			product.possibilities.some((possibility: string) => possibility.toLowerCase() === input.toLowerCase())
 	);
-	return matchedProduct || Products.UNKNOWN;
+	return (matchedProduct || Products.UNKNOWN) as unknown as Product;
 };
 
-export { type Product, Products, mapToProduct };
+export { mapToProduct };

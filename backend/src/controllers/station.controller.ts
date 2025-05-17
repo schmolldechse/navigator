@@ -1,7 +1,7 @@
 import Elysia, { t } from "elysia";
 import { StationService } from "../services/station.service";
 import { HttpStatus } from "../response/status";
-import { type Station, StopAnalyticsSchema } from "navigator-core/src/models/station";
+import { type Station, StationSchema, StopAnalyticsSchema } from "navigator-core/src/models/station";
 import { HttpError } from "../response/error";
 import { DateTime } from "luxon";
 import { StatisticsService } from "../services/statistics.service";
@@ -18,7 +18,8 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 		detail: {
 			summary: "Query stations",
 			description: "Search for stations by name. Returns a list of stations matching the search term."
-		}
+		},
+		response: t.Array(StationSchema)
 	})
 	.get(
 		"/:evaNumber",
@@ -42,7 +43,8 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 				summary: "Station by evaNumber",
 				description:
 					"Get a station by its evaNumber. Returns the station object if available or fetches and caches it if not found locally."
-			}
+			},
+			response: StationSchema
 		}
 	)
 	.post(
