@@ -1,9 +1,10 @@
 import Elysia from "elysia";
 import swagger from "@elysiajs/swagger";
 import { authApp } from "./auth/auth";
-import stationController from "./controllers/station.controller";
 import { HttpStatus } from "./response/status";
 import { HttpError } from "./response/error";
+import stationController from "./controllers/station.controller";
+import timetableController from "./controllers/timetable.controller";
 
 const restApi = new Elysia({ prefix: "/api" })
 	.error({ HttpError })
@@ -28,7 +29,8 @@ const restApi = new Elysia({ prefix: "/api" })
 
 		return Response.json({ error: message, status: set.status });
 	})
-	.use(stationController);
+	.use(stationController)
+	.use(timetableController);
 
 const app = new Elysia()
 	.use(
