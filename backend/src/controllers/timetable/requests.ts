@@ -3,33 +3,6 @@ import { mergeConnections } from "../../lib/merge.ts";
 import { mapConnection } from "../../lib/mapping.ts";
 import type { Connection, Journey } from "../../models/connection.ts";
 
-export enum RequestType {
-	DEPARTURES = "departures",
-	ARRIVALS = "arrivals"
-}
-
-/**
- * specifies the profile used in boards
- * db = RIS
- * dbweb = HAFAS
- * combined = both
- */
-export enum Profile {
-	DB = "db",
-	DBWEB = "dbweb",
-	COMBINED = "combined"
-}
-
-export interface Query {
-	evaNumber: number;
-	type: RequestType;
-	profile?: Profile;
-	when?: string;
-	duration?: number;
-	results?: number;
-	locale?: string;
-}
-
 export const retrieveConnections = async (query: Query): Promise<Connection[]> => {
 	const request = await fetch(
 		`https://vendo-prof-${query.profile}.voldechse.wtf/stops/${query.evaNumber}/${query.type}?when=${encodeURIComponent(
