@@ -8,9 +8,9 @@ enum RequestType {
 }
 
 enum Profile {
-	BAHNHOF,
-	RIS,
-	HAFAS
+	BAHNHOF = "bahnhof",
+	RIS = "ris",
+	HAFAS = "hafas"
 }
 
 class TimetableService {
