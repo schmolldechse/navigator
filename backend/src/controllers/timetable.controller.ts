@@ -58,7 +58,7 @@ const timetableController = new Elysia({
 			query: timetableService.query,
 			detail: {
 				summary: "Profile specific timetable",
-				description: "Get the timetable for a station by its evaNumber and profile."
+				description: "Get the timetable for a station by its evaNumber and profile.\n\nKeep in mind, that the 'when' parameter is ignored for the 'bahnhof' profile."
 			}
 		}
 	);
