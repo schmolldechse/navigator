@@ -1,6 +1,8 @@
 import { t } from "elysia";
 import { DateTimeObject } from "../types/datetime";
 import { DateTime } from "luxon";
+import { type Connection } from "navigator-core/src/models/connection";
+import { mapConnection } from "../lib/mapping";
 
 enum RequestType {
 	DEPARTURES = "departures",
@@ -28,13 +30,6 @@ class TimetableService {
 			description: "Duration in minutes to look for the timetable",
 			error: "Parameter 'duration' must be a number."
 		}),
-		results: t.Number({
-			default: 1000,
-			minimum: 1,
-			maximum: 1000,
-			description: "Maximum number of results to return",
-			error: "Parameter 'maxResults' must be a number."
-		}),
 		language: t.String({
 			pattern: "^(de|en)$",
 			default: "en",
@@ -43,28 +38,28 @@ class TimetableService {
 		})
 	});
 
-	retrieveConnections = async (
+	retrieveBahnhofConnections = async (
 		evaNumber: number,
 		type: RequestType = RequestType.DEPARTURES,
-		profile: Profile = Profile.RIS,
 		queryParams: typeof this.query.static
-	): Promise<Connection[]> => {
-		let apiUrl: URL;
-		switch (profile) {
-			case Profile.BAHNHOF:
-				apiUrl = new URL(`https://bahnhof.de/api/boards/${type}?evaNumbers=${evaNumber}`);
-				break;
-			case Profile.RIS:
-				// remove last character ("s")
-				const risType = type.slice(0, -1);
-				apiUrl = new URL(`https://regio-guide.de/@prd/zupo-travel-information/api/public/ri/board/${risType}/${evaNumber}`);
-				break;
-			case Profile.HAFAS:
-				const hafasType = type === RequestType.DEPARTURES ? "abfahrten" : "ankuenfte";
-				apiUrl = new URL(`https://int.bahn.de/web/api/reiseloesung/${hafasType}`)
-		}
+	): Promise<{ connections: Connection[] }[]> => {
+		let apiUrl: URL = new URL(`https://bahnhof.de/api/boards/${type}?evaNumbers=${evaNumber}`);
+		apiUrl.searchParams.append("duration", String(queryParams.duration));
+		apiUrl.searchParams.append("locale", queryParams.language);
 
-		return apiUrl.toString();
+		const request = await fetch(apiUrl, { method: "GET" });
+		if (!request.ok) return [];
+
+		const response = await request.json();
+		if (!response?.entries || !Array.isArray(response?.entries)) return [];
+
+		return Object.values(response?.entries)
+			.filter(Array.isArray)
+			.map((journeyRaw) => ({
+				connections: journeyRaw
+					.filter((connectionRaw) => connectionRaw?.journeyID)
+					.map((connectionRaw) => mapConnection(connectionRaw, type, true))
+			}));
 	};
 }
 

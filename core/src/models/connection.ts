@@ -44,7 +44,6 @@ const ConnectionSchema = t.Object({
 	})),
 	messages: t.Optional(t.Array(MessageSchema)),
 	cancelled: t.Optional(t.Boolean({ description: "Indicates if the connection is cancelled." })),
-	providesVehicleSequence: t.Optional(t.Boolean({ description: "Indicates if the connection provides vehicle sequence." })),
 	walking: t.Optional(t.Boolean({ description: "Indicates if the connection includes walking." })),
 	distance: t.Optional(t.Number({ description: "The distance of the connection in meters." })),
 	loadFactor: t.Optional(t.String({

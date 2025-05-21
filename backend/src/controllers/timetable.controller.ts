@@ -1,6 +1,7 @@
 import Elysia, { t } from "elysia";
 import { HttpStatus } from "../response/status";
 import { Profile, RequestType, TimetableService } from "../services/timetable.service";
+import { HttpError } from "../response/error";
 
 const timetableService = new TimetableService();
 
@@ -21,35 +22,44 @@ const timetableController = new Elysia({
 	tags: ["Timetable"]
 })
 	.decorate({ httpStatus: HttpStatus })
-	.get(
-		"/:evaNumber/:type",
-		({ params: { evaNumber, type }, query }) => {
-			return timetableService.retrieveConnections(evaNumber, type, Profile.RIS, query);
-		},
-		{
-			params,
-			query: timetableService.query,
-			detail: {
-				summary: "List timetable for a station",
-				description: "Get the timetable for a station by its evaNumber."
-			}
-		}
-	)
-	.get("/profile/:profile/:evaNumber/:type", ({ params: { profile, evaNumber, type }, query }) => {}, {
-		params: t.Intersect([
-			params,
-			t.Object({
-				profile: t.Enum(Profile, {
-					default: Profile.RIS,
-					description: "Profile to use for the request",
-					error: "Parameter 'profile' must be either 'bahnhof', 'ris' or 'hafas'."
-				})
-			})
-		]),
+	.get("/:evaNumber/:type", ({ params: { evaNumber, type }, query }) => {}, {
+		params,
 		query: timetableService.query,
 		detail: {
-			summary: "Profile specific timetable",
-			description: "Get the timetable for a station by its evaNumber and profile."
+			summary: "List timetable for a station",
+			description: "Get the timetable for a station by its evaNumber."
 		}
-	});
+	})
+	.get(
+		"/profile/:profile/:evaNumber/:type",
+		({ params: { profile, evaNumber, type }, query }) => {
+			switch (profile) {
+				case Profile.BAHNHOF:
+					return timetableService.retrieveBahnhofConnections(evaNumber, type, query);
+				case Profile.RIS:
+					return 0;
+				case Profile.HAFAS:
+					return 0;
+				default:
+					throw new HttpError(HttpStatus.HTTP_400_BAD_REQUEST, "Invalid profile");
+			}
+		},
+		{
+			params: t.Intersect([
+				params,
+				t.Object({
+					profile: t.Enum(Profile, {
+						default: Profile.RIS,
+						description: "Profile to use for the request",
+						error: "Parameter 'profile' must be either 'bahnhof', 'ris' or 'hafas'."
+					})
+				})
+			]),
+			query: timetableService.query,
+			detail: {
+				summary: "Profile specific timetable",
+				description: "Get the timetable for a station by its evaNumber and profile."
+			}
+		}
+	);
 export default timetableController;

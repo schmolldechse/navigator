@@ -1,58 +1,49 @@
-import calculateDuration from "./time.ts";
 import { DateTime } from "luxon";
-import type { Connection } from "../models/connection.ts";
-import { mapToProduct } from "../models/products.ts";
-import type { Stop } from "../models/station.ts";
-import type { Message } from "../models/message.ts";
-import type { Sequence } from "../models/sequence.ts";
-import type { RouteData } from "../models/route.ts";
-import type { Time } from "../models/time.ts";
+import { type Connection } from "navigator-core/src/models/connection";
+import { type Stop } from "navigator-core/src/models/station";
+import { type Time } from "navigator-core/src/models/time";
+import { type Message } from "navigator-core/src/models/message";
+import { mapToProduct } from "navigator-core/src/models/products";
+import calculateDuration from "./time";
 
 const mapConnection = (
 	entry: any,
 	type: "departures" | "arrivals" | "both",
-	queriedFromBahnhof: boolean = false,
+	isBahnhofProfile: boolean = false,
 	parseTimesInStopovers: boolean = false
 ): Connection => {
-	const isIdentifiableAsHAFAS = (entry?.journeyID ?? entry?.tripId ?? "").startsWith("2|#");
+	const isIdentifiableAsHAFAS = entry?.journeyID.startsWith("2|#");
 
 	const connection: Connection = {
 		// journeyId
-		ris_journeyId: isIdentifiableAsHAFAS ? undefined : (entry?.journeyID ?? entry?.tripId ?? undefined),
-		hafas_journeyId: isIdentifiableAsHAFAS ? entry?.tripId : undefined,
+		ris_journeyId: isIdentifiableAsHAFAS ? undefined : entry?.journeyID,
+		hafas_journeyId: undefined, // TODO
 		// destination
-		destination: entry?.destination ? mapStops(entry?.destination)![0] : undefined,
-		actualDestination: entry?.actualDestination ? mapStops(entry?.actualDestination)![0] : undefined,
-		direction: queriedFromBahnhof ? undefined : (entry?.direction ?? undefined), // somehow, "direction" shows either "departure" / "arrival" at the Bahnhof API
+		destination: entry?.destination ? mapStop(entry?.destination)! : undefined,
+		actualDestination: entry?.actualDestination ? mapStop(entry?.actualDestination)! : undefined,
+		direction: isBahnhofProfile ? undefined : undefined, // TODO
 		// origin
-		origin: entry?.origin ? mapStops(entry?.origin)![0] : undefined,
-		provenance: entry?.provenance ?? undefined,
+		origin: entry?.origin ? mapStop(entry?.origin)! : undefined,
+		provenance: isBahnhofProfile ? undefined : undefined, // TODO
 		// departure/ arrival time
-		departure: type === "both" || type === "departures" ? mapTime(entry, "departure") : undefined,
-		arrival: type === "both" || type === "arrivals" ? mapTime(entry, "arrival") : undefined,
+		departure: type !== "arrivals" ? mapTime(entry, "departure") : undefined,
+		arrival: type !== "departures" ? mapTime(entry, "arrival") : undefined,
 		// lineInformation
-		lineInformation: !entry?.walking
-			? {
-					type: mapToProduct(entry?.type ?? entry?.line?.product).value ?? undefined,
-					replacementServiceType: entry?.replacementServiceType ?? undefined,
-					product: entry?.line?.productName ?? undefined,
-					lineName: entry?.lineName ?? entry?.line?.name,
-					additionalLineName: entry?.additionalLineName ?? undefined,
+		lineInformation: entry?.walking
+			? undefined
+			: {
+					type: mapToProduct(entry?.type).value ?? undefined,
+					product: isBahnhofProfile ? undefined : undefined, // TODO
+					lineName: entry?.lineName, // TODO
+					additionalLineName: !isBahnhofProfile ? undefined : entry?.additionalLineName,
 					fahrtNr: entry?.line?.fahrtNr ?? undefined,
-					operator: {
-						id: entry?.line?.operator?.id ?? undefined,
-						name: entry?.line?.operator?.name ?? undefined
-					}
-				}
-			: undefined,
-		viaStops:
-			mapStops(
-				entry.viaStops ?? entry?.nextStopovers ?? entry?.previousStopovers ?? entry?.stopovers,
-				isIdentifiableAsHAFAS && parseTimesInStopovers
-			) ?? undefined,
-		messages: mapMessages(entry?.messages ?? entry?.remarks, isIdentifiableAsHAFAS) ?? undefined,
-		cancelled: !entry?.walking ? (entry?.canceled ?? entry?.cancelled ?? false) : undefined,
-		providesVehicleSequence: entry?.walking ? undefined : entry?.providesVehicleSequence,
+					operator: isBahnhofProfile ? undefined : undefined // TODO
+				},
+		viaStops: (entry?.viaStops ?? []).map((rawStop: any) =>
+			mapStop(rawStop, isIdentifiableAsHAFAS && parseTimesInStopovers)
+		),
+		messages: mapMessages(entry?.messages, isIdentifiableAsHAFAS) ?? undefined, // TODO
+		cancelled: !entry?.walking ? (entry?.canceled ?? false) : undefined, // TODO
 		walking: entry?.walking ? entry?.walking : undefined,
 		distance: entry?.walking ? entry?.distance : undefined,
 		loadFactor: entry?.loadFactor ?? undefined
@@ -90,58 +81,42 @@ const mapConnection = (
 const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	const isDeparture = type === "departure";
 
-	const delay = (): number =>
-		calculateDuration(
-			DateTime.fromISO(
-				entry?.timeDelayed ?? entry?.when ?? entry?.plannedWhen ?? (isDeparture ? entry?.departure : entry?.arrival)
-			),
-			DateTime.fromISO(
-				entry?.timeSchedule ?? entry?.plannedWhen ?? (isDeparture ? entry?.plannedDeparture : entry?.plannedArrival)
-			),
-			"seconds"
-		);
+	const delay: number = calculateDuration(
+		DateTime.fromISO(entry?.timeDelayed), // TODO
+		DateTime.fromISO(entry?.timeSchedule), // TODO
+		["seconds"]
+	).seconds;
 
 	return {
-		plannedTime:
-			entry?.timeSchedule ??
-			entry?.plannedWhen ??
-			(isDeparture ? entry?.plannedDeparture : entry?.plannedArrival) ??
-			undefined,
-		actualTime: entry?.timeDelayed ?? entry?.when ?? (isDeparture ? entry?.departure : entry?.arrival) ?? undefined,
-		delay: !entry?.walking ? ((isDeparture ? entry?.departureDelay : entry?.arrivalDelay) ?? delay()) : undefined,
-		plannedPlatform: !entry?.walking
-			? (entry?.platformSchedule ??
-				entry?.plannedPlatform ??
-				(isDeparture ? entry?.plannedDeparturePlatform : entry?.plannedArrivalPlatform))
-			: undefined,
-		actualPlatform: !entry?.walking
-			? (entry?.platform ?? (isDeparture ? entry?.departurePlatform : entry?.arrivalPlatform))
-			: undefined
+		plannedTime: entry?.timeSchedule ?? undefined, // TODO
+		actualTime: entry?.timeDelayed ?? undefined, // TODO
+		delay: !entry?.walking ? delay : undefined,
+		plannedPlatform: !entry?.walking ? entry?.platform : undefined,
+		actualPlatform: !entry?.walking ? entry?.platform : undefined
 	};
 };
 
-const mapStops = (entry: any, parseTimeInfo: boolean = false): Stop[] | null => {
+const mapStop = (entry: any, parseTimeInfo: boolean = false): Stop | null => {
 	if (!entry) return null;
-	if (!Array.isArray(entry)) entry = [entry];
 
-	return entry.map((rawStop: any) => ({
-		evaNumber: rawStop?.evaNumber ?? rawStop?.id ?? rawStop?.stop?.id,
-		name: rawStop?.name ?? rawStop?.stop?.name,
-		cancelled: rawStop?.canceled ?? rawStop?.cancelled ?? false,
-		additional: rawStop?.additional ?? undefined,
-		separation: rawStop?.separation ?? undefined,
+	return {
+		evaNumber: Number(entry?.evaNumber),
+		name: entry?.name,
+		cancelled: entry?.canceled ?? false,
+		additional: entry?.additional ?? undefined,
+		separation: entry?.separation ?? undefined,
 		nameParts:
-			rawStop?.nameParts?.map((rawPart: any) => ({
+			entry?.nameParts?.map((rawPart: any) => ({
 				type: rawPart?.type,
 				value: rawPart?.value
 			})) ?? undefined,
-		departure: parseTimeInfo ? mapTime(rawStop, "departure") : undefined,
-		arrival: parseTimeInfo ? mapTime(rawStop, "arrival") : undefined,
-		messages: parseTimeInfo ? mapMessages(rawStop?.remarks, true) : undefined
-	}));
+		departure: parseTimeInfo ? mapTime(entry, "departure") : undefined,
+		arrival: parseTimeInfo ? mapTime(entry, "arrival") : undefined,
+		messages: parseTimeInfo ? mapMessages(entry?.remarks, true) : undefined
+	};
 };
 
-const mapMessages = (entry: any, isIdentifiableAsHAFAS: boolean = false): Message[] | [] => {
+const mapMessages = (entry: any, isIdentifiableAsHAFAS: boolean = false): Message[] => {
 	if (!entry) return [];
 
 	if (isIdentifiableAsHAFAS)

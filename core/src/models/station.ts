@@ -5,12 +5,12 @@ import { MessageSchema } from "./message";
 const StationSchema = t.Object({
 	name: t.String({ description: "Name of a station" }),
 	evaNumber: t.Number({ description: "Unique evaNumber of a station" }),
-	coordinates: t.Object({
+	coordinates: t.Optional(t.Object({
 		latitude: t.Number({ description: "Latitude of the station" }),
 		longitude: t.Number({ description: "Longitude of the station" })
-	}, { description: "Coordinates of the station" }),
-	ril100: t.Array(t.String(), { description: "List of RIL100 numbers of the station" }),
-	products: t.Array(t.String(), { description: "List of products available at the station" })
+	}, { description: "Coordinates of the station" })),
+	ril100: t.Optional(t.Array(t.String(), { description: "List of RIL100 numbers of the station" })),
+	products: t.Optional(t.Array(t.String(), { description: "List of products available at the station" }))
 });
 type Station = typeof StationSchema.static;
 

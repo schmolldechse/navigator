@@ -50,21 +50,3 @@ export const retrieveCombinedConnections = async (
 		return getTime(a) - getTime(b);
 	});
 };
-
-export const retrieveBahnhofJourneys = async (query: Query): Promise<Journey[]> => {
-	const request = await fetch(
-		`https://bahnhof.de/api/boards/${query.type}?evaNumbers=${query.evaNumber}&duration=${query.duration}&locale=${query.locale}`
-	);
-	if (!request.ok) return [];
-
-	const response = await request.json();
-	if (!response?.entries || !Array.isArray(response?.entries)) return [];
-
-	return Object.values(response?.entries)
-		.filter(Array.isArray)
-		.map((journeyRaw) => ({
-			connections: journeyRaw
-				.filter((connectionRaw) => connectionRaw?.journeyID)
-				.map((connectionRaw) => mapConnection(connectionRaw, query.type, true))
-		}));
-};
