@@ -9,22 +9,32 @@ import calculateDuration from "./time";
 const mapConnection = (
 	entry: any,
 	type: "departures" | "arrivals" | "both",
-	isBahnhofProfile: boolean = false,
-	parseTimesInStopovers: boolean = false
+	options: {
+		isBahnhofProfile?: boolean;
+		parseTimesInStopovers?: boolean;
+	} = { isBahnhofProfile: false, parseTimesInStopovers: false }
 ): Connection => {
-	const isIdentifiableAsHAFAS = entry?.journeyID.startsWith("2|#");
+	/**
+	 * journeyID : bahnhof profile
+	 * train?.journeyId : ris profile
+	 */
+	const journeyId = entry?.journeyID ?? entry?.train?.journeyId;
+	const isIdentifiableAsHAFAS = journeyId?.startsWith("2|#") ?? false;
 
 	const connection: Connection = {
-		// journeyId
-		ris_journeyId: isIdentifiableAsHAFAS ? undefined : entry?.journeyID,
-		hafas_journeyId: undefined, // TODO
+		/**
+		 * journeyID : bahnhof profile
+		 * train?.journeyId : ris profile
+		 */
+		ris_journeyId: isIdentifiableAsHAFAS ? undefined : journeyId,
+		hafas_journeyId: isIdentifiableAsHAFAS ? journeyId : undefined,
 		// destination
 		destination: entry?.destination ? mapStop(entry?.destination)! : undefined,
 		actualDestination: entry?.actualDestination ? mapStop(entry?.actualDestination)! : undefined,
-		direction: isBahnhofProfile ? undefined : undefined, // TODO
+		direction: options.isBahnhofProfile ? undefined : undefined, // TODO
 		// origin
 		origin: entry?.origin ? mapStop(entry?.origin)! : undefined,
-		provenance: isBahnhofProfile ? undefined : undefined, // TODO
+		provenance: options.isBahnhofProfile ? undefined : undefined, // TODO
 		// departure/ arrival time
 		departure: type !== "arrivals" ? mapTime(entry, "departure") : undefined,
 		arrival: type !== "departures" ? mapTime(entry, "arrival") : undefined,
@@ -32,21 +42,38 @@ const mapConnection = (
 		lineInformation: entry?.walking
 			? undefined
 			: {
-					type: mapToProduct(entry?.type).value ?? undefined,
-					product: isBahnhofProfile ? undefined : undefined, // TODO
-					lineName: entry?.lineName, // TODO
-					additionalLineName: !isBahnhofProfile ? undefined : entry?.additionalLineName,
-					fahrtNr: entry?.line?.fahrtNr ?? undefined,
-					operator: isBahnhofProfile ? undefined : undefined // TODO
+					/**
+					 * type : bahnhof profile
+					 * train?.type : ris profile
+					 */
+					type: mapToProduct(entry?.type ?? entry?.train?.type).value ?? undefined,
+					product: options.isBahnhofProfile ? undefined : entry?.train?.category, // TODO
+					/**
+					 * lineName : bahnhof profile
+					 * (train?.category + train?.lineName) : ris profile
+					 */
+					lineName: entry?.lineName ?? entry?.train?.category + entry?.train?.lineName, // TODO
+					additionalLineName: !options.isBahnhofProfile ? undefined : entry?.additionalLineName,
+					/**
+					 * line?.fahrtNr : bahnhof profile
+					 * train?.no : ris profile
+					 */
+					fahrtNr: entry?.line?.fahrtNr ?? entry?.train?.no ?? undefined,
+					operator: options.isBahnhofProfile
+						? undefined
+						: {
+								id: entry?.administration?.id,
+								name: entry?.administration?.operatorName
+							} // TODO
 				},
 		viaStops: (entry?.viaStops ?? []).map((rawStop: any) =>
-			mapStop(rawStop, isIdentifiableAsHAFAS && parseTimesInStopovers)
+			mapStop(rawStop, isIdentifiableAsHAFAS && options.parseTimesInStopovers)
 		),
 		messages: mapMessages(entry?.messages, isIdentifiableAsHAFAS) ?? undefined, // TODO
 		cancelled: !entry?.walking ? (entry?.canceled ?? false) : undefined, // TODO
 		walking: entry?.walking ? entry?.walking : undefined,
 		distance: entry?.walking ? entry?.distance : undefined,
-		loadFactor: entry?.loadFactor ?? undefined
+		loadFactor: undefined // TODO
 	};
 
 	/**
@@ -78,18 +105,27 @@ const mapConnection = (
 	return connection;
 };
 
+/**
+ * actualTime
+ * timeDelayed : bahnhof profile
+ * timePredicted : ris profile
+ *
+ * plannedTime
+ * timeSchedule : bahnhof profile
+ * time : ris profile
+ */
 const mapTime = (entry: any, type: "departure" | "arrival"): Time => {
 	const isDeparture = type === "departure";
 
-	const delay: number = calculateDuration(
-		DateTime.fromISO(entry?.timeDelayed), // TODO
-		DateTime.fromISO(entry?.timeSchedule), // TODO
-		["seconds"]
-	).seconds;
+	const plannedTime = DateTime.fromISO(entry?.timeSchedule ?? entry?.time);
+	let actualTime = DateTime.fromISO(entry?.timeDelayed ?? entry?.timePredicted);
+	if (!actualTime.isValid) actualTime = plannedTime;
+
+	const delay: number = calculateDuration(actualTime, plannedTime, ["seconds"]).seconds;
 
 	return {
-		plannedTime: entry?.timeSchedule ?? undefined, // TODO
-		actualTime: entry?.timeDelayed ?? undefined, // TODO
+		plannedTime: plannedTime.toISO()!,
+		actualTime: actualTime.toISO()!,
 		delay: !entry?.walking ? delay : undefined,
 		plannedPlatform: !entry?.walking ? entry?.platform : undefined,
 		actualPlatform: !entry?.walking ? entry?.platform : undefined
@@ -100,7 +136,11 @@ const mapStop = (entry: any, parseTimeInfo: boolean = false): Stop | null => {
 	if (!entry) return null;
 
 	return {
-		evaNumber: Number(entry?.evaNumber),
+		/**
+		 * evaNumber : bahnhof profile
+		 * evaNo : ris profile
+		 */
+		evaNumber: Number(entry?.evaNumber ?? entry?.evaNo),
 		name: entry?.name,
 		cancelled: entry?.canceled ?? false,
 		additional: entry?.additional ?? undefined,

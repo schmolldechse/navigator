@@ -38,7 +38,7 @@ const ConnectionSchema = t.Object({
 		additionalLineName: t.Optional(t.String({ description: "Additional line name", examples: "RE 87" })),
 		fahrtNr: t.Optional(t.String({ description: "The number of the train", examples: "IC 287" })),
 		operator: t.Optional(t.Object({
-			id: t.Optional(t.String({ description: "The ID of the operator", examples: "DB" })),
+			id: t.Optional(t.String({ description: "The ID of the operator" })),
 			name: t.Optional(t.String({ description: "The name of the operator", examples: "Deutsche Bahn" }))
 		}))
 	})),
@@ -48,7 +48,7 @@ const ConnectionSchema = t.Object({
 	distance: t.Optional(t.Number({ description: "The distance of the connection in meters." })),
 	loadFactor: t.Optional(t.String({
 		description: "The load factor of the connection.",
-		examples: ["low-to-medium", "high", "very-high", "exceptionally-high"]
+		examples: ["LOW", "MIDDLE", "HIGH"]
 	}))
 });
 type Connection = typeof ConnectionSchema.static;

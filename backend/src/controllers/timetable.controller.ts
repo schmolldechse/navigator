@@ -37,7 +37,7 @@ const timetableController = new Elysia({
 				case Profile.BAHNHOF:
 					return timetableService.retrieveBahnhofConnections(evaNumber, type, query);
 				case Profile.RIS:
-					return 0;
+					return timetableService.retrieveRISConnections(evaNumber, type, query);
 				case Profile.HAFAS:
 					return 0;
 				default:

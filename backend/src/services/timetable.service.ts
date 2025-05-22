@@ -38,6 +38,51 @@ class TimetableService {
 		})
 	});
 
+	retrieveRISConnections = async (
+		evaNumber: number,
+		type: RequestType = RequestType.DEPARTURES,
+		queryParams: typeof this.query.static
+	): Promise<{ connections: Connection[] }[]> => {
+		const typeString = type === RequestType.DEPARTURES ? "departure" : "arrival";
+		const transports = [
+			"HIGH_SPEED_TRAIN",
+			"INTERCITY_TRAIN",
+			"INTER_REGIONAL_TRAIN",
+			"REGIONAL_TRAIN",
+			"CITY_TRAIN",
+			"BUS",
+			"FERRY",
+			"SUBWAY",
+			"TRAM",
+			"SHUTTLE",
+			"UNKNOWN"
+		];
+
+		let apiUrl: URL = new URL(
+			`https://regio-guide.de/@prd/zupo-travel-information/api/public/ri/board/${typeString}/${evaNumber}`
+		);
+		apiUrl.searchParams.append("modeOfTransport", transports.join(","));
+		apiUrl.searchParams.append("timeStart", queryParams.when.toUTC().toISO({ includeOffset: false, suppressMilliseconds: true })!);
+		apiUrl.searchParams.append(
+			"timeEnd",
+			queryParams.when.plus({ minute: queryParams.duration }).toUTC().toISO({
+				includeOffset: false,
+				suppressMilliseconds: true
+			})!
+		);
+		apiUrl.searchParams.append("expandTimeFrame", "TIME_END");
+		apiUrl.searchParams.append("occupancy", String(true));
+
+		const request = await fetch(apiUrl, { method: "GET" });
+		if (!request.ok) return [];
+
+		const response = await request.json();
+		if (!response?.items || !Array.isArray(response?.items)) return [];
+
+		return Object.values(response?.items)
+			.map((journeyRaw) => ({ connections: [mapConnection(journeyRaw, type)] }));
+	};
+
 	retrieveBahnhofConnections = async (
 		evaNumber: number,
 		type: RequestType = RequestType.DEPARTURES,
@@ -58,7 +103,7 @@ class TimetableService {
 			.map((journeyRaw) => ({
 				connections: journeyRaw
 					.filter((connectionRaw) => connectionRaw?.journeyID)
-					.map((connectionRaw) => mapConnection(connectionRaw, type, true))
+					.map((connectionRaw) => mapConnection(connectionRaw, type, { isBahnhofProfile: true }))
 			}));
 	};
 }
