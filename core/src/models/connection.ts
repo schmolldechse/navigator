@@ -26,17 +26,10 @@ const ConnectionSchema = t.Object({
 	arrival: t.Optional(TimeSchema),
 	lineInformation: t.Optional(t.Object({
 		type: t.String({ description: "The type of the journey", examples: "NahverkehrsonstigeZuege" }),
-		/**
-		 * @deprecated
-		 */
-		replacementServiceType: t.Optional(t.String({
-			description: "The type of the replacement service",
-			examples: "Busse"
-		})),
-		product: t.Optional(t.String({ description: "Product category", examples: "IC" })),
+		product: t.Optional(t.String({ description: "Name of the product's category", examples: "RE" })),
+		tripNumber: t.Optional(t.String({ description: "Unique id of the journey", examples: "287" })),
 		lineName: t.Optional(t.String({ description: "The name of the line", examples: "IC 287" })),
 		additionalLineName: t.Optional(t.String({ description: "Additional line name", examples: "RE 87" })),
-		fahrtNr: t.Optional(t.String({ description: "The number of the train", examples: "IC 287" })),
 		operator: t.Optional(t.Object({
 			id: t.Optional(t.String({ description: "The ID of the operator" })),
 			name: t.Optional(t.String({ description: "The name of the operator", examples: "Deutsche Bahn" }))
