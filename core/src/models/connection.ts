@@ -27,9 +27,9 @@ const ConnectionSchema = t.Object({
 	lineInformation: t.Optional(t.Object({
 		type: t.String({ description: "The type of the journey", examples: "NahverkehrsonstigeZuege" }),
 		product: t.Optional(t.String({ description: "Name of the product's category", examples: "RE" })),
-		tripNumber: t.Optional(t.String({ description: "Unique id of the journey", examples: "287" })),
-		lineName: t.Optional(t.String({ description: "The name of the line", examples: "IC 287" })),
-		additionalLineName: t.Optional(t.String({ description: "Additional line name", examples: "RE 87" })),
+		journeyNumber: t.Optional(t.String({ description: "Unique id of the journey", examples: "287" })),
+		journeyName: t.Optional(t.String({ description: "Name of this journey", examples: "IC 287" })),
+		additionalJourneyName: t.Optional(t.String({ description: "Additional name for this journey", examples: "RE 87" })),
 		operator: t.Optional(t.Object({
 			id: t.Optional(t.String({ description: "The ID of the operator" })),
 			name: t.Optional(t.String({ description: "The name of the operator", examples: "Deutsche Bahn" }))

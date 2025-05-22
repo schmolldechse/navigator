@@ -5,6 +5,7 @@ import { type Time } from "navigator-core/src/models/time";
 import { type Message } from "navigator-core/src/models/message";
 import { mapToProduct } from "navigator-core/src/models/products";
 import calculateDuration from "./time";
+import { extractProduct } from "./regex";
 
 const mapConnection = (
 	entry: any,
@@ -47,18 +48,18 @@ const mapConnection = (
 					 * train?.type : ris profile
 					 */
 					type: mapToProduct(entry?.type ?? entry?.train?.type).value ?? undefined,
-					product: options.isBahnhofProfile ? undefined : entry?.train?.category, // TODO
+					product: options.isBahnhofProfile ? extractProduct(entry?.lineName) : entry?.train?.category, // TODO
+					journeyNumber: entry?.line?.fahrtNr ?? entry?.train?.no ?? undefined,
 					/**
 					 * lineName : bahnhof profile
 					 * (train?.category + train?.lineName) : ris profile
 					 */
-					lineName: entry?.lineName ?? entry?.train?.category + entry?.train?.lineName, // TODO
-					additionalLineName: !options.isBahnhofProfile ? undefined : entry?.additionalLineName,
+					journeyName: entry?.lineName ?? (entry?.train?.category + " " + entry?.train?.lineName), // TODO
+					additionalJourneyName: !options.isBahnhofProfile ? undefined : entry?.additionalLineName,
 					/**
 					 * line?.fahrtNr : bahnhof profile
 					 * train?.no : ris profile
 					 */
-					fahrtNr: entry?.line?.fahrtNr ?? entry?.train?.no ?? undefined,
 					operator: options.isBahnhofProfile
 						? undefined
 						: {
