@@ -52,12 +52,14 @@ public class StationMergeService
     {
         var stadaStations = new Dictionary<int, string[]>();
         {
-            var content = JsonSerializer.Deserialize<JsonElement>(await File.ReadAllTextAsync(_stadaFile, Encoding.UTF8));
+            var content =
+                JsonSerializer.Deserialize<JsonElement>(await File.ReadAllTextAsync(_stadaFile, Encoding.UTF8,
+                    cancellationToken));
             var root = content.GetProperty("Result").GetProperty("result");
             if (root.ValueKind != JsonValueKind.Array)
                 throw new InvalidOperationException("Invalid STADA data format");
 
-            root.EnumerateArray().ToList().ForEach(station =>
+            root.EnumerateArray().AsParallel().ForAll(station =>
             {
                 var evaNumbers = station.GetProperty("evaNumbers").EnumerateArray()
                     .Where(e => e.ValueKind == JsonValueKind.Object)
@@ -71,44 +73,63 @@ public class StationMergeService
                     .Select(ril => ril!)
                     .ToArray();
 
-                evaNumbers.AsEnumerable().ToList()
-                    .ForEach(evaNumber => stadaStations.Add(evaNumber, ril100Identifiers));
+                foreach (var evaNumber in evaNumbers)
+                {
+                    lock (stadaStations)
+                    {
+                        stadaStations[evaNumber] = ril100Identifiers;
+                    }
+                }
             });
         }
-        
+
         var stations = new List<Station>();
         {
             var risFiles = Directory.GetFiles(_tempFolder).Where(file => !file.EndsWith("stada.json")).ToList();
             if (!risFiles.Any()) throw new InvalidOperationException("No RIS files found in the temp folder");
 
-            risFiles.ForEach(file =>
+            var stationLists = await Task.WhenAll(risFiles.Select(async file =>
             {
-                var document = JsonSerializer.Deserialize<JsonElement>(File.ReadAllText(file, Encoding.UTF8));
+                var document =
+                    JsonSerializer.Deserialize<JsonElement>(await File.ReadAllTextAsync(file, Encoding.UTF8,
+                        cancellationToken));
                 var root = document.GetProperty("stopPlaces");
                 if (root.ValueKind != JsonValueKind.Array)
                     throw new InvalidOperationException($"Invalid RIS data format in file {file}");
 
-                root.EnumerateArray().ToList().ForEach(stationDocument =>
+                var localStations = new List<Station>();
+                root.EnumerateArray().AsParallel().ForAll(stationDocument =>
                 {
                     var evaNumberProperty = stationDocument.GetProperty("evaNumber");
                     if (evaNumberProperty.ValueKind != JsonValueKind.String)
                         throw new InvalidOperationException("Invalid EVA number format in RIS data");
 
                     int.TryParse(stationDocument.GetProperty("evaNumber").GetString(), out var evaNumber);
-                    var existingStation = stations.FirstOrDefault(station => station.EvaNumber == evaNumber);
+                    Station? existingStation = null;
+                    lock (stations)
+                    {
+                        existingStation = stations.FirstOrDefault(station => station.EvaNumber == evaNumber);
+                    }
+
                     if (existingStation != null)
                     {
-                        // Adjust the existing Station object as needed
-                        existingStation.Name = stationDocument.GetProperty("names").GetProperty("DE").GetProperty("nameLong")
-                            .GetString() ?? existingStation.Name;
-                        existingStation.Ril100 = stadaStations.GetValueOrDefault(evaNumber, existingStation.Ril100?.ToArray() ?? []).ToList();
-                        existingStation.Products = stationDocument.GetProperty("availableTransports").EnumerateArray()
-                            .Select(product => MapProduct(product.GetString())).Distinct().ToList();
-                        existingStation.Coordinates = new Coordinates()
+                        lock (existingStation)
                         {
-                            Latitude = stationDocument.GetProperty("position").GetProperty("longitude").GetDouble(),
-                            Longitude = stationDocument.GetProperty("position").GetProperty("latitude").GetDouble()
-                        };
+                            existingStation.Name = stationDocument.GetProperty("names").GetProperty("DE")
+                                .GetProperty("nameLong")
+                                .GetString() ?? existingStation.Name;
+                            existingStation.Ril100 = stadaStations
+                                .GetValueOrDefault(evaNumber, existingStation.Ril100?.ToArray() ?? []).ToList();
+                            existingStation.Products = stationDocument.GetProperty("availableTransports")
+                                .EnumerateArray()
+                                .Select(product => MapProduct(product.GetString())).Distinct().ToList();
+                            existingStation.Coordinates = new Coordinates()
+                            {
+                                Latitude = stationDocument.GetProperty("position").GetProperty("longitude").GetDouble(),
+                                Longitude = stationDocument.GetProperty("position").GetProperty("latitude").GetDouble()
+                            };
+                        }
+
                         return;
                     }
 
@@ -120,36 +141,55 @@ public class StationMergeService
                         Ril100 = stadaStations.GetValueOrDefault(evaNumber, []).ToList(),
                         Products = stationDocument.GetProperty("availableTransports").EnumerateArray()
                             .Select(product => MapProduct(product.GetString())).Distinct().ToList(),
-                        Coordinates = new Coordinates()
+                        Coordinates = new Coordinates
                         {
                             Latitude = stationDocument.GetProperty("position").GetProperty("longitude").GetDouble(),
                             Longitude = stationDocument.GetProperty("position").GetProperty("latitude").GetDouble()
                         }
                     };
 
-                    var groupMembers = stationDocument.GetProperty("groupMembers").EnumerateArray().ToList()
-                        .Where(groupMember => groupMember.ValueKind == JsonValueKind.String)
-                        .Where(groupMember => int.TryParse(groupMember.GetString(), out var groupEvaNumber) &&
-                                              groupEvaNumber != evaNumber)
-                        .Select(groupMember =>
-                        {
-                            int.TryParse(groupMember.GetString(), out var groupEvaNumber);
-                            var ril100 = stadaStations.GetValueOrDefault(evaNumber, [])
-                                .Concat(stadaStations.GetValueOrDefault(groupEvaNumber, [])).Distinct().ToList();
-                            return new Station()
-                            {
-                                Name = station.Name,
-                                EvaNumber = groupEvaNumber,
-                                Ril100 = ril100,
-                                Products = station.Products,
-                                Coordinates = station.Coordinates
-                            };
-                        })
-                        .Append(station);
-                    stations.AddRange(groupMembers);
+                    var groupMembers = GetGroupMembers(stationDocument, evaNumber, station, stadaStations);
+                    lock (localStations)
+                    {
+                        localStations.AddRange(groupMembers);
+                    }
                 });
-            });
-            return stations;
+                return localStations;
+            }));
+            stations = stationLists.SelectMany(x => x).ToList();
         }
+        return stations;
+    }
+
+    /// <summary>
+    /// Extracts group members for a station, including the station itself.
+    /// </summary>
+    /// <param name="stationDocument">The JSON element representing the station.</param>
+    /// <param name="evaNumber">The evaNumber of the station.</param>
+    /// <param name="station">The Station object for the current station.</param>
+    /// <param name="stadaStations">The STADA stations dictionary.</param>
+    /// <returns>A list of Station objects representing the group members and the station itself.</returns>
+    private static IEnumerable<Station> GetGroupMembers(JsonElement stationDocument, int evaNumber, Station station, Dictionary<int, string[]> stadaStations)
+    {
+        var groupMembers = stationDocument.GetProperty("groupMembers").EnumerateArray().ToList()
+            .Where(groupMember => groupMember.ValueKind == JsonValueKind.String)
+            .Where(groupMember => int.TryParse(groupMember.GetString(), out var groupEvaNumber) && groupEvaNumber != evaNumber)
+            .Select(groupMember =>
+            {
+                int.TryParse(groupMember.GetString(), out var groupEvaNumber);
+                var ril100 = stadaStations.GetValueOrDefault(evaNumber, [])
+                    .Concat(stadaStations.GetValueOrDefault(groupEvaNumber, [])).Distinct().ToList();
+                return new Station
+                {
+                    Name = station.Name,
+                    EvaNumber = groupEvaNumber,
+                    Ril100 = ril100,
+                    Products = station.Products,
+                    Coordinates = station.Coordinates
+                };
+            })
+            .Append(station);
+        return groupMembers;
     }
 }
+
