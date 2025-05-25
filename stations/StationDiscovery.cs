@@ -1,4 +1,7 @@
-﻿using System.Text.Json;
+﻿using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using stations.Api;
 using stations.Models;
@@ -19,11 +22,20 @@ public class StationDiscovery
     private readonly Random _random = new();
 
     private readonly string _tempFolder = Path.Combine(Path.GetTempPath(), "navigator", "stations");
+    
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     public StationDiscovery(ApiService apiService, ILogger<StationDiscovery> logger)
     {
         _apiService = apiService;
         _logger = logger;
+
+        _jsonSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
 
         if (!Directory.Exists(_tempFolder)) Directory.CreateDirectory(_tempFolder);
     }
@@ -32,7 +44,7 @@ public class StationDiscovery
     {
         _logger.LogDebug("Fetching STADA stations...");
         var stada = _apiService.GetStadaStations(cancellationToken);
-        await File.WriteAllTextAsync(Path.Combine(_tempFolder, "stada.json"), JsonSerializer.Serialize(stada), cancellationToken);
+        await File.WriteAllTextAsync(Path.Combine(_tempFolder, "stada.json"), JsonSerializer.Serialize(stada, _jsonSerializerOptions), Encoding.UTF8, cancellationToken);
         
         _logger.LogDebug("Fetching RIS stations...");
         await DiscoverRisStations(_defaultBoundingBox, 0, 0, cancellationToken);
@@ -84,7 +96,7 @@ public class StationDiscovery
             depth + "_" + boundingBox.ToString() + "_" + (grouped ? "_grouped" : "_single") + ".json");
         var results = await _apiService.GetRisStations(center, radius, grouped, cancellationToken);
 
-        await File.WriteAllTextAsync(path, JsonSerializer.Serialize(results), cancellationToken);
+        await File.WriteAllTextAsync(path, JsonSerializer.Serialize(results, _jsonSerializerOptions), Encoding.UTF8, cancellationToken);
         _logger.LogDebug($"{results.GetProperty("stopPlaces").GetArrayLength()} stations found");
 
         return results;
@@ -100,3 +112,4 @@ public class StationDiscovery
         return 0;
     }
 }
+
