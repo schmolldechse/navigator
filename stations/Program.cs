@@ -10,7 +10,6 @@ class Program
     static async Task Main(string[] args)
     {
         var services = new ServiceCollection();
-
         services.AddLogging(builder =>
         {
             builder.AddConsole();
@@ -32,7 +31,16 @@ class Program
 
         var provider = services.BuildServiceProvider();
 
-        var stationDiscovery = provider.GetRequiredService<StationDiscovery>();
-        await stationDiscovery.DiscoverStations();
+        var logger = provider.GetService<ILogger<Program>>();
+
+        bool skipDiscovery = args.Any(arg => arg.Equals("skipDiscovery", StringComparison.OrdinalIgnoreCase));
+        if (skipDiscovery)
+        {
+            var stationDiscovery = provider.GetRequiredService<StationDiscovery>();
+            await stationDiscovery.DiscoverStations();
+        }
+        else logger?.LogInformation("Skipping station discovery as requested");
+
+        logger?.LogInformation("Writing stations to database...");
     }
 }
