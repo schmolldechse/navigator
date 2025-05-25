@@ -8,6 +8,7 @@ namespace stations.Database;
 public class StationDbContext : DbContext
 {
     public DbSet<Station> Stations { get; set; }
+    public DbSet<Coordinates> Coordinates { get; set; }
 
     private readonly Regex _uriRegex =
         new(@"^postgresql://(?:([^:]+)(?::([^@]+))?@)?([^:/]+)(?::(\d+))?(?:/([^?]+))?(?:\?(.*))?$");
@@ -21,10 +22,18 @@ public class StationDbContext : DbContext
             entity.HasKey(e => e.EvaNumber);
             entity.Property(e => e.Ril100).HasColumnType("text[]");
             entity.Property(e => e.Products).HasColumnType("text[]");
-            
-            // map back Latitude and Longitude to Coordinates
-            entity.Property<double>("_latitude").HasColumnName("Latitude").IsRequired();
-            entity.Property<double>("_longitude").HasColumnName("Longitude").IsRequired();
+        });
+        modelBuilder.Entity<Coordinates>(entity =>
+        {
+            entity.ToTable("station_coordinates");
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.EvaNumber).IsUnique();
+            entity.Property(e => e.Latitude).IsRequired();
+            entity.Property(e => e.Longitude).IsRequired();
+            entity.HasOne(e => e.Station)
+                  .WithOne(s => s.Coordinates)
+                  .HasForeignKey<Coordinates>(e => e.EvaNumber)
+                  .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

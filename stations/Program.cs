@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using stations.Api;
 using stations.Database;
 using stations.Models;
+using stations.Models.Database;
 
 namespace stations;
 
@@ -41,6 +42,28 @@ class Program
             await stationDiscovery.DiscoverStations();
         }
         else logger?.LogInformation("Skipping station discovery as requested");
+        
+        logger?.LogInformation("Insert Metzingen");
+        using (var context = provider.GetRequiredService<StationDbContext>())
+        {
+            var data = new Station()
+            {
+                EvaNumber = 8004009,
+                Name = "Metzingen (Württ)",
+                Ril100 = new List<string> { "TME" },
+                Products = new List<string>
+                    { "INTERCITYUNDEUROCITYZUEGE", "NAHVERKEHRSONSTIGEZUEGE", "BUSSE", "ANRUFPFLICHTIGEVERKEHRE" },
+                Coordinates = new Coordinates
+                {
+                    Latitude = 1,
+                    Longitude = 1
+                },
+                QueryingEnabled = true
+            };
+            context.Stations.Add(data);
+            await context.SaveChangesAsync();
+            logger?.LogInformation("Inserted Metzingen with EvaNumber {EvaNumber}", data.EvaNumber);
+        }
 
         logger?.LogInformation("Writing stations to database...");
     }

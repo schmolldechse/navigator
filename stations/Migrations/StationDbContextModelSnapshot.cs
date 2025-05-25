@@ -24,6 +24,31 @@ namespace stations.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("stations.Models.Database.Coordinates", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EvaNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double precision");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double precision");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EvaNumber")
+                        .IsUnique();
+
+                    b.ToTable("station_coordinates", "data");
+                });
+
             modelBuilder.Entity("stations.Models.Database.Station", b =>
                 {
                     b.Property<int>("EvaNumber")
@@ -50,17 +75,25 @@ namespace stations.Migrations
                     b.PrimitiveCollection<List<string>>("Ril100")
                         .HasColumnType("text[]");
 
-                    b.Property<double>("_latitude")
-                        .HasColumnType("double precision")
-                        .HasColumnName("Latitude");
-
-                    b.Property<double>("_longitude")
-                        .HasColumnType("double precision")
-                        .HasColumnName("Longitude");
-
                     b.HasKey("EvaNumber");
 
                     b.ToTable("stations", "data");
+                });
+
+            modelBuilder.Entity("stations.Models.Database.Coordinates", b =>
+                {
+                    b.HasOne("stations.Models.Database.Station", "Station")
+                        .WithOne("Coordinates")
+                        .HasForeignKey("stations.Models.Database.Coordinates", "EvaNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Station");
+                });
+
+            modelBuilder.Entity("stations.Models.Database.Station", b =>
+                {
+                    b.Navigation("Coordinates");
                 });
 #pragma warning restore 612, 618
         }

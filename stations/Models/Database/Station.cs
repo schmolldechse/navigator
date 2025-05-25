@@ -11,21 +11,8 @@ public class Station
     public required string Name { get; set; }
     public List<string>? Ril100 { get; set; }
     public required List<string> Products { get; set; }
-    
-    private double _latitude { get; set; }
-    private double _longitude { get; set; }
 
-    [NotMapped]
-    public Coordinates? Coordinates
-    {
-        get => new() { Latitude = _latitude, Longitude = _longitude };
-        set
-        {
-            if (value == null) return;
-            _latitude = value.Latitude;
-            _longitude = value.Longitude;
-        }
-    }
+    public Coordinates? Coordinates { get; set; } = new();
     
     // Parameters used for the Daemon
     public bool? QueryingEnabled { get; set; }
@@ -34,6 +21,15 @@ public class Station
 
 public class Coordinates
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+    
+    // Foreign key to Station
+    [ForeignKey("EvaNumber")]
+    public int EvaNumber { get; set; }
+    public Station Station { get; set; } = null!;
+    
     public double Latitude { get; set; }
     public double Longitude { get; set; }
 }
