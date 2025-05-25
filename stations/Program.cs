@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using stations.Api;
+using stations.Database;
 using stations.Models;
 
 namespace stations;
@@ -28,9 +29,9 @@ class Program
         services.AddHttpClient();
         services.AddSingleton<ApiService>();
         services.AddSingleton<StationDiscovery>();
+        services.AddDbContext<StationDbContext>();
 
         var provider = services.BuildServiceProvider();
-
         var logger = provider.GetService<ILogger<Program>>();
 
         bool skipDiscovery = args.Any(arg => arg.Equals("skipDiscovery", StringComparison.OrdinalIgnoreCase));
