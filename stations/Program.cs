@@ -35,8 +35,8 @@ class Program
         var provider = services.BuildServiceProvider();
         var logger = provider.GetService<ILogger<Program>>();
 
-        bool skipDiscovery = args.Any(arg => arg.Equals("skipDiscovery", StringComparison.OrdinalIgnoreCase));
-        if (skipDiscovery)
+        bool skipDiscovery = args.Any(arg => arg.Equals("--skipDiscovery", StringComparison.OrdinalIgnoreCase));
+        if (!skipDiscovery)
         {
             var stationDiscovery = provider.GetRequiredService<StationDiscovery>();
             await stationDiscovery.DiscoverStations();
