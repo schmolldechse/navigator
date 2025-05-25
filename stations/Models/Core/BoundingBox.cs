@@ -1,9 +1,9 @@
 ﻿namespace stations.Models;
 
-public record BoundingBox(double North, double South, double East, double West)
+public record BoundingBox(double North, double West, double South, double East)
 {
     public override string ToString()
     {
-        return $"[{North}_{South}_{East}_{West}]";
+        return $"[{North}_{West}_{South}_{East}]";
     }
 }

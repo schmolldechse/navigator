@@ -38,9 +38,9 @@ public class GeoCalculations
 
         return new(
             North: boundingBox.North - quadrantRow * halfY,
-            East: boundingBox.West - (1 - quadrantCol) * halfX,
+            West: boundingBox.West + quadrantCol * halfX,
             South: boundingBox.South + (1 - quadrantRow) * halfY,
-            West: boundingBox.West + quadrantCol * halfX
+            East: boundingBox.East - (1 - quadrantCol) * halfX
         );
     }
 

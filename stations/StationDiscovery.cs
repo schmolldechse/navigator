@@ -13,7 +13,7 @@ public class StationDiscovery
     private readonly ApiService _apiService;
     private readonly ILogger<StationDiscovery> _logger;
 
-    private readonly BoundingBox _defaultBoundingBox = new(70.0, -10.0, 35.0, 40.0);
+    private readonly BoundingBox _defaultBoundingBox = new(North: 70.0, West: -10.0, South: 35.0, East: 40.0);
 
     private const int LimitResults = 10_000;
     private const int MaxDepth = 8;
