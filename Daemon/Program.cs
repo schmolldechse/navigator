@@ -17,9 +17,9 @@ class Program
             builder.SetMinimumLevel(LogLevel.Information);
         });
 
-        services.AddSingleton<DaemonManager>();
-        services.AddSingleton<MonitorStations>();
-        services.AddSingleton<MonitorJourneys>();
+        services.AddSingleton<DaemonManager>()
+            .AddSingleton<MonitorStations>()
+            .AddSingleton<MonitorJourneys>();
 
         var serviceProvider = services.BuildServiceProvider();
 

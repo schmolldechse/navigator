@@ -10,22 +10,20 @@ class Program
     static async Task Main(string[] args)
     {
         var services = new ServiceCollection();
-        
+
         services.AddLogging(builder =>
         {
             builder.AddConsole();
             builder.SetMinimumLevel(LogLevel.Information);
         });
-        
-        services.AddSingleton<AppConfiguration>(provider =>
+
+        services.AddSingleton<AppConfiguration>(_ => new AppConfiguration()
         {
-            return new AppConfiguration()
-            {
-                ClientId = Environment.GetEnvironmentVariable("DB_CLIENT_ID") ??
-                           throw new ArgumentNullException("DB_CLIENT_ID", "DeutscheBahn ClientId not configured"),
-                ClientSecret = Environment.GetEnvironmentVariable("DB_CLIENT_SECRET") ??
-                               throw new ArgumentNullException("DB_CLIENT_SECRET", "DeutscheBahn ClientSecret not configured"),
-            };
+            ClientId = Environment.GetEnvironmentVariable("DB_CLIENT_ID") ??
+                       throw new ArgumentNullException("DB_CLIENT_ID", "DeutscheBahn ClientId not configured"),
+            ClientSecret = Environment.GetEnvironmentVariable("DB_CLIENT_SECRET") ??
+                           throw new ArgumentNullException("DB_CLIENT_SECRET",
+                               "DeutscheBahn ClientSecret not configured"),
         });
 
         services.AddHttpClient();
@@ -33,7 +31,7 @@ class Program
         services.AddSingleton<StationDiscovery>();
 
         var provider = services.BuildServiceProvider();
-        
+
         var stationDiscovery = provider.GetRequiredService<StationDiscovery>();
         await stationDiscovery.DiscoverStations();
     }
