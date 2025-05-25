@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using stations.Models;
 
@@ -11,8 +10,6 @@ public class ApiService
     private readonly AppConfiguration _appConfiguration;
 
     private readonly ILogger<ApiService> _logger;
-    
-    private readonly JsonSerializerOptions _jsonSerializerOptions;
 
     private const string _risApiUrl = "https://apis.deutschebahn.com/db-api-marketplace/apis/ris-stations/v1/stop-places/by-position?latitude={0}&longitude={1}&radius={2}&groupBy={3}&onlyActive=false&limit=10000";
     private const string _stadaApiUrl = "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations";
@@ -22,12 +19,6 @@ public class ApiService
         _httpClient = httpClient;
         _appConfiguration = appConfiguration;
         _logger = logger;
-
-        _jsonSerializerOptions = new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true,
-            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-        };
         
         _httpClient.DefaultRequestHeaders.Add("DB-Client-Id", _appConfiguration.ClientId);
         _httpClient.DefaultRequestHeaders.Add("DB-Api-Key", _appConfiguration.ClientSecret);
