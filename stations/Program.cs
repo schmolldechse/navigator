@@ -46,31 +46,20 @@ class Program
         var stationMergeService = provider.GetRequiredService<StationMergeService>();
         var stations = await stationMergeService.MergeStationsAsync();
         logger?.LogInformation("Merged {Count} stations", stations.Count);
+        
+        // remove duplicates
+        var uniqueStations = stations
+            .GroupBy(s => s.EvaNumber)
+            .Select(g => g.First())
+            .ToList();
+        logger?.LogInformation("Found {Count} unique stations", uniqueStations.Count);
 
-        /*
-        logger?.LogInformation("Insert Metzingen");
         using (var context = provider.GetRequiredService<StationDbContext>())
         {
-            var data = new Station()
-            {
-                EvaNumber = 8004009,
-                Name = "Metzingen (Württ)",
-                Ril100 = new List<string> { "TME" },
-                Products = new List<string>
-                    { "INTERCITYUNDEUROCITYZUEGE", "NAHVERKEHRSONSTIGEZUEGE", "BUSSE", "ANRUFPFLICHTIGEVERKEHRE" },
-                Coordinates = new Coordinates
-                {
-                    Latitude = 1,
-                    Longitude = 1
-                },
-                QueryingEnabled = true
-            };
-            context.Stations.Add(data);
-            await context.SaveChangesAsync();
-            logger?.LogInformation("Inserted Metzingen with EvaNumber {EvaNumber}", data.EvaNumber);
+            context.Stations.AddRange(uniqueStations);
+            var amount = await context.SaveChangesAsync();
+                
+            logger?.LogInformation("Inserted {Amount} stations", amount);
         }
-
-        logger?.LogInformation("Writing stations to database...");
-        */
     }
 }
