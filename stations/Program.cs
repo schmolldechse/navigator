@@ -3,7 +3,6 @@ using Microsoft.Extensions.Logging;
 using stations.Api;
 using stations.Database;
 using stations.Models;
-using stations.Models.Database;
 
 namespace stations;
 
@@ -30,6 +29,7 @@ class Program
         services.AddHttpClient();
         services.AddSingleton<ApiService>();
         services.AddSingleton<StationDiscovery>();
+        services.AddSingleton<StationMergeService>();
         services.AddDbContext<StationDbContext>();
 
         var provider = services.BuildServiceProvider();
@@ -43,6 +43,11 @@ class Program
         }
         else logger?.LogInformation("Skipping station discovery as requested");
         
+        var stationMergeService = provider.GetRequiredService<StationMergeService>();
+        var stations = await stationMergeService.MergeStationsAsync();
+        logger?.LogInformation("Merged {Count} stations", stations.Count);
+
+        /*
         logger?.LogInformation("Insert Metzingen");
         using (var context = provider.GetRequiredService<StationDbContext>())
         {
@@ -66,5 +71,6 @@ class Program
         }
 
         logger?.LogInformation("Writing stations to database...");
+        */
     }
 }
