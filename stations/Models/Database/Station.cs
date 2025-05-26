@@ -14,7 +14,7 @@ public class Station
     public List<string> Ril100 { get; set; } = new();
     public required List<string> Products { get; set; } = new();
     
-    public Coordinates? Coordinates { get; set; } = new();
+    public Coordinates? Coordinates { get; set; }
     
     // Parameters used for the Daemon
     public bool? QueryingEnabled { get; set; }
