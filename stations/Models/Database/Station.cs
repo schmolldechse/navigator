@@ -1,17 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 
 namespace stations.Models.Database;
 
+[Index(nameof(EvaNumber), IsUnique = true)]
 public class Station
 {
     [Key]
     public required int EvaNumber { get; set; }
     [MaxLength(512)]
     public required string Name { get; set; }
-    public List<string>? Ril100 { get; set; }
-    public required List<string> Products { get; set; }
-
+    public List<string> Ril100 { get; set; } = new();
+    public required List<string> Products { get; set; } = new();
+    
     public Coordinates? Coordinates { get; set; } = new();
     
     // Parameters used for the Daemon

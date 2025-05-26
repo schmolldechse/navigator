@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using stations.Database;
@@ -12,9 +13,11 @@ using stations.Database;
 namespace stations.Migrations
 {
     [DbContext(typeof(StationDbContext))]
-    partial class StationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250526141039_Ensure EvaNumber is unique")]
+    partial class EnsureEvaNumberisunique
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
