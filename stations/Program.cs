@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using stations.Api;
 using stations.Database;
@@ -42,24 +43,16 @@ class Program
             await stationDiscovery.DiscoverStations();
         }
         else logger?.LogInformation("Skipping station discovery as requested");
-        
-        var stationMergeService = provider.GetRequiredService<StationMergeService>();
-        var stations = await stationMergeService.MergeStationsAsync();
-        logger?.LogInformation("Merged {Count} stations", stations.Count);
-        
-        // remove duplicates
-        var uniqueStations = stations
-            .GroupBy(s => s.EvaNumber)
-            .Select(g => g.First())
-            .ToList();
-        logger?.LogInformation("Found {Count} unique stations", uniqueStations.Count);
 
-        using (var context = provider.GetRequiredService<StationDbContext>())
-        {
-            context.Stations.AddRange(uniqueStations);
-            var amount = await context.SaveChangesAsync();
-                
-            logger?.LogInformation("Inserted {Amount} stations", amount);
-        }
+        var stationMergeService = provider.GetRequiredService<StationMergeService>();
+        var list = await stationMergeService.MergeStationsAsync();
+        logger?.LogInformation("Merged {Count} stations", list.Count);
+        
+        await using var context = provider.GetRequiredService<StationDbContext>();
+        await context.Database.MigrateAsync();
+        
+        context.Stations.AddRange(list);
+        var amount = await context.SaveChangesAsync();
+        logger?.LogInformation("Inserted {Amount} entries", amount);
     }
 }
