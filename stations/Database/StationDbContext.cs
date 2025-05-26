@@ -39,7 +39,7 @@ public class StationDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var connectionString = Environment.GetEnvironmentVariable("POSTGRES_DATABASE") ?? throw new ArgumentNullException("POSTGRES_DATABASE", "PostgreSQL connection string not configured");
+        var connectionString = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING") ?? throw new ArgumentNullException("POSTGRES_CONNECTION_STRING", "PostgreSQL connection string not configured");
         
         var parsed = ParseToEfConnectionString(connectionString);
         optionsBuilder.UseNpgsql(parsed);

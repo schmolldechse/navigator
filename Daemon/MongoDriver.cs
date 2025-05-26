@@ -5,7 +5,7 @@ namespace Daemon;
 public class MongoDriver
 {
     private static IMongoDatabase? _database;
-    private static readonly MongoClient _client = new(Environment.GetEnvironmentVariable("MONGO_URL"));
+    private static readonly MongoClient _client = new(Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING") ?? throw new ArgumentNullException("MONGO_CONNECTION_STRING", "MongoDB connection string is not set."));
 
     public static async Task<IMongoDatabase> ConnectToDatabaseAsync()
     {
