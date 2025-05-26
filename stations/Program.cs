@@ -44,14 +44,21 @@ class Program
         }
         else logger?.LogInformation("Skipping station discovery as requested");
 
+        // Merge our stations from RIS and StaDa
         var stationMergeService = provider.GetRequiredService<StationMergeService>();
         var list = await stationMergeService.MergeStationsAsync();
         logger?.LogInformation("Merged {Count} stations", list.Count);
         
+        // Apply migration and create extension
         await using var context = provider.GetRequiredService<StationDbContext>();
         await context.Database.MigrateAsync();
-        
-        context.Stations.AddRange(list);
+
+        // Gather existing stations and filter out those already in the database
+        var existingEvaNumbers = context.Stations.Select(s => s.EvaNumber).ToHashSet();
+        var newStations = list.Where(s => !existingEvaNumbers.Contains(s.EvaNumber)).ToList();
+        logger?.LogInformation("Filtered to {Count} new stations (not already in database)", newStations.Count);
+
+        context.Stations.AddRange(newStations);
         var amount = await context.SaveChangesAsync();
         logger?.LogInformation("Inserted {Amount} entries", amount);
     }
