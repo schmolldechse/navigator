@@ -52,6 +52,9 @@ class Program
         // Apply migration and create extension
         await using var context = provider.GetRequiredService<StationDbContext>();
         await context.Database.MigrateAsync();
+        logger?.LogInformation("Applied database migrations");
+        await context.Database.ExecuteSqlRawAsync("CREATE EXTENSION IF NOT EXISTS pg_trgm;");
+        logger?.LogInformation("Created `pg_trgm` extension");
 
         // Gather existing stations and filter out those already in the database
         var existingEvaNumbers = context.Stations.Select(s => s.EvaNumber).ToHashSet();
