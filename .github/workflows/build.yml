@@ -103,7 +103,7 @@ jobs:
       - name: Build & push daemon
         uses: docker/build-push-action@v6
         with:
-          context: Daemon
+          context: daemon
           tags: |
             ${{ env.DAEMON_IMAGE }}:${{ github.sha }}
             ${{ env.DAEMON_IMAGE }}:latest
