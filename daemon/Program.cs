@@ -70,6 +70,7 @@ class Program
 
         // daemons
         services.AddSingleton<DaemonManager>();
+        services.AddSingleton<GatheringRisIdsDaemon>();
     }
 
     private static async Task RunStationGathering(ServiceProvider serviceProvider, bool skipApi = false)
@@ -106,7 +107,7 @@ class Program
         var shutdownEvent = serviceProvider.GetRequiredService<ManualResetEventSlim>();
         using var manager = serviceProvider.GetRequiredService<DaemonManager>();
 
-        // TODO: add daemons
+        manager.AddDaemon(serviceProvider.GetRequiredService<GatheringRisIdsDaemon>());
         manager.StartAll();
 
         shutdownEvent.Wait();
