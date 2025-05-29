@@ -18,8 +18,7 @@ public class Station
     [Column("ril100")]
     public required List<string> Ril100 { get; set; } = new();
     
-    [Column("products")]
-    public required List<string> Products { get; set; } = new();
+    public virtual ICollection<Product> Products { get; set; } = new List<Product>();
     
     public Coordinates? Coordinates { get; set; }
     
@@ -37,15 +36,35 @@ public class Coordinates
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    [Column("station_eva_number")]
+    [Column("eva_number")]
     public int EvaNumber { get; set; }
     
     [ForeignKey(nameof(EvaNumber))]
-    public Station Station { get; set; } = null!;
+    public virtual Station Station { get; set; } = null!;
     
     [Column("latitude")]
     public double? Latitude { get; set; }
     
     [Column("longitude")]
     public double? Longitude { get; set; }
+}
+
+public class Product
+{
+    [Key]
+    [Column("id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+    
+    [Column("eva_number")]
+    public int EvaNumber { get; set; }
+    
+    [ForeignKey(nameof(EvaNumber))]
+    public virtual Station Station { get; set; } = null!;
+    
+    [Column("name")]
+    public required string ProductName { get; set; }
+    
+    [Column("querying_enabled")]
+    public bool? QueryingEnabled { get; set; }
 }

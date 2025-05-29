@@ -98,7 +98,12 @@ public class StationMergingService
                             Name = name,
                             EvaNumber = iteratingEvaNumber,
                             Coordinates = coordinates,
-                            Products = products,
+                            Products = products.Select(p => new Product
+                            {
+                                ProductName = p,
+                                EvaNumber = iteratingEvaNumber,
+                                QueryingEnabled = false
+                            }).ToList(),
                             Ril100 = ril100Identifiers.Distinct().ToList()
                         },
                         (_, existingStation) =>
@@ -106,6 +111,15 @@ public class StationMergingService
                             existingStation.Name = name;
                             existingStation.EvaNumber = iteratingEvaNumber;
                             existingStation.Ril100 = existingStation.Ril100.Union(ril100Identifiers).Distinct().ToList();
+                            existingStation.Products = products
+                                .Where(productName => existingStation.Products.All(prod => prod.ProductName != productName))
+                                .Select(productName => new Product
+                                {
+                                    ProductName = productName,
+                                    EvaNumber = iteratingEvaNumber,
+                                    QueryingEnabled = false
+                                })
+                                .ToList();
                             return existingStation;
                         });
                 }

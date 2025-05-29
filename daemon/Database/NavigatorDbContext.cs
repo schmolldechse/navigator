@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-using daemon.Models;
 using daemon.Models.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,6 +9,8 @@ public class NavigatorDbContext : DbContext
 {
     public DbSet<Station> Stations { get; set; }
     public DbSet<Coordinates> Coordinates { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<IdentifiedRisId> RisIds { get; set; }
     
     private readonly Regex _uriRegex =
         new(@"^postgresql://(?:([^:]+)(?::([^@]+))?@)?([^:/]+)(?::(\d+))?(?:/([^?]+))?(?:\?(.*))?$");
@@ -25,7 +26,17 @@ public class NavigatorDbContext : DbContext
             entity.ToTable("stations");
             entity.HasKey(e => e.EvaNumber);
             entity.Property(e => e.Ril100).HasColumnType("text[]");
-            entity.Property(e => e.Products).HasColumnType("text[]");
+        });
+        
+        // station_products
+        modelBuilder.Entity<Product>(entity =>
+        {
+            entity.ToTable("station_products");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Station)
+                .WithMany(s => s.Products)
+                .HasForeignKey(e => e.EvaNumber)
+                .OnDelete(DeleteBehavior.Cascade);
         });
         
         // station_coordinates
@@ -38,6 +49,13 @@ public class NavigatorDbContext : DbContext
                 .WithOne(s => s.Coordinates)
                 .HasForeignKey<Coordinates>(e => e.EvaNumber)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // ris_ids
+        modelBuilder.Entity<IdentifiedRisId>(entity =>
+        {
+            entity.ToTable("ris_ids");
+            entity.HasKey(e => e.Id);
         });
     }
 

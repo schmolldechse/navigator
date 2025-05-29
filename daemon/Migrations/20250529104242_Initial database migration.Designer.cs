@@ -13,7 +13,7 @@ using daemon.Database;
 namespace daemon.Migrations
 {
     [DbContext(typeof(NavigatorDbContext))]
-    [Migration("20250527203001_Initial database migration")]
+    [Migration("20250529104242_Initial database migration")]
     partial class Initialdatabasemigration
     {
         /// <inheritdoc />
@@ -38,7 +38,7 @@ namespace daemon.Migrations
 
                     b.Property<int>("EvaNumber")
                         .HasColumnType("integer")
-                        .HasColumnName("station_eva_number");
+                        .HasColumnName("eva_number");
 
                     b.Property<double?>("Latitude")
                         .HasColumnType("double precision")
@@ -54,6 +54,68 @@ namespace daemon.Migrations
                         .IsUnique();
 
                     b.ToTable("station_coordinates", "core");
+                });
+
+            modelBuilder.Entity("daemon.Models.Database.IdentifiedRisId", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("DiscoveryDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("discovery_date");
+
+                    b.Property<DateTime?>("LastSeen")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_seen");
+
+                    b.Property<DateTime?>("LastSucceededAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_succeeded_at");
+
+                    b.Property<string>("Product")
+                        .IsRequired()
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("product");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .IsUnique();
+
+                    b.ToTable("ris_ids", "core");
+                });
+
+            modelBuilder.Entity("daemon.Models.Database.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("EvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("eva_number");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<bool?>("QueryingEnabled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("querying_enabled");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EvaNumber");
+
+                    b.ToTable("station_products", "core");
                 });
 
             modelBuilder.Entity("daemon.Models.Database.Station", b =>
@@ -74,11 +136,6 @@ namespace daemon.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)")
                         .HasColumnName("name");
-
-                    b.PrimitiveCollection<List<string>>("Products")
-                        .IsRequired()
-                        .HasColumnType("text[]")
-                        .HasColumnName("products");
 
                     b.Property<bool?>("QueryingEnabled")
                         .HasColumnType("boolean")
@@ -108,9 +165,22 @@ namespace daemon.Migrations
                     b.Navigation("Station");
                 });
 
+            modelBuilder.Entity("daemon.Models.Database.Product", b =>
+                {
+                    b.HasOne("daemon.Models.Database.Station", "Station")
+                        .WithMany("Products")
+                        .HasForeignKey("EvaNumber")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Station");
+                });
+
             modelBuilder.Entity("daemon.Models.Database.Station", b =>
                 {
                     b.Navigation("Coordinates");
+
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }
