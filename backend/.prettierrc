@@ -6,13 +6,5 @@
 	"singleQuote": false,
 	"trailingComma": "none",
 	"bracketSpacing": true,
-	"arrowParens": "always",
-	"overrides": [
-		{
-			"files": "*.svelte",
-			"options": {
-				"parser": "svelte"
-			}
-		}
-	]
+	"arrowParens": "always"
 }
