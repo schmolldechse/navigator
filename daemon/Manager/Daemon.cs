@@ -14,7 +14,7 @@ public abstract class Daemon : IDisposable
     public TimeSpan Interval { get; }
     public TimeSpan RetryErrorDelay { get; }
     
-    public bool IsRunning => !_executionTask.IsCompleted;
+    public bool IsRunning => _executionTask != null && !_executionTask.IsCompleted;
 
     protected Daemon(string name, TimeSpan interval, TimeSpan retryErrorDelay, ILogger<Daemon> logger)
     {
