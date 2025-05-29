@@ -10,8 +10,7 @@ public class GatheringRisIdsDaemon : Daemon
 {
     /**
      * TODO:
-     * 1) map products correctly
-     * 2) sort out disabled products
+     * 1) sort out disabled products
      */
     
     private readonly ILogger<GatheringRisIdsDaemon> _logger;
@@ -55,8 +54,6 @@ public class GatheringRisIdsDaemon : Daemon
                 DateOnly.FromDateTime(randomStation.LastQueried.Value.Date.AddDays(1)),
                 TimeOnly.FromTimeSpan(date.TimeOfDay)
             ), DateTimeKind.Utc);
-            
-            _logger.LogInformation("{0} - {1}", randomStation.LastQueried, newLastQueried);
             
             await ProcessStation(randomStation, newLastQueried, cancellationToken);
         }
@@ -121,7 +118,7 @@ public class GatheringRisIdsDaemon : Daemon
             return new IdentifiedRisId()
             {
                 Id = TryParse(trainElement.GetProperty("journeyId")),
-                Product = trainElement.GetProperty("type").GetString() ??
+                Product = Product.MapProduct(trainElement.GetProperty("type").GetString()) ??
                           throw new InvalidOperationException("Expected 'product' to be a non-null string"),
                 DiscoveryDate = DateTime.UtcNow
             };

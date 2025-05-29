@@ -13,38 +13,12 @@ public class StationMergingService
     private readonly string _tempFolder = Path.Combine(Path.GetTempPath(), "navigator", "station_discovery");
     private readonly string _stadaFile;
 
-    private readonly Dictionary<string, string[]> _productMapping = new()
-    {
-        { "Hochgeschwindigkeitszuege", new[] { "HIGH_SPEED_TRAIN", "nationalExpress" } },
-        { "IntercityUndEurocityZuege", new[] { "INTERCITY_TRAIN", "national" } },
-        { "InterregioUndSchnellzuege", new[] { "INTER_REGIONAL_TRAIN", "regionalExpress" } },
-        { "NahverkehrsonstigeZuege", new[] { "REGIONAL_TRAIN", "regional" } },
-        { "Sbahnen", new[] { "CITY_TRAIN", "suburban" } },
-        { "Busse", new[] { "BUS" } },
-        { "Schiffe", new[] { "FERRY" } },
-        { "UBahn", new[] { "SUBWAY" } },
-        { "Strassenbahn", new[] { "TRAM" } },
-        { "AnrufpflichtigeVerkehre", new[] { "SHUTTLE", "taxi" } },
-        { "Unknown", new string[] { } }
-    };
-
     public StationMergingService(ILogger<StationMergingService> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
 
         if (!Directory.Exists(_tempFolder)) Directory.CreateDirectory(_tempFolder);
         _stadaFile = Path.Combine(_tempFolder, "stada.json");
-    }
-
-    private string MapProduct(string? transport)
-    {
-        if (string.IsNullOrEmpty(transport)) return "Unknown";
-        foreach (var pair in _productMapping)
-        {
-            if (pair.Value.Any(value => string.Equals(value, transport, StringComparison.OrdinalIgnoreCase)))
-                return pair.Key;
-        }
-        return "Unknown";
     }
 
     public async Task<List<Station>> MergeStationsAsync(CancellationToken cancellationToken = default)
@@ -82,7 +56,7 @@ public class StationMergingService
                 // parameters
                 var ril100Identifiers = GetRil100Identifiers(groupEvaNumbers, evaNumberRilDict);
                 var products = stationElement.GetProperty("availableTransports").EnumerateArray()
-                    .Select(product => MapProduct(product.GetString()))
+                    .Select(product => Product.MapProduct(product.GetString()))
                     .Concat(GetProductsByRil(ril100Identifiers, rilProductsDict))
                     .Distinct()
                     .ToList();
