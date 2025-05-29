@@ -10,6 +10,7 @@ public class NavigatorDbContext : DbContext
     public DbSet<Station> Stations { get; set; }
     public DbSet<Coordinates> Coordinates { get; set; }
     public DbSet<Product> Products { get; set; }
+    public DbSet<Ril100> Ril100 { get; set; }
     public DbSet<IdentifiedRisId> RisIds { get; set; }
     
     private readonly Regex _uriRegex =
@@ -25,7 +26,6 @@ public class NavigatorDbContext : DbContext
         {
             entity.ToTable("stations");
             entity.HasKey(e => e.EvaNumber);
-            entity.Property(e => e.Ril100).HasColumnType("text[]");
         });
         
         // station_products
@@ -35,6 +35,17 @@ public class NavigatorDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.HasOne(e => e.Station)
                 .WithMany(s => s.Products)
+                .HasForeignKey(e => e.EvaNumber)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+        
+        // station_ril100
+        modelBuilder.Entity<Ril100>(entity =>
+        {
+            entity.ToTable("station_ril100");
+            entity.HasKey(e => e.Id);
+            entity.HasOne(e => e.Station)
+                .WithMany(s => s.Ril100)
                 .HasForeignKey(e => e.EvaNumber)
                 .OnDelete(DeleteBehavior.Cascade);
         });

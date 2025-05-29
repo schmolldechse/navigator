@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -8,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace daemon.Migrations
 {
     /// <inheritdoc />
-    public partial class Initialdatabasemigration : Migration
+    public partial class Initialdatabaseschema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,7 +39,6 @@ namespace daemon.Migrations
                     eva_number = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
-                    ril100 = table.Column<List<string>>(type: "text[]", nullable: false),
                     querying_enabled = table.Column<bool>(type: "boolean", nullable: true),
                     last_queried = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -80,7 +78,7 @@ namespace daemon.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     eva_number = table.Column<int>(type: "integer", nullable: false),
-                    name = table.Column<string>(type: "text", nullable: false),
+                    name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     querying_enabled = table.Column<bool>(type: "boolean", nullable: true)
                 },
                 constraints: table =>
@@ -88,6 +86,28 @@ namespace daemon.Migrations
                     table.PrimaryKey("PK_station_products", x => x.id);
                     table.ForeignKey(
                         name: "FK_station_products_stations_eva_number",
+                        column: x => x.eva_number,
+                        principalSchema: "core",
+                        principalTable: "stations",
+                        principalColumn: "eva_number",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "station_ril100",
+                schema: "core",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    eva_number = table.Column<int>(type: "integer", nullable: false),
+                    ril100 = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_station_ril100", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_station_ril100_stations_eva_number",
                         column: x => x.eva_number,
                         principalSchema: "core",
                         principalTable: "stations",
@@ -116,6 +136,12 @@ namespace daemon.Migrations
                 column: "eva_number");
 
             migrationBuilder.CreateIndex(
+                name: "IX_station_ril100_eva_number",
+                schema: "core",
+                table: "station_ril100",
+                column: "eva_number");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_stations_eva_number",
                 schema: "core",
                 table: "stations",
@@ -136,6 +162,10 @@ namespace daemon.Migrations
 
             migrationBuilder.DropTable(
                 name: "station_products",
+                schema: "core");
+
+            migrationBuilder.DropTable(
+                name: "station_ril100",
                 schema: "core");
 
             migrationBuilder.DropTable(
