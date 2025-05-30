@@ -17,7 +17,7 @@ public class GatheringRisIdsDaemon : Daemon
         "https://regio-guide.de/@prd/zupo-travel-information/api/public/ri/board/{0}/{1}?timeStart={2}&timeEnd={3}&expandTimeFrame=TIME_START&modeOfTransport=HIGH_SPEED_TRAIN,INTERCITY_TRAIN,INTER_REGIONAL_TRAIN,REGIONAL_TRAIN,CITY_TRAIN,BUS,FERRY,SUBWAY,TRAM,SHUTTLE,UNKNOWN";
 
     public GatheringRisIdsDaemon(ILogger<GatheringRisIdsDaemon> logger, NavigatorDbContext dbContext)
-        : base("Gathering RIS IDs", TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(300), logger)
+        : base("Gathering RIS IDs", TimeSpan.FromSeconds(300), TimeSpan.FromSeconds(300), logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
         _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext), "Database context cannot be null");
