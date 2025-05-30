@@ -51,7 +51,7 @@ public class Product
 
     [Column("name")] [MaxLength(32)] public required string ProductName { get; set; }
 
-    [Column("querying_enabled")] public bool? QueryingEnabled { get; set; }
+    [Column("querying_enabled")] public bool QueryingEnabled { get; set; }
     
     private static readonly Dictionary<string, string[]> ProductDict = new()
     {

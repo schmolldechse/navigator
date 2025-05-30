@@ -104,7 +104,7 @@ namespace daemon.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("name");
 
-                    b.Property<bool?>("QueryingEnabled")
+                    b.Property<bool>("QueryingEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("querying_enabled");
 

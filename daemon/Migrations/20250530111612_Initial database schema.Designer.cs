@@ -12,7 +12,7 @@ using daemon.Database;
 namespace daemon.Migrations
 {
     [DbContext(typeof(NavigatorDbContext))]
-    [Migration("20250529182946_Initial database schema")]
+    [Migration("20250530111612_Initial database schema")]
     partial class Initialdatabaseschema
     {
         /// <inheritdoc />
@@ -107,7 +107,7 @@ namespace daemon.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("name");
 
-                    b.Property<bool?>("QueryingEnabled")
+                    b.Property<bool>("QueryingEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("querying_enabled");
 

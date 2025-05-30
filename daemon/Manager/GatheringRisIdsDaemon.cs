@@ -8,11 +8,6 @@ namespace daemon.Manager;
 
 public class GatheringRisIdsDaemon : Daemon
 {
-    /**
-     * TODO:
-     * 1) sort out disabled products
-     */
-    
     private readonly ILogger<GatheringRisIdsDaemon> _logger;
     private readonly NavigatorDbContext _dbContext;
 
@@ -31,9 +26,10 @@ public class GatheringRisIdsDaemon : Daemon
     protected override async Task ExecuteCoreAsync(CancellationToken cancellationToken)
     {
         var date = DateTime.UtcNow;
-        
+
         var randomStation = await _dbContext.Stations
             .Where(s => s.QueryingEnabled == true && (s.LastQueried == null || s.LastQueried < date.Date.AddDays(-1)))
+            .Include(s => s.Products)
             .OrderBy(s => Guid.NewGuid())
             .FirstOrDefaultAsync(cancellationToken);
         if (randomStation == null) return;
@@ -54,7 +50,7 @@ public class GatheringRisIdsDaemon : Daemon
                 DateOnly.FromDateTime(randomStation.LastQueried.Value.Date.AddDays(1)),
                 TimeOnly.FromTimeSpan(date.TimeOfDay)
             ), DateTimeKind.Utc);
-            
+
             await ProcessStation(randomStation, newLastQueried, cancellationToken);
         }
     }
@@ -74,20 +70,27 @@ public class GatheringRisIdsDaemon : Daemon
             .DistinctBy(x => x.Id)
             .ToList();
 
+        var enabledProducts = station.Products
+            .Where(p => p.QueryingEnabled)
+            .Select(p => p.ProductName)
+            .ToHashSet();
+        // filter out RIS IDs that don't match enabled products
+        var filteredByProduct = results.Where(risId => enabledProducts.Contains(risId.Product)).ToList();
+
         // sort out already existing RIS IDs
         var existingRisIds = _dbContext.RisIds.Select(risId => risId.Id).ToHashSet();
-        var newIds = results.Where(risId => !existingRisIds.Contains(risId.Id)).ToList();
-        _logger.LogInformation(
-            "Filtered to {Count} new RIS Ids (not already in database) for {Name} (evaNumber: {EvaNumber})",
-            newIds.Count, station.Name, station.EvaNumber);
+        var newIds = filteredByProduct.Where(risId => !existingRisIds.Contains(risId.Id)).ToList();
 
         // insert RIS IDs
         _dbContext.RisIds.AddRange(newIds);
-        
+
         // update last_queried
         station.LastQueried = date;
         var amount = await _dbContext.SaveChangesAsync(cancellationToken);
-        _logger.LogInformation("Inserted {Amount} entries", amount);
+        _logger.LogInformation(
+            "Retrieved a total of {Count} RIS IDs for station {StationName} (evaNumber: {EvaNumber}): Filtered out by product: {Filtered}, Already in DB: {FilteredByDB}, Inserted: {Inserted}",
+            results.Count, station.Name, station.EvaNumber, (results.Count - filteredByProduct.Count), (filteredByProduct.Count - newIds.Count),
+            (amount - 1));
     }
 
     private async Task<List<IdentifiedRisId>> CallApi(int evaNumber, DateOnly date,
@@ -101,7 +104,7 @@ public class GatheringRisIdsDaemon : Daemon
         var response = await _httpClient.GetAsync(string.Format(_apiUrl, boardType, evaNumber,
             Uri.EscapeDataString(timeStart.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")),
             Uri.EscapeDataString(timeEnd.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))));
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode) return new();
 
         await using var stream = await response.Content.ReadAsStreamAsync();
         var content = (await JsonDocument.ParseAsync(stream)).RootElement;

@@ -79,7 +79,7 @@ namespace daemon.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     eva_number = table.Column<int>(type: "integer", nullable: false),
                     name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    querying_enabled = table.Column<bool>(type: "boolean", nullable: true)
+                    querying_enabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
