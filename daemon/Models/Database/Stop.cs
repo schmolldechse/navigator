@@ -12,7 +12,7 @@ public class Stop
 
     [Column("journey_id")]
     [MaxLength(45)] // 8 (date) + 1 (dash) + 36 (UUID) = 45
-    public required string JourneyId { get; set; }
+    public string JourneyId { get; set; }
 
     [ForeignKey(nameof(JourneyId))] public virtual Journey Journey { get; set; } = null!;
     

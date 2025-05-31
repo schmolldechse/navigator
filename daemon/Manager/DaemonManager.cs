@@ -23,7 +23,6 @@ public class DaemonManager : IDisposable
         }
 
         _daemons.Add(daemon);
-        _logger.LogInformation("Daemon '{Name}' added", daemon.Name);
     }
 
     public void StartAll()

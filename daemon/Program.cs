@@ -71,11 +71,12 @@ class Program
         services.AddSingleton<StationMergingService>();
 
         // database
-        services.AddDbContext<NavigatorDbContext>();
+        services.AddDbContext<NavigatorDbContext>(ServiceLifetime.Scoped);
 
         // daemons
         services.AddSingleton<DaemonManager>();
         services.AddSingleton<GatheringRisIdsDaemon>();
+        services.AddSingleton<GatheringJourneyDaemon>();
     }
 
     private static async Task RunStationGathering(ServiceProvider serviceProvider, bool skipApi = false)
@@ -113,6 +114,7 @@ class Program
         using var manager = serviceProvider.GetRequiredService<DaemonManager>();
 
         manager.AddDaemon(serviceProvider.GetRequiredService<GatheringRisIdsDaemon>());
+        manager.AddDaemon(serviceProvider.GetRequiredService<GatheringJourneyDaemon>());
         manager.StartAll();
 
         shutdownEvent.Wait();

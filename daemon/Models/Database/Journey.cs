@@ -17,10 +17,10 @@ public class Journey
     public virtual Operator Operator { get; set; } = null!;
     
     [NotMapped]
-    public Stop? Origin => ViaStops?.FirstOrDefault();
+    public virtual Stop? Origin => ViaStops?.FirstOrDefault();
 
     [NotMapped]
-    public Stop? Destination => ViaStops?.LastOrDefault();
+    public virtual Stop? Destination => ViaStops?.LastOrDefault();
     
     public virtual ICollection<Stop> ViaStops { get; set; } = new List<Stop>();
     
