@@ -26,8 +26,8 @@ public class GatheringJourneyDaemon : Daemon
     // timetable changes
     private readonly DateTime[] _timetableChanges =
     {
-        new(2024, 12, 17, 0, 0, 0),
-        new(2025, 6, 9, 0, 0, 0)
+        new(2024, 12, 17, 0, 0, 0, DateTimeKind.Utc),
+        new(2025, 6, 9, 0, 0, 0, DateTimeKind.Utc)
     };
 
     private DateTime GetLastTimetableChange(DateTime? compareTo = null)
@@ -57,18 +57,20 @@ public class GatheringJourneyDaemon : Daemon
         {
             date = new DateTime(
                 DateOnly.FromDateTime(GetLastTimetableChange()),
-                TimeOnly.FromTimeSpan(date.TimeOfDay)
-            );
             await ProcessJourney(randomRisId, date, cancellationToken);
+                TimeOnly.FromTimeSpan(date.TimeOfDay),
+                DateTimeKind.Utc
+            );
         }
         // do not fetch journeys for the same day, as the journey may not reach their destination yet
         else if (randomRisId.LastSeen.Value.Date <= date.Date)
         {
             date = new DateTime(
                 DateOnly.FromDateTime(randomRisId.LastSeen!.Value.Date.AddDays(1)),
-                TimeOnly.FromTimeSpan(date.TimeOfDay)
-            );
             await ProcessJourney(randomRisId, date, cancellationToken);
+                TimeOnly.FromTimeSpan(date.TimeOfDay),
+                DateTimeKind.Utc
+            );
         }
     }
 
