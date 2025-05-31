@@ -63,7 +63,7 @@ public class GatheringJourneyDaemon : Daemon
             await ProcessJourney(randomRisId, date, dbContext, cancellationToken);
         }
         // do not fetch journeys for the same day, as the journey may not reach their destination yet
-        else if (randomRisId.LastSeen.Value.Date <= date.Date)
+        else if (randomRisId.LastSeen.Value.Date < date.Date)
         {
             date = new DateTime(
                 DateOnly.FromDateTime(randomRisId.LastSeen!.Value.Date.AddDays(1)),
