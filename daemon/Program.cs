@@ -42,8 +42,8 @@ class Program
         var gatheringMode = ParseGatheringMode(args);
         if (gatheringMode != GatheringMode.Full)
             await RunStationGathering(serviceProvider, skipApi: gatheringMode == GatheringMode.Api);
-
-        await RunDaemon(serviceProvider);
+        
+        RunDaemon(serviceProvider);
     }
 
     private static void ConfigureServices(IServiceCollection services)
@@ -102,7 +102,7 @@ class Program
         logger.LogWarning("Please change --skipGathering to 'full' to avoid calling this process again.");
     }
 
-    private static async Task RunDaemon(ServiceProvider serviceProvider)
+    private static void RunDaemon(ServiceProvider serviceProvider)
     {
         var shutdownEvent = serviceProvider.GetRequiredService<ManualResetEventSlim>();
         using var manager = serviceProvider.GetRequiredService<DaemonManager>();
