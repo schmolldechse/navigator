@@ -13,7 +13,12 @@ class Program
     static async Task Main(string[] args)
     {
         var services = new ServiceCollection();
-        services.AddLogging(builder => builder.AddConsole().SetMinimumLevel(LogLevel.Information));
+        services.AddLogging(builder => builder.AddSimpleConsole(options =>
+        {
+            options.SingleLine = true;
+            options.TimestampFormat = "[HH:mm:ss] ";
+            options.IncludeScopes = false;
+        }).SetMinimumLevel(LogLevel.Information));
 
         ConfigureServices(services);
 
