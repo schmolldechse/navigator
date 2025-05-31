@@ -57,24 +57,24 @@ public class GatheringJourneyDaemon : Daemon
         {
             date = new DateTime(
                 DateOnly.FromDateTime(GetLastTimetableChange()),
-            await ProcessJourney(randomRisId, date, cancellationToken);
                 TimeOnly.FromTimeSpan(date.TimeOfDay),
                 DateTimeKind.Utc
             );
+            await ProcessJourney(randomRisId, date, dbContext, cancellationToken);
         }
         // do not fetch journeys for the same day, as the journey may not reach their destination yet
         else if (randomRisId.LastSeen.Value.Date <= date.Date)
         {
             date = new DateTime(
                 DateOnly.FromDateTime(randomRisId.LastSeen!.Value.Date.AddDays(1)),
-            await ProcessJourney(randomRisId, date, cancellationToken);
                 TimeOnly.FromTimeSpan(date.TimeOfDay),
                 DateTimeKind.Utc
             );
+            await ProcessJourney(randomRisId, date, dbContext, cancellationToken);
         }
     }
 
-    private async Task ProcessJourney(IdentifiedRisId risId, DateTime date, CancellationToken cancellationToken)
+    private async Task ProcessJourney(IdentifiedRisId risId, DateTime date, NavigatorDbContext dbContext, CancellationToken cancellationToken)
     {
         JourneyResponse journeyResponse = await CallApi(risId.Id.ToString(), date, cancellationToken);
         if (journeyResponse.ParsingError)
@@ -82,6 +82,20 @@ public class GatheringJourneyDaemon : Daemon
             _logger.LogError("Failed to parse journey for RIS ID {RisId}", risId.Id);
             return;
         }
+        
+        // first update risId
+        risId.LastSeen = date;
+
+        if (journeyResponse.Journey != null)
+        {
+            risId.LastSucceededAt = date;
+            
+            // check before adding
+            var exists = await dbContext.Journeys.AnyAsync(j => j.Id == journeyResponse.Journey.Id, cancellationToken);
+            if (!exists) dbContext.Journeys.Add(journeyResponse.Journey);
+        }
+        
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task<JourneyResponse> CallApi(string risId, DateTime when, CancellationToken cancellationToken)
@@ -136,7 +150,7 @@ public class GatheringJourneyDaemon : Daemon
                 var stopObj = new Stop()
                 {
                     Cancelled = cancelled,
-                    EvaNumber = int.Parse(stop.GetProperty("station").GetProperty("evaNo").GetString() ?? throw new ArgumentNullException("evaNo cannot be null")),                    
+                    EvaNumber = int.Parse(stop.GetProperty("station").GetProperty("evaNo").GetString() ?? throw new ArgumentNullException("evaNo cannot be null")),
                     Name = stop.GetProperty("station").GetProperty("name").GetString() ??
                            throw new ArgumentNullException("Station name cannot be null"),
                     Messages = stop.GetProperty("messages").EnumerateArray().Select(message => new StopMessage()
@@ -196,7 +210,6 @@ public class GatheringJourneyDaemon : Daemon
             }).ToList()
         };
 
-        _logger.LogInformation("Got {0}", JsonSerializer.Serialize(journey));
         return new JourneyResponse()
         {
             Journey = journey,
