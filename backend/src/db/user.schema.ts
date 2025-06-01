@@ -1,8 +1,9 @@
 import { integer, pgSchema, serial, text, unique } from "drizzle-orm/pg-core";
-import { user } from "./auth.schema.ts";
 
-export const dataSchema = pgSchema("data");
-export const favoriteStations = dataSchema.table(
+/**
+ * TODO: fix
+export const userSchema = pgSchema("data");
+export const favoriteStations = userSchema.table(
 	"favorite_stations",
 	{
 		id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -15,3 +16,4 @@ export const favoriteStations = dataSchema.table(
 		uniqueUserEva: unique().on(table.userId, table.evaNumber)
 	})
 );
+*/

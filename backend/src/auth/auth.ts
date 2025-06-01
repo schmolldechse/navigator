@@ -8,7 +8,7 @@ import { openAPI } from "better-auth/plugins";
 
 const auth = betterAuth({
 	database: new Pool({
-		connectionString: process.env.AUTH_POSTGRES_URL! + "?options=-csearch_path=auth"
+		connectionString: process.env.POSTGRES_CONNECTION_STRING!,
 	}),
 	socialProviders: {
 		github: {
