@@ -2,6 +2,7 @@
 using daemon.Manager;
 using daemon.Models;
 using daemon.Service;
+using daemon.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -59,11 +60,15 @@ class Program
         var dbClientSecret = Environment.GetEnvironmentVariable("DB_CLIENT_SECRET") ??
                              throw new ArgumentNullException("DB_CLIENT_SECRET",
                                  "DeutscheBahn ClientSecret not configured");
-        services.AddSingleton(new AppConfiguration(dbClientId, dbClientSecret));
+        var proxies = Environment.GetEnvironmentVariable("PROXIES");
+        var proxyEnabled = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PROXY_ENABLED")) && 
+                           bool.TryParse(Environment.GetEnvironmentVariable("PROXY_ENABLED"), out var enabled) && enabled;
+        services.AddSingleton(new AppConfiguration(dbClientId, dbClientSecret, proxies, proxyEnabled));
 
         // common
         services.AddHttpClient();
         services.AddSingleton(new ManualResetEventSlim(false));
+        services.AddSingleton<ProxyRotator>();
 
         // station gathering services
         services.AddSingleton<ApiService>();

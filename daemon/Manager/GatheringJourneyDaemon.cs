@@ -2,6 +2,7 @@
 using System.Text.Json;
 using daemon.Database;
 using daemon.Models.Database;
+using daemon.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,15 +13,16 @@ public class GatheringJourneyDaemon : Daemon
 {
     private readonly ILogger<GatheringJourneyDaemon> _logger;
     private readonly IServiceProvider _serviceProvider;
-    private readonly HttpClient _httpClient = new();
+    private readonly ProxyRotator _proxyRotator;
 
     private readonly string _apiUrl = "https://regio-guide.de/@prd/zupo-travel-information/api/public/ri/journey/{0}";
 
-    public GatheringJourneyDaemon(ILogger<GatheringJourneyDaemon> logger, IServiceProvider serviceProvider)
+    public GatheringJourneyDaemon(ILogger<GatheringJourneyDaemon> logger, IServiceProvider serviceProvider, ProxyRotator proxyRotator)
         : base("Gather Journey", TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(300), logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _proxyRotator = proxyRotator ?? throw new ArgumentNullException(nameof(proxyRotator));
     }
 
     // timetable changes
@@ -101,7 +103,10 @@ public class GatheringJourneyDaemon : Daemon
     private async Task<JourneyResponse> CallApi(string risId, DateTime when, CancellationToken cancellationToken)
     {
         string formattedId = when.ToString("yyyyMMdd") + "-" + risId;
-        var request = await _httpClient.GetAsync(string.Format(_apiUrl, formattedId), cancellationToken);
+        
+        // random proxy
+        using var httpClient = _proxyRotator.GetRandomProxy();
+        var request = await httpClient.GetAsync(string.Format(_apiUrl, formattedId), cancellationToken);
 
         // 500 code is thrown if the journey does not exist
         if (!request.IsSuccessStatusCode)
@@ -215,12 +220,6 @@ public class GatheringJourneyDaemon : Daemon
             Journey = journey,
             ParsingError = false
         };
-    }
-
-    public override void Dispose()
-    {
-        _httpClient.Dispose();
-        base.Dispose();
     }
 }
 
