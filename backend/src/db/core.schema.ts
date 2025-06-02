@@ -1,4 +1,4 @@
-import { pgSchema, uuid, varchar, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+import { pgSchema, uuid, varchar, timestamp, integer, boolean, serial } from "drizzle-orm/pg-core";
 
 const coreSchema = pgSchema("core");
 
@@ -15,21 +15,21 @@ const risIds = coreSchema.table("ris_ids", {
 const stations = coreSchema.table("stations", {
 	evaNumber: integer("eva_number").notNull().primaryKey(),
 	name: varchar("name", { length: 512 }).notNull(),
-	latitude: integer("latitude"),
-	longitude: integer("longitude"),
+	latitude: integer("latitude").notNull(),
+	longitude: integer("longitude").notNull(),
 	queryingEnabled: boolean("querying_enabled"),
 	lastQueried: timestamp("last_queried", { mode: "date" }),
 });
 
 const stationProducts = coreSchema.table("station_products", {
-	id: integer("id").notNull().primaryKey(),
+	id: serial("id").primaryKey(),
 	evaNumber: integer("eva_number").notNull().references(() => stations.evaNumber, { onDelete: "cascade" }),
 	name: varchar("name", { length: 32 }).notNull(),
 	queryingEnabled: boolean("querying_enabled").notNull(),
 });
 
 const stationRil = coreSchema.table("station_ril100", {
-	id: integer("id").notNull().primaryKey(),
+	id: serial("id").primaryKey(),
 	evaNumber: integer("eva_number").notNull().references(() => stations.evaNumber, { onDelete: "cascade" }),
 	ril100: varchar("ril100", { length: 32 }).notNull(),
 });
