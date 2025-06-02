@@ -15,7 +15,7 @@ public class Station
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
 
-    public virtual Coordinates? Coordinates { get; set; }
+    public virtual required Coordinates Coordinates { get; set; }
 
     [Column("querying_enabled")] public bool? QueryingEnabled { get; set; }
 
