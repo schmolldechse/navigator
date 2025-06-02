@@ -10,7 +10,7 @@ const StationSchema = t.Object({
 		longitude: t.Number({ description: "Longitude of the station" })
 	}, { description: "Coordinates of the station" }),
 	ril100: t.Optional(t.Array(t.String(), { description: "List of RIL100 numbers of the station" })),
-	products: t.Optional(t.Array(t.String(), { description: "List of products available at the station" }))
+	products: t.Array(t.String(), { description: "List of products available at the station" })
 });
 type Station = typeof StationSchema.static;
 

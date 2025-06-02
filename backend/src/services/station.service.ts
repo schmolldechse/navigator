@@ -1,16 +1,26 @@
 import { type Station } from "navigator-core/src/models/station";
-import { mapToProduct, Products } from "navigator-core/src/models/products";
 import { HttpError } from "../response/error";
 import { HttpStatus } from "../response/status";
-import { getCollection, StationDocument } from "../db/mongodb/mongodb";
+import { v4 as uuid } from "uuid";
+import { database } from "../db/postgres";
+import { stationProducts, stationRil, stations } from "../db/core.schema";
+import { eq } from "drizzle-orm";
 
 class StationService {
 	fetchStations = async (searchTerm: string): Promise<Station[]> => {
-		const params = new URLSearchParams({
-			query: searchTerm,
-			limit: "10"
+		const request = await fetch("https://app.vendo.noncd.db.de/mob/location/search", {
+			method: "POST",
+			headers: {
+				Accept: "application/x.db.vendo.mob.location.v3+json",
+				"Content-Type": "application/x.db.vendo.mob.location.v3+json",
+				"X-Correlation-ID": uuid() + "_" + uuid()
+			},
+			body: JSON.stringify({
+				searchTerm,
+				maxResults: 10,
+				locationTypes: ["ALL"]
+			})
 		});
-		const request = await fetch(`https://vendo-prof-db.voldechse.wtf/locations?${params.toString()}`, { method: "GET" });
 		if (!request.ok)
 			throw new HttpError(HttpStatus.HTTP_502_BAD_GATEWAY, `Could not find any stations related to ${searchTerm}`);
 
@@ -21,54 +31,58 @@ class StationService {
 				`Response was expected to be an array, but got ${typeof response}`
 			);
 
-		return response
-			.filter((data: any) => /^\d+$/.test(data?.id))
+		const stationList: Station[] = response
+			.filter((stationElement: any) => /^\d+$/.test(stationElement?.evaNr))
 			.map(
-				(data: any) =>
+				(stationElement: any) =>
 					({
-						name: data?.name,
-						evaNumber: Number(data?.id),
+						name: stationElement.name,
+						evaNumber: Number(stationElement.evaNr),
 						coordinates: {
-							latitude: data?.location?.latitude,
-							longitude: data?.location?.longitude
+							latitude: stationElement.coordinates.latitude,
+							longitude: stationElement.coordinates.longitude
 						},
-						// either "ril100Ids" is included directly in the object, or it is, for whatever reason, contained in a nested "station" object
-						ril100: (data?.ril100Ids || data?.station?.ril100Ids || []).map((ril100Id: string) => ril100Id),
-						products: Object.entries(data?.products || [])
-							.filter(([key, value]) => value === true)
-							.map(([key]) => mapToProduct(key))
-							.filter((product) => product.value !== Products.UNKNOWN.value)
-							.map((product) => product.value)
+						products: stationElement.products ?? []
 					}) as Station
-			) as Station[];
+			);
+		return await Promise.all(
+			stationList.map((station) => this.saveStation(station))
+		);
 	};
 
-	fetchAndCacheStations = async (searchTerm: string): Promise<Station[]> => {
-		const stations: Station[] = await this.fetchStations(searchTerm);
-		if (stations.length > 0) await this.cacheStations(stations);
+	private saveStation = async (station: Station): Promise<Station> => {
+		const existing = await database.select().from(stations).where(eq(stations.evaNumber, station.evaNumber)).limit(1);
+		if (existing.length === 0)
+			// insert station object itself
+			await database.insert(stations).values({
+				evaNumber: station.evaNumber,
+				name: station.name,
+				latitude: station.coordinates.latitude,
+				longitude: station.coordinates.longitude
+			});
 
-		return stations;
-	};
+		// insert products
+		const existingProducts = (
+			await database.select().from(stationProducts).where(eq(stationProducts.evaNumber, station.evaNumber))
+		).map((product) => product.name.toLowerCase());
+		const newProducts = station.products.filter((product: string) => !existingProducts.includes(product.toLowerCase()));
+		if (newProducts.length > 0) {
+			const promises = newProducts.map((product: string) =>
+				database.insert(stationProducts).values({
+					evaNumber: station.evaNumber,
+					name: product,
+					queryingEnabled: false
+				})
+			);
+			await Promise.all(promises);
+		}
 
-	private cacheStations = async (stations: Station[]): Promise<void> => {
-		const collection = await getCollection("stations");
-
-		const bulkOps = stations.map((station) => ({
-			updateOne: {
-				filter: { evaNumber: station.evaNumber },
-				update: {
-					$set: {
-						name: station.name,
-						coordinates: station.coordinates,
-						ril100: station.ril100,
-						products: station.products
-					}
-				},
-				upsert: true
-			}
-		}));
-
-		await collection.bulkWrite(bulkOps);
+		// update ril100
+		const ril100 = (await database.select().from(stationRil).where(eq(stationRil.evaNumber, station.evaNumber))).map(
+			(ril) => ril.ril100
+		);
+		if (ril100.length > 0) station.ril100 = ril100;
+		return station;
 	};
 
 	getCachedStation = async (evaNumber: number): Promise<StationDocument | null> => {

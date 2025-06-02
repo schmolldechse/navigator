@@ -11,7 +11,7 @@ const statisticsService = new StatisticsService();
 
 const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 	.decorate({ httpStatus: HttpStatus })
-	.get("/", ({ query }) => stationService.fetchAndCacheStations(query.query), {
+	.get("/", ({ query }) => stationService.fetchStations(query.query), {
 		query: t.Object({
 			query: t.String()
 		}),
