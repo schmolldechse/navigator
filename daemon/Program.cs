@@ -38,7 +38,6 @@ class Program
 
         // apply migrations
         var dbContext = serviceProvider.GetRequiredService<NavigatorDbContext>();
-        await dbContext.Database.EnsureCreatedAsync();
         await dbContext.Database.MigrateAsync();
         logger!.LogInformation("Database migrations applied successfully.");
         await dbContext.Database.ExecuteSqlRawAsync("CREATE EXTENSION IF NOT EXISTS pg_trgm;");
