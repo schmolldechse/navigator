@@ -24,16 +24,10 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 	.get(
 		"/:evaNumber",
 		async ({ params: { evaNumber } }) => {
-			const cachedStation = await stationService.getCachedStation(evaNumber);
-			if (cachedStation) {
-				const { _id, lastQueried, queryingEnabled, ...extracted } = cachedStation;
-				return extracted as Station;
-			}
+			const station = await stationService.fetchStationByEvaNumber(evaNumber);
+			if (!station) throw new HttpError(HttpStatus.HTTP_400_BAD_REQUEST, "Station not found");
 
-			const stations = await stationService.fetchAndCacheStations(String(evaNumber));
-			if (!stations.length) throw new HttpError(HttpStatus.HTTP_400_BAD_REQUEST, "Station not found");
-
-			return stations[0];
+			return station;
 		},
 		{
 			params: t.Object({

@@ -45,21 +45,70 @@ class StationService {
 						products: stationElement.products ?? []
 					}) as Station
 			);
-		return await Promise.all(
-			stationList.map((station) => this.saveStation(station))
-		);
+		return await Promise.all(stationList.map((station) => this.saveStation(station)));
 	};
 
-	private saveStation = async (station: Station): Promise<Station> => {
-		const existing = await database.select().from(stations).where(eq(stations.evaNumber, station.evaNumber)).limit(1);
-		if (existing.length === 0)
-			// insert station object itself
-			await database.insert(stations).values({
-				evaNumber: station.evaNumber,
-				name: station.name,
-				latitude: station.coordinates.latitude,
-				longitude: station.coordinates.longitude
-			});
+	fetchStationByEvaNumber = async (evaNumber: number): Promise<Station> => {
+		const request = await fetch(`https://app.vendo.noncd.db.de/mob/location/details/${evaNumber}`, {
+			method: "GET",
+			headers: {
+				Accept: "application/x.db.vendo.mob.location.v3+json",
+				"Content-Type": "application/x.db.vendo.mob.location.v3+json",
+				"X-Correlation-ID": uuid() + "_" + uuid()
+			}
+		});
+		if (!request.ok)
+			throw new HttpError(HttpStatus.HTTP_502_BAD_GATEWAY, `Could not find any stations related to ${evaNumber}`);
+
+		const response = await request.json();
+		if (!response)
+			throw new HttpError(
+				HttpStatus.HTTP_502_BAD_GATEWAY,
+				`Response was expected to be an object, but got ${typeof response}`
+			);
+
+		if (!response.haltName)
+			throw new HttpError(
+				HttpStatus.HTTP_502_BAD_GATEWAY,
+				`Response did not match expected format. Missing 'haltName' property.`
+			);
+
+		const station: Station = {
+			name: response.haltName,
+			products: (response.produktGattungen ?? []).map((productElement: any) => productElement.produktGattung),
+			evaNumber: -1,
+			coordinates: {
+				latitude: -1,
+				longitude: -1
+			}
+		};
+
+		// search for a station by name
+		const existingStation = await database.select().from(stations).where(eq(stations.name, station.name)).limit(1);
+		if (existingStation.length === 0)
+			throw new HttpError(HttpStatus.HTTP_502_BAD_GATEWAY, `Could not find any station with ${station.name}`);
+
+		// update values
+		station.evaNumber = Number(existingStation[0].evaNumber);
+		station.coordinates = {
+			latitude: existingStation[0].latitude,
+			longitude: existingStation[0].longitude
+		};
+		return this.saveStation(station, false);
+	};
+
+	private saveStation = async (station: Station, insertNew: boolean = true): Promise<Station> => {
+		if (insertNew) {
+			const existing = await database.select().from(stations).where(eq(stations.evaNumber, station.evaNumber)).limit(1);
+			if (existing.length === 0)
+				// insert station object itself
+				await database.insert(stations).values({
+					evaNumber: station.evaNumber,
+					name: station.name,
+					latitude: station.coordinates.latitude,
+					longitude: station.coordinates.longitude
+				});
+		}
 
 		// insert products
 		const existingProducts = (
@@ -83,11 +132,6 @@ class StationService {
 		);
 		if (ril100.length > 0) station.ril100 = ril100;
 		return station;
-	};
-
-	getCachedStation = async (evaNumber: number): Promise<StationDocument | null> => {
-		const collection = await getCollection("stations");
-		return (await collection.findOne({ evaNumber })) as StationDocument;
 	};
 
 	/**
