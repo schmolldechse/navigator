@@ -19,7 +19,6 @@ public class NavigatorDbContext : DbContext
     public DbSet<Journey> Journeys { get; set; }
     public DbSet<JourneyMessage> JourneyMessages { get; set; }
     public DbSet<Stop> ViaStops { get; set; }
-    public DbSet<Time> StopTime { get; set; }
     public DbSet<StopMessage> StopMessages { get; set; }
     
     private readonly Regex _uriRegex =
@@ -95,16 +94,31 @@ public class NavigatorDbContext : DbContext
         {
             entity.ToTable("journey_via-stops");
             entity.HasKey(e => e.Id);
-
-            entity.HasOne(s => s.Arrival)
-                .WithMany()
-                .HasForeignKey("ArrivalId")
-                .OnDelete(DeleteBehavior.SetNull);
             
-            entity.HasOne(s => s.Departure)
-                .WithMany()
-                .HasForeignKey("DepartureId")
-                .OnDelete(DeleteBehavior.SetNull);
+            entity.HasOne(s => s.Journey)
+                .WithMany(j => j.ViaStops)
+                .HasForeignKey(s => s.JourneyId)
+                .OnDelete(DeleteBehavior.Cascade);
+            
+            // flatten Arrival properties
+            entity.OwnsOne(s => s.Arrival, a =>
+            {
+                a.Property(t => t.PlannedTime).HasColumnName("arrival_planned_time");
+                a.Property(t => t.ActualTime).HasColumnName("arrival_actual_time");
+                a.Property(t => t.Delay).HasColumnName("arrival_delay");
+                a.Property(t => t.PlannedPlatform).HasColumnName("arrival_planned_platform");
+                a.Property(t => t.ActualPlatform).HasColumnName("arrival_actual_platform");
+            });
+            
+            // flatten Departure properties
+            entity.OwnsOne(s => s.Departure, d =>
+            {
+                d.Property(t => t.PlannedTime).HasColumnName("departure_planned_time");
+                d.Property(t => t.ActualTime).HasColumnName("departure_actual_time");
+                d.Property(t => t.Delay).HasColumnName("departure_delay");
+                d.Property(t => t.PlannedPlatform).HasColumnName("departure_planned_platform");
+                d.Property(t => t.ActualPlatform).HasColumnName("departure_actual_platform");
+            });
             
             // ensure unique EvaNumber per Journey
             entity.HasIndex(e => new { e.JourneyId, e.EvaNumber }).IsUnique();
@@ -119,12 +133,6 @@ public class NavigatorDbContext : DbContext
                 .WithMany(s => s.Messages)
                 .HasForeignKey(m => m.StopId)
                 .OnDelete(DeleteBehavior.Cascade);
-        });
-
-        modelBuilder.Entity<Time>(entity =>
-        {
-            entity.ToTable("journey_stop_times");
-            entity.HasKey(e => e.Id);
         });
     }
 

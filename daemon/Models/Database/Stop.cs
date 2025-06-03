@@ -25,16 +25,9 @@ public class Stop
     
     [Column("cancelled")]
     public required bool Cancelled { get; set; }
-    
-    [Column("arrival")]
-    protected int? ArrivalId { get; set; }
 
-    [ForeignKey(nameof(ArrivalId))] public virtual Time? Arrival { get; set; } = null!;
+    public virtual Time? Arrival { get; set; } = null!;
 
-    [Column("departure")]
-    protected int? DepartureId { get; set; }
-    
-    [ForeignKey(nameof(DepartureId))]
     public virtual Time? Departure { get; set; } = null!;
 
     public virtual ICollection<StopMessage> Messages { get; set; } = new List<StopMessage>();

@@ -16,24 +16,6 @@ namespace daemon.Migrations
                 name: "core");
 
             migrationBuilder.CreateTable(
-                name: "journey_stop_times",
-                schema: "core",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    planned_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    actual_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    delay = table.Column<int>(type: "integer", nullable: false),
-                    planned_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
-                    actual_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_journey_stop_times", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "journeys",
                 schema: "core",
                 columns: table => new
@@ -76,8 +58,8 @@ namespace daemon.Migrations
                     eva_number = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
-                    latitude = table.Column<double>(type: "double precision", nullable: true),
-                    longitude = table.Column<double>(type: "double precision", nullable: true),
+                    latitude = table.Column<double>(type: "double precision", nullable: false),
+                    longitude = table.Column<double>(type: "double precision", nullable: false),
                     querying_enabled = table.Column<bool>(type: "boolean", nullable: true),
                     last_queried = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
@@ -121,26 +103,20 @@ namespace daemon.Migrations
                     name = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
                     eva_number = table.Column<int>(type: "integer", nullable: false),
                     cancelled = table.Column<bool>(type: "boolean", nullable: false),
-                    arrival = table.Column<int>(type: "integer", nullable: true),
-                    departure = table.Column<int>(type: "integer", nullable: true)
+                    arrival_planned_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    arrival_actual_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    arrival_delay = table.Column<int>(type: "integer", nullable: true),
+                    arrival_planned_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    arrival_actual_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    departure_planned_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    departure_actual_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    departure_delay = table.Column<int>(type: "integer", nullable: true),
+                    departure_planned_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    departure_actual_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_journey_via-stops", x => x.id);
-                    table.ForeignKey(
-                        name: "FK_journey_via-stops_journey_stop_times_arrival",
-                        column: x => x.arrival,
-                        principalSchema: "core",
-                        principalTable: "journey_stop_times",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_journey_via-stops_journey_stop_times_departure",
-                        column: x => x.departure,
-                        principalSchema: "core",
-                        principalTable: "journey_stop_times",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
                         name: "FK_journey_via-stops_journeys_journey_id",
                         column: x => x.journey_id,
@@ -232,18 +208,6 @@ namespace daemon.Migrations
                 column: "stop_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_via-stops_arrival",
-                schema: "core",
-                table: "journey_via-stops",
-                column: "arrival");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journey_via-stops_departure",
-                schema: "core",
-                table: "journey_via-stops",
-                column: "departure");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_journey_via-stops_journey_id_eva_number",
                 schema: "core",
                 table: "journey_via-stops",
@@ -313,10 +277,6 @@ namespace daemon.Migrations
 
             migrationBuilder.DropTable(
                 name: "stations",
-                schema: "core");
-
-            migrationBuilder.DropTable(
-                name: "journey_stop_times",
                 schema: "core");
 
             migrationBuilder.DropTable(

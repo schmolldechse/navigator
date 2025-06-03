@@ -208,17 +208,9 @@ namespace daemon.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("ArrivalId")
-                        .HasColumnType("integer")
-                        .HasColumnName("arrival");
-
                     b.Property<bool>("Cancelled")
                         .HasColumnType("boolean")
                         .HasColumnName("cancelled");
-
-                    b.Property<int?>("DepartureId")
-                        .HasColumnType("integer")
-                        .HasColumnName("departure");
 
                     b.Property<int>("EvaNumber")
                         .HasColumnType("integer")
@@ -237,10 +229,6 @@ namespace daemon.Migrations
                         .HasColumnName("name");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ArrivalId");
-
-                    b.HasIndex("DepartureId");
 
                     b.HasIndex("JourneyId", "EvaNumber")
                         .IsUnique();
@@ -282,44 +270,6 @@ namespace daemon.Migrations
                     b.HasIndex("StopId");
 
                     b.ToTable("journey_stop_messages", "core");
-                });
-
-            modelBuilder.Entity("daemon.Models.Database.Time", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("ActualPlatform")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("actual_platform");
-
-                    b.Property<DateTime>("ActualTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("actual_time");
-
-                    b.Property<int>("Delay")
-                        .HasColumnType("integer")
-                        .HasColumnName("delay");
-
-                    b.Property<string>("PlannedPlatform")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)")
-                        .HasColumnName("planned_platform");
-
-                    b.Property<DateTime>("PlannedTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("planned_time");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("journey_stop_times", "core");
                 });
 
             modelBuilder.Entity("daemon.Models.Database.Journey", b =>
@@ -433,11 +383,11 @@ namespace daemon.Migrations
                             b1.Property<int>("StationEvaNumber")
                                 .HasColumnType("integer");
 
-                            b1.Property<double?>("Latitude")
+                            b1.Property<double>("Latitude")
                                 .HasColumnType("double precision")
                                 .HasColumnName("latitude");
 
-                            b1.Property<double?>("Longitude")
+                            b1.Property<double>("Longitude")
                                 .HasColumnType("double precision")
                                 .HasColumnName("longitude");
 
@@ -449,26 +399,95 @@ namespace daemon.Migrations
                                 .HasForeignKey("StationEvaNumber");
                         });
 
-                    b.Navigation("Coordinates");
+                    b.Navigation("Coordinates")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("daemon.Models.Database.Stop", b =>
                 {
-                    b.HasOne("daemon.Models.Database.Time", "Arrival")
-                        .WithMany()
-                        .HasForeignKey("ArrivalId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("daemon.Models.Database.Time", "Departure")
-                        .WithMany()
-                        .HasForeignKey("DepartureId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
                     b.HasOne("daemon.Models.Database.Journey", "Journey")
                         .WithMany("ViaStops")
                         .HasForeignKey("JourneyId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.OwnsOne("daemon.Models.Database.Time", "Arrival", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("ActualPlatform")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("arrival_actual_platform");
+
+                            b1.Property<DateTime>("ActualTime")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("arrival_actual_time");
+
+                            b1.Property<int>("Delay")
+                                .HasColumnType("integer")
+                                .HasColumnName("arrival_delay");
+
+                            b1.Property<string>("PlannedPlatform")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("arrival_planned_platform");
+
+                            b1.Property<DateTime>("PlannedTime")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("arrival_planned_time");
+
+                            b1.HasKey("Id");
+
+                            b1.ToTable("journey_via-stops", "core");
+
+                            b1.WithOwner()
+                                .HasForeignKey("Id");
+                        });
+
+                    b.OwnsOne("daemon.Models.Database.Time", "Departure", b1 =>
+                        {
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("ActualPlatform")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("departure_actual_platform");
+
+                            b1.Property<DateTime>("ActualTime")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("departure_actual_time");
+
+                            b1.Property<int>("Delay")
+                                .HasColumnType("integer")
+                                .HasColumnName("departure_delay");
+
+                            b1.Property<string>("PlannedPlatform")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("departure_planned_platform");
+
+                            b1.Property<DateTime>("PlannedTime")
+                                .HasColumnType("timestamp with time zone")
+                                .HasColumnName("departure_planned_time");
+
+                            b1.HasKey("Id");
+
+                            b1.ToTable("journey_via-stops", "core");
+
+                            b1.WithOwner()
+                                .HasForeignKey("Id");
+                        });
 
                     b.Navigation("Arrival");
 
