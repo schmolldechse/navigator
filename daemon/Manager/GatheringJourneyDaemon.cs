@@ -140,7 +140,7 @@ public class GatheringJourneyDaemon : Daemon
                 ProductType = Product.MapProduct(content.GetProperty("type").GetString()),
                 ProductName = content.GetProperty("category").GetString() ?? string.Empty,
                 JourneyName = content.GetProperty("name").GetString() ?? string.Empty,
-                JourneyNumber = content.GetProperty("no").GetInt16().ToString() ?? string.Empty
+                JourneyNumber = content.GetProperty("no").GetInt32().ToString() ?? string.Empty
             },
             Messages = content.GetProperty("hims").EnumerateArray().Select(message => new JourneyMessage()
             {
