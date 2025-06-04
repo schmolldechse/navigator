@@ -31,7 +31,7 @@ namespace daemon.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_journeys", x => x.journey_id);
-                    table.CheckConstraint("CK_Trip_JourneyId_Format", "journey_id ~ '^\\d{8}-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'");
+                    table.CheckConstraint("journey_id_format", "journey_id ~ '^\\d{8}-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'");
                 });
 
             migrationBuilder.CreateTable(

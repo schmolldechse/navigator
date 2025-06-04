@@ -71,7 +71,7 @@ public class NavigatorDbContext : DbContext
         {
             entity.ToTable("journeys");
             entity.HasKey(e => e.Id); 
-            entity.ToTable(t => t.HasCheckConstraint("CK_Trip_JourneyId_Format", 
+            entity.ToTable(t => t.HasCheckConstraint("journey_id_format", 
                "journey_id ~ '^\\d{8}-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'"));
             
             entity.OwnsOne(j => j.LineInformation);

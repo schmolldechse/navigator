@@ -70,7 +70,7 @@ namespace daemon.Migrations
 
                     b.ToTable("journeys", "core", t =>
                         {
-                            t.HasCheckConstraint("CK_Trip_JourneyId_Format", "journey_id ~ '^\\d{8}-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'");
+                            t.HasCheckConstraint("journey_id_format", "journey_id ~ '^\\d{8}-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'");
                         });
                 });
 
