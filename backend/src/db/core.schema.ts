@@ -62,7 +62,7 @@ const journeyMessage = coreSchema.table("journey_messages", {
 	)
 ]);
 
-const journeyViaStops = coreSchema.table("journey_via_stops", {
+const journeyViaStops = coreSchema.table("journey_via-stops", {
 	id: serial("id").primaryKey(),
 	journeyId: varchar("journey_id", { length: 45 }).notNull().references(() => journeys.journeyId, { onDelete: "cascade" }),
 	evaNumber: integer("eva_number").notNull(),
