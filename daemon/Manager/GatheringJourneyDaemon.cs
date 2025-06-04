@@ -159,10 +159,15 @@ public class GatheringJourneyDaemon : Daemon
                     Name = stop.GetProperty("station").GetProperty("name").GetString() ??
                            throw new ArgumentNullException("Station name cannot be null"),
                     Messages = stop.GetProperty("messages").EnumerateArray().Select(message => new StopMessage()
-                    {
-                        Code = int.Parse(message.GetProperty("code").GetString() ?? throw new ArgumentNullException("Message code cannot be null")),
-                        Message = message.GetProperty("text").GetString() ?? string.Empty,
-                        Summary = message.GetProperty("textShort").GetString() ?? string.Empty
+                        {
+                            Code = int.Parse(message.GetProperty("code").GetString() ??
+                                             throw new ArgumentNullException("Message code cannot be null")),
+                            Message = message.GetProperty("text").GetString() ?? string.Empty,
+                            Summary = message.TryGetProperty("textShort", out var textShortProp) &&
+                                      textShortProp.ValueKind != JsonValueKind.Null &&
+                                      textShortProp.GetString() != null
+                                ? textShortProp.GetString()!
+                                : message.GetProperty("text").GetString()!
                     }).ToList()
                 };
 
