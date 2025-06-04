@@ -1,10 +1,11 @@
 import Elysia, { t } from "elysia";
 import { StationService } from "../services/station.service";
 import { HttpStatus } from "../response/status";
-import { type Station, StationSchema, StopAnalyticsSchema } from "navigator-core/src/models/station";
 import { HttpError } from "../response/error";
 import { DateTime } from "luxon";
 import { StatisticsService } from "../services/statistics.service";
+import { StationSchema } from "../models/elysia/station.model";
+import { StopAnalyticsSchema } from "../models/elysia/analytics.model";
 
 const stationService = new StationService();
 const statisticsService = new StatisticsService();
@@ -48,6 +49,11 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 			body.endDate = (body.endDate || DateTime.now()).endOf("day");
 			if (body.startDate > body.endDate) throw new HttpError(400, "Start date can't be after end date");
 
+			// filter out empty strings
+			body.filter.products = body.filter.products.filter((product: string) => product.trim() !== "");
+			body.filter.lineName = body.filter.lineName.filter((line: string) => line.trim() !== "");
+			body.filter.lineNumber = body.filter.lineNumber.filter((line: string) => line.trim() !== "");
+
 			const evaNumbers = await stationService.getRelatedEvaNumbers(evaNumber);
 			return await statisticsService.startEvaluation(body, evaNumbers);
 		},
@@ -63,4 +69,5 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 			response: StopAnalyticsSchema
 		}
 	);
+
 export default stationController;

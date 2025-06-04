@@ -1,8 +1,8 @@
 import { t } from "elysia";
 import { DateTimeObject } from "../types/datetime";
 import { DateTime } from "luxon";
-import { type Connection } from "navigator-core/src/models/connection";
 import { mapConnection } from "../lib/mapping";
+import { Connection } from "../models/core/models";
 
 enum RequestType {
 	DEPARTURES = "departures",

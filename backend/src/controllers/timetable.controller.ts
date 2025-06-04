@@ -2,6 +2,7 @@ import Elysia, { t } from "elysia";
 import { HttpStatus } from "../response/status";
 import { Profile, RequestType, TimetableService } from "../services/timetable.service";
 import { HttpError } from "../response/error";
+import { ConnectionSchema } from "../models/elysia/connection.model";
 
 const timetableService = new TimetableService();
 
@@ -38,8 +39,11 @@ const timetableController = new Elysia({
 					return timetableService.retrieveBahnhofConnections(evaNumber, type, query);
 				case Profile.RIS:
 					return timetableService.retrieveRISConnections(evaNumber, type, query);
+				/**
+				 * TODO:
 				case Profile.HAFAS:
 					return 0;
+				 */
 				default:
 					throw new HttpError(HttpStatus.HTTP_400_BAD_REQUEST, "Invalid profile");
 			}
@@ -58,8 +62,10 @@ const timetableController = new Elysia({
 			query: timetableService.query,
 			detail: {
 				summary: "Profile specific timetable",
-				description: "Get the timetable for a station by its evaNumber and profile.\n\nKeep in mind, that the 'when' parameter is ignored for the 'bahnhof' profile."
-			}
+				description:
+					"Get the timetable for a station by its evaNumber and profile.\n\nKeep in mind, that the 'when' parameter is ignored for the 'bahnhof' profile."
+			},
+			response: t.Array(t.Object({ connections: t.Array(ConnectionSchema) }))
 		}
 	);
 export default timetableController;

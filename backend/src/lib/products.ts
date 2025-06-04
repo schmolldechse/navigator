@@ -1,10 +1,4 @@
-import { t } from "elysia";
-
-const ProductSchema = t.Object({
-	value: t.String({ description: "The name of the product, obtained from Vendo DB API." }),
-	possibilities: t.Array(t.String(), { description: "An array of product names that can be matched to the value." })
-}, { description: "A Product represents a specific type of transportation." });
-type Product = typeof ProductSchema.static;
+import { Product } from "../models/core/models";
 
 const Products = {
 	HOCHGESCHWINDIGKEITSZUEGE: {
@@ -29,8 +23,6 @@ const Products = {
 	UNKNOWN: { value: "UNKNOWN", possibilities: [] }
 } as const;
 
-export { ProductSchema, Product, Products };
-
 const mapToProduct = (input?: string): Product => {
 	if (!input) return Products.UNKNOWN as unknown as Product;
 
@@ -42,4 +34,4 @@ const mapToProduct = (input?: string): Product => {
 	return (matchedProduct || Products.UNKNOWN) as unknown as Product;
 };
 
-export { mapToProduct };
+export { Products, mapToProduct };

@@ -1,11 +1,10 @@
 import { DateTime } from "luxon";
-import { type Connection } from "navigator-core/src/models/connection";
-import { type Stop } from "navigator-core/src/models/station";
-import { type Time } from "navigator-core/src/models/time";
-import { type Message } from "navigator-core/src/models/message";
-import { mapToProduct } from "navigator-core/src/models/products";
 import calculateDuration from "./time";
 import { extractProduct } from "./regex";
+import { Connection, Message, RouteData, Stop } from "../models/core/models";
+import { Sequence } from "../models/core/sequence";
+import { mapToProduct } from "./products";
+import Time from "./time";
 
 const mapConnection = (
 	entry: any,

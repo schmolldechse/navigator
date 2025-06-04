@@ -2,7 +2,7 @@ import { Controller, Get, Queries, Route, Tags } from "tsoa";
 import { DateTime } from "luxon";
 import { mapCoachSequence } from "../../lib/mapping.ts";
 import { HttpError } from "../../lib/errors/HttpError.ts";
-import type { Sequence } from "../../models/sequence.ts";
+import type { Sequence } from "../../models/core/sequence.ts";
 
 class SequenceQuery {
 	lineDetails!: string;

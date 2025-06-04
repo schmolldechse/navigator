@@ -16,7 +16,6 @@
 		"@types/papaparse": "^5.3.16",
 		"@types/pg": "^8.15.1",
 		"drizzle-kit": "^0.30.6",
-		"navigator-core": "../core",
 		"prettier": "^3.5.3"
 	},
 	"peerDependencies": {
