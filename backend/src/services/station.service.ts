@@ -97,6 +97,26 @@ class StationService {
 		return this.saveStation(station, false);
 	};
 
+	getRelatedEvaNumbers = async (evaNumber: number): Promise<number[]> => {
+		const rilMap = (
+			await database.select({ ril100: stationRil.ril100 }).from(stationRil).where(eq(stationRil.evaNumber, evaNumber))
+		).flatMap((ril) => ril.ril100);
+		if (rilMap.length === 0) return [evaNumber];
+
+		return (
+			await Promise.all(
+				rilMap.map(async (ril100) =>
+					(
+						await database
+							.select({ evaNumber: stationRil.evaNumber })
+							.from(stationRil)
+							.where(eq(stationRil.ril100, ril100))
+					).flatMap((ril) => ril.evaNumber)
+				)
+			)
+		).flat();
+	};
+
 	private saveStation = async (station: Station, insertNew: boolean = true): Promise<Station> => {
 		if (insertNew) {
 			const existing = await database.select().from(stations).where(eq(stations.evaNumber, station.evaNumber)).limit(1);
@@ -132,22 +152,6 @@ class StationService {
 		);
 		if (ril100.length > 0) station.ril100 = ril100;
 		return station;
-	};
-
-	/**
-	 * Since a station can have multiple ril100 identifiers, we try to gather all `evaNumber`'s from a station
-	 * This may happen at larger stations, for example:
-	 * - Stuttgart Hbf
-	 * - Hauptbf (Arnulf-Klett-Platz), Stuttgart
-	 */
-	getRelatedEvaNumbers = async (station: Station): Promise<number[]> => {
-		if ((station?.ril100 || []).length > 0) {
-			const collection = await getCollection("stations");
-			return (await collection.find({ ril100: { $in: station.ril100 } }).toArray()).map(
-				(station: Station) => station?.evaNumber
-			);
-		}
-		return [station?.evaNumber];
 	};
 }
 
