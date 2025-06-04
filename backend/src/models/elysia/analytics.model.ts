@@ -1,5 +1,10 @@
 import { t } from "elysia";
 
+const MeasurementSchema = t.Object({
+	date: t.String({ format: "date" }),
+	amount: t.Number()
+});
+
 const StopAnalyticsSchema = t.Object({
 	executionTime: t.Optional(t.Number({ description: "Specifies the time in ms how long the analysis took" })),
 	relatedEvaNumbers: t.Array(t.Number(), {
@@ -8,10 +13,13 @@ const StopAnalyticsSchema = t.Object({
 	foundByQuery: t.Optional(t.Number({ description: "Amount of connections found in the database" })),
 	parsingSucceeded: t.Number({ description: "Amount of connections which could be parsed" }),
 	parsingFailed: t.Number({ description: "Amount of connections which could not be parsed" }),
-	products: t.Record(t.String(), t.Number(), {
-		examples: [{ Busse: 1, NahverkehrsonstigeZuege: 2 }],
-		description: "Specifies how often a product has occurred"
-	}),
+	products: t.Array(
+		t.Object({
+			type: t.String({ description: "Type of product" }),
+			amount: t.Number(),
+			measurements: t.Array(MeasurementSchema)
+		})
+	),
 	arrival: t.Object({
 		total: t.Number({ description: "Specifies the total number of arrivals" }),
 		averageDelay: t.Number({ description: "Specifies the average delay in seconds" }),
@@ -35,4 +43,4 @@ const StopAnalyticsSchema = t.Object({
 	cancellations: t.Number({ description: "Specifies the total number of cancellations" })
 });
 
-export { StopAnalyticsSchema };
+export { MeasurementSchema, StopAnalyticsSchema };
