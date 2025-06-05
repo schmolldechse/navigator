@@ -37,7 +37,10 @@ const StopAnalyticsSchema = t.Object({
 		totalDelayed: t.Number({ description: "Specifies the total number of departures which were delayed" }),
 		totalPlatformChanges: t.Number({ description: "Specifies the total number of departures which had a platform change" })
 	}),
-	cancellations: t.Number({ description: "Specifies the total number of cancellations" })
+	cancellations: t.Object({
+		amount: t.Number(),
+		measurements: t.Array(MeasurementSchema)
+	})
 });
 
 export { MeasurementSchema, StopAnalyticsSchema };

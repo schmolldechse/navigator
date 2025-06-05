@@ -65,7 +65,9 @@ class StatisticsService {
 		conditions.push(inArray(journeyViaStops.evaNumber, evaNumbers));
 
 		const result = await query.where(and(...conditions)) as unknown as { journey: typeof journeys, viaStops: typeof journeyViaStops }[];
-		console.dir(this.gatherProducts(result.map((resultElement) => resultElement.journey)), { depth: null });
+
+		// console.dir(this.gatherProducts(result.map((resultElement) => resultElement.journey)), { depth: null });
+		console.dir(this.gatherCancellations(result.map((resultElement) => resultElement.viaStops)), { depth: null });
 	};
 
 	private gatherProducts = (journeyList: typeof journeys[]): typeof StopAnalyticsSchema.static.products => {
@@ -97,6 +99,32 @@ class StatisticsService {
 
 		return products;
 	};
+
+	private gatherCancellations = (viaStops: typeof journeyViaStops[]): typeof StopAnalyticsSchema.static.cancellations => {
+		const cancellations: typeof StopAnalyticsSchema.static.cancellations = {
+			amount: 0,
+			measurements: []
+		};
+
+		for (const viaStop of viaStops) {
+			if (!viaStop.cancelled) continue;
+			cancellations.amount += 1;
+
+			const date = DateTime.fromFormat(String(viaStop.journeyId).substring(0, 8), "yyyyMMdd");
+			if (!date.isValid) continue;
+
+			if (!cancellations!.measurements.some(measurement => measurement.date === date.toFormat("yyyy-MM-dd"))) {
+				cancellations!.measurements.push({
+					date: date.toFormat("yyyy-MM-dd"),
+					amount: 0
+				});
+			}
+			const measurement = cancellations!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
+			measurement!.amount += 1;
+		}
+
+		return cancellations;
+	}
 }
 
 export { StatisticsService };
