@@ -66,6 +66,7 @@ const journeyViaStops = coreSchema.table("journey_via-stops", {
 	id: serial("id").primaryKey(),
 	journeyId: varchar("journey_id", { length: 45 }).notNull().references(() => journeys.journeyId, { onDelete: "cascade" }),
 	evaNumber: integer("eva_number").notNull(),
+	cancelled: boolean("cancelled").notNull(),
 	arrivalPlannedTime: timestamp("arrival_planned_time", { mode: "date" }),
 	arrivalActualTime: timestamp("arrival_actual_time", { mode: "date" }),
 	arrivalDelay: integer("arrival_delay"),
