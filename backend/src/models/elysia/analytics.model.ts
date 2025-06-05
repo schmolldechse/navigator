@@ -2,7 +2,45 @@ import { t } from "elysia";
 
 const MeasurementSchema = t.Object({
 	date: t.String({ format: "date" }),
-	amount: t.Number()
+	totalMeasured: t.Number()
+});
+
+const DelaySchema = t.Object({
+	average: t.Number({ description: "Specifies the average delay in seconds" }),
+	minimum: t.Number({ description: "Specifies the minimum delay in seconds" }),
+	maximum: t.Number({ description: "Specifies the maximum delay in seconds" }),
+});
+
+const TimeSchema = t.Object({
+	total: t.Object({
+		totalMeasured: t.Number(),
+		measurements: t.Array(MeasurementSchema)
+	}),
+	delay: t.Intersect([
+		DelaySchema,
+		t.Object({
+			measurements: t.Array(t.Intersect([
+				MeasurementSchema,
+				DelaySchema,
+			]))
+		})
+	]),
+	tooEarly: t.Object({
+		totalMeasured: t.Number(),
+		measurements: t.Array(MeasurementSchema)
+	}),
+	punctual: t.Object({
+		totalMeasured: t.Number(),
+		measurements: t.Array(MeasurementSchema)
+	}),
+	delayed: t.Object({
+		totalMeasured: t.Number(),
+		measurements: t.Array(MeasurementSchema)
+	}),
+	platformChanges: t.Object({
+		totalMeasured: t.Number(),
+		measurements: t.Array(MeasurementSchema)
+	})
 });
 
 const StopAnalyticsSchema = t.Object({
@@ -13,32 +51,14 @@ const StopAnalyticsSchema = t.Object({
 	products: t.Array(
 		t.Object({
 			type: t.String({ description: "Type of product" }),
-			amount: t.Number(),
+			totalMeasured: t.Number(),
 			measurements: t.Array(MeasurementSchema)
 		})
 	),
-	arrival: t.Object({
-		total: t.Number({ description: "Specifies the total number of arrivals" }),
-		averageDelay: t.Number({ description: "Specifies the average delay in seconds" }),
-		minimumDelay: t.Number({ description: "Specifies the minimum delay in seconds" }),
-		maximumDelay: t.Number({ description: "Specifies the maximum delay in seconds" }),
-		totalTooEarly: t.Number({ description: "Specifies the total number of arrivals which were too early" }),
-		totalPunctual: t.Number({ description: "Specifies the total number of arrivals which were punctual" }),
-		totalDelayed: t.Number({ description: "Specifies the total number of arrivals which were delayed" }),
-		totalPlatformChanges: t.Number({ description: "Specifies the total number of arrivals which had a platform change" })
-	}),
-	departure: t.Object({
-		total: t.Number({ description: "Specifies the total number of departures" }),
-		averageDelay: t.Number({ description: "Specifies the average delay in seconds" }),
-		minimumDelay: t.Number({ description: "Specifies the minimum delay in seconds" }),
-		maximumDelay: t.Number({ description: "Specifies the maximum delay in seconds" }),
-		totalTooEarly: t.Number({ description: "Specifies the total number of departures which were too early" }),
-		totalPunctual: t.Number({ description: "Specifies the total number of departures which were punctual" }),
-		totalDelayed: t.Number({ description: "Specifies the total number of departures which were delayed" }),
-		totalPlatformChanges: t.Number({ description: "Specifies the total number of departures which had a platform change" })
-	}),
+	arrival: TimeSchema,
+	departure: TimeSchema,
 	cancellations: t.Object({
-		amount: t.Number(),
+		totalMeasured: t.Number(),
 		measurements: t.Array(MeasurementSchema)
 	})
 });
