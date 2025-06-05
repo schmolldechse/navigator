@@ -10,9 +10,6 @@ const StopAnalyticsSchema = t.Object({
 	relatedEvaNumbers: t.Array(t.Number(), {
 		description: "An array of related evaNumbers which where considered in the analysis"
 	}),
-	foundByQuery: t.Optional(t.Number({ description: "Amount of connections found in the database" })),
-	parsingSucceeded: t.Number({ description: "Amount of connections which could be parsed" }),
-	parsingFailed: t.Number({ description: "Amount of connections which could not be parsed" }),
 	products: t.Array(
 		t.Object({
 			type: t.String({ description: "Type of product" }),
