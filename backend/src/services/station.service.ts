@@ -1,4 +1,4 @@
-import { type Station } from "navigator-core/src/models/station";
+import { Station } from "../models/core/models";
 import { HttpError } from "../response/error";
 import { HttpStatus } from "../response/status";
 import { v4 as uuid } from "uuid";
