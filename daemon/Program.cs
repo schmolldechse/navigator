@@ -1,4 +1,5 @@
-﻿using daemon.Database;
+﻿using CommandLine;
+using daemon.Database;
 using daemon.Manager;
 using daemon.Models;
 using daemon.Service;
@@ -13,13 +14,18 @@ class Program
 {
     static async Task Main(string[] args)
     {
+        // parse command line arguments
+        Options cmdOptions = new();
+        CommandLine.Parser.Default.ParseArguments<Options>(args)
+            .WithParsed(parsed => cmdOptions = parsed);
+        
         var services = new ServiceCollection();
         services.AddLogging(builder => builder.AddSimpleConsole(options =>
         {
             options.SingleLine = true;
             options.TimestampFormat = "[HH:mm:ss] ";
             options.IncludeScopes = false;
-        }).SetMinimumLevel(LogLevel.Information));
+        }).SetMinimumLevel(cmdOptions.Debug ? LogLevel.Debug : LogLevel.Information));
 
         ConfigureServices(services);
 
@@ -44,9 +50,8 @@ class Program
         logger!.LogInformation("Created pg_trgm extension if it did not exist.");
 
         // parse command line arguments
-        var gatheringMode = ParseGatheringMode(args);
-        if (gatheringMode != GatheringMode.Full)
-            await RunStationGathering(serviceProvider, skipApi: gatheringMode == GatheringMode.Api);
+        if (cmdOptions.SkipGathering != GatheringMode.Full)
+            await RunStationGathering(serviceProvider, skipApi: cmdOptions.SkipGathering == GatheringMode.Api);
         
         RunDaemon(serviceProvider);
     }
@@ -124,21 +129,6 @@ class Program
         shutdownEvent.Wait();
         // await manager.StopAll();
     }
-
-    private static GatheringMode ParseGatheringMode(string[] args)
-    {
-        foreach (var arg in args)
-        {
-            if (arg.StartsWith("--skipGathering=", StringComparison.OrdinalIgnoreCase))
-            {
-                var value = arg.Substring("--skipGathering=".Length).ToLower();
-                if (value == "full") return GatheringMode.Full;
-                if (value == "api") return GatheringMode.Api;
-            }
-        }
-
-        return GatheringMode.None;
-    }
 }
 
 public enum GatheringMode
@@ -146,4 +136,23 @@ public enum GatheringMode
     None,
     Api, // skip Api calls
     Full, // skips Api calls + inserting ~297k stations into PostgresSQL
+}
+
+public class Options
+{
+    [Option('s', "skipGathering", Required = false, HelpText = "Skip gathering of stations. Options: 'None', 'Api', 'Full'")]
+    public string SkipGatheringStr { get; set; } = "None";
+    
+    public GatheringMode SkipGathering 
+    { 
+        get 
+        {
+            if (Enum.TryParse<GatheringMode>(SkipGatheringStr, true, out var result))
+                return result;
+            return GatheringMode.None;
+        }
+    }
+    
+    [Option("debug", Required = false, HelpText = "Enable debug logging.")]
+    public bool Debug { get; set; } = false;
 }

@@ -33,14 +33,9 @@ public class ProxyRotator
 
     public HttpClient GetRandomProxy()
     {
-        if (!_proxyEnabled || _proxies.Count == 0)
-        {
-            _logger.LogDebug("No proxies available or proxy usage disabled. Returning direct connection HttpClient.");
-            return new HttpClient();
-        }
+        if (!_proxyEnabled || _proxies.Count == 0) return new HttpClient();
 
         var selectedProxy = _proxies[_random.Next(_proxies.Count)];
-
         var webProxy = new WebProxy();
         
         // Parse the proxy URL
