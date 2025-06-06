@@ -71,6 +71,7 @@ class StatisticsService {
 		return {
 			executionTime: DateTime.now().diff(startTime, "milliseconds").milliseconds,
 			relatedEvaNumbers: evaNumbers,
+			totalJourneys: result.length,
 			departure: this.gatherDepartures(body.filter, result.map(item => item.viaStops)),
 			arrival: this.gatherArrivals(body.filter, result.map(item => item.viaStops)),
 			cancellations: this.gatherCancellations(result.map(item => item.viaStops)),

@@ -48,6 +48,7 @@ const StopAnalyticsSchema = t.Object({
 	relatedEvaNumbers: t.Array(t.Number(), {
 		description: "An array of related evaNumbers which where considered in the analysis"
 	}),
+	totalJourneys: t.Number({ description: "Total number of journeys considered in the analysis" }),
 	products: t.Array(
 		t.Object({
 			type: t.String({ description: "Type of product" }),
