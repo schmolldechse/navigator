@@ -10,15 +10,27 @@ import { StopAnalyticsSchema } from "../models/elysia/analytics.model";
 import { StatisticsHelper } from "./statistics.helper";
 
 class StatisticsService {
-	// timetable change
-	readonly START_DATE: DateTime = DateTime.fromObject({ day: 17, month: 12, year: 2024 }).startOf("day");
 	private readonly helper: StatisticsHelper = new StatisticsHelper();
+
+	// timetable changes
+	readonly TIMETABLE_CHANGES: DateTime[] = [
+		DateTime.fromObject({ day: 17, month: 12, year: 2024 }).startOf("day"),
+		DateTime.fromObject({ day: 9, month: 6, year: 2025 }).startOf("day"),
+	]
+
+	private getLastTimetableChange = (compareTo?: DateTime): DateTime => {
+		compareTo ??= DateTime.now();
+
+		const filteredChanges = this.TIMETABLE_CHANGES.filter(change => change <= compareTo);
+		if (filteredChanges.length === 0) return this.TIMETABLE_CHANGES.reduce((min, date) => date < min ? date : min, this.TIMETABLE_CHANGES[0]);
+		return filteredChanges.reduce((max, date) => date > max ? date : max, filteredChanges[0]);
+	}
 
 	readonly statsBody = t.Object({
 		startDate: t.Optional(
 			DateTimeObject({
 				fieldName: "startDate",
-				default: this.START_DATE.toFormat("yyyy-MM-dd"),
+				default: this.getLastTimetableChange().toFormat("yyyy-MM-dd"),
 				description: "Start date of the filter",
 				error: "Parameter 'startDate' could not be parsed as a date."
 			})
