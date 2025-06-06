@@ -1,46 +1,38 @@
 import { t } from "elysia";
 
-const MeasurementSchema = t.Object({
+const MeasurementByDateSchema = t.Object({
 	date: t.String({ format: "date" }),
 	totalMeasured: t.Number()
+});
+
+const CompleteMeasurementSchema = t.Object({
+	totalMeasured: t.Number(),
+	measurements: t.Array(MeasurementByDateSchema)
 });
 
 const DelaySchema = t.Object({
 	average: t.Number({ description: "Specifies the average delay in seconds" }),
 	minimum: t.Number({ description: "Specifies the minimum delay in seconds" }),
-	maximum: t.Number({ description: "Specifies the maximum delay in seconds" }),
+	maximum: t.Number({ description: "Specifies the maximum delay in seconds" })
 });
 
-const TimeSchema = t.Object({
-	total: t.Object({
-		totalMeasured: t.Number(),
-		measurements: t.Array(MeasurementSchema)
-	}),
+const DelayByDateMeasurementSchema = t.Intersect([
+	MeasurementByDateSchema,
+	DelaySchema
+]);
+
+const TimeStatisticsSchema = t.Object({
+	total: CompleteMeasurementSchema,
 	delay: t.Intersect([
 		DelaySchema,
 		t.Object({
-			measurements: t.Array(t.Intersect([
-				MeasurementSchema,
-				DelaySchema,
-			]))
+			measurements: t.Array(DelayByDateMeasurementSchema)
 		})
 	]),
-	tooEarly: t.Object({
-		totalMeasured: t.Number(),
-		measurements: t.Array(MeasurementSchema)
-	}),
-	punctual: t.Object({
-		totalMeasured: t.Number(),
-		measurements: t.Array(MeasurementSchema)
-	}),
-	delayed: t.Object({
-		totalMeasured: t.Number(),
-		measurements: t.Array(MeasurementSchema)
-	}),
-	platformChanges: t.Object({
-		totalMeasured: t.Number(),
-		measurements: t.Array(MeasurementSchema)
-	})
+	tooEarly: CompleteMeasurementSchema,
+	punctual: CompleteMeasurementSchema,
+	delayed: CompleteMeasurementSchema,
+	platformChanges: CompleteMeasurementSchema
 });
 
 const StopAnalyticsSchema = t.Object({
@@ -50,18 +42,14 @@ const StopAnalyticsSchema = t.Object({
 	}),
 	totalJourneys: t.Number({ description: "Total number of journeys considered in the analysis" }),
 	products: t.Array(
-		t.Object({
-			type: t.String({ description: "Type of product" }),
-			totalMeasured: t.Number(),
-			measurements: t.Array(MeasurementSchema)
-		})
+		t.Intersect([
+			CompleteMeasurementSchema,
+			t.Object({ type: t.String({ description: "Type of the product" }) })
+		])
 	),
-	arrival: TimeSchema,
-	departure: TimeSchema,
-	cancellations: t.Object({
-		totalMeasured: t.Number(),
-		measurements: t.Array(MeasurementSchema)
-	})
+	arrival: TimeStatisticsSchema,
+	departure: TimeStatisticsSchema,
+	cancellations: CompleteMeasurementSchema
 });
 
-export { MeasurementSchema, StopAnalyticsSchema };
+export { MeasurementByDateSchema, CompleteMeasurementSchema, TimeStatisticsSchema, DelayByDateMeasurementSchema, StopAnalyticsSchema };
