@@ -103,7 +103,7 @@ class StationService {
 		).flatMap((ril) => ril.ril100);
 		if (rilMap.length === 0) return [evaNumber];
 
-		return (
+		const evaNumbers = (
 			await Promise.all(
 				rilMap.map(async (ril100) =>
 					(
@@ -115,6 +115,8 @@ class StationService {
 				)
 			)
 		).flat();
+
+		return [...new Set(evaNumbers)];
 	};
 
 	private saveStation = async (station: Station, insertNew: boolean = true): Promise<Station> => {
