@@ -49,6 +49,8 @@ class StatisticsService {
 	});
 
 	startEvaluation = async (body: typeof this.statsBody.static, evaNumbers: number[]): Promise<StopAnalytics> => {
+		const startTime = DateTime.now();
+
 		const query = database
 			.select({ journey: journeys, viaStops: journeyViaStops })
 			.from(journeys)
@@ -66,9 +68,14 @@ class StatisticsService {
 
 		const result = await query.where(and(...conditions)) as unknown as { journey: typeof journeys, viaStops: typeof journeyViaStops }[];
 
-		// console.dir(this.gatherProducts(result.map((resultElement) => resultElement.journey)), { depth: null });
-		// console.dir(this.gatherCancellations(result.map((resultElement) => resultElement.viaStops)), { depth: null });
-		console.dir(this.gatherArrivals(body.filter, result.map((resultElement) => resultElement.viaStops)), { depth: null });
+		return {
+			executionTime: DateTime.now().diff(startTime, "milliseconds").milliseconds,
+			relatedEvaNumbers: evaNumbers,
+			departure: this.gatherDepartures(body.filter, result.map(item => item.viaStops)),
+			arrival: this.gatherArrivals(body.filter, result.map(item => item.viaStops)),
+			cancellations: this.gatherCancellations(result.map(item => item.viaStops)),
+			products: this.gatherProducts(result.map(item => item.journey))
+		}
 	};
 
 	private gatherProducts = (journeyList: typeof journeys[]): typeof StopAnalyticsSchema.static.products => {
@@ -258,6 +265,141 @@ class StatisticsService {
 		});
 
 		return arrival;
+	}
+
+	private gatherDepartures = (filter: typeof this.statsBody.static.filter, viaStops: typeof journeyViaStops[]): typeof StopAnalyticsSchema.static.departure => {
+		const departure: typeof StopAnalyticsSchema.static.departure = {
+			total: {
+				totalMeasured: 0,
+				measurements: []
+			},
+			delay: {
+				average: 0,
+				minimum: Number.MAX_SAFE_INTEGER,
+				maximum: Number.MIN_SAFE_INTEGER,
+				measurements: []
+			},
+			tooEarly: {
+				totalMeasured: 0,
+				measurements: []
+			},
+			punctual: {
+				totalMeasured: 0,
+				measurements: []
+			},
+			delayed: {
+				totalMeasured: 0,
+				measurements: []
+			},
+			platformChanges: {
+				totalMeasured: 0,
+				measurements: []
+			}
+		};
+
+		const calculateTotal = (date: DateTime): void => {
+			if (!departure.total!.measurements.some(measurement => measurement.date === date.toFormat("yyyy-MM-dd")))
+				departure.total!.measurements.push({
+					date: date.toFormat("yyyy-MM-dd"),
+					totalMeasured: 0
+				});
+
+			const measurement = departure.total!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
+			measurement!.totalMeasured += 1;
+		}
+		const calculateDelay = (viaStop: typeof journeyViaStops, date: DateTime): void => {
+			if(!departure.delay!.measurements.some(measurement => measurement.date === date.toFormat("yyyy-MM-dd")))
+				departure.delay!.measurements.push({
+					date: date.toFormat("yyyy-MM-dd"),
+					totalMeasured: 0,
+					average: 0,
+					minimum: Number.MAX_SAFE_INTEGER,
+					maximum: Number.MIN_SAFE_INTEGER
+				});
+			const measurement = departure.delay!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
+			measurement!.totalMeasured += 1;
+			measurement!.average += Number(viaStop.arrivalDelay);
+			measurement!.minimum = Math.min(measurement!.minimum, Number(viaStop.arrivalDelay));
+			measurement!.maximum = Math.max(measurement!.maximum, Number(viaStop.arrivalDelay));
+		}
+		const calculateTooEarly = (viaStop: typeof journeyViaStops, date: DateTime): void => {
+			if(!departure.tooEarly!.measurements.some(measurement => measurement.date === date.toFormat("yyyy-MM-dd")))
+				departure.tooEarly!.measurements.push({
+					date: date.toFormat("yyyy-MM-dd"),
+					totalMeasured: 0
+				});
+
+			if (Number(viaStop.arrivalDelay) > 0) return;
+			const measurement = departure.tooEarly!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
+			measurement!.totalMeasured += 1;
+		}
+		const calculatePunctual = (viaStop: typeof journeyViaStops, date: DateTime): void => {
+			if(!departure.punctual!.measurements.some(measurement => measurement.date === date.toFormat("yyyy-MM-dd")))
+				departure.punctual!.measurements.push({
+					date: date.toFormat("yyyy-MM-dd"),
+					totalMeasured: 0
+				});
+
+			if (Number(viaStop.arrivalDelay) < 0 || Number(viaStop.arrivalDelay) > filter.delayThreshold) return;
+			const measurement = departure.punctual!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
+			measurement!.totalMeasured += 1;
+		}
+		const calculateDelayed = (viaStop: typeof journeyViaStops, date: DateTime): void => {
+			if(!departure.delayed!.measurements.some(measurement => measurement.date === date.toFormat("yyyy-MM-dd")))
+				departure.delayed!.measurements.push({
+					date: date.toFormat("yyyy-MM-dd"),
+					totalMeasured: 0
+				});
+
+			if (Number(viaStop.arrivalDelay) <= filter.delayThreshold) return;
+			const measurement = departure.delayed!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
+			measurement!.totalMeasured += 1;
+		}
+		const calculatePlatformChanges = (viaStop: typeof journeyViaStops, date: DateTime): void => {
+			if(!departure.platformChanges!.measurements.some(measurement => measurement.date === date.toFormat("yyyy-MM-dd")))
+				departure.platformChanges!.measurements.push({
+					date: date.toFormat("yyyy-MM-dd"),
+					totalMeasured: 0
+				});
+
+			if (String(viaStop.arrivalPlannedPlatform) === String(viaStop.arrivalActualPlatform)) return;
+			const measurement = departure.platformChanges!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
+			measurement!.totalMeasured += 1;
+		}
+
+		for (const viaStop of viaStops) {
+			if (!(viaStop.departureActualTime ?? viaStop.departurePlannedTime)) continue;
+
+			const date = DateTime.fromFormat(String(viaStop.journeyId).substring(0, 8), "yyyyMMdd");
+			if (!date.isValid) continue;
+
+			calculateTotal(date);
+			calculateDelay(viaStop, date);
+			calculateTooEarly(viaStop, date);
+			calculatePunctual(viaStop, date);
+			calculateDelayed(viaStop, date);
+			calculatePlatformChanges(viaStop, date);
+		}
+
+		// sum up totalMeasured for: total, tooEarly, punctual, delayed, platformChanges
+		departure.total!.totalMeasured = departure.total!.measurements.reduce((acc, measurement) => acc + measurement.totalMeasured, 0);
+		departure.tooEarly!.totalMeasured = departure.tooEarly!.measurements.reduce((acc, measurement) => acc + measurement.totalMeasured, 0);
+		departure.punctual!.totalMeasured = departure.punctual!.measurements.reduce((acc, measurement) => acc + measurement.totalMeasured, 0);
+		departure.delayed!.totalMeasured = departure.delayed!.measurements.reduce((acc, measurement) => acc + measurement.totalMeasured, 0);
+		departure.platformChanges!.totalMeasured = departure.platformChanges!.measurements.reduce((acc, measurement) => acc + measurement.totalMeasured, 0);
+
+		// calculate averages
+		const delayTotalMeasured = departure.delayed!.measurements.reduce((acc, measurement) => acc + measurement.totalMeasured, 0);
+		departure.delay!.average = departure.delay!.measurements.reduce((acc, measurement) => acc + measurement.average, 0) / delayTotalMeasured;
+		departure.delay!.minimum = departure.delay!.measurements.reduce((acc, measurement) => Math.min(acc, measurement.minimum), Number.MAX_SAFE_INTEGER);
+		departure.delay!.maximum = departure.delay!.measurements.reduce((acc, measurement) => Math.max(acc, measurement.maximum), Number.MIN_SAFE_INTEGER);
+
+		departure.delay!.measurements.forEach(measurement => {
+			if (measurement.totalMeasured === 0) return;
+			measurement.average = measurement.average / measurement.totalMeasured;
+		});
+
+		return departure;
 	}
 }
 
