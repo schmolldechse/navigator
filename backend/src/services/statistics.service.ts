@@ -115,9 +115,6 @@ class StatisticsService {
 		};
 
 		for (const viaStop of viaStops) {
-			if (!viaStop.cancelled) continue;
-			cancellations.totalMeasured += 1;
-
 			const date = DateTime.fromFormat(String(viaStop.journeyId).substring(0, 8), "yyyyMMdd");
 			if (!date.isValid) continue;
 
@@ -127,8 +124,11 @@ class StatisticsService {
 					totalMeasured: 0
 				});
 			const measurement = cancellations!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
-			measurement!.totalMeasured += 1;
+			if (viaStop.cancelled) measurement!.totalMeasured += 1;
 		}
+
+		// sum up totalMeasured
+		cancellations!.totalMeasured = cancellations!.measurements.reduce((acc, measurement) => acc + measurement.totalMeasured, 0);
 
 		return cancellations;
 	}
