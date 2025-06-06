@@ -329,9 +329,9 @@ class StatisticsService {
 				});
 			const measurement = departure.delay!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
 			measurement!.totalMeasured += 1;
-			measurement!.average += Number(viaStop.arrivalDelay);
-			measurement!.minimum = Math.min(measurement!.minimum, Number(viaStop.arrivalDelay));
-			measurement!.maximum = Math.max(measurement!.maximum, Number(viaStop.arrivalDelay));
+			measurement!.average += Number(viaStop.departureDelay);
+			measurement!.minimum = Math.min(measurement!.minimum, Number(viaStop.departureDelay));
+			measurement!.maximum = Math.max(measurement!.maximum, Number(viaStop.departureDelay));
 		}
 		const calculateTooEarly = (viaStop: typeof journeyViaStops, date: DateTime): void => {
 			if(!departure.tooEarly!.measurements.some(measurement => measurement.date === date.toFormat("yyyy-MM-dd")))
@@ -340,7 +340,7 @@ class StatisticsService {
 					totalMeasured: 0
 				});
 
-			if (Number(viaStop.arrivalDelay) > 0) return;
+			if (Number(viaStop.departureDelay) > 0) return;
 			const measurement = departure.tooEarly!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
 			measurement!.totalMeasured += 1;
 		}
@@ -351,7 +351,7 @@ class StatisticsService {
 					totalMeasured: 0
 				});
 
-			if (Number(viaStop.arrivalDelay) < 0 || Number(viaStop.arrivalDelay) > filter.delayThreshold) return;
+			if (Number(viaStop.departureDelay) < 0 || Number(viaStop.departureDelay) > filter.delayThreshold) return;
 			const measurement = departure.punctual!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
 			measurement!.totalMeasured += 1;
 		}
@@ -362,7 +362,7 @@ class StatisticsService {
 					totalMeasured: 0
 				});
 
-			if (Number(viaStop.arrivalDelay) <= filter.delayThreshold) return;
+			if (Number(viaStop.departureDelay) <= filter.delayThreshold) return;
 			const measurement = departure.delayed!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
 			measurement!.totalMeasured += 1;
 		}
@@ -373,7 +373,7 @@ class StatisticsService {
 					totalMeasured: 0
 				});
 
-			if (String(viaStop.arrivalPlannedPlatform) === String(viaStop.arrivalActualPlatform)) return;
+			if (String(viaStop.departurePlannedPlatform) === String(viaStop.departureActualPlatform)) return;
 			const measurement = departure.platformChanges!.measurements.find(measurement => measurement.date === date.toFormat("yyyy-MM-dd"));
 			measurement!.totalMeasured += 1;
 		}
