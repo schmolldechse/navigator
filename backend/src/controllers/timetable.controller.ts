@@ -2,7 +2,7 @@ import Elysia, { t } from "elysia";
 import { HttpStatus } from "../response/status";
 import { Profile, RequestType, TimetableService } from "../services/timetable.service";
 import { HttpError } from "../response/error";
-import { ConnectionSchema } from "../models/elysia/connection.model";
+import { GroupedTimetableEntrySchema } from "../models/elysia/timetable.model";
 
 const timetableService = new TimetableService();
 
@@ -65,7 +65,7 @@ const timetableController = new Elysia({
 				description:
 					"Get the timetable for a station by its evaNumber and profile.\n\nKeep in mind, that the 'when' parameter is ignored for the 'bahnhof' profile."
 			},
-			response: t.Array(t.Object({ connections: t.Array(ConnectionSchema) }))
+			response: t.Array(GroupedTimetableEntrySchema)
 		}
 	);
 export default timetableController;
