@@ -264,6 +264,16 @@ class StatisticsService {
 			measurement.average = measurement.average / measurement.totalMeasured;
 		});
 
+		// ensure non MIN_SAFE_INTEGER, MAX_SAFE_INTEGER & NaN values
+		arrival.delay!.average = isNaN(arrival.delay!.average) ? 0 : arrival.delay!.average;
+		arrival.delay!.minimum = arrival.delay!.minimum === Number.MAX_SAFE_INTEGER ? 0 : arrival.delay!.minimum;
+		arrival.delay!.maximum = arrival.delay!.maximum === Number.MIN_SAFE_INTEGER ? 0 : arrival.delay!.maximum;
+		arrival.delay!.measurements.forEach(measurement => {
+			measurement.average = isNaN(measurement.average) ? 0 : measurement.average;
+			measurement.minimum = measurement.minimum === Number.MAX_SAFE_INTEGER ? 0 : measurement.minimum;
+			measurement.maximum = measurement.maximum === Number.MIN_SAFE_INTEGER ? 0 : measurement.maximum;
+		});
+
 		return arrival;
 	}
 
@@ -397,6 +407,16 @@ class StatisticsService {
 		departure.delay!.measurements.forEach(measurement => {
 			if (measurement.totalMeasured === 0) return;
 			measurement.average = measurement.average / measurement.totalMeasured;
+		});
+
+		// ensure non MIN_SAFE_INTEGER, MAX_SAFE_INTEGER & NaN values
+		departure.delay!.average = isNaN(departure.delay!.average) ? 0 : departure.delay!.average;
+		departure.delay!.minimum = departure.delay!.minimum === Number.MAX_SAFE_INTEGER ? 0 : departure.delay!.minimum;
+		departure.delay!.maximum = departure.delay!.maximum === Number.MIN_SAFE_INTEGER ? 0 : departure.delay!.maximum;
+		departure.delay!.measurements.forEach(measurement => {
+			measurement.average = isNaN(measurement.average) ? 0 : measurement.average;
+			measurement.minimum = measurement.minimum === Number.MAX_SAFE_INTEGER ? 0 : measurement.minimum;
+			measurement.maximum = measurement.maximum === Number.MIN_SAFE_INTEGER ? 0 : measurement.maximum;
 		});
 
 		return departure;
