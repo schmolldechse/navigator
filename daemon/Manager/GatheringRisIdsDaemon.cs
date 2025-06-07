@@ -143,7 +143,7 @@ public class GatheringRisIdsDaemon : Daemon
 
         string uuidPart = fullTripId.Substring(9);
         if (!Guid.TryParse(uuidPart, out Guid guid))
-            throw new FormatException("Input does not contain a valid UUID after the date");
+            throw new FormatException($"Input does not contain a valid UUID after the date: {fullTripId}");
         return guid;
     }
 
