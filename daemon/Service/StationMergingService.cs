@@ -21,16 +21,13 @@ public class StationMergingService
         _stadaFile = Path.Combine(_tempFolder, "stada.json");
     }
 
-    public async Task<List<Station>> MergeStationsAsync(CancellationToken cancellationToken = default)
+    public async Task<List<Station>> MergeFiles(CancellationToken cancellationToken = default)
     {
-        var evaNumberRilDict = await LoadStadaStationsAsync(cancellationToken);
-        var rilProductsDict = new ConcurrentDictionary<string, HashSet<string>>(); // use HashSet for unique products
-        
         var risFiles = Directory.GetFiles(_tempFolder).Where(file => !file.EndsWith("stada.json")).ToList();
         if (!risFiles.Any()) throw new InvalidOperationException("No RIS files found in the temp folder");
 
-        var allStations = new ConcurrentDictionary<int, Station>();
-        var risFileTasks = risFiles.Select(async file =>
+        ConcurrentDictionary<int, Station> stations = new ConcurrentDictionary<int, Station>();
+        var tasks = risFiles.Select(async file =>
         {
             await using var fileStream = File.OpenRead(file);
             using var document = await JsonDocument.ParseAsync(fileStream, cancellationToken: cancellationToken);
@@ -53,89 +50,72 @@ public class StationMergingService
                     .Append(evaNumber)
                     .ToArray();
 
-                // parameters
-                var ril100Identifiers = GetRil100Identifiers(groupEvaNumbers, evaNumberRilDict);
                 var products = stationElement.GetProperty("availableTransports").EnumerateArray()
                     .Select(product => Product.MapProduct(product.GetString()))
-                    .Concat(GetProductsByRil(ril100Identifiers, rilProductsDict))
                     .Distinct()
                     .ToList();
                 var name = stationElement.GetProperty("names").GetProperty("DE").GetProperty("nameLong").GetString()!;
 
-                // save products by ril100
-                ril100Identifiers.ToList().ForEach(ril100 => rilProductsDict.AddOrUpdate(
-                    ril100,
-                    _ => [..products],
-                    (_, existingProducts) => [..existingProducts, ..products]
-                ));
-
-                foreach (var iteratingEvaNumber in groupEvaNumbers)
+                foreach (var groupEvaNumber in groupEvaNumbers)
                 {
-                    allStations.AddOrUpdate(iteratingEvaNumber,
-                        _ => new Station
+                    stations.AddOrUpdate(groupEvaNumber, (_) => new Station()
+                    {
+                        EvaNumber = groupEvaNumber,
+                        Name = stationElement.GetProperty("names").GetProperty("DE").GetProperty("nameLong")
+                            .GetString()!,
+                        Products = products.Select(product => new Product()
                         {
-                            Name = name,
-                            EvaNumber = iteratingEvaNumber,
-                            Coordinates = new()
+                            EvaNumber = groupEvaNumber,
+                            ProductName = product,
+                            QueryingEnabled = false
+                        }).ToList(),
+                        Coordinates = new Coordinates()
+                        {
+                            Latitude = stationElement.GetProperty("position").GetProperty("latitude").GetDouble(),
+                            Longitude = stationElement.GetProperty("position").GetProperty("longitude").GetDouble()
+                        }
+                    }, (_, existingStation) =>
+                    {
+                        if (evaNumber == groupEvaNumber)
+                        {
+                            existingStation.Name = name;
+                            existingStation.Coordinates = new Coordinates()
                             {
                                 Latitude = stationElement.GetProperty("position").GetProperty("latitude").GetDouble(),
                                 Longitude = stationElement.GetProperty("position").GetProperty("longitude").GetDouble()
-                            },
-                            Ril100 = ril100Identifiers.Select(rill100 => new Ril100()
+                            };
+                        }
+
+                        existingStation.Products = existingStation.Products.Union(products.Select(product =>
+                            new Product()
                             {
-                                Ril100Identifier = rill100,
-                                EvaNumber = iteratingEvaNumber
-                            }).ToList(),
-                            Products = products.Select(product => new Product
-                            {
-                                EvaNumber = iteratingEvaNumber,
+                                EvaNumber = groupEvaNumber,
                                 ProductName = product,
                                 QueryingEnabled = false
-                            }).ToList(),
-                        },
-                        (_, existingStation) =>
-                        {
-                            existingStation.Name = name;
-                            existingStation.EvaNumber = iteratingEvaNumber;
-                            existingStation.Ril100 = existingStation.Ril100.Union(ril100Identifiers.Select(rill100 => new Ril100()
-                            {
-                                Ril100Identifier = rill100,
-                                EvaNumber = iteratingEvaNumber
-                            }).ToList()).DistinctBy(x => x.Ril100Identifier).ToList();
-                            
-                            // this update process is necessary if the station itself does not have any "ril100" identifier
-                            existingStation.Products = existingStation.Products.Union(products.Select(product => new Product
-                            {
-                                EvaNumber = iteratingEvaNumber,
-                                ProductName = product,
-                                QueryingEnabled = false
-                            }).ToList()).DistinctBy(x => x.ProductName).ToList();
-                            return existingStation;
-                        });
+                            })).DistinctBy(x => x.ProductName).ToList();
+                        return existingStation;
+                    });
                 }
             }
         });
-        await Task.WhenAll(risFileTasks);
-        
-        // update products by ril100 identifiers
-        allStations.Values.Where(station => station.Ril100.Any(ril100 => rilProductsDict.ContainsKey(ril100.Ril100Identifier)))
-            .AsParallel()
-            .ForAll(station =>
-            {
-                var ril100Identifiers = station.Ril100
-                    .Select(ril100 => ril100.Ril100Identifier)
-                    .ToArray();
-
-                station.Products = station.Products.Concat(GetProductsByRil(ril100Identifiers, rilProductsDict)
-                    .Select(product => new Product()
-                    {
-                        EvaNumber = station.EvaNumber,
-                        ProductName = product,
-                        QueryingEnabled = false
-                    })).DistinctBy(x => x.ProductName).ToList();
-            });
-        return allStations.Values.ToList();
+        await Task.WhenAll(tasks);
+        return stations.Values.ToList();
     }
+
+    public async Task<List<Station>> MergeWithStada(List<Station> stations, CancellationToken cancellationToken = default)
+    {
+        var stadaStations = await LoadStadaStationsAsync(cancellationToken);
+        foreach (var station in stations)
+        {
+            if (!stadaStations.ContainsKey(station.EvaNumber)) continue;
+            station.Ril100 = stadaStations.GetValueOrDefault(station.EvaNumber, []).Select(ril100 => new Ril100()
+            {
+                EvaNumber = station.EvaNumber,
+                Ril100Identifier = ril100
+            }).ToList();
+        }
+        return stations;
+    } 
 
     private async Task<Dictionary<int, string[]>> LoadStadaStationsAsync(CancellationToken cancellationToken)
     {
@@ -176,13 +156,6 @@ public class StationMergingService
 
     private string[] GetRil100Identifiers(int[] evaNumbers, Dictionary<int, string[]> stadaStations) => evaNumbers
         .SelectMany(evaNumber => stadaStations.GetValueOrDefault(evaNumber, []))
-        .Distinct()
-        .ToArray();
-
-    private string[] GetProductsByRil(string[] ril100Identifiers,
-        ConcurrentDictionary<string, HashSet<string>> productsByRil) => ril100Identifiers
-        .Where(productsByRil.ContainsKey)
-        .SelectMany(ril => productsByRil[ril])
         .Distinct()
         .ToArray();
 }

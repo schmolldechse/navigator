@@ -98,11 +98,14 @@ class Program
             await stationDiscoveryService.DiscoverStations();
         }
         else logger.LogInformation("Skipping gathering of stations as requested.");
-
+        
         // merge stations
         var stationMergingService = serviceProvider.GetRequiredService<StationMergingService>();
-        var stations = await stationMergingService.MergeStationsAsync();
+        var stations = await stationMergingService.MergeFiles();
         logger.LogInformation("Merged {Count} stations.", stations.Count);
+        
+        stations = await stationMergingService.MergeWithStada(stations);
+        logger.LogInformation("Merged with STADA data");
 
         // filter out stations already in the database
         var dbContext = serviceProvider.GetRequiredService<NavigatorDbContext>();
@@ -113,7 +116,7 @@ class Program
         dbContext.Stations.AddRange(newStations);
         var amount = await dbContext.SaveChangesAsync();
         logger.LogInformation("Inserted {Amount} entries", amount);
-        
+
         logger.LogWarning("Please change --skipGathering to 'full' to avoid calling this process again.");
     }
 
