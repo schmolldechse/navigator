@@ -20,7 +20,7 @@ namespace daemon.Migrations
                 schema: "core",
                 columns: table => new
                 {
-                    journey_id = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: false),
+                    journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
                     product_type = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     product_name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     journey_number = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
@@ -39,7 +39,7 @@ namespace daemon.Migrations
                 schema: "core",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<string>(type: "character varying(73)", maxLength: 73, nullable: false),
                     product = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     discovery_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     last_seen = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
@@ -75,7 +75,7 @@ namespace daemon.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    journey_id = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: false),
+                    journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
                     code = table.Column<int>(type: "integer", nullable: false),
                     message = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
                     summary = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false)
@@ -99,7 +99,7 @@ namespace daemon.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    journey_id = table.Column<string>(type: "character varying(45)", maxLength: 45, nullable: false),
+                    journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
                     name = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
                     eva_number = table.Column<int>(type: "integer", nullable: false),
                     cancelled = table.Column<bool>(type: "boolean", nullable: false),
@@ -208,11 +208,10 @@ namespace daemon.Migrations
                 column: "stop_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_via-stops_journey_id_eva_number",
+                name: "IX_journey_via-stops_journey_id",
                 schema: "core",
                 table: "journey_via-stops",
-                columns: new[] { "journey_id", "eva_number" },
-                unique: true);
+                column: "journey_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_journeys_journey_id",

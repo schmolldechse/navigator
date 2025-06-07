@@ -128,7 +128,7 @@ public class GatheringRisIdsDaemon : Daemon
         }).ToList();
     }
 
-    private Guid TryParse(JsonElement jsonElement)
+    private string TryParse(JsonElement jsonElement)
     {
         if (jsonElement.ValueKind != JsonValueKind.String)
             throw new InvalidOperationException("Expected JSON element to be a string");
@@ -136,15 +136,14 @@ public class GatheringRisIdsDaemon : Daemon
         string fullTripId = jsonElement.GetString() ??
                             throw new InvalidOperationException("Expected JSON element to be a non-null string");
 
-        // Format: yyyyMMdd-{UUID}
+        // Format: yyyyMMdd-{UUID}[-UUID]
+        // {} - everything inside the curly brackets is necessary
+        // [] - everything inside the square brackets is optional
         string datePart = fullTripId.Substring(0, 8);
         if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out _))
             throw new FormatException("Input does not start with a valid date");
-
-        string uuidPart = fullTripId.Substring(9);
-        if (!Guid.TryParse(uuidPart, out Guid guid))
-            throw new FormatException($"Input does not contain a valid UUID after the date: {fullTripId}");
-        return guid;
+        
+        return fullTripId.Substring(9);
     }
 
     public override void Dispose()

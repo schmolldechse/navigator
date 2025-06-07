@@ -25,7 +25,7 @@ public abstract class AbstractMessage
 public class JourneyMessage : AbstractMessage
 {
     [Column("journey_id")]
-    [MaxLength(45)] // 8 (date) + 1 (dash) + 36 (UUID) = 45
+    [MaxLength(82)] // 8 (date) + 1 (dash) + 36 (UUID) [ +1 (dash) + 36 (UUID) ] = 45 | 82
     public string JourneyId { get; set; }
 
     [ForeignKey(nameof(JourneyId))] public virtual Journey Journey { get; set; } = null!;

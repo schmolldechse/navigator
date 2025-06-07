@@ -9,7 +9,7 @@ public class Journey
 {
     [Key]
     [Column("journey_id")]
-    [MaxLength(45)] // 8 (date) + 1 (dash) + 36 (UUID) = 45
+    [MaxLength(82)] // 8 (date) + 1 (dash) + 36 (UUID) [ +1 (dash) + 36 (UUID) ] = 45 | 82
     public required string Id { get; set; }
     
     public virtual LineInformation LineInformation { get; set; } = null!;

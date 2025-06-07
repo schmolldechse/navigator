@@ -25,9 +25,9 @@ namespace daemon.Migrations
 
             modelBuilder.Entity("daemon.Models.Database.IdentifiedRisId", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                    b.Property<string>("Id")
+                        .HasMaxLength(73)
+                        .HasColumnType("character varying(73)")
                         .HasColumnName("id");
 
                     b.Property<DateTime>("DiscoveryDate")
@@ -59,8 +59,8 @@ namespace daemon.Migrations
             modelBuilder.Entity("daemon.Models.Database.Journey", b =>
                 {
                     b.Property<string>("Id")
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)")
+                        .HasMaxLength(82)
+                        .HasColumnType("character varying(82)")
                         .HasColumnName("journey_id");
 
                     b.HasKey("Id");
@@ -89,8 +89,8 @@ namespace daemon.Migrations
 
                     b.Property<string>("JourneyId")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)")
+                        .HasMaxLength(82)
+                        .HasColumnType("character varying(82)")
                         .HasColumnName("journey_id");
 
                     b.Property<string>("Message")
@@ -218,8 +218,8 @@ namespace daemon.Migrations
 
                     b.Property<string>("JourneyId")
                         .IsRequired()
-                        .HasMaxLength(45)
-                        .HasColumnType("character varying(45)")
+                        .HasMaxLength(82)
+                        .HasColumnType("character varying(82)")
                         .HasColumnName("journey_id");
 
                     b.Property<string>("Name")
@@ -230,8 +230,7 @@ namespace daemon.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("JourneyId", "EvaNumber")
-                        .IsUnique();
+                    b.HasIndex("JourneyId");
 
                     b.ToTable("journey_via-stops", "core");
                 });
@@ -277,7 +276,7 @@ namespace daemon.Migrations
                     b.OwnsOne("daemon.Models.Database.LineInformation", "LineInformation", b1 =>
                         {
                             b1.Property<string>("JourneyId")
-                                .HasColumnType("character varying(45)");
+                                .HasColumnType("character varying(82)");
 
                             b1.Property<string>("JourneyName")
                                 .IsRequired()
@@ -314,7 +313,7 @@ namespace daemon.Migrations
                     b.OwnsOne("daemon.Models.Database.Operator", "Operator", b1 =>
                         {
                             b1.Property<string>("JourneyId")
-                                .HasColumnType("character varying(45)");
+                                .HasColumnType("character varying(82)");
 
                             b1.Property<string>("Code")
                                 .IsRequired()

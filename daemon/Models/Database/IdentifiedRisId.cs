@@ -9,7 +9,8 @@ public class IdentifiedRisId
 {
     [Key]
     [Column("id")]
-    public required Guid Id { get; set; }
+    [MaxLength(73)] 
+    public required string Id { get; set; }
     
     [MaxLength(128)]
     [Column("product")]

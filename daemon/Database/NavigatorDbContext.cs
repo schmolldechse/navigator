@@ -119,9 +119,6 @@ public class NavigatorDbContext : DbContext
                 d.Property(t => t.PlannedPlatform).HasColumnName("departure_planned_platform");
                 d.Property(t => t.ActualPlatform).HasColumnName("departure_actual_platform");
             });
-            
-            // ensure unique EvaNumber per Journey
-            entity.HasIndex(e => new { e.JourneyId, e.EvaNumber }).IsUnique();
         });
         
         // journey_stop_messages

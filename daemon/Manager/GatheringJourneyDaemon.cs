@@ -80,7 +80,7 @@ public class GatheringJourneyDaemon : Daemon
     private async Task ProcessJourney(IdentifiedRisId risId, DateTime date, NavigatorDbContext dbContext,
         CancellationToken cancellationToken)
     {
-        JourneyResponse journeyResponse = await CallApi(risId.Id.ToString(), date, cancellationToken);
+        JourneyResponse journeyResponse = await CallApi(risId.Id, date, cancellationToken);
         if (journeyResponse.ParsingError)
         {
             _logger.LogError("Failed to parse journey for RIS ID {RisId}", risId.Id);
