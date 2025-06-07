@@ -4,7 +4,10 @@ import { DateTime } from "luxon";
 import { Message, SmallStop, Time, TimetableEntry } from "../models/core/models";
 import { SingleTimetableEntrySchema } from "../models/elysia/timetable.model";
 import { mapToProduct } from "../lib/products";
-import { extractLeadingLetters } from "../lib/regex";
+import { extractJourneyNumber, extractLeadingLetters } from "../lib/regex";
+import { database } from "../db/postgres";
+import { stations } from "../db/core.schema";
+import { eq } from "drizzle-orm";
 
 enum RequestType {
 	DEPARTURES = "departures",
@@ -84,9 +87,11 @@ class TimetableService {
 		const response = await request.json();
 		if (!response?.items || !Array.isArray(response?.items)) return [];
 
-		return Object.values(response?.items)
-			.filter((journeyRaw: any) => journeyRaw?.train?.journeyId)
-			.map((journeyRaw: any) => ({ entries: [this.mapToJourney(journeyRaw)] }));
+		return await Promise.all(
+			Object.values(response?.items)
+				.filter((journeyRaw: any) => journeyRaw?.train?.journeyId)
+				.map(async (journeyRaw: any) => ({ entries: [await this.mapToJourney(journeyRaw)] }))
+		);
 	};
 
 	retrieveBahnhofConnections = async (
@@ -94,7 +99,8 @@ class TimetableService {
 		type: RequestType = RequestType.DEPARTURES,
 		queryParams: typeof this.query.static
 	): Promise<TimetableEntry[]> => {
-		let apiUrl: URL = new URL(`https://bahnhof.de/api/boards/${type}?evaNumbers=${evaNumber}`);
+		let apiUrl: URL = new URL(`https://bahnhof.de/api/boards/${type}`);
+		apiUrl.searchParams.append("evaNumbers", String(evaNumber));
 		apiUrl.searchParams.append("duration", String(queryParams.duration));
 		apiUrl.searchParams.append("locale", queryParams.language);
 
@@ -104,47 +110,99 @@ class TimetableService {
 		const response = await request.json();
 		if (!response?.entries || !Array.isArray(response?.entries)) return [];
 
-		return Object.values(response?.entries)
-			.filter(Array.isArray)
-			.map((journeyRaw) => ({
-				entries: journeyRaw
-					.filter((connectionRaw) => connectionRaw?.journeyID)
-					.map((connectionRaw) => this.mapToJourney(connectionRaw, { isBahnhofProfile: true }))
-			}));
+		return await Promise.all(
+			Object.values(response?.entries)
+				.filter(Array.isArray)
+				.map(async (journeyRaw) => ({
+					entries: await Promise.all(
+						journeyRaw
+							.filter((connectionRaw) => connectionRaw?.journeyID)
+							.map((connectionRaw) => this.mapToJourney(connectionRaw, { isBahnhofProfile: true }))
+					)
+				}))
+		);
 	};
 
-	private mapToJourney = (
+	retrieveHAFASConnections = async (
+		evaNumber: number,
+		type: RequestType = RequestType.DEPARTURES,
+		queryParams: typeof this.query.static
+	): Promise<TimetableEntry[]> => {
+		const typeString = type === RequestType.DEPARTURES ? "abfahrten" : "ankuenfte";
+
+		let apiUrl: URL = new URL(`https://int.bahn.de/web/api/reiseloesung/${typeString}`);
+		apiUrl.searchParams.append("datum", queryParams.when.toFormat("yyyy-MM-dd"));
+		apiUrl.searchParams.append("zeit", queryParams.when.toFormat("HH:mm:ss"));
+		apiUrl.searchParams.append("ortExtId", String(evaNumber));
+		apiUrl.searchParams.append("mitVias", String(true));
+
+		const request = await fetch(apiUrl, { method: "GET" });
+		if (!request.ok) return [];
+
+		const response = await request.json();
+		if (!response.entries || !Array.isArray(response.entries)) return [];
+
+		const values = Object.values(response.entries)
+			.filter((entry: any) => entry?.journeyId)
+			.map(async (entry: any) => {
+				// remove first and last entry of `ueber` as these are the actual origin and destination stops
+				let viaStops = entry?.ueber?.slice(1, -1) ?? [];
+
+				// as `ueber` only contains the name of the stops, we add `evaNumber` from our PostgreSQL database
+				viaStops = await Promise.all(
+					viaStops.map(async (viaStop: string) => {
+						const query = await database
+							.select({ evaNumber: stations.evaNumber })
+							.from(stations)
+							.where(eq(stations.name, viaStop));
+						return {
+							name: viaStop,
+							evaNumber: query[0]?.evaNumber ?? undefined
+						};
+					})
+				);
+
+				return {
+					...entry,
+					ueber: viaStops
+				};
+			});
+
+		return await Promise.all(
+			(await Promise.all(values)).map(async (entry) => ({
+				entries: [await this.mapToJourney(entry)]
+			}))
+		);
+	};
+
+	private mapToJourney = async (
 		entry: any,
 		options: {
 			isBahnhofProfile: boolean;
 		} = { isBahnhofProfile: false }
-	): typeof SingleTimetableEntrySchema.static => {
-		const journeyId = entry?.journeyID ?? entry?.train?.journeyId;
+	): Promise<typeof SingleTimetableEntrySchema.static> => {
+		const journeyId = entry?.journeyID ?? entry?.train?.journeyId ?? entry?.journeyId;
 		const isHAFAS = journeyId?.startsWith("2|#") ?? false;
 
-		return {
+		const journey = {
 			ris_journeyId: !isHAFAS ? journeyId : undefined,
 			hafas_journeyId: isHAFAS ? journeyId : undefined,
-			origin: this.mapToSmallStop(entry.stopPlace ?? entry?.station),
-			provenance: !isHAFAS ? undefined : undefined,
-			destination: this.mapToSmallStop(entry?.destination),
-			direction: !isHAFAS ? undefined : undefined,
-			cancelled: entry?.canceled ?? false,
+			origin: isHAFAS ? undefined : this.mapToSmallStop(entry.stopPlace ?? entry?.station),
+			destination: isHAFAS ? undefined : this.mapToSmallStop(entry?.destination),
+			cancelled: entry?.canceled,
 			timeInformation: this.mapToTime(entry),
 			lineInformation: {
-				productType: mapToProduct(entry?.type ?? entry?.train?.type).value,
-				productName: options.isBahnhofProfile ? extractLeadingLetters(entry?.lineName) : entry?.train?.category,
-				journeyNumber: options.isBahnhofProfile ? undefined : entry?.train?.no,
-				journeyName: entry?.lineName ?? entry?.train?.category + " " + entry?.train?.lineName,
+				productType: mapToProduct(entry?.type ?? entry?.train?.type ?? entry?.verkehrmittel?.produktGattung).value,
+				productName: options.isBahnhofProfile ? extractLeadingLetters(entry?.lineName) : entry?.train?.category ?? entry?.verkehrmittel?.kurzText,
+				journeyNumber: options.isBahnhofProfile ? undefined : entry?.train?.no ?? extractJourneyNumber(entry?.verkehrmittel?.name),
+				journeyName: entry?.lineName ?? entry?.verkehrmittel?.mittelText ?? (entry?.train?.category + " " + entry?.train?.lineName),
 				additionalJourneyName: !options.isBahnhofProfile ? undefined : entry?.additionalLineName,
 				operator: {
 					code: entry?.administrationID ?? entry?.administration?.id,
 					name: options.isBahnhofProfile ? undefined : entry?.administration?.operatorName
 				}
 			},
-			viaStops: !options.isBahnhofProfile
-				? undefined
-				: (entry?.viaStops ?? []).map((rawStop: any) => this.mapToSmallStop(rawStop)),
+			viaStops: (entry?.viaStops ?? entry?.ueber ?? []).map((rawStop: any) => this.mapToSmallStop(rawStop)),
 			messages: !options.isBahnhofProfile
 				? []
 				: entry?.messages?.common
@@ -154,14 +212,44 @@ class TimetableService {
 						.concat(entry?.messages?.via)
 						.map((messageRaw: any) => this.mapMessage(messageRaw))
 		} as typeof SingleTimetableEntrySchema.static;
+
+		if (isHAFAS) {
+			journey.origin = (
+				await database
+					.select({ name: stations.name })
+					.from(stations)
+					.where(eq(stations.evaNumber, Number(entry?.bahnhofsId)))
+			).map((station: any) => ({
+				name: station.name,
+				evaNumber: Number(entry?.bahnhofsId),
+				cancelled: false
+			}))[0];
+
+			journey.destination = (
+				await database
+					.select({ evaNumber: stations.evaNumber })
+					.from(stations)
+					.where(eq(stations.name, entry?.terminus))
+			).map((station: any) => ({
+				name: entry?.terminus,
+				evaNumber: station.evaNumber,
+				cancelled: false
+			}))[0];
+
+			journey.cancelled = (entry?.meldungen ?? []).some((message: any) => message.type = "HALT_AUSFALL");
+			journey.messages = (entry?.meldungen ?? []).map((message: any) => this.mapMessage(message, true));
+		}
+
+		if (journey.viaStops?.length === 0) journey.viaStops = undefined;
+		return journey;
 	};
 
 	private mapToSmallStop = (stop: any): SmallStop => ({
 		name: stop?.name,
 		evaNumber: Number(stop?.evaNumber ?? stop?.evaNo),
 		cancelled: stop?.canceled ?? false,
-		additional: stop?.additional ? stop?.additional : undefined,
-		separation: stop?.separation ? stop?.separation : undefined,
+		additional: stop?.additional,
+		separation: stop?.separation,
 		nameParts:
 			stop?.nameParts?.map((rawPart: any) => ({
 				type: rawPart.type,
@@ -170,26 +258,40 @@ class TimetableService {
 	});
 
 	private mapToTime = (entry: any): Time => {
-		const plannedTime = DateTime.fromISO(entry?.time ?? entry?.timeSchedule);
-		let actualTime = DateTime.fromISO(entry?.timePredicted ?? entry?.timeDelayed);
+		const plannedTime = DateTime.fromISO(entry?.time ?? entry?.timeSchedule ?? entry?.zeit);
+		let actualTime = DateTime.fromISO(entry?.timePredicted ?? entry?.timeDelayed ?? entry?.ezZeit);
 		if (!actualTime.isValid) actualTime = plannedTime;
 
 		const delay: number = actualTime.diff(plannedTime, ["seconds"]).seconds;
+
+		const plannedPlatform = entry?.platform ?? entry?.gleis;
+		let actualPlatform = entry?.platformPredicted ?? entry?.platformSchedule ?? entry?.ezGleis;
+		if (!actualPlatform) actualPlatform = plannedPlatform;
 
 		return {
 			plannedTime: plannedTime.toISO(),
 			actualTime: actualTime.toISO(),
 			delay: delay,
-			plannedPlatform: entry?.platform,
-			actualPlatform: entry?.platformPredicted ?? entry?.platformSchedule
+			plannedPlatform: plannedPlatform,
+			actualPlatform: actualPlatform
 		} as Time;
 	};
 
-	private mapMessage = (entry: any): Message => ({
-		type: entry?.type,
-		text: entry?.text,
-		links: entry?.links ?? undefined
-	});
+	private mapMessage = (entry: any, isHAFAS: boolean = false): Message => {
+		if (isHAFAS) {
+			const type = entry?.prioritaet === "HOCH" && entry?.type === "HALT_AUSFALL" ? "canceled-trip" : "general-warning";
+			return {
+				type: type,
+				text: entry?.text,
+			} as Message;
+		}
+
+		return {
+			type: entry?.type,
+			text: entry?.text,
+			links: entry?.links ?? undefined
+		};
+	}
 }
 
 export { TimetableService, RequestType, Profile };

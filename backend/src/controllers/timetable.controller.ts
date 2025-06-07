@@ -39,11 +39,8 @@ const timetableController = new Elysia({
 					return timetableService.retrieveBahnhofConnections(evaNumber, type, query);
 				case Profile.RIS:
 					return timetableService.retrieveRISConnections(evaNumber, type, query);
-				/**
-				 * TODO:
 				case Profile.HAFAS:
-					return 0;
-				 */
+					return timetableService.retrieveHAFASConnections(evaNumber, type, query);
 				default:
 					throw new HttpError(HttpStatus.HTTP_400_BAD_REQUEST, "Invalid profile");
 			}

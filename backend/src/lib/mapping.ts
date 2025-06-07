@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import calculateDuration from "./time";
-import { extractProduct } from "./regex";
-import { Connection, Message, RouteData, Stop } from "../models/core/models";
+import { extractLeadingLetters } from "./regex";
+import { Connection, Message, RouteData } from "../models/core/models";
 import { Sequence } from "../models/core/sequence";
 import { mapToProduct } from "./products";
 import Time from "./time";
@@ -47,7 +47,7 @@ const mapConnection = (
 					 * train?.type : ris profile
 					 */
 					type: mapToProduct(entry?.type ?? entry?.train?.type).value ?? undefined,
-					product: options.isBahnhofProfile ? extractProduct(entry?.lineName) : entry?.train?.category, // TODO
+					product: options.isBahnhofProfile ? extractLeadingLetters(entry?.lineName) : entry?.train?.category, // TODO
 					journeyNumber: entry?.line?.fahrtNr ?? entry?.train?.no ?? undefined,
 					/**
 					 * lineName : bahnhof profile
