@@ -135,7 +135,52 @@ class TimetableService {
 		);
 	};
 
-	retrieveHAFASConnections = async (
+	retrieveHafasConnections = async (
+		evaNumber: number,
+		type: RequestType = RequestType.DEPARTURES,
+		queryParams: typeof this.query.static
+	): Promise<TimetableEntry[]> => {
+		const requestAmount = Math.ceil(queryParams.duration / 60);
+		if (requestAmount === 1) return this.makeHafasRequest(evaNumber, type, queryParams);
+
+		const requests = Array.from({ length: requestAmount }, (_, i) =>
+			this.makeHafasRequest(evaNumber, type, {
+				...queryParams,
+				when: queryParams.when.plus({ minute: i * 60 }),
+				duration: Math.min(60, queryParams.duration - i * 60)
+			})
+		);
+
+		const results = (await Promise.all(requests)).flat();
+		const uniqueJourneys = new Map<string, typeof SingleTimetableEntrySchema.static>();
+		results.forEach((entry) => {
+			entry.entries.forEach((journey) => {
+				if (!journey.hafas_journeyId) return;
+				if (uniqueJourneys.has(journey.hafas_journeyId)) return;
+				uniqueJourneys.set(journey.hafas_journeyId, journey);
+			});
+		});
+
+		// filter out journeys that are after the requested duration
+		const endTime = queryParams.when.plus({ minute: queryParams.duration + 1 });
+		for (const [id, journey] of uniqueJourneys) {
+			const plannedTime = DateTime.fromISO(journey.timeInformation.actualTime);
+			if (plannedTime > endTime) uniqueJourneys.delete(id);
+		}
+
+		// sort journeys by actualTime
+		const sortedJourneys = Array.from(uniqueJourneys.values()).sort((a, b) => {
+			const aTime = DateTime.fromISO(a.timeInformation.actualTime);
+			const bTime = DateTime.fromISO(b.timeInformation.actualTime);
+			return aTime < bTime ? -1 : 1;
+		});
+
+		return sortedJourneys.map((journey: typeof SingleTimetableEntrySchema.static) => ({
+			entries: [journey]
+		}));
+	};
+
+	private makeHafasRequest = async (
 		evaNumber: number,
 		type: RequestType = RequestType.DEPARTURES,
 		queryParams: typeof this.query.static
@@ -158,22 +203,30 @@ class TimetableService {
 			Object.values(response.entries)
 				.filter((entry: any) => entry?.journeyId)
 				.map(async (entry: any) => {
-					// remove first and last entry of `ueber` as these are the actual origin and destination stops
-					let viaStopsArray = entry?.ueber?.slice(1, -1) ?? [];
+					let viaStopsArray = entry?.ueber ?? [];
 					if (viaStopsArray.length === 0) return { ...entry, ueber: [] };
 
 					// gather all evaNumbers of the via stops
 					const query = await database
-						.select({ name: stations.name, evaNumber: stations.evaNumber })
+						.select({ name: stations.name, evaNumber: stations.evaNumber, weight: stations.weight })
 						.from(stations)
 						.where(inArray(stations.name, viaStopsArray));
 
+					viaStopsArray = viaStopsArray.map((viaStop: string) => {
+						const matchingStops = query.filter(stop => stop.name === viaStop);
+						if (matchingStops.length > 0) {
+							const stopWithHighestWeight = matchingStops.reduce((prev, current) =>
+								(current.weight > prev.weight) ? current : prev, matchingStops[0]);
+							return { name: viaStop, evaNumber: stopWithHighestWeight.evaNumber };
+						}
+						return { name: viaStop, evaNumber: -1 };
+					});
+
 					return {
 						...entry,
-						ueber: viaStopsArray.map((viaStop: string) => ({
-							name: viaStop,
-							evaNumber: query.find((stop) => stop.name === viaStop)?.evaNumber ?? undefined
-						}))
+						ueber: viaStopsArray.slice(1, -1),
+						originEvaNumber: viaStopsArray[0]?.evaNumber!,
+						destinationEvaNumber: viaStopsArray[viaStopsArray.length - 1]?.evaNumber!
 					};
 				})
 		);
@@ -201,30 +254,17 @@ class TimetableService {
 		const isHAFAS = journeyId?.startsWith("2|#") ?? false;
 
 		const getOrigin = async (): Promise<SmallStop> => {
-			if (isHAFAS && options.isDeparture) {
+			if (isHAFAS) {
 				const result = (
 					await database
 						.select({ name: stations.name })
 						.from(stations)
-						.where(eq(stations.evaNumber, Number(entry?.bahnhofsId)))
+						.where(eq(stations.evaNumber, entry?.originEvaNumber))
 				)[0];
 
 				return {
-					name: result.name,
-					evaNumber: Number(entry?.bahnhofsId),
-					cancelled: false
-				} as SmallStop;
-			} else if (isHAFAS && !options.isDeparture) {
-				const result = (
-					await database
-						.select({ evaNumber: stations.evaNumber })
-						.from(stations)
-						.where(eq(stations.name, entry?.terminus))
-				)[0];
-
-				return {
-					name: entry?.terminus,
-					evaNumber: result.evaNumber,
+					name: result?.name ?? "NaN",
+					evaNumber: entry?.originEvaNumber,
 					cancelled: false
 				} as SmallStop;
 			}
@@ -233,30 +273,17 @@ class TimetableService {
 			return options.isDeparture ? this.mapToSmallStop(entry?.station) : this.mapToSmallStop(entry?.origin);
 		};
 		const getDestination = async (): Promise<SmallStop> => {
-			if (isHAFAS && options.isDeparture) {
-				const result = (
-					await database
-						.select({ evaNumber: stations.evaNumber })
-						.from(stations)
-						.where(eq(stations.name, entry?.terminus))
-				)[0];
-
-				return {
-					name: entry?.terminus,
-					evaNumber: result.evaNumber,
-					cancelled: false
-				} as SmallStop;
-			} else if (isHAFAS && !options.isDeparture) {
+			if (isHAFAS) {
 				const result = (
 					await database
 						.select({ name: stations.name })
 						.from(stations)
-						.where(eq(stations.evaNumber, Number(entry?.bahnhofsId)))
+						.where(eq(stations.evaNumber, entry?.destinationEvaNumber))
 				)[0];
 
 				return {
-					name: result.name,
-					evaNumber: Number(entry?.bahnhofsId),
+					name: result?.name ?? "NaN",
+					evaNumber: entry?.destinationEvaNumber,
 					cancelled: false
 				} as SmallStop;
 			}

@@ -40,7 +40,7 @@ const timetableController = new Elysia({
 				case Profile.RIS:
 					return timetableService.retrieveRISConnections(evaNumber, type, query);
 				case Profile.HAFAS:
-					return timetableService.retrieveHAFASConnections(evaNumber, type, query);
+					return timetableService.retrieveHafasConnections(evaNumber, type, query);
 				default:
 					throw new HttpError(HttpStatus.HTTP_400_BAD_REQUEST, "Invalid profile");
 			}
