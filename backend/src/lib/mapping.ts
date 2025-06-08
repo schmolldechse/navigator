@@ -3,7 +3,7 @@ import calculateDuration from "./time";
 import { extractLeadingLetters } from "./regex";
 import { Connection, Message, RouteData } from "../models/core/models";
 import { Sequence } from "../models/core/sequence";
-import { mapToProduct } from "./products";
+import { mapToProduct } from "../models/core/products";
 import Time from "./time";
 
 const mapConnection = (

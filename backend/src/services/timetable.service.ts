@@ -3,7 +3,7 @@ import { DateTimeObject } from "../types/datetime";
 import { DateTime } from "luxon";
 import { Message, SmallStop, Time, TimetableEntry } from "../models/core/models";
 import { SingleTimetableEntrySchema } from "../models/elysia/timetable.model";
-import { mapToProduct } from "../lib/products";
+import { mapToProduct } from "../models/core/products";
 import { extractJourneyNumber, extractLeadingLetters } from "../lib/regex";
 import { database } from "../db/postgres";
 import { stations } from "../db/core.schema";
@@ -277,7 +277,7 @@ class TimetableService {
 			cancelled: isCancelled(),
 			timeInformation: this.mapToTime(entry),
 			lineInformation: {
-				productType: mapToProduct(entry?.type ?? entry?.train?.type ?? entry?.verkehrmittel?.produktGattung).value,
+				productType: mapToProduct(entry?.type ?? entry?.train?.type ?? entry?.verkehrmittel?.produktGattung),
 				productName: options.isBahnhofProfile
 					? extractLeadingLetters(entry?.lineName)
 					: (entry?.train?.category ?? entry?.verkehrmittel?.kurzText),

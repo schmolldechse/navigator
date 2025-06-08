@@ -5,7 +5,7 @@ import { mapToRoute } from "../../lib/mapping.ts";
 import { type RouteData } from "../../models/route.ts";
 import { fromLineName } from "../../lib/converter.ts";
 import type { LineColor } from "../../models/connection.ts";
-import { Products } from "../../lib/products.ts";
+import { Products } from "../../models/core/products.ts";
 
 class RoutePlannerQuery {
 	/**
