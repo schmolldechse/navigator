@@ -7,7 +7,7 @@ import { mapToProduct } from "../lib/products";
 import { extractJourneyNumber, extractLeadingLetters } from "../lib/regex";
 import { database } from "../db/postgres";
 import { stations } from "../db/core.schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 
 enum RequestType {
 	DEPARTURES = "departures",
@@ -154,34 +154,32 @@ class TimetableService {
 		const response = await request.json();
 		if (!response.entries || !Array.isArray(response.entries)) return [];
 
-		const values = Object.values(response.entries)
-			.filter((entry: any) => entry?.journeyId)
-			.map(async (entry: any) => {
-				// remove first and last entry of `ueber` as these are the actual origin and destination stops
-				let viaStops = entry?.ueber?.slice(1, -1) ?? [];
+		const values = await Promise.all(
+			Object.values(response.entries)
+				.filter((entry: any) => entry?.journeyId)
+				.map(async (entry: any) => {
+					// remove first and last entry of `ueber` as these are the actual origin and destination stops
+					let viaStopsArray = entry?.ueber?.slice(1, -1) ?? [];
+					if (viaStopsArray.length === 0) return { ...entry, ueber: [] };
 
-				// as `ueber` only contains the name of the stops, we add `evaNumber` from our PostgreSQL database
-				viaStops = await Promise.all(
-					viaStops.map(async (viaStop: string) => {
-						const query = await database
-							.select({ evaNumber: stations.evaNumber })
-							.from(stations)
-							.where(eq(stations.name, viaStop));
-						return {
+					// gather all evaNumbers of the via stops
+					const query = await database
+						.select({ name: stations.name, evaNumber: stations.evaNumber })
+						.from(stations)
+						.where(inArray(stations.name, viaStopsArray));
+
+					return {
+						...entry,
+						ueber: viaStopsArray.map((viaStop: string) => ({
 							name: viaStop,
-							evaNumber: query[0]?.evaNumber ?? undefined
-						};
-					})
-				);
-
-				return {
-					...entry,
-					ueber: viaStops
-				};
-			});
+							evaNumber: query.find((stop) => stop.name === viaStop)?.evaNumber ?? undefined
+						}))
+					};
+				})
+		);
 
 		return await Promise.all(
-			(await Promise.all(values)).map(async (entry) => ({
+			values.map(async (entry) => ({
 				entries: [
 					await this.mapToJourney(entry, {
 						isBahnhofProfile: false,
