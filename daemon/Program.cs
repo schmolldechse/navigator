@@ -99,13 +99,12 @@ class Program
         }
         else logger.LogInformation("Skipping gathering of stations as requested.");
         
-        // merge stations
+        // merge files
         var stationMergingService = serviceProvider.GetRequiredService<StationMergingService>();
-        var stations = await stationMergingService.MergeFiles();
-        logger.LogInformation("Merged {Count} stations.", stations.Count);
+        var stadaStations = await stationMergingService.LoadStadaStationsAsync(cancellationToken: CancellationToken.None);
         
-        stations = await stationMergingService.MergeWithStada(stations);
-        logger.LogInformation("Merged with STADA data");
+        var stations = await stationMergingService.MergeFiles(stadaStations, CancellationToken.None);
+        logger.LogInformation("Merged {Count} stations.", stations.Count);
 
         // filter out stations already in the database
         var dbContext = serviceProvider.GetRequiredService<NavigatorDbContext>();

@@ -21,8 +21,10 @@ public class StationMergingService
         _stadaFile = Path.Combine(_tempFolder, "stada.json");
     }
 
-    public async Task<List<Station>> MergeFiles(CancellationToken cancellationToken = default)
+    public async Task<List<Station>> MergeFiles(Dictionary<int, string[]>? stadaStations, CancellationToken cancellationToken = default)
     {
+        stadaStations ??= await LoadStadaStationsAsync(cancellationToken);
+        
         var risFiles = Directory.GetFiles(_tempFolder).Where(file => !file.EndsWith("stada.json")).ToList();
         if (!risFiles.Any()) throw new InvalidOperationException("No RIS files found in the temp folder");
 
@@ -73,7 +75,12 @@ public class StationMergingService
                         {
                             Latitude = stationElement.GetProperty("position").GetProperty("latitude").GetDouble(),
                             Longitude = stationElement.GetProperty("position").GetProperty("longitude").GetDouble()
-                        }
+                        },
+                        Ril100 = GetRil100Identifiers(groupEvaNumbers, stadaStations).Select(ril100 => new Ril100()
+                            {
+                                EvaNumber = groupEvaNumber,
+                                Ril100Identifier = ril100
+                            }).ToList()
                     }, (_, existingStation) =>
                     {
                         if (evaNumber == groupEvaNumber)
@@ -92,7 +99,14 @@ public class StationMergingService
                                 EvaNumber = groupEvaNumber,
                                 ProductName = product,
                                 QueryingEnabled = false
-                            })).DistinctBy(x => x.ProductName).ToList();
+                            })).DistinctBy(product => product.ProductName).ToList();
+
+                        existingStation.Ril100 = existingStation.Ril100.Union(
+                            GetRil100Identifiers(groupEvaNumbers, stadaStations).Select(ril100 => new Ril100()
+                            {
+                                EvaNumber = groupEvaNumber,
+                                Ril100Identifier = ril100
+                            })).DistinctBy(ril100 => ril100.Ril100Identifier).ToList();
                         return existingStation;
                     });
                 }
@@ -102,22 +116,7 @@ public class StationMergingService
         return stations.Values.ToList();
     }
 
-    public async Task<List<Station>> MergeWithStada(List<Station> stations, CancellationToken cancellationToken = default)
-    {
-        var stadaStations = await LoadStadaStationsAsync(cancellationToken);
-        foreach (var station in stations)
-        {
-            if (!stadaStations.ContainsKey(station.EvaNumber)) continue;
-            station.Ril100 = stadaStations.GetValueOrDefault(station.EvaNumber, []).Select(ril100 => new Ril100()
-            {
-                EvaNumber = station.EvaNumber,
-                Ril100Identifier = ril100
-            }).ToList();
-        }
-        return stations;
-    } 
-
-    private async Task<Dictionary<int, string[]>> LoadStadaStationsAsync(CancellationToken cancellationToken)
+    public async Task<Dictionary<int, string[]>> LoadStadaStationsAsync(CancellationToken cancellationToken)
     {
         var stadaStations = new Dictionary<int, string[]>();
 
