@@ -90,7 +90,14 @@ class TimetableService {
 		return await Promise.all(
 			Object.values(response?.items)
 				.filter((journeyRaw: any) => journeyRaw?.train?.journeyId)
-				.map(async (journeyRaw: any) => ({ entries: [await this.mapToJourney(journeyRaw)] }))
+				.map(async (journeyRaw: any) => ({
+					entries: [
+						await this.mapToJourney(journeyRaw, {
+							isBahnhofProfile: false,
+							isDeparture: type === RequestType.DEPARTURES
+						})
+					]
+				}))
 		);
 	};
 
@@ -117,7 +124,12 @@ class TimetableService {
 					entries: await Promise.all(
 						journeyRaw
 							.filter((connectionRaw) => connectionRaw?.journeyID)
-							.map((connectionRaw) => this.mapToJourney(connectionRaw, { isBahnhofProfile: true }))
+							.map((connectionRaw) =>
+								this.mapToJourney(connectionRaw, {
+									isBahnhofProfile: true,
+									isDeparture: type === RequestType.DEPARTURES
+								})
+							)
 					)
 				}))
 		);
@@ -170,7 +182,12 @@ class TimetableService {
 
 		return await Promise.all(
 			(await Promise.all(values)).map(async (entry) => ({
-				entries: [await this.mapToJourney(entry)]
+				entries: [
+					await this.mapToJourney(entry, {
+						isBahnhofProfile: false,
+						isDeparture: type === RequestType.DEPARTURES
+					})
+				]
 			}))
 		);
 	};
@@ -179,28 +196,107 @@ class TimetableService {
 		entry: any,
 		options: {
 			isBahnhofProfile: boolean;
-		} = { isBahnhofProfile: false }
+			isDeparture: boolean;
+		} = { isBahnhofProfile: false, isDeparture: true }
 	): Promise<typeof SingleTimetableEntrySchema.static> => {
 		const journeyId = entry?.journeyID ?? entry?.train?.journeyId ?? entry?.journeyId;
 		const isHAFAS = journeyId?.startsWith("2|#") ?? false;
 
+		const getOrigin = async (): Promise<SmallStop> => {
+			if (isHAFAS && options.isDeparture) {
+				const result = (
+					await database
+						.select({ name: stations.name })
+						.from(stations)
+						.where(eq(stations.evaNumber, Number(entry?.bahnhofsId)))
+				)[0];
+
+				return {
+					name: result.name,
+					evaNumber: Number(entry?.bahnhofsId),
+					cancelled: false
+				} as SmallStop;
+			} else if (isHAFAS && !options.isDeparture) {
+				const result = (
+					await database
+						.select({ evaNumber: stations.evaNumber })
+						.from(stations)
+						.where(eq(stations.name, entry?.terminus))
+				)[0];
+
+				return {
+					name: entry?.terminus,
+					evaNumber: result.evaNumber,
+					cancelled: false
+				} as SmallStop;
+			}
+			if (options.isBahnhofProfile)
+				return options.isDeparture ? this.mapToSmallStop(entry?.stopPlace) : this.mapToSmallStop(entry?.origin);
+			return options.isDeparture ? this.mapToSmallStop(entry?.station) : this.mapToSmallStop(entry?.origin);
+		};
+		const getDestination = async (): Promise<SmallStop> => {
+			if (isHAFAS && options.isDeparture) {
+				const result = (
+					await database
+						.select({ evaNumber: stations.evaNumber })
+						.from(stations)
+						.where(eq(stations.name, entry?.terminus))
+				)[0];
+
+				return {
+					name: entry?.terminus,
+					evaNumber: result.evaNumber,
+					cancelled: false
+				} as SmallStop;
+			} else if (isHAFAS && !options.isDeparture) {
+				const result = (
+					await database
+						.select({ name: stations.name })
+						.from(stations)
+						.where(eq(stations.evaNumber, Number(entry?.bahnhofsId)))
+				)[0];
+
+				return {
+					name: result.name,
+					evaNumber: Number(entry?.bahnhofsId),
+					cancelled: false
+				} as SmallStop;
+			}
+			if (options.isBahnhofProfile)
+				return options.isDeparture ? this.mapToSmallStop(entry?.destination) : this.mapToSmallStop(entry?.stopPlace);
+			return options.isDeparture ? this.mapToSmallStop(entry?.destination) : this.mapToSmallStop(entry?.station);
+		};
+		const isCancelled = () => {
+			if (isHAFAS) return (entry?.meldungen ?? []).some((message: any) => message.type === "HALT_AUSFALL");
+			return entry?.canceled ?? false;
+		};
+
 		const journey = {
 			ris_journeyId: !isHAFAS ? journeyId : undefined,
 			hafas_journeyId: isHAFAS ? journeyId : undefined,
-			origin: isHAFAS ? undefined : this.mapToSmallStop(entry.stopPlace ?? entry?.station),
-			destination: isHAFAS ? undefined : this.mapToSmallStop(entry?.destination),
-			cancelled: entry?.canceled,
+			origin: await getOrigin(),
+			destination: await getDestination(),
+			cancelled: isCancelled(),
 			timeInformation: this.mapToTime(entry),
 			lineInformation: {
 				productType: mapToProduct(entry?.type ?? entry?.train?.type ?? entry?.verkehrmittel?.produktGattung).value,
-				productName: options.isBahnhofProfile ? extractLeadingLetters(entry?.lineName) : entry?.train?.category ?? entry?.verkehrmittel?.kurzText,
-				journeyNumber: options.isBahnhofProfile ? undefined : entry?.train?.no ?? extractJourneyNumber(entry?.verkehrmittel?.name),
-				journeyName: entry?.lineName ?? entry?.verkehrmittel?.mittelText ?? (entry?.train?.category + " " + entry?.train?.lineName),
+				productName: options.isBahnhofProfile
+					? extractLeadingLetters(entry?.lineName)
+					: (entry?.train?.category ?? entry?.verkehrmittel?.kurzText),
+				journeyNumber: options.isBahnhofProfile
+					? undefined
+					: (entry?.train?.no ?? extractJourneyNumber(entry?.verkehrmittel?.name)),
+				journeyName:
+					entry?.lineName ??
+					entry?.verkehrmittel?.mittelText ??
+					entry?.train?.category + " " + entry?.train?.lineName,
 				additionalJourneyName: !options.isBahnhofProfile ? undefined : entry?.additionalLineName,
-				operator: {
-					code: entry?.administrationID ?? entry?.administration?.id,
-					name: options.isBahnhofProfile ? undefined : entry?.administration?.operatorName
-				}
+				operator: options.isBahnhofProfile
+					? undefined
+					: {
+							code: entry?.administration?.id,
+							name: entry?.administration?.operatorName
+						}
 			},
 			viaStops: (entry?.viaStops ?? entry?.ueber ?? []).map((rawStop: any) => this.mapToSmallStop(rawStop)),
 			messages: !options.isBahnhofProfile
@@ -213,33 +309,7 @@ class TimetableService {
 						.map((messageRaw: any) => this.mapMessage(messageRaw))
 		} as typeof SingleTimetableEntrySchema.static;
 
-		if (isHAFAS) {
-			journey.origin = (
-				await database
-					.select({ name: stations.name })
-					.from(stations)
-					.where(eq(stations.evaNumber, Number(entry?.bahnhofsId)))
-			).map((station: any) => ({
-				name: station.name,
-				evaNumber: Number(entry?.bahnhofsId),
-				cancelled: false
-			}))[0];
-
-			journey.destination = (
-				await database
-					.select({ evaNumber: stations.evaNumber })
-					.from(stations)
-					.where(eq(stations.name, entry?.terminus))
-			).map((station: any) => ({
-				name: entry?.terminus,
-				evaNumber: station.evaNumber,
-				cancelled: false
-			}))[0];
-
-			journey.cancelled = (entry?.meldungen ?? []).some((message: any) => message.type = "HALT_AUSFALL");
-			journey.messages = (entry?.meldungen ?? []).map((message: any) => this.mapMessage(message, true));
-		}
-
+		if (isHAFAS) journey.messages = (entry?.meldungen ?? []).map((message: any) => this.mapMessage(message, true));
 		if (journey.viaStops?.length === 0) journey.viaStops = undefined;
 		return journey;
 	};
@@ -282,7 +352,7 @@ class TimetableService {
 			const type = entry?.prioritaet === "HOCH" && entry?.type === "HALT_AUSFALL" ? "canceled-trip" : "general-warning";
 			return {
 				type: type,
-				text: entry?.text,
+				text: entry?.text
 			} as Message;
 		}
 
@@ -291,7 +361,7 @@ class TimetableService {
 			text: entry?.text,
 			links: entry?.links ?? undefined
 		};
-	}
+	};
 }
 
 export { TimetableService, RequestType, Profile };
