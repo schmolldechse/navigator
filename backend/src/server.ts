@@ -25,6 +25,12 @@ const restApi = new Elysia({ prefix: "/api" })
 				set.status = error.status;
 				message = "Route does not exist";
 				break;
+			case "UNKNOWN":
+				set.status = HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR;
+				message = "The server encountered an unexpected condition and could not fulfill the request.";
+
+				console.error("Unknown error occurred:", error);
+				break;
 		}
 
 		return Response.json({ error: message, status: set.status });
