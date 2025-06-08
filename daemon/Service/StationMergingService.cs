@@ -13,6 +13,23 @@ public class StationMergingService
     private readonly string _tempFolder = Path.Combine(Path.GetTempPath(), "navigator", "station_discovery");
     private readonly string _stadaFile;
 
+    private const int LowestPriceCategory = 8;
+    private const double PriceCategoryWeight = 0.5;
+    
+    private readonly Dictionary<string, double> _productWeights = new()
+    {
+        { "Hochgeschwindigkeitszuege", 3 },
+        { "IntercityUndEurocityZuege", 2 },
+        { "InterregioUndSchnellzuege", 1 },
+        { "NahverkehrsonstigeZuege", 1 },
+        { "Sbahnen", 1 },
+        { "UBahn", 0.5 },
+        { "Schiffe", 0.2 },
+        { "Strassenbahn", 0.2 },
+        { "Busse", 0.1 },
+        { "AnrufpflichtigeVerkehre", 0.1 }
+    };
+
     public StationMergingService(ILogger<StationMergingService> logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
@@ -21,7 +38,7 @@ public class StationMergingService
         _stadaFile = Path.Combine(_tempFolder, "stada.json");
     }
 
-    public async Task<List<Station>> MergeFiles(Dictionary<int, string[]>? stadaStations, CancellationToken cancellationToken = default)
+    public async Task<List<Station>> MergeFiles(Dictionary<int, StadaStationInfo>? stadaStations, CancellationToken cancellationToken = default)
     {
         stadaStations ??= await LoadStadaStationsAsync(cancellationToken);
         
@@ -116,9 +133,9 @@ public class StationMergingService
         return stations.Values.ToList();
     }
 
-    public async Task<Dictionary<int, string[]>> LoadStadaStationsAsync(CancellationToken cancellationToken)
+    public async Task<Dictionary<int, StadaStationInfo>> LoadStadaStationsAsync(CancellationToken cancellationToken)
     {
-        var stadaStations = new Dictionary<int, string[]>();
+        var stadaStations = new Dictionary<int, StadaStationInfo>();
 
         var content = JsonSerializer.Deserialize<JsonElement>(
             await File.ReadAllTextAsync(_stadaFile, Encoding.UTF8, cancellationToken));
@@ -132,9 +149,13 @@ public class StationMergingService
         Parallel.ForEach(stations, station =>
         {
             var evaNumbers = station.GetProperty("evaNumbers").EnumerateArray()
-                .Where(e => e.ValueKind == JsonValueKind.Object)
-                .Where(e => e.GetProperty("number").ValueKind == JsonValueKind.Number)
-                .Select(e => e.GetProperty("number").GetInt32())
+                .Where(element => element.ValueKind == JsonValueKind.Object)
+                .Select(element =>
+                {
+                    if (element.GetProperty("number").ValueKind != JsonValueKind.Number) 
+                        throw new InvalidOperationException("Invalid EVA number format in STADA data");
+                    return (element.GetProperty("number").GetInt32(), element.GetProperty("isMain").GetBoolean());
+                })
                 .ToArray();
 
             var ril100Identifiers = station.GetProperty("ril100Identifiers").EnumerateArray()
@@ -146,15 +167,38 @@ public class StationMergingService
             {
                 lock (stadaStations)
                 {
-                    stadaStations[evaNumber] = ril100Identifiers;
+                    stadaStations[evaNumber.Item1] = new StadaStationInfo()
+                    {
+                        Ril100Identifiers = ril100Identifiers,
+                        PriceCategory = evaNumber.Item2 ? station.GetProperty("priceCategory").GetInt16() : null
+                    };
                 }
             }
         });
         return stadaStations;
     }
 
-    private string[] GetRil100Identifiers(int[] evaNumbers, Dictionary<int, string[]> stadaStations) => evaNumbers
-        .SelectMany(evaNumber => stadaStations.GetValueOrDefault(evaNumber, []))
+    public double CalculateWeight(Station origin, int priceCategory = -1)
+    {
+        var weight = 0.1;
+        foreach (var product in origin.Products)
+        {
+            if (!_productWeights.Keys.Any(key => string.Equals(key, product.ProductName, StringComparison.OrdinalIgnoreCase))) continue;
+            weight += _productWeights[product.ProductName];
+        }
+
+        if (priceCategory != -1) weight += Math.Pow(2, Math.Max(LowestPriceCategory + 1 - priceCategory, 0)) * PriceCategoryWeight;
+        return Math.Max(0.1, Math.Round(Math.Pow(weight, 3) * 10) / 10);
+    }
+
+    private string[] GetRil100Identifiers(int[] evaNumbers, Dictionary<int, StadaStationInfo> stadaStations) => evaNumbers
+        .SelectMany(evaNumber => stadaStations.GetValueOrDefault(evaNumber)?.Ril100Identifiers ?? [])
         .Distinct()
         .ToArray();
+}
+
+public class StadaStationInfo
+{
+    public string[] Ril100Identifiers { get; set; } = [];
+    public int? PriceCategory { get; set; }
 }

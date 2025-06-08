@@ -105,6 +105,14 @@ class Program
         
         var stations = await stationMergingService.MergeFiles(stadaStations, CancellationToken.None);
         logger.LogInformation("Merged {Count} stations.", stations.Count);
+        
+        // calculate weights
+        stations = stations.Select(station =>
+        {
+            station.Weight = stationMergingService.CalculateWeight(station, stadaStations.GetValueOrDefault(station.EvaNumber)?.PriceCategory ?? -1);
+            return station;
+        }).ToList();
+        logger.LogInformation("Calculated weights for stations.");
 
         // filter out stations already in the database
         var dbContext = serviceProvider.GetRequiredService<NavigatorDbContext>();

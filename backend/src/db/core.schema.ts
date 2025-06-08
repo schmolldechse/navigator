@@ -16,6 +16,7 @@ const risIds = coreSchema.table("ris_ids", {
 const stations = coreSchema.table("stations", {
 	evaNumber: integer("eva_number").notNull().primaryKey(),
 	name: varchar("name", { length: 512 }).notNull(),
+	weight: integer("weight").notNull().default(0),
 	latitude: integer("latitude").notNull(),
 	longitude: integer("longitude").notNull(),
 	queryingEnabled: boolean("querying_enabled"),

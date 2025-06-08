@@ -11,6 +11,8 @@ public class Station
 
     [MaxLength(512)] [Column("name")] public required string Name { get; set; }
 
+    [Column("weight")] public double Weight { get; set; } = 0;
+
     public virtual ICollection<Ril100> Ril100 { get; set; } = new List<Ril100>();
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();

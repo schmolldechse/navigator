@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using daemon.Database;
@@ -11,9 +12,11 @@ using daemon.Database;
 namespace daemon.Migrations
 {
     [DbContext(typeof(NavigatorDbContext))]
-    partial class NavigatorDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250608202540_Add station weights")]
+    partial class Addstationweights
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
