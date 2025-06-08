@@ -18,7 +18,7 @@ class StatisticsService {
 		DateTime.fromObject({ day: 9, month: 6, year: 2025 }).startOf("day"),
 	]
 
-	private getLastTimetableChange = (compareTo?: DateTime): DateTime => {
+	public getLastTimetableChange = (compareTo?: DateTime): DateTime => {
 		compareTo ??= DateTime.now();
 
 		const filteredChanges = this.TIMETABLE_CHANGES.filter(change => change <= compareTo);

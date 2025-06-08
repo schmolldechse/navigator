@@ -45,7 +45,7 @@ const stationController = new Elysia({ prefix: "/station", tags: ["Stations"] })
 	.post(
 		"/stats/:evaNumber",
 		async ({ params: { evaNumber }, body }) => {
-			body.startDate = (body.startDate || statisticsService.START_DATE).startOf("day");
+			body.startDate = (body.startDate || statisticsService.getLastTimetableChange()).startOf("day");
 			body.endDate = (body.endDate || DateTime.now()).endOf("day");
 			if (body.startDate > body.endDate) throw new HttpError(400, "Start date can't be after end date");
 
