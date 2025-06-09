@@ -22,6 +22,13 @@ const StationSchema = t.Intersect([
 	})
 ]);
 
+const StationDatabaseSchema = t.Intersect([
+	StationSchema,
+	t.Object({
+		weight: t.Optional(t.Number())
+	})
+]);
+
 const SmallStopSchema = t.Intersect([
 	BasicSchema,
 	t.Object({
@@ -44,4 +51,4 @@ const LargeStopSchema = t.Intersect([
 	})
 ]);
 
-export { StationSchema, SmallStopSchema, LargeStopSchema };
+export { StationSchema, StationDatabaseSchema, SmallStopSchema, LargeStopSchema };

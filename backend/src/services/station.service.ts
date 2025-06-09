@@ -5,6 +5,7 @@ import { v4 as uuid } from "uuid";
 import { database } from "../db/postgres";
 import { stationProducts, stationRil, stations } from "../db/core.schema";
 import { eq } from "drizzle-orm";
+import { StationDatabaseSchema } from "../models/elysia/station.model";
 
 class StationService {
 	fetchStations = async (searchTerm: string): Promise<Station[]> => {
@@ -31,7 +32,7 @@ class StationService {
 				`Response was expected to be an array, but got ${typeof response}`
 			);
 
-		const stationList: Station[] = response
+		const stationList: (typeof StationDatabaseSchema.static)[] = response
 			.filter((stationElement: any) => /^\d+$/.test(stationElement?.evaNr))
 			.map(
 				(stationElement: any) =>
@@ -42,59 +43,44 @@ class StationService {
 							latitude: stationElement.coordinates.latitude,
 							longitude: stationElement.coordinates.longitude
 						},
-						products: stationElement.products ?? []
-					}) as Station
+						products: stationElement.products ?? [],
+						weight: stationElement.weight ?? 0
+					}) as typeof StationDatabaseSchema.static
 			);
 		return await Promise.all(stationList.map((station) => this.saveStation(station)));
 	};
 
 	fetchStationByEvaNumber = async (evaNumber: number): Promise<Station> => {
-		const request = await fetch(`https://app.vendo.noncd.db.de/mob/location/details/${evaNumber}`, {
-			method: "GET",
-			headers: {
-				Accept: "application/x.db.vendo.mob.location.v3+json",
-				"Content-Type": "application/x.db.vendo.mob.location.v3+json",
-				"X-Correlation-ID": uuid() + "_" + uuid()
-			}
-		});
-		if (!request.ok)
+		const result = await database
+			.select({
+				evaNumber: stations.evaNumber,
+				name: stations.name,
+				latitude: stations.latitude,
+				longitude: stations.longitude
+			})
+			.from(stations)
+			.where(eq(stations.evaNumber, evaNumber))
+			.limit(1);
+		if (result.length === 0)
 			throw new HttpError(HttpStatus.HTTP_502_BAD_GATEWAY, `Could not find any stations related to ${evaNumber}`);
 
-		const response = await request.json();
-		if (!response)
-			throw new HttpError(
-				HttpStatus.HTTP_502_BAD_GATEWAY,
-				`Response was expected to be an object, but got ${typeof response}`
-			);
+		const products = (await database.select().from(stationProducts).where(eq(stationProducts.evaNumber, evaNumber))).map(
+			(entry) => entry.name
+		);
+		const ril100 = (await database.select().from(stationRil).where(eq(stationRil.evaNumber, evaNumber))).map(
+			(entry) => entry.ril100
+		);
 
-		if (!response.haltName)
-			throw new HttpError(
-				HttpStatus.HTTP_502_BAD_GATEWAY,
-				`Response did not match expected format. Missing 'haltName' property.`
-			);
-
-		const station: Station = {
-			name: response.haltName,
-			products: (response.produktGattungen ?? []).map((productElement: any) => productElement.produktGattung),
-			evaNumber: -1,
+		return {
+			name: result[0].name,
+			evaNumber: result[0].evaNumber,
 			coordinates: {
-				latitude: -1,
-				longitude: -1
-			}
-		};
-
-		// search for a station by name
-		const existingStation = await database.select().from(stations).where(eq(stations.name, station.name)).limit(1);
-		if (existingStation.length === 0)
-			throw new HttpError(HttpStatus.HTTP_502_BAD_GATEWAY, `Could not find any station with ${station.name}`);
-
-		// update values
-		station.evaNumber = Number(existingStation[0].evaNumber);
-		station.coordinates = {
-			latitude: existingStation[0].latitude,
-			longitude: existingStation[0].longitude
-		};
-		return this.saveStation(station, false);
+				latitude: result[0].latitude,
+				longitude: result[0].longitude
+			},
+			products: products,
+			ril100: ril100.length > 0 ? ril100 : undefined
+		} as Station;
 	};
 
 	getRelatedEvaNumbers = async (evaNumber: number): Promise<number[]> => {
@@ -119,7 +105,7 @@ class StationService {
 		return [...new Set(evaNumbers)];
 	};
 
-	private saveStation = async (station: Station, insertNew: boolean = true): Promise<Station> => {
+	private saveStation = async (station: typeof StationDatabaseSchema.static, insertNew: boolean = true): Promise<Station> => {
 		if (insertNew) {
 			const existing = await database.select().from(stations).where(eq(stations.evaNumber, station.evaNumber)).limit(1);
 			if (existing.length === 0)
@@ -128,7 +114,8 @@ class StationService {
 					evaNumber: station.evaNumber,
 					name: station.name,
 					latitude: station.coordinates.latitude,
-					longitude: station.coordinates.longitude
+					longitude: station.coordinates.longitude,
+					weight: station.weight ?? 0
 				});
 		}
 
