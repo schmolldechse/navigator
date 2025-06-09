@@ -4,7 +4,7 @@ import { DateTime } from "luxon";
 import { Message, Time, TimetableEntry, TimetableStop } from "../models/core/models";
 import { SingleTimetableEntrySchema } from "../models/elysia/timetable.model";
 import { mapToProduct } from "../models/core/products";
-import { extractJourneyNumber, extractLeadingLetters } from "../lib/regex";
+import { extractJourneyNumber, extractLeadingLetters, normalize } from "../lib/regex";
 import { database } from "../db/postgres";
 import { stations } from "../db/core.schema";
 import { eq, inArray } from "drizzle-orm";
@@ -42,6 +42,130 @@ class TimetableService {
 			error: "Parameter 'language' must be either 'de' or 'en'."
 		})
 	});
+
+	retrieveCombined = async (
+		evaNumber: number,
+		type: RequestType = RequestType.DEPARTURES,
+		queryParams: typeof this.query.static
+	): Promise<TimetableEntry[]> => {
+		const now: DateTime = DateTime.now().set({ second: 0, millisecond: 0 });
+		const endTime: DateTime = queryParams.when.plus({ minute: queryParams.duration });
+
+		// fallback to HAFAS & RIS if the requested time is in the past
+		if (now >= endTime) {
+			const [ris, hafas] = await Promise.all([
+				this.retrieveRISConnections(evaNumber, type, queryParams),
+				this.retrieveHafasConnections(evaNumber, type, queryParams)
+			]);
+			return this.mergeTimetables(ris, hafas, type);
+		}
+
+		const remainingDuration: number = Math.ceil(endTime.diff(now, ["minute"]).minutes);
+		const bahnhofDuration = Math.min(remainingDuration, 360);
+		// fallback to HAFAS & RIS
+		if (bahnhofDuration < 1) {
+			const [ris, hafas] = await Promise.all([
+				this.retrieveRISConnections(evaNumber, type, queryParams),
+				this.retrieveHafasConnections(evaNumber, type, queryParams)
+			]);
+			return this.mergeTimetables(ris, hafas, type);
+		}
+
+		// use Bahnhof, RIS & HAFAS
+		console.log("Use Bahnhof, RIS & HAFAS");
+		console.log("remainingDuration", remainingDuration);
+		console.log("bahnhofDuration", bahnhofDuration);
+		return [];
+	};
+
+	private mergeEntry = (
+		entryA: typeof SingleTimetableEntrySchema.static,
+		entryB: typeof SingleTimetableEntrySchema.static
+	): typeof SingleTimetableEntrySchema.static => ({
+		...entryB,
+		...entryA,
+		ris_journeyId: entryA.ris_journeyId ?? entryB.ris_journeyId,
+		hafas_journeyId: entryA.hafas_journeyId ?? entryB.hafas_journeyId,
+		origin: entryA.origin ?? entryB.origin,
+		destination: entryA.destination ?? entryB.destination,
+		timeInformation: entryA.timeInformation ?? entryB.timeInformation,
+		lineInformation: entryA.lineInformation ?? entryB.lineInformation,
+		viaStops: entryA.viaStops ? [...(entryA.viaStops ?? []), ...(entryB.viaStops ?? [])] : entryB.viaStops,
+		messages: entryA.messages ? [...(entryA.messages ?? []), ...(entryB.messages ?? [])] : entryB.messages
+	});
+
+	// merge both timetables by preferring the entries from timetableA
+	private mergeTimetables = (
+		timetableEntriesA: TimetableEntry[],
+		timetableEntriesB: TimetableEntry[],
+		type: RequestType = RequestType.DEPARTURES
+	): TimetableEntry[] => {
+		if (timetableEntriesA.length === 0) return timetableEntriesB;
+		if (timetableEntriesB.length === 0) return timetableEntriesA;
+
+		// simplify timetableB as the entries are nested
+		let simplifiedTimetableEntriesB: (typeof SingleTimetableEntrySchema.static)[] = timetableEntriesB.flatMap(
+			(entry) => entry.entries
+		);
+		timetableEntriesA.forEach((timetableA: TimetableEntry) => {
+			timetableA.entries.map((singleTimetableA: typeof SingleTimetableEntrySchema.static) => {
+				const matchingEntry = simplifiedTimetableEntriesB.find(
+					(singleTimetableB: typeof SingleTimetableEntrySchema.static) =>
+						this.doesTimetableMatch(singleTimetableA, singleTimetableB, type)
+				);
+				if (matchingEntry) {
+					// remove singleTimetableB from simplifiedTimetableEntriesB
+					simplifiedTimetableEntriesB = simplifiedTimetableEntriesB.filter((entry) => entry !== matchingEntry);
+
+					// merge the two entries
+					Object.assign(singleTimetableA, this.mergeEntry(singleTimetableA, matchingEntry));
+					return singleTimetableA;
+				}
+
+				// keep original entry from timetableA
+				return singleTimetableA;
+			});
+		});
+
+		// insert remaining entries from simplifiedTimetableEntriesB
+		simplifiedTimetableEntriesB.forEach((singleTimetableB: typeof SingleTimetableEntrySchema.static) =>
+			timetableEntriesA.push({ entries: [singleTimetableB] })
+		);
+
+		return timetableEntriesA;
+	};
+
+	private doesTimetableMatch = (
+		timetableA: typeof SingleTimetableEntrySchema.static,
+		timetableB: typeof SingleTimetableEntrySchema.static,
+		type: RequestType = RequestType.DEPARTURES
+	): boolean => {
+		if (timetableA.ris_journeyId === timetableB.ris_journeyId) return true;
+		if (timetableA.hafas_journeyId === timetableB.hafas_journeyId) return true;
+
+		const matchesLine = (): boolean =>
+			normalize(timetableA.lineInformation.journeyName) === normalize(timetableB.lineInformation.journeyName) ||
+			timetableA.lineInformation.journeyNumber === timetableB.lineInformation.journeyNumber;
+
+		const matchesTime = (): boolean => {
+			const aTime = DateTime.fromISO(timetableA.timeInformation.plannedTime);
+			const bTime = DateTime.fromISO(timetableB.timeInformation.plannedTime);
+			if (!aTime.isValid || !bTime.isValid) return false;
+			return aTime.equals(bTime);
+		};
+
+		const matchesPlatform = (): boolean => {
+			if (!timetableA.timeInformation.plannedPlatform || !timetableB.timeInformation.plannedPlatform) return true;
+			return timetableA.timeInformation.plannedPlatform === timetableB.timeInformation.plannedPlatform;
+		};
+
+		const matchesStop = (): boolean => {
+			if (type === RequestType.DEPARTURES) return timetableA.origin.evaNumber === timetableB.origin.evaNumber;
+			return timetableA.destination.evaNumber === timetableB.destination.evaNumber;
+		};
+
+		return matchesLine() && matchesTime() && matchesPlatform() && matchesStop();
+	};
 
 	retrieveRISConnections = async (
 		evaNumber: number,
@@ -213,10 +337,12 @@ class TimetableService {
 						.where(inArray(stations.name, viaStopsArray));
 
 					viaStopsArray = viaStopsArray.map((viaStop: string) => {
-						const matchingStops = query.filter(stop => stop.name === viaStop);
+						const matchingStops = query.filter((stop) => stop.name === viaStop);
 						if (matchingStops.length > 0) {
-							const stopWithHighestWeight = matchingStops.reduce((prev, current) =>
-								(current.weight > prev.weight) ? current : prev, matchingStops[0]);
+							const stopWithHighestWeight = matchingStops.reduce(
+								(prev, current) => (current.weight > prev.weight ? current : prev),
+								matchingStops[0]
+							);
 							return { name: viaStop, evaNumber: stopWithHighestWeight.evaNumber };
 						}
 						return { name: viaStop, evaNumber: -1 };

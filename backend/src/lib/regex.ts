@@ -8,4 +8,8 @@ const extractJourneyNumber = (input: string): number => {
 	return match ? parseInt(match[1]) : 0;
 }
 
-export { extractLeadingLetters, extractJourneyNumber };
+const normalize = (input: string): string => {
+	return input.replace(/[^a-zA-Z0-9]/g, "");
+}
+
+export { extractLeadingLetters, extractJourneyNumber, normalize };

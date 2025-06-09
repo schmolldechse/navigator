@@ -27,9 +27,7 @@ const SingleTimetableEntrySchema = t.Object({
 		description: "Identifier for the journey in the HAFAS system."
 	})),
 	origin: TimetableStopSchema,
-	provenance: t.Optional(t.String({ description: "The provenance station name. Mainly used wit HAFAS." })),
 	destination: TimetableStopSchema,
-	direction: t.Optional(t.String({ description: "The direction's station name. Mainly used with HAFAS." })),
 	viaStops: t.Optional(t.Array(TimetableStopSchema, { description: "List of intermediate stops of the journey" })),
 	timeInformation: TimeSchema,
 	lineInformation: t.Object({
