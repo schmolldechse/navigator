@@ -15,7 +15,7 @@ class StatisticsService {
 	// timetable changes
 	readonly TIMETABLE_CHANGES: DateTime[] = [
 		DateTime.fromObject({ day: 17, month: 12, year: 2024 }).startOf("day"),
-		DateTime.fromObject({ day: 9, month: 6, year: 2025 }).startOf("day"),
+		DateTime.fromObject({ day: 15, month: 6, year: 2025 }).startOf("day"),
 	]
 
 	public getLastTimetableChange = (compareTo?: DateTime): DateTime => {

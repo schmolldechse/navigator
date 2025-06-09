@@ -30,7 +30,7 @@ public class GatheringJourneyDaemon : Daemon
     private readonly DateTime[] _timetableChanges =
     {
         new(2024, 12, 17, 0, 0, 0, DateTimeKind.Utc),
-        new(2025, 6, 9, 0, 0, 0, DateTimeKind.Utc)
+        new(2025, 6, 15, 0, 0, 0, DateTimeKind.Utc)
     };
 
     private DateTime GetLastTimetableChange(DateTime? compareTo = null)
