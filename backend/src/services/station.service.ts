@@ -138,14 +138,13 @@ class StationService {
 		).map((product) => product.name.toLowerCase());
 		const newProducts = station.products.filter((product: string) => !existingProducts.includes(product.toLowerCase()));
 		if (newProducts.length > 0) {
-			const promises = newProducts.map((product: string) =>
-				database.insert(stationProducts).values({
+			await database.insert(stationProducts).values(
+				newProducts.map((product: string) => ({
 					evaNumber: station.evaNumber,
 					name: product,
 					queryingEnabled: false
-				})
+				}))
 			);
-			await Promise.all(promises);
 		}
 
 		// update ril100
