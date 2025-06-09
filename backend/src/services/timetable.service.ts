@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import { DateTimeObject } from "../types/datetime";
 import { DateTime } from "luxon";
-import { Message, SmallStop, Time, TimetableEntry } from "../models/core/models";
+import { Message, Time, TimetableEntry, TimetableStop } from "../models/core/models";
 import { SingleTimetableEntrySchema } from "../models/elysia/timetable.model";
 import { mapToProduct } from "../models/core/products";
 import { extractJourneyNumber, extractLeadingLetters } from "../lib/regex";
@@ -253,7 +253,7 @@ class TimetableService {
 		const journeyId = entry?.journeyID ?? entry?.train?.journeyId ?? entry?.journeyId;
 		const isHAFAS = journeyId?.startsWith("2|#") ?? false;
 
-		const getOrigin = async (): Promise<SmallStop> => {
+		const getOrigin = async (): Promise<TimetableStop> => {
 			if (isHAFAS) {
 				const result = (
 					await database
@@ -266,13 +266,13 @@ class TimetableService {
 					name: result?.name ?? "NaN",
 					evaNumber: entry?.originEvaNumber,
 					cancelled: false
-				} as SmallStop;
+				} as TimetableStop;
 			}
 			if (options.isBahnhofProfile)
 				return options.isDeparture ? this.mapToSmallStop(entry?.stopPlace) : this.mapToSmallStop(entry?.origin);
 			return options.isDeparture ? this.mapToSmallStop(entry?.station) : this.mapToSmallStop(entry?.origin);
 		};
-		const getDestination = async (): Promise<SmallStop> => {
+		const getDestination = async (): Promise<TimetableStop> => {
 			if (isHAFAS) {
 				const result = (
 					await database
@@ -285,7 +285,7 @@ class TimetableService {
 					name: result?.name ?? "NaN",
 					evaNumber: entry?.destinationEvaNumber,
 					cancelled: false
-				} as SmallStop;
+				} as TimetableStop;
 			}
 			if (options.isBahnhofProfile)
 				return options.isDeparture ? this.mapToSmallStop(entry?.destination) : this.mapToSmallStop(entry?.stopPlace);
@@ -339,7 +339,7 @@ class TimetableService {
 		return journey;
 	};
 
-	private mapToSmallStop = (stop: any): SmallStop => ({
+	private mapToSmallStop = (stop: any): TimetableStop => ({
 		name: stop?.name,
 		evaNumber: Number(stop?.evaNumber ?? stop?.evaNo),
 		cancelled: stop?.canceled ?? false,

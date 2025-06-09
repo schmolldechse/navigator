@@ -2,13 +2,13 @@ import { t } from "elysia";
 import { TimeSchema } from "./time.model";
 import { MessageSchema } from "./message.model";
 
-const BasicSchema = t.Object({
+const BasicStationSchema = t.Object({
 	name: t.String({ description: "Name of the station" }),
 	evaNumber: t.Number({ description: "Unique evaNumber of the station" })
 });
 
 const StationSchema = t.Intersect([
-	BasicSchema,
+	BasicStationSchema,
 	t.Object({
 		coordinates: t.Object(
 			{
@@ -29,21 +29,8 @@ const StationDatabaseSchema = t.Intersect([
 	})
 ]);
 
-const SmallStopSchema = t.Intersect([
-	BasicSchema,
-	t.Object({
-		cancelled: t.Boolean({ description: "Marks if the stop is cancelled" }),
-		additional: t.Optional(t.Boolean({ description: "Marks if the stop is additional" })),
-		separation: t.Optional(t.Boolean({ description: "Specifies if there is an separation of vehicles at this station" })),
-		nameParts: t.Optional(t.Array(t.Object({
-			type: t.String(),
-			value: t.String(),
-		}), { description: "List of name parts" }))
-	})
-]);
-
 const LargeStopSchema = t.Intersect([
-	SmallStopSchema,
+	StationSchema,
 	t.Object({
 		departure: t.Optional(TimeSchema),
 		arrival: t.Optional(TimeSchema),
@@ -51,4 +38,4 @@ const LargeStopSchema = t.Intersect([
 	})
 ]);
 
-export { StationSchema, StationDatabaseSchema, SmallStopSchema, LargeStopSchema };
+export { BasicStationSchema, StationSchema, StationDatabaseSchema, LargeStopSchema };

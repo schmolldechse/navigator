@@ -1,7 +1,20 @@
 import { t } from "elysia";
-import { SmallStopSchema } from "./station.model";
+import { BasicStationSchema } from "./station.model";
 import { MessageSchema } from "./message.model";
 import { TimeSchema } from "./time.model";
+
+const TimetableStopSchema = t.Intersect([
+	BasicStationSchema,
+	t.Object({
+		cancelled: t.Boolean({ description: "Marks if the stop is cancelled" }),
+		additional: t.Optional(t.Boolean({ description: "Marks if the stop is additional" })),
+		separation: t.Optional(t.Boolean({ description: "Specifies if there is an separation of vehicles at this station" })),
+		nameParts: t.Optional(t.Array(t.Object({
+			type: t.String(),
+			value: t.String(),
+		}), { description: "List of name parts" }))
+	})
+]);
 
 const SingleTimetableEntrySchema = t.Object({
 	ris_journeyId: t.Optional(t.String({
@@ -13,11 +26,11 @@ const SingleTimetableEntrySchema = t.Object({
 	hafas_journeyId: t.Optional(t.String({
 		description: "Identifier for the journey in the HAFAS system."
 	})),
-	origin: SmallStopSchema,
+	origin: TimetableStopSchema,
 	provenance: t.Optional(t.String({ description: "The provenance station name. Mainly used wit HAFAS." })),
-	destination: SmallStopSchema,
+	destination: TimetableStopSchema,
 	direction: t.Optional(t.String({ description: "The direction's station name. Mainly used with HAFAS." })),
-	viaStops: t.Optional(t.Array(SmallStopSchema, { description: "List of intermediate stops of the journey" })),
+	viaStops: t.Optional(t.Array(TimetableStopSchema, { description: "List of intermediate stops of the journey" })),
 	timeInformation: TimeSchema,
 	lineInformation: t.Object({
 		productType: t.String({ description: "The product type of the journey", examples: ["NahverkehrsonstigeZuege"] }),
@@ -41,4 +54,4 @@ const GroupedTimetableEntrySchema = t.Object({
 	entries: t.Array(SingleTimetableEntrySchema)
 });
 
-export { SingleTimetableEntrySchema, GroupedTimetableEntrySchema };
+export { TimetableStopSchema, SingleTimetableEntrySchema, GroupedTimetableEntrySchema };
