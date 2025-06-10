@@ -19,7 +19,7 @@ public class GatheringJourneyDaemon : Daemon
 
     public GatheringJourneyDaemon(ILogger<GatheringJourneyDaemon> logger, IServiceProvider serviceProvider,
         ProxyRotator proxyRotator)
-        : base("Gather Journey", TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(300), logger)
+        : base("Gather Journey", TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(300), logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
@@ -49,11 +49,12 @@ public class GatheringJourneyDaemon : Daemon
 
         var date = DateTime.UtcNow;
 
-        var randomRisId = await dbContext.RisIds
+        var risIds = await dbContext.RisIds
             .Where(risId => risId.LastSeen == null || risId.LastSeen < date.Date.AddDays(-1))
             .OrderBy(risId => risId.LastSeen ?? DateTime.MinValue)
-            .ThenBy(r => Guid.NewGuid())
-            .FirstOrDefaultAsync(cancellationToken);
+            .Take(100)
+            .ToListAsync(cancellationToken);
+            var randomRisId = risIds.Count > 0 ? risIds[Random.Shared.Next(risIds.Count)] : null;
         if (randomRisId == null) return;
 
         if (randomRisId.LastSeen == null)
