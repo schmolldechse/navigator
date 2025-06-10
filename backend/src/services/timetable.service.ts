@@ -78,15 +78,9 @@ class TimetableService {
 			this.retrieveHafasConnections(evaNumber, type, queryParams)
 		]);
 
-		/**
-		 * TODO:
-		 * - merge "journeyNumber" correctly
-		 * - remove duplicates in viaStops, prefer the ones from Bahnhof
-		 */
-
 		let mergedTimetable: TimetableEntry[] = this.mergeTimetables(ris, hafas, type);
 		if (bahnhof.length === 0) return mergedTimetable;
-		return this.mergeTimetables(mergedTimetable, bahnhof, type);
+		return this.mergeTimetables(bahnhof, mergedTimetable, type);
 	};
 
 	private mergeEntry = (
@@ -100,8 +94,14 @@ class TimetableService {
 		origin: entryA.origin ?? entryB.origin,
 		destination: entryA.destination ?? entryB.destination,
 		timeInformation: entryA.timeInformation ?? entryB.timeInformation,
-		lineInformation: entryA.lineInformation ?? entryB.lineInformation,
-		viaStops: entryA.viaStops ? [...(entryA.viaStops ?? []), ...(entryB.viaStops ?? [])] : entryB.viaStops,
+		lineInformation: {
+			...entryB.lineInformation,
+			...entryA.lineInformation,
+			// prefer from entryB, as the RIS/ HAFAS entries are more complete
+			journeyNumber: entryA?.lineInformation.journeyNumber ?? entryB.lineInformation.journeyNumber,
+			operator: entryA?.lineInformation.operator ?? entryB.lineInformation.operator,
+		},
+		viaStops: entryA.viaStops && entryA.viaStops.length > 1 ? entryA.viaStops : entryB.viaStops,
 		messages: entryA.messages ? [...(entryA.messages ?? []), ...(entryB.messages ?? [])] : entryB.messages
 	});
 
@@ -120,6 +120,7 @@ class TimetableService {
 		);
 		timetableEntriesA.forEach((timetableA: TimetableEntry) => {
 			timetableA.entries.map((singleTimetableA: typeof SingleTimetableEntrySchema.static) => {
+				// search for a matching entry in simplifiedTimetableEntriesB
 				const matchingEntry = simplifiedTimetableEntriesB.find(
 					(singleTimetableB: typeof SingleTimetableEntrySchema.static) =>
 						this.doesTimetableMatch(singleTimetableA, singleTimetableB, type)
