@@ -72,10 +72,21 @@ class TimetableService {
 		}
 
 		// use Bahnhof, RIS & HAFAS
-		console.log("Use Bahnhof, RIS & HAFAS");
-		console.log("remainingDuration", remainingDuration);
-		console.log("bahnhofDuration", bahnhofDuration);
-		return [];
+		const [bahnhof, ris, hafas] = await Promise.all([
+			this.retrieveBahnhofConnections(evaNumber, type, { ...queryParams, duration: bahnhofDuration }),
+			this.retrieveRISConnections(evaNumber, type, queryParams),
+			this.retrieveHafasConnections(evaNumber, type, queryParams)
+		]);
+
+		/**
+		 * TODO:
+		 * - merge "journeyNumber" correctly
+		 * - remove duplicates in viaStops, prefer the ones from Bahnhof
+		 */
+
+		let mergedTimetable: TimetableEntry[] = this.mergeTimetables(ris, hafas, type);
+		if (bahnhof.length === 0) return mergedTimetable;
+		return this.mergeTimetables(mergedTimetable, bahnhof, type);
 	};
 
 	private mergeEntry = (
