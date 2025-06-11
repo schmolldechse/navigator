@@ -1,15 +1,13 @@
 import { betterAuth } from "better-auth";
 import { usernamePlugin } from "./plugins/username";
 import type { GithubProfile } from "better-auth/social-providers";
-import { Pool } from "pg";
 import { rolePlugin } from "./plugins/role";
 import Elysia, { Context, error } from "elysia";
 import { openAPI } from "better-auth/plugins";
+import { pool } from "../db/postgres";
 
 const auth = betterAuth({
-	database: new Pool({
-		connectionString: process.env.POSTGRES_CONNECTION_STRING!,
-	}),
+	database: pool,
 	socialProviders: {
 		github: {
 			enabled: true,
@@ -26,6 +24,7 @@ const auth = betterAuth({
 	plugins: [usernamePlugin(), rolePlugin(), openAPI()]
 });
 
+// elysia application
 const authApp = new Elysia().all("/api/auth/*", (context: Context) => {
 	const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
 	// validate request method
