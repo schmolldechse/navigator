@@ -78,9 +78,21 @@ class TimetableService {
 			this.retrieveHafasConnections(evaNumber, type, queryParams)
 		]);
 
-		let mergedTimetable: TimetableEntry[] = this.mergeTimetables(ris, hafas, type);
-		if (bahnhof.length === 0) return mergedTimetable;
-		return this.mergeTimetables(bahnhof, mergedTimetable, type);
+		let mergedTimetables: TimetableEntry[] = this.mergeTimetables(bahnhof, this.mergeTimetables(ris, hafas, type), type);
+		// remove entries before & after the requested time
+		mergedTimetables = mergedTimetables.filter((entry) => {
+			const firstEntryTime = DateTime.fromISO(entry.entries[0].timeInformation.plannedTime);
+			const lastEntryTime = DateTime.fromISO(entry.entries[entry.entries.length - 1].timeInformation.plannedTime);
+			return firstEntryTime >= queryParams.when && lastEntryTime <= endTime;
+		});
+
+		// sort by actualTime
+		mergedTimetables.sort((a, b) => {
+			const aTime = DateTime.fromISO(a.entries[0].timeInformation.actualTime);
+			const bTime = DateTime.fromISO(b.entries[0].timeInformation.actualTime);
+			return aTime < bTime ? -1 : 1;
+		});
+		return mergedTimetables;
 	};
 
 	private mergeEntry = (
