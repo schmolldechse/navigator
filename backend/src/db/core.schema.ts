@@ -1,5 +1,4 @@
-import { pgSchema, uuid, varchar, timestamp, integer, boolean, serial, check, unique } from "drizzle-orm/pg-core";
-import { sql } from "drizzle-orm";
+import { pgSchema, uuid, varchar, timestamp, integer, boolean, serial } from "drizzle-orm/pg-core";
 
 const coreSchema = pgSchema("core");
 
@@ -10,6 +9,7 @@ const risIds = coreSchema.table("ris_ids", {
 	discoveryDate: timestamp("discovery_date", { mode: "date" }).notNull(),
 	lastSeenDate: timestamp("last_seen", { mode: "date" }),
 	lastSucceededAt: timestamp("last_succeeded_at", { mode: "date" }),
+	active: boolean("active").notNull().default(true),
 });
 
 // stations

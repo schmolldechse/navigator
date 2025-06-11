@@ -28,9 +28,10 @@ public class GatheringRisIdsDaemon : Daemon
         var date = DateTime.UtcNow;
 
         var randomStation = await _dbContext.Stations
-            .Where(s => s.QueryingEnabled == true && (s.LastQueried == null || s.LastQueried < date.Date.AddDays(-1)))
-            .Include(s => s.Products)
-            .OrderBy(s => Guid.NewGuid())
+            .Where(station => station.QueryingEnabled == true &&
+                              (station.LastQueried == null || station.LastQueried < date.Date.AddDays(-1)))
+            .Include(station => station.Products)
+            .OrderBy(_ => Guid.NewGuid())
             .FirstOrDefaultAsync(cancellationToken);
         if (randomStation == null) return;
 
@@ -66,31 +67,55 @@ public class GatheringRisIdsDaemon : Daemon
                 CallApi(station.EvaNumber, lookupDateWithDuration),
                 CallApi(station.EvaNumber, lookupDateWithDuration, false)
             ]).GetAwaiter().GetResult().ToArray()
-            .SelectMany(x => x)
-            .DistinctBy(x => x.Id)
+            .SelectMany(risId => risId)
+            .DistinctBy(risId => risId.Id)
             .ToList();
 
-        var enabledProducts = station.Products
-            .Where(p => p.QueryingEnabled)
-            .Select(p => p.ProductName)
-            .ToHashSet();
         // filter out RIS IDs that don't match enabled products
+        var enabledProducts = station.Products
+            .Where(product => product.QueryingEnabled)
+            .Select(product => product.ProductName)
+            .ToHashSet();
         var filteredByProduct = results.Where(risId => enabledProducts.Contains(risId.Product)).ToList();
 
-        // sort out already existing RIS IDs
-        var existingRisIds = _dbContext.RisIds.Select(risId => risId.Id).ToHashSet();
-        var newIds = filteredByProduct.Where(risId => !existingRisIds.Contains(risId.Id)).ToList();
-
-        // insert RIS IDs
-        _dbContext.RisIds.AddRange(newIds);
-
-        // update last_queried
-        station.LastQueried = date;
-        var amount = await _dbContext.SaveChangesAsync(cancellationToken);
+        var (inserted, updated) = await UpsertRisIds(station, date, filteredByProduct, cancellationToken);
         _logger.LogInformation(
-            "Retrieved a total of {Count} RIS IDs for station {StationName} (evaNumber: {EvaNumber}): Filtered out by product: {Filtered}, Already in DB: {FilteredByDB}, Inserted: {Inserted}",
-            results.Count, station.Name, station.EvaNumber, (results.Count - filteredByProduct.Count), (filteredByProduct.Count - newIds.Count),
-            (amount - 1));
+            "Retrieved a total of {Count} RIS IDs for station {StationName} (evaNumber: {EvaNumber}): Filtered out by product: {Filtered}, Already in DB (updated `active` bool): {Updated}, Inserted: {Inserted}",
+            results.Count, station.Name, station.EvaNumber, (results.Count - filteredByProduct.Count), updated,
+            inserted);
+    }
+
+    private async Task<(int inserted, int updated)> UpsertRisIds(Station station, DateTime date,
+        List<IdentifiedRisId> risIds,
+        CancellationToken cancellationToken)
+    {
+        station.LastQueried = date;
+
+        if (!risIds.Any())
+        {
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return (0, 0);
+        }
+
+        // existing RIS IDs from the database
+        var existingRisIds = await _dbContext.RisIds
+            .Where(risId => risIds.Select(gatheredRisId => gatheredRisId.Id).Contains(risId.Id))
+            .ToDictionaryAsync(risId => risId.Id, cancellationToken);
+
+        // separate new & existing
+        var newRisIds = risIds.Where(risId => !existingRisIds.ContainsKey(risId.Id)).ToList();
+        var existingToUpdate = risIds.Where(risId => existingRisIds.ContainsKey(risId.Id)).ToList();
+
+        if (newRisIds.Any()) _dbContext.RisIds.AddRange(newRisIds);
+
+        foreach (var risId in existingToUpdate)
+        {
+            var dbEntity = existingRisIds[risId.Id];
+            dbEntity.Active = true;
+        }
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        return (newRisIds.Count, existingToUpdate.Count);
     }
 
     private async Task<List<IdentifiedRisId>> CallApi(int evaNumber, DateOnly date,
@@ -123,7 +148,8 @@ public class GatheringRisIdsDaemon : Daemon
                 Id = TryParse(trainElement.GetProperty("journeyId")),
                 Product = Product.MapProduct(trainElement.GetProperty("type").GetString()) ??
                           throw new InvalidOperationException("Expected 'product' to be a non-null string"),
-                DiscoveryDate = DateTime.UtcNow
+                DiscoveryDate = DateTime.UtcNow,
+                Active = true
             };
         }).ToList();
     }
@@ -142,7 +168,7 @@ public class GatheringRisIdsDaemon : Daemon
         string datePart = fullTripId.Substring(0, 8);
         if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out _))
             throw new FormatException("Input does not start with a valid date");
-        
+
         return fullTripId.Substring(9);
     }
 

@@ -24,4 +24,7 @@ public class IdentifiedRisId
     
     [Column("last_succeeded_at")]
     public DateTime? LastSucceededAt { get; set; }
+    
+    [Column("active")]
+    public bool Active { get; set; } = true;
 }

@@ -50,6 +50,7 @@ public class GatheringJourneyDaemon : Daemon
         var date = DateTime.UtcNow;
 
         var risIds = await dbContext.RisIds
+            .Where(risId => risId.Active)
             .Where(risId => risId.LastSeen == null || risId.LastSeen < date.Date.AddDays(-1))
             .OrderBy(risId => risId.LastSeen ?? DateTime.MinValue)
             .Take(100)
