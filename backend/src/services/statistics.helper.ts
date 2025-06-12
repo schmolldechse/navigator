@@ -164,10 +164,6 @@ class StatisticsHelper {
 		result.punctual = this.calculateTotalFromMeasurements(result.punctual);
 		result.delayed = this.calculateTotalFromMeasurements(result.delayed);
 		result.platformChanges = this.calculateTotalFromMeasurements(result.platformChanges);
-
-		// calculate averages for delay
-		result.delay = this.processDelayMeasurements(result.delay);
-
 		return result;
 	};
 }
