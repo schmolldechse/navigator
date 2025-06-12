@@ -27,4 +27,7 @@ public class IdentifiedRisId
     
     [Column("active")]
     public bool Active { get; set; } = true;
+    
+    [Column("is_locked")]
+    public bool IsLocked { get; set; } = false;
 }

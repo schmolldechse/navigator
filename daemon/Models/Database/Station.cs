@@ -19,7 +19,9 @@ public class Station
 
     public virtual required Coordinates Coordinates { get; set; }
 
-    [Column("querying_enabled")] public bool? QueryingEnabled { get; set; }
+    [Column("querying_enabled")] public bool QueryingEnabled { get; set; } = false;
 
     [Column("last_queried")] public DateTime? LastQueried { get; set; }
+    
+    [Column("is_locked")] public bool IsLocked { get; set; } = false;
 }

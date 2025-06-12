@@ -10,6 +10,7 @@ const risIds = coreSchema.table("ris_ids", {
 	lastSeenDate: timestamp("last_seen", { mode: "date" }),
 	lastSucceededAt: timestamp("last_succeeded_at", { mode: "date" }),
 	active: boolean("active").notNull().default(true),
+	isLocked: boolean("is_locked").notNull().default(false),
 });
 
 // stations
@@ -19,8 +20,9 @@ const stations = coreSchema.table("stations", {
 	weight: integer("weight").notNull().default(0),
 	latitude: integer("latitude").notNull(),
 	longitude: integer("longitude").notNull(),
-	queryingEnabled: boolean("querying_enabled"),
+	queryingEnabled: boolean("querying_enabled").notNull().default(false),
 	lastQueried: timestamp("last_queried", { mode: "date" }),
+	isLocked: boolean("is_locked").notNull().default(false),
 });
 
 const stationProducts = coreSchema.table("station_products", {

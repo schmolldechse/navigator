@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Data;
+using System.Globalization;
 using System.Text.Json;
 using daemon.Database;
 using daemon.Models.Database;
@@ -49,33 +50,56 @@ public class GatheringJourneyDaemon : Daemon
 
         var date = DateTime.UtcNow;
 
-        var risIds = await dbContext.RisIds
-            .Where(risId => risId.Active)
-            .Where(risId => risId.LastSeen == null || risId.LastSeen < date.Date.AddDays(-1))
-            .OrderBy(risId => risId.LastSeen ?? DateTime.MinValue)
-            .Take(100)
-            .ToListAsync(cancellationToken);
-            var randomRisId = risIds.Count > 0 ? risIds[Random.Shared.Next(risIds.Count)] : null;
-        if (randomRisId == null) return;
+        IdentifiedRisId? randomRisId = null;
+        await using (var transaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken))
+        {
+            var risIds = await dbContext.RisIds
+                .Where(risId => !risId.IsLocked)
+                .Where(risId => risId.Active)
+                .Where(risId => risId.LastSeen == null || risId.LastSeen < date.Date.AddDays(-1))
+                .OrderBy(risId => risId.LastSeen ?? DateTime.MinValue)
+                .Take(100)
+                .ToListAsync(cancellationToken); 
+            randomRisId = risIds.Count > 0 ? risIds[Random.Shared.Next(risIds.Count)] : null;
+            if (randomRisId == null)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                return;
+            }
 
-        if (randomRisId.LastSeen == null)
-        {
-            date = new DateTime(
-                DateOnly.FromDateTime(GetLastTimetableChange()),
-                TimeOnly.FromTimeSpan(date.TimeOfDay),
-                DateTimeKind.Utc
-            );
-            await ProcessJourney(randomRisId, date, dbContext, cancellationToken);
+            randomRisId.IsLocked = true;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
         }
-        // do not fetch journeys for the same day, as the journey may not reach their destination yet
-        else if (randomRisId.LastSeen.Value.Date < date.Date)
+
+        try
         {
-            date = new DateTime(
-                DateOnly.FromDateTime(randomRisId.LastSeen!.Value.Date.AddDays(1)),
-                TimeOnly.FromTimeSpan(date.TimeOfDay),
-                DateTimeKind.Utc
-            );
-            await ProcessJourney(randomRisId, date, dbContext, cancellationToken);
+            if (randomRisId.LastSeen == null)
+            {
+                date = new DateTime(
+                    DateOnly.FromDateTime(GetLastTimetableChange()),
+                    TimeOnly.FromTimeSpan(date.TimeOfDay),
+                    DateTimeKind.Utc
+                );
+                await ProcessJourney(randomRisId, date, dbContext, cancellationToken);
+            }
+            // do not fetch journeys for the same day, as the journey may not reach their destination yet
+            else if (randomRisId.LastSeen.Value.Date < date.Date)
+            {
+                date = new DateTime(
+                    DateOnly.FromDateTime(randomRisId.LastSeen!.Value.Date.AddDays(1)),
+                    TimeOnly.FromTimeSpan(date.TimeOfDay),
+                    DateTimeKind.Utc
+                );
+                await ProcessJourney(randomRisId, date, dbContext, cancellationToken);
+            }
+        }
+        finally
+        {
+            await using var unlockTransaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+            randomRisId.IsLocked = false;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await unlockTransaction.CommitAsync(cancellationToken);
         }
     }
 
