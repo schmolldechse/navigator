@@ -73,17 +73,32 @@ public class GatheringJourneyDaemon : Daemon
 
         try
         {
+            /*
+             * For RIS IDs that have never been processed (LastSeen is null):
+             * - Gets the last timetable change date (starting from the previous day at midnight).
+             * - Uses this date, going back 7 days (=> this could be lowered, but 7 days is a good buffer)
+             */
             if (randomRisId.LastSeen == null)
             {
+                var timetableChange = GetLastTimetableChange(date.Date.AddDays(-1));
                 date = new DateTime(
-                    DateOnly.FromDateTime(GetLastTimetableChange()),
+                    DateOnly.FromDateTime(timetableChange.AddDays(-7)),
                     TimeOnly.FromTimeSpan(date.TimeOfDay),
                     DateTimeKind.Utc
                 );
                 await ProcessJourney(randomRisId, date, dbContext, cancellationToken);
             }
-            // do not fetch journeys for the same day, as the journey may not reach their destination yet
-            else if (randomRisId.LastSeen.Value.Date < date.Date)
+            /*
+             * For previously processed RIS IDs, we are comparing:
+             * - Midnight of LastSeen (+1 day)              |       exp: 2025-06-13 20:17:00     ->    2025-06-14 00:00:00
+             * - Midnight of current date (-1 day)          |       exp: 2025-06-15 13:00:00     ->    2025-06-14 00:00:00
+             *
+             * We add one day to LastSeen (as this is the day which we want to gather) and then compare it to the current date (-1 day).
+             * Result: LastSeen of the RIS ID is going to be set to : 2025-06-14 00:00:00
+
+             * If LastSeen is older than the current date, the RIS ID is processed. Would it be newer, the journey could be not complete yet.
+             */
+            else if (randomRisId.LastSeen.Value.Date.AddDays(1) < date.Date.AddDays(-1))
             {
                 date = new DateTime(
                     DateOnly.FromDateTime(randomRisId.LastSeen!.Value.Date.AddDays(1)),
@@ -130,7 +145,7 @@ public class GatheringJourneyDaemon : Daemon
     private async Task<JourneyResponse> CallApi(string risId, DateTime when, CancellationToken cancellationToken)
     {
         string formattedId = when.ToString("yyyyMMdd") + "-" + risId;
-        _logger.LogDebug("Gathering journey for RIS id {0}", formattedId);
+        _logger.LogDebug("Gathering journey for RIS ID {0}", formattedId);
 
         // random proxy
         using var httpClient = _proxyRotator.GetRandomProxy();

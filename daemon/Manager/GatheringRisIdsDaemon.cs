@@ -29,7 +29,7 @@ public class GatheringRisIdsDaemon : Daemon
     {
         using var scope = _serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<NavigatorDbContext>();
-        
+
         var date = DateTime.UtcNow;
 
         Station? randomStation = null;
@@ -65,12 +65,14 @@ public class GatheringRisIdsDaemon : Daemon
 
                 await ProcessStation(randomStation, startDate, dbContext, cancellationToken);
             }
-            else if (randomStation.LastQueried < date.Date)
+            else if (randomStation.LastQueried.Value.Date < date.Date)
             {
-                var newLastQueried = DateTime.SpecifyKind(new(
+                var newLastQueried = new DateTime(
                     DateOnly.FromDateTime(randomStation.LastQueried.Value.Date.AddDays(1)),
-                    TimeOnly.FromTimeSpan(date.TimeOfDay)
-                ), DateTimeKind.Utc);
+                    TimeOnly.FromTimeSpan(date.TimeOfDay), 
+                    DateTimeKind.Utc);
+                _logger.LogInformation("Querying {Name} (evaNumber: {EvaNumber}) for date {Date}",
+                    randomStation.Name, randomStation.EvaNumber, newLastQueried);
 
                 await ProcessStation(randomStation, newLastQueried, dbContext, cancellationToken);
             }
