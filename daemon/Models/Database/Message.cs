@@ -12,7 +12,8 @@ public abstract class AbstractMessage
     public int Id { get; set; }
     
     [Column("code")]
-    public required int Code { get; set; }
+    [MaxLength(64)]
+    public required string Code { get; set; }
     
     [Column("message")]
     [MaxLength(2048)]
@@ -33,9 +34,9 @@ public class JourneyMessage : AbstractMessage
     
     public static JourneyMessage CreateJourneyMessage(JsonElement element, string journeyId)
     {
-        var code = -1;
-        if (element.TryGetProperty("code", out var codeElement) && codeElement.ValueKind != JsonValueKind.Null) code = int.Parse(codeElement.ToString());
-        else if (element.TryGetProperty("id", out var idElement) && idElement.ValueKind != JsonValueKind.Null) code = int.Parse(idElement.ToString());
+        var code = string.Empty;
+        if (element.TryGetProperty("code", out var codeElement) && codeElement.ValueKind != JsonValueKind.Null) code = codeElement.ToString();
+        else if (element.TryGetProperty("id", out var idElement) && idElement.ValueKind != JsonValueKind.Null) code = idElement.ToString();
         else throw new ArgumentNullException(nameof(element), $"Failed to parse the JourneyMessage code for {journeyId}");
 
         return new()
@@ -58,8 +59,8 @@ public class StopMessage : AbstractMessage
     
     public static StopMessage CreateStopMessage(JsonElement element, string journeyId)
     {
-        var code = -1;
-        if (element.TryGetProperty("code", out var codeElement) && codeElement.ValueKind != JsonValueKind.Null) code = int.Parse(codeElement.ToString());
+        var code = string.Empty;
+        if (element.TryGetProperty("code", out var codeElement) && codeElement.ValueKind != JsonValueKind.Null) code = codeElement.ToString();
         else throw new ArgumentNullException(nameof(element), $"Failed to parse the StopMessage code for {journeyId}");
 
         var message = string.Empty;

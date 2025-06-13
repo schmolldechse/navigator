@@ -47,10 +47,10 @@ const journeys = coreSchema.table("journeys", {
 	journeyName: varchar("journey_name", { length: 512 }).notNull(),
 });
 
-const journeyMessage = coreSchema.table("journey_messages", {
+const journeyMessages = coreSchema.table("journey_messages", {
 	id: serial("id").primaryKey(),
 	journeyId: varchar("journey_id", { length: 82 }).notNull().references(() => journeys.journeyId, { onDelete: "cascade" }),
-	code: integer("code").notNull(),
+	code: varchar("code", { length: 64 }).notNull(),
 	message: varchar("message", { length: 2048 }).notNull(),
 	summary: varchar("summary", { length: 2048 }).notNull(),
 });
@@ -76,9 +76,9 @@ const journeyStopMessages = coreSchema.table("journey_stop_messages", {
 	id: serial("id").primaryKey(),
 	stopId: integer("stop_id").notNull().references(() => journeyViaStops.id, { onDelete: "cascade" }),
 	evaNumber: integer("eva_number").notNull(),
-	code: integer("code").notNull(),
+	code: varchar("code", { length: 64 }).notNull(),
 	message: varchar("message", { length: 2048 }).notNull(),
 	summary: varchar("summary", { length: 2048 }).notNull(),
 });
 
-export { risIds, stations, stationProducts, stationRil, journeys, journeyMessage, journeyViaStops, journeyStopMessages };
+export { risIds, stations, stationProducts, stationRil, journeys, journeyMessages, journeyViaStops, journeyStopMessages };
