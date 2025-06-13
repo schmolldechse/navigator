@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Globalization;
 using System.Text.Json;
 using daemon.Database;
 using daemon.Models.Database;
@@ -149,116 +148,16 @@ public class GatheringJourneyDaemon : Daemon
         var content = (await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)).RootElement;
 
         if (content.GetProperty("journeyId").ValueKind == JsonValueKind.Null)
-            return new()
-            {
-                Journey = null,
-                ParsingError = false
-            };
+            return new() { Journey = null, ParsingError = false };
+        var journeyId = content.GetProperty("journeyId").GetString()!;
 
         var journey = new Journey()
         {
-            Id = content.GetProperty("journeyId").GetString() ??
-                 throw new ArgumentNullException("Journey ID cannot be null"),
-            Operator = new Operator()
-            {
-                Code = content.GetProperty("operatorCode").GetString() ?? string.Empty,
-                Name = content.GetProperty("operatorName").GetString() ?? string.Empty
-            },
-            LineInformation = new LineInformation()
-            {
-                ProductType = Product.MapProduct(content.GetProperty("type").GetString()),
-                ProductName = content.GetProperty("category").GetString() ?? string.Empty,
-                JourneyName = content.GetProperty("name").GetString() ?? string.Empty,
-                JourneyNumber = content.GetProperty("no").GetInt32().ToString() ?? string.Empty
-            },
-            Messages = content.GetProperty("hims").EnumerateArray().Select(message => new JourneyMessage()
-            {
-                Code = int.Parse(
-                    message.TryGetProperty("code", out var codeProp) && codeProp.ValueKind != JsonValueKind.Null &&
-                    codeProp.GetString() != null ? codeProp.GetString() :
-                    message.TryGetProperty("id", out var idProp) && idProp.ValueKind != JsonValueKind.Null &&
-                    idProp.GetString() != null ? idProp.GetString() :
-                    throw new ArgumentNullException("Message code or id cannot be null")
-                ),
-                Message = message.GetProperty("caption").GetString() ?? string.Empty,
-                Summary = message.GetProperty("shortText").GetString() ?? string.Empty
-            }).ToList(),
-            ViaStops = content.GetProperty("stops").EnumerateArray().Select(stop =>
-            {
-                var cancelled = stop.GetProperty("status").GetString() == "Canceled" ||
-                                (stop.TryGetProperty("canceled", out var canceledProp) && canceledProp.GetBoolean());
-                var stopObj = new Stop()
-                {
-                    Cancelled = cancelled,
-                    EvaNumber = int.Parse(stop.GetProperty("station").GetProperty("evaNo").GetString() ??
-                                          throw new ArgumentNullException("evaNo cannot be null")),
-                    Name = stop.GetProperty("station").GetProperty("name").GetString() ??
-                           throw new ArgumentNullException("Station name cannot be null"),
-                    Messages = stop.GetProperty("messages").EnumerateArray().Select(message => new StopMessage()
-                    {
-                        Code = int.Parse(message.GetProperty("code").GetString() ??
-                                         throw new ArgumentNullException("Message code cannot be null")),
-                        Message = message.GetProperty("text").GetString() ?? string.Empty,
-                        Summary = message.TryGetProperty("textShort", out var textShortProp) &&
-                                  textShortProp.ValueKind != JsonValueKind.Null &&
-                                  textShortProp.GetString() != null
-                            ? textShortProp.GetString()!
-                            : message.GetProperty("text").GetString()!
-                    }).ToList()
-                };
-
-                if (stop.TryGetProperty("arrivalTime", out var arrivalTimeProp) &&
-                    arrivalTimeProp.ValueKind != JsonValueKind.Null)
-                {
-                    var actualTime = DateTime.Parse(
-                        arrivalTimeProp.GetProperty("predicted").GetString() ?? string.Empty,
-                        null,
-                        DateTimeStyles.AdjustToUniversal
-                    );
-                    var plannedTime = DateTime.Parse(
-                        arrivalTimeProp.GetProperty("target").GetString() ?? string.Empty,
-                        null,
-                        DateTimeStyles.AdjustToUniversal
-                    );
-                    var arrivalTime = new Time()
-                    {
-                        ActualTime = actualTime,
-                        PlannedTime = plannedTime,
-                        Delay = (int)(actualTime - plannedTime).TotalSeconds,
-                        ActualPlatform =
-                            stop.GetProperty("track").GetProperty("prediction").GetString() ?? string.Empty,
-                        PlannedPlatform = stop.GetProperty("track").GetProperty("target").GetString() ?? string.Empty
-                    };
-                    stopObj.Arrival = arrivalTime;
-                }
-
-                if (stop.TryGetProperty("departureTime", out var departureTimeProp) &&
-                    departureTimeProp.ValueKind != JsonValueKind.Null)
-                {
-                    var actualTime = DateTime.Parse(
-                        departureTimeProp.GetProperty("predicted").GetString() ?? string.Empty,
-                        null,
-                        DateTimeStyles.AdjustToUniversal
-                    );
-                    var plannedTime = DateTime.Parse(
-                        departureTimeProp.GetProperty("target").GetString() ?? string.Empty,
-                        null,
-                        DateTimeStyles.AdjustToUniversal
-                    );
-                    var departureTime = new Time()
-                    {
-                        ActualTime = actualTime,
-                        PlannedTime = plannedTime,
-                        Delay = (int)(actualTime - plannedTime).TotalSeconds,
-                        ActualPlatform =
-                            stop.GetProperty("track").GetProperty("prediction").GetString() ?? string.Empty,
-                        PlannedPlatform = stop.GetProperty("track").GetProperty("target").GetString() ?? string.Empty
-                    };
-                    stopObj.Departure = departureTime;
-                }
-
-                return stopObj;
-            }).ToList()
+            Id = journeyId,
+            Operator = Operator.CreateOperator(content, journeyId: journeyId),
+            LineInformation = LineInformation.CreateLineInformation(content, journeyId: journeyId),
+            Messages = content.GetProperty("hims").EnumerateArray().Select(message => JourneyMessage.CreateJourneyMessage(message, journeyId)).ToList(),
+            ViaStops = content.GetProperty("stops").EnumerateArray().Select(stop => Stop.CreateStop(stop, journeyId)).ToList()
         };
 
         return new JourneyResponse()

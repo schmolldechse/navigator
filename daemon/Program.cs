@@ -22,7 +22,6 @@ class Program
         var services = new ServiceCollection();
         services.AddLogging(builder => builder.AddSimpleConsole(options =>
         {
-            options.SingleLine = true;
             options.TimestampFormat = "[HH:mm:ss] ";
             options.IncludeScopes = false;
         }).SetMinimumLevel(cmdOptions.Debug ? LogLevel.Debug : LogLevel.Information));
