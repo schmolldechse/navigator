@@ -88,14 +88,11 @@ public class GatheringRisIdsDaemon : Daemon
 
     private async Task ProcessStation(Station station, DateTime date, NavigatorDbContext dbContext, CancellationToken cancellationToken)
     {
-        var lookupDate = DateOnly.FromDateTime(date.Date);
-        var lookupDateWithDuration = DateOnly.FromDateTime(date.Date.AddHours(12));
-
         var results = (await Task.WhenAll([
-                CallApi(station.EvaNumber, lookupDate),
-                CallApi(station.EvaNumber, lookupDate, false),
-                CallApi(station.EvaNumber, lookupDateWithDuration),
-                CallApi(station.EvaNumber, lookupDateWithDuration, false)
+                CallApi(station.EvaNumber, date.Date),
+                CallApi(station.EvaNumber, date.Date, false),
+                CallApi(station.EvaNumber, date.Date.AddHours(12)),
+                CallApi(station.EvaNumber, date.Date.AddHours(12), false)
             ])).SelectMany(risId => risId)
             .DistinctBy(risId => risId.Id)
             .ToList();
@@ -148,14 +145,12 @@ public class GatheringRisIdsDaemon : Daemon
         return (newRisIds.Count, existingToUpdate.Count);
     }
 
-    private async Task<List<IdentifiedRisId>> CallApi(int evaNumber, DateOnly date,
+    private async Task<List<IdentifiedRisId>> CallApi(int evaNumber, DateTime timeStart,
         bool isDeparture = true)
     {
         var boardType = isDeparture ? "departure" : "arrival";
-
-        var timeStart = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Utc);
         var timeEnd = timeStart.AddMinutes(720);
-
+        
         var response = await _httpClient.GetAsync(string.Format(_apiUrl, boardType, evaNumber,
             Uri.EscapeDataString(timeStart.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")),
             Uri.EscapeDataString(timeEnd.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))));
