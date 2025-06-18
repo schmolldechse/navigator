@@ -102,7 +102,8 @@ class RouteService {
 					default: false
 				})
 			)
-		})
+		}),
+		reference: t.Optional(t.String({ description: "The reference (either earlier/ later) to lookup routes for" }))
 	});
 
 	private readonly deutscheBahnOccupancies: (typeof OccupancySchema.static)[] = [
@@ -228,7 +229,8 @@ class RouteService {
 				nurDeutschlandTicketVerbindungen: false,
 				deutschlandTicketVorhanden: false,
 				maxUmstiege: changeoverAmount(),
-				minUmstiegszeit: changeoverTime()
+				minUmstiegszeit: changeoverTime(),
+				pagingReference: body.reference
 			})
 		});
 		if (!request.ok)
