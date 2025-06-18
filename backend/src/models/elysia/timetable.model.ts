@@ -1,6 +1,5 @@
 import { t } from "elysia";
 import { BasicStationSchema } from "./station.model";
-import { MessageSchema } from "./message.model";
 import { TimeSchema } from "./time.model";
 
 const TimetableStopSchema = t.Intersect([
@@ -15,6 +14,16 @@ const TimetableStopSchema = t.Intersect([
 		}), { description: "List of name parts" }))
 	})
 ]);
+
+const TimetableMessageSchema = t.Object(
+	{
+		type: t.String({ description: "Type of the message" }),
+		text: t.String({ description: "Text of the message" }),
+		summary: t.Optional(t.String({ description: "Summary of the message" })),
+		links: t.Optional(t.Array(t.Any(), { description: "More information related to a message. Used by Bahnhof API." }))
+	},
+	{ description: "Message object" }
+);
 
 const SingleTimetableEntrySchema = t.Object({
 	ris_journeyId: t.Optional(t.String({
@@ -44,7 +53,7 @@ const SingleTimetableEntrySchema = t.Object({
 			name: t.Optional(t.String({ description: "The name of the operator", examples: ["DB Fernverkehr AG"] }))
 		}))
 	}),
-	messages: t.Array(MessageSchema),
+	messages: t.Array(TimetableMessageSchema),
 	cancelled: t.Boolean({ description: "Indicates if the journey is cancelled." })
 });
 
@@ -52,4 +61,4 @@ const GroupedTimetableEntrySchema = t.Object({
 	entries: t.Array(SingleTimetableEntrySchema)
 });
 
-export { TimetableStopSchema, SingleTimetableEntrySchema, GroupedTimetableEntrySchema };
+export { TimetableStopSchema, TimetableMessageSchema, SingleTimetableEntrySchema, GroupedTimetableEntrySchema };

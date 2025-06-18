@@ -21,12 +21,6 @@ class RoutePlannerQuery {
 	 */
 	to!: number;
 
-	/**
-	 * @maxItems 10 maximum of 10 products can be disabled
-	 * @uniqueItems Only unique values are allowed
-	 */
-	disabledProducts?: string;
-
 	departure?: string;
 	arrival?: string;
 	results?: number = 5;
@@ -94,9 +88,6 @@ export class JourneyController extends Controller {
 			stopovers: "true"
 		});
 
-		if ((query?.disabledProducts?.length ?? 0) > 0)
-			this.disallowProducts(query?.disabledProducts!).forEach((product) => params.set(Object.keys(product)[0], "false"));
-
 		if (query.earlierThan) params.set("earlierThan", query.earlierThan);
 		else if (query.laterThan) params.set("laterThan", query.laterThan);
 		else {
@@ -110,20 +101,5 @@ export class JourneyController extends Controller {
 		if (!request.ok) throw new Error("Failed to fetch route");
 
 		return mapToRoute(await request.json()) as RouteData;
-	};
-
-	disallowProducts = (input: string): { [product: string]: boolean }[] => {
-		return input
-			.split(",")
-			.map((line) => line.trim())
-			.filter((product) =>
-				Object.values(Products)
-					.filter((p) => p.possibilities.length > 0)
-					.some((p) => p.value === product)
-			)
-			.map((product) => {
-				const object = Object.values(Products).find((p) => p.value === product);
-				return { [object?.possibilities?.slice(-1)[0]!]: false };
-			});
 	};
 }

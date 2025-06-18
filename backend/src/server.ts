@@ -5,6 +5,7 @@ import { HttpStatus } from "./response/status";
 import { HttpError } from "./response/error";
 import stationController from "./controllers/station.controller";
 import timetableController from "./controllers/timetable.controller";
+import routeController from "./controllers/route.controller";
 
 const restApi = new Elysia({ prefix: "/api" })
 	.error({ HttpError })
@@ -36,7 +37,8 @@ const restApi = new Elysia({ prefix: "/api" })
 		return Response.json({ error: message, status: set.status });
 	})
 	.use(stationController)
-	.use(timetableController);
+	.use(timetableController)
+	.use(routeController);
 
 const app = new Elysia()
 	.use(

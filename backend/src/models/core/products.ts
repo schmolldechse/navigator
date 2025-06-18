@@ -35,7 +35,8 @@ const mapToProduct = (input?: string): string => {
 		case "suburban": // origin: suburban :
 		case "sbahn": // origin: SBAHN : bahn.de
 			return Products.SBAHNEN;
-		case "bus": // origin: BUS : bahnhof.de, regio-guide.de
+		case "bus": // origin: BUS : bahnhof.de, regio-guide.de , bahn.de
+		case "ersatzverkehr": // origin: ERSATZVERKEHR : bahn.de
 			return Products.BUSSE;
 		case "ferry": // origin: FERRY : bahnhof.de, regio-guide.de
 		case "schiff": // origin: SCHIFF : bahn.de

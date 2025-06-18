@@ -1,6 +1,4 @@
 import { t } from "elysia";
-import { TimeSchema } from "./time.model";
-import { MessageSchema } from "./message.model";
 
 const BasicStationSchema = t.Object({
 	name: t.String({ description: "Name of the station" }),
@@ -29,13 +27,4 @@ const StationDatabaseSchema = t.Intersect([
 	})
 ]);
 
-const LargeStopSchema = t.Intersect([
-	StationSchema,
-	t.Object({
-		departure: t.Optional(TimeSchema),
-		arrival: t.Optional(TimeSchema),
-		messages: t.Array(MessageSchema)
-	})
-]);
-
-export { BasicStationSchema, StationSchema, StationDatabaseSchema, LargeStopSchema };
+export { BasicStationSchema, StationSchema, StationDatabaseSchema };

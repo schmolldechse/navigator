@@ -1,5 +1,5 @@
 import { SingleTimetableEntrySchema } from "../models/elysia/timetable.model";
-import { Message, Time, TimetableEntry, TimetableStop } from "../models/core/models";
+import { Time, TimetableEntry, TimetableMessage, TimetableStop } from "../models/core/models";
 import { database } from "../db/postgres";
 import { stations } from "../db/core.schema";
 import { eq } from "drizzle-orm";
@@ -234,20 +234,20 @@ class TimetableHelper {
 		} as Time;
 	};
 
-	mapMessage = (entry: any, isHAFAS: boolean = false): Message => {
+	mapMessage = (entry: any, isHAFAS: boolean = false): TimetableMessage => {
 		if (isHAFAS) {
 			const type = entry?.prioritaet === "HOCH" && entry?.type === "HALT_AUSFALL" ? "canceled-trip" : "general-warning";
 			return {
 				type: type,
 				text: entry?.text
-			} as Message;
+			} as TimetableMessage;
 		}
 
 		return {
 			type: entry?.type,
 			text: entry?.text,
 			links: entry?.links ?? undefined
-		};
+		} as TimetableMessage;
 	};
 }
 
