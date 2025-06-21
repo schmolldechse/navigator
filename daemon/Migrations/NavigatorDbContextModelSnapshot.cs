@@ -71,15 +71,19 @@ namespace daemon.Migrations
                         .HasColumnType("character varying(82)")
                         .HasColumnName("journey_id");
 
+                    b.Property<DateOnly>("JourneyDate")
+                        .HasColumnType("date")
+                        .HasColumnName("journey_date");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("journeys", "core", t =>
-                        {
-                            t.HasCheckConstraint("journey_id_format", "journey_id ~ '^\\d{8}-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'");
-                        });
+                    b.HasIndex("JourneyDate")
+                        .HasDatabaseName("idx_journey_date");
+
+                    b.ToTable("journeys", "core");
                 });
 
             modelBuilder.Entity("daemon.Models.Database.JourneyMessage", b =>
@@ -96,6 +100,10 @@ namespace daemon.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("code");
+
+                    b.Property<DateOnly>("JourneyDate")
+                        .HasColumnType("date")
+                        .HasColumnName("journey_date");
 
                     b.Property<string>("JourneyId")
                         .IsRequired()
@@ -116,6 +124,9 @@ namespace daemon.Migrations
                         .HasColumnName("summary");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("JourneyDate")
+                        .HasDatabaseName("idx_messages_journeydate");
 
                     b.HasIndex("JourneyId");
 
@@ -234,6 +245,10 @@ namespace daemon.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("eva_number");
 
+                    b.Property<DateOnly>("JourneyDate")
+                        .HasColumnType("date")
+                        .HasColumnName("journey_date");
+
                     b.Property<string>("JourneyId")
                         .IsRequired()
                         .HasMaxLength(82)
@@ -248,7 +263,19 @@ namespace daemon.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EvaNumber")
+                        .HasDatabaseName("idx_via-stops_evanumber");
+
+                    b.HasIndex("JourneyDate")
+                        .HasDatabaseName("idx_via-stops_journeydate");
+
                     b.HasIndex("JourneyId");
+
+                    b.HasIndex("EvaNumber", "JourneyDate")
+                        .HasDatabaseName("idx_via-stops_evanumber_journeydate");
+
+                    b.HasIndex("EvaNumber", "JourneyId")
+                        .HasDatabaseName("idx_via-stops_evanumber_journeyid");
 
                     b.ToTable("journey_via-stops", "core");
                 });

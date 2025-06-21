@@ -12,8 +12,8 @@ using daemon.Database;
 namespace daemon.Migrations
 {
     [DbContext(typeof(NavigatorDbContext))]
-    [Migration("20250611100157_Add active toggle to RIS ID")]
-    partial class AddactivetoggletoRISID
+    [Migration("20250621101209_Initial database schema")]
+    partial class Initialdatabaseschema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -40,6 +40,10 @@ namespace daemon.Migrations
                     b.Property<DateTime>("DiscoveryDate")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("discovery_date");
+
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
 
                     b.Property<DateTime?>("LastSeen")
                         .HasColumnType("timestamp with time zone")
@@ -70,15 +74,19 @@ namespace daemon.Migrations
                         .HasColumnType("character varying(82)")
                         .HasColumnName("journey_id");
 
+                    b.Property<DateOnly>("JourneyDate")
+                        .HasColumnType("date")
+                        .HasColumnName("journey_date");
+
                     b.HasKey("Id");
 
                     b.HasIndex("Id")
                         .IsUnique();
 
-                    b.ToTable("journeys", "core", t =>
-                        {
-                            t.HasCheckConstraint("journey_id_format", "journey_id ~ '^\\d{8}-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'");
-                        });
+                    b.HasIndex("JourneyDate")
+                        .HasDatabaseName("idx_journey_date");
+
+                    b.ToTable("journeys", "core");
                 });
 
             modelBuilder.Entity("daemon.Models.Database.JourneyMessage", b =>
@@ -90,9 +98,15 @@ namespace daemon.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Code")
-                        .HasColumnType("integer")
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
                         .HasColumnName("code");
+
+                    b.Property<DateOnly>("JourneyDate")
+                        .HasColumnType("date")
+                        .HasColumnName("journey_date");
 
                     b.Property<string>("JourneyId")
                         .IsRequired()
@@ -113,6 +127,9 @@ namespace daemon.Migrations
                         .HasColumnName("summary");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("JourneyDate")
+                        .HasDatabaseName("idx_messages_journeydate");
 
                     b.HasIndex("JourneyId");
 
@@ -184,6 +201,10 @@ namespace daemon.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EvaNumber"));
 
+                    b.Property<bool>("IsLocked")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_locked");
+
                     b.Property<DateTime?>("LastQueried")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_queried");
@@ -194,7 +215,7 @@ namespace daemon.Migrations
                         .HasColumnType("character varying(512)")
                         .HasColumnName("name");
 
-                    b.Property<bool?>("QueryingEnabled")
+                    b.Property<bool>("QueryingEnabled")
                         .HasColumnType("boolean")
                         .HasColumnName("querying_enabled");
 
@@ -227,6 +248,10 @@ namespace daemon.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("eva_number");
 
+                    b.Property<DateOnly>("JourneyDate")
+                        .HasColumnType("date")
+                        .HasColumnName("journey_date");
+
                     b.Property<string>("JourneyId")
                         .IsRequired()
                         .HasMaxLength(82)
@@ -241,7 +266,19 @@ namespace daemon.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("EvaNumber")
+                        .HasDatabaseName("idx_via-stops_evanumber");
+
+                    b.HasIndex("JourneyDate")
+                        .HasDatabaseName("idx_via-stops_journeydate");
+
                     b.HasIndex("JourneyId");
+
+                    b.HasIndex("EvaNumber", "JourneyDate")
+                        .HasDatabaseName("idx_via-stops_evanumber_journeydate");
+
+                    b.HasIndex("EvaNumber", "JourneyId")
+                        .HasDatabaseName("idx_via-stops_evanumber_journeyid");
 
                     b.ToTable("journey_via-stops", "core");
                 });
@@ -255,8 +292,10 @@ namespace daemon.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("Code")
-                        .HasColumnType("integer")
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
                         .HasColumnName("code");
 
                     b.Property<string>("Message")

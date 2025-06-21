@@ -26,25 +26,26 @@ public class NavigatorDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        var schema = Environment.GetEnvironmentVariable("POSTGRES_CORE_SCHEMA") ?? throw new ArgumentNullException("POSTGRES_CORE_SCHEMA", "Core schema not configured");
-        modelBuilder.HasDefaultSchema(schema);
+        modelBuilder.HasDefaultSchema("core");
         
         // stations
         modelBuilder.Entity<Station>(entity =>
         {
             entity.ToTable("stations");
-            entity.HasKey(e => e.EvaNumber);
-            entity.OwnsOne(e => e.Coordinates);
+            
+            entity.HasKey(station => station.EvaNumber);
+            entity.OwnsOne(station => station.Coordinates);
         });
         
         // station_products
         modelBuilder.Entity<Product>(entity =>
         {
             entity.ToTable("station_products");
-            entity.HasKey(e => e.Id);
-            entity.HasOne(e => e.Station)
-                .WithMany(s => s.Products)
-                .HasForeignKey(e => e.EvaNumber)
+            
+            entity.HasKey(product => product.Id);
+            entity.HasOne(product => product.Station)
+                .WithMany(station => station.Products)
+                .HasForeignKey(product => product.EvaNumber)
                 .OnDelete(DeleteBehavior.Cascade);
         });
         
@@ -52,10 +53,11 @@ public class NavigatorDbContext : DbContext
         modelBuilder.Entity<Ril100>(entity =>
         {
             entity.ToTable("station_ril100");
-            entity.HasKey(e => e.Id);
-            entity.HasOne(e => e.Station)
-                .WithMany(s => s.Ril100)
-                .HasForeignKey(e => e.EvaNumber)
+            
+            entity.HasKey(ril => ril.Id);
+            entity.HasOne(ril => ril.Station)
+                .WithMany(station => station.Ril100)
+                .HasForeignKey(ril => ril.EvaNumber)
                 .OnDelete(DeleteBehavior.Cascade);
         });
         
@@ -63,72 +65,94 @@ public class NavigatorDbContext : DbContext
         modelBuilder.Entity<IdentifiedRisId>(entity =>
         {
             entity.ToTable("ris_ids");
-            entity.HasKey(e => e.Id);
+            
+            entity.HasKey(risId => risId.Id);
         });
         
         // journeys
         modelBuilder.Entity<Journey>(entity =>
         {
             entity.ToTable("journeys");
-            entity.HasKey(e => e.Id); 
-            entity.ToTable(t => t.HasCheckConstraint("journey_id_format", 
-               "journey_id ~ '^\\d{8}-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'"));
             
-            entity.OwnsOne(j => j.LineInformation);
-            entity.OwnsOne(j => j.Operator);
+            entity.HasKey(journey => journey.Id); 
+            entity.OwnsOne(journey => journey.LineInformation);
+            entity.OwnsOne(journey => journey.Operator);
+            
+            // indexes
+            entity.HasIndex(journey => journey.JourneyDate)
+                .HasDatabaseName("idx_journey_date");
         });
             
         // journey_messages
         modelBuilder.Entity<JourneyMessage>(entity =>
         {
             entity.ToTable("journey_messages");
-            entity.HasKey(e => e.Id);
-            entity.HasOne(e => e.Journey)
-                .WithMany(j => j.Messages)
-                .HasForeignKey(m => m.JourneyId)
+            
+            entity.HasKey(message => message.Id);
+            entity.HasOne(message => message.Journey)
+                .WithMany(journey => journey.Messages)
+                .HasForeignKey(message => message.JourneyId)
                 .OnDelete(DeleteBehavior.Cascade);
+            
+            // indexes
+            entity.HasIndex(message => message.JourneyDate)
+                .HasDatabaseName("idx_messages_journeydate");
         });
         
         // journey_via-stops
         modelBuilder.Entity<Stop>(entity =>
         {
             entity.ToTable("journey_via-stops");
-            entity.HasKey(e => e.Id);
+            entity.HasKey(stop => stop.Id);
             
-            entity.HasOne(s => s.Journey)
-                .WithMany(j => j.ViaStops)
-                .HasForeignKey(s => s.JourneyId)
+            entity.HasOne(stop => stop.Journey)
+                .WithMany(journey => journey.ViaStops)
+                .HasForeignKey(stop => stop.JourneyId)
                 .OnDelete(DeleteBehavior.Cascade);
             
             // flatten Arrival properties
-            entity.OwnsOne(s => s.Arrival, a =>
+            entity.OwnsOne(stop => stop.Arrival, arrival =>
             {
-                a.Property(t => t.PlannedTime).HasColumnName("arrival_planned_time");
-                a.Property(t => t.ActualTime).HasColumnName("arrival_actual_time");
-                a.Property(t => t.Delay).HasColumnName("arrival_delay");
-                a.Property(t => t.PlannedPlatform).HasColumnName("arrival_planned_platform");
-                a.Property(t => t.ActualPlatform).HasColumnName("arrival_actual_platform");
+                arrival.Property(time => time.PlannedTime).HasColumnName("arrival_planned_time");
+                arrival.Property(time => time.ActualTime).HasColumnName("arrival_actual_time");
+                arrival.Property(time => time.Delay).HasColumnName("arrival_delay");
+                arrival.Property(time => time.PlannedPlatform).HasColumnName("arrival_planned_platform");
+                arrival.Property(time => time.ActualPlatform).HasColumnName("arrival_actual_platform");
             });
             
             // flatten Departure properties
-            entity.OwnsOne(s => s.Departure, d =>
+            entity.OwnsOne(stop => stop.Departure, departure =>
             {
-                d.Property(t => t.PlannedTime).HasColumnName("departure_planned_time");
-                d.Property(t => t.ActualTime).HasColumnName("departure_actual_time");
-                d.Property(t => t.Delay).HasColumnName("departure_delay");
-                d.Property(t => t.PlannedPlatform).HasColumnName("departure_planned_platform");
-                d.Property(t => t.ActualPlatform).HasColumnName("departure_actual_platform");
+                departure.Property(time => time.PlannedTime).HasColumnName("departure_planned_time");
+                departure.Property(time => time.ActualTime).HasColumnName("departure_actual_time");
+                departure.Property(time => time.Delay).HasColumnName("departure_delay");
+                departure.Property(time => time.PlannedPlatform).HasColumnName("departure_planned_platform");
+                departure.Property(time => time.ActualPlatform).HasColumnName("departure_actual_platform");
             });
+            
+            // indexes
+            entity.HasIndex(stop => stop.EvaNumber)
+                .HasDatabaseName("idx_via-stops_evanumber");
+            
+            entity.HasIndex(stop => stop.JourneyDate)
+                .HasDatabaseName("idx_via-stops_journeydate");
+            
+            entity.HasIndex(stop => new { stop.EvaNumber, stop.JourneyId })
+                .HasDatabaseName("idx_via-stops_evanumber_journeyid");
+            
+            entity.HasIndex(stop => new { stop.EvaNumber, stop.JourneyDate })
+                .HasDatabaseName("idx_via-stops_evanumber_journeydate");
         });
         
         // journey_stop_messages
         modelBuilder.Entity<StopMessage>(entity =>
         {
             entity.ToTable("journey_stop_messages");
-            entity.HasKey(e => e.Id);
-            entity.HasOne(e => e.Stop)
-                .WithMany(s => s.Messages)
-                .HasForeignKey(m => m.StopId)
+            
+            entity.HasKey(message => message.Id);
+            entity.HasOne(message => message.Stop)
+                .WithMany(stop => stop.Messages)
+                .HasForeignKey(message => message.StopId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

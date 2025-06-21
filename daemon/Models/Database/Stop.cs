@@ -15,6 +15,12 @@ public class Stop
     [MaxLength(82)] // 8 (date) + 1 (dash) + 36 (UUID) [ +1 (dash) + 36 (UUID) ] = 45 | 82
     public string JourneyId { get; set; }
 
+    [Column("journey_date")]
+    public virtual DateOnly JourneyDate { 
+        get => DateOnly.ParseExact(JourneyId.Substring(0, 8), "yyyyMMdd", null);
+        private set { } 
+    }
+
     [ForeignKey(nameof(JourneyId))] public virtual Journey Journey { get; set; } = null!;
     
     [Column("name")]

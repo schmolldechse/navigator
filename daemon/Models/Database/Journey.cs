@@ -12,6 +12,12 @@ public class Journey
     [MaxLength(82)] // 8 (date) + 1 (dash) + 36 (UUID) [ +1 (dash) + 36 (UUID) ] = 45 | 82
     public required string Id { get; set; }
     
+    [Column("journey_date")]
+    public virtual DateOnly JourneyDate { 
+        get => DateOnly.ParseExact(Id.Substring(0, 8), "yyyyMMdd", null);
+        private set { }
+    }
+    
     public virtual LineInformation LineInformation { get; set; } = null!;
     
     public virtual Operator Operator { get; set; } = null!;

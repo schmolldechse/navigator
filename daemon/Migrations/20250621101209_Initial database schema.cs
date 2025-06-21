@@ -21,6 +21,7 @@ namespace daemon.Migrations
                 columns: table => new
                 {
                     journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
+                    journey_date = table.Column<DateOnly>(type: "date", nullable: false),
                     product_type = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     product_name = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     journey_number = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
@@ -31,7 +32,6 @@ namespace daemon.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_journeys", x => x.journey_id);
-                    table.CheckConstraint("journey_id_format", "journey_id ~ '^\\d{8}-[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$'");
                 });
 
             migrationBuilder.CreateTable(
@@ -43,7 +43,9 @@ namespace daemon.Migrations
                     product = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
                     discovery_date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     last_seen = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    last_succeeded_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    last_succeeded_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    active = table.Column<bool>(type: "boolean", nullable: false),
+                    is_locked = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -58,10 +60,12 @@ namespace daemon.Migrations
                     eva_number = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     name = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
+                    weight = table.Column<double>(type: "double precision", nullable: false),
                     latitude = table.Column<double>(type: "double precision", nullable: false),
                     longitude = table.Column<double>(type: "double precision", nullable: false),
-                    querying_enabled = table.Column<bool>(type: "boolean", nullable: true),
-                    last_queried = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    querying_enabled = table.Column<bool>(type: "boolean", nullable: false),
+                    last_queried = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    is_locked = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -76,7 +80,8 @@ namespace daemon.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
-                    code = table.Column<int>(type: "integer", nullable: false),
+                    journey_date = table.Column<DateOnly>(type: "date", nullable: false),
+                    code = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     message = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
                     summary = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false)
                 },
@@ -100,6 +105,7 @@ namespace daemon.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
+                    journey_date = table.Column<DateOnly>(type: "date", nullable: false),
                     name = table.Column<string>(type: "character varying(512)", maxLength: 512, nullable: false),
                     eva_number = table.Column<int>(type: "integer", nullable: false),
                     cancelled = table.Column<bool>(type: "boolean", nullable: false),
@@ -179,7 +185,7 @@ namespace daemon.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     stop_id = table.Column<int>(type: "integer", nullable: false),
-                    code = table.Column<int>(type: "integer", nullable: false),
+                    code = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     message = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
                     summary = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false)
                 },
@@ -196,6 +202,12 @@ namespace daemon.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "idx_messages_journeydate",
+                schema: "core",
+                table: "journey_messages",
+                column: "journey_date");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_journey_messages_journey_id",
                 schema: "core",
                 table: "journey_messages",
@@ -208,10 +220,40 @@ namespace daemon.Migrations
                 column: "stop_id");
 
             migrationBuilder.CreateIndex(
+                name: "idx_via-stops_evanumber",
+                schema: "core",
+                table: "journey_via-stops",
+                column: "eva_number");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_via-stops_evanumber_journeydate",
+                schema: "core",
+                table: "journey_via-stops",
+                columns: new[] { "eva_number", "journey_date" });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_via-stops_evanumber_journeyid",
+                schema: "core",
+                table: "journey_via-stops",
+                columns: new[] { "eva_number", "journey_id" });
+
+            migrationBuilder.CreateIndex(
+                name: "idx_via-stops_journeydate",
+                schema: "core",
+                table: "journey_via-stops",
+                column: "journey_date");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_journey_via-stops_journey_id",
                 schema: "core",
                 table: "journey_via-stops",
                 column: "journey_id");
+
+            migrationBuilder.CreateIndex(
+                name: "idx_journey_date",
+                schema: "core",
+                table: "journeys",
+                column: "journey_date");
 
             migrationBuilder.CreateIndex(
                 name: "IX_journeys_journey_id",
