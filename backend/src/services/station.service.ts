@@ -83,28 +83,6 @@ class StationService {
 		} as Station;
 	};
 
-	getRelatedEvaNumbers = async (evaNumber: number): Promise<number[]> => {
-		const rilMap = (
-			await database.select({ ril100: stationRil.ril100 }).from(stationRil).where(eq(stationRil.evaNumber, evaNumber))
-		).flatMap((ril) => ril.ril100);
-		if (rilMap.length === 0) return [evaNumber];
-
-		const evaNumbers = (
-			await Promise.all(
-				rilMap.map(async (ril100) =>
-					(
-						await database
-							.select({ evaNumber: stationRil.evaNumber })
-							.from(stationRil)
-							.where(eq(stationRil.ril100, ril100))
-					).flatMap((ril) => ril.evaNumber)
-				)
-			)
-		).flat();
-
-		return [...new Set(evaNumbers)];
-	};
-
 	private saveStation = async (station: typeof StationDatabaseSchema.static, insertNew: boolean = true): Promise<Station> => {
 		if (insertNew) {
 			const existing = await database.select().from(stations).where(eq(stations.evaNumber, station.evaNumber)).limit(1);
