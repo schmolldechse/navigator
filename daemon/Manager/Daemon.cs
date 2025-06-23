@@ -11,20 +11,16 @@ public abstract class Daemon : IDisposable
     protected readonly ILogger<Daemon> Logger;
     
     public String Name { get; }
-    public TimeSpan Interval { get; }
-    public TimeSpan RetryErrorDelay { get; }
+    public TimeSpan MaxIntervalSeconds { get; }
     
     public bool IsRunning => _executionTask != null && !_executionTask.IsCompleted;
 
-    protected Daemon(string name, TimeSpan interval, TimeSpan retryErrorDelay, ILogger<Daemon> logger)
+    protected Daemon(string name, TimeSpan maxIntervalSeconds, ILogger<Daemon> logger)
     {
         Name = name ?? throw new ArgumentNullException(nameof(name), "Daemon name cannot be null");
-        if (interval <= TimeSpan.Zero)
-            throw new ArgumentOutOfRangeException(nameof(interval), "Interval must be greater than zero");
-        if (retryErrorDelay < TimeSpan.Zero)
-            throw new ArgumentOutOfRangeException(nameof(retryErrorDelay), "Retry error delay cannot be negative");
-        Interval = interval;
-        RetryErrorDelay = retryErrorDelay;
+        if (maxIntervalSeconds < TimeSpan.FromSeconds(5))
+            throw new ArgumentOutOfRangeException(nameof(maxIntervalSeconds), "maxIntervalSeconds must be greater than 5");
+        MaxIntervalSeconds = maxIntervalSeconds;
         
         Logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
     }
@@ -50,16 +46,20 @@ public abstract class Daemon : IDisposable
             try
             {
                 await ExecuteCoreAsync(cancellationToken);
-                if (!cancellationToken.IsCancellationRequested) await Task.Delay(Interval, cancellationToken);
+                
+                var interval = TimeSpan.FromSeconds(Random.Shared.Next(5, (int)MaxIntervalSeconds.TotalSeconds));
+                if (!cancellationToken.IsCancellationRequested) await Task.Delay(interval, cancellationToken);
             }
             catch (Exception exception)
             {
-                Logger.LogError(exception, "Error in daemon '{Name}' occurred: {Error}", Name, exception.Message);
                 if (!cancellationToken.IsCancellationRequested)
                 {
                     try
                     {
-                        await Task.Delay(RetryErrorDelay, cancellationToken);
+                        var delay = TimeSpan.FromSeconds(Random.Shared.Next(5, (int) MaxIntervalSeconds.TotalSeconds * 2));
+                        Logger.LogInformation("Error in daemon '{Name}' occurred. Will retry in {Delay} seconds. Error: {Error}", Name, delay.TotalSeconds, exception.Message);
+                        
+                        await Task.Delay(delay, cancellationToken);
                     }
                     catch (OperationCanceledException)
                     {

@@ -19,7 +19,7 @@ public class GatheringJourneyDaemon : Daemon
 
     public GatheringJourneyDaemon(ILogger<GatheringJourneyDaemon> logger, IServiceProvider serviceProvider,
         ProxyRotator proxyRotator)
-        : base("Gather Journey", TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(300), logger)
+        : base("Gather Journey", TimeSpan.FromSeconds(15), logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
