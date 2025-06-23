@@ -22,8 +22,8 @@ public class GatheringJourneyDaemon : Daemon
         : base("Gather Journey", TimeSpan.FromSeconds(15), logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
-        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
-        _proxyRotator = proxyRotator ?? throw new ArgumentNullException(nameof(proxyRotator));
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider), "Service provider cannot be null");
+        _proxyRotator = proxyRotator ?? throw new ArgumentNullException(nameof(proxyRotator), "Proxy rotator cannot be null");
     }
 
     // timetable changes

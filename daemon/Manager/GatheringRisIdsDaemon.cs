@@ -2,6 +2,7 @@
 using System.Text.Json;
 using daemon.Database;
 using daemon.Models.Database;
+using daemon.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,17 +13,17 @@ public class GatheringRisIdsDaemon : Daemon
 {
     private readonly ILogger<GatheringRisIdsDaemon> _logger;
     private readonly IServiceProvider _serviceProvider;
-
-    private readonly HttpClient _httpClient = new();
+    private readonly ProxyRotator _proxyRotator;
 
     private readonly string _apiUrl =
         "https://regio-guide.de/@prd/zupo-travel-information/api/public/ri/board/{0}/{1}?timeStart={2}&timeEnd={3}&expandTimeFrame=TIME_START&modeOfTransport=HIGH_SPEED_TRAIN,INTERCITY_TRAIN,INTER_REGIONAL_TRAIN,REGIONAL_TRAIN,CITY_TRAIN,BUS,FERRY,SUBWAY,TRAM,SHUTTLE,UNKNOWN";
 
-    public GatheringRisIdsDaemon(ILogger<GatheringRisIdsDaemon> logger, IServiceProvider serviceProvider)
+    public GatheringRisIdsDaemon(ILogger<GatheringRisIdsDaemon> logger, IServiceProvider serviceProvider, ProxyRotator proxyRotator)
         : base("Gathering RIS IDs", TimeSpan.FromSeconds(300), logger)
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
         _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider), "Service provider cannot be null");
+        _proxyRotator = proxyRotator ?? throw new ArgumentNullException(nameof(proxyRotator), "Proxy rotator cannot be null");
     }
 
     protected override async Task ExecuteCoreAsync(CancellationToken cancellationToken)
@@ -151,12 +152,14 @@ public class GatheringRisIdsDaemon : Daemon
         var boardType = isDeparture ? "departure" : "arrival";
         var timeEnd = timeStart.AddMinutes(720);
         
-        var response = await _httpClient.GetAsync(string.Format(_apiUrl, boardType, evaNumber,
+        // random proxy
+        var httpClient = _proxyRotator.GetRandomProxy();
+        var request = await httpClient.GetAsync(string.Format(_apiUrl, boardType, evaNumber,
             Uri.EscapeDataString(timeStart.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")),
             Uri.EscapeDataString(timeEnd.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))));
-        if (!response.IsSuccessStatusCode) return new();
+        if (!request.IsSuccessStatusCode) return new();
 
-        await using var stream = await response.Content.ReadAsStreamAsync();
+        await using var stream = await request.Content.ReadAsStreamAsync();
         var content = (await JsonDocument.ParseAsync(stream)).RootElement;
 
         var items = content.GetProperty("items");
@@ -195,11 +198,5 @@ public class GatheringRisIdsDaemon : Daemon
             throw new FormatException("Input does not start with a valid date");
 
         return fullTripId.Substring(9);
-    }
-
-    public override void Dispose()
-    {
-        _httpClient.Dispose();
-        base.Dispose();
     }
 }
