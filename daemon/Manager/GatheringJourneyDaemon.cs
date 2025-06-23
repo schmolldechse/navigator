@@ -57,7 +57,7 @@ public class GatheringJourneyDaemon : Daemon
                 .Where(risId => risId.Active)
                 .Where(risId => risId.LastSeen == null || risId.LastSeen < date.Date.AddDays(-1))
                 .OrderBy(risId => risId.LastSeen ?? DateTime.MinValue)
-                .Take(100)
+                .Take(1000)
                 .ToListAsync(cancellationToken); 
             randomRisId = risIds.Count > 0 ? risIds[Random.Shared.Next(risIds.Count)] : null;
             if (randomRisId == null)
