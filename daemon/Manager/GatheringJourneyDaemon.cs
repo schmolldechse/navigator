@@ -148,7 +148,7 @@ public class GatheringJourneyDaemon : Daemon
         _logger.LogDebug("Gathering journey for RIS ID {0}", formattedId);
 
         // random proxy
-        using var httpClient = _proxyRotator.GetRandomProxy();
+        var httpClient = _proxyRotator.GetRandomProxy();
         var request = await httpClient.GetAsync(string.Format(_apiUrl, formattedId), cancellationToken);
 
         // 500 code is thrown if the journey does not exist
