@@ -122,7 +122,9 @@ class StatisticsHelper {
 			delays.filter((delay) => delay.type === "departure")
 		);
 
-		cancellations.measurements = cancellations.measurements.map((measurement) => this.calculateTotalFromMeasurements(measurement));
+		cancellations.measurements = cancellations.measurements.map((measurement) =>
+			this.calculateTotalFromMeasurements(measurement)
+		);
 		cancellations.total = cancellations.measurements.reduce((acc, measurement) => acc + measurement.total, 0);
 
 		return {
@@ -236,21 +238,30 @@ class StatisticsHelper {
 		// tooEarly
 		const tooEarlyMeasurement = this.getOrCreateDateMeasurement(timeStatistics.tooEarly.measurements, date);
 		if (isDeparture ? row.departure_too_early_count : row.arrival_too_early_count) {
-			const productInMeasurement = this.getOrCreateSingleProductInMeasurement(tooEarlyMeasurement.products, row.product_type);
+			const productInMeasurement = this.getOrCreateSingleProductInMeasurement(
+				tooEarlyMeasurement.products,
+				row.product_type
+			);
 			productInMeasurement.total += isDeparture ? row.departure_too_early_count : row.arrival_too_early_count;
 		}
 
 		// punctual
 		const punctualMeasurement = this.getOrCreateDateMeasurement(timeStatistics.punctual.measurements, date);
 		if (isDeparture ? row.departure_punctual_count : row.arrival_punctual_count) {
-			const productInMeasurement = this.getOrCreateSingleProductInMeasurement(punctualMeasurement.products, row.product_type);
+			const productInMeasurement = this.getOrCreateSingleProductInMeasurement(
+				punctualMeasurement.products,
+				row.product_type
+			);
 			productInMeasurement.total += isDeparture ? row.departure_punctual_count : row.arrival_punctual_count;
 		}
 
 		// delayed
 		const delayedMeasurement = this.getOrCreateDateMeasurement(timeStatistics.delayed.measurements, date);
 		if (isDeparture ? row.departure_delayed_count : row.arrival_delayed_count) {
-			const productInMeasurement = this.getOrCreateSingleProductInMeasurement(delayedMeasurement.products, row.product_type);
+			const productInMeasurement = this.getOrCreateSingleProductInMeasurement(
+				delayedMeasurement.products,
+				row.product_type
+			);
 			productInMeasurement.total += isDeparture ? row.departure_delayed_count : row.arrival_delayed_count;
 		}
 
@@ -325,7 +336,9 @@ class StatisticsHelper {
 		timeStatistics: typeof TimeStatisticsSchema.static,
 		delays: OverallDelayCalculation[]
 	): typeof TimeStatisticsSchema.static => {
-		timeStatistics.total.measurements = timeStatistics.total.measurements.map((measurement) => this.calculateTotalFromMeasurements(measurement));
+		timeStatistics.total.measurements = timeStatistics.total.measurements.map((measurement) =>
+			this.calculateTotalFromMeasurements(measurement)
+		);
 		timeStatistics.total.total = timeStatistics.total.measurements.reduce((acc, measurement) => acc + measurement.total, 0);
 
 		timeStatistics.delay.measurements = timeStatistics.delay.measurements.map((measurement) => {
@@ -334,8 +347,14 @@ class StatisticsHelper {
 			measurement.average =
 				delaysOnDate.reduce((acc, delay) => acc + delay.delaySum, 0) /
 				delaysOnDate.reduce((acc, delay) => acc + delay.totalCount, 0);
-			measurement.minimum = measurement.products.reduce((acc, product) => Math.min(acc, product.minimum), Number.MAX_SAFE_INTEGER);
-			measurement.maximum = measurement.products.reduce((acc, product) => Math.max(acc, product.maximum), Number.MIN_SAFE_INTEGER);
+			measurement.minimum = measurement.products.reduce(
+				(acc, product) => Math.min(acc, product.minimum),
+				Number.MAX_SAFE_INTEGER
+			);
+			measurement.maximum = measurement.products.reduce(
+				(acc, product) => Math.max(acc, product.maximum),
+				Number.MIN_SAFE_INTEGER
+			);
 			return measurement;
 		});
 		timeStatistics.delay.average =
@@ -368,25 +387,33 @@ class StatisticsHelper {
 		timeStatistics.delay.maximum =
 			timeStatistics.delay.maximum === Number.MIN_SAFE_INTEGER ? 0 : timeStatistics.delay.maximum;
 
-		timeStatistics.tooEarly.measurements = timeStatistics.tooEarly.measurements.map((measurement) => this.calculateTotalFromMeasurements(measurement));
+		timeStatistics.tooEarly.measurements = timeStatistics.tooEarly.measurements.map((measurement) =>
+			this.calculateTotalFromMeasurements(measurement)
+		);
 		timeStatistics.tooEarly.total = timeStatistics.tooEarly.measurements.reduce(
 			(acc, measurement) => acc + measurement.total,
 			0
 		);
 
-		timeStatistics.punctual.measurements = timeStatistics.punctual.measurements.map((measurement) => this.calculateTotalFromMeasurements(measurement));
+		timeStatistics.punctual.measurements = timeStatistics.punctual.measurements.map((measurement) =>
+			this.calculateTotalFromMeasurements(measurement)
+		);
 		timeStatistics.punctual.total = timeStatistics.punctual.measurements.reduce(
 			(acc, measurement) => acc + measurement.total,
 			0
 		);
 
-		timeStatistics.delayed.measurements = timeStatistics.delayed.measurements.map((measurement) => this.calculateTotalFromMeasurements(measurement));
+		timeStatistics.delayed.measurements = timeStatistics.delayed.measurements.map((measurement) =>
+			this.calculateTotalFromMeasurements(measurement)
+		);
 		timeStatistics.delayed.total = timeStatistics.delayed.measurements.reduce(
 			(acc, measurement) => acc + measurement.total,
 			0
 		);
 
-		timeStatistics.platformChanges.measurements = timeStatistics.platformChanges.measurements.map((measurement) => this.calculateTotalFromMeasurements(measurement));
+		timeStatistics.platformChanges.measurements = timeStatistics.platformChanges.measurements.map((measurement) =>
+			this.calculateTotalFromMeasurements(measurement)
+		);
 		timeStatistics.platformChanges.total = timeStatistics.platformChanges.measurements.reduce(
 			(acc, measurement) => acc + measurement.total,
 			0

@@ -23,15 +23,19 @@ const timetableController = new Elysia({
 	tags: ["Timetable"]
 })
 	.decorate({ httpStatus: HttpStatus })
-	.get("/:evaNumber/:type", ({ params: { evaNumber, type }, query }) => timetableService.retrieveCombined(evaNumber, type, query), {
-		params,
-		query: timetableService.query,
-		detail: {
-			summary: "List timetable for a station",
-			description: "Get the timetable for a station by its evaNumber."
-		},
-		response: t.Array(GroupedTimetableEntrySchema)
-	})
+	.get(
+		"/:evaNumber/:type",
+		({ params: { evaNumber, type }, query }) => timetableService.retrieveCombined(evaNumber, type, query),
+		{
+			params,
+			query: timetableService.query,
+			detail: {
+				summary: "List timetable for a station",
+				description: "Get the timetable for a station by its evaNumber."
+			},
+			response: t.Array(GroupedTimetableEntrySchema)
+		}
+	)
 	.get(
 		"/profile/:profile/:evaNumber/:type",
 		({ params: { profile, evaNumber, type }, query }) => {

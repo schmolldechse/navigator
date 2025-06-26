@@ -78,7 +78,11 @@ class TimetableService {
 			this.retrieveHafasConnections(evaNumber, type, queryParams)
 		]);
 
-		let mergedTimetables: TimetableEntry[] = this.helper.mergeTimetables(bahnhof, this.helper.mergeTimetables(ris, hafas, type), type);
+		let mergedTimetables: TimetableEntry[] = this.helper.mergeTimetables(
+			bahnhof,
+			this.helper.mergeTimetables(ris, hafas, type),
+			type
+		);
 		// remove entries before & after the requested time
 		mergedTimetables = mergedTimetables.filter((entry) => {
 			const firstEntryTime = DateTime.fromISO(entry.entries[0].timeInformation.plannedTime);

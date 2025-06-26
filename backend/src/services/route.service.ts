@@ -9,7 +9,8 @@ import {
 	NormalRouteSectionSchema,
 	OccupancySchema,
 	RouteDetailsSchema,
-	RouteEntrySchema, RouteJourneyAttributeSchema,
+	RouteEntrySchema,
+	RouteJourneyAttributeSchema,
 	RouteMessageSchema,
 	WalkingRouteSectionSchema
 } from "../models/elysia/route.model";
@@ -351,23 +352,22 @@ class RouteService {
 			};
 		};
 
-		const createWalkingSection = (section: any): typeof WalkingRouteSectionSchema.static =>
-			({
-				isWalking: true,
-				distance: section.distanz,
-				origin: {
-					name: section.abfahrtsOrt,
-					evaNumber: Number(section.abfahrtsOrtExtId),
-					departure: parseTimeSchema(section, true),
-				},
-				destination: {
-					name: section.ankunftsOrt,
-					evaNumber: Number(section.ankunftsOrtExtId),
-					arrival: parseTimeSchema(section, false),
-				},
-				cancelled: this.isCancelled(section),
-				messages: this.mapMessages(section)
-			});
+		const createWalkingSection = (section: any): typeof WalkingRouteSectionSchema.static => ({
+			isWalking: true,
+			distance: section.distanz,
+			origin: {
+				name: section.abfahrtsOrt,
+				evaNumber: Number(section.abfahrtsOrtExtId),
+				departure: parseTimeSchema(section, true)
+			},
+			destination: {
+				name: section.ankunftsOrt,
+				evaNumber: Number(section.ankunftsOrtExtId),
+				arrival: parseTimeSchema(section, false)
+			},
+			cancelled: this.isCancelled(section),
+			messages: this.mapMessages(section)
+		});
 
 		const createNormalSection = async (section: any): Promise<typeof NormalRouteSectionSchema.static> => {
 			const buildStop = (
@@ -398,7 +398,7 @@ class RouteService {
 						default:
 							return "INFORMATION";
 					}
-				}
+				};
 
 				return attribute
 					.filter((attr: any) => !(attr.kategorie === "BEFÖRDERER" || attr.key === "BEF"))
@@ -410,7 +410,7 @@ class RouteService {
 								sectionsNote: attr?.teilstreckenHinweis
 							}) as typeof RouteJourneyAttributeSchema.static
 					);
-			}
+			};
 
 			return {
 				hafas_journeyId: section.journeyId,
@@ -439,7 +439,8 @@ class RouteService {
 					productName: section.verkehrsmittel.kurzText,
 					journeyName: section.verkehrsmittel.mittelText,
 					journeyNumber: Number(section.verkehrsmittel.nummer),
-					operator: section.verkehrsmittel.zugattribute.find((attr: any) => attr.kategorie === "BEFÖRDERER")?.value ?? "NaN",
+					operator:
+						section.verkehrsmittel.zugattribute.find((attr: any) => attr.kategorie === "BEFÖRDERER")?.value ?? "NaN"
 				}
 			};
 		};

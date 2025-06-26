@@ -9,7 +9,7 @@ const routeController = new Elysia({ prefix: "/route", tags: ["Routes"] })
 	.post("/", async ({ body }) => await routeService.retrieveRoutes(body), {
 		detail: {
 			summary: "Get routes",
-			description: "Fetches routes based on the two provided stations.",
+			description: "Fetches routes based on the two provided stations."
 		},
 		body: routeService.routeBody,
 		response: RouteDetailsSchema

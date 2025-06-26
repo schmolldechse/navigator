@@ -62,7 +62,9 @@ class StatisticsService {
 				minimum: 0,
 				maximum: Number.MAX_SAFE_INTEGER
 			}),
-			products: t.Array(t.UnionEnum([
+			products: t.Array(
+				t.UnionEnum(
+					[
 						Products.HOCHGESCHWINDIGKEITSZUEGE,
 						Products.INTERCITYUNDEUROCITYZUEGE,
 						Products.INTERREGIOUNDSCHNELLZUEGE,
@@ -109,12 +111,14 @@ class StatisticsService {
 		const startDate = body.startDate!.toFormat("yyyy-MM-dd");
 		const endDate = body.endDate!.toFormat("yyyy-MM-dd");
 
-		const evaNumberSQL = body.evaNumbers.length > 0
-			? sql.raw(`ARRAY[${body.evaNumbers.map((n) => Number(n)).join(",")}]::integer[]`)
-			: sql`NULL`;
-		const productSQL = body.filter.products.length > 0
-			? sql.raw(`ARRAY[${body.filter.products.map((p) => `'${p}'`).join(",")}]::varchar[]`)
-			: sql`NULL`;
+		const evaNumberSQL =
+			body.evaNumbers.length > 0
+				? sql.raw(`ARRAY[${body.evaNumbers.map((n) => Number(n)).join(",")}]::integer[]`)
+				: sql`NULL`;
+		const productSQL =
+			body.filter.products.length > 0
+				? sql.raw(`ARRAY[${body.filter.products.map((p) => `'${p}'`).join(",")}]::varchar[]`)
+				: sql`NULL`;
 
 		const query = await database.execute(sql`
 			WITH date_range AS (
@@ -269,7 +273,8 @@ class StatisticsService {
 			LEFT JOIN statistics ON (combinations.date = statistics.date) AND (combinations.product_type = statistics.product_type)
 			ORDER BY combinations.date, combinations.product_type;
 		`);
-		if (!query.rows || query.rows.length === 0) throw new HttpError(HttpStatus.HTTP_502_BAD_GATEWAY, "No data found for the given parameters.");
+		if (!query.rows || query.rows.length === 0)
+			throw new HttpError(HttpStatus.HTTP_502_BAD_GATEWAY, "No data found for the given parameters.");
 
 		const rows = query.rows as unknown as StatisticsDatabaseResult[];
 		const statistics = this.helper.calculateStatistics(rows);
@@ -280,7 +285,7 @@ class StatisticsService {
 			arrival: statistics.arrival,
 			departure: statistics.departure,
 			cancellations: statistics.cancellations
-		}
+		};
 	};
 }
 

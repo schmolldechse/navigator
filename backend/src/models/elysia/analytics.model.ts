@@ -4,11 +4,13 @@ const ProductOccurrenceInMeasurementSchema = t.Object({
 	date: t.String({ format: "date", description: "Date of the measurement" }),
 	totalStops: t.Number({ description: "Total number of stops on this date" }),
 	totalUniqueJourneys: t.Number({ description: "Total number of unique journeys on this date" }),
-	products: t.Array(t.Object({
-		productType: t.String({ description: "Type of the product" }),
-		stopCount: t.Number({ description: "Total number of stops for this product on this date" }),
-		uniqueJourneys: t.Number({ description: "Total number of unique journeys for this product on this date" })
-	}))
+	products: t.Array(
+		t.Object({
+			productType: t.String({ description: "Type of the product" }),
+			stopCount: t.Number({ description: "Total number of stops for this product on this date" }),
+			uniqueJourneys: t.Number({ description: "Total number of unique journeys for this product on this date" })
+		})
+	)
 });
 
 const ProductOccurrenceSchema = t.Object({
@@ -20,7 +22,7 @@ const ProductOccurrenceSchema = t.Object({
 const SingleProductInGeneralMeasurementSchema = t.Object({
 	productType: t.String({ description: "Type of the product" }),
 	total: t.Number({ description: "Total value for this product type on this date" })
-})
+});
 
 const GeneralMeasurementSchema = t.Object({
 	date: t.String({ format: "date", description: "Date of the measurement" }),
@@ -31,7 +33,7 @@ const GeneralMeasurementSchema = t.Object({
 const GeneralDelayStatisticSchema = t.Object({
 	average: t.Number({ description: "Average delay in seconds" }),
 	minimum: t.Number({ description: "Minimum delay in seconds" }),
-	maximum: t.Number({ description: "Maximum delay in seconds" }),
+	maximum: t.Number({ description: "Maximum delay in seconds" })
 });
 
 const SingleProductDelayStatisticSchema = t.Intersect([
@@ -52,7 +54,7 @@ const DelayMeasurementStatisticSchema = t.Intersect([
 const TimeStatisticsSchema = t.Object({
 	total: t.Object({
 		total: t.Number({ description: "Total number of arrivals/ departures for this date" }),
-		measurements: t.Array(GeneralMeasurementSchema),
+		measurements: t.Array(GeneralMeasurementSchema)
 	}),
 	delay: t.Intersect([
 		GeneralDelayStatisticSchema,
@@ -91,4 +93,15 @@ const JourneyStatisticsSchema = t.Object({
 	cancellations: CancellationSchema
 });
 
-export { ProductOccurrenceInMeasurementSchema, ProductOccurrenceSchema, SingleProductInGeneralMeasurementSchema, GeneralMeasurementSchema, SingleProductDelayStatisticSchema, GeneralDelayStatisticSchema, DelayMeasurementStatisticSchema, TimeStatisticsSchema, CancellationSchema, JourneyStatisticsSchema };
+export {
+	ProductOccurrenceInMeasurementSchema,
+	ProductOccurrenceSchema,
+	SingleProductInGeneralMeasurementSchema,
+	GeneralMeasurementSchema,
+	SingleProductDelayStatisticSchema,
+	GeneralDelayStatisticSchema,
+	DelayMeasurementStatisticSchema,
+	TimeStatisticsSchema,
+	CancellationSchema,
+	JourneyStatisticsSchema
+};

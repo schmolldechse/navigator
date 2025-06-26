@@ -25,7 +25,7 @@ class TimetableHelper {
 			...entryA.lineInformation,
 			// prefer from entryB, as the RIS/ HAFAS entries are more complete
 			journeyNumber: entryA?.lineInformation.journeyNumber ?? entryB.lineInformation.journeyNumber,
-			operator: entryA?.lineInformation.operator ?? entryB.lineInformation.operator,
+			operator: entryA?.lineInformation.operator ?? entryB.lineInformation.operator
 		},
 		viaStops: entryA.viaStops && entryA.viaStops.length > 1 ? entryA.viaStops : entryB.viaStops,
 		messages: entryA.messages ? [...(entryA.messages ?? []), ...(entryB.messages ?? [])] : entryB.messages
@@ -181,19 +181,19 @@ class TimetableHelper {
 				operator: options.isBahnhofProfile
 					? undefined
 					: {
-						code: entry?.administration?.id,
-						name: entry?.administration?.operatorName
-					}
+							code: entry?.administration?.id,
+							name: entry?.administration?.operatorName
+						}
 			},
 			viaStops: (entry?.viaStops ?? entry?.ueber ?? []).map((rawStop: any) => this.mapToSmallStop(rawStop)),
 			messages: !options.isBahnhofProfile
 				? []
 				: entry?.messages?.common
-					.concat(entry?.messages?.delay)
-					.concat(entry?.messages?.cancelation)
-					.concat(entry?.messages?.destination)
-					.concat(entry?.messages?.via)
-					.map((messageRaw: any) => this.mapMessage(messageRaw))
+						.concat(entry?.messages?.delay)
+						.concat(entry?.messages?.cancelation)
+						.concat(entry?.messages?.destination)
+						.concat(entry?.messages?.via)
+						.map((messageRaw: any) => this.mapMessage(messageRaw))
 		} as typeof SingleTimetableEntrySchema.static;
 
 		if (isHAFAS) journey.messages = (entry?.meldungen ?? []).map((message: any) => this.mapMessage(message, true));
