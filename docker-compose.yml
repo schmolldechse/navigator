@@ -5,9 +5,11 @@ services:
     restart: always
     ports: [ "3000:3000" ]
     networks: [ "navigator-network" ]
+    depends_on:
+      - navigator-backend
     environment:
-      PUBLIC_BACKEND_BASE_URL: ${PUBLIC_BACKEND_BASE_URL}
-      BACKEND_DOCKER_BASE_URL: ${BACKEND_DOCKER_BASE_URL}
+      PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL}
+      INTERNAL_BACKEND_URL: ${INTERNAL_BACKEND_URL}
 
   navigator-backend:
     container_name: navigator-backend
@@ -16,14 +18,13 @@ services:
     ports: [ "8000:8000" ]
     networks: [ "navigator-network" ]
     depends_on:
-      - navigator-mongodb
       - navigator-postgres
     environment:
-      MONGO_URL: ${MONGO_URL}
       AUTH_SECRET: ${AUTH_SECRET}
       AUTH_POSTGRES_URL: ${AUTH_POSTGRES_URL}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
+      POSTGRES_CONNECTION_STRING: ${POSTGRES_CONNECTION_STRING}
 
   navigator-daemon:
     container_name: navigator-daemon
@@ -31,23 +32,9 @@ services:
     restart: on-failure
     networks: [ "navigator-network" ]
     depends_on:
-      - navigator-mongodb
+      - navigator-postgres
     environment:
-      MONGO_URL: ${MONGO_URL}
-
-  navigator-mongodb:
-    container_name: navigator-mongodb
-    image: bitnami/mongodb:latest
-    restart: always
-    ports: [ "27017:27017" ]
-    networks: [ "navigator-network" ]
-    environment:
-      MONGODB_ROOT_PASSWORD: strong-password-here
-      MONGODB_EXTRA_DATABASES: ${MONGODB_EXTRA_DATABASES}
-      MONGODB_EXTRA_USERNAMES: ${MONGODB_EXTRA_USERNAMES}
-      MONGODB_EXTRA_PASSWORDS: ${MONGODB_EXTRA_PASSWORDS}
-    volumes:
-      - mongodb_data:/bitnami/mongodb
+      POSTGRES_CONNECTION_STRING: ${POSTGRES_CONNECTION_STRING}
 
   navigator-postgres:
     container_name: navigator-postgres
@@ -66,5 +53,4 @@ networks:
     driver: bridge
 
 volumes:
-  mongodb_data:
   postgres_data:
