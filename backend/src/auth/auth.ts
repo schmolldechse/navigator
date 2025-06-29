@@ -2,7 +2,7 @@ import { betterAuth } from "better-auth";
 import { usernamePlugin } from "./plugins/username";
 import type { GithubProfile } from "better-auth/social-providers";
 import { rolePlugin } from "./plugins/role";
-import Elysia, { Context, error } from "elysia";
+import Elysia, { Context } from "elysia";
 import { openAPI } from "better-auth/plugins";
 import { pool } from "../db/postgres";
 
@@ -22,20 +22,19 @@ const auth = betterAuth({
 	plugins: [usernamePlugin(), rolePlugin(), openAPI()]
 });
 
-// elysia application
 const authApp = new Elysia().all("/api/auth/*", (context: Context) => {
 	const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
 	// validate request method
 	if (BETTER_AUTH_ACCEPT_METHODS.includes(context.request.method)) return auth.handler(context.request);
-	else error(405, "Method Not Allowed");
+	else context.status(405);
 });
 
 // OpenAPI schema
-let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>;
-const getSchema = async () => (_schema ??= auth.api.generateOpenAPISchema());
+let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>
+const getSchema = async () => (_schema ??= auth.api.generateOpenAPISchema())
 
-const AuthOpenAPI = {
-	getPaths: (prefix = "/api/auth") =>
+const OpenAPI = {
+	getPaths: (prefix = '/api/auth') =>
 		getSchema().then(({ paths }) => {
 			const reference: typeof paths = Object.create(null);
 
@@ -54,4 +53,4 @@ const AuthOpenAPI = {
 	components: getSchema().then(({ components }) => components) as Promise<any>
 } as const;
 
-export { auth, authApp, AuthOpenAPI };
+export { auth, authApp, OpenAPI };

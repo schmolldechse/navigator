@@ -1,8 +1,8 @@
 <script lang="ts">
-	import { authClient } from "$lib/auth-client";
+	import { client } from "$lib/auth/client";
 	import { goto } from "$app/navigation";
 
-	const session = authClient.useSession();
+	const session = client.useSession();
 </script>
 
 {#if $session.data}

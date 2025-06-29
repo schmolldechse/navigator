@@ -1,6 +1,6 @@
 <script lang="ts">
 	import GitHub from "$components/ui/icons/GitHub.svelte";
-	import { authClient } from "$lib/auth-client";
+	import { client } from "$lib/auth/client";
 	import { MetaTags } from "svelte-meta-tags";
 	import LogoIcon from "$components/branding/LogoIcon.svelte";
 </script>
@@ -37,7 +37,7 @@
 
 		<button
 			class="bg-primary-darker hover:bg-primary-dark flex w-full cursor-pointer flex-row items-center justify-center gap-x-4 rounded-l p-2"
-			onclick={() => authClient.signIn.social({ provider: "github", callbackURL: window.location.origin })}
+			onclick={() => client.signIn.social({ provider: "github", callbackURL: window.location.origin })}
 		>
 			<GitHub height="25" width="25" />
 			<span class="text-lg font-medium">Continue with GitHub</span>

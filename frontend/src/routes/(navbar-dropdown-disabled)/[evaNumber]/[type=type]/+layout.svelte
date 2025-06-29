@@ -5,7 +5,7 @@
 	import Clock from "$components/timetable/Clock.svelte";
 	import CornerDownRight from "lucide-svelte/icons/corner-down-right";
 	import Star from "lucide-svelte/icons/star";
-	import { authClient } from "$lib/auth-client";
+	import { client } from "$lib/auth/client";
 	import { page } from "$app/state";
 	import { getContext, onMount, setContext } from "svelte";
 	import type { Station } from "$models/station";
@@ -18,7 +18,7 @@
 	setContext<boolean>("isDeparture", page.params.type === "departures");
 	let isDeparture = getContext<boolean>("isDeparture");
 
-	const session = authClient.useSession();
+	const session = client.useSession();
 
 	let favor = $state<boolean>(false);
 	onMount(() => {

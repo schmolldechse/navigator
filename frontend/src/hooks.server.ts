@@ -1,8 +1,8 @@
 import type { Handle } from "@sveltejs/kit";
-import { authClient } from "$lib/auth-client";
+import { client } from "$lib/auth/client";
 
 export const handle: Handle = async ({ event, resolve }) => {
-	const session = await authClient.getSession({
+	const session = await client.getSession({
 		fetchOptions: {
 			headers: event.request.headers
 		}
