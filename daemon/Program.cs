@@ -44,13 +44,6 @@ class Program
 			shutdownEvent.Set();
 		};
 
-		// apply migrations
-		var dbContext = serviceProvider.GetRequiredService<NavigatorDbContext>();
-		await dbContext.Database.MigrateAsync();
-		logger!.LogInformation("Database migrations applied successfully.");
-		await dbContext.Database.ExecuteSqlRawAsync("CREATE EXTENSION IF NOT EXISTS pg_trgm;");
-		logger!.LogInformation("Created pg_trgm extension if it did not exist.");
-
 		// parse command line arguments
 		if (cmdOptions.SkipGathering != GatheringMode.Full)
 			await RunStationGathering(serviceProvider, skipApi: cmdOptions.SkipGathering == GatheringMode.Api);
