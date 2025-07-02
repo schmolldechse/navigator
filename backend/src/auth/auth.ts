@@ -4,10 +4,21 @@ import type { GithubProfile } from "better-auth/social-providers";
 import { rolePlugin } from "./plugins/role";
 import Elysia, { Context } from "elysia";
 import { openAPI } from "better-auth/plugins";
-import { pool } from "../db/postgres";
+import { database } from "../db/postgres";
+import { cors } from "@elysiajs/cors";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { account, session, user, verification } from "../db/auth.schema";
 
 const auth = betterAuth({
-	database: pool,
+	database: drizzleAdapter(database, {
+		provider: "pg",
+		schema: {
+			user,
+			session,
+			account,
+			verification
+		}
+	}),
 	socialProviders: {
 		github: {
 			enabled: true,
@@ -22,12 +33,19 @@ const auth = betterAuth({
 	plugins: [usernamePlugin(), rolePlugin(), openAPI()]
 });
 
-const authApp = new Elysia().all("/api/auth/*", (context: Context) => {
-	const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
-	// validate request method
-	if (BETTER_AUTH_ACCEPT_METHODS.includes(context.request.method)) return auth.handler(context.request);
-	else context.status(405);
-});
+const authApp = new Elysia()
+	.use(cors({
+		origin: ["http://localhost:5173", "http://localhost:3000"],
+		credentials: true,
+		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+		allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
+	}))
+	.all("/api/auth/*", (context: Context) => {
+		const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
+		// validate request method
+		if (BETTER_AUTH_ACCEPT_METHODS.includes(context.request.method)) return auth.handler(context.request);
+		else context.status(405);
+	});
 
 // OpenAPI schema
 let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>
