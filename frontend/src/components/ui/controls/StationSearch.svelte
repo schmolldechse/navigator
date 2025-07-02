@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type { Station } from "$models/station";
 	import { onMount, type Snippet } from "svelte";
 	import { env } from "$env/dynamic/public";
+	import type { Station } from "$models/models";
 
 	let {
 		station = $bindable<Station | undefined>(undefined),
@@ -29,7 +29,7 @@
 		if (!query) return;
 
 		const searchParams = new URLSearchParams({ query });
-		const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/stations?${searchParams.toString()}`);
+		const request = await fetch(`${env.PUBLIC_BACKEND_URL}/api/station/?${searchParams.toString()}`);
 		if (!request.ok) return;
 
 		const response = await request.json();
@@ -51,7 +51,7 @@
 		selectedIndex = -1;
 	};
 
-	let debounceTimer = $state<number>();
+	let debounceTimer = $state<ReturnType<typeof setTimeout>>();
 	const handleInput = () => {
 		if (!inputElement) return;
 		if (inputElement.value.length === 0) {
