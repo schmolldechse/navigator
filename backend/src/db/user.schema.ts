@@ -1,19 +1,16 @@
-import { integer, pgSchema, serial, text, unique } from "drizzle-orm/pg-core";
+import { integer, pgSchema, text, unique } from "drizzle-orm/pg-core";
+import { user } from "./auth.schema";
 
-/**
- * TODO: fix
-export const userSchema = pgSchema("data");
-export const favoriteStations = userSchema.table(
-	"favorite_stations",
-	{
-		id: integer().primaryKey().generatedAlwaysAsIdentity(),
-		userId: text("user_id")
-			.notNull()
-			.references(() => user.id, { onDelete: "cascade" }),
-		evaNumber: integer("evaNumber").notNull()
-	},
-	(table) => ({
-		uniqueUserEva: unique().on(table.userId, table.evaNumber)
-	})
-);
-*/
+const schema = pgSchema("user_data");
+
+const favoriteStations = schema.table("favorite_stations", {
+	id: integer().primaryKey().generatedAlwaysAsIdentity(),
+	userId: text("user_id")
+		.notNull()
+		.references(() => user.id, { onDelete: "cascade" }),
+	evaNumber: integer("eva_number").notNull(),
+}, (table) => [
+	unique().on(table.userId, table.evaNumber)
+]);
+
+export { favoriteStations };

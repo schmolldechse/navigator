@@ -1,5 +1,5 @@
 {
-  "id": "c732db92-86de-4b9b-a6c0-1ce70628fea6",
+  "id": "539680f2-0e2b-4422-9668-5eead3f0edad",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -957,21 +957,76 @@
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
+    },
+    "user_data.favorite_stations": {
+      "name": "favorite_stations",
+      "schema": "user_data",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "identity": {
+            "type": "always",
+            "name": "favorite_stations_id_seq",
+            "schema": "user_data",
+            "increment": "1",
+            "startWith": "1",
+            "minValue": "1",
+            "maxValue": "2147483647",
+            "cache": "1",
+            "cycle": false
+          }
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eva_number": {
+          "name": "eva_number",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "favorite_stations_user_id_user_id_fk": {
+          "name": "favorite_stations_user_id_user_id_fk",
+          "tableFrom": "favorite_stations",
+          "tableTo": "user",
+          "schemaTo": "auth",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "favorite_stations_user_id_eva_number_unique": {
+          "name": "favorite_stations_user_id_eva_number_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "user_id",
+            "eva_number"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
-  "enums": {
-    "auth.role": {
-      "name": "role",
-      "schema": "auth",
-      "values": [
-        "default",
-        "admin"
-      ]
-    }
-  },
-  "schemas": {
-    "auth": "auth"
-  },
+  "enums": {},
+  "schemas": {},
   "sequences": {},
   "roles": {},
   "policies": {},

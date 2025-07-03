@@ -6,6 +6,7 @@ import { RouteDetailsSchema } from "../models/elysia/route.model";
 const routeService = new RouteService();
 
 const routeController = new Elysia({ prefix: "/route", tags: ["Routes"] })
+	.decorate({ httpStatus: HttpStatus })
 	.post("/", async ({ body }) => await routeService.retrieveRoutes(body), {
 		detail: {
 			summary: "Get routes",
@@ -13,7 +14,6 @@ const routeController = new Elysia({ prefix: "/route", tags: ["Routes"] })
 		},
 		body: routeService.routeBody,
 		response: RouteDetailsSchema
-	})
-	.decorate({ httpStatus: HttpStatus });
+	});
 
 export default routeController;

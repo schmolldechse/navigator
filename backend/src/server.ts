@@ -7,6 +7,7 @@ import stationController from "./controllers/station.controller";
 import timetableController from "./controllers/timetable.controller";
 import routeController from "./controllers/route.controller";
 import statisticsController from "./controllers/statistics.controller";
+import userController from "./controllers/user.controller";
 
 const restApi = new Elysia({ prefix: "/api" })
 	.error({ HttpError })
@@ -43,7 +44,8 @@ const restApi = new Elysia({ prefix: "/api" })
 	.use(stationController)
 	.use(timetableController)
 	.use(routeController)
-	.use(statisticsController);
+	.use(statisticsController)
+	.use(userController);
 
 const app = new Elysia()
 	.use(
