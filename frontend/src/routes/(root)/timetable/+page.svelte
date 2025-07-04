@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { DateTime } from "luxon";
 	import StationSearch from "$components/ui/controls/StationSearch.svelte";
-	import type { Station } from "$models/station";
+	import type { Station } from "$models/models";
 	import TimePicker from "$components/ui/controls/TimePicker.svelte";
 	import { goto } from "$app/navigation";
 	import Search from "lucide-svelte/icons/search";
@@ -9,13 +9,13 @@
 	import Button from "$components/ui/interactive/Button.svelte";
 	import type { Snapshot } from "../$types";
 
-	let type: "departures" | "arrivals" = $state<"departures" | "arrivals">("departures");
-	let station: Station | undefined = $state(undefined);
+	let type = $state<"departure" | "arrival">("departure");
+	let station = $state<Station | undefined>(undefined);
 	let date = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 
 	interface SnapshotData {
 		station: Station | undefined;
-		type: "departures" | "arrivals";
+		type: "departure" | "arrival";
 	}
 
 	export const snapshot: Snapshot<SnapshotData> = {

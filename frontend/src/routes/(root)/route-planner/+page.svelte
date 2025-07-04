@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { DateTime } from "luxon";
-	import type { Station } from "$models/station";
 	import TravelMode from "$components/ui/controls/TravelMode.svelte";
 	import StationSearch from "$components/ui/controls/StationSearch.svelte";
 	import ArrowUpDown from "lucide-svelte/icons/arrow-up-down";
@@ -9,11 +8,12 @@
 	import Button from "$components/ui/interactive/Button.svelte";
 	import { goto } from "$app/navigation";
 	import type { Snapshot } from "../$types";
+	import type { Station } from "$models/models";
 
-	let type: "departures" | "arrivals" = $state<"departures" | "arrivals">("departures");
+	let type = $state<"departure" | "arrival">("departure");
 
-	let start: Station | undefined = $state(undefined);
-	let destination: Station | undefined = $state(undefined);
+	let start = $state<Station | undefined>(undefined);
+	let destination = $state<Station | undefined>(undefined);
 
 	let date: DateTime<true> = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
 
@@ -22,7 +22,7 @@
 	interface SnapshotData {
 		start: Station | undefined;
 		destination: Station | undefined;
-		type: "departures" | "arrivals";
+		type: "departure" | "arrival";
 		disabledProducts: string[];
 	}
 
@@ -84,24 +84,19 @@
 		class="rounded-md px-5 py-2 font-bold text-black"
 		onclick={async () => {
 			if (disabledProducts.length === 10) return;
+
 			if (!start || !destination) return;
 			if (start.evaNumber === destination.evaNumber) return;
+
 			if (!date) return;
 
 			const params = new URLSearchParams({
 				from: String(start.evaNumber),
-				to: String(destination.evaNumber)
+				to: String(destination.evaNumber),
+				disabledProducts: disabledProducts.join(","),
+				type,
+				when: date.toISO()
 			});
-			if (disabledProducts.length > 0) params.set("disabledProducts", disabledProducts.join(","));
-			switch (type) {
-				case "departures":
-					params.set("departure", date.toISO());
-					break;
-				case "arrivals":
-					params.set("arrival", date.toISO());
-					break;
-			}
-
 			await goto(`journey/planned?${params.toString()}`);
 		}}
 	>

@@ -1,49 +1,44 @@
 import type { PageServerLoad } from "./$types";
-import type { Station } from "$models/station";
-import type { RouteData } from "$models/route";
 import { error } from "@sveltejs/kit";
 import { env } from "$env/dynamic/private";
+import type { RouteDetails, Station } from "$models/models";
 
 export const load: PageServerLoad = async ({
 	url
 }): Promise<{
 	stations: Promise<{ from: Station; to: Station }>;
-	route: Promise<RouteData>;
+	route: Promise<RouteDetails>;
 }> => {
 	const urlParams = new URLSearchParams(url.search);
 
-	const from = urlParams.get("from");
-	const to = urlParams.get("to");
+	const fromEvaNumber: number = Number(urlParams.get("from"));
+	const toEvaNumber: number = Number(urlParams.get("to"));
 
-	if (!from || !to) throw error(400, "Missing required 'from' or 'to' parameter");
+	if (!fromEvaNumber || !toEvaNumber) throw error(400, "Missing required 'from' or 'to' parameter");
 
 	return {
-		stations: Promise.all([loadStation(from), loadStation(to)]).then(([from, to]) => ({ from, to })),
-		route: loadRoute(from, to, urlParams)
+		stations: Promise.all([loadStation(fromEvaNumber), loadStation(toEvaNumber)]).then(([from, to]) => ({ from, to })),
+		route: loadRoute(fromEvaNumber, toEvaNumber)
 	};
 };
 
-const loadStation = async (evaNumber: string): Promise<Station> => {
-	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/stations/${evaNumber}`, {
+const loadStation = async (evaNumber: number): Promise<Station> => {
+	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/station/${evaNumber}`, {
 		method: "GET"
 	});
 	if (!request.ok) throw error(400, `Could not load the station: ${evaNumber}`);
 	return (await request.json()) as Station;
 };
 
-const loadRoute = async (from: string, to: string, urlParams: URLSearchParams): Promise<RouteData> => {
-	const params = new URLSearchParams({
-		from,
-		to,
-		...Object.fromEntries(
-			["departure", "arrival", "disabledProducts", "results", "earlierThan", "laterThan"]
-				.filter((key) => urlParams.has(key))
-				.map((key) => [key, urlParams.get(key)!])
-		)
-	});
-	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/journey/route-planner?${params.toString()}`, {
-		method: "GET"
+const loadRoute = async (from: number, to: number): Promise<RouteDetails> => {
+	const request = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/route`, {
+		method: "POST",
+		body: JSON.stringify({
+			from,
+			to,
+			type:
+		})
 	});
 	if (!request.ok) throw error(400, "There was an error while loading the route data");
-	return (await request.json()) as RouteData;
+	return (await request.json()) as RouteDetails;
 };

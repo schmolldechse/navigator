@@ -3,6 +3,7 @@ import { TimeSchema } from "../elysia/time.model";
 import { LineColorSchema } from "../elysia/connection.model";
 import { GroupedTimetableEntrySchema, TimetableMessageSchema, TimetableStopSchema } from "../elysia/timetable.model";
 import { JourneyStatisticsSchema } from "../elysia/analytics.model";
+import { RouteDetailsSchema } from "../elysia/route.model";
 
 type Station = typeof StationSchema.static;
 
@@ -15,4 +16,6 @@ type TimetableEntry = typeof GroupedTimetableEntrySchema.static;
 type TimetableStop = typeof TimetableStopSchema.static;
 type TimetableMessage = typeof TimetableMessageSchema.static;
 
-export { Station, Time, LineColor, JourneyStatistics, TimetableEntry, TimetableStop, TimetableMessage };
+type RouteDetails = typeof RouteDetailsSchema.static;
+
+export { Station, Time, LineColor, JourneyStatistics, TimetableEntry, TimetableStop, TimetableMessage, RouteDetails };

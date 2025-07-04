@@ -1,6 +1,5 @@
 import Elysia from "elysia";
 import swagger from "@elysiajs/swagger";
-import { authApp } from "./auth/auth";
 import { HttpStatus } from "./response/status";
 import { HttpError } from "./response/error";
 import stationController from "./controllers/station.controller";
@@ -8,6 +7,7 @@ import timetableController from "./controllers/timetable.controller";
 import routeController from "./controllers/route.controller";
 import statisticsController from "./controllers/statistics.controller";
 import userController from "./controllers/user.controller";
+import { authApp, OpenAPI } from "./auth/auth";
 
 const restApi = new Elysia({ prefix: "/api" })
 	.error({ HttpError })
@@ -61,7 +61,9 @@ const app = new Elysia()
 					title: "Navigator Backend",
 					description: "API documentation for the Navigator backend",
 					version: "1.0.0"
-				}
+				},
+				components: await OpenAPI.components,
+				paths: await OpenAPI.getPaths()
 			}
 		})
 	)

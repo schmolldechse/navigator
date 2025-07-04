@@ -1,9 +1,9 @@
 <script lang="ts">
 	let {
-		type = $bindable("departures"),
+		type = $bindable("departure"),
 		class: classNames = ""
 	}: {
-		type: "departures" | "arrivals";
+		type: "departure" | "arrival";
 		class?: string;
 	} = $props();
 </script>
@@ -12,26 +12,26 @@
 	<button
 		type="button"
 		class="cursor-pointer font-bold"
-		class:underline={type === "departures"}
-		class:underline-offset-2={type === "departures"}
-		class:decoration-2={type === "departures"}
-		class:text-accent={type === "departures"}
-		class:text-text={type !== "departures"}
-		onclick={() => (type = "departures")}
+		class:underline={type === "departure"}
+		class:underline-offset-2={type === "departure"}
+		class:decoration-2={type === "departure"}
+		class:text-accent={type === "departure"}
+		class:text-text={type !== "departure"}
+		onclick={() => (type = "departure")}
 	>
-		Departures
+		departure
 	</button>
 	<span class="nd-fg-white text-xl">|</span>
 	<button
 		type="button"
 		class="cursor-pointer font-bold"
-		class:underline={type === "arrivals"}
-		class:underline-offset-2={type === "arrivals"}
-		class:decoration-2={type === "arrivals"}
-		class:text-accent={type === "arrivals"}
-		class:text-text={type !== "arrivals"}
-		onclick={() => (type = "arrivals")}
+		class:underline={type === "arrival"}
+		class:underline-offset-2={type === "arrival"}
+		class:decoration-2={type === "arrival"}
+		class:text-accent={type === "arrival"}
+		class:text-text={type !== "arrival"}
+		onclick={() => (type = "arrival")}
 	>
-		Arrivals
+		arrival
 	</button>
 </div>

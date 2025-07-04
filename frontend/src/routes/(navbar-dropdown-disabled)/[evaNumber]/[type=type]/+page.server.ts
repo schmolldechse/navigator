@@ -1,32 +1,30 @@
 import type { PageServerLoad } from "./$types";
 import { error } from "@sveltejs/kit";
-import type { Journey } from "$models/connection";
+import type { TimetableEntry } from "$models/models";
 import { DateTime } from "luxon";
 import { env } from "$env/dynamic/private";
 
-export const load: PageServerLoad = async ({ params, url }): Promise<{ journeys: Promise<Journey[]> }> => {
-	const journeys = loadJourneys(
-		params.evaNumber,
-		params.type,
-		url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO()
+export const load: PageServerLoad = async ({ params, url }): Promise<{ timetable: TimetableEntry[] }> => {
+	if (params.type !== "departures" && params.type !== "arrivals")
+		throw error(400, `Parameter 'type' must be either 'departures' or 'arrivals'.`);
+
+	const when = url.searchParams.get("startDate") ?? DateTime.now().set({ second: 0, millisecond: 0 }).toISO();
+
+	const response = await fetch(
+		`${env.PRIVATE_BACKEND_URL}/api/timetable/${params.evaNumber}/${params.type}`,
+		{
+			method: "GET",
+			body: JSON.stringify({
+				when,
+				duration: 60,
+				language: "en"
+			})
+		}
 	);
-	return { journeys };
-};
-
-const loadJourneys = async (evaNumber: string, type: string, startDate: string): Promise<Journey[]> => {
-	const queryString = new URLSearchParams({
-		evaNumber: evaNumber,
-		type: type,
-		when: startDate
-	}).toString();
-
-	const response = await fetch(`${env.BACKEND_DOCKER_BASE_URL}/api/v1/timetable/combined?${queryString}`, {
-		method: "GET"
-	});
-	if (!response.ok) throw error(404, `No journeys found for ${evaNumber}.`);
+	if (!response.ok) throw error(404, `No journeys found for ${params.evaNumber}.`);
 
 	const jsonData = await response.json();
-	if (!Array.isArray(jsonData)) throw error(500, `No journeys found for ${evaNumber}.`);
+	if (!Array.isArray(jsonData)) throw error(500, `No journeys found for ${params.evaNumber}.`);
 
-	return jsonData as Journey[];
+	return { timetable: jsonData as TimetableEntry[] };
 };

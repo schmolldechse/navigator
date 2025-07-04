@@ -1,8 +1,5 @@
 <script lang="ts">
 	import { MetaTags } from "svelte-meta-tags";
-	import type { PageProps } from "./$types";
-
-	let { children }: PageProps = $props();
 </script>
 
 <MetaTags

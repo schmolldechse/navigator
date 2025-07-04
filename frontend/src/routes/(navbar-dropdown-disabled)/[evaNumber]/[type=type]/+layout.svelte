@@ -8,7 +8,7 @@
 	import { client } from "$lib/auth/client";
 	import { page } from "$app/state";
 	import { getContext, onMount, setContext } from "svelte";
-	import type { Station } from "$models/station";
+	import type { Station } from "$models/models";
 	import { env } from "$env/dynamic/public";
 
 	let { children, data }: LayoutProps = $props();
@@ -25,7 +25,7 @@
 		if (!$session?.data) return;
 
 		const checkFavored = async () => {
-			const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/user/station/favored/${station?.evaNumber}`, {
+			const request = await fetch(`${env.PUBLIC_BACKEND_URL}/api/user/favored/${station?.evaNumber}`, {
 				method: "GET",
 				credentials: "include"
 			});
@@ -39,7 +39,7 @@
 	const toggleFavour = async () => {
 		if (!$session?.data) return;
 
-		const request = await fetch(`${env.PUBLIC_BACKEND_BASE_URL}/api/v1/user/station/favor/${station?.evaNumber}`, {
+		const request = await fetch(`${env.PUBLIC_BACKEND_URL}/api/user/favored/${station?.evaNumber}`, {
 			method: "POST",
 			credentials: "include"
 		});
