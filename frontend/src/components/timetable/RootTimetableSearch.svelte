@@ -6,9 +6,10 @@
 	import Search from "lucide-svelte/icons/search";
 	import TravelMode from "$components/ui/controls/TravelMode.svelte";
 	import Button from "$components/ui/interactive/Button.svelte";
+	import type { Valid } from "luxon/src/_util";
 
 	interface Props {
-		onSearch?: (station: Station, date: DateTime, type: "departure" | "arrival") => void;
+		onSearch?: (station: Station, date: DateTime<Valid>, type: "departure" | "arrival") => void;
 	}
 
 	let { onSearch }: Props = $props();

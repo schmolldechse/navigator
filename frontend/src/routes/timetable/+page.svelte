@@ -1,4 +1,5 @@
 <script>
+	import { goto } from "$app/navigation";
 	import Navbar from "$components/Navbar.svelte";
 	import RootTimetableSearch from "$components/timetable/RootTimetableSearch.svelte";
 	import GitHub from "$components/ui/icons/GitHub.svelte";
@@ -30,9 +31,7 @@
 	<Navbar dropdownEnabled={true} />
 
 	<div class="flex flex-1 items-center justify-center">
-		<RootTimetableSearch onSearch={async (station, date, type) => {
-            console.log("Searching for", station.evaNumber, date.toISO(), type);
-        }} />
+		<RootTimetableSearch onSearch={async (station, date, type) => await goto(`/timetable/${station.evaNumber}/${type + "s"}?when=${encodeURIComponent(date.toISO())}`, { invalidateAll: true })} />
 	</div>
 
 	<footer
