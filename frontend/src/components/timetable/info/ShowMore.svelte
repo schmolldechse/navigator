@@ -3,7 +3,7 @@
 </script>
 
 <button
-	class="group bg-primary-dark ml-2 inline-flex cursor-pointer items-center justify-center rounded-2xl px-2 py-1"
+	class="group bg-stone-900 ml-2 inline-flex cursor-pointer items-center justify-center rounded-2xl px-2 py-1"
 	style="vertical-align: middle"
 	{onclick}
 	aria-label="Show more"
