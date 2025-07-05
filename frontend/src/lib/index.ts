@@ -1,24 +1,6 @@
 // place files you want to import through the `$lib` alias in this folder.
-import type { Stop } from "$models/station";
 import { DateTime, Duration, type DurationUnit } from "luxon";
 import type { Time } from "$models/time";
-
-const mapStops = (entry: any): Stop[] | null => {
-	if (!entry) return null;
-	if (!Array.isArray(entry)) entry = [entry];
-	return entry.map((rawStop: any) => ({
-		evaNumber: rawStop?.evaNumber ?? rawStop?.id,
-		name: rawStop?.name,
-		cancelled: rawStop?.canceled ?? rawStop?.cancelled ?? false,
-		additional: rawStop?.additional ?? undefined,
-		separation: rawStop?.separation ?? undefined,
-		nameParts:
-			rawStop?.nameParts?.map((rawPart: any) => ({
-				type: rawPart?.type,
-				value: rawPart?.value
-			})) ?? undefined
-	}));
-};
 
 const calculateDuration = (startDate: DateTime, endDate: DateTime, unit: DurationUnit | DurationUnit[]): Duration => {
 	if (!startDate.isValid || !endDate.isValid) {
@@ -41,4 +23,4 @@ const formatDuration = (end?: Time, start?: Time): string => {
 	} else return `${Math.floor(duration)} min`;
 };
 
-export { writeStop, mapStops, calculateDuration, formatDuration };
+export { calculateDuration, formatDuration };

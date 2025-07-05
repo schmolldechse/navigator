@@ -25,8 +25,8 @@
 	import ReservationsMissing from "$components/timetable/messages/icons/ReservationsMissing.svelte";
 	import NoBicycleTransport from "$components/timetable/messages/icons/NoBicycleTransport.svelte";
 	import ShowMore from "$components/timetable/info/ShowMore.svelte";
-	import type { ValidMessage } from "$lib/models";
 	import type { SingleTimetableEntry, TimetableMessage, TimetableStop } from "$models/models";
+	import type { Component } from "svelte";
 
 	interface Props {
 		timetableEntry: SingleTimetableEntry;
@@ -35,6 +35,10 @@
 	let { timetableEntry }: Props = $props();
 
 	let expanded = $state<boolean>(false);
+	interface ValidMessage {
+		type: string;
+		component?: Component;
+	}
 	const validMessages: ValidMessage[] = [
 		{ type: "bicycle-transport", component: BicycleTransport },
 		{ type: "bicycle-reservation-required", component: BicycleReservationRequired },
