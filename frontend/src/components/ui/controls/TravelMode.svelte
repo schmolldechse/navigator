@@ -19,7 +19,7 @@
 		class:text-text={type !== "departure"}
 		onclick={() => (type = "departure")}
 	>
-		departure
+		Departure
 	</button>
 	<span class="nd-fg-white text-xl">|</span>
 	<button
@@ -32,6 +32,6 @@
 		class:text-text={type !== "arrival"}
 		onclick={() => (type = "arrival")}
 	>
-		arrival
+		Arrival
 	</button>
 </div>

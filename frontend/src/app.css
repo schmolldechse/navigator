@@ -8,33 +8,14 @@
 @import "@fontsource/jetbrains-mono/600.css";
 @import "@fontsource/jetbrains-mono/800.css";
 
-@plugin 'tailwind-scrollbar' {
-	nocompatible: true;
-}
-
 @theme {
-	--color-text: var(--text);
-	--color-background: var(--background);
-	--color-primary: var(--primary);
-	--color-primary-dark: var(--primary-dark);
-	--color-primary-darker: var(--primary-darker);
-	--color-secondary: var(--secondary);
-	--color-accent: var(--accent);
-
-	--color-input-background: var(--input-background);
-	--color-titlebar-background: var(--titlebar-background);
-
-	--font-montserrat: Montserrat, sans-serif;
+	--color-text: var(--color-text);
+	--color-background: var(--color-background);
+	--color-primary: var(--color-primary);
+	--color-secondary: var(--color-secondary);
+	--color-accent: var(--color-accent);
 }
 
-/*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
-  so we've added these compatibility styles to make sure everything still
-  looks the same as it did with Tailwind CSS v3.
-
-  If we ever want to remove these styles, we need to add an explicit border
-  color utility to any element that depends on these defaults.
-*/
 @layer base {
 	*,
 	::after,
@@ -45,22 +26,40 @@
 	}
 
 	:root {
-		--text: #ffffff;
-		--background: #0a0a0a;
-		--primary: #404040;
-		--primary-dark: #1e1e1e;
-		--primary-darker: #121212;
-		--secondary: #7b2e2e;
-		--accent: #ffda0a;
+		--color-text: #ffffff;
+		--color-background: #0a0a0a;
+		--color-primary: #404040;
+		--color-secondary: #8c0e0e;
+		--color-accent: #ffda0a;
 
-		--input-background: #151515;
-		--titlebar-background: #0f0f0f;
+		--font-montserrat: "Montserrat", sans-serif;
+		--font-jetbrains-mono: "JetBrains Mono", monospace;
+	}
+
+	body {
+		background-color: var(--color-background);
+		font-family: var(--font-montserrat);
+		color: var(--color-text);
 	}
 }
 
 @layer scrollbar {
 	.accent-scrollbar {
-		@apply scrollbar scrollbar-w-2 scrollbar-track-background scrollbar-thumb-accent scrollbar-thumb-rounded-full;
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-accent) var(--color-background);
+	}
+
+	.accent-scrollbar::-webkit-scrollbar {
+		width: 8px;
+	}
+
+	.accent-scrollbar::-webkit-scrollbar-track {
+		background: var(--color-background);
+	}
+
+	.accent-scrollbar::-webkit-scrollbar-thumb {
+		background: var(--color-accent);
+		border-radius: 9999px;
 	}
 
 	.accent-scrollbar::-webkit-scrollbar-button {
@@ -99,8 +98,4 @@
 	.changeover {
 		background: repeating-linear-gradient(0deg, #717379 0px, #717379 2px, transparent 0px, transparent 5px);
 	}
-}
-
-body {
-	@apply bg-background font-montserrat text-text;
 }
