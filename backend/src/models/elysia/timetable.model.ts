@@ -47,7 +47,7 @@ const SingleTimetableEntrySchema = t.Object({
 	),
 	origin: TimetableStopSchema,
 	destination: TimetableStopSchema,
-	viaStops: t.Optional(t.Array(TimetableStopSchema, { description: "List of intermediate stops of the journey" })),
+	viaStops: t.Array(TimetableStopSchema, { description: "List of intermediate stops of the journey" }),
 	timeInformation: TimeSchema,
 	lineInformation: t.Object({
 		productType: t.String({ description: "The product type of the journey", examples: ["NahverkehrsonstigeZuege"] }),

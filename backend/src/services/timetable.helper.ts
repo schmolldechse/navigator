@@ -197,7 +197,6 @@ class TimetableHelper {
 		} as typeof SingleTimetableEntrySchema.static;
 
 		if (isHAFAS) journey.messages = (entry?.meldungen ?? []).map((message: any) => this.mapMessage(message, true));
-		if (journey.viaStops?.length === 0) journey.viaStops = undefined;
 		return journey;
 	};
 
