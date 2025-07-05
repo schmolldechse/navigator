@@ -41,22 +41,25 @@
 {#snippet renderViaStops(viaStops: TimetableStop[])}
 	{@const displayedStops = viaStopsExtended ? viaStops : viaStops.slice(0, 3)}
 
-	{#each displayedStops as viaStop, index}
-		<span>{writeStop(viaStop)}</span>{#if index < displayedStops.length - 1}
-			<span class="px-2 text-xl font-bold tracking-widest">&minus;</span>
-		{/if}
-	{/each}
+	<div class="flex flex-wrap items-center">
+		{#each displayedStops as viaStop, index}
+			<span class="text-base md:text-xl">{writeStop(viaStop)}</span>{#if index < displayedStops.length - 1}
+				<span class="px-2 text-xl md:text-2xl font-bold tracking-widest">&minus;</span>
+			{/if}
+		{/each}
 
-	{#if viaStops.length > 3}
-		<ShowMore onclick={() => (viaStopsExtended = !viaStopsExtended)} />
-	{/if}
+		{#if viaStops.length > 3}
+			<ShowMore onclick={() => (viaStopsExtended = !viaStopsExtended)} />
+		{/if}
+	</div>
 {/snippet}
 
 {#snippet renderSingleTimetableEntry(singleTimetableEntry: SingleTimetableEntry)}
 	<div
 		class={[
 			{ "bg-text text-background": singleTimetableEntry.cancelled },
-			{ "bg-background text-text": !singleTimetableEntry.cancelled }
+			{ "bg-background text-text": !singleTimetableEntry.cancelled },
+			"py-2"
 		]}
 	>
 		<!-- Layout for smaller screens -->
@@ -97,7 +100,7 @@
 						{ "text-xl font-medium": !isPlatformChanged(singleTimetableEntry.timeInformation) }
 					]}
 				>
-					{!isPlatformChanged(singleTimetableEntry.timeInformation)
+					{isPlatformChanged(singleTimetableEntry.timeInformation)
 						? singleTimetableEntry.timeInformation.actualPlatform
 						: singleTimetableEntry.timeInformation.plannedPlatform}
 				</span>
@@ -112,6 +115,79 @@
 			<span class="text-xl font-semibold tracking-tight">
 				{isDeparture ? writeStop(singleTimetableEntry.destination) : writeStop(singleTimetableEntry.origin)}
 			</span>
+		</div>
+
+		<!-- Layout for larger screens -->
+		<div class="container mx-auto hidden flex-col gap-y-0.5 md:flex">
+			<!-- 1st row: Messages -->
+			<div class="flex flex-row gap-x-8">
+				<!-- Spacer -->
+				<div class="flex-1"></div>
+
+				<!-- Messages -->
+				<div class="flex-4">
+					<Messages timetableEntry={singleTimetableEntry} />
+				</div>
+
+				<!-- Spacer -->
+				<div class="flex-1"></div>
+			</div>
+
+			<!-- 2nd row: LineInformation, ViaStops -->
+			<div class="flex flex-row items-center gap-x-8">
+				<!-- LineInformation -->
+				<div class="flex flex-1 justify-end text-xl font-semibold">
+					<span>{singleTimetableEntry.lineInformation.journeyName}</span>
+					{#if singleTimetableEntry.lineInformation?.additionalJourneyName}
+						<span>/ {singleTimetableEntry.lineInformation?.additionalJourneyName}</span>
+					{/if}
+				</div>
+
+				<!-- ViaStops -->
+				<div class="flex-4">
+					{@render renderViaStops(singleTimetableEntry.viaStops)}
+				</div>
+
+				<!-- Spacer -->
+				<div class="flex-1"></div>
+			</div>
+
+			<!-- 3rd row: Time, Destination/ Origin, Platform -->
+			<div class="flex flex-row items-center gap-x-8">
+				<!-- Time Information -->
+				<div class="flex w-full flex-1 justify-end gap-x-2">
+					<span class="text-3xl font-medium">{displayTime(singleTimetableEntry.timeInformation.plannedTime)}</span>
+					{#if isDelayed(singleTimetableEntry.timeInformation)}
+						<span
+							class="bg-text text-background flex w-fit items-center justify-center px-2 py-0.5 text-[16pt] font-bold"
+						>
+							{displayTime(singleTimetableEntry.timeInformation.actualTime)}
+						</span>
+					{/if}
+				</div>
+
+				<!-- Destination/ Origin -->
+				<span class="flex-4 text-3xl font-medium tracking-tight">
+					{isDeparture ? writeStop(singleTimetableEntry.destination) : writeStop(singleTimetableEntry.origin)}
+				</span>
+
+				<!-- Platform -->
+				<span
+					class={[
+						{
+							"bg-text text-background px-2 py-0.5 text-[16pt] font-bold md:px-0": isPlatformChanged(
+								singleTimetableEntry.timeInformation
+							)
+						},
+						{ "text-3xl font-medium": !isPlatformChanged(singleTimetableEntry.timeInformation) },
+						"w-full flex-1 text-right"
+					]}
+				>
+					{isPlatformChanged(singleTimetableEntry.timeInformation)
+						? singleTimetableEntry.timeInformation.actualPlatform
+						: singleTimetableEntry.timeInformation.plannedPlatform}
+				</span>
+			</div>
 		</div>
 	</div>
 {/snippet}
