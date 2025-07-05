@@ -53,7 +53,12 @@
 {/snippet}
 
 {#snippet renderSingleTimetableEntry(singleTimetableEntry: SingleTimetableEntry)}
-	<div>
+	<div
+		class={[
+			{ "bg-text text-background": singleTimetableEntry.cancelled },
+			{ "bg-background text-text": !singleTimetableEntry.cancelled }
+		]}
+	>
 		<!-- Layout for smaller screens -->
 		<div class="flex flex-col gap-y-0.5 px-2 md:hidden">
 			<!-- 1st row: Messages -->
@@ -68,12 +73,14 @@
 			</div>
 
 			<!-- 3rd row: TimeInformation -->
-			<div class="flex justify-between items-center">
+			<div class="flex items-center justify-between">
 				<!-- Time -->
 				<div class="flex gap-x-2">
 					<span class="text-xl font-medium">{displayTime(singleTimetableEntry.timeInformation.plannedTime)}</span>
 					{#if isDelayed(singleTimetableEntry.timeInformation)}
-						<span class="bg-text text-background flex w-fit items-center justify-center px-2 py-0.5 text-[12pt] font-bold">
+						<span
+							class="bg-text text-background flex w-fit items-center justify-center px-2 py-0.5 text-[12pt] font-bold"
+						>
 							{displayTime(singleTimetableEntry.timeInformation.actualTime)}
 						</span>
 					{/if}
@@ -82,8 +89,12 @@
 				<!-- Platform -->
 				<span
 					class={[
-						{ "text-[12pt] font-bold bg-text text-background px-2 py-0.5 md:px-0": isPlatformChanged(singleTimetableEntry.timeInformation) },
-						{ "font-medium text-xl": !isPlatformChanged(singleTimetableEntry.timeInformation) }
+						{
+							"bg-text text-background px-2 py-0.5 text-[12pt] font-bold md:px-0": isPlatformChanged(
+								singleTimetableEntry.timeInformation
+							)
+						},
+						{ "text-xl font-medium": !isPlatformChanged(singleTimetableEntry.timeInformation) }
 					]}
 				>
 					{!isPlatformChanged(singleTimetableEntry.timeInformation)
