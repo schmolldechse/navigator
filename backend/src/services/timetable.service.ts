@@ -1,7 +1,7 @@
 import { t } from "elysia";
 import { DateTimeObject } from "../types/datetime";
 import { DateTime } from "luxon";
-import { TimetableEntry } from "../models/core/models";
+import { GroupedTimetableEntry } from "../models/core/models";
 import { SingleTimetableEntrySchema } from "../models/elysia/timetable.model";
 import { database } from "../db/postgres";
 import { stations } from "../db/core.schema";
@@ -47,7 +47,7 @@ class TimetableService {
 		evaNumber: number,
 		type: RequestType = RequestType.DEPARTURES,
 		queryParams: typeof this.query.static
-	): Promise<TimetableEntry[]> => {
+	): Promise<GroupedTimetableEntry[]> => {
 		const now: DateTime = DateTime.now().set({ second: 0, millisecond: 0 });
 		const endTime: DateTime = queryParams.when.plus({ minute: queryParams.duration });
 
@@ -78,7 +78,7 @@ class TimetableService {
 			this.retrieveHafasConnections(evaNumber, type, queryParams)
 		]);
 
-		let mergedTimetables: TimetableEntry[] = this.helper.mergeTimetables(
+		let mergedTimetables: GroupedTimetableEntry[] = this.helper.mergeTimetables(
 			bahnhof,
 			this.helper.mergeTimetables(ris, hafas, type),
 			type
@@ -103,7 +103,7 @@ class TimetableService {
 		evaNumber: number,
 		type: RequestType = RequestType.DEPARTURES,
 		queryParams: typeof this.query.static
-	): Promise<TimetableEntry[]> => {
+	): Promise<GroupedTimetableEntry[]> => {
 		const typeString = type === RequestType.DEPARTURES ? "departure" : "arrival";
 		const transports = [
 			"HIGH_SPEED_TRAIN",
@@ -161,7 +161,7 @@ class TimetableService {
 		evaNumber: number,
 		type: RequestType = RequestType.DEPARTURES,
 		queryParams: typeof this.query.static
-	): Promise<TimetableEntry[]> => {
+	): Promise<GroupedTimetableEntry[]> => {
 		let apiUrl: URL = new URL(`https://bahnhof.de/api/boards/${type}`);
 		apiUrl.searchParams.append("evaNumbers", String(evaNumber));
 		apiUrl.searchParams.append("duration", String(queryParams.duration));
@@ -195,7 +195,7 @@ class TimetableService {
 		evaNumber: number,
 		type: RequestType = RequestType.DEPARTURES,
 		queryParams: typeof this.query.static
-	): Promise<TimetableEntry[]> => {
+	): Promise<GroupedTimetableEntry[]> => {
 		const requestAmount = Math.ceil(queryParams.duration / 60);
 		if (requestAmount === 1) return this.makeHafasRequest(evaNumber, type, queryParams);
 
@@ -240,7 +240,7 @@ class TimetableService {
 		evaNumber: number,
 		type: RequestType = RequestType.DEPARTURES,
 		queryParams: typeof this.query.static
-	): Promise<TimetableEntry[]> => {
+	): Promise<GroupedTimetableEntry[]> => {
 		const typeString = type === RequestType.DEPARTURES ? "abfahrten" : "ankuenfte";
 
 		let apiUrl: URL = new URL(`https://int.bahn.de/web/api/reiseloesung/${typeString}`);

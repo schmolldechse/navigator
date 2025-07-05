@@ -1,5 +1,5 @@
 import { SingleTimetableEntrySchema } from "../models/elysia/timetable.model";
-import { Time, TimetableEntry, TimetableMessage, TimetableStop } from "../models/core/models";
+import { Time, GroupedTimetableEntry, TimetableMessage, TimetableStop } from "../models/core/models";
 import { database } from "../db/postgres";
 import { stations } from "../db/core.schema";
 import { eq } from "drizzle-orm";
@@ -33,10 +33,10 @@ class TimetableHelper {
 
 	// merge both timetables by preferring the entries from timetableA
 	mergeTimetables = (
-		timetableEntriesA: TimetableEntry[],
-		timetableEntriesB: TimetableEntry[],
+		timetableEntriesA: GroupedTimetableEntry[],
+		timetableEntriesB: GroupedTimetableEntry[],
 		type: RequestType = RequestType.DEPARTURES
-	): TimetableEntry[] => {
+	): GroupedTimetableEntry[] => {
 		if (timetableEntriesA.length === 0) return timetableEntriesB;
 		if (timetableEntriesB.length === 0) return timetableEntriesA;
 
@@ -44,7 +44,7 @@ class TimetableHelper {
 		let simplifiedTimetableEntriesB: (typeof SingleTimetableEntrySchema.static)[] = timetableEntriesB.flatMap(
 			(entry) => entry.entries
 		);
-		timetableEntriesA.forEach((timetableA: TimetableEntry) => {
+		timetableEntriesA.forEach((timetableA: GroupedTimetableEntry) => {
 			timetableA.entries.map((singleTimetableA: typeof SingleTimetableEntrySchema.static) => {
 				// search for a matching entry in simplifiedTimetableEntriesB
 				const matchingEntry = simplifiedTimetableEntriesB.find(
