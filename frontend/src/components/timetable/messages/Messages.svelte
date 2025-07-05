@@ -1,10 +1,6 @@
 <script lang="ts">
-	import type { Message } from "$models/message";
 	import { onMount } from "svelte";
-	import type { Connection } from "$models/connection";
 	import { DateTime } from "luxon";
-	import type { Stop } from "$models/station";
-	import { mapStops, writeStop } from "$lib";
 	import BicycleTransport from "$components/timetable/messages/icons/BicycleTransport.svelte";
 	import BicycleReservationRequired from "$components/timetable/messages/icons/BicycleReservationRequired.svelte";
 	import CancelledStops from "$components/timetable/messages/icons/CancelledStops.svelte";
@@ -31,11 +27,17 @@
 	import NoBicycleTransport from "$components/timetable/messages/icons/NoBicycleTransport.svelte";
 	import ShowMore from "$components/timetable/info/ShowMore.svelte";
 	import type { ValidMessage } from "$lib/models";
+	import type { SingleTimetableEntry, TimetableMessage, TimetableStop } from "$models/models";
 
-	let { connection }: { connection?: Connection } = $props();
+	interface Props {
+		timetableEntry: SingleTimetableEntry;
+	};
+
+	let { timetableEntry }: Props = $props();
+
 	let expanded = $state<boolean>(false);
 	onMount(() => {
-		if (!connection?.cancelled) return;
+		if (!timetableEntry.cancelled) return;
 		expanded = true;
 	});
 
@@ -66,7 +68,16 @@
 		{ type: "no-bicycle-transport", component: NoBicycleTransport }
 	];
 
-	const formatMessage = (message: Message): string => {
+	const writeStop = (stop: TimetableStop): string => {
+		if (!stop) return "???";
+		if (!stop.nameParts || stop.nameParts.length === 0) return stop.name;
+		return stop.nameParts
+			.map((part) => part.value)
+			.join("")
+			.trim();
+	};
+
+	const formatMessage = (message: TimetableMessage): string => {
 		if (!message?.type || !message?.text) return "Invalid message object";
 		if (!message?.links || message?.links?.length === 0) return message?.text;
 
@@ -74,10 +85,8 @@
 		message?.links?.forEach((link, index) => {
 			const placeholder = `{{${index}}}`;
 
-			if (link?.type === "station") {
-				const stop: Stop = mapStops(link)![0];
-				formatted = formatted.replace(placeholder, writeStop(stop, link?.name));
-			} else if (link?.type === "time") {
+			if (link?.type === "station") formatted = formatted.replace(placeholder, writeStop(link as TimetableStop));
+			else if (link?.type === "time") {
 				const time = DateTime.fromISO(link?.time).setLocale("de-DE").toLocaleString(DateTime.TIME_24_SIMPLE);
 				formatted = formatted.replace(placeholder, time);
 			} else if (link?.type === "line") formatted = formatted.replace(placeholder, link?.lineName);
@@ -88,9 +97,9 @@
 	};
 </script>
 
-{#if (connection?.messages || []).length > 1 && !expanded}
+{#if (timetableEntry?.messages || []).length > 1 && !expanded}
 	<div class="my-1 flex flex-row gap-x-2 py-0.5">
-		{#each connection?.messages || [] as message, index (index)}
+		{#each timetableEntry?.messages || [] as message, index (index)}
 			{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
 			{#if validMessage?.component}
 				{@const Component = validMessage.component}
@@ -103,10 +112,10 @@
 	</div>
 {/if}
 
-{#if (connection?.messages || []).length <= 1 || expanded}
-	{#each connection?.messages || [] as message, index (index)}
+{#if (timetableEntry?.messages || []).length <= 1 || expanded}
+	{#each timetableEntry?.messages || [] as message, index (index)}
 		{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
-		<div class="my-1 flex flex-row gap-x-2 py-0.5 text-lg">
+		<div class="py-0.5 flex flex-row gap-x-2 text-base md:text-lg">
 			{#if validMessage?.component}
 				{@const Component = validMessage.component}
 				<Component />

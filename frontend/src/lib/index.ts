@@ -3,16 +3,6 @@ import type { Stop } from "$models/station";
 import { DateTime, Duration, type DurationUnit } from "luxon";
 import type { Time } from "$models/time";
 
-const writeStop = (stop?: Stop, fallbackName: string = ""): string => {
-	if (!stop) return fallbackName;
-	if (!stop.name) return fallbackName;
-	if (!stop.nameParts || stop.nameParts.length === 0) return stop.name;
-	return stop.nameParts
-		.map((part) => part.value)
-		.join("")
-		.trim();
-};
-
 const mapStops = (entry: any): Stop[] | null => {
 	if (!entry) return null;
 	if (!Array.isArray(entry)) entry = [entry];

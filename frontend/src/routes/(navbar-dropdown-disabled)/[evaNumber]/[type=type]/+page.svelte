@@ -4,7 +4,7 @@
 	import ConnectionComponent from "$components/timetable/ConnectionComponent.svelte";
 	import WingTrain from "$components/timetable/WingTrain.svelte";
 	import Loader from "$components/Loader.svelte";
-	import WarningNoConnections from "$components/timetable/WarningNoConnections.svelte";
+	import WarningNoConnections from "$components/timetable/TimetableEntriesEmptyWarning.svelte";
 	import type { TimetableEntry } from "$models/models";
 
 	let { data }: PageProps = $props();

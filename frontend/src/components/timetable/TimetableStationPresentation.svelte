@@ -73,7 +73,7 @@
 	/>
 
 	<div class="container mx-auto flex items-center justify-between">
-		<span class="h-full w-[25%] animate-pulse rounded-2xl bg-stone-600/45 px-6 py-2 text-2xl font-bold"></span>
+		<span class="h-[35px] w-[25%] animate-pulse rounded-2xl bg-stone-200/45 px-6 py-2 text-2xl font-bold"></span>
 		<Clock />
 	</div>
 {:then station}
@@ -98,7 +98,7 @@
 
 	<div class="container mx-auto w-full">
 		<div class="flex items-start justify-between">
-			<div class="flex flex-row items-baseline gap-x-2 break-all">
+			<div class="flex flex-row gap-x-2 break-all">
 				{#if $session.data}
 					<Star
 						class="shrink-0 cursor-pointer transition-all duration-300 {isFavored

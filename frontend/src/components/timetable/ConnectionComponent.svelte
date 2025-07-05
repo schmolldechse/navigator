@@ -27,41 +27,6 @@
 	class:text-background={connection?.cancelled ?? false}
 	class="py-1 font-medium"
 >
-	<!-- layout for smaller screens (under md) -->
-	<div class="gap-y-2 p-2 md:hidden">
-		<!-- 1st row; Messages -->
-		<Messages {connection} />
-
-		<!-- 2nd row; Line Name -->
-		<div class="flex flex-row text-lg font-bold">
-			<a
-				href={`/journey/coach-sequence?lineDetails=${connection?.lineInformation?.product}_${connection?.lineInformation?.fahrtNr}&evaNumber=${station?.evaNumber}&date=${DateTime.local().toFormat("yyyyMMdd")}`}
-				target="_blank"
-			>
-				{connection?.lineInformation?.lineName}
-			</a>
-			{#if connection?.lineInformation?.additionalLineName}
-				<span>/ {connection?.lineInformation?.additionalLineName}</span>
-			{/if}
-		</div>
-
-		<!-- 3rd row; Time & Platform Information -->
-		<div class="flex flex-row items-center justify-between text-2xl font-semibold">
-			<TimeInformation time={isDeparture ? connection?.departure : connection?.arrival} delayClass="text-lg" />
-			<Platform time={isDeparture ? connection?.departure : connection?.arrival} />
-		</div>
-
-		<!-- 4th row; viaStops -->
-		<ViaStops viaStops={connection?.viaStops} />
-
-		<!-- 5th row; destination/ origin -->
-		<div class="text-2xl">
-			{isDeparture
-				? writeStop(connection?.actualDestination || connection?.destination, connection?.direction)
-				: writeStop(connection?.origin, connection?.provenance)}
-		</div>
-	</div>
-
 	<!-- layout for larger screens (above md) -->
 	<div class="mx-auto hidden flex-col justify-between md:flex">
 		<!-- 1st row -->
