@@ -16,22 +16,26 @@
 	<span class="h-[15px]"></span>
 
 	{#await data.timetable}
-		{#each Array(5) as _, index}
-			{#if index !== 0}
-				<TimetableEntrySeparator />
-			{/if}
-			<TimetableEntrySkeleton />
-		{/each}
+		<div class="flex flex-col gap-y-4">
+			{#each Array(5) as _, index}
+				{#if index !== 0}
+					<TimetableEntrySeparator />
+				{/if}
+				<TimetableEntrySkeleton />
+			{/each}
+		</div>
 	{:then timetable}
 		{#if timetable.length === 0}
 			<TimetableEntriesEmptyWarning />
 		{:else}
-			{#each timetable as timetableEntry, index}
-				{#if index !== 0}
-					<TimetableEntrySeparator />
-				{/if}
-				<TimetableEntry {timetableEntry} />
-			{/each}
+			<div class="flex flex-col gap-y-2">
+				{#each timetable as timetableEntry, index}
+					{#if index !== 0}
+						<TimetableEntrySeparator />
+					{/if}
+					<TimetableEntry {timetableEntry} />
+				{/each}
+			</div>
 		{/if}
 	{/await}
 </div>
