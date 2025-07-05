@@ -107,7 +107,7 @@
 {#if dropdownOpen}
 	<div
 		bind:this={dropdownElement}
-		class="bg-input-background border-primary absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 border px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl"
+		class="bg-black border-primary absolute top-0 left-0 z-10 flex w-full flex-col gap-y-6 border px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl"
 		role="dialog"
 	>
 		<!-- Header -->
@@ -119,7 +119,7 @@
 		<!-- Month navigation -->
 		<div class="flex items-center justify-between px-2">
 			<button
-				class="hover:text-accent flex items-center gap-x-2 text-white/75 transition-colors duration-200"
+				class="hover:text-accent flex items-center gap-x-2 text-white/75 transition-colors duration-200 cursor-pointer"
 				onclick={() => (date = date.minus({ month: 1 }))}
 				aria-label="One month back"
 			>
@@ -130,7 +130,7 @@
 			<span class="text-lg font-bold">{date.toFormat("MMMM yyyy")}</span>
 
 			<button
-				class="hover:text-accent flex items-center gap-x-2 text-white/75 transition-colors duration-200"
+				class="hover:text-accent flex items-center gap-x-2 text-white/75 transition-colors duration-200 cursor-pointer"
 				onclick={() => (date = date.plus({ month: 1 }))}
 				aria-label="One month forward"
 			>
@@ -196,7 +196,7 @@
 			<!-- hours/ minutes inputs -->
 			<div class="flex items-center gap-x-8">
 				<button
-					class="bg-input-background border-accent/30 hover:border-accent hover:text-accent rounded-md border p-2 text-white/75 transition-colors"
+					class="bg-input-background border-accent/30 hover:border-accent hover:text-accent rounded-md border p-2 text-white/75 transition-colors cursor-pointer"
 					onclick={() => (date = date.minus({ minutes: 15 }))}
 					aria-label="Decrease date by 15 minutes"
 					title="-15min"
@@ -227,7 +227,7 @@
 				</div>
 
 				<button
-					class="bg-input-background border-accent/30 hover:border-accent hover:text-accent rounded-md border p-2 text-white/75 transition-colors"
+					class="bg-input-background border-accent/30 hover:border-accent hover:text-accent rounded-md border p-2 text-white/75 transition-colors cursor-pointer"
 					onclick={() => (date = date.plus({ minutes: 15 }))}
 					aria-label="Increase date by 15 minutes"
 					title="+15min"
