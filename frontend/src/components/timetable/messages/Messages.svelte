@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from "svelte";
 	import { DateTime } from "luxon";
 	import BicycleTransport from "$components/timetable/messages/icons/BicycleTransport.svelte";
 	import BicycleReservationRequired from "$components/timetable/messages/icons/BicycleReservationRequired.svelte";
@@ -36,11 +35,6 @@
 	let { timetableEntry }: Props = $props();
 
 	let expanded = $state<boolean>(false);
-	onMount(() => {
-		if (!timetableEntry.cancelled) return;
-		expanded = true;
-	});
-
 	const validMessages: ValidMessage[] = [
 		{ type: "bicycle-transport", component: BicycleTransport },
 		{ type: "bicycle-reservation-required", component: BicycleReservationRequired },
