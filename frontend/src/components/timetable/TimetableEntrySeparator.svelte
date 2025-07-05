@@ -1,11 +1,11 @@
-<div class="container mx-auto">
+<div>
 	<!-- Separator for smaller screens -->
-	<span class="block w-full border-t md:hidden border-[0.15rem]"></span>
+	<span class="block w-full h-[4px] bg-white md:hidden"></span>
 
 	<!-- Separator for larger screens -->
-	<div class="hidden md:flex">
-		<span class="mr-8 w-full flex-1 border-t border-[0.15rem]"></span>
-		<span class="flex-4 mr-8 w-full border-t border-[0.15rem]"></span>
-		<span class="w-full flex-1 border-t border-[0.15rem]"></span>
+	<div class="hidden gap-x-8 md:flex container mx-auto">
+		<span class="w-full flex-1 h-[4px] bg-white"></span>
+		<span class="w-full flex-4 h-[4px] bg-white"></span>
+		<span class="w-full flex-1 h-[4px] bg-white"></span>
 	</div>
 </div>
