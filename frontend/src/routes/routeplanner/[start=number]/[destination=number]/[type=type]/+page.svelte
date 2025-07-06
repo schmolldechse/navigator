@@ -116,7 +116,7 @@
 		return prevDeparture.day !== departure.day;
 	};
 
-    /**
+	/**
      * 
 	let lineColors = $state<LineColor[]>([]);
 	const fetchLineColors = async () => {
@@ -178,10 +178,14 @@
 		{#each plannedRoute?.entries ?? [] as route, index}
 			{#if isDayDifferent(index)}
 				{@const date = DateTime.fromISO(route.sections[0].origin.departure?.plannedTime ?? "")}
-				<!--<DateHeader {date} /> -->
-                <p>date change</p>
+
+				<div class="self-center container px-4 md:px-8 my-2">
+					<span class="border-text/50 text-text font-medium block w-full border-b text-lg md:text-xl">
+						{date.toLocaleString({ weekday: "short", day: "numeric", month: "short", year: "numeric" })}
+					</span>
+				</div>
 			{/if}
-            <RouteEntry {route} />
+			<RouteEntry {route} />
 		{:else}<RouteEntriesEmptyWarning />
 		{/each}
 	{/await}
