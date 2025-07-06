@@ -415,9 +415,9 @@ class RouteService {
 					productType: mapToProduct(section.verkehrsmittel.produktGattung),
 					productName: section.verkehrsmittel.kurzText,
 					journeyName: section.verkehrsmittel.mittelText,
-					journeyNumber: Number(section.verkehrsmittel.nummer),
 					operator:
 						section.verkehrsmittel.zugattribute.find((attr: any) => attr.kategorie === "BEFÖRDERER")?.value ?? "NaN"
+					journeyNumber: this.extractJourneyNumber(section.verkehrsmittel.nummer),
 				}
 			};
 		};
@@ -435,6 +435,12 @@ class RouteService {
 			messages: this.mapMessages(entry)
 		} as typeof RouteEntrySchema.static;
 	};
+
+	private extractJourneyNumber = (entry: string): number => {
+		const digits = entry.match(/\d/g);
+		if (!digits) return NaN;
+		return parseInt(digits.join(""), 10);
+	}
 
 	private getAllowedProducts = (disabledProducts: string[]): string[] => {
 		disabledProducts = disabledProducts.map((product) => product.toUpperCase());
