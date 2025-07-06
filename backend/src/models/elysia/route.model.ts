@@ -35,7 +35,6 @@ const WalkingRouteSectionSchema = t.Object({
 	messages: t.Array(RouteMessageSchema, { description: "Array of messages for the section" })
 });
 
-// NORMAL SECTION
 const ExtendedRouteStopSchema = t.Intersect([
 	BasicRouteStopSchema,
 	t.Object({
@@ -51,6 +50,7 @@ const RouteJourneyAttributeSchema = t.Object({
 	sectionsNote: t.Optional(t.String({ description: "Note for the section", examples: ["(Köln Hbf - Stuttgart Hbf)"] }))
 });
 
+// NORMAL SECTION
 const NormalRouteSectionSchema = t.Object({
 	hafas_journeyId: t.String({
 		description: "Identifier for the journey in the HAFAS system. Optional when `section` is set to true."
