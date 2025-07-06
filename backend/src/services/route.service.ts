@@ -415,9 +415,8 @@ class RouteService {
 					productType: mapToProduct(section.verkehrsmittel.produktGattung),
 					productName: section.verkehrsmittel.kurzText,
 					journeyName: section.verkehrsmittel.mittelText,
-					operator:
-						section.verkehrsmittel.zugattribute.find((attr: any) => attr.kategorie === "BEFÖRDERER")?.value ?? "NaN"
 					journeyNumber: this.extractJourneyNumber(section.verkehrsmittel.nummer),
+					operator: section.verkehrsmittel.zugattribute.find((attr: any) => attr.kategorie === "BEFÖRDERER")?.value ?? null
 				}
 			};
 		};
