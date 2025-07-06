@@ -48,38 +48,15 @@ class RouteService {
 			error: "Parameter 'endDate' could not be parsed as a date."
 		}),
 		filter: t.Object({
-			disabledProducts: t.Optional(
-				t.Array(
-					t.UnionEnum(
-						[
-							Products.HOCHGESCHWINDIGKEITSZUEGE,
-							Products.INTERCITYUNDEUROCITYZUEGE,
-							Products.INTERREGIOUNDSCHNELLZUEGE,
-							Products.NAHVERKEHRSONSTIGEZUEGE,
-							Products.SBAHNEN,
-							Products.BUSSE,
-							Products.SCHIFFE,
-							Products.UBAHN,
-							Products.STRASSENBAHN,
-							Products.ANRUFPFLICHTIGEVERKEHRE
-						],
-						{
-							description: "The name of the corresponding product to disable",
-							error: () => {
-								throw new HttpError(
-									HttpStatus.HTTP_400_BAD_REQUEST,
-									"Invalid product provided. Must be one of the valid Products enum values."
-								);
-							}
-						}
-					),
-					{
-						description: "List of disabled products",
-						default: [],
-						uniqueItems: true,
-						maxItems: 10
-					}
-				)
+			disabledProducts: t.Array(
+				t.String({
+					description: "The name of the corresponding product to disable"
+				}),
+				{
+					description: "List of disabled products",
+					default: [],
+					uniqueItems: true
+				}
 			),
 			changeover: t.Optional(
 				t.Object({
@@ -209,7 +186,7 @@ class RouteService {
 				anfrageZeitpunkt: body.when.toFormat("yyyy-MM-dd'T'HH:mm:ss"),
 				ankunftSuche: body.type === "departure" ? "ABFAHRT" : "ANKUNFT",
 				klasse: "KLASSE_2",
-				produktgattungen: this.getAllowedProducts(body.filter?.disabledProducts ?? []),
+				produktgattungen: this.getAllowedProducts(body.filter.disabledProducts),
 				reisende: [
 					{
 						typ: "ERWACHSENER",
@@ -459,10 +436,12 @@ class RouteService {
 		} as typeof RouteEntrySchema.static;
 	};
 
-	private getAllowedProducts = (disabledProducts: string[]): string[] =>
-		Object.values(Products)
-			.filter((product: Products) => product !== Products.UNKNOWN && !disabledProducts.includes(product.toString()))
+	private getAllowedProducts = (disabledProducts: string[]): string[] => {
+		disabledProducts = disabledProducts.map((product) => product.toUpperCase());
+		return Object.values(Products)
+			.filter((product: Products) => product !== Products.UNKNOWN && !disabledProducts.includes(product.toUpperCase()))
 			.map((product: Products) => this.mapToBahnWebProduct(product));
+	}
 
 	/**
 	 * Maps a product from the Products enum to the bahn.de API product string.

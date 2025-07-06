@@ -63,34 +63,13 @@ class StatisticsService {
 				maximum: Number.MAX_SAFE_INTEGER
 			}),
 			products: t.Array(
-				t.UnionEnum(
-					[
-						Products.HOCHGESCHWINDIGKEITSZUEGE,
-						Products.INTERCITYUNDEUROCITYZUEGE,
-						Products.INTERREGIOUNDSCHNELLZUEGE,
-						Products.NAHVERKEHRSONSTIGEZUEGE,
-						Products.SBAHNEN,
-						Products.BUSSE,
-						Products.SCHIFFE,
-						Products.UBAHN,
-						Products.STRASSENBAHN,
-						Products.ANRUFPFLICHTIGEVERKEHRE
-					],
-					{
-						description: "The name of the product type which should be included in the statistics.",
-						error: () => {
-							throw new HttpError(
-								HttpStatus.HTTP_400_BAD_REQUEST,
-								"Invalid product provided. Must be one of the valid Products enum values."
-							);
-						}
-					}
-				),
+				t.String({
+					description: "The name of the product type which should be included in the statistics."
+				}),
 				{
 					description: "List of product types to filter by. For example, `HOCHGESCHWINDIGKEITSZUEGE`.",
 					default: [],
-					uniqueItems: true,
-					maxItems: 10
+					uniqueItems: true
 				}
 			),
 			lineName: t.String({ description: "An REGEX pattern which lineNames should be included in the statistics." }),
@@ -113,11 +92,11 @@ class StatisticsService {
 
 		const evaNumberSQL =
 			body.evaNumbers.length > 0
-				? sql.raw(`ARRAY[${body.evaNumbers.map((n) => Number(n)).join(",")}]::integer[]`)
+				? sql.raw(`ARRAY[${body.evaNumbers.map((evaNumber) => evaNumber).join(",")}]::integer[]`)
 				: sql`NULL`;
 		const productSQL =
 			body.filter.products.length > 0
-				? sql.raw(`ARRAY[${body.filter.products.map((p) => `'${p}'`).join(",")}]::varchar[]`)
+				? sql.raw(`ARRAY[${body.filter.products.map((product) => `'${product}'`).join(",")}]::varchar[]`)
 				: sql`NULL`;
 
 		const query = await database.execute(sql`
@@ -131,7 +110,7 @@ class StatisticsService {
     			AND (
         			${productSQL}::varchar[] IS NULL
         			OR coalesce(array_length(${productSQL}::varchar[], 1), 0) = 0
-        			OR product_type = ANY(${productSQL}::varchar[])
+        			OR UPPER(product_type) = ANY(SELECT UPPER(unnest(${productSQL}::varchar[])))
     			)
 				AND (
 					${body.filter.lineName}::varchar IS NULL
