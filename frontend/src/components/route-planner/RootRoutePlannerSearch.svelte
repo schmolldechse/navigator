@@ -5,7 +5,7 @@
 	import TravelMode from "$components/ui/controls/TravelMode.svelte";
 	import Button from "$components/ui/interactive/Button.svelte";
 	import type { Station } from "$models/models";
-	import { ArrowUpDown } from "lucide-svelte";
+	import ArrowDownUp from "lucide-svelte/icons/arrow-down-up";
 	import { DateTime } from "luxon";
 	import type { Valid } from "luxon/src/_util";
 
@@ -52,7 +52,7 @@
 					destination = temp;
 				}}
 			>
-				<ArrowUpDown class="stroke-background stroke-3" />
+				<ArrowDownUp class="stroke-background stroke-3" />
 			</button>
 
 			<StationSearch bind:station={destination} placeholder="Destination" />
