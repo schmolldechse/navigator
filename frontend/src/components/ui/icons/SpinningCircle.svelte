@@ -15,7 +15,7 @@
 
 <style>
 	.cls-1 {
-		stroke: var(--text);
+		stroke: var(--color-white);
 		stroke-width: 100px;
 	}
 
@@ -26,7 +26,7 @@
 	}
 
 	.cls-2 {
-		stroke: var(--accent);
+		stroke: var(--color-accent);
 		stroke-width: 125px;
 		stroke-linecap: round;
 		animation: spin 1.5s linear infinite;

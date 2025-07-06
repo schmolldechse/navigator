@@ -1,12 +1,11 @@
-<script lang="ts">
+<script>
+	import { goto } from "$app/navigation";
 	import Navbar from "$components/Navbar.svelte";
-	import type { LayoutProps } from "./$types";
-	import { DateTime } from "luxon";
+	import RootRoutePlannerSearch from "$components/route-planner/RootRoutePlannerSearch.svelte";
 	import GitHub from "$components/ui/icons/GitHub.svelte";
-	import { MetaTags } from "svelte-meta-tags";
 	import ServerCog from "lucide-svelte/icons/server-cog";
-
-	let { children }: LayoutProps = $props();
+	import { DateTime } from "luxon";
+	import { MetaTags } from "svelte-meta-tags";
 </script>
 
 <MetaTags
@@ -32,11 +31,11 @@
 	<Navbar dropdownEnabled={true} />
 
 	<div class="flex flex-1 items-center justify-center">
-		{@render children()}
+		<RootRoutePlannerSearch onSearch={async (start, destination, date, type, disabledProducts) => await goto("", { invalidateAll: true })} />
 	</div>
 
 	<footer
-		class="bg-primary-darker sticky bottom-0 flex w-full flex-row items-center justify-between p-4 text-xs md:text-base"
+		class="bg-primary/25 sticky bottom-0 flex w-full flex-row items-center justify-between p-4 text-xs md:text-base"
 	>
 		<span>&copy; {DateTime.now().year} - Schmolldechse & Contributors</span>
 

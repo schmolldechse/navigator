@@ -32,40 +32,6 @@
 		return legs.flatMap((leg) => durationOfConnection(leg)).reduce((acc, el) => acc + el);
 	});
 
-	const isCancelled: boolean = $derived(route?.legs?.some((leg: Connection) => leg?.cancelled));
-
-	const isChangeoverPossible: boolean = $derived.by(() => {
-		if (route?.legs?.length === 0) return true;
-
-		// skip if any leg is cancelled, or no changeovers are available
-		if (route?.legs?.some((leg: Connection) => leg?.cancelled)) return true;
-		if (!route?.legs?.some((leg: Connection) => leg?.walking)) return true;
-
-		return route?.legs?.every((leg: Connection, index: number) => {
-			if (!leg?.walking) return true;
-
-			const startWalking = route?.legs[index - 1]?.arrival;
-			const stopWalking = route?.legs[index + 1]?.departure;
-
-			if (!startWalking || !stopWalking) return true;
-			return (
-				calculateDuration(
-					DateTime.fromISO(stopWalking?.actualTime ?? stopWalking?.plannedTime ?? ""),
-					DateTime.fromISO(startWalking?.actualTime ?? startWalking?.plannedTime ?? ""),
-					"minutes"
-				).minutes >= 0
-			);
-		});
-	});
-
-	const messagesAvailable: boolean = $derived.by(() => {
-		const generalMessages: boolean = route?.messages?.filter((message: Message) => message?.type !== "hint")?.length > 0;
-		const legMessages: boolean = route?.legs?.some(
-			(leg: Connection) => (leg?.messages ?? []).filter((message: Message) => message?.type !== "hint")?.length > 0
-		);
-		return generalMessages || legMessages;
-	});
-
 	const getWidthRatio = (duration: number, maxDuration: number) => {
 		if (maxDuration <= 0) return "0%";
 		return `${(duration / maxDuration) * 100}%`;
@@ -75,22 +41,6 @@
 </script>
 
 <div class="border-primary/45 overflow-hidden rounded-lg border-2">
-	<!-- Header -->
-	{#if isCancelled || !isChangeoverPossible}
-		<div class="bg-secondary/50 flex flex-row items-center gap-x-2 px-3 py-1">
-			<Ban size="20" />
-			<span class="text-sm font-semibold md:text-lg">Route is not possible</span>
-		</div>
-	{/if}
-
-	<!-- Header -->
-	{#if messagesAvailable}
-		<div class="bg-secondary/50 flex flex-row items-center gap-x-2 px-3 py-1">
-			<GeneralWarning height="20px" width="20px" />
-			<span class="text-sm font-semibold md:text-lg">There are warnings on this route</span>
-		</div>
-	{/if}
-
 	<div class="space-y-2 px-4 py-2" class:opacity-65={isCancelled}>
 		<!-- Time Info -->
 		<div class="flex flex-row items-baseline gap-x-2 tracking-tight">

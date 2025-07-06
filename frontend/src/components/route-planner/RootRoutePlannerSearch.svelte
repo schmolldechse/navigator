@@ -1,45 +1,31 @@
 <script lang="ts">
-	import { DateTime } from "luxon";
-	import TravelMode from "$components/ui/controls/TravelMode.svelte";
-	import StationSearch from "$components/ui/controls/StationSearch.svelte";
-	import ArrowUpDown from "lucide-svelte/icons/arrow-up-down";
-	import TimePicker from "$components/ui/controls/TimePicker.svelte";
 	import ProductPicker from "$components/ui/controls/ProductPicker.svelte";
+	import StationSearch from "$components/ui/controls/StationSearch.svelte";
+	import TimePicker from "$components/ui/controls/TimePicker.svelte";
+	import TravelMode from "$components/ui/controls/TravelMode.svelte";
 	import Button from "$components/ui/interactive/Button.svelte";
-	import { goto } from "$app/navigation";
-	import type { Snapshot } from "../$types";
 	import type { Station } from "$models/models";
+	import { ArrowUpDown } from "lucide-svelte";
+	import { DateTime } from "luxon";
+	import type { Valid } from "luxon/src/_util";
 
-	let type = $state<"departure" | "arrival">("departure");
-
-	let start = $state<Station | undefined>(undefined);
-	let destination = $state<Station | undefined>(undefined);
-
-	let date: DateTime<true> = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
-
-	let disabledProducts = $state<string[]>([]);
-
-	interface SnapshotData {
-		start: Station | undefined;
-		destination: Station | undefined;
-		type: "departure" | "arrival";
-		disabledProducts: string[];
+	interface Props {
+		onSearch?: (start: Station, destination: Station, date: DateTime<Valid>, type: "departure" | "arrival", disabledProducts: string[]) => void;
 	}
 
-	export const snapshot: Snapshot<SnapshotData> = {
-		capture: () => ({ start, destination, type, disabledProducts }),
-		restore: (value) => {
-			start = value.start;
-			destination = value.destination;
-			type = value.type;
-			disabledProducts = value.disabledProducts;
-		}
-	};
+	let { onSearch }: Props = $props();
+
+    // settings
+	let type = $state<"departure" | "arrival">("departure");
+	let start = $state<Station | undefined>(undefined);
+	let destination = $state<Station | undefined>(undefined);
+	let date = $state(DateTime.now().set({ second: 0, millisecond: 0 }));
+	let disabledProducts = $state<string[]>([]);
 </script>
 
 <div class="mx-4 flex w-full flex-col gap-y-4 text-base md:w-[720px]">
 	<!-- Titlebar -->
-	<header class="bg-titlebar-background flex items-center justify-between rounded-t-2xl p-4">
+	<header class="bg-primary/35 flex items-center justify-between rounded-t-2xl p-4">
 		<span class="text-accent text-base font-bold md:text-3xl">Route Planner</span>
 		<TravelMode bind:type class="text-xs md:text-base" />
 	</header>
@@ -56,7 +42,7 @@
 			<StationSearch bind:station={start} placeholder="Start" />
 
 			<button
-				class="bg-accent hover:bg-accent absolute top-1/2 z-10 mr-4 -translate-y-1/2 cursor-pointer self-end rounded-full p-2 transition-transform duration-300 hover:rotate-180"
+				class="bg-accent hover:bg-accent absolute top-1/2 z-5 mr-4 -translate-y-1/2 cursor-pointer self-end rounded-full p-2 transition-transform duration-300 hover:rotate-180"
 				onclick={() => {
 					if (!start || !destination) return;
 					if (start.evaNumber === destination.evaNumber) return;
@@ -83,6 +69,8 @@
 	<Button
 		class="rounded-md px-5 py-2 font-bold text-black"
 		onclick={async () => {
+			if (!onSearch) return;
+
 			if (disabledProducts.length === 10) return;
 
 			if (!start || !destination) return;
@@ -90,14 +78,7 @@
 
 			if (!date) return;
 
-			const params = new URLSearchParams({
-				from: String(start.evaNumber),
-				to: String(destination.evaNumber),
-				disabledProducts: disabledProducts.join(","),
-				type,
-				when: date.toISO()
-			});
-			await goto(`journey/planned?${params.toString()}`);
+			onSearch(start, destination, date, type, disabledProducts);
 		}}
 	>
 		Search

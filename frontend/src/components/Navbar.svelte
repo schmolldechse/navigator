@@ -13,7 +13,7 @@
 
 	let dropdownElements = $state<DropdownElement[]>([
 		{ name: "Timetable", href: "timetable" },
-		{ name: "Route Planner", href: "route-planner" }
+		{ name: "Route Planner", href: "routeplanner" }
 	]);
 </script>
 
