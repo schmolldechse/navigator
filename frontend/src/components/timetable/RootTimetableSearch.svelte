@@ -14,6 +14,7 @@
 
 	let { onSearch }: Props = $props();
 
+	// settings
     let type = $state<"departure" | "arrival">("departure");
 	let station = $state<Station | undefined>(undefined);
 	let date = $state<DateTime>(DateTime.now().set({ second: 0, millisecond: 0 }));
@@ -21,7 +22,7 @@
 
 <div class="mx-4 flex w-full flex-col gap-y-4 text-base md:w-[720px]">
 	<!-- Titlebar -->
-	<header class="bg-primary/25 flex items-center justify-between rounded-t-2xl p-4">
+	<header class="bg-primary/35 flex items-center justify-between rounded-t-2xl p-4">
 		<span class="text-accent text-base font-bold md:text-3xl">Timetable</span>
 		<TravelMode bind:type class="text-xs md:text-base" />
 	</header>

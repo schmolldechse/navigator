@@ -136,7 +136,7 @@
 
 <!-- overflow-hidden needed for highlight effect! -->
 <button
-	class="bg-input-background group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-2xl px-4 py-3 shadow-sm"
+	class="bg-primary/25 group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-2xl px-4 py-3 shadow-sm"
 	onclick={(event: MouseEvent) => {
 		event.stopPropagation();
 		dropdownOpen = !dropdownOpen;
@@ -159,7 +159,7 @@
 </button>
 
 {#snippet renderProduct(product: Product)}
-	<div class="hover:bg-accent/10 flex justify-between rounded-lg px-4 py-2 transition-colors">
+	<div class="hover:bg-accent/10 z-10 flex justify-between rounded-lg px-4 py-2 transition-colors">
 		<div class="flex items-center gap-x-4 text-lg">
 			{#if product?.icon}
 				{@const Icon = product.icon.component}
@@ -177,7 +177,7 @@
 {#if dropdownOpen}
 	<div
 		bind:this={dropdownElement}
-		class="bg-input-background border-primary absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 border px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl"
+		class="bg-black border-primary absolute top-0 left-0 z-999 flex w-full flex-col gap-y-6 border px-4 py-3 md:left-1/2 md:w-[40%] md:-translate-x-1/2 md:translate-y-1/4 md:rounded-2xl"
 		role="menu"
 		aria-orientation="vertical"
 	>

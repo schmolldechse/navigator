@@ -60,6 +60,6 @@
 
 	.switch[aria-checked="true"] .switch-thumb {
 		transform: translateX(1.25rem);
-		background-color: var(--accent);
+		background-color: var(--color-accent);
 	}
 </style>
