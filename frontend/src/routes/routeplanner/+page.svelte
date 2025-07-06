@@ -31,7 +31,7 @@
 	<Navbar dropdownEnabled={true} />
 
 	<div class="flex flex-1 items-center justify-center">
-		<RootRoutePlannerSearch onSearch={async (start, destination, date, type, disabledProducts) => await goto("", { invalidateAll: true })} />
+		<RootRoutePlannerSearch onSearch={async (start, destination, date, type, disabledProducts) => await goto(`/routeplanner/${start.evaNumber}/${destination.evaNumber}/${type}s?when=${date.toISO()}`, { invalidateAll: true })} />
 	</div>
 
 	<footer

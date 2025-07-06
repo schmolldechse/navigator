@@ -31,7 +31,7 @@
 	<Navbar dropdownEnabled={true} />
 
 	<div class="flex flex-1 items-center justify-center">
-		<RootTimetableSearch onSearch={async (station, date, type) => await goto(`/timetable/${station.evaNumber}/${type + "s"}?when=${encodeURIComponent(date.toISO())}`, { invalidateAll: true })} />
+		<RootTimetableSearch onSearch={async (station, date, type) => await goto(`/timetable/${station?.evaNumber}/${type}s?startDate=${encodeURIComponent(date.toISO())}`)} />
 	</div>
 
 	<footer
