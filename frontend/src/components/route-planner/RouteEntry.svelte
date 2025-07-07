@@ -167,7 +167,27 @@
 					{/if}
 				{:else}
 					{@const section = _sec as NormalSection}
+					{@const isNonWalkingChangeoverAfterwards = i < route.sections.length - 1 && !route.sections[i + 1].isWalking}
+
 					<RouteNormalSection {section} />
+					
+					{#if isNonWalkingChangeoverAfterwards}
+						<div class="border-primary/85 relative flex min-h-fit flex-row py-6">
+							<div class="text-text/75 flex basis-1/6 justify-end italic">
+								{formatDuration(section.destination.arrival!, section.origin.departure!)}
+							</div>
+
+							<div class="flex w-[50px] justify-center md:w-[75px]">
+								<span class="z-1 absolute inset-y-0 h-full w-[4px] bg-white"></span>
+							</div>
+
+							<span class="flex h-[20px] basis-4/6">
+								<p>Changeover</p>
+							</span>
+
+							<span class="flex h-[20px] basis-1/6"></span>
+						</div>
+					{/if}
 				{/if}
 			{/each}
 		</div>
