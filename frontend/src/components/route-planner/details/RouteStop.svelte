@@ -46,12 +46,12 @@
 
 	<!-- Connecting Line -->
 	<div class="flex w-[50px] justify-center transition-all duration-500 md:w-[75px] items-center">
-		<CircleDot class={`bg-background z-1 absolute shrink-0 self-start ${position === "start" ? "top-0.5" : ""} ${position === "end" ? "bottom-0.5" : ""}`} />
+		<CircleDot class={`bg-background z-1 absolute shrink-0 ${position === "start" ? "self-start" : ""} ${position === "end" ? "self-end" : ""}`} />
 		<span class={["absolute z-0 h-full w-[4px] bg-white", { "inset-y-1": position === "start" }, { "-inset-y-1": position === "end" }]}></span>
 	</div>
 
 	<!-- 4/6 Stop -->
-	<div class="flex basis-4/6 flex-col leading-none">
+	<div class={["flex basis-4/6 flex-col", { "self-start": position === "start" }, { "self-end": position === "end" }]}>
 		<div class="flex flex-row">
 			<span class="text-base md:text-xl">{stop.name}</span>
 			<ChevronRight color="#ffda0a" class="ml-1 shrink-0" />
