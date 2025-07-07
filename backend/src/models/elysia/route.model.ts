@@ -25,6 +25,15 @@ const BasicRouteStopSchema = t.Intersect([
 	})
 ]);
 
+const ExtendedRouteStopSchema = t.Intersect([
+	BasicRouteStopSchema,
+	t.Object({
+		occupancy: t.Array(OccupancySchema, { description: "Array of occupancy information" }),
+		messages: t.Array(RouteMessageSchema),
+		cancelled: t.Boolean({ description: "Indicates if the stop is cancelled" })
+	})
+]);
+
 // WALKING SECTION
 const WalkingRouteSectionSchema = t.Object({
 	isWalking: t.Boolean({ description: "Indicates if the section is a walking section", default: true }),
@@ -34,15 +43,6 @@ const WalkingRouteSectionSchema = t.Object({
 	cancelled: t.Boolean({ description: "Indicates if the section is cancelled" }),
 	messages: t.Array(RouteMessageSchema, { description: "Array of messages for the section" })
 });
-
-const ExtendedRouteStopSchema = t.Intersect([
-	BasicRouteStopSchema,
-	t.Object({
-		occupancy: t.Array(OccupancySchema, { description: "Array of occupancy information" }),
-		messages: t.Array(RouteMessageSchema),
-		cancelled: t.Boolean({ description: "Indicates if the stop is cancelled" })
-	})
-]);
 
 const RouteJourneyAttributeSchema = t.Object({
 	category: t.UnionEnum(["INFORMATION", "ACCESSIBILITY", "BICYCLE-TRANSPORT"], { description: "Category of the attribute" }),

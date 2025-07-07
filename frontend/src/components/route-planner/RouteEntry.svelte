@@ -1,10 +1,11 @@
 <script lang="ts">
 	import Walking from "$components/ui/icons/Walking.svelte";
-	import type { NormalSection, RouteEntry, Time } from "$models/models";
+	import type { NormalSection, WalkingSection, RouteEntry, Time } from "$models/models";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
 	import ChevronUp from "lucide-svelte/icons/chevron-up";
 	import Ban from "lucide-svelte/icons/ban";
 	import { DateTime } from "luxon";
+	import RouteNormalSection from "./details/RouteNormalSection.svelte";
 
 	interface Props {
 		route: RouteEntry;
@@ -145,4 +146,24 @@
 	</div>
 
 	<!-- Details -->
+	{#if detailsExpanded}
+		<div class="border-primary/85 flex flex-col border-t py-4 px-2 md:px-5">
+			<span class="pb-4 text-lg font-semibold tracking-tighter md:pb-6">Route Details</span>
+
+			{#each route.sections as _sec, i}
+				{#if _sec.isWalking}
+					{@const section = _sec as WalkingSection}
+					{@const firstIsWalking = i === 0}
+					{@const lastIsWalking = i === route.sections.length - 1}
+
+					{#if firstIsWalking}
+						<p>bastard</p>
+					{/if}
+				{:else}
+					{@const section = _sec as NormalSection}
+					<RouteNormalSection {section} />
+				{/if}
+			{/each}
+		</div>
+	{/if}
 </div>
