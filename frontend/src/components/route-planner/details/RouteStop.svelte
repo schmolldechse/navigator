@@ -30,7 +30,7 @@
 	{@const delay = DateTime.fromISO(time?.actualTime).diff(DateTime.fromISO(time?.plannedTime), ["seconds"]).seconds}
 	{@const displayTime = (time: string) => DateTime.fromISO(time).setLocale("de-DE").toLocaleString(DateTime.TIME_24_SIMPLE)}
 
-	<div class="flex basis-1/6 flex-col justify-end gap-x-2 items-end">
+	<div class={["flex basis-1/6 flex-col justify-end gap-x-2 items-end", { "self-start": position === "start" }, { "self-end": position === "end" }]}>
 		<span class="text-base font-medium md:text-xl">{displayTime(time.plannedTime)}</span>
 		{#if delay < -60 || delay > 60}
 			<span class="text-background bg-white px-1 text-[10pt] font-bold md:px-2 md:text-[12pt]"
