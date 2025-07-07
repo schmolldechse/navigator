@@ -31,12 +31,15 @@
 	<Navbar dropdownEnabled={true} />
 
 	<div class="flex flex-1 items-center justify-center">
-		<RootRoutePlannerSearch onSearch={async (start, destination, date, type, disabledProducts) => await goto(`/routeplanner/${start.evaNumber}/${destination.evaNumber}/${type}s?when=${date.toISO()}`, { invalidateAll: true })} />
+		<RootRoutePlannerSearch
+			onSearch={async (start, destination, date, type, disabledProducts) =>
+				await goto(`/routeplanner/${start.evaNumber}/${destination.evaNumber}/${type}s?when=${date.toISO()}`, {
+					invalidateAll: true
+				})}
+		/>
 	</div>
 
-	<footer
-		class="bg-primary/25 sticky bottom-0 flex w-full flex-row items-center justify-between p-4 text-xs md:text-base"
-	>
+	<footer class="bg-primary/25 sticky bottom-0 flex w-full flex-row items-center justify-between p-4 text-xs md:text-base">
 		<span>&copy; {DateTime.now().year} - Schmolldechse & Contributors</span>
 
 		<div class="flex flex-row items-center justify-center gap-4">

@@ -52,9 +52,11 @@ const RouteJourneyAttributeSchema = t.Object({
 
 // NORMAL SECTION
 const NormalRouteSectionSchema = t.Object({
-	hafas_journeyId: t.Nullable(t.String({
-		description: "Identifier for the journey in the HAFAS system. Optional when `section` is set to true."
-	})),
+	hafas_journeyId: t.Nullable(
+		t.String({
+			description: "Identifier for the journey in the HAFAS system. Optional when `section` is set to true."
+		})
+	),
 	origin: ExtendedRouteStopSchema,
 	destination: ExtendedRouteStopSchema,
 	journeysDirection: t.Optional(BasicStationSchema),

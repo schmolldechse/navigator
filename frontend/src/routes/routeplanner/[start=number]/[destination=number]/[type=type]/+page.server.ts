@@ -55,7 +55,7 @@ export const load: PageServerLoad = async ({
 		disabledProducts: string[];
 		date: string;
 		type: "departures" | "arrivals";
-	}
+	};
 }> => {
 	let when = DateTime.fromISO(url.searchParams.get("when") || DateTime.now().set({ second: 0, millisecond: 0 }).toISO());
 	if (!when.isValid) when = DateTime.now().set({ second: 0, millisecond: 0 });

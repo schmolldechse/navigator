@@ -10,7 +10,7 @@
 	interface Props {
 		stop: ExtendedRouteStop | NormalRouteStop;
 		showDeparture?: boolean;
-        position: "start" | "end";
+		position: "start" | "end";
 	}
 
 	let { stop, showDeparture = true, position }: Props = $props();
@@ -30,7 +30,13 @@
 	{@const delay = DateTime.fromISO(time?.actualTime).diff(DateTime.fromISO(time?.plannedTime), ["seconds"]).seconds}
 	{@const displayTime = (time: string) => DateTime.fromISO(time).setLocale("de-DE").toLocaleString(DateTime.TIME_24_SIMPLE)}
 
-	<div class={["flex basis-1/6 flex-col justify-end gap-x-2 items-end", { "self-start": position === "start" }, { "self-end": position === "end" }]}>
+	<div
+		class={[
+			"flex basis-1/6 flex-col items-end justify-end gap-x-2",
+			{ "self-start": position === "start" },
+			{ "self-end": position === "end" }
+		]}
+	>
 		<span class="text-base font-medium md:text-xl">{displayTime(time.plannedTime)}</span>
 		{#if delay < -60 || delay > 60}
 			<span class="text-background bg-white px-1 text-[10pt] font-bold md:px-2 md:text-[12pt]"
@@ -45,9 +51,17 @@
 	{@render renderTimeInformation(showDeparture ? stop.departure! : stop.arrival!)}
 
 	<!-- Connecting Line -->
-	<div class="flex w-[50px] justify-center transition-all duration-500 md:w-[75px] items-center">
-		<CircleDot class={`bg-background z-1 absolute shrink-0 ${position === "start" ? "self-start" : ""} ${position === "end" ? "self-end" : ""}`} />
-		<span class={["absolute z-0 h-full w-[4px] bg-white", { "inset-y-1": position === "start" }, { "-inset-y-1": position === "end" }]}></span>
+	<div class="flex w-[50px] items-center justify-center transition-all duration-500 md:w-[75px]">
+		<CircleDot
+			class={`bg-background absolute z-1 shrink-0 ${position === "start" ? "self-start" : ""} ${position === "end" ? "self-end" : ""}`}
+		/>
+		<span
+			class={[
+				"absolute z-0 h-full w-[4px] bg-white",
+				{ "inset-y-1": position === "start" },
+				{ "-inset-y-1": position === "end" }
+			]}
+		></span>
 	</div>
 
 	<!-- 4/6 Stop -->
@@ -71,8 +85,16 @@
 	</div>
 
 	<!-- 1/6 Platform -->
-	<div class={["flex basis-1/6 flex-col items-end md:items-start", { "self-start": position === "start" }, { "self-end": position === "end" }]}>
-		<span class="text-base font-medium md:text-xl">{showDeparture ? (stop.departure?.plannedPlatform ?? "") : (stop.arrival?.plannedPlatform ?? "")}</span>
+	<div
+		class={[
+			"flex basis-1/6 flex-col items-end md:items-start",
+			{ "self-start": position === "start" },
+			{ "self-end": position === "end" }
+		]}
+	>
+		<span class="text-base font-medium md:text-xl"
+			>{showDeparture ? (stop.departure?.plannedPlatform ?? "") : (stop.arrival?.plannedPlatform ?? "")}</span
+		>
 		{#if !isSamePlatform(showDeparture ? (stop.departure?.plannedPlatform ?? "") : (stop.arrival?.plannedPlatform ?? ""), showDeparture ? (stop.departure?.actualPlatform ?? "") : (stop.arrival?.actualPlatform ?? ""))}
 			<span class="text-background bg-white px-1 text-[10pt] font-bold md:px-2 md:text-[12pt]"
 				>{showDeparture ? (stop.departure?.actualPlatform ?? "") : (stop.arrival?.actualPlatform ?? "")}</span

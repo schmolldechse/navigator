@@ -7,7 +7,7 @@
 
 <div class="container mx-auto">
 	<!-- Separator for smaller screens -->
-	<div class="flex flex-col md:hidden gap-y-2">
+	<div class="flex flex-col gap-y-2 md:hidden">
 		<!-- 1st row -->
 		{@render renderRow("w-1/4 h-[20px]")}
 
@@ -26,7 +26,7 @@
 		<!-- 1st row -->
 		<div class="flex flex-row items-center">
 			<div class="mr-8 flex-1"></div>
-			<div class="flex-4 mr-4">
+			<div class="mr-4 flex-4">
 				{@render renderRow("w-1/4 h-[20px]")}
 			</div>
 			<div class="flex-1"></div>
@@ -37,7 +37,7 @@
 			<div class="mr-8 flex-1">
 				{@render renderRow("w-1/3 h-[30px]")}
 			</div>
-			<div class="flex-4 mr-4">
+			<div class="mr-4 flex-4">
 				{@render renderRow("w-full h-[30px]")}
 			</div>
 			<div class="flex-1"></div>
@@ -48,7 +48,7 @@
 			<div class="mr-8 flex-1">
 				{@render renderRow("w-1/2 h-[30px]")}
 			</div>
-			<div class="flex-4 mr-4">
+			<div class="mr-4 flex-4">
 				{@render renderRow("w-1/4 h-[30px]")}
 			</div>
 			<div class="flex-1">

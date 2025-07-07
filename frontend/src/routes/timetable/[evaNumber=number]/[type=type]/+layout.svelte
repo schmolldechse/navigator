@@ -1,7 +1,7 @@
 <script>
 	import Navbar from "$components/Navbar.svelte";
 
-    let { children } = $props();
+	let { children } = $props();
 </script>
 
 <div class="flex min-h-screen flex-col">

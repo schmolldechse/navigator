@@ -44,7 +44,7 @@
 	<div class="flex flex-wrap items-center">
 		{#each displayedStops as viaStop, index}
 			<span class="text-base md:text-xl">{writeStop(viaStop)}</span>{#if index < displayedStops.length - 1}
-				<span class="px-2 text-xl md:text-2xl font-bold tracking-widest">&minus;</span>
+				<span class="px-2 text-xl font-bold tracking-widest md:text-2xl">&minus;</span>
 			{/if}
 		{/each}
 

@@ -20,17 +20,13 @@ const userController = new Elysia({ prefix: "/user", tags: ["User"] })
 	})
 	.group("/favored", (app) =>
 		app
-			.get(
-				"/",
-				async ({ user }) => userService.getFavoredStationsBy(user.id),
-				{
-					detail: {
-						summary: "Get favored stations",
-						description: "Returns a list of stations that the user has marked as favorite."
-					},
-					response: t.Array(StationSchema)
-				}
-			)
+			.get("/", async ({ user }) => userService.getFavoredStationsBy(user.id), {
+				detail: {
+					summary: "Get favored stations",
+					description: "Returns a list of stations that the user has marked as favorite."
+				},
+				response: t.Array(StationSchema)
+			})
 			.get("/:evaNumber", async ({ user, params: { evaNumber } }) => userService.isStationFavoredBy(user.id, evaNumber), {
 				detail: {
 					summary: "Check if a station is favored",
@@ -46,7 +42,8 @@ const userController = new Elysia({ prefix: "/user", tags: ["User"] })
 			.post("/:evaNumber", async ({ user, params: { evaNumber } }) => userService.favorStationBy(user.id, evaNumber), {
 				detail: {
 					summary: "Toggle favor for a station",
-					description: "Toggles the favorite status of the specified station for the user. If the station is already favored, it will be unfavored, and vice versa."
+					description:
+						"Toggles the favorite status of the specified station for the user. If the station is already favored, it will be unfavored, and vice versa."
 				},
 				response: userService.StationFavoredResponse,
 				params: t.Object({

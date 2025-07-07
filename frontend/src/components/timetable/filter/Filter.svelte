@@ -115,7 +115,7 @@
 	};
 </script>
 
-<div class="scrollbar-none bg-stone-950 flex items-center gap-x-2 overflow-x-auto p-2 md:justify-center">
+<div class="scrollbar-none flex items-center gap-x-2 overflow-x-auto bg-stone-950 p-2 md:justify-center">
 	{#each filteredTypes as type}
 		<button
 			class="hover:outline-accent flex shrink-0 cursor-pointer items-center gap-x-2 rounded-full px-4 py-2"

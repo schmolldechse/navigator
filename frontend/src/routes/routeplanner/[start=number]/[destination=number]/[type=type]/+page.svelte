@@ -179,8 +179,8 @@
 			{#if isDayDifferent(index)}
 				{@const date = DateTime.fromISO(route.sections[0].origin.departure?.plannedTime ?? "")}
 
-				<div class="self-center container px-4 md:px-8 my-2">
-					<span class="border-text/50 text-text font-medium block w-full border-b text-lg md:text-xl">
+				<div class="container my-2 self-center px-4 md:px-8">
+					<span class="border-text/50 text-text block w-full border-b text-lg font-medium md:text-xl">
 						{date.toLocaleString({ weekday: "short", day: "numeric", month: "short", year: "numeric" })}
 					</span>
 				</div>

@@ -12,10 +12,17 @@ const loadStation = async (evaNumber: number): Promise<Station> => {
 	return (await request.json()) as Station;
 };
 
-const loadTimetable = async (evaNumber: number, type: "departures" | "arrivals", when: DateTime): Promise<GroupedTimetableEntry[]> => {
-	const request = await fetch(`${env.PRIVATE_BACKEND_URL}/api/timetable/${evaNumber}/${type}?when=${encodeURIComponent(when.toISO()!)}`, {
-        method: "GET"
-    });
+const loadTimetable = async (
+	evaNumber: number,
+	type: "departures" | "arrivals",
+	when: DateTime
+): Promise<GroupedTimetableEntry[]> => {
+	const request = await fetch(
+		`${env.PRIVATE_BACKEND_URL}/api/timetable/${evaNumber}/${type}?when=${encodeURIComponent(when.toISO()!)}`,
+		{
+			method: "GET"
+		}
+	);
 	if (!request.ok) throw error(400, `Could not load the timetable for ${evaNumber} (${type}) at ${when.toISO()}`);
 
 	const jsonData = await request.json();
@@ -25,7 +32,8 @@ const loadTimetable = async (evaNumber: number, type: "departures" | "arrivals",
 };
 
 export const load: PageServerLoad = async ({
-	params, url
+	params,
+	url
 }): Promise<{ station: Promise<Station>; timetable: Promise<GroupedTimetableEntry[]> }> => {
 	let when = DateTime.fromISO(url.searchParams.get("when") || DateTime.now().set({ second: 0, millisecond: 0 }).toISO());
 	if (!when.isValid) when = DateTime.now().set({ second: 0, millisecond: 0 });
@@ -33,5 +41,5 @@ export const load: PageServerLoad = async ({
 	return {
 		station: loadStation(Number(params.evaNumber)),
 		timetable: loadTimetable(Number(params.evaNumber), params.type as "departures" | "arrivals", when)
-	}
+	};
 };

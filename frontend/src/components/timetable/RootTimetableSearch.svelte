@@ -15,7 +15,7 @@
 	let { onSearch }: Props = $props();
 
 	// settings
-    let type = $state<"departure" | "arrival">("departure");
+	let type = $state<"departure" | "arrival">("departure");
 	let station = $state<Station | undefined>(undefined);
 	let date = $state<DateTime>(DateTime.now().set({ second: 0, millisecond: 0 }));
 </script>

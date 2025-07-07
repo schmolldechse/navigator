@@ -10,12 +10,18 @@
 	import type { Valid } from "luxon/src/_util";
 
 	interface Props {
-		onSearch?: (start: Station, destination: Station, date: DateTime<Valid>, type: "departure" | "arrival", disabledProducts: string[]) => void;
+		onSearch?: (
+			start: Station,
+			destination: Station,
+			date: DateTime<Valid>,
+			type: "departure" | "arrival",
+			disabledProducts: string[]
+		) => void;
 	}
 
 	let { onSearch }: Props = $props();
 
-    // settings
+	// settings
 	let type = $state<"departure" | "arrival">("departure");
 	let start = $state<Station | undefined>(undefined);
 	let destination = $state<Station | undefined>(undefined);

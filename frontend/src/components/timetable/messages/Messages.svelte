@@ -30,7 +30,7 @@
 
 	interface Props {
 		timetableEntry: SingleTimetableEntry;
-	};
+	}
 
 	let { timetableEntry }: Props = $props();
 
@@ -113,7 +113,7 @@
 {#if (timetableEntry?.messages || []).length <= 1 || expanded}
 	{#each timetableEntry?.messages || [] as message, index (index)}
 		{@const validMessage = validMessages.find((validMessage) => validMessage.type === message.type)}
-		<div class="py-0.5 flex flex-row gap-x-2 font-medium text-base md:text-lg">
+		<div class="flex flex-row gap-x-2 py-0.5 text-base font-medium md:text-lg">
 			{#if validMessage?.component}
 				{@const Component = validMessage.component}
 				<Component />

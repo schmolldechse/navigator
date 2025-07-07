@@ -415,8 +415,11 @@ class RouteService {
 					productType: mapToProduct(section.verkehrsmittel.produktGattung ?? section.verkehrsmittel.kurzText),
 					productName: section.verkehrsmittel.kurzText,
 					journeyName: section.verkehrsmittel.mittelText,
-					journeyNumber: this.extractJourneyNumber(section.verkehrsmittel.nummer ?? section.verkehrsmittel.mittelText),
-					operator: section.verkehrsmittel.zugattribute.find((attr: any) => attr.kategorie === "BEFÖRDERER")?.value ?? null
+					journeyNumber: this.extractJourneyNumber(
+						section.verkehrsmittel.nummer ?? section.verkehrsmittel.mittelText
+					),
+					operator:
+						section.verkehrsmittel.zugattribute.find((attr: any) => attr.kategorie === "BEFÖRDERER")?.value ?? null
 				}
 			};
 		};
@@ -440,14 +443,14 @@ class RouteService {
 		const digits = entry.match(/\d/g);
 		if (!digits) return null;
 		return parseInt(digits.join(""), 10);
-	}
+	};
 
 	private getAllowedProducts = (disabledProducts: string[]): string[] => {
 		disabledProducts = disabledProducts.map((product) => product.toUpperCase());
 		return Object.values(Products)
 			.filter((product: Products) => product !== Products.UNKNOWN && !disabledProducts.includes(product.toUpperCase()))
 			.map((product: Products) => this.mapToBahnWebProduct(product));
-	}
+	};
 
 	/**
 	 * Maps a product from the Products enum to the bahn.de API product string.

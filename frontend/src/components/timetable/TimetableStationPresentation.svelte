@@ -98,7 +98,7 @@
 
 	<div class="container mx-auto w-full">
 		<div class="flex items-start justify-between">
-			<div class="flex flex-row md:items-center gap-x-2 break-all">
+			<div class="flex flex-row gap-x-2 break-all md:items-center">
 				{#if $session.data}
 					<Star
 						class="shrink-0 cursor-pointer transition-all duration-300 {isFavored
@@ -107,7 +107,7 @@
 						onclick={toggleFavour}
 					/>
 				{/if}
-				<span class="self-start whitespace-normal break-normal text-xl font-semibold md:text-4xl">{station.name}</span>
+				<span class="self-start text-xl font-semibold break-normal whitespace-normal md:text-4xl">{station.name}</span>
 			</div>
 			<Clock />
 		</div>

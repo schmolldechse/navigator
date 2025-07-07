@@ -34,12 +34,14 @@ const auth = betterAuth({
 });
 
 const authApp = new Elysia()
-	.use(cors({
-		origin: ["http://localhost:5173", "http://localhost:3000"],
-		credentials: true,
-		methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-		allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
-	}))
+	.use(
+		cors({
+			origin: ["http://localhost:5173", "http://localhost:3000"],
+			credentials: true,
+			methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+			allowedHeaders: ["Content-Type", "Authorization", "Cookie"]
+		})
+	)
 	.all("/api/auth/*", (context: Context) => {
 		const BETTER_AUTH_ACCEPT_METHODS = ["POST", "GET"];
 		// validate request method
@@ -48,11 +50,11 @@ const authApp = new Elysia()
 	});
 
 // OpenAPI schema
-let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>
-const getSchema = async () => (_schema ??= auth.api.generateOpenAPISchema())
+let _schema: ReturnType<typeof auth.api.generateOpenAPISchema>;
+const getSchema = async () => (_schema ??= auth.api.generateOpenAPISchema());
 
 const OpenAPI = {
-	getPaths: (prefix = '/api/auth') =>
+	getPaths: (prefix = "/api/auth") =>
 		getSchema().then(({ paths }) => {
 			const reference: typeof paths = Object.create(null);
 

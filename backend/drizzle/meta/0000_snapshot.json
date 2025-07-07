@@ -1,1039 +1,998 @@
 {
-  "id": "539680f2-0e2b-4422-9668-5eead3f0edad",
-  "prevId": "00000000-0000-0000-0000-000000000000",
-  "version": "7",
-  "dialect": "postgresql",
-  "tables": {
-    "auth.account": {
-      "name": "account",
-      "schema": "auth",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "accountId": {
-          "name": "accountId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "providerId": {
-          "name": "providerId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "accessToken": {
-          "name": "accessToken",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "refreshToken": {
-          "name": "refreshToken",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "idToken": {
-          "name": "idToken",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "accessTokenExpiresAt": {
-          "name": "accessTokenExpiresAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "refreshTokenExpiresAt": {
-          "name": "refreshTokenExpiresAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "scope": {
-          "name": "scope",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "password": {
-          "name": "password",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "account_userId_user_id_fk": {
-          "name": "account_userId_user_id_fk",
-          "tableFrom": "account",
-          "tableTo": "user",
-          "schemaTo": "auth",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "auth.session": {
-      "name": "session",
-      "schema": "auth",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "expiresAt": {
-          "name": "expiresAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "token": {
-          "name": "token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ipAddress": {
-          "name": "ipAddress",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "userAgent": {
-          "name": "userAgent",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "session_userId_user_id_fk": {
-          "name": "session_userId_user_id_fk",
-          "tableFrom": "session",
-          "tableTo": "user",
-          "schemaTo": "auth",
-          "columnsFrom": [
-            "userId"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "session_token_unique": {
-          "name": "session_token_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "auth.user": {
-      "name": "user",
-      "schema": "auth",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "email": {
-          "name": "email",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "emailVerified": {
-          "name": "emailVerified",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "image": {
-          "name": "image",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "username": {
-          "name": "username",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "role": {
-          "name": "role",
-          "type": "role",
-          "typeSchema": "auth",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'default'"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "user_email_unique": {
-          "name": "user_email_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
-        },
-        "user_username_unique": {
-          "name": "user_username_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "username"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "auth.verification": {
-      "name": "verification",
-      "schema": "auth",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "identifier": {
-          "name": "identifier",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "value": {
-          "name": "value",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "expiresAt": {
-          "name": "expiresAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "core.journey_messages": {
-      "name": "journey_messages",
-      "schema": "core",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "journey_id": {
-          "name": "journey_id",
-          "type": "varchar(82)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "journey_date": {
-          "name": "journey_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "code": {
-          "name": "code",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "message": {
-          "name": "message",
-          "type": "varchar(2048)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "summary": {
-          "name": "summary",
-          "type": "varchar(2048)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "idx_messages_journeydate": {
-          "name": "idx_messages_journeydate",
-          "columns": [
-            {
-              "expression": "journey_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "journey_messages_journey_id_journeys_journey_id_fk": {
-          "name": "journey_messages_journey_id_journeys_journey_id_fk",
-          "tableFrom": "journey_messages",
-          "tableTo": "journeys",
-          "schemaTo": "core",
-          "columnsFrom": [
-            "journey_id"
-          ],
-          "columnsTo": [
-            "journey_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "core.journey_stop_messages": {
-      "name": "journey_stop_messages",
-      "schema": "core",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "stop_id": {
-          "name": "stop_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "code": {
-          "name": "code",
-          "type": "varchar(64)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "message": {
-          "name": "message",
-          "type": "varchar(2048)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "summary": {
-          "name": "summary",
-          "type": "varchar(2048)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "journey_stop_messages_stop_id_journey_via-stops_id_fk": {
-          "name": "journey_stop_messages_stop_id_journey_via-stops_id_fk",
-          "tableFrom": "journey_stop_messages",
-          "tableTo": "journey_via-stops",
-          "schemaTo": "core",
-          "columnsFrom": [
-            "stop_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "core.journey_via-stops": {
-      "name": "journey_via-stops",
-      "schema": "core",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "journey_id": {
-          "name": "journey_id",
-          "type": "varchar(82)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "journey_date": {
-          "name": "journey_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "eva_number": {
-          "name": "eva_number",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cancelled": {
-          "name": "cancelled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "arrival_planned_time": {
-          "name": "arrival_planned_time",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "arrival_actual_time": {
-          "name": "arrival_actual_time",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "arrival_delay": {
-          "name": "arrival_delay",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "arrival_planned_platform": {
-          "name": "arrival_planned_platform",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "arrival_actual_platform": {
-          "name": "arrival_actual_platform",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "departure_planned_time": {
-          "name": "departure_planned_time",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "departure_actual_time": {
-          "name": "departure_actual_time",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "departure_delay": {
-          "name": "departure_delay",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "departure_planned_platform": {
-          "name": "departure_planned_platform",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "departure_actual_platform": {
-          "name": "departure_actual_platform",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "idx_via-stops_evanumber": {
-          "name": "idx_via-stops_evanumber",
-          "columns": [
-            {
-              "expression": "eva_number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_via-stops_journeydate": {
-          "name": "idx_via-stops_journeydate",
-          "columns": [
-            {
-              "expression": "journey_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_via-stops_evanumber_journeyid": {
-          "name": "idx_via-stops_evanumber_journeyid",
-          "columns": [
-            {
-              "expression": "eva_number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "journey_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "idx_via-stops_evanumber_journeydate": {
-          "name": "idx_via-stops_evanumber_journeydate",
-          "columns": [
-            {
-              "expression": "eva_number",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            },
-            {
-              "expression": "journey_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "journey_via-stops_journey_id_journeys_journey_id_fk": {
-          "name": "journey_via-stops_journey_id_journeys_journey_id_fk",
-          "tableFrom": "journey_via-stops",
-          "tableTo": "journeys",
-          "schemaTo": "core",
-          "columnsFrom": [
-            "journey_id"
-          ],
-          "columnsTo": [
-            "journey_id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "core.journeys": {
-      "name": "journeys",
-      "schema": "core",
-      "columns": {
-        "journey_id": {
-          "name": "journey_id",
-          "type": "varchar(82)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "journey_date": {
-          "name": "journey_date",
-          "type": "date",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "product_type": {
-          "name": "product_type",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "product_name": {
-          "name": "product_name",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "journey_number": {
-          "name": "journey_number",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "journey_name": {
-          "name": "journey_name",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "operator_code": {
-          "name": "operator_code",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "operator_name": {
-          "name": "operator_name",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "idx_journey_date": {
-          "name": "idx_journey_date",
-          "columns": [
-            {
-              "expression": "journey_date",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "core.ris_ids": {
-      "name": "ris_ids",
-      "schema": "core",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "varchar(73)",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "product": {
-          "name": "product",
-          "type": "varchar(128)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "discovery_date": {
-          "name": "discovery_date",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "last_seen": {
-          "name": "last_seen",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "last_succeeded_at": {
-          "name": "last_succeeded_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "active": {
-          "name": "active",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "is_locked": {
-          "name": "is_locked",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "core.station_products": {
-      "name": "station_products",
-      "schema": "core",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "eva_number": {
-          "name": "eva_number",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "querying_enabled": {
-          "name": "querying_enabled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "station_products_eva_number_stations_eva_number_fk": {
-          "name": "station_products_eva_number_stations_eva_number_fk",
-          "tableFrom": "station_products",
-          "tableTo": "stations",
-          "schemaTo": "core",
-          "columnsFrom": [
-            "eva_number"
-          ],
-          "columnsTo": [
-            "eva_number"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "core.station_ril100": {
-      "name": "station_ril100",
-      "schema": "core",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "eva_number": {
-          "name": "eva_number",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "ril100": {
-          "name": "ril100",
-          "type": "varchar(32)",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "station_ril100_eva_number_stations_eva_number_fk": {
-          "name": "station_ril100_eva_number_stations_eva_number_fk",
-          "tableFrom": "station_ril100",
-          "tableTo": "stations",
-          "schemaTo": "core",
-          "columnsFrom": [
-            "eva_number"
-          ],
-          "columnsTo": [
-            "eva_number"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "core.stations": {
-      "name": "stations",
-      "schema": "core",
-      "columns": {
-        "eva_number": {
-          "name": "eva_number",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "name": {
-          "name": "name",
-          "type": "varchar(512)",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "weight": {
-          "name": "weight",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 0
-        },
-        "latitude": {
-          "name": "latitude",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "longitude": {
-          "name": "longitude",
-          "type": "double precision",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "querying_enabled": {
-          "name": "querying_enabled",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        },
-        "last_queried": {
-          "name": "last_queried",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "is_locked": {
-          "name": "is_locked",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "user_data.favorite_stations": {
-      "name": "favorite_stations",
-      "schema": "user_data",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "identity": {
-            "type": "always",
-            "name": "favorite_stations_id_seq",
-            "schema": "user_data",
-            "increment": "1",
-            "startWith": "1",
-            "minValue": "1",
-            "maxValue": "2147483647",
-            "cache": "1",
-            "cycle": false
-          }
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "eva_number": {
-          "name": "eva_number",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "favorite_stations_user_id_user_id_fk": {
-          "name": "favorite_stations_user_id_user_id_fk",
-          "tableFrom": "favorite_stations",
-          "tableTo": "user",
-          "schemaTo": "auth",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "favorite_stations_user_id_eva_number_unique": {
-          "name": "favorite_stations_user_id_eva_number_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "user_id",
-            "eva_number"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    }
-  },
-  "enums": {},
-  "schemas": {},
-  "sequences": {},
-  "roles": {},
-  "policies": {},
-  "views": {},
-  "_meta": {
-    "columns": {},
-    "schemas": {},
-    "tables": {}
-  }
+	"id": "539680f2-0e2b-4422-9668-5eead3f0edad",
+	"prevId": "00000000-0000-0000-0000-000000000000",
+	"version": "7",
+	"dialect": "postgresql",
+	"tables": {
+		"auth.account": {
+			"name": "account",
+			"schema": "auth",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"accountId": {
+					"name": "accountId",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"providerId": {
+					"name": "providerId",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"userId": {
+					"name": "userId",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"accessToken": {
+					"name": "accessToken",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"refreshToken": {
+					"name": "refreshToken",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"idToken": {
+					"name": "idToken",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"accessTokenExpiresAt": {
+					"name": "accessTokenExpiresAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"refreshTokenExpiresAt": {
+					"name": "refreshTokenExpiresAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"scope": {
+					"name": "scope",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"password": {
+					"name": "password",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"account_userId_user_id_fk": {
+					"name": "account_userId_user_id_fk",
+					"tableFrom": "account",
+					"tableTo": "user",
+					"schemaTo": "auth",
+					"columnsFrom": ["userId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"auth.session": {
+			"name": "session",
+			"schema": "auth",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"expiresAt": {
+					"name": "expiresAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"token": {
+					"name": "token",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"ipAddress": {
+					"name": "ipAddress",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"userAgent": {
+					"name": "userAgent",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"userId": {
+					"name": "userId",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"session_userId_user_id_fk": {
+					"name": "session_userId_user_id_fk",
+					"tableFrom": "session",
+					"tableTo": "user",
+					"schemaTo": "auth",
+					"columnsFrom": ["userId"],
+					"columnsTo": ["id"],
+					"onDelete": "no action",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"session_token_unique": {
+					"name": "session_token_unique",
+					"nullsNotDistinct": false,
+					"columns": ["token"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"auth.user": {
+			"name": "user",
+			"schema": "auth",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"email": {
+					"name": "email",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"emailVerified": {
+					"name": "emailVerified",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"image": {
+					"name": "image",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"username": {
+					"name": "username",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"role": {
+					"name": "role",
+					"type": "role",
+					"typeSchema": "auth",
+					"primaryKey": false,
+					"notNull": true,
+					"default": "'default'"
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"user_email_unique": {
+					"name": "user_email_unique",
+					"nullsNotDistinct": false,
+					"columns": ["email"]
+				},
+				"user_username_unique": {
+					"name": "user_username_unique",
+					"nullsNotDistinct": false,
+					"columns": ["username"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"auth.verification": {
+			"name": "verification",
+			"schema": "auth",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "text",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"identifier": {
+					"name": "identifier",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"value": {
+					"name": "value",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"expiresAt": {
+					"name": "expiresAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"createdAt": {
+					"name": "createdAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"updatedAt": {
+					"name": "updatedAt",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"core.journey_messages": {
+			"name": "journey_messages",
+			"schema": "core",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"journey_id": {
+					"name": "journey_id",
+					"type": "varchar(82)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"journey_date": {
+					"name": "journey_date",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"code": {
+					"name": "code",
+					"type": "varchar(64)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"message": {
+					"name": "message",
+					"type": "varchar(2048)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"summary": {
+					"name": "summary",
+					"type": "varchar(2048)",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {
+				"idx_messages_journeydate": {
+					"name": "idx_messages_journeydate",
+					"columns": [
+						{
+							"expression": "journey_date",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"journey_messages_journey_id_journeys_journey_id_fk": {
+					"name": "journey_messages_journey_id_journeys_journey_id_fk",
+					"tableFrom": "journey_messages",
+					"tableTo": "journeys",
+					"schemaTo": "core",
+					"columnsFrom": ["journey_id"],
+					"columnsTo": ["journey_id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"core.journey_stop_messages": {
+			"name": "journey_stop_messages",
+			"schema": "core",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"stop_id": {
+					"name": "stop_id",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"code": {
+					"name": "code",
+					"type": "varchar(64)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"message": {
+					"name": "message",
+					"type": "varchar(2048)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"summary": {
+					"name": "summary",
+					"type": "varchar(2048)",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"journey_stop_messages_stop_id_journey_via-stops_id_fk": {
+					"name": "journey_stop_messages_stop_id_journey_via-stops_id_fk",
+					"tableFrom": "journey_stop_messages",
+					"tableTo": "journey_via-stops",
+					"schemaTo": "core",
+					"columnsFrom": ["stop_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"core.journey_via-stops": {
+			"name": "journey_via-stops",
+			"schema": "core",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"journey_id": {
+					"name": "journey_id",
+					"type": "varchar(82)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"journey_date": {
+					"name": "journey_date",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(512)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"eva_number": {
+					"name": "eva_number",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"cancelled": {
+					"name": "cancelled",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"arrival_planned_time": {
+					"name": "arrival_planned_time",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"arrival_actual_time": {
+					"name": "arrival_actual_time",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"arrival_delay": {
+					"name": "arrival_delay",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"arrival_planned_platform": {
+					"name": "arrival_planned_platform",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"arrival_actual_platform": {
+					"name": "arrival_actual_platform",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"departure_planned_time": {
+					"name": "departure_planned_time",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"departure_actual_time": {
+					"name": "departure_actual_time",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"departure_delay": {
+					"name": "departure_delay",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"departure_planned_platform": {
+					"name": "departure_planned_platform",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"departure_actual_platform": {
+					"name": "departure_actual_platform",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": false
+				}
+			},
+			"indexes": {
+				"idx_via-stops_evanumber": {
+					"name": "idx_via-stops_evanumber",
+					"columns": [
+						{
+							"expression": "eva_number",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_via-stops_journeydate": {
+					"name": "idx_via-stops_journeydate",
+					"columns": [
+						{
+							"expression": "journey_date",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_via-stops_evanumber_journeyid": {
+					"name": "idx_via-stops_evanumber_journeyid",
+					"columns": [
+						{
+							"expression": "eva_number",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "journey_id",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				},
+				"idx_via-stops_evanumber_journeydate": {
+					"name": "idx_via-stops_evanumber_journeydate",
+					"columns": [
+						{
+							"expression": "eva_number",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						},
+						{
+							"expression": "journey_date",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {
+				"journey_via-stops_journey_id_journeys_journey_id_fk": {
+					"name": "journey_via-stops_journey_id_journeys_journey_id_fk",
+					"tableFrom": "journey_via-stops",
+					"tableTo": "journeys",
+					"schemaTo": "core",
+					"columnsFrom": ["journey_id"],
+					"columnsTo": ["journey_id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"core.journeys": {
+			"name": "journeys",
+			"schema": "core",
+			"columns": {
+				"journey_id": {
+					"name": "journey_id",
+					"type": "varchar(82)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"journey_date": {
+					"name": "journey_date",
+					"type": "date",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"product_type": {
+					"name": "product_type",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"product_name": {
+					"name": "product_name",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"journey_number": {
+					"name": "journey_number",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"journey_name": {
+					"name": "journey_name",
+					"type": "varchar(512)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"operator_code": {
+					"name": "operator_code",
+					"type": "varchar(128)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"operator_name": {
+					"name": "operator_name",
+					"type": "varchar(512)",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {
+				"idx_journey_date": {
+					"name": "idx_journey_date",
+					"columns": [
+						{
+							"expression": "journey_date",
+							"isExpression": false,
+							"asc": true,
+							"nulls": "last"
+						}
+					],
+					"isUnique": false,
+					"concurrently": false,
+					"method": "btree",
+					"with": {}
+				}
+			},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"core.ris_ids": {
+			"name": "ris_ids",
+			"schema": "core",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "varchar(73)",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"product": {
+					"name": "product",
+					"type": "varchar(128)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"discovery_date": {
+					"name": "discovery_date",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"last_seen": {
+					"name": "last_seen",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"last_succeeded_at": {
+					"name": "last_succeeded_at",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"active": {
+					"name": "active",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": true
+				},
+				"is_locked": {
+					"name": "is_locked",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"core.station_products": {
+			"name": "station_products",
+			"schema": "core",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"eva_number": {
+					"name": "eva_number",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"querying_enabled": {
+					"name": "querying_enabled",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"station_products_eva_number_stations_eva_number_fk": {
+					"name": "station_products_eva_number_stations_eva_number_fk",
+					"tableFrom": "station_products",
+					"tableTo": "stations",
+					"schemaTo": "core",
+					"columnsFrom": ["eva_number"],
+					"columnsTo": ["eva_number"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"core.station_ril100": {
+			"name": "station_ril100",
+			"schema": "core",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "serial",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"eva_number": {
+					"name": "eva_number",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"ril100": {
+					"name": "ril100",
+					"type": "varchar(32)",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"station_ril100_eva_number_stations_eva_number_fk": {
+					"name": "station_ril100_eva_number_stations_eva_number_fk",
+					"tableFrom": "station_ril100",
+					"tableTo": "stations",
+					"schemaTo": "core",
+					"columnsFrom": ["eva_number"],
+					"columnsTo": ["eva_number"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"core.stations": {
+			"name": "stations",
+			"schema": "core",
+			"columns": {
+				"eva_number": {
+					"name": "eva_number",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true
+				},
+				"name": {
+					"name": "name",
+					"type": "varchar(512)",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"weight": {
+					"name": "weight",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": true,
+					"default": 0
+				},
+				"latitude": {
+					"name": "latitude",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"longitude": {
+					"name": "longitude",
+					"type": "double precision",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"querying_enabled": {
+					"name": "querying_enabled",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				},
+				"last_queried": {
+					"name": "last_queried",
+					"type": "timestamp",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"is_locked": {
+					"name": "is_locked",
+					"type": "boolean",
+					"primaryKey": false,
+					"notNull": true,
+					"default": false
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		},
+		"user_data.favorite_stations": {
+			"name": "favorite_stations",
+			"schema": "user_data",
+			"columns": {
+				"id": {
+					"name": "id",
+					"type": "integer",
+					"primaryKey": true,
+					"notNull": true,
+					"identity": {
+						"type": "always",
+						"name": "favorite_stations_id_seq",
+						"schema": "user_data",
+						"increment": "1",
+						"startWith": "1",
+						"minValue": "1",
+						"maxValue": "2147483647",
+						"cache": "1",
+						"cycle": false
+					}
+				},
+				"user_id": {
+					"name": "user_id",
+					"type": "text",
+					"primaryKey": false,
+					"notNull": true
+				},
+				"eva_number": {
+					"name": "eva_number",
+					"type": "integer",
+					"primaryKey": false,
+					"notNull": true
+				}
+			},
+			"indexes": {},
+			"foreignKeys": {
+				"favorite_stations_user_id_user_id_fk": {
+					"name": "favorite_stations_user_id_user_id_fk",
+					"tableFrom": "favorite_stations",
+					"tableTo": "user",
+					"schemaTo": "auth",
+					"columnsFrom": ["user_id"],
+					"columnsTo": ["id"],
+					"onDelete": "cascade",
+					"onUpdate": "no action"
+				}
+			},
+			"compositePrimaryKeys": {},
+			"uniqueConstraints": {
+				"favorite_stations_user_id_eva_number_unique": {
+					"name": "favorite_stations_user_id_eva_number_unique",
+					"nullsNotDistinct": false,
+					"columns": ["user_id", "eva_number"]
+				}
+			},
+			"policies": {},
+			"checkConstraints": {},
+			"isRLSEnabled": false
+		}
+	},
+	"enums": {},
+	"schemas": {},
+	"sequences": {},
+	"roles": {},
+	"policies": {},
+	"views": {},
+	"_meta": {
+		"columns": {},
+		"schemas": {},
+		"tables": {}
+	}
 }

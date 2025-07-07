@@ -141,7 +141,7 @@
 	{#if dropdownOpen && stationsQueried?.length > 0}
 		<div
 			bind:this={dropdownElement}
-			class="border-primary bg-black absolute mt-1 z-10 flex w-full flex-col gap-y-1 rounded-xl border p-3 shadow-md"
+			class="border-primary absolute z-10 mt-1 flex w-full flex-col gap-y-1 rounded-xl border bg-black p-3 shadow-md"
 		>
 			{#each stationsQueried as station, index (station)}
 				<button

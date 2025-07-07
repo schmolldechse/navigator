@@ -148,7 +148,7 @@
 
 	<!-- Details -->
 	{#if detailsExpanded}
-		<div class="border-primary/85 flex flex-col border-t py-4 px-2 md:px-5">
+		<div class="border-primary/85 flex flex-col border-t px-2 py-4 md:px-5">
 			<span class="pb-4 text-lg font-semibold tracking-tighter md:pb-6">Route Details</span>
 
 			{#each route.sections as _sec, i}
@@ -159,18 +159,40 @@
 					{@const lastIsWalking = i === route.sections.length - 1}
 
 					{#if firstIsWalking}
-						<RouteWalkingSection stop={section.origin} startWalking={section.origin.departure!} stopWalking={route.sections[i + 1].origin.departure!} distanceInMeters={section.distance} isFirst={true} isLast={false} />
+						<RouteWalkingSection
+							stop={section.origin}
+							startWalking={section.origin.departure!}
+							stopWalking={route.sections[i + 1].origin.departure!}
+							distanceInMeters={section.distance}
+							isFirst={true}
+							isLast={false}
+						/>
 					{:else if lastIsWalking}
-						<RouteWalkingSection stop={section.destination} startWalking={route.sections[i - 1].destination.arrival!} stopWalking={section.destination.arrival!} distanceInMeters={section.distance} isFirst={false} isLast={true} />
+						<RouteWalkingSection
+							stop={section.destination}
+							startWalking={route.sections[i - 1].destination.arrival!}
+							stopWalking={section.destination.arrival!}
+							distanceInMeters={section.distance}
+							isFirst={false}
+							isLast={true}
+						/>
 					{:else}
-						<RouteWalkingSection stop={section.origin} startWalking={route.sections[i - 1].destination.arrival!} stopWalking={route.sections[i + 1].origin.departure!} distanceInMeters={section.distance} isFirst={false} isLast={false} />
+						<RouteWalkingSection
+							stop={section.origin}
+							startWalking={route.sections[i - 1].destination.arrival!}
+							stopWalking={route.sections[i + 1].origin.departure!}
+							distanceInMeters={section.distance}
+							isFirst={false}
+							isLast={false}
+						/>
 					{/if}
 				{:else}
 					{@const section = _sec as NormalSection}
-					{@const isNonWalkingChangeoverAfterwards = i < route.sections.length - 1 && !route.sections[i + 1].isWalking}
+					{@const isNonWalkingChangeoverAfterwards =
+						i < route.sections.length - 1 && !route.sections[i + 1].isWalking}
 
 					<RouteNormalSection {section} />
-					
+
 					{#if isNonWalkingChangeoverAfterwards}
 						<div class="border-primary/85 relative flex min-h-fit flex-row py-6">
 							<div class="text-text/75 flex basis-1/6 justify-end italic">
@@ -178,7 +200,7 @@
 							</div>
 
 							<div class="flex w-[50px] justify-center md:w-[75px]">
-								<span class="z-1 absolute inset-y-0 h-full w-[4px] bg-white"></span>
+								<span class="absolute inset-y-0 z-1 h-full w-[4px] bg-white"></span>
 							</div>
 
 							<span class="flex h-[20px] basis-4/6">

@@ -37,7 +37,7 @@
 			</div>
 
 			<div class="flex w-[50px] justify-center md:w-[75px]">
-				<span class="z-1 absolute inset-y-0 h-full w-[4px] bg-white"></span>
+				<span class="absolute inset-y-0 z-1 h-full w-[4px] bg-white"></span>
 			</div>
 
 			<span class="flex h-[20px] basis-4/6">
@@ -56,7 +56,7 @@
 		</div>
 
 		<div class="flex w-[50px] justify-center md:w-[75px]">
-			<span class="z-1 absolute inset-y-0 h-full w-[4px] bg-white"></span>
+			<span class="absolute inset-y-0 z-1 h-full w-[4px] bg-white"></span>
 		</div>
 
 		<span class="flex h-[20px] basis-4/6">
@@ -75,7 +75,7 @@
 			</div>
 
 			<div class="flex w-[50px] justify-center md:w-[75px]">
-				<span class="z-1 absolute inset-y-0 h-full w-[4px] bg-white"></span>
+				<span class="absolute inset-y-0 z-1 h-full w-[4px] bg-white"></span>
 			</div>
 
 			<span class="flex h-[20px] basis-4/6">

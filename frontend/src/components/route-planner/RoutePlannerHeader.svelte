@@ -11,7 +11,7 @@
 </script>
 
 <div class="container mx-auto">
-	<span class="text-xl md:text-2xl font-bold">Route</span>
+	<span class="text-xl font-bold md:text-2xl">Route</span>
 
 	{#await stations}
 		<div class="flex flex-row items-center gap-x-2">
@@ -26,12 +26,12 @@
 	{:then { start, destination }}
 		<div class="flex flex-row items-center gap-x-2">
 			<CircleDot class="h-[20px] w-[20px] md:h-[25px] md:w-[25px]" />
-			<span class="text-normal md:text-lg font-medium tracking-tight">{start?.name}</span>
+			<span class="text-normal font-medium tracking-tight md:text-lg">{start?.name}</span>
 		</div>
 
 		<div class="flex flex-row items-center gap-x-2">
 			<CornerDownRight class="h-[20px] w-[20px] md:h-[25px] md:w-[25px]" />
-			<span class="text-normal md:text-lg font-medium tracking-tight">{destination?.name}</span>
+			<span class="text-normal font-medium tracking-tight md:text-lg">{destination?.name}</span>
 		</div>
 	{/await}
 </div>
