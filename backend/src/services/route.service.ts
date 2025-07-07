@@ -222,8 +222,8 @@ class RouteService {
 			);
 
 		return {
-			earlierRef: response.verbindungReference.earlier,
-			laterRef: response.verbindungReference.later,
+			earlierRef: response.verbindungReference.earlier ?? null,
+			laterRef: response.verbindungReference.later ?? null,
 			entries: await Promise.all(
 				response.verbindungen.map(async (verbindungEntry: any) => await this.mapToRouteEntry(verbindungEntry))
 			)
@@ -390,7 +390,7 @@ class RouteService {
 			};
 
 			return {
-				hafas_journeyId: section.journeyId,
+				hafas_journeyId: section.journeyId ?? null,
 				origin: buildStop(section.halte[0], false, true),
 				destination: buildStop(section.halte[section.halte.length - 1], true, false),
 				messages: this.mapMessages(section),
@@ -412,10 +412,10 @@ class RouteService {
 				viaStops: (section.halte as any[]).slice(1, -1).map((viaStop: any) => buildStop(viaStop)),
 				attributes: buildAttributes(section.verkehrsmittel.zugattribute),
 				lineInformation: {
-					productType: mapToProduct(section.verkehrsmittel.produktGattung),
+					productType: mapToProduct(section.verkehrsmittel.produktGattung ?? section.verkehrsmittel.kurzText),
 					productName: section.verkehrsmittel.kurzText,
 					journeyName: section.verkehrsmittel.mittelText,
-					journeyNumber: this.extractJourneyNumber(section.verkehrsmittel.nummer),
+					journeyNumber: this.extractJourneyNumber(section.verkehrsmittel.nummer ?? section.verkehrsmittel.mittelText),
 					operator: section.verkehrsmittel.zugattribute.find((attr: any) => attr.kategorie === "BEFÖRDERER")?.value ?? null
 				}
 			};
@@ -436,6 +436,7 @@ class RouteService {
 	};
 
 	private extractJourneyNumber = (entry: string): number | null => {
+		if (!entry) return null;
 		const digits = entry.match(/\d/g);
 		if (!digits) return null;
 		return parseInt(digits.join(""), 10);

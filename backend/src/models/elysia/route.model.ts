@@ -52,9 +52,9 @@ const RouteJourneyAttributeSchema = t.Object({
 
 // NORMAL SECTION
 const NormalRouteSectionSchema = t.Object({
-	hafas_journeyId: t.String({
+	hafas_journeyId: t.Nullable(t.String({
 		description: "Identifier for the journey in the HAFAS system. Optional when `section` is set to true."
-	}),
+	})),
 	origin: ExtendedRouteStopSchema,
 	destination: ExtendedRouteStopSchema,
 	journeysDirection: t.Optional(BasicStationSchema),
@@ -87,8 +87,8 @@ const RouteEntrySchema = t.Object({
 });
 
 const RouteDetailsSchema = t.Object({
-	earlierRef: t.String({ description: "Reference to lookup for earlier routes." }),
-	laterRef: t.String({ description: "Reference to lookup for later routes." }),
+	earlierRef: t.Nullable(t.String({ description: "Reference to lookup for earlier routes." })),
+	laterRef: t.Nullable(t.String({ description: "Reference to lookup for later routes." })),
 	entries: t.Array(RouteEntrySchema, { description: "Array of routes" })
 });
 
