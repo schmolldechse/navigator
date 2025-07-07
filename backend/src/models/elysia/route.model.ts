@@ -63,7 +63,7 @@ const NormalRouteSectionSchema = t.Object({
 		{
 			productType: t.String({ description: "The product type of the journey", examples: ["NahverkehrsonstigeZuege"] }),
 			productName: t.String({ description: "The product category of the journey", examples: ["RB"] }),
-			journeyNumber: t.Number({ description: "The unique id of the journey per day", examples: [22565] }),
+			journeyNumber: t.Nullable(t.Number({ description: "The unique id of the journey per day", examples: [22565] })),
 			journeyName: t.String({ description: "The name of this journey", examples: ["RB 63"] }),
 			operator: t.Nullable(t.String({ description: "The operator's name of the journey", examples: ["DB Regio AG"] }))
 		},

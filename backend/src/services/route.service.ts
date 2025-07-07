@@ -435,9 +435,9 @@ class RouteService {
 		} as typeof RouteEntrySchema.static;
 	};
 
-	private extractJourneyNumber = (entry: string): number => {
+	private extractJourneyNumber = (entry: string): number | null => {
 		const digits = entry.match(/\d/g);
-		if (!digits) return NaN;
+		if (!digits) return null;
 		return parseInt(digits.join(""), 10);
 	}
 
