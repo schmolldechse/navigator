@@ -1,14 +1,14 @@
 <script lang="ts">
 	import GeneralWarning from "$components/timetable/messages/icons/GeneralWarning.svelte";
 	import NoOnwardJourney from "$components/timetable/messages/icons/NoOnwardJourney.svelte";
-	import type { ExtendedRouteStop, RouteMessage, Time } from "$models/models";
+	import type { ExtendedRouteStop, NormalRouteStop, RouteMessage, Time } from "$models/models";
 	import ChevronRight from "lucide-svelte/icons/chevron-right";
 	import CircleDot from "lucide-svelte/icons/circle-dot";
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
 
 	interface Props {
-		stop: ExtendedRouteStop;
+		stop: ExtendedRouteStop | NormalRouteStop;
 		showDeparture?: boolean;
         position: "start" | "end";
 	}
@@ -57,15 +57,17 @@
 			<ChevronRight color="#ffda0a" class="ml-1 shrink-0" />
 		</div>
 
-		<div class="flex flex-col">
-			{#each stop.messages as message}
-				{@const MessageComponent = getMessageComponent(message, stop.cancelled)}
-				<div class="flex items-center gap-x-2">
-					<MessageComponent />
-					<span class="text-sm font-semibold">{message.content}</span>
-				</div>
-			{/each}
-		</div>
+		{#if "messages" in stop && stop.messages}
+			<div class="flex flex-col">
+				{#each stop.messages as message}
+					{@const MessageComponent = getMessageComponent(message, stop.cancelled)}
+					<div class="flex items-center gap-x-2">
+						<MessageComponent />
+						<span class="text-sm font-semibold">{message.content}</span>
+					</div>
+				{/each}
+			</div>
+		{/if}
 	</div>
 
 	<!-- 1/6 Platform -->

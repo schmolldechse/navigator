@@ -6,6 +6,7 @@
 	import Ban from "lucide-svelte/icons/ban";
 	import { DateTime } from "luxon";
 	import RouteNormalSection from "./details/RouteNormalSection.svelte";
+	import RouteWalkingSection from "./details/RouteWalkingSection.svelte";
 
 	interface Props {
 		route: RouteEntry;
@@ -153,11 +154,16 @@
 			{#each route.sections as _sec, i}
 				{#if _sec.isWalking}
 					{@const section = _sec as WalkingSection}
+
 					{@const firstIsWalking = i === 0}
 					{@const lastIsWalking = i === route.sections.length - 1}
 
 					{#if firstIsWalking}
-						<p>bastard</p>
+						<RouteWalkingSection stop={section.origin} startWalking={section.origin.departure!} stopWalking={route.sections[i + 1].origin.departure!} distanceInMeters={section.distance} isFirst={true} isLast={false} />
+					{:else if lastIsWalking}
+						<RouteWalkingSection stop={section.destination} startWalking={route.sections[i - 1].destination.arrival!} stopWalking={section.destination.arrival!} distanceInMeters={section.distance} isFirst={false} isLast={true} />
+					{:else}
+						<RouteWalkingSection stop={section.origin} startWalking={route.sections[i - 1].destination.arrival!} stopWalking={route.sections[i + 1].origin.departure!} distanceInMeters={section.distance} isFirst={false} isLast={false} />
 					{/if}
 				{:else}
 					{@const section = _sec as NormalSection}
