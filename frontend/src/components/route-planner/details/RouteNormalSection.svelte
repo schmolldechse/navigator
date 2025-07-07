@@ -4,38 +4,38 @@
 	import RouteStop from "./RouteStop.svelte";
 	import GeneralWarning from "$components/timetable/messages/icons/GeneralWarning.svelte";
 	import ChevronDown from "lucide-svelte/icons/chevron-down";
-    import ChevronUp from "lucide-svelte/icons/chevron-up";
+	import ChevronUp from "lucide-svelte/icons/chevron-up";
 	import RouteViaStop from "./RouteViaStop.svelte";
 
-    interface Props {
-        section: NormalSection;
-    }
+	interface Props {
+		section: NormalSection;
+	}
 
-    let { section }: Props = $props();
-    let showViaStops = $state<boolean>(false);
+	let { section }: Props = $props();
+	let showViaStops = $state<boolean>(false);
 
-    let sectionDuration = $derived.by(() => {
-        const departureTime = DateTime.fromISO(section.origin.departure!.actualTime);
-        const arrivalTime = DateTime.fromISO(section.destination.arrival!.actualTime);
-        
-        const duration = arrivalTime.diff(departureTime, ["hours", "minutes"]);
-        if (duration.hours >= 1) return duration.toFormat("h'h' m'm'");
+	let sectionDuration = $derived.by(() => {
+		const departureTime = DateTime.fromISO(section.origin.departure!.actualTime);
+		const arrivalTime = DateTime.fromISO(section.destination.arrival!.actualTime);
+
+		const duration = arrivalTime.diff(departureTime, ["hours", "minutes"]);
+		if (duration.hours >= 1) return duration.toFormat("h'h' m'm'");
 		else return duration.toFormat("m'm'");
-    });
+	});
 </script>
 
 <div class="flex flex-col md:px-2">
-    <!-- Origin -->
-    <RouteStop stop={section.origin} showDeparture={true} position="start" />
+	<!-- Origin -->
+	<RouteStop stop={section.origin} showDeparture={true} position="start" />
 
-    <!-- Line Info -->
+	<!-- Line Info -->
 	<div class="relative flex flex-row py-10">
 		<!-- 1/6 Time -->
 		<span class="min-w-1 basis-1/6 text-right text-sm">{sectionDuration}</span>
 
 		<!-- Connecting Line -->
 		<div class="flex w-[50px] justify-center transition-all duration-500 md:w-[75px]">
-			<span class="bg-white absolute z-0 h-full w-[4px] inset-y-0"></span>
+			<span class="absolute inset-y-0 z-0 h-full w-[4px] bg-white"></span>
 		</div>
 
 		<!-- 5/6 -->
@@ -45,7 +45,9 @@
 				<span>
 					{section.lineInformation?.journeyName}
 				</span>
-				<span>({section.lineInformation?.journeyNumber})</span>
+				{#if section.lineInformation.journeyNumber}
+					<span>({section.lineInformation?.journeyNumber})</span>
+				{/if}
 			</div>
 
 			<!-- Continuation -->
@@ -53,7 +55,7 @@
 		</div>
 	</div>
 
-    <!-- (Warning-)Messages, that are not type of "hint" (<- only information regarding the Connection) -->
+	<!-- (Warning-)Messages, that are not type of "hint" (<- only information regarding the Connection) -->
 	{#if section.messages.length > 0}
 		<div class="relative flex flex-row pb-6">
 			<!-- 1/6 Time -->
@@ -79,7 +81,7 @@
 		</div>
 	{/if}
 
-    <!-- ViaStops -->
+	<!-- ViaStops -->
 	{#if section.viaStops.length ?? 0 > 0}
 		<div class="relative flex min-h-fit flex-row pb-4">
 			<!-- 1/6 Time -->
@@ -95,7 +97,9 @@
 				class="flex w-full basis-5/6 cursor-pointer flex-row items-center gap-x-2 text-left"
 				onclick={() => (showViaStops = !showViaStops)}
 			>
-				<span class="tracking-wide font-light">{section.viaStops.length ?? 0} stop{(section.viaStops.length ?? 0) === 1 ? "" : "s"}</span>
+				<span class="font-light tracking-wide"
+					>{section.viaStops.length ?? 0} stop{(section.viaStops.length ?? 0) === 1 ? "" : "s"}</span
+				>
 
 				{#if !showViaStops}
 					<ChevronDown color="#ffda0a" />
@@ -112,6 +116,6 @@
 		{/each}
 	{/if}
 
-    <!-- Destination -->
-    <RouteStop stop={section.destination} showDeparture={false} position="end" />
+	<!-- Destination -->
+	<RouteStop stop={section.destination} showDeparture={false} position="end" />
 </div>
