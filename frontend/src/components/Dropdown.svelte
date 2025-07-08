@@ -38,7 +38,7 @@
 	<!-- DropDown Button -->
 	<button
 		bind:this={menuTriggerElement}
-		class="cursor-pointer hover:text-accent"
+		class={["cursor-pointer", {"text-accent": isOpen}]}
 		onmouseenter={() => (burgerHov = true)}
 		onmouseleave={() => (burgerHov = false)}
 	>
