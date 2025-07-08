@@ -15,7 +15,7 @@ services:
     container_name: navigator-backend
     image: ghcr.io/schmolldechse/navigator-backend:latest
     restart: always
-    ports: [ "8000:8000" ]
+    ports: [ "8000:3000" ]
     networks: [ "navigator-network" ]
     depends_on:
       navigator-postgres:
