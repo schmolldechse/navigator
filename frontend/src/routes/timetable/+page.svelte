@@ -41,7 +41,7 @@
 		<span>&copy; {DateTime.now().year} - Schmolldechse & Contributors</span>
 
 		<div class="flex flex-row items-center justify-center gap-4">
-			<a class="flex flex-row items-center gap-2" href="/api-docs" target="_blank" title="API Docs">
+			<a class="flex flex-row items-center gap-2" href="/swagger" target="_blank" title="API Docs">
 				<ServerCog size="24" class="hover:stroke-accent transition-colors duration-200" />
 			</a>
 
