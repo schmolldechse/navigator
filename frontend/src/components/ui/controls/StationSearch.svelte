@@ -113,7 +113,11 @@
 
 <div class="relative">
 	<button
-		class="bg-primary/25 group relative w-full cursor-text overflow-hidden rounded-2xl px-4 py-1 shadow-sm"
+		class={[
+			"bg-primary/25 group relative w-full cursor-text overflow-hidden rounded-2xl px-4 py-1 shadow-sm",
+			{ "rounded-t-2xl rounded-b-none": placeholder === "Start" },
+			{ "rounded-b-2xl rounded-t-none": placeholder === "Destination" }
+		]}
 		onclick={(event) => {
 			event.stopPropagation();
 			inputElement.focus();
