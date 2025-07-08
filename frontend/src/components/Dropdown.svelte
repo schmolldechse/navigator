@@ -38,7 +38,7 @@
 	<!-- DropDown Button -->
 	<button
 		bind:this={menuTriggerElement}
-		class={["cursor-pointer", {"text-accent": isOpen}]}
+		class={["cursor-pointer", { "text-accent": isOpen }]}
 		onmouseenter={() => (burgerHov = true)}
 		onmouseleave={() => (burgerHov = false)}
 	>
@@ -48,7 +48,7 @@
 	<!-- Dropdown Options -->
 	{#if isOpen}
 		<div
-			class="bg-primary-darker absolute right-0 top-full z-10 mt-0 w-48 rounded-md p-2 shadow-lg"
+			class="bg-primary-darker absolute top-full right-0 z-10 mt-0 w-48 rounded-md p-2 shadow-lg"
 			bind:this={dropdownContainer}
 			onmouseenter={() => {
 				dropDownHov = true;
