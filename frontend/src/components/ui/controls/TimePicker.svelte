@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { DateTime } from "luxon";
-	import Clock from "lucide-svelte/icons/clock";
-	import ChevronDown from "lucide-svelte/icons/chevron-down";
-	import ChevronLeft from "lucide-svelte/icons/chevron-left";
-	import ChevronRight from "lucide-svelte/icons/chevron-right";
-	import X from "lucide-svelte/icons/x";
-	import Minus from "lucide-svelte/icons/minus";
-	import Plus from "lucide-svelte/icons/plus";
-	import TimerReset from "lucide-svelte/icons/timer-reset";
+	import Clock from "@lucide/svelte/icons/clock";
+	import ChevronDown from "@lucide/svelte/icons/chevron-down";
+	import ChevronLeft from "@lucide/svelte/icons/chevron-left";
+	import ChevronRight from "@lucide/svelte/icons/chevron-right";
+	import X from "@lucide/svelte/icons/x";
+	import Minus from "@lucide/svelte/icons/minus";
+	import Plus from "@lucide/svelte/icons/plus";
+	import TimerReset from "@lucide/svelte/icons/timer-reset";
 	import Button from "$components/ui/interactive/Button.svelte";
 	import { onMount } from "svelte";
 

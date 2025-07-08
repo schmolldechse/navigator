@@ -2,8 +2,8 @@
 	import GeneralWarning from "$components/timetable/messages/icons/GeneralWarning.svelte";
 	import NoOnwardJourney from "$components/timetable/messages/icons/NoOnwardJourney.svelte";
 	import type { ExtendedRouteStop, NormalRouteStop, RouteMessage, Time } from "$models/models";
-	import ChevronRight from "lucide-svelte/icons/chevron-right";
-	import CircleDot from "lucide-svelte/icons/circle-dot";
+	import ChevronRight from "@lucide/svelte/icons/chevron-right";
+	import CircleDot from "@lucide/svelte/icons/circle-dot";
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
 

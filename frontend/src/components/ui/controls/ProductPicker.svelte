@@ -1,7 +1,7 @@
 <script lang="ts">
 	import LongDistance from "$components/ui/transport-types/LongDistance.svelte";
 	import { type Component, onMount } from "svelte";
-	import X from "lucide-svelte/icons/x";
+	import X from "@lucide/svelte/icons/x";
 	import Regional from "$components/ui/transport-types/Regional.svelte";
 	import Suburban from "$components/ui/transport-types/Suburban.svelte";
 	import Bus from "$components/ui/transport-types/Bus.svelte";
@@ -10,7 +10,7 @@
 	import Tram from "$components/ui/transport-types/Tram.svelte";
 	import Switch from "$components/ui/interactive/Switch.svelte";
 	import Taxi from "$components/ui/transport-types/Taxi.svelte";
-	import ChevronDown from "lucide-svelte/icons/chevron-down";
+	import ChevronDown from "@lucide/svelte/icons/chevron-down";
 	import Button from "$components/ui/interactive/Button.svelte";
 
 	export interface Product {

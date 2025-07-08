@@ -3,9 +3,9 @@
 	import { MetaTags } from "svelte-meta-tags";
 	import Clock from "./Clock.svelte";
 	import { client } from "$src/lib/auth/client";
-	import Star from "lucide-svelte/icons/star";
+	import Star from "@lucide/svelte/icons/star";
 	import { env } from "$env/dynamic/public";
-	import CornerDownRight from "lucide-svelte/icons/corner-down-right";
+	import CornerDownRight from "@lucide/svelte/icons/corner-down-right";
 	import { page } from "$app/state";
 	import { goto } from "$app/navigation";
 

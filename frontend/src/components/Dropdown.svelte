@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Menu from "lucide-svelte/icons/menu";
+	import Menu from "@lucide/svelte/icons/menu";
 	import { onMount } from "svelte";
 
 	export interface DropdownElement {

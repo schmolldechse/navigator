@@ -4,8 +4,8 @@
 	import { MetaTags } from "svelte-meta-tags";
 	import type { PageProps } from "./$types";
 	import SpinningCircle from "$components/ui/icons/SpinningCircle.svelte";
-	import ArrowDown from "lucide-svelte/icons/arrow-down";
-	import ArrowUp from "lucide-svelte/icons/arrow-up";
+	import ArrowDown from "@lucide/svelte/icons/arrow-down";
+	import ArrowUp from "@lucide/svelte/icons/arrow-up";
 	import { env } from "$env/dynamic/public";
 	import { page } from "$app/state";
 	import { DateTime } from "luxon";

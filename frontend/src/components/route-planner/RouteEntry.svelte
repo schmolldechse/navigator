@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Walking from "$components/ui/icons/Walking.svelte";
 	import type { NormalSection, WalkingSection, RouteEntry, Time } from "$models/models";
-	import ChevronDown from "lucide-svelte/icons/chevron-down";
-	import ChevronUp from "lucide-svelte/icons/chevron-up";
-	import Ban from "lucide-svelte/icons/ban";
+	import ChevronDown from "@lucide/svelte/icons/chevron-down";
+	import ChevronUp from "@lucide/svelte/icons/chevron-up";
+	import Ban from "@lucide/svelte/icons/ban";
 	import { DateTime } from "luxon";
 	import RouteNormalSection from "./details/RouteNormalSection.svelte";
 	import RouteWalkingSection from "./details/RouteWalkingSection.svelte";

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import TriangleAlert from "lucide-svelte/icons/triangle-alert";
+	import TriangleAlert from "@lucide/svelte/icons/triangle-alert";
 </script>
 
 <div class="flex items-center gap-x-4 px-5">
