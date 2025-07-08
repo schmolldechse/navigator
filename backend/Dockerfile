@@ -14,7 +14,7 @@ WORKDIR /app
 RUN bun run drizzle:migrate
 
 
-FROM install_stage AS production_stage
+FROM migration_stage AS production_stage
 
 WORKDIR /app
 
