@@ -54,7 +54,7 @@ const restApi = new Elysia({ prefix: "/api" })
 const app = new Elysia()
 	.use(
 		swagger({
-			path: "/api",
+			path: "/swagger",
 			scalarConfig: {
 				hideDarkModeToggle: true,
 				// needs to be empty that the theme is changeable: {@link https://github.com/elysiajs/elysia-swagger/issues/194}
