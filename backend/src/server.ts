@@ -65,7 +65,13 @@ const app = new Elysia()
 					title: "Navigator Backend",
 					description: "API documentation for the Navigator backend",
 					version: "1.0.0"
-				}
+				},
+				servers: [
+					{
+						url: `${Bun.env.PUBLIC_BACKEND_URL ?? "http://localhost:3000"}`,
+						description: "API server"
+					}
+				]
 			}
 		})
 	)
