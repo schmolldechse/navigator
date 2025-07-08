@@ -6,7 +6,7 @@ services:
     ports: [ "3000:3000" ]
     networks: [ "navigator-network" ]
     depends_on:
-      - navigator-backend
+      navigator-backend
     environment:
       PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL}
       PRIVATE_BACKEND_URL: ${PRIVATE_BACKEND_URL}
@@ -18,7 +18,8 @@ services:
     ports: [ "8000:8000" ]
     networks: [ "navigator-network" ]
     depends_on:
-      - navigator-postgres
+      navigator-postgres:
+        condition: service_healthy
     environment:
       AUTH_SECRET: ${AUTH_SECRET}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
@@ -31,13 +32,15 @@ services:
     restart: on-failure
     networks: [ "navigator-network" ]
     depends_on:
-      - navigator-postgres
+      navigator-postgres:
+        condition: service_healthy
     environment:
       POSTGRES_CONNECTION_STRING: ${POSTGRES_CONNECTION_STRING}
 
   navigator-postgres:
     container_name: navigator-postgres
     image: postgres:latest
+    restart: on-failure
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -46,6 +49,12 @@ services:
     networks: [ "navigator-network" ]
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
 
 networks:
   navigator-network:
