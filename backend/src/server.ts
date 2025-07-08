@@ -8,6 +8,10 @@ import routeController from "./controllers/route.controller";
 import statisticsController from "./controllers/statistics.controller";
 import userController from "./controllers/user.controller";
 import { authApp, OpenAPI } from "./auth/auth";
+import { migrate } from "drizzle-orm/node-postgres/migrator";
+import { database } from "./db/postgres";
+
+migrate(database, { migrationsFolder: "./drizzle" });
 
 const restApi = new Elysia({ prefix: "/api" })
 	.error({ HttpError })

@@ -7,14 +7,7 @@ COPY package.json bun.lock* ./
 RUN bun install
 
 
-FROM install_stage AS migration_stage
-
-WORKDIR /app
-
-RUN bun run drizzle:migrate
-
-
-FROM migration_stage AS production_stage
+FROM install_stage AS production_stage
 
 WORKDIR /app
 
