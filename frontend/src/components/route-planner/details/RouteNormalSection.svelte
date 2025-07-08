@@ -3,8 +3,8 @@
 	import { DateTime } from "luxon";
 	import RouteStop from "./RouteStop.svelte";
 	import GeneralWarning from "$components/timetable/messages/icons/GeneralWarning.svelte";
-	import ChevronDown from "lucide-svelte/icons/chevron-down";
-	import ChevronUp from "lucide-svelte/icons/chevron-up";
+	import ChevronDown from "@lucide/svelte/icons/chevron-down";
+	import ChevronUp from "@lucide/svelte/icons/chevron-up";
 	import RouteViaStop from "./RouteViaStop.svelte";
 
 	interface Props {

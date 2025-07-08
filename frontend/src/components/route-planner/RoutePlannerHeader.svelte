@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Station } from "$models/models";
-	import CornerDownRight from "lucide-svelte/icons/corner-down-right";
-	import CircleDot from "lucide-svelte/icons/circle-dot";
+	import CornerDownRight from "@lucide/svelte/icons/corner-down-right";
+	import CircleDot from "@lucide/svelte/icons/circle-dot";
 
 	interface Props {
 		stations: Promise<{ start: Station; destination: Station }>;

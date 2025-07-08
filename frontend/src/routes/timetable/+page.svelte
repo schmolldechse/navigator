@@ -3,7 +3,7 @@
 	import Navbar from "$components/Navbar.svelte";
 	import RootTimetableSearch from "$components/timetable/RootTimetableSearch.svelte";
 	import GitHub from "$components/ui/icons/GitHub.svelte";
-	import ServerCog from "lucide-svelte/icons/server-cog";
+	import ServerCog from "@lucide/svelte/icons/server-cog";
 	import { DateTime } from "luxon";
 	import { MetaTags } from "svelte-meta-tags";
 </script>

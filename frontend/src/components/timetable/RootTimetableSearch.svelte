@@ -3,7 +3,7 @@
 	import StationSearch from "$components/ui/controls/StationSearch.svelte";
 	import type { Station } from "$models/models";
 	import TimePicker from "$components/ui/controls/TimePicker.svelte";
-	import Search from "lucide-svelte/icons/search";
+	import Search from "@lucide/svelte/icons/search";
 	import TravelMode from "$components/ui/controls/TravelMode.svelte";
 	import Button from "$components/ui/interactive/Button.svelte";
 	import type { Valid } from "luxon/src/_util";

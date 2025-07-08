@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Minus from "lucide-svelte/icons/minus";
+	import Minus from "@lucide/svelte/icons/minus";
 </script>
 
 <div class="border-primary/45 space-y-2 rounded-lg border-2 px-4 py-2 text-2xl font-medium">

@@ -5,7 +5,7 @@
 	import TravelMode from "$components/ui/controls/TravelMode.svelte";
 	import Button from "$components/ui/interactive/Button.svelte";
 	import type { Station } from "$models/models";
-	import ArrowDownUp from "lucide-svelte/icons/arrow-down-up";
+	import ArrowDownUp from "@lucide/svelte/icons/arrow-down-up";
 	import { DateTime } from "luxon";
 	import type { Valid } from "luxon/src/_util";
 
