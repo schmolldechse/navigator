@@ -9,7 +9,7 @@ services:
       - navigator-backend
     environment:
       PUBLIC_BACKEND_URL: ${PUBLIC_BACKEND_URL}
-      INTERNAL_BACKEND_URL: ${INTERNAL_BACKEND_URL}
+      PRIVATE_BACKEND_URL: ${PRIVATE_BACKEND_URL}
 
   navigator-backend:
     container_name: navigator-backend
@@ -21,7 +21,6 @@ services:
       - navigator-postgres
     environment:
       AUTH_SECRET: ${AUTH_SECRET}
-      AUTH_POSTGRES_URL: ${AUTH_POSTGRES_URL}
       GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID}
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET}
       POSTGRES_CONNECTION_STRING: ${POSTGRES_CONNECTION_STRING}
