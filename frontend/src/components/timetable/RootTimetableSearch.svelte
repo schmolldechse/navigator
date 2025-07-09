@@ -35,7 +35,7 @@
 
 	<!-- Search button -->
 	<button
-		class="bg-accent hover:bg-accent/90 disabled:bg-accent/50 cursor-pointer rounded-md px-5 py-2 font-bold text-black transition-colors md:w-fit md:self-end disabled:cursor-not-allowed"
+		class="bg-accent hover:bg-accent/90 disabled:bg-accent/50 cursor-pointer rounded-md px-5 py-2 font-bold text-black transition-colors disabled:cursor-not-allowed md:w-fit md:self-end"
 		disabled={!station || !date}
 		onclick={() => {
 			if (!onSearch) return;

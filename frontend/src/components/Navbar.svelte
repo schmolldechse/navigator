@@ -18,7 +18,7 @@
 	]);
 </script>
 
-<div class="z-999 sticky top-0 flex w-full items-center justify-between bg-[#171717] p-2 px-4 md:hidden">
+<div class="sticky top-0 z-999 flex w-full items-center justify-between bg-[#171717] p-2 px-4 md:hidden">
 	<VisualIdentity />
 
 	<div class="relative flex flex-row items-center gap-x-4">
@@ -31,7 +31,7 @@
 	</div>
 </div>
 
-<div class="z-999 sticky top-0 hidden w-full items-center justify-between bg-[#171717] p-2 px-4 md:flex">
+<div class="sticky top-0 z-999 hidden w-full items-center justify-between bg-[#171717] p-2 px-4 md:flex">
 	<div class="flex flex-row items-center gap-x-12">
 		<VisualIdentity />
 		<div class="flex flex-row gap-x-8">

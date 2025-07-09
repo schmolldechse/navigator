@@ -237,7 +237,9 @@ class RouteService {
 			earlierRef: response.verbindungReference.earlier ?? null,
 			laterRef: response.verbindungReference.later ?? null,
 			entries: await Promise.all(
-				response.verbindungen.map(async (verbindungEntry: any) => await this.mapToRouteEntry(verbindungEntry, directions))
+				response.verbindungen.map(
+					async (verbindungEntry: any) => await this.mapToRouteEntry(verbindungEntry, directions)
+				)
 			)
 		} as typeof RouteDetailsSchema.static;
 	};
@@ -328,7 +330,10 @@ class RouteService {
 			.filter(Boolean);
 	};
 
-	private mapToRouteEntry = async (entry: any, directions: typeof BasicStationSchema.static[]): Promise<typeof RouteEntrySchema.static> => {
+	private mapToRouteEntry = async (
+		entry: any,
+		directions: (typeof BasicStationSchema.static)[]
+	): Promise<typeof RouteEntrySchema.static> => {
 		const parseTimeSchema = (timeEntry: any, isDeparture: boolean = true): typeof TimeSchema.static => {
 			const plannedTime = DateTime.fromISO(isDeparture ? timeEntry.abfahrtsZeitpunkt : timeEntry.ankunftsZeitpunkt);
 			let actualTime = DateTime.fromISO(isDeparture ? timeEntry.ezAbfahrtsZeitpunkt : timeEntry.ezAnkunftsZeitpunkt);
@@ -407,13 +412,12 @@ class RouteService {
 					);
 			};
 
-			const journeysDirection =
-				directions.find(
-					(direction: typeof BasicStationSchema.static) => direction.name === section.verkehrsmittel.richtung
-				) || {
-					name: section.verkehrsmittel.richtung,
-					evaNumber: -1
-				};
+			const journeysDirection = directions.find(
+				(direction: typeof BasicStationSchema.static) => direction.name === section.verkehrsmittel.richtung
+			) || {
+				name: section.verkehrsmittel.richtung,
+				evaNumber: -1
+			};
 
 			return {
 				hafas_journeyId: section.journeyId ?? null,
