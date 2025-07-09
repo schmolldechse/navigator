@@ -16,8 +16,9 @@ import {
 } from "../models/elysia/route.model";
 import { database } from "../db/postgres";
 import { stations } from "../db/core.schema";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { TimeSchema } from "../models/elysia/time.model";
+import { BasicStationSchema } from "../models/elysia/station.model";
 
 class RouteService {
 	readonly routeBody = t.Object({
@@ -221,14 +222,31 @@ class RouteService {
 				`Response was expected to be an array, but got ${typeof response}`
 			);
 
+		const directions = await this.loadDirectionsFromDatabase(
+			response.verbindungen
+				.flatMap((entry: any) =>
+					entry.verbindungsAbschnitte
+						.filter((section: any) => section.verkehrsmittel.typ !== "WALK")
+						.filter((section: any) => section.verkehrsmittel.richtung !== undefined)
+						.map((section: any) => section.verkehrsmittel.richtung)
+				)
+				.filter((direction: string, index: number, array: string[]) => array.indexOf(direction) === index)
+		);
+
 		return {
 			earlierRef: response.verbindungReference.earlier ?? null,
 			laterRef: response.verbindungReference.later ?? null,
 			entries: await Promise.all(
-				response.verbindungen.map(async (verbindungEntry: any) => await this.mapToRouteEntry(verbindungEntry))
+				response.verbindungen.map(async (verbindungEntry: any) => await this.mapToRouteEntry(verbindungEntry, directions))
 			)
 		} as typeof RouteDetailsSchema.static;
 	};
+
+	private loadDirectionsFromDatabase = async (stationNames: string[]): Promise<(typeof BasicStationSchema.static)[]> =>
+		await database
+			.select({ name: stations.name, evaNumber: stations.evaNumber })
+			.from(stations)
+			.where(inArray(stations.name, stationNames));
 
 	private isCancelled = (entry: any): boolean => {
 		if (!(entry.risNotizen && entry.himMeldungen && entry.priorisierteMeldungen)) return false;
@@ -310,7 +328,7 @@ class RouteService {
 			.filter(Boolean);
 	};
 
-	private mapToRouteEntry = async (entry: any): Promise<typeof RouteEntrySchema.static> => {
+	private mapToRouteEntry = async (entry: any, directions: typeof BasicStationSchema.static[]): Promise<typeof RouteEntrySchema.static> => {
 		const parseTimeSchema = (timeEntry: any, isDeparture: boolean = true): typeof TimeSchema.static => {
 			const plannedTime = DateTime.fromISO(isDeparture ? timeEntry.abfahrtsZeitpunkt : timeEntry.ankunftsZeitpunkt);
 			let actualTime = DateTime.fromISO(isDeparture ? timeEntry.ezAbfahrtsZeitpunkt : timeEntry.ezAnkunftsZeitpunkt);
@@ -389,23 +407,20 @@ class RouteService {
 					);
 			};
 
+			const journeysDirection =
+				directions.find(
+					(direction: typeof BasicStationSchema.static) => direction.name === section.verkehrsmittel.richtung
+				) || {
+					name: section.verkehrsmittel.richtung,
+					evaNumber: -1
+				};
+
 			return {
 				hafas_journeyId: section.journeyId ?? null,
 				origin: buildStop(section.halte[0], false, true),
 				destination: buildStop(section.halte[section.halte.length - 1], true, false),
 				messages: this.mapMessages(section),
-				journeysDirection: section.verkehrsmittel?.richtung
-					? await (async () => {
-							const evaNumber = await database
-								.select({ evaNumber: stations.evaNumber })
-								.from(stations)
-								.where(eq(stations.name, section.verkehrsmittel.richtung));
-							return {
-								name: section.verkehrsmittel.richtung,
-								evaNumber: evaNumber[0]?.evaNumber ?? NaN
-							};
-						})()
-					: undefined,
+				journeysDirection: section.verkehrsmittel?.richtung ? journeysDirection : undefined,
 				cancelled: this.isCancelled(entry),
 				isWalking: false,
 				occupancy: this.mapOccupancies(entry),
