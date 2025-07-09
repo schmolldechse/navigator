@@ -119,13 +119,8 @@
 	<button
 		class={[
 			"bg-primary/25 group relative w-full cursor-text overflow-hidden rounded-2xl px-4 py-1 shadow-sm",
-<<<<<<< Updated upstream
-			{ "rounded-t-2xl rounded-b-none": placeholder === "Start" },
-			{ "rounded-t-none rounded-b-2xl": placeholder === "Destination" }
-=======
 			{ "rounded-b-none rounded-t-2xl": placeholder === "Start" },
 			{ "rounded-b-2xl rounded-t-none": placeholder === "Destination" }
->>>>>>> Stashed changes
 		]}
 		onclick={(event) => {
 			event.stopPropagation();
