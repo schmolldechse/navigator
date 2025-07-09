@@ -18,7 +18,7 @@
 	]);
 </script>
 
-<div class="bg-primary/25 z-999 sticky top-0 flex w-full items-center justify-between p-2 px-4 md:hidden">
+<div class="z-999 sticky top-0 flex w-full items-center justify-between bg-[#171717] p-2 px-4 md:hidden">
 	<VisualIdentity />
 
 	<div class="relative flex flex-row items-center gap-x-4">
@@ -31,25 +31,26 @@
 	</div>
 </div>
 
-<div class="bg-primary/25 z-999 sticky top-0 hidden w-full items-center justify-between p-2 px-4 md:flex">
-	<div class="flex flex-row items-center gap-x-10">
+<div class="z-999 sticky top-0 hidden w-full items-center justify-between bg-[#171717] p-2 px-4 md:flex">
+	<div class="flex flex-row items-center gap-x-12">
 		<VisualIdentity />
-
-		{#each dropdownElements as link}
-			<a
-				href={link.href}
-				class={[
-					"hover:text-accent relative cursor-pointer text-xl font-semibold transition-colors duration-500",
-					{ "text-accent": link.href === page.url.pathname }
-				]}
-			>
-				{link.name}
-				<span
-					class="bg-accent absolute -bottom-1 left-0 h-0.5 w-full origin-left transition-transform duration-300"
-					style="transform: scaleX({link.href === page.url.pathname ? 1 : 0});"
-				></span>
-			</a>
-		{/each}
+		<div class="flex flex-row gap-x-8">
+			{#each dropdownElements as link}
+				<a
+					href={link.href}
+					class={[
+						"hover:text-accent relative cursor-pointer text-xl font-medium transition-colors duration-500",
+						{ "text-accent": link.href === page.url.pathname }
+					]}
+				>
+					{link.name}
+					<span
+						class="bg-accent absolute -bottom-1 left-0 h-0.5 w-full origin-left transition-transform duration-300"
+						style="transform: scaleX({link.href === page.url.pathname ? 1 : 0});"
+					></span>
+				</a>
+			{/each}
+		</div>
 	</div>
 	<div class="relative flex flex-row items-center gap-x-4">
 		{#if userInfo}
