@@ -3,7 +3,6 @@
 	import StationSearch from "$components/ui/controls/StationSearch.svelte";
 	import TimePicker from "$components/ui/controls/TimePicker.svelte";
 	import TravelMode from "$components/ui/controls/TravelMode.svelte";
-	import Button from "$components/ui/interactive/Button.svelte";
 	import type { Station } from "$models/models";
 	import ArrowDownUp from "@lucide/svelte/icons/arrow-down-up";
 	import { DateTime } from "luxon";
@@ -72,9 +71,10 @@
 	</div>
 
 	<!-- Search button -->
-	<Button
-		class="rounded-md px-5 py-2 font-bold text-black"
-		onclick={async () => {
+	<button
+		class="bg-accent hover:bg-accent/90 disabled:bg-accent/50 cursor-pointer rounded-md px-5 py-2 font-bold text-black transition-colors md:w-fit md:self-end disabled:cursor-not-allowed"
+		disabled={disabledProducts.length === 10 || !start || !destination || start.evaNumber === destination.evaNumber || !date}
+		onclick={() => {
 			if (!onSearch) return;
 
 			if (disabledProducts.length === 10) return;
@@ -85,8 +85,6 @@
 			if (!date) return;
 
 			onSearch(start, destination, date, type, disabledProducts);
-		}}
+		}}>Search</button
 	>
-		Search
-	</Button>
 </div>
