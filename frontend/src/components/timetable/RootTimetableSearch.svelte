@@ -5,7 +5,6 @@
 	import TimePicker from "$components/ui/controls/TimePicker.svelte";
 	import Search from "@lucide/svelte/icons/search";
 	import TravelMode from "$components/ui/controls/TravelMode.svelte";
-	import Button from "$components/ui/interactive/Button.svelte";
 	import type { Valid } from "luxon/src/_util";
 
 	interface Props {
@@ -34,17 +33,15 @@
 
 	<TimePicker bind:date />
 
-	<Button
-		class="rounded-md px-5 py-2 font-bold text-black md:w-fit md:self-end"
+	<button
+		class="bg-accent hover:bg-accent/90 disabled:bg-accent/50 cursor-pointer rounded-md px-5 py-2 font-bold text-black transition-colors md:w-fit md:self-end disabled:cursor-not-allowed"
+		disabled={!station || !date}
 		onclick={() => {
 			if (!onSearch) return;
 
-			if (!station) return;
-			if (!date) return;
+			if (!station || !date) return;
 
 			onSearch(station, date, type);
-		}}
+		}}>Search</button
 	>
-		Search
-	</Button>
 </div>

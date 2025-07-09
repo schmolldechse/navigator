@@ -2,7 +2,7 @@
 	let { width = "75", height = "75" }: { height?: string; width?: string } = $props();
 </script>
 
-<svg viewBox="0 0 1024 1024" {width} {height}>
+<svg viewBox="0 50 1024 1024" {width} {height}>
 	<rect class="cls-1" x="142.67" y="637.4" width="35.68" height="39.64" />
 	<rect class="cls-1" x="206.09" y="637.4" width="76.21" height="39.64" />
 	<rect class="cls-1" x="308.71" y="637.4" width="76.21" height="39.64" />
