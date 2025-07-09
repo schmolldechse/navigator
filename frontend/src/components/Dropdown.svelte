@@ -48,7 +48,11 @@
 	<!-- Dropdown Options -->
 	{#if isOpen}
 		<div
+<<<<<<< Updated upstream
 			class="bg-primary-darker absolute top-full right-0 z-10 mt-0 w-48 rounded-md p-2 shadow-lg"
+=======
+			class="bg-[#171717] absolute right-0 top-full z-10 mt-0 w-48 rounded-md p-2 shadow-lg"
+>>>>>>> Stashed changes
 			bind:this={dropdownContainer}
 			onmouseenter={() => {
 				dropDownHov = true;
@@ -61,7 +65,7 @@
 		>
 			{#each dropdownElements as element}
 				<a
-					class="text-text hover:text-accent hover:bg-primary-dark block w-full cursor-pointer rounded-md px-4 py-2 text-left text-base"
+					class="text-text hover:text-accent block w-full cursor-pointer rounded-md px-4 py-2 text-left text-base"
 					href={element.href}
 					onclick={() => (isOpen = false)}
 				>

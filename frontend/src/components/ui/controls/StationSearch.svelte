@@ -37,6 +37,7 @@
 
 		stationsQueried = response as Station[];
 		dropdownOpen = stationsQueried.length > 0;
+		selectedIndex = 0;
 	};
 
 	let selectedIndex = $state<number>(-1);
@@ -104,6 +105,9 @@
 			if (inputElement && inputElement.contains(event.target as Node)) return;
 
 			dropdownOpen = false;
+			if(!station && stationsQueried.length > 0) {
+				selectStation(0); return;
+			}
 		};
 
 		document.addEventListener("click", clickOutside);
@@ -115,12 +119,18 @@
 	<button
 		class={[
 			"bg-primary/25 group relative w-full cursor-text overflow-hidden rounded-2xl px-4 py-1 shadow-sm",
+<<<<<<< Updated upstream
 			{ "rounded-t-2xl rounded-b-none": placeholder === "Start" },
 			{ "rounded-t-none rounded-b-2xl": placeholder === "Destination" }
+=======
+			{ "rounded-b-none rounded-t-2xl": placeholder === "Start" },
+			{ "rounded-b-2xl rounded-t-none": placeholder === "Destination" }
+>>>>>>> Stashed changes
 		]}
 		onclick={(event) => {
 			event.stopPropagation();
 			inputElement.focus();
+			inputElement.setSelectionRange(inputElement.value.length, inputElement.value.length);
 			dropdownOpen = true;
 		}}
 		aria-expanded={dropdownOpen}
@@ -145,16 +155,17 @@
 	{#if dropdownOpen && stationsQueried?.length > 0}
 		<div
 			bind:this={dropdownElement}
-			class="border-primary absolute z-10 mt-1 flex w-full flex-col gap-y-1 rounded-xl border bg-black p-3 shadow-md"
+			class="border-primary absolute z-10 mt-1 flex w-full flex-col gap-y-1 rounded-b-xl border bg-black p-3 shadow-md"
 		>
+			{selectStation(stationsQueried[0])}
 			{#each stationsQueried as station, index (station)}
 				<button
 					tabindex="0"
 					onclick={() => selectStation(index)}
 					onfocus={() => (selectedIndex = index)}
 					class={[
-						"hover:bg-secondary/25 w-full cursor-pointer rounded-md px-2 py-1 text-left",
-						{ "bg-secondary/25": selectedIndex === index }
+						"hover:bg-white/15 w-full cursor-pointer rounded-md px-2 py-1 text-left",
+						{ "bg-white/15": selectedIndex === index }
 					]}
 				>
 					{station?.name}

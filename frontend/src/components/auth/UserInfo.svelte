@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { client } from "$lib/auth/client";
-	import { goto } from "$app/navigation";
 
 	const session = client.useSession();
 </script>
@@ -11,8 +10,5 @@
 		<img src={$session.data.user.image} height={35} width={35} alt="User avatar" />
 	</div>
 {:else}
-	<button
-		class="hover:text-accent cursor-pointer text-xl font-bold transition-colors duration-500"
-		onclick={async () => await goto("/login")}>SIGN IN</button
-	>
+	<a class="hover:text-accent cursor-pointer text-xl font-bold transition-colors duration-500" href="/login">SIGN IN</a>
 {/if}
