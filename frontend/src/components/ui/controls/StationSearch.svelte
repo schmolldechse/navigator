@@ -105,8 +105,9 @@
 			if (inputElement && inputElement.contains(event.target as Node)) return;
 
 			dropdownOpen = false;
-			if(!station && stationsQueried.length > 0) {
-				selectStation(0); return;
+			if (!station && stationsQueried.length > 0) {
+				selectStation(0);
+				return;
 			}
 		};
 
@@ -119,8 +120,8 @@
 	<button
 		class={[
 			"bg-primary/25 group relative w-full cursor-text overflow-hidden rounded-2xl px-4 py-1 shadow-sm",
-			{ "rounded-b-none rounded-t-2xl": placeholder === "Start" },
-			{ "rounded-b-2xl rounded-t-none": placeholder === "Destination" }
+			{ "rounded-t-2xl rounded-b-none": placeholder === "Start" },
+			{ "rounded-t-none rounded-b-2xl": placeholder === "Destination" }
 		]}
 		onclick={(event) => {
 			event.stopPropagation();
@@ -159,7 +160,7 @@
 					onclick={() => selectStation(index)}
 					onfocus={() => (selectedIndex = index)}
 					class={[
-						"hover:bg-white/15 w-full cursor-pointer rounded-md px-2 py-1 text-left",
+						"w-full cursor-pointer rounded-md px-2 py-1 text-left hover:bg-white/15",
 						{ "bg-white/15": selectedIndex === index }
 					]}
 				>

@@ -48,7 +48,7 @@
 	<!-- Dropdown Options -->
 	{#if isOpen}
 		<div
-			class="bg-[#171717] absolute right-0 top-full z-10 mt-0 w-48 rounded-md p-2 shadow-lg"
+			class="absolute top-full right-0 z-10 mt-0 w-48 rounded-md bg-[#171717] p-2 shadow-lg"
 			bind:this={dropdownContainer}
 			onmouseenter={() => {
 				dropDownHov = true;
