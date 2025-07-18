@@ -15,7 +15,7 @@ migrate(database, { migrationsFolder: "./drizzle" });
 
 const restApi = new Elysia({ prefix: "/api" })
 	.error({ HttpError })
-	.onError({ as: "global" }, ({ error, set, code }) => {
+	.onError({ as: "global" }, ({ error, set, code, request }) => {
 		let message = "Internal Server Error";
 		set.status = HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR;
 
@@ -33,7 +33,7 @@ const restApi = new Elysia({ prefix: "/api" })
 				break;
 			case "NOT_FOUND":
 				set.status = error.status;
-				message = "Route does not exist";
+				message = `Route ${request?.url || 'Unknown path'} not found.`;
 				break;
 			case "UNKNOWN":
 				set.status = HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR;
