@@ -58,20 +58,17 @@ const app = new Elysia()
 			scalarConfig: {
 				hideDarkModeToggle: true,
 				// needs to be empty that the theme is changeable: {@link https://github.com/elysiajs/elysia-swagger/issues/194}
-				customCss: ""
+				customCss: "",
+				spec: {
+					url: "/swagger/json"
+				}
 			},
 			documentation: {
 				info: {
 					title: "Navigator Backend",
 					description: "API documentation for the Navigator backend",
 					version: "1.0.0"
-				},
-				servers: [
-					{
-						url: `${Bun.env.PUBLIC_BACKEND_URL ?? "http://localhost:3000"}`,
-						description: "API server"
-					}
-				]
+				}
 			}
 		})
 	)
