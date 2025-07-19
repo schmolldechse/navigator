@@ -52,16 +52,18 @@ const restApi = new Elysia({ prefix: "/api" })
 	.use(userController);
 
 const app = new Elysia()
+	.get("/", ({ redirect }) => redirect("/swagger"))
+	.use(authApp)
+	.use(restApi)
 	.use(
 		swagger({
-			path: "/swagger",
+			// goofy ahh Elysia Bug: @elysiajs/swagger needs to be v1.2.2 and the scalarCDN needs to be set as it would otherwise not render the Swagger UI correctly
+			// see https://discord.com/channels/1044804142461362206/1392464615069188124/1392894151028379658
+			scalarCDN: "https://cdn.jsdelivr.net/npm/@scalar/api-reference@1.32.1/dist/browser/standalone.min.js",
 			scalarConfig: {
-				hideDarkModeToggle: true,
+				theme: "saturn",
 				// needs to be empty that the theme is changeable: {@link https://github.com/elysiajs/elysia-swagger/issues/194}
-				customCss: "",
-				spec: {
-					url: "/swagger/json"
-				}
+				customCss: ""
 			},
 			documentation: {
 				info: {
@@ -69,12 +71,10 @@ const app = new Elysia()
 					description: "API documentation for the Navigator backend",
 					version: "1.0.0"
 				}
-			}
+			},
+			exclude: ["/"]
 		})
 	)
-	.get("/", ({ redirect }) => redirect("/swagger"))
-	.use(authApp)
-	.use(restApi)
 	.listen(3000);
 
 console.log(`Elysia server is running at ${app.server?.hostname}:${app.server?.port}`);
