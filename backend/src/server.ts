@@ -75,6 +75,7 @@ const app = new Elysia()
 			}
 		})
 	)
+	.get("/", ({ redirect }) => redirect("/swagger"))
 	.use(authApp)
 	.use(restApi)
 	.listen(3000);
