@@ -1,0 +1,114 @@
+name: Lint, Build & Deploy
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint-frontend:
+    name: Lint Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run frontend linting
+        uses: ./.github/actions/lint
+        with:
+          project: frontend
+
+  lint-backend:
+    name: Lint Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run backend linting
+        uses: ./.github/actions/lint
+        with:
+          project: backend
+
+  lint-daemon:
+    name: Lint Daemon
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run daemon linting
+        uses: ./.github/actions/lint
+        with:
+          project: daemon
+
+  build-frontend:
+    name: Build Frontend
+    needs: lint-frontend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build and push Frontend docker image
+        uses: ./.github/actions/build
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          image_name: navigator-frontend
+          context: frontend
+
+  build-backend:
+    name: Build Backend
+    needs: lint-backend
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build and push Backend docker image
+        uses: ./.github/actions/build
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          image_name: navigator-backend
+          context: backend
+
+  build-daemon:
+    name: Build Daemon
+    needs: lint-daemon
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Build and push Daemon docker image
+        uses: ./.github/actions/build
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          image_name: navigator-daemon
+          context: daemon
+
+  deploy-development:
+    name: Deploy to Development
+    needs: [build-frontend, build-backend]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Development
+        shell: bash
+        env:
+          DEPLOYMENT_URL: ${{ secrets.DEV_DEPLOYMENT_URL }}
+          AUTH_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          echo "Deploying to development environment..."
+
+          response=$(curl -w "%{http_code}" -s -X POST $DEPLOYMENT_URL -H "Authorization: Bearer $AUTH_TOKEN" -H "Content-Type: application/json")
+
+          http_code=${response: -3}
+
+          if [[ $http_code -ge 200 && $http_code -lt 300 ]]; then
+            echo "Deployment successful (HTTP $http_code)"
+          else
+            echo "Deployment failed (HTTP $http_code)"
+            exit 1
+          fi
