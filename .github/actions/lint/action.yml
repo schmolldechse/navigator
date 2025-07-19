@@ -1,0 +1,49 @@
+name: 'Linting Workflow'
+description: 'Runs linting checks on the specified project'
+
+inputs:
+  project:
+    required: true
+    type: string
+    description: 'The project to lint (frontend, backend, daemon)'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Setup Bun (Frontend/ Backend)
+      if: ${{ inputs.project != 'daemon' }}
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: 'latest'
+
+    - name: Setup .NET (Daemon)
+      if: ${{ inputs.project == 'daemon' }}
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '9.0.x'
+
+    - name: Install dependencies (Frontend/ Backend)
+      if: ${{ inputs.project != 'daemon' }}
+      working-directory: ${{ inputs.project }}
+      shell: bash
+      run: bun install --dev
+
+    - name: Install dependencies (Daemon)
+      if: ${{ inputs.project == 'daemon' }}
+      working-directory: ${{ inputs.project }}
+      shell: bash
+      run: | 
+        dotnet restore
+        dotnet tool restore
+
+    - name: Prettier format check (Frontend/ Backend)
+      if: ${{ inputs.project != 'daemon' }}
+      working-directory: ${{ inputs.project }}
+      shell: bash
+      run: bun lint
+
+    - name: .NET format check (Daemon)
+      if: ${{ inputs.project == 'daemon' }}
+      working-directory: ${{ inputs.project }}
+      shell: bash
+      run: dotnet csharpier check .

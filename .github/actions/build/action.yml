@@ -2,19 +2,22 @@ name: 'Build and Push Docker Images'
 description: 'Builds and pushes a Docker image to GHCR'
 
 inputs:
-  image-name:
+  image_name:
+    required: true
+    type: string
     description: 'Name of the Docker image to build'
-    required: true
   context:
-    description: 'Context directory for the Docker build'
     required: true
+    type: string
+    description: 'Context directory for the Docker build'
+  github_token:
+    required: true
+    type: string
+    description: 'GitHub token for authentication with GHCR'
 
 runs:
   using: 'composite'
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v3
 
@@ -23,20 +26,20 @@ runs:
       with:
         registry: ghcr.io
         username: ${{ github.repository_owner }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.github_token }}
 
     - name: Extract metadata and tags
       id: meta
       uses: docker/metadata-action@v5
       with:
-        images: ghcr.io/${{ github.repository_owner }}/${{ inputs.image-name }}
+        images: ghcr.io/${{ github.repository_owner }}/${{ inputs.image_name }}
         tags: |
           # Latest commit SHA 
           type=sha,format=short
           # nightly
           type=raw,value=nightly
           # 'latest' on master branch
-          type=branch,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
+          type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
 
     - name: Build and push Docker image
       id: build
