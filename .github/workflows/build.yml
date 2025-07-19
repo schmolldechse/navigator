@@ -1,110 +1,42 @@
-name: Docker Build
+name: Build Docker Images
 
 on:
   workflow_run:
     workflows: ["Linting Checks"]
-    branches: [master]
+    branches: ["*"]
     types: [completed]
+  workflow_dispatch:
 
 jobs:
-  docker-build-frontend:
-    if: >
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'master'
+  build-frontend:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    environment: production
-    env:
-      FRONTEND_IMAGE: ghcr.io/${{ github.repository_owner }}/navigator-frontend
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: ./.github/actions/build-docker-image.yml
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
-      - name: Login in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build & push frontend
-        uses: docker/build-push-action@v6
-        with:
+          image-name: navigator-frontend
           context: frontend
-          tags: |
-            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-            ${{ env.FRONTEND_IMAGE }}:latest
-          push: true
 
-  docker-build-backend:
-    if: >
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'master'
+  build-backend:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    environment: production
-    env:
-      BACKEND_IMAGE: ghcr.io/${{ github.repository_owner }}/navigator-backend
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: ./.github/actions/build-docker-image.yml
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build & push backend
-        uses: docker/build-push-action@v6
-        with:
+          image-name: navigator-backend
           context: backend
-          tags: |
-              ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
-              ${{ env.BACKEND_IMAGE }}:latest
-          push: true
 
-  docker-build-daemon:
-    if: >
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.head_branch == 'master'
+  build-daemon:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
-    environment: production
-    env:
-      DAEMON_IMAGE: ghcr.io/${{ github.repository_owner }}/navigator-daemon
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: ./.github/actions/build-docker-image.yml
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build & push daemon
-        uses: docker/build-push-action@v6
-        with:
+          image-name: navigator-daemon
           context: daemon
-          tags: |
-            ${{ env.DAEMON_IMAGE }}:${{ github.sha }}
-            ${{ env.DAEMON_IMAGE }}:latest
-          push: true
