@@ -2,6 +2,8 @@ name: Lint, Build & Deploy
 
 on:
   pull_request:
+  push:
+    branches: [master]
   workflow_dispatch:
 
 jobs:
@@ -93,6 +95,7 @@ jobs:
     name: Deploy to Development
     needs: [build-frontend, build-backend]
     runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/master'
     steps:
       - name: Deploy to Development
         shell: bash
