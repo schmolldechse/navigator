@@ -33,7 +33,7 @@ const restApi = new Elysia({ prefix: "/api" })
 				break;
 			case "NOT_FOUND":
 				set.status = error.status;
-				message = `Route ${request?.url || 'Unknown path'} not found.`;
+				message = `Route ${request?.url || "Unknown path"} not found.`;
 				break;
 			case "UNKNOWN":
 				set.status = HttpStatus.HTTP_500_INTERNAL_SERVER_ERROR;
