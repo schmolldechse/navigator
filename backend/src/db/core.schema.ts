@@ -32,7 +32,9 @@ const stationProducts = coreSchema.table("station_products", {
 		.references(() => stations.evaNumber, { onDelete: "cascade" }),
 	name: varchar("name", { length: 32 }).notNull(),
 	queryingEnabled: boolean("querying_enabled").notNull()
-});
+}, (table) => [
+	index("idx_products_eva_number_name").on(table.evaNumber, table.name),
+]);
 
 const stationRil = coreSchema.table("station_ril100", {
 	id: serial("id").primaryKey(),
@@ -55,7 +57,11 @@ const journeys = coreSchema.table(
 		operatorCode: varchar("operator_code", { length: 128 }).notNull(),
 		operatorName: varchar("operator_name", { length: 512 }).notNull()
 	},
-	(table) => [index("idx_journey_date").on(table.journeyDate)]
+	(table) => [
+		index("idx_journey_date").on(table.journeyDate),
+		index("idx_journey_product_type").on(table.productType),
+		index("idx_journey_date_product_type").on(table.journeyDate, table.productType)
+	]
 );
 
 const journeyMessages = coreSchema.table(
