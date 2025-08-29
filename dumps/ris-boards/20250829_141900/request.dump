@@ -1,0 +1,16 @@
+GET /db/apis/ris-boards/v1/public/departures/8000096?filterTransports=HIGH_SPEED_TRAIN,INTERCITY_TRAIN,INTER_REGIONAL_TRAIN,REGIONAL_TRAIN&includeStationGroup=false&maxViaStops=4&timeEnd=2025-08-29T17:19:38Z&sortBy=TIME_SCHEDULE HTTP/2
+Host: apis.deutschebahn.com
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Referer: https://ris-abfahrtstafel.noncd.db.de/
+DB-Api-Key: <redacted>
+DB-Client-Id: <redacted>
+Origin: https://ris-abfahrtstafel.noncd.db.de
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Priority: u=4
+TE: trailers
