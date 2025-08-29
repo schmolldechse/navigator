@@ -25,16 +25,18 @@ const stations = coreSchema.table("stations", {
 	isLocked: boolean("is_locked").notNull().default(false)
 });
 
-const stationProducts = coreSchema.table("station_products", {
-	id: serial("id").primaryKey(),
-	evaNumber: integer("eva_number")
-		.notNull()
-		.references(() => stations.evaNumber, { onDelete: "cascade" }),
-	name: varchar("name", { length: 32 }).notNull(),
-	queryingEnabled: boolean("querying_enabled").notNull()
-}, (table) => [
-	index("idx_products_eva_number_name").on(table.evaNumber, table.name),
-]);
+const stationProducts = coreSchema.table(
+	"station_products",
+	{
+		id: serial("id").primaryKey(),
+		evaNumber: integer("eva_number")
+			.notNull()
+			.references(() => stations.evaNumber, { onDelete: "cascade" }),
+		name: varchar("name", { length: 32 }).notNull(),
+		queryingEnabled: boolean("querying_enabled").notNull()
+	},
+	(table) => [index("idx_products_eva_number_name").on(table.evaNumber, table.name)]
+);
 
 const stationRil = coreSchema.table("station_ril100", {
 	id: serial("id").primaryKey(),

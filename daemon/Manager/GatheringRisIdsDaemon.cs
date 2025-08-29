@@ -132,7 +132,7 @@ public class GatheringRisIdsDaemon : Daemon
 			.Select(product => product.ProductName)
 			.ToHashSet();
 		var filteredByProduct = results.Where(risId => enabledProducts.Contains(risId.Product)).ToList();
-		
+
 		// update `discovery_date` so every has the same date
 		filteredByProduct.ForEach(risId => risId.DiscoveryDate = DateTime.UtcNow);
 
