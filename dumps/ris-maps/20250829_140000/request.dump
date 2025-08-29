@@ -1,0 +1,21 @@
+POST /db/apis/ris-maps/v2/journey-positions/emulated HTTP/2
+Host: apis.deutschebahn.com
+User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0
+Accept: application/vnd.de.db.ris+json
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br, zstd
+Content-Type: application/json
+RISMAPS-App-Id: livemap-WebSdk
+DB-Api-Key: <redacted>
+DB-Client-Id: <redacted>
+Content-Length: 50
+Origin: https://generalsanierung.db-ersatzverkehr.de
+Connection: keep-alive
+Referer: https://generalsanierung.db-ersatzverkehr.de/
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+TE: trailers
+
+----- Payload -----
+{"administrationIDs":["eco001","eco002","eco003"]}
