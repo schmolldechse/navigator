@@ -158,14 +158,18 @@ public class GatheringJourneyDaemon : Daemon
 		string formattedId = when.ToString("yyyyMMdd") + "-" + risId;
 		_logger.LogDebug("Gathering journey for RIS ID {0}", formattedId);
 
-		// random proxy
 		var httpClient = _proxyRotator.GetRandomProxy();
 		var request = await httpClient.GetAsync(string.Format(_apiUrl, formattedId), cancellationToken);
 
 		// 500 code is thrown if the journey does not exist
 		if (!request.IsSuccessStatusCode)
 			return new() { Journey = null, ParsingError = false };
-
+		
+		// It may happen that a non-JSON response is returned (see https://github.com/schmolldechse/navigator/issues/163)
+		var contentType = request.Content.Headers.ContentType?.MediaType;
+		if (contentType == null || !contentType.Contains("application/json", StringComparison.OrdinalIgnoreCase))
+			return new() { Journey = null, ParsingError = true };
+		
 		await using var stream = await request.Content.ReadAsStreamAsync(cancellationToken);
 		var content = (await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)).RootElement;
 
