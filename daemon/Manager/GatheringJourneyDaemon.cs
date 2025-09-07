@@ -166,9 +166,10 @@ public class GatheringJourneyDaemon : Daemon
 			return new() { Journey = null, ParsingError = false };
 
 		// It may happen that a non-JSON response is returned (see https://github.com/schmolldechse/navigator/issues/163)
+		// Skip ParsingError as there is simply no journey
 		var contentType = request.Content.Headers.ContentType?.MediaType;
 		if (contentType == null || !contentType.Contains("application/json", StringComparison.OrdinalIgnoreCase))
-			return new() { Journey = null, ParsingError = true };
+			return new() { Journey = null, ParsingError = false };
 
 		await using var stream = await request.Content.ReadAsStreamAsync(cancellationToken);
 		var content = (await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)).RootElement;
