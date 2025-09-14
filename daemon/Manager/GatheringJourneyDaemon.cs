@@ -161,14 +161,8 @@ public class GatheringJourneyDaemon : Daemon
 		var httpClient = _proxyRotator.GetRandomProxy();
 		var request = await httpClient.GetAsync(string.Format(_apiUrl, formattedId), cancellationToken);
 
-		// 500 code is thrown if the journey does not exist
-		if (!request.IsSuccessStatusCode)
-			return new() { Journey = null, ParsingError = false };
-
-		// It may happen that a non-JSON response is returned (see https://github.com/schmolldechse/navigator/issues/163)
-		// Skip ParsingError as there is simply no journey
-		var contentType = request.Content.Headers.ContentType?.MediaType;
-		if (contentType == null || !contentType.Contains("application/json", StringComparison.OrdinalIgnoreCase))
+		// Everything except 200 is considered as no journey found
+		if (request.StatusCode != System.Net.HttpStatusCode.OK)
 			return new() { Journey = null, ParsingError = false };
 
 		await using var stream = await request.Content.ReadAsStreamAsync(cancellationToken);
