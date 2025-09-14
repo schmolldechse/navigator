@@ -13,11 +13,10 @@ struct TimetableRequestDTO: Content {
     // Path Parameters
     let profile: TimetableProfile
     let evaNumber: Int
-    let type: TimetableType
     
     // Query Parameters
-    let when: Date?
-    let duration: Int?
+    var when: Date?
+    var duration: Int?
     
     init(_ request: Request) throws {
         guard let profile = request.parameters.get("profile", as: TimetableProfile.self) else {
@@ -28,15 +27,10 @@ struct TimetableRequestDTO: Content {
             throw Abort(.badRequest, reason: "Invalid 'evaNumber' specified. It must be an integer.")
         }
         
-        guard let type = request.parameters.get("type", as: TimetableType.self) else {
-            throw Abort(.badRequest, reason: "Invalid 'type' specified. Valid types are: \(TimetableType.allCases.map(\.rawValue).joined(separator: ", "))")
-        }
-        
         let query = try request.query.decode(QueryParams.self)
         
         self.profile = profile
         self.evaNumber = evaNumber
-        self.type = type
         
         self.when = query.when ?? Date()
         self.duration = query.duration ?? 60
@@ -48,8 +42,6 @@ struct TimetableRequestDTO: Content {
         let profile: TimetableProfile
         /// The station to load the timetable for.
         let evaNumber: Int
-        /// The type of timetable to look for.
-        let type: TimetableType
     }
     
     @OpenAPIDescriptable

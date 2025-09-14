@@ -9,6 +9,7 @@ import Vapor
 import Foundation
 
 protocol TimetableProvider {
-    func retrieveTimetable(for timetableRequest: TimetableRequestDTO, req: Request) async throws -> [TimetableEntryDTO]
+    func retrieveDepartures(for timetableRequest: TimetableRequestDTO, req: Request) async throws -> [DepartureEntry]
+    
+    func retrieveArrivals(for timetableRequest: TimetableRequestDTO, req: Request) async throws -> [ArrivalEntry]
 }
-
