@@ -6,6 +6,7 @@ func routes(_ app: Application) throws {
     app.get("") { req async in
         req.redirect(to: "swagger", redirectType: .permanent)
     }
+    .excludeFromOpenAPI()
     
     app.get("swagger") { req async throws in
         try await req.view.render("index", ["title": "Navigator Backend"])
