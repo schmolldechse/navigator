@@ -156,14 +156,33 @@ public class GatheringJourneyDaemon : Daemon
 	private async Task<JourneyResponse> CallApi(string risId, DateTime when, CancellationToken cancellationToken)
 	{
 		string formattedId = when.ToString("yyyyMMdd") + "-" + risId;
-		_logger.LogDebug("Gathering journey for RIS ID {0}", formattedId);
+		_logger.LogInformation("Gathering journey for RIS ID {0}", formattedId);
 
 		var httpClient = _proxyRotator.GetRandomProxy();
 		var request = await httpClient.GetAsync(string.Format(_apiUrl, formattedId), cancellationToken);
 
+		_logger.LogDebug(
+			"Got {StatusCode} ({Code}) for journey {RisId}",
+			request.StatusCode,
+			(int)request.StatusCode,
+			formattedId
+		);
+
 		// Everything except 200 is considered as no journey found
 		if (request.StatusCode != System.Net.HttpStatusCode.OK)
 			return new() { Journey = null, ParsingError = false };
+
+		// If our Content-Type is not 'application/json', we can't parse this as the server blocked our request and therefore mark it as a ParsingError
+		// as we do not want to increase our 'LastSeen' date for the requested RIS ID
+		if (
+			request.Content.Headers.ContentType == null
+			|| !string.Equals(
+				request.Content.Headers.ContentType.MediaType,
+				"application/json",
+				StringComparison.OrdinalIgnoreCase
+			)
+		)
+			return new() { Journey = null, ParsingError = true };
 
 		await using var stream = await request.Content.ReadAsStreamAsync(cancellationToken);
 		var content = (await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)).RootElement;
