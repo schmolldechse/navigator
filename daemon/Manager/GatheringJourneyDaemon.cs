@@ -182,13 +182,13 @@ public class GatheringJourneyDaemon : Daemon
 				StringComparison.OrdinalIgnoreCase
 			)
 		)
-			return new() { Journey = null, ParsingError = true };
+			return new() { Journey = null, ParsingError = false };
 
 		await using var stream = await request.Content.ReadAsStreamAsync(cancellationToken);
 		var content = (await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)).RootElement;
 
 		if (content.GetProperty("journeyId").ValueKind == JsonValueKind.Null)
-			return new() { Journey = null, ParsingError = false };
+			return new() { Journey = null, ParsingError = true };
 		var journeyId = content.GetProperty("journeyId").GetString()!;
 
 		var journey = new Journey()
