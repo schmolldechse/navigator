@@ -29,22 +29,22 @@ struct TimetableController: RouteCollection {
             .get(use: self.departures)
             .openAPI(
                 summary: "Get departures",
-                description: "Loads departure timetable for a specific station",
+                description: "Loads a set of departing journeys for a specific station.",
                 query: .type(TimetableRequestDTO.QueryParams.self),
                 path: .type(TimetableRequestDTO.PathParams.self)
             )
-            .response(statusCode: .ok, body: .type([DepartureEntry].self), description: "Array of timetable entries")
+            .response(statusCode: .ok, body: .type([DepartureEntry].self), description: "Array of departure timetable entries")
             .response(statusCode: .badRequest, description: "Invalid parameters specified")
         
         timetables.grouped(":profile", "arrivals", ":evaNumber")
             .get(use: self.arrivals)
             .openAPI(
-                summary: "Load timetable",
-                description: "Loads a timetable for a specific station",
+                summary: "Get arrivals",
+                description: "Loads a set of arriving journeys for a specific station.",
                 query: .type(TimetableRequestDTO.QueryParams.self),
                 path: .type(TimetableRequestDTO.PathParams.self)
             )
-            .response(statusCode: .ok, body: .type([ArrivalEntry].self), description: "Array of timetable entries")
+            .response(statusCode: .ok, body: .type([ArrivalEntry].self), description: "Array of arrival timetable entries")
             .response(statusCode: .badRequest, description: "Invalid parameters specified")
     }
 
