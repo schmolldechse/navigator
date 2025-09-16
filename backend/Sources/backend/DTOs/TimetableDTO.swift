@@ -93,7 +93,7 @@ internal struct Information: Content {
     var textShort: String?
 }
 
-internal enum InformationType: String, CaseIterable, Codable, OpenAPIDescriptable {
+internal enum InformationType: String, CaseIterable, Codable {
     case JOURNEY_ATTRIBUTE = "JOURNEY_ATTRIBUTE"
     case DISRUPTION = "DISRUPTION"
     case MESSAGES = "MESSAGES"
@@ -176,4 +176,3 @@ internal enum JourneyType: String, CaseIterable, Codable, OpenAPIDescriptable {
         )
     }
 }
-
