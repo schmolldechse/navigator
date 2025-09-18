@@ -30,12 +30,13 @@ public class GatheringJourneyDaemon : Daemon
 		_proxyRotator = proxyRotator ?? throw new ArgumentNullException(nameof(proxyRotator), "Proxy rotator cannot be null");
 	}
 
-	// timetable changes
-	private readonly DateTime[] _timetableChanges =
-	{
-		new(2024, 12, 17, 0, 0, 0, DateTimeKind.Utc),
-		new(2025, 6, 15, 0, 0, 0, DateTimeKind.Utc),
-	};
+    // timetable changes
+    private readonly DateTime[] _timetableChanges =
+    {
+        new(2024, 12, 17, 0, 0, 0, DateTimeKind.Utc),
+        new(2025, 6, 15, 0, 0, 0, DateTimeKind.Utc),
+        new(2025, 12, 14, 0, 0, 0, DateTimeKind.Utc)
+    };
 
 	private DateTime GetLastTimetableChange(DateTime? compareTo = null)
 	{
