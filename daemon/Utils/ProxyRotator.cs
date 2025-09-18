@@ -1,5 +1,4 @@
 using System.Net;
-using daemon.Models;
 using Microsoft.Extensions.Logging;
 
 namespace daemon.Utils;
@@ -14,26 +13,21 @@ public class ProxyRotator : IDisposable
 
 	private bool _disposed;
 
-	public ProxyRotator(ILogger<ProxyRotator> logger, AppConfiguration configuration)
+	public ProxyRotator(ILogger<ProxyRotator> logger)
 	{
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
-		_proxyEnabled = configuration.ProxyEnabled;
-
+		
+		bool.TryParse(Environment.GetEnvironmentVariable("PROXY_ENABLED"), out _proxyEnabled);
 		if (!_proxyEnabled)
 		{
 			_logger.LogInformation("Proxy usage is disabled via configuration");
 			return;
 		}
 
-		var proxyList = configuration.Proxies?.Split(
-			',',
-			StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries
-		);
-		if (proxyList != null && proxyList.Length > 0)
-		{
-			proxyList.ToList().ForEach(proxy => _proxies.Add(CreateHttpClientWithProxy(proxy)));
-			_logger.LogInformation("ProxyRotator initialized with {Count} proxies", _proxies.Count);
-		}
+		var proxyList = (Environment.GetEnvironmentVariable("PROXIES") ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+		if (proxyList.Length == 0) return;
+		proxyList.ToList().ForEach(proxy => _proxies.Add(CreateHttpClientWithProxy(proxy))); 
+		_logger.LogInformation("ProxyRotator initialized with {Count} proxies", _proxies.Count);
 	}
 
 	public HttpClient GetRandomProxy()
@@ -51,17 +45,15 @@ public class ProxyRotator : IDisposable
 		if (Uri.TryCreate(proxyUrl, UriKind.Absolute, out Uri? proxyUri))
 		{
 			webProxy.Address = new Uri($"{proxyUri.Scheme}://{proxyUri.Host}:{proxyUri.Port}");
-			if (!string.IsNullOrEmpty(proxyUri.UserInfo))
-			{
-				string[] userInfoParts = proxyUri.UserInfo.Split(':', 2);
-				if (userInfoParts.Length == 2)
-				{
-					webProxy.Credentials = new NetworkCredential(userInfoParts[0], userInfoParts[1]);
-				}
+			if (string.IsNullOrEmpty(proxyUri.UserInfo)) return new();
+			
+			string[] userInfoParts = proxyUri.UserInfo.Split(':', 2); 
+			if (userInfoParts.Length == 2) 
+			{ 
+				webProxy.Credentials = new NetworkCredential(userInfoParts[0], userInfoParts[1]);
 			}
 		}
-		else
-			webProxy.Address = new Uri(proxyUrl);
+		else webProxy.Address = new Uri(proxyUrl);
 
 		var httpClientHandler = new HttpClientHandler
 		{
@@ -69,16 +61,7 @@ public class ProxyRotator : IDisposable
 			UseProxy = true,
 			PreAuthenticate = true,
 		};
-
-		var httpClient = new HttpClient(httpClientHandler) { Timeout = TimeSpan.FromMinutes(1) };
-
-		httpClient.DefaultRequestHeaders.Clear();
-		httpClient.DefaultRequestHeaders.Add(
-			"User-Agent",
-			"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3"
-		);
-
-		return httpClient;
+		return new(httpClientHandler) { Timeout = TimeSpan.FromMinutes(1)};
 	}
 
 	public void Dispose()

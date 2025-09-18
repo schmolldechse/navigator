@@ -1,5 +1,4 @@
 ﻿using System.Text.Json;
-using daemon.Models;
 using daemon.Models.Core;
 using Microsoft.Extensions.Logging;
 
@@ -14,15 +13,13 @@ public class ApiService
 		"https://apis.deutschebahn.com/db-api-marketplace/apis/ris-stations/v1/stop-places/by-position?latitude={0}&longitude={1}&radius={2}&groupBy={3}&onlyActive=false&limit=10000";
 	private const string StadaApiUrl = "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations";
 
-	public ApiService(HttpClient httpClient, AppConfiguration appConfiguration, ILogger<ApiService> logger)
+	public ApiService(HttpClient httpClient, ILogger<ApiService> logger)
 	{
 		_httpClient = httpClient;
-		if (appConfiguration == null)
-			throw new ArgumentNullException(nameof(appConfiguration), "AppConfiguration cannot be null");
 		_logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
 
-		_httpClient.DefaultRequestHeaders.Add("DB-Client-Id", appConfiguration.DbClientId);
-		_httpClient.DefaultRequestHeaders.Add("DB-Api-Key", appConfiguration.DbClientSecret);
+		_httpClient.DefaultRequestHeaders.Add("DB-Client-Id", Environment.GetEnvironmentVariable("STATIONS_CLIENT_ID") ?? "STATIONS_CLIENT_ID environment variable not set.");
+		_httpClient.DefaultRequestHeaders.Add("DB-Api-Key", Environment.GetEnvironmentVariable("STATIONS_API_KEY") ?? "STATIONS_API_KEY environment variable not set.");
 		_httpClient.DefaultRequestHeaders.Add("X-Correlation-Id", Guid.NewGuid() + "_" + Guid.NewGuid());
 	}
 

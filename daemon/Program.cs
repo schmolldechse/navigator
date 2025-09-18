@@ -1,10 +1,8 @@
-﻿using CommandLine;
+﻿using System.CommandLine;
 using daemon.Database;
 using daemon.Manager;
-using daemon.Models;
 using daemon.Service;
 using daemon.Utils;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -12,29 +10,58 @@ namespace daemon;
 
 class Program
 {
-	static async Task Main(string[] args)
+	static async Task<int> Main(string[] args)
 	{
-		// parse command line arguments
-		Options cmdOptions = new();
-		CommandLine.Parser.Default.ParseArguments<Options>(args).WithParsed(parsed => cmdOptions = parsed);
+		Option<bool> debugOption = new("--debug")
+		{
+			Description = "Enable debug logging",
+			DefaultValueFactory = _ => false
+		};
+		
+		Option<GatheringMode> skipGatheringOption = new("--skipGathering") 
+		{
+			Description = "Skip station gathering. 'none' = gather from API + merge files, 'api' = skip API calls, 'full' = skip all gathering (default: api)",
+			DefaultValueFactory = _ => GatheringMode.Api
+		};
 
+		var rootCommand = new RootCommand("Navigator Daemon application");
+		rootCommand.Options.Add(debugOption);
+		rootCommand.Options.Add(skipGatheringOption);
+		
+		rootCommand.SetAction(async parseResult =>
+		{
+			await RunApplication(parseResult.GetRequiredValue(debugOption), parseResult.GetRequiredValue(skipGatheringOption));
+		});
+		return await rootCommand.Parse(args).InvokeAsync();
+	}
+
+	private static async Task RunApplication(bool debug, GatheringMode skipGathering)
+	{
 		var services = new ServiceCollection();
-		services.AddLogging(builder =>
-			builder
-				.AddSimpleConsole(options =>
-				{
-					options.TimestampFormat = "[HH:mm:ss] ";
-					options.IncludeScopes = false;
-				})
-				.SetMinimumLevel(cmdOptions.Debug ? LogLevel.Debug : LogLevel.Information)
-		);
+		services.AddLogging(builder => builder.AddSimpleConsole(options =>
+		{
+			options.TimestampFormat = "[HH:mm:ss] ";
+			options.IncludeScopes = false;
+		}).SetMinimumLevel(debug ? LogLevel.Debug : LogLevel.Information));
 
-		ConfigureServices(services);
+		services.AddHttpClient();
+		services.AddSingleton(new ManualResetEventSlim(false));
+		services.AddSingleton<ProxyRotator>();
 
+		services.AddSingleton<ApiService>();
+		services.AddSingleton<StationDiscoveryService>();
+		services.AddSingleton<StationMergingService>();
+		
+		services.AddDbContext<NavigatorDbContext>(ServiceLifetime.Scoped);
+		
+		services.AddSingleton<DaemonManager>();
+		services.AddSingleton<GatheringRisIdsDaemon>();
+		services.AddSingleton<GatheringJourneyDaemon>();
+		
 		var serviceProvider = services.BuildServiceProvider();
 		var logger = serviceProvider.GetService<ILogger<Program>>();
 		logger!.LogInformation("Navigator daemon application is starting...");
-
+		
 		Console.CancelKeyPress += (sender, eventArgs) =>
 		{
 			eventArgs.Cancel = true;
@@ -43,47 +70,10 @@ class Program
 			var shutdownEvent = serviceProvider.GetRequiredService<ManualResetEventSlim>();
 			shutdownEvent.Set();
 		};
-
-		// parse command line arguments
-		if (cmdOptions.SkipGathering != GatheringMode.Full)
-			await RunStationGathering(serviceProvider, skipApi: cmdOptions.SkipGathering == GatheringMode.Api);
-
+		
+		if (skipGathering != GatheringMode.Full)
+			await RunStationGathering(serviceProvider, skipApi: skipGathering == GatheringMode.Api);
 		RunDaemon(serviceProvider);
-	}
-
-	private static void ConfigureServices(IServiceCollection services)
-	{
-		// Environment Variables
-		var dbClientId =
-			Environment.GetEnvironmentVariable("DB_CLIENT_ID")
-			?? throw new ArgumentNullException("DB_CLIENT_ID", "DeutscheBahn ClientId not configured");
-		var dbClientSecret =
-			Environment.GetEnvironmentVariable("DB_CLIENT_SECRET")
-			?? throw new ArgumentNullException("DB_CLIENT_SECRET", "DeutscheBahn ClientSecret not configured");
-		var proxies = Environment.GetEnvironmentVariable("PROXIES");
-		var proxyEnabled =
-			!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("PROXY_ENABLED"))
-			&& bool.TryParse(Environment.GetEnvironmentVariable("PROXY_ENABLED"), out var enabled)
-			&& enabled;
-		services.AddSingleton(new AppConfiguration(dbClientId, dbClientSecret, proxies, proxyEnabled));
-
-		// common
-		services.AddHttpClient();
-		services.AddSingleton(new ManualResetEventSlim(false));
-		services.AddSingleton<ProxyRotator>();
-
-		// station gathering services
-		services.AddSingleton<ApiService>();
-		services.AddSingleton<StationDiscoveryService>();
-		services.AddSingleton<StationMergingService>();
-
-		// database
-		services.AddDbContext<NavigatorDbContext>(ServiceLifetime.Scoped);
-
-		// daemons
-		services.AddSingleton<DaemonManager>();
-		services.AddSingleton<GatheringRisIdsDaemon>();
-		services.AddSingleton<GatheringJourneyDaemon>();
 	}
 
 	private static async Task RunStationGathering(ServiceProvider serviceProvider, bool skipApi = false)
@@ -95,8 +85,7 @@ class Program
 			var stationDiscoveryService = serviceProvider.GetRequiredService<StationDiscoveryService>();
 			await stationDiscoveryService.DiscoverStations();
 		}
-		else
-			logger.LogInformation("Skipping gathering of stations as requested.");
+		else logger.LogInformation("Skipping gathering of stations as requested.");
 
 		// merge files
 		var stationMergingService = serviceProvider.GetRequiredService<StationMergingService>();
@@ -106,16 +95,10 @@ class Program
 		logger.LogInformation("Merged {Count} stations.", stations.Count);
 
 		// calculate weights
-		stations = stations
-			.Select(station =>
-			{
-				station.Weight = stationMergingService.CalculateWeight(
-					station,
-					stadaStations.GetValueOrDefault(station.EvaNumber)?.PriceCategory ?? -1
-				);
-				return station;
-			})
-			.ToList();
+		stations = stations.Select(station => { 
+			station.Weight = stationMergingService.CalculateWeight(station, stadaStations.GetValueOrDefault(station.EvaNumber)?.PriceCategory ?? -1); 
+			return station; 
+		}).ToList();
 		logger.LogInformation("Calculated weights for stations.");
 
 		// filter out stations already in the database
@@ -150,23 +133,4 @@ public enum GatheringMode
 	None,
 	Api, // skip Api calls
 	Full, // skips Api calls + inserting ~297k stations into PostgresSQL
-}
-
-public class Options
-{
-	[Option('s', "skipGathering", Required = false, HelpText = "Skip gathering of stations. Options: 'None', 'Api', 'Full'")]
-	public string SkipGatheringStr { get; set; } = "None";
-
-	public GatheringMode SkipGathering
-	{
-		get
-		{
-			if (Enum.TryParse<GatheringMode>(SkipGatheringStr, true, out var result))
-				return result;
-			return GatheringMode.None;
-		}
-	}
-
-	[Option("debug", Required = false, HelpText = "Enable debug logging.")]
-	public bool Debug { get; set; } = false;
 }
