@@ -13,8 +13,12 @@ public class IdentifiedRisId
 	public required string Id { get; set; }
 
 	[MaxLength(128)]
-	[Column("product")]
-	public required string Product { get; set; }
+	[Column("transport_type")]
+	public required string TransportProduct { get; set; }
+	
+	[MaxLength(128)]
+	[Column("replacement_transport_type")]
+	public string? ReplacementTransportProduct { get; set; }
 
 	[Column("discovery_date")]
 	public required DateTime DiscoveryDate { get; set; }

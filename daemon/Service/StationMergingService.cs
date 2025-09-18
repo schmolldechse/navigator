@@ -18,16 +18,16 @@ public class StationMergingService
 
 	private readonly Dictionary<string, double> _productWeights = new()
 	{
-		{ "Hochgeschwindigkeitszuege", 3 },
-		{ "IntercityUndEurocityZuege", 2 },
-		{ "InterregioUndSchnellzuege", 1 },
-		{ "NahverkehrsonstigeZuege", 1 },
-		{ "Sbahnen", 1 },
-		{ "UBahn", 0.5 },
-		{ "Schiffe", 0.2 },
-		{ "Strassenbahn", 0.2 },
-		{ "Busse", 0.1 },
-		{ "AnrufpflichtigeVerkehre", 0.1 },
+		{ "HIGH_SPEED_TRAIN", 3 },
+		{ "INTERCITY_TRAIN", 2 },
+		{ "INTER_REGIONAL_TRAIN", 1 },
+		{ "REGIONAL_TRAIN", 1 },
+		{ "CITY_TRAIN", 1 },
+		{ "SUBWAY", 0.5 },
+		{ "FERRY", 0.2 },
+		{ "TRAM", 0.2 },
+		{ "BUS", 0.1 },
+		{ "SHUTTLE", 0.1 }
 	};
 
 	public StationMergingService(ILogger<StationMergingService> logger)
@@ -81,7 +81,7 @@ public class StationMergingService
 				var products = stationElement
 					.GetProperty("availableTransports")
 					.EnumerateArray()
-					.Select(product => Product.MapProduct(product.GetString()))
+					.Select(product => product.GetString())
 					.Distinct()
 					.ToList();
 				var name = stationElement.GetProperty("names").GetProperty("DE").GetProperty("nameLong").GetString()!;

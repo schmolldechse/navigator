@@ -9,245 +9,203 @@ using Microsoft.Extensions.Logging;
 
 namespace daemon.Manager;
 
-public class GatheringRisIdsDaemon : Daemon
+public class GatheringRisIdsDaemon(
+    ILogger<GatheringRisIdsDaemon> logger,
+    IServiceProvider serviceProvider,
+    ProxyRotator proxyRotator) : Daemon("Gathering RIS IDs", TimeSpan.FromSeconds(600), logger)
 {
-	private readonly ILogger<GatheringRisIdsDaemon> _logger;
-	private readonly IServiceProvider _serviceProvider;
-	private readonly ProxyRotator _proxyRotator;
+    private readonly string _apiUrl = "https://apis.deutschebahn.com/db/apis/ris-boards/v1/public/{0}/{1}?timeStart={2}&timeEnd={3}";
 
-	private readonly string _apiUrl =
-		"https://regio-guide.de/@prd/zupo-travel-information/api/public/ri/board/{0}/{1}?timeStart={2}&timeEnd={3}&expandTimeFrame=TIME_START&modeOfTransport=HIGH_SPEED_TRAIN,INTERCITY_TRAIN,INTER_REGIONAL_TRAIN,REGIONAL_TRAIN,CITY_TRAIN,BUS,FERRY,SUBWAY,TRAM,SHUTTLE,UNKNOWN";
+    protected override async Task ExecuteCoreAsync(CancellationToken cancellationToken)
+    {
+        using var scope = serviceProvider.CreateScope();
+        var dbContext = scope.ServiceProvider.GetRequiredService<NavigatorDbContext>();
 
-	public GatheringRisIdsDaemon(
-		ILogger<GatheringRisIdsDaemon> logger,
-		IServiceProvider serviceProvider,
-		ProxyRotator proxyRotator
-	)
-		: base("Gathering RIS IDs", TimeSpan.FromSeconds(300), logger)
-	{
-		_logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null");
-		_serviceProvider =
-			serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider), "Service provider cannot be null");
-		_proxyRotator = proxyRotator ?? throw new ArgumentNullException(nameof(proxyRotator), "Proxy rotator cannot be null");
-	}
+        Station? randomStation = null;
+        await using (var transaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken))
+        {
+            randomStation = await dbContext
+                .Stations.Where(station => !station.IsLocked)
+                .Where(station => station.QueryingEnabled)
+                .Where(station => station.LastQueried == null || station.LastQueried < DateTime.UtcNow.Date.AddDays(-1))
+                .Include(station => station.Products)
+                .OrderBy(_ => Guid.NewGuid())
+                .FirstOrDefaultAsync(cancellationToken);
+            if (randomStation == null)
+            {
+                await transaction.RollbackAsync(cancellationToken);
+                return;
+            }
 
-	protected override async Task ExecuteCoreAsync(CancellationToken cancellationToken)
-	{
-		using var scope = _serviceProvider.CreateScope();
-		var dbContext = scope.ServiceProvider.GetRequiredService<NavigatorDbContext>();
+            randomStation.IsLocked = true;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await transaction.CommitAsync(cancellationToken);
+        }
 
-		var date = DateTime.UtcNow;
+        try
+        {
+            // RIS::Boards gives us the opportunity to query up boards to 7 days in the past.
+            if (randomStation.LastQueried == null)
+            {
+                var lastQueried = DateTime.UtcNow.AddDays(-7);
+                logger.LogInformation(
+                    "{Name} (evaNumber: {EvaNumber}) has not been queried yet! Set 'last_queried to' {StartDate}",
+                    randomStation.Name,
+                    randomStation.EvaNumber,
+                    lastQueried
+                );
 
-		Station? randomStation = null;
-		await using (
-			var transaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken)
-		)
-		{
-			randomStation = await dbContext
-				.Stations.Where(station => !station.IsLocked)
-				.Where(station => station.QueryingEnabled)
-				.Where(station => station.LastQueried == null || station.LastQueried < date.Date.AddDays(-1))
-				.Include(station => station.Products)
-				.OrderBy(_ => Guid.NewGuid())
-				.FirstOrDefaultAsync(cancellationToken);
-			if (randomStation == null)
-			{
-				await transaction.RollbackAsync(cancellationToken);
-				return;
-			}
+                await ProcessStation(randomStation, lastQueried, dbContext, cancellationToken);
+            }
+            // Check if the station was last queried before today's midnight date.
+            else if (randomStation.LastQueried.Value.Date < DateTime.UtcNow.Date)
+            {
+                var lastQueried = new DateTime(
+                    DateOnly.FromDateTime(randomStation.LastQueried.Value.Date.AddDays(1)),
+                    TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),
+                    DateTimeKind.Utc
+                );
+                logger.LogInformation(
+                    "Querying {Name} (evaNumber: {EvaNumber}) for date {Date}",
+                    randomStation.Name,
+                    randomStation.EvaNumber,
+                    lastQueried
+                );
 
-			randomStation.IsLocked = true;
-			await dbContext.SaveChangesAsync(cancellationToken);
-			await transaction.CommitAsync(cancellationToken);
-		}
+                await ProcessStation(randomStation, lastQueried, dbContext, cancellationToken);
+            }
+        }
+        finally
+        {
+            await using var unlockTransaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
+            randomStation.IsLocked = false;
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await unlockTransaction.CommitAsync(cancellationToken);
+        }
+    }
 
-		try
-		{
-			if (randomStation.LastQueried == null)
-			{
-				// the API above saves RIS id's up to 7 days in the past
-				var startDate = date.AddDays(-7);
-				_logger.LogInformation(
-					"{Name} (evaNumber: {EvaNumber}) has not been queried yet! Set 'last_queried to' {StartDate}",
-					randomStation.Name,
-					randomStation.EvaNumber,
-					startDate
-				);
+    private async Task ProcessStation(
+        Station station,
+        DateTime date,
+        NavigatorDbContext dbContext,
+        CancellationToken cancellationToken
+    )
+    {
+        var apiResults = await Task.WhenAll(
+            CallApi(station.EvaNumber, date.Date),
+            CallApi(station.EvaNumber, date.Date, false),
+            CallApi(station.EvaNumber, date.Date.AddHours(12)),
+            CallApi(station.EvaNumber, date.Date.AddHours(12), false));
+        var results = apiResults.SelectMany(identifiedRisId => identifiedRisId)
+            .DistinctBy(identifiedRisId => identifiedRisId.Id)
+            .ToList();
 
-				await ProcessStation(randomStation, startDate, dbContext, cancellationToken);
-			}
-			else if (randomStation.LastQueried.Value.Date < date.Date)
-			{
-				var newLastQueried = new DateTime(
-					DateOnly.FromDateTime(randomStation.LastQueried.Value.Date.AddDays(1)),
-					TimeOnly.FromTimeSpan(date.TimeOfDay),
-					DateTimeKind.Utc
-				);
-				_logger.LogInformation(
-					"Querying {Name} (evaNumber: {EvaNumber}) for date {Date}",
-					randomStation.Name,
-					randomStation.EvaNumber,
-					newLastQueried
-				);
+        // filter out RIS IDs that don't match enabled products
+        var enabledProducts = station.Products
+            .Where(product => product.QueryingEnabled)
+            .Select(product => product.ProductName)
+            .ToHashSet();
+        var filteredByProduct = results
+            .Where(identifiedRisId => enabledProducts.Contains(identifiedRisId.TransportProduct)).ToList();
+        
+        var discoveryDate = DateTime.UtcNow;
+        filteredByProduct.ForEach(risId => risId.DiscoveryDate = discoveryDate);
+        
+        // upsert RIS IDs
+        station.LastQueried = date;
 
-				await ProcessStation(randomStation, newLastQueried, dbContext, cancellationToken);
-			}
-		}
-		finally
-		{
-			await using var unlockTransaction = await dbContext.Database.BeginTransactionAsync(
-				IsolationLevel.ReadCommitted,
-				cancellationToken
-			);
-			randomStation.IsLocked = false;
-			await dbContext.SaveChangesAsync(cancellationToken);
-			await unlockTransaction.CommitAsync(cancellationToken);
-		}
-	}
+        if (!filteredByProduct.Any())
+        {
+            await dbContext.SaveChangesAsync(cancellationToken);
+            logger.LogInformation("No RIS IDs found to insert/ update for {StationName} (evaNumber: {EvaNumber}). No action need to be taken.", station.Name, station.EvaNumber);
+            return;
+        }
 
-	private async Task ProcessStation(
-		Station station,
-		DateTime date,
-		NavigatorDbContext dbContext,
-		CancellationToken cancellationToken
-	)
-	{
-		var results = (
-			await Task.WhenAll(
-				[
-					CallApi(station.EvaNumber, date.Date),
-					CallApi(station.EvaNumber, date.Date, false),
-					CallApi(station.EvaNumber, date.Date.AddHours(12)),
-					CallApi(station.EvaNumber, date.Date.AddHours(12), false),
-				]
-			)
-		)
-			.SelectMany(risId => risId)
-			.DistinctBy(risId => risId.Id)
-			.ToList();
+        var existingRisIds = await dbContext.RisIds
+            .Where(identifiedRisId => filteredByProduct.Select(gatheredRisId => gatheredRisId.Id).Contains(identifiedRisId.Id))
+            .ToDictionaryAsync(identifiedRisId => identifiedRisId.Id, cancellationToken);
 
-		// filter out RIS IDs that don't match enabled products
-		var enabledProducts = station
-			.Products.Where(product => product.QueryingEnabled)
-			.Select(product => product.ProductName)
-			.ToHashSet();
-		var filteredByProduct = results.Where(risId => enabledProducts.Contains(risId.Product)).ToList();
+        // separate new & existing
+        var newRisIds = filteredByProduct.Where(risId => !existingRisIds.ContainsKey(risId.Id)).ToList();
+        if (newRisIds.Any()) await dbContext.RisIds.AddRangeAsync(newRisIds, cancellationToken);
 
-		// update `discovery_date` so every has the same date
-		filteredByProduct.ForEach(risId => risId.DiscoveryDate = DateTime.UtcNow);
+        var existingToUpdate = filteredByProduct.Where(risId => existingRisIds.ContainsKey(risId.Id)).ToList();
+        existingToUpdate.ForEach(risId => risId.Active = true);
 
-		var (inserted, updated) = await UpsertRisIds(station, date, filteredByProduct, dbContext, cancellationToken);
-		_logger.LogInformation(
-			"Retrieved a total of {Count} RIS IDs for station {StationName} (evaNumber: {EvaNumber}): Filtered out by product: {Filtered}, Already in DB (updated `active` bool): {Updated}, Inserted: {Inserted}",
-			results.Count,
-			station.Name,
-			station.EvaNumber,
-			(results.Count - filteredByProduct.Count),
-			updated,
-			inserted
-		);
-	}
+        await dbContext.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("Retrieved a total of {Count} RIS IDs for {StationName} (evaNumber: {EvaNumber}): Filtered out by product: {Filtered}, Already in DB (updated `active` bool): {Updated}, Inserted: {Inserted}",
+            results.Count,
+            station.Name,
+            station.EvaNumber,
+            (results.Count - filteredByProduct.Count),
+            existingToUpdate.Count,
+            newRisIds.Count
+        );
+    }
 
-	private async Task<(int inserted, int updated)> UpsertRisIds(
-		Station station,
-		DateTime date,
-		List<IdentifiedRisId> risIds,
-		NavigatorDbContext dbContext,
-		CancellationToken cancellationToken
-	)
-	{
-		station.LastQueried = date;
+    private async Task<List<IdentifiedRisId>> CallApi(int evaNumber, DateTime timeStart, bool isDeparture = true)
+    {
+        var boardType = isDeparture ? "departures" : "arrivals";
+        var timeEnd = timeStart.AddMinutes(720);
 
-		if (!risIds.Any())
-		{
-			await dbContext.SaveChangesAsync(cancellationToken);
-			return (0, 0);
-		}
+        var httpClient = proxyRotator.GetRandomProxy();
+        var url = string.Format(_apiUrl, boardType, evaNumber,
+            Uri.EscapeDataString(timeStart.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")),
+            Uri.EscapeDataString(timeEnd.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")));
 
-		// existing RIS IDs from the database
-		var existingRisIds = await dbContext
-			.RisIds.Where(risId => risIds.Select(gatheredRisId => gatheredRisId.Id).Contains(risId.Id))
-			.ToDictionaryAsync(risId => risId.Id, cancellationToken);
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Get, url);
+        httpRequest.Headers.Add("Accept", "application/vnd.de.db.ris+json");
+        httpRequest.Headers.Add("DB-Client-Id",
+            Environment.GetEnvironmentVariable("BOARDS_CLIENT_ID") ??
+            throw new InvalidOperationException("BOARDS_CLIENT_ID environment variable is not set."));
+        httpRequest.Headers.Add("DB-Api-Key",
+            Environment.GetEnvironmentVariable("BOARDS_API_KEY") ??
+            throw new InvalidOperationException("BOARDS_API_KEY environment variable is not set."));
 
-		// separate new & existing
-		var newRisIds = risIds.Where(risId => !existingRisIds.ContainsKey(risId.Id)).ToList();
-		var existingToUpdate = risIds.Where(risId => existingRisIds.ContainsKey(risId.Id)).ToList();
+        var response = await httpClient.SendAsync(httpRequest);
+        if (!response.IsSuccessStatusCode) return [];
 
-		if (newRisIds.Any())
-			dbContext.RisIds.AddRange(newRisIds);
+        await using var stream = await response.Content.ReadAsStreamAsync();
+        var content = (await JsonDocument.ParseAsync(stream)).RootElement;
 
-		foreach (var risId in existingToUpdate)
-		{
-			var dbEntity = existingRisIds[risId.Id];
-			dbEntity.Active = true;
-		}
+        var boards = content.GetProperty(boardType);
+        if (boards.ValueKind != JsonValueKind.Array) throw new InvalidOperationException($"Expected '{boardType}' to be an array");
+        if (boards.GetArrayLength() == 0) return [];
 
-		await dbContext.SaveChangesAsync(cancellationToken);
-		return (newRisIds.Count, existingToUpdate.Count);
-	}
+        return boards.EnumerateArray().Select(boardEntry =>
+        {
+            if (!boardEntry.TryGetProperty("journeyID", out var _))
+                throw new InvalidOperationException($"Expected journeyID property in {boardType} entry");
 
-	private async Task<List<IdentifiedRisId>> CallApi(int evaNumber, DateTime timeStart, bool isDeparture = true)
-	{
-		var boardType = isDeparture ? "departure" : "arrival";
-		var timeEnd = timeStart.AddMinutes(720);
+            var transportElement = boardEntry.GetProperty("transport");
+            string? replacementProduct = null;
+            if (transportElement.TryGetProperty("replacementTransport", out var replacementTransportElement) &&
+                replacementTransportElement.ValueKind == JsonValueKind.Object &&
+                replacementTransportElement.TryGetProperty("realType", out var realTypeElement))
+                replacementProduct = realTypeElement.GetString();
 
-		// random proxy
-		var httpClient = _proxyRotator.GetRandomProxy();
-		var request = await httpClient.GetAsync(
-			string.Format(
-				_apiUrl,
-				boardType,
-				evaNumber,
-				Uri.EscapeDataString(timeStart.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")),
-				Uri.EscapeDataString(timeEnd.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ"))
-			)
-		);
-		if (!request.IsSuccessStatusCode)
-			return new();
+            return new IdentifiedRisId()
+            {
+                Id = TryParse(boardEntry.GetProperty("journeyID")),
+                TransportProduct = boardEntry.GetProperty("transport").GetProperty("type").GetString()!,
+                ReplacementTransportProduct = replacementProduct,
+                DiscoveryDate = DateTime.UtcNow,
+                Active = true
+            };
+        }).ToList();
+    }
 
-		await using var stream = await request.Content.ReadAsStreamAsync();
-		var content = (await JsonDocument.ParseAsync(stream)).RootElement;
+    private string TryParse(JsonElement journeyIdElement)
+    {
+        if (journeyIdElement.ValueKind != JsonValueKind.String)
+            throw new InvalidOperationException($"Expected 'journeyID' property to be a string but got {journeyIdElement.ValueKind}");
 
-		var items = content.GetProperty("items");
-		if (items.ValueKind != JsonValueKind.Array)
-			throw new InvalidOperationException("Expected 'items' to be an array");
-		if (items.GetArrayLength() == 0)
-			return new();
-
-		return items
-			.EnumerateArray()
-			.Select(item =>
-			{
-				if (!item.TryGetProperty("train", out JsonElement trainElement))
-					throw new InvalidOperationException("Expected 'train' property in item");
-				return new IdentifiedRisId()
-				{
-					Id = TryParse(trainElement.GetProperty("journeyId")),
-					Product =
-						Product.MapProduct(trainElement.GetProperty("type").GetString())
-						?? throw new InvalidOperationException("Expected 'product' to be a non-null string"),
-					DiscoveryDate = DateTime.UtcNow,
-					Active = true,
-				};
-			})
-			.ToList();
-	}
-
-	private string TryParse(JsonElement jsonElement)
-	{
-		if (jsonElement.ValueKind != JsonValueKind.String)
-			throw new InvalidOperationException("Expected JSON element to be a string");
-
-		string fullTripId =
-			jsonElement.GetString() ?? throw new InvalidOperationException("Expected JSON element to be a non-null string");
-
-		// Format: yyyyMMdd-{UUID}[-UUID]
-		// {} - everything inside the curly brackets is necessary
-		// [] - everything inside the square brackets is optional
-		string datePart = fullTripId.Substring(0, 8);
-		if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out _))
-			throw new FormatException("Input does not start with a valid date");
-
-		return fullTripId.Substring(9);
-	}
+        // Format: yyyyMMdd-{UUID}[-UUID]
+        // {} - everything inside the curly brackets is necessary
+        // [] - everything inside the square brackets is optional
+        string datePart = journeyIdElement.GetString()!.Substring(0, 8);
+        if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out _))
+            throw new FormatException("Expected 'journeyID' to start with a valid date in the format 'yyyyMMdd'");
+        return journeyIdElement.GetString()!.Substring(9);
+    }
 }
