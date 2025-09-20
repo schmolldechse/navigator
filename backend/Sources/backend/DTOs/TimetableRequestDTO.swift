@@ -15,8 +15,8 @@ struct TimetableRequestDTO: Content {
     let evaNumber: Int
     
     // Query Parameters
-    var when: Date?
-    var duration: Int?
+    var when: Date
+    var duration: Int
     
     init(_ request: Request) throws {
         guard let profile = request.parameters.get("profile", as: TimetableProfile.self) else {
@@ -27,11 +27,11 @@ struct TimetableRequestDTO: Content {
             throw Abort(.badRequest, reason: "Invalid 'evaNumber' specified. It must be an integer.")
         }
         
-        let query = try request.query.decode(QueryParams.self)
-        
         self.profile = profile
         self.evaNumber = evaNumber
         
+        let query = try request.query.decode(QueryParams.self)
+
         self.when = query.when ?? Date()
         self.duration = query.duration ?? 60
     }
@@ -53,6 +53,29 @@ struct TimetableRequestDTO: Content {
         
         static func validations(_ validations: inout Validations) {
             validations.add("duration", as: Int.self, is: .range(1...), required: false)
+        }
+        
+        init(from decoder: any Decoder) throws {
+            enum CodingKeys: String, CodingKey {
+                case when, duration
+            }
+            
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+                        
+            self.duration = try container.decodeIfPresent(Int.self, forKey: .duration)
+                        
+            if let dateString = try container.decodeIfPresent(String.self, forKey: .when) {
+                let formatter = ISO8601DateFormatter()
+                formatter.formatOptions = [.withInternetDateTime, .withColonSeparatorInTimeZone]
+                            
+                if let date = formatter.date(from: dateString) {
+                    self.when = date
+                } else {
+                    throw DecodingError.dataCorruptedError(forKey: .when, in: container, debugDescription: "Date string '\(dateString)' does not match expected ISO 8601 format.")
+                }
+            } else {
+                self.when = nil
+            }
         }
     }
 }
