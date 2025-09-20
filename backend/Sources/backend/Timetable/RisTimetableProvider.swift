@@ -16,8 +16,8 @@ struct RisTimetableProvider: TimetableProvider {
             throw Abort(.internalServerError, reason: "Missing Deutsche Bahn API credentials.")
         }
                 
-        let endTime: Date = timetableRequest.when!.addingTimeInterval(Double(timetableRequest.duration!) * 60.0)
-        let response = try await req.client.get(URI(string: "\(apiUrl)/\(isDeparture ? "departures" : "arrivals")/\(timetableRequest.evaNumber)?timeEnd=\(endTime.ISO8601Format())&timeStart=\(timetableRequest.when!.ISO8601Format())")) { clientReq in
+        let endTime: Date = timetableRequest.when.addingTimeInterval(Double(timetableRequest.duration) * 60.0)
+        let response = try await req.client.get(URI(string: "\(apiUrl)/\(isDeparture ? "departures" : "arrivals")/\(timetableRequest.evaNumber)?timeEnd=\(endTime.ISO8601Format())&timeStart=\(timetableRequest.when.ISO8601Format())")) { clientReq in
             clientReq.headers.add(name: "DB-Client-Id", value: clientId)
             clientReq.headers.add(name: "DB-Api-Key", value: apiKey)
             clientReq.headers.add(name: "Accept", value: "application/vnd.de.db.ris+json")
