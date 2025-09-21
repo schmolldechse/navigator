@@ -11,7 +11,7 @@ final class TransportOccurence: Model, @unchecked Sendable {
     static let schema: String = "station_transports"
     static let space: String? = "core"
     
-    @ID(custom: ".id", generatedBy: .database)
+    @ID(custom: "id", generatedBy: .database)
     var id: Int?
     
     @Enum(key: "transport_name")

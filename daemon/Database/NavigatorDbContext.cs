@@ -2,6 +2,8 @@
 using System.Text.RegularExpressions;
 using daemon.Models.Database;
 using daemon.Models.Database.Journey;
+using daemon.Models.Database.RISIdentifier;
+using daemon.Models.Database.Station;
 using Microsoft.EntityFrameworkCore;
 
 namespace daemon.Database;
@@ -10,7 +12,7 @@ public class NavigatorDbContext : DbContext
 {
 	// stations
 	public DbSet<Station> Stations { get; set; }
-	public DbSet<Product> Products { get; set; }
+	public DbSet<TransportOccurence> Products { get; set; }
 	public DbSet<Ril100> Ril100 { get; set; }
 
 	// ris_ids
@@ -35,17 +37,12 @@ public class NavigatorDbContext : DbContext
 		modelBuilder.Entity<Station>(entity =>
 		{
 			entity.ToTable("stations");
-
-			entity.HasKey(station => station.EvaNumber);
-			entity.OwnsOne(station => station.Coordinates);
 		});
 
 		// station_products
-		modelBuilder.Entity<Product>(entity =>
+		modelBuilder.Entity<TransportOccurence>(entity =>
 		{
-			entity.ToTable("station_products");
-
-			entity.HasKey(product => product.Id);
+			entity.ToTable("station_transports");
 			entity
 				.HasOne(product => product.Station)
 				.WithMany(station => station.Products)
@@ -57,8 +54,6 @@ public class NavigatorDbContext : DbContext
 		modelBuilder.Entity<Ril100>(entity =>
 		{
 			entity.ToTable("station_ril100");
-
-			entity.HasKey(ril => ril.Id);
 			entity
 				.HasOne(ril => ril.Station)
 				.WithMany(station => station.Ril100)
@@ -70,8 +65,8 @@ public class NavigatorDbContext : DbContext
 		modelBuilder.Entity<IdentifiedRisId>(entity =>
 		{
 			entity.ToTable("ris_ids");
-
-			entity.HasKey(risId => risId.Id);
+			entity.Property(risId => risId.TransportProduct).HasConversion<string>();
+			entity.Property(risId => risId.ReplacementTransportProduct).HasConversion<string>();
 		});
 		
 		// journeys
@@ -122,10 +117,10 @@ public class NavigatorDbContext : DbContext
 				.OnDelete(DeleteBehavior.Cascade);
 		});
 		
-		// journey_scheduled_stop_place_informations
+		// journey_stop_place_informations
 		modelBuilder.Entity<Information>(entity =>
 		{
-			entity.ToTable("journey_scheduled_stop_place_informations");
+			entity.ToTable("journey_stop_place_informations");
 			entity.Property(information => information.Type).HasConversion<string>();
 		});
 	}

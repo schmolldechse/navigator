@@ -12,7 +12,7 @@ struct CreateIdentifiedRISId: AsyncMigration {
         let transportTypeEnum = try await database.enum("TransportType").read()
         
         try await database.schema(IdentifiedRISID.schema, space: IdentifiedRISID.space)
-            .field("id", .string, .required, .identifier(auto: false))
+            .field("id", .custom("VARCHAR(128)"), .required, .identifier(auto: false))
             .field("transport_type", transportTypeEnum, .required)
             .field("replacement_transport_type", transportTypeEnum)
             .field("discovery_date", .datetime, .required)

@@ -2,23 +2,21 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 
-namespace daemon.Models.Database;
+namespace daemon.Models.Database.RISIdentifier;
 
 [Index(nameof(Id), IsUnique = true)]
 public class IdentifiedRisId
 {
 	[Key]
 	[Column("id")]
-	[MaxLength(73)]
-	public required string Id { get; set; }
+	[MaxLength(128)]
+	public required string Id { get; init; }
 
-	[MaxLength(128)]
 	[Column("transport_type")]
-	public required string TransportProduct { get; set; }
+	public required TransportType TransportProduct { get; init; }
 	
-	[MaxLength(128)]
 	[Column("replacement_transport_type")]
-	public string? ReplacementTransportProduct { get; set; }
+	public TransportType? ReplacementTransportProduct { get; init; }
 
 	[Column("discovery_date")]
 	public required DateTime DiscoveryDate { get; set; }

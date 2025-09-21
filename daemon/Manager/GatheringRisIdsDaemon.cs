@@ -2,6 +2,8 @@
 using System.Text.Json;
 using daemon.Database;
 using daemon.Models.Database;
+using daemon.Models.Database.RISIdentifier;
+using daemon.Models.Database.Station;
 using daemon.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -103,10 +105,10 @@ public class GatheringRisIdsDaemon(
         // filter out RIS IDs that don't match enabled products
         var enabledProducts = station.Products
             .Where(product => product.QueryingEnabled)
-            .Select(product => product.ProductName)
+            .Select(product => product.TransportType.ToString())
             .ToHashSet();
         var filteredByProduct = results
-            .Where(identifiedRisId => enabledProducts.Contains(identifiedRisId.TransportProduct)).ToList();
+            .Where(identifiedRisId => enabledProducts.Contains(identifiedRisId.TransportProduct.ToString())).ToList();
         
         var discoveryDate = DateTime.UtcNow;
         filteredByProduct.ForEach(risId => risId.DiscoveryDate = discoveryDate);
@@ -182,7 +184,7 @@ public class GatheringRisIdsDaemon(
                 throw new InvalidOperationException($"Expected journeyID property in {boardType} entry");
 
             var transportElement = boardEntry.GetProperty("transport");
-            string? replacementProduct = null;
+            string? replacementProduct = string.Empty;
             if (transportElement.TryGetProperty("replacementTransport", out var replacementTransportElement) &&
                 replacementTransportElement.ValueKind == JsonValueKind.Object &&
                 replacementTransportElement.TryGetProperty("realType", out var realTypeElement))
@@ -191,12 +193,19 @@ public class GatheringRisIdsDaemon(
             return new IdentifiedRisId()
             {
                 Id = TryParse(boardEntry.GetProperty("journeyID")),
-                TransportProduct = boardEntry.GetProperty("transport").GetProperty("type").GetString()!,
-                ReplacementTransportProduct = replacementProduct,
+                TransportProduct = ParseTransportType(boardEntry.GetProperty("transport").GetProperty("type").GetString()!),
+                ReplacementTransportProduct = replacementProduct == string.Empty ? null : ParseTransportType(replacementProduct!),
                 DiscoveryDate = DateTime.UtcNow,
                 Active = true
             };
         }).ToList();
+    }
+
+    private TransportType ParseTransportType(string input)
+    {
+        if (Enum.TryParse<TransportType>(input, true, out var result))
+            return result;
+        throw new FormatException($"Unknown transport type: {input}");
     }
 
     private string TryParse(JsonElement journeyIdElement)

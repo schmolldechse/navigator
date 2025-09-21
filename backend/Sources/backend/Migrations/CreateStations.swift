@@ -41,15 +41,15 @@ struct CreateStations: AsyncMigration {
             .create()
         
         try await database.schema(TransportOccurence.schema, space: TransportOccurence.space)
-            .id()
+            .field("id", .int32, .identifier(auto: true))
             .field("transport_name", transportTypeEnum, .required)
             .field("querying_enabled", .bool, .required)
             .field("eva_number", .int32, .required, .references(Station.schema, space: Station.space, "eva_number", onDelete: .cascade))
             .create()
         
         try await database.schema(Ril100.schema, space: Ril100.space)
-            .id()
-            .field("ril100", .string, .required)
+            .field("id", .int32, .identifier(auto: true))
+            .field("ril100", .custom("VARCHAR(64)"), .required)
             .field("eva_number", .int32, .required, .references(Station.schema, space: Station.space, "eva_number", onDelete: .cascade))
             .create()
     }

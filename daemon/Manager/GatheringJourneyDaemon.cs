@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using daemon.Database;
 using daemon.Models.Database;
 using daemon.Models.Database.Journey;
+using daemon.Models.Database.RISIdentifier;
 using daemon.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

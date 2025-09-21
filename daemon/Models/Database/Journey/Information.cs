@@ -6,7 +6,7 @@ namespace daemon.Models.Database.Journey;
 public class Information
 {
     [Key]
-    [Column("information_id")]
+    [Column("id")]
     public int Id { get; init; }
     
     
@@ -21,13 +21,14 @@ public class Information
     public required InformationType Type { get; init; }
     
     [Column("key")]
+    [MaxLength(64)]
     public required string Key { get; init; }
     
     [Column("text")]
     [MaxLength(2048)]
     public required string Text { get; init; }
     
-    [Column("textShort")]
+    [Column("text_short")]
     [MaxLength(2048)]
     public string? TextShort { get; init; }
     

@@ -2,6 +2,7 @@
 using System.Text;
 using System.Text.Json;
 using daemon.Models.Database;
+using daemon.Models.Database.Station;
 using Microsoft.Extensions.Logging;
 
 namespace daemon.Service;
@@ -100,18 +101,15 @@ public class StationMergingService
 									.GetProperty("nameLong")
 									.GetString()!,
 								Products = products
-									.Select(product => new Product()
+									.Select(product => new TransportOccurence()
 									{
 										EvaNumber = groupEvaNumber,
-										ProductName = product,
+										TransportType = ParseTransportType(product),
 										QueryingEnabled = false,
 									})
 									.ToList(),
-								Coordinates = new Coordinates()
-								{
-									Latitude = stationElement.GetProperty("position").GetProperty("latitude").GetDouble(),
-									Longitude = stationElement.GetProperty("position").GetProperty("longitude").GetDouble(),
-								},
+								Latitude = stationElement.GetProperty("position").GetProperty("latitude").GetDouble(),
+								Longitude = stationElement.GetProperty("position").GetProperty("longitude").GetDouble(),
 								Ril100 = GetRil100Identifiers(groupEvaNumbers, stadaStations)
 									.Select(ril100 => new Ril100() { EvaNumber = groupEvaNumber, Ril100Identifier = ril100 })
 									.ToList(),
@@ -121,23 +119,22 @@ public class StationMergingService
 							if (evaNumber == groupEvaNumber)
 							{
 								existingStation.Name = name;
-								existingStation.Coordinates = new Coordinates()
-								{
-									Latitude = stationElement.GetProperty("position").GetProperty("latitude").GetDouble(),
-									Longitude = stationElement.GetProperty("position").GetProperty("longitude").GetDouble(),
-								};
+								existingStation.Latitude = stationElement.GetProperty("position")
+									.GetProperty("latitude").GetDouble();
+								existingStation.Longitude = stationElement.GetProperty("position")
+									.GetProperty("longitude").GetDouble();
 							}
 
 							existingStation.Products = existingStation
 								.Products.Union(
-									products.Select(product => new Product()
+									products.Select(product => new TransportOccurence()
 									{
 										EvaNumber = groupEvaNumber,
-										ProductName = product,
+										TransportType = ParseTransportType(product),
 										QueryingEnabled = false,
 									})
 								)
-								.DistinctBy(product => product.ProductName)
+								.DistinctBy(product => product.TransportType)
 								.ToList();
 
 							existingStation.Ril100 = existingStation
@@ -213,15 +210,22 @@ public class StationMergingService
 		);
 		return stadaStations;
 	}
+	
+	private TransportType ParseTransportType(string input)
+	{
+		if (Enum.TryParse<TransportType>(input, true, out var result))
+			return result;
+		throw new FormatException($"Unknown transport type: {input}");
+	}
 
 	public double CalculateWeight(Station origin, int priceCategory = -1)
 	{
 		var weight = 0.1;
 		foreach (var product in origin.Products)
 		{
-			if (!_productWeights.Keys.Any(key => string.Equals(key, product.ProductName, StringComparison.OrdinalIgnoreCase)))
+			if (!_productWeights.Keys.Any(key => string.Equals(key, product.TransportType.ToString(), StringComparison.OrdinalIgnoreCase)))
 				continue;
-			weight += _productWeights[product.ProductName];
+			weight += _productWeights[product.TransportType.ToString()];
 		}
 
 		if (priceCategory != -1)
