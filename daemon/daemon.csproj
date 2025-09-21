@@ -21,5 +21,4 @@
       <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4" />
       <PackageReference Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
     </ItemGroup>
-
 </Project>

@@ -163,7 +163,11 @@ public class GatheringRisIdsDaemon(
             throw new InvalidOperationException("BOARDS_API_KEY environment variable is not set."));
 
         var response = await httpClient.SendAsync(httpRequest);
-        if (!response.IsSuccessStatusCode) return [];
+        if (!response.IsSuccessStatusCode)
+        { 
+            logger.LogDebug("Failed to retrieve {BoardType} for evaNumber {EvaNumber}. Received {StatusCode} ({Response})", boardType, evaNumber, response.StatusCode, await response.Content.ReadAsStringAsync());
+            return [];
+        }
 
         await using var stream = await response.Content.ReadAsStreamAsync();
         var content = (await JsonDocument.ParseAsync(stream)).RootElement;
