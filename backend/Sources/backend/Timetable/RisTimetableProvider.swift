@@ -170,12 +170,12 @@ struct RisTimetableProvider: TimetableProvider {
         }
     }
     
-    private func buildSchedule(for timetableEntry: [String: Any]) -> ScheduleAtStopPlace {
+    private func buildSchedule(for timetableEntry: [String: Any]) -> ScheduleAtStopPlaceDTO {
         let plannedTime: Date = ((timetableEntry["timeSchedule"] as? String)?.toDate())!
         let actualTime: Date = ((timetableEntry["time"] as? String)?.toDate())!
         let delay: Int = Int(actualTime.timeIntervalSince(plannedTime))
         
-        return ScheduleAtStopPlace(
+        return ScheduleAtStopPlaceDTO(
             plannedTime: plannedTime,
             actualTime: actualTime,
             delay: delay,
@@ -184,7 +184,7 @@ struct RisTimetableProvider: TimetableProvider {
         )
     }
     
-    private func buildTransport(for transportEntry: [String: Any], type: String) -> Transport {
+    private func buildTransport(for transportEntry: [String: Any], type: String) -> TransportDTO {
         let replacementType: TransportType? = {
             guard let replacementTypeObj = transportEntry["replacementTransport"] as? [String: Any] else { return nil }
             return TransportType(rawValue: (replacementTypeObj["realType"] as! String).uppercased()) ?? .UNKNOWN
@@ -195,7 +195,7 @@ struct RisTimetableProvider: TimetableProvider {
             return (transportEntry["category"] as! String) + " " + line
         }()
                 
-        return Transport(
+        return TransportDTO(
             type: TransportType(rawValue: (transportEntry["type"] as! String).uppercased()) ?? .UNKNOWN,
             replacementType: replacementType,
             category: transportEntry["category"] as! String,
@@ -206,31 +206,31 @@ struct RisTimetableProvider: TimetableProvider {
         )
     }
     
-    private func buildAdministration(for timetableEntry: [String: Any]) -> Administration? {
+    private func buildAdministration(for timetableEntry: [String: Any]) -> AdministrationDTO? {
         guard let administration = timetableEntry["administration"] as? [String: Any] else {
             return nil
         }
         
-        return Administration(
+        return AdministrationDTO(
             administrationId: administration["administrationID"] as! String,
             operatorCode: administration["operatorCode"] as! String,
             operatorName: administration["operatorName"] as! String
         )
     }
     
-    private func buildInformations(for timetableEntry: [String: Any]) -> [Information] {
-        var informations: [Information] = []
+    private func buildInformations(for timetableEntry: [String: Any]) -> [InformationDTO] {
+        var informations: [InformationDTO] = []
         
-        let messages = (timetableEntry["messages"] as? [[String: Any]] ?? []).compactMap { message -> Information in
-            Information(
-                type: .MESSAGES,
+        let messages = (timetableEntry["messages"] as? [[String: Any]] ?? []).compactMap { message -> InformationDTO in
+            InformationDTO(
+                type: .MESSAGE,
                 key: "nasty ahhh",
                 text: message["text"] as! String,
                 textShort: message["textShort"] as? String
             )
         }
         
-        let disruptions = (timetableEntry["disruptions"] as? [[String: Any]] ?? []).compactMap { disruption -> Information? in
+        let disruptions = (timetableEntry["disruptions"] as? [[String: Any]] ?? []).compactMap { disruption -> InformationDTO? in
             guard
                 let descriptions = disruption["descriptions"] as? [String: [String: Any]],
                 let firstObject = descriptions.first?.value,
@@ -240,7 +240,7 @@ struct RisTimetableProvider: TimetableProvider {
                 return nil
             }
             
-            return Information(
+            return InformationDTO(
                 type: .DISRUPTION,
                 key: "general-warning",
                 text: text,
@@ -248,8 +248,8 @@ struct RisTimetableProvider: TimetableProvider {
             )
         }
         
-        let attributes = (timetableEntry["attributes"] as? [[String: Any]] ?? []).compactMap { attribute -> Information? in
-            Information(
+        let attributes = (timetableEntry["attributes"] as? [[String: Any]] ?? []).compactMap { attribute -> InformationDTO? in
+            InformationDTO(
                 type: .JOURNEY_ATTRIBUTE,
                 key: attribute["code"] as! String,
                 text: attribute["text"] as! String,

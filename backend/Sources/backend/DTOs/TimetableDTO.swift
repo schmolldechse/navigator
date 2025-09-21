@@ -12,17 +12,17 @@ internal struct DepartureEntry: Content {
     var ris_journeyId: String?
     var hafas_journeyId: String?
 
-    var administration: Administration?
-    var transport: Transport
+    var administration: AdministrationDTO?
+    var transport: TransportDTO
 
     var destination: StopAtStopPlace
     var differingDestination: StopAtStopPlace?
     var direction: [StopPlace]
     var viaStops: [StopAtStopPlace]
 
-    var departure: ScheduleAtStopPlace
+    var departure: ScheduleAtStopPlaceDTO
     
-    var informations: [Information]
+    var informations: [InformationDTO]
 
     var cancelled: Bool
     var additional: Bool?
@@ -35,17 +35,17 @@ internal struct ArrivalEntry: Content {
     var ris_journeyId: String?
     var hafas_journeyId: String?
 
-    var administration: Administration?
-    var transport: Transport
+    var administration: AdministrationDTO?
+    var transport: TransportDTO
 
     var origin: StopAtStopPlace
     var differingOrigin: StopAtStopPlace?
     var direction: [StopPlace]
     var viaStops: [StopAtStopPlace]
 
-    var arrival: ScheduleAtStopPlace
+    var arrival: ScheduleAtStopPlaceDTO
     
-    var informations: [Information]
+    var informations: [InformationDTO]
 
     var cancelled: Bool
     var additional: Bool?
@@ -71,7 +71,7 @@ internal struct StopAtStopPlace: Content {
     var additional: Bool?
 }
 
-internal struct ScheduleAtStopPlace: Content {
+internal struct ScheduleAtStopPlaceDTO: Content {
     var plannedTime: Date
     var actualTime: Date
     var delay: Int
@@ -80,13 +80,13 @@ internal struct ScheduleAtStopPlace: Content {
     var actualPlatform: String?
 }
 
-internal struct Administration: Content {
+internal struct AdministrationDTO: Content {
     var administrationId: String
     var operatorCode: String
     var operatorName: String
 }
 
-internal struct Information: Content {
+internal struct InformationDTO: Content {
     var type: InformationType
     var key: String
     var text: String
@@ -96,10 +96,12 @@ internal struct Information: Content {
 internal enum InformationType: String, CaseIterable, Codable {
     case JOURNEY_ATTRIBUTE = "JOURNEY_ATTRIBUTE"
     case DISRUPTION = "DISRUPTION"
-    case MESSAGES = "MESSAGES"
+    case MESSAGE = "MESSAGE"
+    case RIS_QUALITY_DEVIATION = "RIS_QUALITY_DEVIATION"
+    case RIS_CAUSE_REASON = "RIS_CAUSE_REASON"
 }
 
-internal struct Transport: Content {
+internal struct TransportDTO: Content {
     var type: TransportType
     var replacementType: TransportType?
     var category: String

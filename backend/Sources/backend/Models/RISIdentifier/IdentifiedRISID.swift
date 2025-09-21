@@ -15,10 +15,10 @@ final class IdentifiedRISID: Model, @unchecked Sendable {
     @ID(custom: "id", generatedBy: .user)
     var id: String?
     
-    @Field(key: "transport_type")
+    @Enum(key: "transport_type")
     var transportType: TransportType
     
-    @Field(key: "replacement_transport_type")
+    @OptionalEnum(key: "replacement_transport_type")
     var replacementTransportType: TransportType?
     
     @Field(key: "discovery_date")
@@ -49,3 +49,4 @@ final class IdentifiedRISID: Model, @unchecked Sendable {
         self.isLocked = isLocked
     }
 }
+
