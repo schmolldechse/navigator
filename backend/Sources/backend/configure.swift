@@ -24,6 +24,7 @@ public func configure(_ app: Application) async throws {
     ContentConfiguration.global.use(encoder: jsonEncoder, for: .json)
     ContentConfiguration.global.use(decoder: jsonDecoder, for: .json)
 
+    // MARK: - Database & Migrations
     app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
         hostname: Environment.get("DATABASE_HOST") ?? "localhost",
         port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
@@ -34,6 +35,14 @@ public func configure(_ app: Application) async throws {
     ), as: .psql)
 
     app.migrations.add(CreateTodo())
+    app.migrations.add(CreateCoreSchema())
+    app.migrations.add(CreateStations())
+    
+    if !app.environment.isRelease {
+        app.logger.info("Running migrations...")
+        try await app.autoMigrate()
+        app.logger.info("Migrations complete.")
+    }
 
     app.views.use(.leaf)
     
