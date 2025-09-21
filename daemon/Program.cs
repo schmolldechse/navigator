@@ -21,7 +21,7 @@ class Program
 		Option<GatheringMode> skipGatheringOption = new("--skipGathering") 
 		{
 			Description = "Skip station gathering. 'none' = gather from API + merge files, 'api' = skip API calls, 'full' = skip all gathering (default: api)",
-			DefaultValueFactory = _ => GatheringMode.Api
+			DefaultValueFactory = _ => GatheringMode.None
 		};
 
 		var rootCommand = new RootCommand("Navigator Daemon application");
