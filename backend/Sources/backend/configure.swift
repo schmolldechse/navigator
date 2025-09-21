@@ -37,6 +37,7 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateTodo())
     app.migrations.add(CreateCoreSchema())
     app.migrations.add(CreateStations())
+    app.migrations.add(CreateIdentifiedRISId())
     
     if !app.environment.isRelease {
         app.logger.info("Running migrations...")
