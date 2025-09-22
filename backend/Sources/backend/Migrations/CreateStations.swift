@@ -9,26 +9,6 @@ import Fluent
 
 struct CreateStations: AsyncMigration {
     func prepare(on database: any Database) async throws {
-        let transportTypeEnum = try await database.enum("TransportType")
-            .case("HIGH_SPEED_TRAIN")
-            .case("INTERCITY_TRAIN")
-            .case("INTER_REGIONAL_TRAIN")
-            .case("REGIONAL_TRAIN")
-            .case("CITY_TRAIN")
-            .case("SUBWAY")
-            .case("TRAM")
-            .case("BUS")
-            .case("FERRY")
-            .case("FLIGHT")
-            .case("CAR")
-            .case("TAXI")
-            .case("SHUTTLE")
-            .case("BIKE")
-            .case("SCOOTER")
-            .case("WALK")
-            .case("UNKNOWN")
-            .create()
-        
         try await database.schema(Station.schema, space: Station.space)
             .field("eva_number", .int32, .required, .identifier(auto: false))
             .field("name", .custom("VARCHAR(512)"), .required)
@@ -41,21 +21,20 @@ struct CreateStations: AsyncMigration {
             .create()
         
         try await database.schema(TransportOccurence.schema, space: TransportOccurence.space)
-            .field("id", .int32, .identifier(auto: true))
-            .field("transport_name", transportTypeEnum, .required)
-            .field("querying_enabled", .bool, .required)
+            .field("id", .int32, .required, .identifier(auto: true))
             .field("eva_number", .int32, .required, .references(Station.schema, space: Station.space, "eva_number", onDelete: .cascade))
+            .field("transport_name", .string, .required)
+            .field("querying_enabled", .bool, .required)
             .create()
         
         try await database.schema(Ril100.schema, space: Ril100.space)
-            .field("id", .int32, .identifier(auto: true))
-            .field("ril100", .custom("VARCHAR(64)"), .required)
+            .field("id", .int32, .required, .identifier(auto: true))
             .field("eva_number", .int32, .required, .references(Station.schema, space: Station.space, "eva_number", onDelete: .cascade))
+            .field("ril100", .custom("VARCHAR(64)"), .required)
             .create()
     }
     
     func revert(on database: any Database) async throws {
-        try await database.enum("TransportType").delete()
         try await database.schema(Station.schema, space: Station.space).delete()
         try await database.schema(TransportOccurence.schema, space: TransportOccurence.space).delete()
         try await database.schema(Ril100.schema, space: Ril100.space).delete()

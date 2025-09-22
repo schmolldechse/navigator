@@ -19,14 +19,13 @@ public class ScheduleAtStopPlace
     
     
     [Column("date")]
-    public virtual DateOnly Date => DateOnly.ParseExact(JourneyId[..8], "yyyyMMdd", null);
+    public required DateOnly Date { get; init; }
     
     [Column("type")]
     public required ScheduleType Type { get; init; }
     
     
     [Column("station_name")]
-    [MaxLength(512)]
     public required string Name { get; init; }
 
     [Column("station_eva_number")]
@@ -63,5 +62,5 @@ public class ScheduleAtStopPlace
     [MaxLength(32)]
     public required string ActualPlatform { get; init; }
     
-    public virtual ICollection<Information> Informations { get; init; } = new List<Information>();
+    public virtual ICollection<Information> Information { get; init; } = new List<Information>();
 }

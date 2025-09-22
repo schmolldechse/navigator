@@ -7,6 +7,7 @@ public class Information
 {
     [Key]
     [Column("id")]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; init; }
     
     
@@ -14,14 +15,14 @@ public class Information
     public int ScheduleAtStopPlaceId { get; init; }
     
     [ForeignKey(nameof(ScheduleAtStopPlaceId))]
-    public virtual ScheduleAtStopPlace ScheduleAtStopPlace { get; init; }
+    public virtual ScheduleAtStopPlace ScheduledStopPlace { get; init; }
     
     
     [Column("type")]
     public required InformationType Type { get; init; }
     
     [Column("key")]
-    [MaxLength(64)]
+    [MaxLength(128)]
     public required string Key { get; init; }
     
     [Column("text")]

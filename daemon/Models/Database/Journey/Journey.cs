@@ -4,19 +4,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace daemon.Models.Database.Journey;
 
-[Index(nameof(Id), IsUnique = true)]
 public class Journey
 {
     [Key]
-    [Column("journey_id")]
     [MaxLength(128)]
+    [Column("journey_id")]
     public required string Id { get; init; }
 
     [Column("date")]
-    public virtual DateOnly Date => DateOnly.ParseExact(Id[..8], "yyyyMMdd", null);
-    
-    [Column("inserted_at")]
-    public virtual DateTime InsertedAt { get; init; } = DateTime.UtcNow;
+    public required DateOnly Date { get; init; }
+
+    [Column("inserted_at")] 
+    public required DateTime InsertedAt { get; init; }
 
     [Column("type")] 
     public required JourneyType Type { get; init; } = JourneyType.REGULAR;
@@ -29,7 +28,7 @@ public class Journey
     public required Administration Administration { get; init; }
     
     
-    public virtual required Transport Transport { get; init; }
+    public virtual Transport? Transport { get; init; }
     
     public virtual ICollection<ScheduleAtStopPlace> ViaStops { get; init; } = new List<ScheduleAtStopPlace>();
 }

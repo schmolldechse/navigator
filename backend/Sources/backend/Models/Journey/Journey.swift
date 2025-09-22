@@ -18,8 +18,8 @@ final class Journey: Model, @unchecked Sendable {
     @Field(key: "date")
     var date: Date
     
-    @Timestamp(key: "inserted_at", on: .create)
-    var insertedAt: Date?
+    @Field(key: "inserted_at")
+    var insertedAt: Date
     
     @Field(key: "type")
     var type: JourneyType

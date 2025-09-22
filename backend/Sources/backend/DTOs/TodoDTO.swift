@@ -5,6 +5,7 @@ struct TodoDTO: Content {
     var id: UUID?
     var title: String?
     
+    /**
     func toModel() -> Todo {
         let model = Todo()
         
@@ -14,4 +15,5 @@ struct TodoDTO: Content {
         }
         return model
     }
+     */
 }

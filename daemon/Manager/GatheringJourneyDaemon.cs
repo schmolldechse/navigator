@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Globalization;
+using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using daemon.Database;
@@ -120,18 +121,18 @@ public class GatheringJourneyDaemon(
         {
             logger.LogError("Failed to parse journey for RIS ID {RisId}", risId.Id);
             return;
-        }
-
+        } 
+        
         // first update risId
         risId.LastSeen = date;
-
-        if (journeyResponse.Journey != null)
-        {
+        
+        if (journeyResponse.Journey != null) 
+        { 
             risId.LastSucceededAt = date;
-
+            
             // check before adding
             var exists = await dbContext.Journeys.AnyAsync(j => j.Id == journeyResponse.Journey.Id, cancellationToken);
-            if (!exists) dbContext.Journeys.Add(journeyResponse.Journey);
+            if (!exists) dbContext.Journeys.Add(journeyResponse.Journey); 
         }
 
         await dbContext.SaveChangesAsync(cancellationToken);
@@ -166,6 +167,7 @@ public class GatheringJourneyDaemon(
             return new JourneyResponse { Journey = null, ParsingError = true };
         
         var journeyId = content.GetProperty("journeyID").GetString()!;
+        var date = DateOnly.ParseExact(journeyId[..8], "yyyyMMdd");
         var infoObject = content.GetProperty("info");
         
         if (infoObject.GetProperty("headerAdministration").ValueKind != JsonValueKind.Object) 
@@ -191,12 +193,14 @@ public class GatheringJourneyDaemon(
         var journey = new Journey()
         {
             Id = journeyId,
+            Date = date,
+            InsertedAt = DateTime.UtcNow,
             Administration = existingAdministration,
             Transport = BuildTransport(infoObject),
             Type = ParseJourneyType(infoObject.GetProperty("type").GetString()!),
-            ViaStops = content.GetProperty("events").EnumerateArray().Select(scheduleObject => BuildSchedule(scheduleObject, informationDict)).ToList()
+            ViaStops = content.GetProperty("events").EnumerateArray().Select(scheduleObject => BuildSchedule(date, scheduleObject, informationDict)).ToList()
         };
-
+        
         return new JourneyResponse { Journey = journey, ParsingError = false };
     }
 
@@ -351,7 +355,7 @@ public class GatheringJourneyDaemon(
         };
     }
 
-    private ScheduleAtStopPlace BuildSchedule(JsonElement scheduleObject, Dictionary<int, List<Information>> infoDict)
+    private ScheduleAtStopPlace BuildSchedule(DateOnly date, JsonElement scheduleObject, Dictionary<int, List<Information>> infoDict)
     {
         var scheduleType = ParseScheduleType(scheduleObject.GetProperty("type").GetString()!);
         
@@ -375,6 +379,7 @@ public class GatheringJourneyDaemon(
         return new ScheduleAtStopPlace()
         {
             Type = scheduleType,
+            Date = date,
             Name = stopPlace.GetProperty("name").GetString()!,
             EvaNumber = int.TryParse(stopPlace.GetProperty("evaNumber").GetString(), out var evaNumber)
                 ? evaNumber
@@ -392,7 +397,7 @@ public class GatheringJourneyDaemon(
                      onDemandElement.ValueKind == JsonValueKind.True,
             NoPassengerChange = scheduleObject.TryGetProperty("noPassengerChange", out var noPassengerChangeElement) &&
                                 noPassengerChangeElement.ValueKind == JsonValueKind.True,
-            Informations = scheduleObject.TryGetProperty("messages", out var messagesElement) && messagesElement.ValueKind == JsonValueKind.Array
+            Information = scheduleObject.TryGetProperty("messages", out var messagesElement) && messagesElement.ValueKind == JsonValueKind.Array
                 ? messagesElement.EnumerateArray()
                     .Select(messageId => messageId.GetInt32())
                     .Where(infoDict.ContainsKey)

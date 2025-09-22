@@ -9,12 +9,10 @@ import Fluent
 
 struct CreateIdentifiedRISId: AsyncMigration {
     func prepare(on database: any Database) async throws {
-        let transportTypeEnum = try await database.enum("TransportType").read()
-        
         try await database.schema(IdentifiedRISID.schema, space: IdentifiedRISID.space)
             .field("id", .custom("VARCHAR(128)"), .required, .identifier(auto: false))
-            .field("transport_type", transportTypeEnum, .required)
-            .field("replacement_transport_type", transportTypeEnum)
+            .field("transport_type", .string, .required)
+            .field("replacement_transport_type", .string)
             .field("discovery_date", .datetime, .required)
             .field("last_seen", .datetime)
             .field("last_succeeded_at", .datetime)

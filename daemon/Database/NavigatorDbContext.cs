@@ -48,6 +48,7 @@ public class NavigatorDbContext : DbContext
 				.WithMany(station => station.Products)
 				.HasForeignKey(product => product.EvaNumber)
 				.OnDelete(DeleteBehavior.Cascade);
+			entity.Property(product => product.TransportType).HasConversion<string>();
 		});
 
 		// station_ril100
@@ -76,19 +77,16 @@ public class NavigatorDbContext : DbContext
 			entity.Property(journey => journey.Type).HasConversion<string>();
 			
 			entity.HasOne(journey => journey.Administration)
-				.WithMany()
-				.HasForeignKey(journey => journey.AdministrationIndex)
-				.OnDelete(DeleteBehavior.Restrict);
+				.WithMany(administration => administration.Journeys)
+				.HasForeignKey(journey => journey.AdministrationIndex);
 
 			entity.HasOne(journey => journey.Transport)
 				.WithOne(transport => transport.Journey)
-				.HasForeignKey<Transport>(transport => transport.JourneyId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.HasForeignKey<Transport>(transport => transport.JourneyId);
 
 			entity.HasMany(journey => journey.ViaStops)
 				.WithOne(stop => stop.Journey)
-				.HasForeignKey(stop => stop.JourneyId)
-				.OnDelete(DeleteBehavior.Cascade);
+				.HasForeignKey(stop => stop.JourneyId);
 		});
 		
 		// journey_administrations
@@ -111,17 +109,16 @@ public class NavigatorDbContext : DbContext
 			entity.ToTable("journey_scheduled_stop_places");
 			entity.Property(stop => stop.Type).HasConversion<string>();
 
-			entity.HasMany(stop => stop.Informations)
-				.WithOne(info => info.ScheduleAtStopPlace)
-				.HasForeignKey(info => info.ScheduleAtStopPlaceId)
-				.OnDelete(DeleteBehavior.Cascade);
+			entity.HasMany(stop => stop.Information)
+				.WithOne(info => info.ScheduledStopPlace)
+				.HasForeignKey(info => info.ScheduleAtStopPlaceId);
 		});
 		
 		// journey_stop_place_informations
 		modelBuilder.Entity<Information>(entity =>
 		{
 			entity.ToTable("journey_stop_place_informations");
-			entity.Property(information => information.Type).HasConversion<string>();
+			entity.Property(info => info.Type).HasConversion<string>();
 		});
 	}
 

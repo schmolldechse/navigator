@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace daemon.Models.Database.Journey;
 
-[Index(nameof(AdministrationId), nameof(OperatorCode), nameof(OperatorName), IsUnique = true, Name = "admin_admin_id_op_code_op_name_uidx")]
 public class Administration
 {
     [Key]
@@ -12,15 +11,17 @@ public class Administration
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; init; }
     
-    [Column("administration_id")]
-    [MaxLength(128)]
-    public string? AdministrationId { get; init; }
-    
-    [Column("operator_code")]
     [MaxLength(64)]
-    public string? OperatorCode { get; init; }
+    [Column("administration_id")]
+    public required string AdministrationId { get; init; }
     
-    [Column("operator_name")]
+    [MaxLength(64)]
+    [Column("operator_code")]
+    public required string OperatorCode { get; init; }
+    
     [MaxLength(256)]
-    public string? OperatorName { get; init; }
+    [Column("operator_name")]
+    public required string OperatorName { get; init; }
+    
+    public virtual ICollection<Journey> Journeys { get; set; } = new List<Journey>();
 }
