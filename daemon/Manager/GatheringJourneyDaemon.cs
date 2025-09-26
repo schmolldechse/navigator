@@ -241,8 +241,8 @@ public class GatheringJourneyDaemon(
                     {
                         Type = InformationType.DISRUPTION,
                         Key = "general-warning",
-                        DisruptionCommunicationId = disruptionObject.GetProperty("disruptionCommunicationID").GetString() ?? null,
-                        DisruptionId = disruptionObject.GetProperty("disruptionID").GetString() ?? null,
+                        DisruptionCommunicationId = disruptionObject.TryGetProperty("disruptionCommunicationID", out var disruptionCommunicationIdObject) ? disruptionCommunicationIdObject.GetString() : null,
+                        DisruptionId = disruptionObject.TryGetProperty("disruptionID", out var disruptionIdObject) ? disruptionIdObject.GetString() : null,
                         Text = langDeObject.GetProperty("text").GetString()!,
                         TextShort = langDeObject.GetProperty("textShort").GetString() ?? null,
                     });
@@ -255,8 +255,8 @@ public class GatheringJourneyDaemon(
                     {
                         Type = InformationType.DISRUPTION,
                         Key = "general-warning",
-                        DisruptionCommunicationId = disruptionObject.GetProperty("disruptionCommunicationID").GetString() ?? null,
-                        DisruptionId = disruptionObject.GetProperty("disruptionID").GetString() ?? null,
+                        DisruptionCommunicationId = disruptionObject.TryGetProperty("disruptionCommunicationID", out var disruptionCommunicationIdObject) ? disruptionCommunicationIdObject.GetString() : null,
+                        DisruptionId = disruptionObject.TryGetProperty("disruptionID", out var disruptionIdObject) ? disruptionIdObject.GetString() : null,
                         Text = langEnObject.GetProperty("text").GetString()!,
                         TextShort = langEnObject.GetProperty("textShort").GetString() ?? null,
                     });
