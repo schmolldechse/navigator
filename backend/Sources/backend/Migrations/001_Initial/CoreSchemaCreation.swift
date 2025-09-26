@@ -1,5 +1,5 @@
 //
-//  CreateCoreSchema.swift
+//  CoreSchemaCreation.swift
 //  backend
 //
 //  Created by Christian Knapp on 21.09.25.
@@ -8,7 +8,7 @@
 import Fluent
 import SQLKit
 
-struct CreateCoreSchema: AsyncMigration {
+struct CoreSchemaCreation: AsyncMigration {
     func prepare(on database: any Database) async throws {
         guard let sql = database as? (any SQLDatabase) else { return }
         try await sql.raw("CREATE SCHEMA IF NOT EXISTS core").run()

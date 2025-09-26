@@ -34,10 +34,10 @@ public func configure(_ app: Application) async throws {
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
 
-    app.migrations.add(CreateCoreSchema())
-    app.migrations.add(CreateStations())
-    app.migrations.add(CreateIdentifiedRISId())
-    app.migrations.add(CreateJourneys())
+    app.migrations.add(CoreSchemaCreation())
+    app.migrations.add(StationMigration())
+    app.migrations.add(IdentifiedRISIDMigration())
+    app.migrations.add(JourneyMigration())
     
     if !app.environment.isRelease {
         app.logger.info("Running migrations...")
