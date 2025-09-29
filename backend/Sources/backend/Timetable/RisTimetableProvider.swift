@@ -11,8 +11,8 @@ struct RisTimetableProvider: TimetableProvider {
     private let apiUrl = "https://apis.deutschebahn.com/db/apis/ris-boards/v1/public/"
     private let journeyPattern = "\\s\\(.*\\)"
     
-    private func requestTimetable(for timetableRequest: TimetableRequestDTO, isDeparture: Bool, req: Request) async throws -> [String: Any] {
-        guard let clientId = Environment.get("DB_CLIENT_ID"), let apiKey = Environment.get("DB_API_KEY") else {
+    private func requestTimetable(for timetableRequest: TimetableRequest, isDeparture: Bool, req: Request) async throws -> [String: Any] {
+        guard let clientId = Environment.get("BOARDS_CLIENT_ID"), let apiKey = Environment.get("BOARDS_API_KEY") else {
             throw Abort(.internalServerError, reason: "Missing Deutsche Bahn API credentials.")
         }
                 
@@ -38,7 +38,7 @@ struct RisTimetableProvider: TimetableProvider {
         return jsonObject
     }
     
-    func retrieveDepartures(for timetableRequest: TimetableRequestDTO, req: Request) async throws -> [DepartureEntry] {
+    func retrieveDepartures(for timetableRequest: TimetableRequest, req: Request) async throws -> [DepartureEntry] {
         let timetable = try await self.requestTimetable(for: timetableRequest, isDeparture: true, req: req)
         guard let boards = timetable["departures"] as? [[String: Any]] else {
             throw Abort(.internalServerError, reason: "Could not find 'departures' in the response.")
@@ -107,7 +107,7 @@ struct RisTimetableProvider: TimetableProvider {
         }
     }
     
-    func retrieveArrivals(for timetableRequest: TimetableRequestDTO, req: Request) async throws -> [ArrivalEntry] {
+    func retrieveArrivals(for timetableRequest: TimetableRequest, req: Request) async throws -> [ArrivalEntry] {
         let timetable = try await self.requestTimetable(for: timetableRequest, isDeparture: false, req: req)
         guard let boards = timetable["arrivals"] as? [[String: Any]] else {
             throw Abort(.internalServerError, reason: "Could not find 'arrivals' in the response.")
