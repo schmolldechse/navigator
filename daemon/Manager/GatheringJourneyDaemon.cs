@@ -47,9 +47,9 @@ public class GatheringJourneyDaemon(
                 .Where(risId => !risId.IsLocked && risId.Active)
                 .Where(risId => risId.LastSeen == null || risId.LastSeen < DateTime.UtcNow.Date.AddDays(-1))
                 .OrderBy(risId => risId.LastSeen ?? DateTime.MinValue)
-                .Take(5000)
+                .Take(15000)
                 .ToListAsync(cancellationToken);
-            risIds = risIds.OrderBy(_ => Random.Shared.Next()).Take(320).ToList();
+            risIds = risIds.OrderBy(_ => Random.Shared.Next()).Take(384).ToList();
             if (risIds.Count == 0)
             {
                 await transaction.RollbackAsync(cancellationToken);
@@ -61,10 +61,9 @@ public class GatheringJourneyDaemon(
             await transaction.CommitAsync(cancellationToken);
         }
 
-        var journeys = await CallApi(risIds, dbContext, cancellationToken);
         try
         {
-            await using var unlockTransaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken); 
+            var journeys = await CallApi(risIds, dbContext, cancellationToken);
             foreach (var journeyResponse in journeys)
             {
                 journeyResponse.RisId.LastSeen = journeyResponse.LastSeen;
@@ -74,20 +73,19 @@ public class GatheringJourneyDaemon(
                     var exists = await dbContext.Journeys.AnyAsync(journey => journey.Id == journeyResponse.Journey!.Id, cancellationToken);
                     if (!exists) dbContext.Journeys.Add(journeyResponse.Journey);
                 }
-                journeyResponse.RisId.IsLocked = false;
             }
 
             await dbContext.SaveChangesAsync(cancellationToken);
-            await unlockTransaction.CommitAsync(cancellationToken);
-            
             logger.LogInformation("Successfully inserted {Count} journeys", journeys.Where(j => j.Journey != null).Count());
         }
         finally
         {
-            await using var unlockTransaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
-            risIds.ForEach(risId => risId.IsLocked = false);
-            await dbContext.SaveChangesAsync(cancellationToken);
-            await unlockTransaction.CommitAsync(cancellationToken);
+            using var unlockScope = serviceProvider.CreateScope();
+            var unlockDbContext = unlockScope.ServiceProvider.GetRequiredService<NavigatorDbContext>();
+            var idsToUnlock = risIds.Select(r => r.Id).ToList();
+            await unlockDbContext.RisIds
+                .Where(r => idsToUnlock.Contains(r.Id))
+                .ExecuteUpdateAsync(s => s.SetProperty(r => r.IsLocked, false), cancellationToken);
         }
     }
     
@@ -192,8 +190,6 @@ public class GatheringJourneyDaemon(
                 journeyResponse.Journey = journey;
             }
         }
-        
-        await dbContext.SaveChangesAsync(cancellationToken);
         return journeys;
     }
     
@@ -217,13 +213,16 @@ public class GatheringJourneyDaemon(
                               administration.OperatorName == headerAdministrationObject.GetProperty("operatorName").GetString()!,
             cancellationToken);
         if (existingAdministration == null)
+        {
             existingAdministration = new Administration()
             {
                 AdministrationId = headerAdministrationObject.GetProperty("administrationID").GetString()!,
                 OperatorCode = headerAdministrationObject.GetProperty("operatorCode").GetString()!,
                 OperatorName = headerAdministrationObject.GetProperty("operatorName").GetString()!
             };
-        
+            dbContext.Administrations.Add(existingAdministration);
+        }
+
         var informationDict = journeyElement.TryGetProperty("messages", out var messagesObject) && messagesObject.ValueKind == JsonValueKind.Object 
             ? BuildInformationDict(journeyElement.GetProperty("messages"))
             : new Dictionary<int, List<Information>>();
