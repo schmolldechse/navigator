@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using System.Globalization;
-using System.Runtime.InteropServices.JavaScript;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using daemon.Database;
@@ -19,7 +18,7 @@ public class GatheringJourneyDaemon(
     IServiceProvider serviceProvider,
     ProxyRotator proxyRotator) : Daemon("Gathering Journey", TimeSpan.FromSeconds(15), logger)
 {
-    private readonly string _apiUrl = "https://apis.deutschebahn.com/db/apis/ris-journeys/v2/{0}";
+    private readonly string _apiUrl = "https://apis.deutschebahn.com/db/apis/ris-journeys/v2/batch";
     private readonly string _journeyDescriptionPattern = @"\s\(.*?\)";
 
     // timetable changes
@@ -41,110 +40,118 @@ public class GatheringJourneyDaemon(
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<NavigatorDbContext>();
         
-        IdentifiedRisId? randomRisId = null;
+        List<IdentifiedRisId> risIds;
         await using (var transaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken))
         {
-            var risIds = await dbContext
-                .RisIds.Where(risId => !risId.IsLocked)
-                .Where(risId => risId.Active)
+            risIds = await dbContext.RisIds
+                .Where(risId => !risId.IsLocked && risId.Active)
                 .Where(risId => risId.LastSeen == null || risId.LastSeen < DateTime.UtcNow.Date.AddDays(-1))
                 .OrderBy(risId => risId.LastSeen ?? DateTime.MinValue)
-                .Take(1000)
+                .Take(5000)
                 .ToListAsync(cancellationToken);
-            randomRisId = risIds.Count > 0 ? risIds[Random.Shared.Next(risIds.Count)] : null;
-            if (randomRisId == null)
+            risIds = risIds.OrderBy(_ => Random.Shared.Next()).Take(320).ToList();
+            if (risIds.Count == 0)
             {
                 await transaction.RollbackAsync(cancellationToken);
                 return;
             }
-
-            randomRisId.IsLocked = true;
+            
+            risIds.ForEach(risId => risId.IsLocked = true);
             await dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
 
+        var journeys = await CallApi(risIds, dbContext, cancellationToken);
         try
         {
-            /*
-             * For RIS IDs that have never been processed (LastSeen is null):
-             * - Gets the last timetable change date (starting from the previous day at midnight).
-             * - Going back 7 days from the last timetable change date. (=> this could be lowered, but 7 days is a good buffer)
-             */
-            if (randomRisId.LastSeen == null)
+            await using var unlockTransaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken); 
+            foreach (var journeyResponse in journeys)
             {
-                var lastSeen = GetLastTimetableChange(DateTime.UtcNow.Date.AddDays(-1));
-                lastSeen = new DateTime(
-                    DateOnly.FromDateTime(lastSeen.AddDays(-7)),
-                    TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),
-                    DateTimeKind.Utc
-                );
-                await ProcessJourney(randomRisId, lastSeen, dbContext, cancellationToken);
+                journeyResponse.RisId.LastSeen = journeyResponse.LastSeen;
+                if (journeyResponse.Journey != null)
+                {
+                    journeyResponse.RisId.LastSucceededAt = journeyResponse.LastSeen;
+                    var exists = await dbContext.Journeys.AnyAsync(journey => journey.Id == journeyResponse.Journey!.Id, cancellationToken);
+                    if (!exists) dbContext.Journeys.Add(journeyResponse.Journey);
+                }
+                journeyResponse.RisId.IsLocked = false;
             }
-            /*
-             * For previously processed RIS IDs, we are comparing:
-             * - Midnight of LastSeen (+1 day)              |       exp: 2025-06-13 20:17:00     ->    2025-06-14 00:00:00
-             * - Midnight of current date (-1 day)          |       exp: 2025-06-15 13:00:00     ->    2025-06-14 00:00:00
-             *
-             * We add one day to LastSeen (as this is the day which we want to gather) and then compare it to the current date (-1 day).
-             * Result: LastSeen of the RIS ID is going to be set to : 2025-06-14 00:00:00
 
-             * If LastSeen is older than the current date, the RIS ID is processed. Would it be newer, the journey could be not complete yet.
-             */
-            else if (randomRisId.LastSeen.Value.Date.AddDays(1) < DateTime.UtcNow.Date.AddDays(-1))
-            {
-                var lastSeen = new DateTime(
-                    DateOnly.FromDateTime(randomRisId.LastSeen!.Value.Date.AddDays(1)),
-                    TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),
-                    DateTimeKind.Utc
-                );
-                await ProcessJourney(randomRisId, lastSeen, dbContext, cancellationToken);
-            }
+            await dbContext.SaveChangesAsync(cancellationToken);
+            await unlockTransaction.CommitAsync(cancellationToken);
+            
+            logger.LogInformation("Successfully inserted {Count} journeys", journeys.Where(j => j.Journey != null).Count());
         }
         finally
         {
             await using var unlockTransaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken);
-            randomRisId.IsLocked = false;
+            risIds.ForEach(risId => risId.IsLocked = false);
             await dbContext.SaveChangesAsync(cancellationToken);
             await unlockTransaction.CommitAsync(cancellationToken);
         }
     }
-
-    private async Task ProcessJourney(
-        IdentifiedRisId risId,
-        DateTime date,
-        NavigatorDbContext dbContext,
-        CancellationToken cancellationToken
-    )
+    
+    private DateTime? EvaluateLastSeen(IdentifiedRisId risId)
     {
-        JourneyResponse journeyResponse = await CallApi(risId.Id, date, dbContext, cancellationToken);
-        if (journeyResponse.ParsingError)
+        /*
+         * For RIS IDs that have never been processed (LastSeen is null):
+         * - Gets the last timetable change date (starting from the previous day at midnight).
+         * - Going back 7 days from the last timetable change date. (=> this could be lowered, but 7 days is a good buffer)
+         */
+        if (risId.LastSeen == null)
         {
-            logger.LogError("Failed to parse journey for RIS ID {RisId}", risId.Id);
-            return;
-        } 
-        
-        // first update risId
-        risId.LastSeen = date;
-        
-        if (journeyResponse.Journey != null) 
-        { 
-            risId.LastSucceededAt = date;
-            
-            // check before adding
-            var exists = await dbContext.Journeys.AnyAsync(j => j.Id == journeyResponse.Journey.Id, cancellationToken);
-            if (!exists) dbContext.Journeys.Add(journeyResponse.Journey); 
+            var lastSeen = GetLastTimetableChange(DateTime.UtcNow.Date.AddDays(-1));
+            lastSeen = new DateTime(
+                DateOnly.FromDateTime(lastSeen.AddDays(-7)),
+                TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),
+                DateTimeKind.Utc
+            );
+            return lastSeen;
         }
-
-        await dbContext.SaveChangesAsync(cancellationToken);
+        /*
+         * For previously processed RIS IDs, we are comparing:
+         * - Midnight of LastSeen (+1 day)              |       exp: 2025-06-13 20:17:00     ->    2025-06-14 00:00:00
+         * - Midnight of current date (-1 day)          |       exp: 2025-06-15 13:00:00     ->    2025-06-14 00:00:00
+         *
+         * We add one day to LastSeen (as this is the day which we want to gather) and then compare it to the current date (-1 day).
+         * Result: LastSeen of the RIS ID is going to be set to : 2025-06-14 00:00:00
+         * 
+         * If LastSeen is older than the current date, the RIS ID is processed. Would it be newer, the journey could be not complete yet.
+         */
+        if (risId.LastSeen.Value.Date.AddDays(1) < DateTime.UtcNow.Date.AddDays(-1))
+        {
+            var lastSeen = new DateTime(
+                DateOnly.FromDateTime(risId.LastSeen!.Value.Date.AddDays(1)),
+                TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),
+                DateTimeKind.Utc
+            );
+            return lastSeen;
+        }
+        return null;
     }
 
-    private async Task<JourneyResponse> CallApi(string risId, DateTime when, NavigatorDbContext dbContext, CancellationToken cancellationToken)
+    private async Task<List<JourneyResponse>> CallApi(List<IdentifiedRisId> risIds, NavigatorDbContext dbContext, CancellationToken cancellationToken)
     {
-        string formattedId = when.ToString("yyyyMMdd") + "-" + risId;
-        logger.LogInformation("Trying to solve a journey for {RisId} on {Date}", risId, when.ToString("yyyy-MM-dd"));
+        List<JourneyResponse> journeys = risIds
+            .Select(risId => new { risId, lastSeen = EvaluateLastSeen(risId) })
+            .Where(x => x.lastSeen != null)
+            .Select(x => new JourneyResponse
+            {
+                RisId = x.risId,
+                Journey = null,
+                LastSeen = x.lastSeen!.Value
+            })
+            .ToList();
+        logger.LogInformation("Trying to solve journeys for {Count}x RIS IDs", risIds.Count);
 
         var httpClient = proxyRotator.GetRandomProxy();
-        using var httpRequest = new HttpRequestMessage(HttpMethod.Get, string.Format(_apiUrl, formattedId));
+        using var httpRequest = new HttpRequestMessage(HttpMethod.Post, string.Format(_apiUrl));
+        httpRequest.Content = new StringContent(JsonSerializer.Serialize(new
+        {
+            includeReferences = true,
+            journeyIDs = journeys.Select(journey => journey.LastSeen.ToString("yyyyMMdd") + "-" + journey.RisId.Id).ToArray(),
+            separateCancelled = false
+        }), System.Text.Encoding.UTF8, "application/json");
         httpRequest.Headers.Add("Accept", "application/vnd.de.db.ris+json");
         httpRequest.Headers.Add("DB-Client-Id",
             Environment.GetEnvironmentVariable("JOURNEYS_CLIENT_ID") ??
@@ -156,22 +163,52 @@ public class GatheringJourneyDaemon(
         var response = await httpClient.SendAsync(httpRequest);
         if (!response.IsSuccessStatusCode)
         { 
-            logger.LogDebug("Failed to retrieve a Journey for {RisId}. Received {StatusCode} ({Response})", formattedId, response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
-            return new JourneyResponse { Journey = null, ParsingError = false };
+            logger.LogDebug("Failed to retrieve journeys. Aborting. Received {StatusCode} ({Response})", response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
+            return new List<JourneyResponse>();
         }
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         var content = (await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)).RootElement;
-
-        if (content.GetProperty("journeyID").ValueKind != JsonValueKind.String || content.GetProperty("info").ValueKind != JsonValueKind.Object)
-            return new JourneyResponse { Journey = null, ParsingError = true };
+        logger.LogInformation("Successfully retrieved journeys for {Count}x RIS IDs. Received {StatusCode}", risIds.Count, response.StatusCode);
         
-        var journeyId = content.GetProperty("journeyID").GetString()!;
+        if (content.TryGetProperty("erroneousJourneys", out var erroneousJourneysArray) &&
+            erroneousJourneysArray.ValueKind == JsonValueKind.Array && erroneousJourneysArray.GetArrayLength() > 0)
+        {
+            logger.LogDebug("Received {Count} erroneous journeys", erroneousJourneysArray.GetArrayLength());
+            // No need to set the JourneyResponse.Journey as it is null
+        }
+
+        if (content.TryGetProperty("journeys", out var journeysArray) &&
+            journeysArray.ValueKind == JsonValueKind.Array && journeysArray.GetArrayLength() > 0)
+        {
+            logger.LogDebug("Received {Count} journeys", journeysArray.GetArrayLength()); 
+            foreach (var journeyElement in journeysArray.EnumerateArray()) 
+            { 
+                var journey = await BuildJourney(journeyElement, dbContext, cancellationToken); 
+                
+                var journeyResponse = journeys.FirstOrDefault(jp => jp.LastSeen.ToString("yyyyMMdd") + "-" + jp.RisId.Id == journeyElement.GetProperty("journeyID").GetString()!);
+                if (journeyResponse == null) continue;
+                
+                journeyResponse.Journey = journey;
+            }
+        }
+        
+        await dbContext.SaveChangesAsync(cancellationToken);
+        return journeys;
+    }
+    
+    private async Task<Journey?> BuildJourney(JsonElement journeyElement, NavigatorDbContext dbContext, CancellationToken cancellationToken)
+    {
+        if (journeyElement.GetProperty("journeyID").ValueKind != JsonValueKind.String ||
+            journeyElement.GetProperty("info").ValueKind != JsonValueKind.Object)
+            return null;
+        
+        var journeyId = journeyElement.GetProperty("journeyID").GetString()!;
         var date = DateOnly.ParseExact(journeyId[..8], "yyyyMMdd");
-        var infoObject = content.GetProperty("info");
+        var infoObject = journeyElement.GetProperty("info");
         
         if (infoObject.GetProperty("headerAdministration").ValueKind != JsonValueKind.Object) 
-            return new JourneyResponse { Journey = null, ParsingError = true };
+            return null;
         var headerAdministrationObject = infoObject.GetProperty("headerAdministration");
         
         var existingAdministration = await dbContext.Administrations.FirstOrDefaultAsync(
@@ -187,21 +224,20 @@ public class GatheringJourneyDaemon(
                 OperatorName = headerAdministrationObject.GetProperty("operatorName").GetString()!
             };
         
-        var informationDict = content .TryGetProperty("messages", out var messagesObject) && messagesObject.ValueKind == JsonValueKind.Object 
-            ? BuildInformationDict(content.GetProperty("messages"))
+        var informationDict = journeyElement.TryGetProperty("messages", out var messagesObject) && messagesObject.ValueKind == JsonValueKind.Object 
+            ? BuildInformationDict(journeyElement.GetProperty("messages"))
             : new Dictionary<int, List<Information>>();
-        var journey = new Journey()
+        return new Journey()
         {
             Id = journeyId,
             Date = date,
             InsertedAt = DateTime.UtcNow,
             Administration = existingAdministration,
+            Cancelled = infoObject.TryGetProperty("journeyCancelled", out var journeyCancelledElement) && journeyCancelledElement.ValueKind == JsonValueKind.True,
             Transport = BuildTransport(infoObject),
             Type = ParseJourneyType(infoObject.GetProperty("type").GetString()!),
-            ViaStops = content.GetProperty("events").EnumerateArray().Select(scheduleObject => BuildSchedule(date, scheduleObject, informationDict)).ToList()
+            ViaStops = journeyElement.GetProperty("events").EnumerateArray().Select(scheduleObject => BuildSchedule(date, scheduleObject, informationDict)).ToList()
         };
-        
-        return new JourneyResponse { Journey = journey, ParsingError = false };
     }
 
     private Dictionary<int, List<Information>> BuildInformationDict(JsonElement messagesObject)
@@ -443,6 +479,7 @@ public class GatheringJourneyDaemon(
 
 class JourneyResponse
 {
-    public Journey? Journey { get; init; }
-    public bool ParsingError { get; init; } = false;
+    public required IdentifiedRisId RisId { get; init; }
+    public Journey? Journey { get; set; }
+    public DateTime LastSeen { get; init; }
 }
