@@ -28,6 +28,10 @@ public class Journey
     public required Administration Administration { get; init; }
     
     
+    [Column("cancelled")]
+    public required bool Cancelled { get; init; } = false;
+    
+    
     public virtual Transport? Transport { get; init; }
     
     public virtual ICollection<ScheduleAtStopPlace> ViaStops { get; init; } = new List<ScheduleAtStopPlace>();

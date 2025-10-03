@@ -30,11 +30,15 @@ struct JourneyMigration: AsyncMigration {
                 date date NOT NULL,
                 inserted_at timestamp NOT NULL,
                 type varchar(255) NOT NULL,
-                administration_index integer NOT NULL REFERENCES "\(unsafeRaw: Administration.space!)"."\(unsafeRaw: Administration.schema)" (id) ON DELETE CASCADE
+                administration_index integer NOT NULL REFERENCES "\(unsafeRaw: Administration.space!)"."\(unsafeRaw: Administration.schema)" (id) ON DELETE CASCADE,
+                cancelled boolean NOT NULL DEFAULT false
             );
             """).run()
         try await sql.raw("""
             CREATE INDEX IF NOT EXISTS "idx_journeys_date" ON "\(unsafeRaw: Journey.space!)"."\(unsafeRaw: Journey.schema)" (date);
+            """).run()
+        try await sql.raw("""
+            CREATE INDEX IF NOT EXISTS "idx_journeys_cancelled" ON "\(unsafeRaw: Journey.space!)"."\(unsafeRaw: Journey.schema)" (cancelled);
             """).run()
         
         // journey_transports
@@ -163,6 +167,9 @@ struct JourneyMigration: AsyncMigration {
         // journeys
         try await sql.raw("""
             DROP INDEX IF EXISTS "idx_journeys_date";
+            """).run()
+        try await sql.raw("""
+            DROP INDEX IF EXISTS "idx_journeys_cancelled";
             """).run()
         try await sql.raw("""
             DROP TABLE IF EXISTS "\(unsafeRaw: Journey.space!)"."\(unsafeRaw: Journey.schema)";

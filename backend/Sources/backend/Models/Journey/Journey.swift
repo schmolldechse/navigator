@@ -27,6 +27,9 @@ final class Journey: Model, @unchecked Sendable {
     @Parent(key: "administration_index")
     var administration: Administration
     
+    @Field(key: "cancelled")
+    var cancelled: Bool
+    
     @OptionalChild(for: \.$journey)
     var transport: Transport?
     
