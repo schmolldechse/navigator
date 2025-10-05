@@ -56,11 +56,11 @@ public class ScheduleAtStopPlace
     
     [Column("planned_platform")]
     [MaxLength(32)]
-    public required string PlannedPlatform { get; init; }
+    public string? PlannedPlatform { get; init; }
     
     [Column("actual_platform")]
     [MaxLength(32)]
-    public required string ActualPlatform { get; init; }
+    public string? ActualPlatform { get; init; }
     
     public virtual ICollection<Information> Information { get; init; } = new List<Information>();
 }

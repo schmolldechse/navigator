@@ -2,16 +2,20 @@
 using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+
 using daemon.Database;
 using daemon.Models.Database;
 using daemon.Models.Database.Journey;
 using daemon.Models.Database.RISIdentifier;
 using daemon.Utils;
+
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace daemon.Manager;
+
+internal readonly record struct SingleJourneyResponse(IdentifiedRisId RisId, DateTime NewLastSeen, Journey? Journey);
 
 public class GatheringJourneyDaemon(
     ILogger<GatheringJourneyDaemon> logger,
@@ -21,7 +25,6 @@ public class GatheringJourneyDaemon(
     private readonly string _apiUrl = "https://apis.deutschebahn.com/db/apis/ris-journeys/v2/batch";
     private readonly string _journeyDescriptionPattern = @"\s\(.*?\)";
 
-    // timetable changes
     private readonly DateTime[] _timetableChanges =
     {
         new(2024, 12, 17, 0, 0, 0, DateTimeKind.Utc),
@@ -39,23 +42,29 @@ public class GatheringJourneyDaemon(
     {
         using var scope = serviceProvider.CreateScope();
         var dbContext = scope.ServiceProvider.GetRequiredService<NavigatorDbContext>();
-        
-        List<IdentifiedRisId> risIds;
+
+        List<SingleJourneyResponse> risIdsToProcess;
         await using (var transaction = await dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken))
         {
-            risIds = await dbContext.RisIds
-                .Where(risId => !risId.IsLocked && risId.Active)
-                .Where(risId => risId.LastSeen == null || risId.LastSeen < DateTime.UtcNow.Date.AddDays(-1))
-                .OrderBy(risId => risId.LastSeen ?? DateTime.MinValue)
-                .Take(15000)
+            var risIds = await (
+                    from risId in dbContext.RisIds
+                    where !risId.IsLocked && risId.Active && (risId.LastSeen == null || risId.LastSeen < DateTime.UtcNow.Date.AddDays(-2))
+                    orderby risId.LastSeen ?? DateTime.MinValue
+                    select risId
+                ).Take(15000)
                 .ToListAsync(cancellationToken);
-            risIds = risIds.OrderBy(_ => Random.Shared.Next()).Take(384).ToList();
+            risIdsToProcess = (
+                    from risId in risIds
+                    orderby Random.Shared.Next()
+                    select new SingleJourneyResponse(risId, EvaluateLastSeen(risId), null))
+                .Take(384)
+                .ToList();
             if (risIds.Count == 0)
             {
                 await transaction.RollbackAsync(cancellationToken);
                 return;
             }
-            
+
             risIds.ForEach(risId => risId.IsLocked = true);
             await dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
@@ -63,13 +72,13 @@ public class GatheringJourneyDaemon(
 
         try
         {
-            var journeys = await CallApi(risIds, dbContext, cancellationToken);
+            var journeys = await CallApi(risIdsToProcess, dbContext, cancellationToken);
             foreach (var journeyResponse in journeys)
             {
-                journeyResponse.RisId.LastSeen = journeyResponse.LastSeen;
+                journeyResponse.RisId.LastSeen = journeyResponse.NewLastSeen;
                 if (journeyResponse.Journey != null)
                 {
-                    journeyResponse.RisId.LastSucceededAt = journeyResponse.LastSeen;
+                    journeyResponse.RisId.LastSucceededAt = journeyResponse.NewLastSeen;
                     var exists = await dbContext.Journeys.AnyAsync(journey => journey.Id == journeyResponse.Journey!.Id, cancellationToken);
                     if (!exists) dbContext.Journeys.Add(journeyResponse.Journey);
                 }
@@ -82,14 +91,14 @@ public class GatheringJourneyDaemon(
         {
             using var unlockScope = serviceProvider.CreateScope();
             var unlockDbContext = unlockScope.ServiceProvider.GetRequiredService<NavigatorDbContext>();
-            var idsToUnlock = risIds.Select(r => r.Id).ToList();
+            var idsToUnlock = risIdsToProcess.Select(risId => risId.RisId.Id).ToList();
             await unlockDbContext.RisIds
-                .Where(r => idsToUnlock.Contains(r.Id))
+                .Where(risId => idsToUnlock.Contains(risId.Id))
                 .ExecuteUpdateAsync(s => s.SetProperty(r => r.IsLocked, false), cancellationToken);
         }
     }
-    
-    private DateTime? EvaluateLastSeen(IdentifiedRisId risId)
+
+    private DateTime EvaluateLastSeen(IdentifiedRisId risId)
     {
         /*
          * For RIS IDs that have never been processed (LastSeen is null):
@@ -99,13 +108,9 @@ public class GatheringJourneyDaemon(
         if (risId.LastSeen == null)
         {
             var lastSeen = GetLastTimetableChange(DateTime.UtcNow.Date.AddDays(-1));
-            lastSeen = new DateTime(
-                DateOnly.FromDateTime(lastSeen.AddDays(-7)),
-                TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),
-                DateTimeKind.Utc
-            );
-            return lastSeen;
+            return new DateTime(DateOnly.FromDateTime(lastSeen.AddDays(-7)), TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay), DateTimeKind.Utc);
         }
+
         /*
          * For previously processed RIS IDs, we are comparing:
          * - Midnight of LastSeen (+1 day)              |       exp: 2025-06-13 20:17:00     ->    2025-06-14 00:00:00
@@ -113,100 +118,65 @@ public class GatheringJourneyDaemon(
          *
          * We add one day to LastSeen (as this is the day which we want to gather) and then compare it to the current date (-1 day).
          * Result: LastSeen of the RIS ID is going to be set to : 2025-06-14 00:00:00
-         * 
+         *
          * If LastSeen is older than the current date, the RIS ID is processed. Would it be newer, the journey could be not complete yet.
          */
-        if (risId.LastSeen.Value.Date.AddDays(1) < DateTime.UtcNow.Date.AddDays(-1))
-        {
-            var lastSeen = new DateTime(
-                DateOnly.FromDateTime(risId.LastSeen!.Value.Date.AddDays(1)),
-                TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),
-                DateTimeKind.Utc
-            );
-            return lastSeen;
-        }
-        return null;
+        return new DateTime(DateOnly.FromDateTime(risId.LastSeen!.Value.Date.AddDays(1)), TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay), DateTimeKind.Utc);
     }
 
-    private async Task<List<JourneyResponse>> CallApi(List<IdentifiedRisId> risIds, NavigatorDbContext dbContext, CancellationToken cancellationToken)
+    private async Task<List<SingleJourneyResponse>> CallApi(List<SingleJourneyResponse> risIds, NavigatorDbContext dbContext, CancellationToken cancellationToken)
     {
-        List<JourneyResponse> journeys = risIds
-            .Select(risId => new { risId, lastSeen = EvaluateLastSeen(risId) })
-            .Where(x => x.lastSeen != null)
-            .Select(x => new JourneyResponse
-            {
-                RisId = x.risId,
-                Journey = null,
-                LastSeen = x.lastSeen!.Value
-            })
-            .ToList();
         logger.LogInformation("Trying to solve journeys for {Count}x RIS IDs", risIds.Count);
 
         var httpClient = proxyRotator.GetRandomProxy();
         using var httpRequest = new HttpRequestMessage(HttpMethod.Post, string.Format(_apiUrl));
-        httpRequest.Content = new StringContent(JsonSerializer.Serialize(new
+        httpRequest.Content = new StringContent(JsonSerializer.Serialize(new 
         {
             includeReferences = true,
-            journeyIDs = journeys.Select(journey => journey.LastSeen.ToString("yyyyMMdd") + "-" + journey.RisId.Id).ToArray(),
+            journeyIDs = risIds.Select(journeyResponse => journeyResponse.NewLastSeen.ToString("yyyyMMdd") + "-" + journeyResponse.RisId.Id).ToArray(),
             separateCancelled = false
         }), System.Text.Encoding.UTF8, "application/json");
         httpRequest.Headers.Add("Accept", "application/vnd.de.db.ris+json");
-        httpRequest.Headers.Add("DB-Client-Id",
-            Environment.GetEnvironmentVariable("JOURNEYS_CLIENT_ID") ??
-            throw new InvalidOperationException("JOURNEYS_CLIENT_ID environment variable is not set."));
-        httpRequest.Headers.Add("DB-Api-Key",
-            Environment.GetEnvironmentVariable("JOURNEYS_API_KEY") ??
-            throw new InvalidOperationException("JOURNEYS_API_KEY environment variable is not set."));
-        
+        httpRequest.Headers.Add("DB-Client-Id", Environment.GetEnvironmentVariable("JOURNEYS_CLIENT_ID") ?? throw new InvalidOperationException("JOURNEYS_CLIENT_ID environment variable is not set."));
+        httpRequest.Headers.Add("DB-Api-Key", Environment.GetEnvironmentVariable("JOURNEYS_API_KEY") ?? throw new InvalidOperationException("JOURNEYS_API_KEY environment variable is not set."));
+
         var response = await httpClient.SendAsync(httpRequest);
         if (!response.IsSuccessStatusCode)
-        { 
+        {
             logger.LogDebug("Failed to retrieve journeys. Aborting. Received {StatusCode} ({Response})", response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
-            return new List<JourneyResponse>();
+            return risIds;
         }
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         var content = (await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken)).RootElement;
         logger.LogInformation("Successfully retrieved journeys for {Count}x RIS IDs. Received {StatusCode}", risIds.Count, response.StatusCode);
-        
-        if (content.TryGetProperty("erroneousJourneys", out var erroneousJourneysArray) &&
-            erroneousJourneysArray.ValueKind == JsonValueKind.Array && erroneousJourneysArray.GetArrayLength() > 0)
-        {
-            logger.LogDebug("Received {Count} erroneous journeys", erroneousJourneysArray.GetArrayLength());
-            // No need to set the JourneyResponse.Journey as it is null
-        }
 
-        if (content.TryGetProperty("journeys", out var journeysArray) &&
-            journeysArray.ValueKind == JsonValueKind.Array && journeysArray.GetArrayLength() > 0)
+        if (content.TryGetProperty("journeys", out var journeysArray) && journeysArray.ValueKind == JsonValueKind.Array && journeysArray.GetArrayLength() > 0)
         {
-            logger.LogDebug("Received {Count} journeys", journeysArray.GetArrayLength()); 
-            foreach (var journeyElement in journeysArray.EnumerateArray()) 
-            { 
-                var journey = await BuildJourney(journeyElement, dbContext, cancellationToken); 
-                
-                var journeyResponse = journeys.FirstOrDefault(jp => jp.LastSeen.ToString("yyyyMMdd") + "-" + jp.RisId.Id == journeyElement.GetProperty("journeyID").GetString()!);
-                if (journeyResponse == null) continue;
-                
-                journeyResponse.Journey = journey;
+            logger.LogDebug("Received {Count} journeys", journeysArray.GetArrayLength());
+            foreach (var journeyElement in journeysArray.EnumerateArray())
+            {
+                var journey = await BuildJourney(journeyElement, dbContext, cancellationToken);
+
+                var index = risIds.FindIndex(journeyResponse => journeyResponse.NewLastSeen.ToString("yyyyMMdd") + "-" + journeyResponse.RisId.Id == journeyElement.GetProperty("journeyID").GetString()!);
+                if (index == -1) continue;
+
+                risIds[index] = risIds[index] with { Journey = journey };
             }
         }
-        return journeys;
+        return risIds;
     }
-    
+
     private async Task<Journey?> BuildJourney(JsonElement journeyElement, NavigatorDbContext dbContext, CancellationToken cancellationToken)
     {
-        if (journeyElement.GetProperty("journeyID").ValueKind != JsonValueKind.String ||
-            journeyElement.GetProperty("info").ValueKind != JsonValueKind.Object)
+        if (!journeyElement.TryGetProperty("journeyID", out var journeyIdElement) || journeyIdElement.ValueKind != JsonValueKind.String || !journeyElement.TryGetProperty("info", out var infoObject) || infoObject.ValueKind != JsonValueKind.Object)
             return null;
-        
-        var journeyId = journeyElement.GetProperty("journeyID").GetString()!;
+
+        var journeyId = journeyIdElement.GetString()!;
         var date = DateOnly.ParseExact(journeyId[..8], "yyyyMMdd");
-        var infoObject = journeyElement.GetProperty("info");
-        
-        if (infoObject.GetProperty("headerAdministration").ValueKind != JsonValueKind.Object) 
+
+        if (!infoObject.TryGetProperty("headerAdministration", out var headerAdministrationObject) || headerAdministrationObject.ValueKind != JsonValueKind.Object)
             return null;
-        var headerAdministrationObject = infoObject.GetProperty("headerAdministration");
-        
         var existingAdministration = await dbContext.Administrations.FirstOrDefaultAsync(
             administration => administration.AdministrationId == headerAdministrationObject.GetProperty("administrationID").GetString()! &&
                               administration.OperatorCode == headerAdministrationObject.GetProperty("operatorCode").GetString()! &&
@@ -223,9 +193,7 @@ public class GatheringJourneyDaemon(
             dbContext.Administrations.Add(existingAdministration);
         }
 
-        var informationDict = journeyElement.TryGetProperty("messages", out var messagesObject) && messagesObject.ValueKind == JsonValueKind.Object 
-            ? BuildInformationDict(journeyElement.GetProperty("messages"))
-            : new Dictionary<int, List<Information>>();
+        var informationDict = journeyElement.TryGetProperty("messages", out var messagesObject) && messagesObject.ValueKind == JsonValueKind.Object ? BuildInformationDict(journeyElement.GetProperty("messages")) : new Dictionary<int, List<Information>>();
         return new Journey()
         {
             Id = journeyId,
@@ -242,139 +210,100 @@ public class GatheringJourneyDaemon(
     private Dictionary<int, List<Information>> BuildInformationDict(JsonElement messagesObject)
     {
         Dictionary<int, List<Information>> infos = new Dictionary<int, List<Information>>();
-        
-        if (messagesObject.TryGetProperty("attributes", out var attributesArray) &&
-            attributesArray.ValueKind == JsonValueKind.Array)
+
+        void ProcessMessageArray(string propertyName, Func<JsonElement, Information> func)
         {
-            attributesArray.EnumerateArray().ToList().ForEach(attributeObject =>
+            if (messagesObject.TryGetProperty(propertyName, out var messageArray) && messageArray.ValueKind == JsonValueKind.Array)
             {
-                int messageId = attributeObject.GetProperty("messageID").GetInt32();
-                if (!infos.ContainsKey(messageId)) infos[messageId] = new List<Information>();
-                
-                var information = new Information()
+                foreach (var message in messageArray.EnumerateArray())
                 {
-                    Type = InformationType.JOURNEY_ATTRIBUTE,
-                    Key = attributeObject.GetProperty("code").GetString()!,
-                    Text = attributeObject.GetProperty("text").GetString()!,
-                };
-                infos[messageId].Add(information);
-            });
+                    var messageId = message.GetProperty("messageID").GetInt32();
+                    if (!infos.ContainsKey(messageId)) infos[messageId] = new List<Information>();
+                    infos[messageId].Add(func(message));
+                }
+            }
         }
 
-        if (messagesObject.TryGetProperty("disruptions", out var disruptionsArray) &&
-            disruptionsArray.ValueKind == JsonValueKind.Array)
+        ProcessMessageArray("attributes", attributeArray => new Information()
         {
-            disruptionsArray.EnumerateArray().ToList().ForEach(disruptionObject =>
+            Type = InformationType.JOURNEY_ATTRIBUTE,
+            Key = attributeArray.GetProperty("code").GetString()!,
+            Text = attributeArray.GetProperty("text").GetString()!,
+        });
+
+
+        if (messagesObject.TryGetProperty("disruptions", out var disruptionsArray) && disruptionsArray.ValueKind == JsonValueKind.Array)
+        {
+            foreach (var disruption in disruptionsArray.EnumerateArray())
             {
-                int messageId = disruptionObject.GetProperty("messageID").GetInt32();
+                var messageId = disruption.GetProperty("messageID").GetInt32();
                 if (!infos.ContainsKey(messageId)) infos[messageId] = new List<Information>();
 
-                if (disruptionObject.TryGetProperty("langDe", out var langDeObject) &&
-                    langDeObject.ValueKind == JsonValueKind.Object)
+                void AddDisruptionInfo(string langProperty)
                 {
-                    infos[messageId].Add(new Information()
+                    if (disruption.TryGetProperty(langProperty, out var langObject) && langObject.ValueKind == JsonValueKind.Object)
                     {
-                        Type = InformationType.DISRUPTION,
-                        Key = "general-warning",
-                        DisruptionCommunicationId = disruptionObject.TryGetProperty("disruptionCommunicationID", out var disruptionCommunicationIdObject) ? disruptionCommunicationIdObject.GetString() : null,
-                        DisruptionId = disruptionObject.TryGetProperty("disruptionID", out var disruptionIdObject) ? disruptionIdObject.GetString() : null,
-                        Text = langDeObject.GetProperty("text").GetString()!,
-                        TextShort = langDeObject.GetProperty("textShort").GetString() ?? null,
-                    });
+                        infos[messageId].Add(new Information()
+                        {
+                            Type = InformationType.DISRUPTION,
+                            Key = "general-warning",
+                            DisruptionCommunicationId = disruption.TryGetProperty("disruptionCommunicationID", out var disruptionCommunicationIdObject) ? disruptionCommunicationIdObject.GetString() : null,
+                            DisruptionId = disruption.TryGetProperty("disruptionID", out var disruptionIdObject) ? disruptionIdObject.GetString() : null,
+                            Text = langObject.GetProperty("text").GetString()!,
+                            TextShort = langObject.GetProperty("textShort").GetString() ?? null,
+                        });
+                    }
                 }
 
-                if (disruptionObject.TryGetProperty("langEn", out var langEnObject) &&
-                    langEnObject.ValueKind == JsonValueKind.Object)
-                {
-                    infos[messageId].Add(new Information()
-                    {
-                        Type = InformationType.DISRUPTION,
-                        Key = "general-warning",
-                        DisruptionCommunicationId = disruptionObject.TryGetProperty("disruptionCommunicationID", out var disruptionCommunicationIdObject) ? disruptionCommunicationIdObject.GetString() : null,
-                        DisruptionId = disruptionObject.TryGetProperty("disruptionID", out var disruptionIdObject) ? disruptionIdObject.GetString() : null,
-                        Text = langEnObject.GetProperty("text").GetString()!,
-                        TextShort = langEnObject.GetProperty("textShort").GetString() ?? null,
-                    });
-                }
-            });
+                AddDisruptionInfo("langDe");
+                AddDisruptionInfo("langEn");
+            }
         }
 
         if (messagesObject.TryGetProperty("notes", out var notesArray) && notesArray.ValueKind == JsonValueKind.Array)
         {
-            notesArray.EnumerateArray().ToList().ForEach(noteObject =>
+            ProcessMessageArray("notes", noteObject => new Information()
             {
-                int messageId = noteObject.GetProperty("messageID").GetInt32();
-                if (!infos.ContainsKey(messageId)) infos[messageId] = new List<Information>();
-                
-                var information = new Information()
-                {
-                    Type = InformationType.MESSAGE,
-                    Key = noteObject.TryGetProperty("code", out var codeElement) && codeElement.ValueKind == JsonValueKind.String 
-                        ? codeElement.GetString()!
-                        : "information",
-                    Text = noteObject.GetProperty("text").GetString()!,
-                    TextShort = noteObject.TryGetProperty("textShort", out var textShortElement) && textShortElement.ValueKind == JsonValueKind.String 
-                        ? textShortElement.GetString()!
-                        : null
-                };
-                infos[messageId].Add(information);
+                Type = InformationType.MESSAGE,
+                Key = noteObject.TryGetProperty("code", out var codeElement) && codeElement.ValueKind == JsonValueKind.String ? codeElement.GetString()! : "information",
+                Text = noteObject.GetProperty("text").GetString()!,
+                TextShort = noteObject.TryGetProperty("textShort", out var textShortElement) && textShortElement.ValueKind == JsonValueKind.String ? textShortElement.GetString()!: null
             });
         }
 
-        if (messagesObject.TryGetProperty("risCauseCodes", out var risCauseCodesArray) &&
-            risCauseCodesArray.ValueKind == JsonValueKind.Array)
+        if (messagesObject.TryGetProperty("risCauseCodes", out var risCauseCodesArray) && risCauseCodesArray.ValueKind == JsonValueKind.Array)
         {
-            risCauseCodesArray.EnumerateArray().ToList().ForEach(risCauseCodeObject =>
+            ProcessMessageArray("risCauseCodes", risCauseCode => new Information()
             {
-                int messageId = risCauseCodeObject.GetProperty("messageID").GetInt32();
-                if (!infos.ContainsKey(messageId)) infos[messageId] = new List<Information>();
-                
-                var information = new Information()
-                {
-                    Type = InformationType.RIS_CAUSE_REASON,
-                    Key = risCauseCodeObject.GetProperty("code").GetString()!,
-                    Text = risCauseCodeObject.GetProperty("text").GetString()!,
-                };
-                infos[messageId].Add(information);
+                Type = InformationType.RIS_CAUSE_REASON,
+                Key = risCauseCode.GetProperty("code").GetString()!, 
+                Text = risCauseCode.GetProperty("text").GetString()!,
             });
         }
-        
-        if (messagesObject.TryGetProperty("risQualityDeviations", out var risQualityDeviationsArray) &&
-            risQualityDeviationsArray.ValueKind == JsonValueKind.Array)
+
+        if (messagesObject.TryGetProperty("risQualityDeviations", out var risQualityDeviationsArray) && risQualityDeviationsArray.ValueKind == JsonValueKind.Array)
         {
-            risQualityDeviationsArray.EnumerateArray().ToList().ForEach(risQualityDeviationObject =>
+            ProcessMessageArray("risQualityDeviations", risQualityDeviation => new Information() 
             {
-                int messageId = risQualityDeviationObject.GetProperty("messageID").GetInt32();
-                if (!infos.ContainsKey(messageId)) infos[messageId] = new List<Information>();
-                
-                var information = new Information()
-                {
-                    Type = InformationType.RIS_QUALITY_DEVIATION,
-                    Key = risQualityDeviationObject.GetProperty("code").GetString()!,
-                    Text = risQualityDeviationObject.GetProperty("text").GetString()!,
-                };
-                infos[messageId].Add(information);
+                Type = InformationType.RIS_QUALITY_DEVIATION,
+                Key = risQualityDeviation.GetProperty("code").GetString()!,
+                Text = risQualityDeviation.GetProperty("text").GetString()!,
             });
         }
-        
+
         return infos;
     }
-    
+
     private Transport BuildTransport(JsonElement infoObject)
     {
-        if (infoObject.GetProperty("transportAtStart").ValueKind != JsonValueKind.Object)
-            throw new InvalidOperationException("Invalid transportAtStart object");
         var transportAtStartObject = infoObject.GetProperty("transportAtStart");
-        
-        var replacementType = string.Empty;
-        if (transportAtStartObject.TryGetProperty("replacementTransport", out var replacementTransportObject) && replacementTransportObject.ValueKind != JsonValueKind.Null)
-        {
-            if (replacementTransportObject.TryGetProperty("realType", out var realTypeElement) && realTypeElement.ValueKind == JsonValueKind.String)
-            {
-                replacementType = realTypeElement.GetString()!;
-            }
-        }
-        
+        if (transportAtStartObject.ValueKind != JsonValueKind.Object) throw new InvalidOperationException("Invalid transportAtStart object");
+
+        var replacementType =
+            transportAtStartObject.TryGetProperty("replacementTransport", out var replacementTransportElement) &&
+            replacementTransportElement.ValueKind == JsonValueKind.Object &&
+            replacementTransportElement.TryGetProperty("realType", out var realTypeElement) ? realTypeElement.GetString() : null;
+
         return new Transport()
         {
             Type = ParseTransportType(transportAtStartObject.GetProperty("type").GetString()!),
@@ -383,55 +312,39 @@ public class GatheringJourneyDaemon(
             Category = transportAtStartObject.GetProperty("category").GetString()!,
             CategoryInternal = transportAtStartObject.GetProperty("categoryInternal").GetString()!,
             JourneyDescription = SimplifyJourneyDescription(transportAtStartObject.GetProperty("journeyDescription").GetString()!),
-            Number = transportAtStartObject.GetProperty("journeyNumber").GetInt32(), 
-            Line = transportAtStartObject.TryGetProperty("line", out var lineObject) && lineObject.ValueKind == JsonValueKind.String 
-                ? lineObject.GetString()
-                : null,
+            Number = transportAtStartObject.GetProperty("journeyNumber").GetInt32(),
+            Line = transportAtStartObject.TryGetProperty("line", out var lineObject) ? lineObject.GetString() : null,
         };
     }
 
-    private ScheduleAtStopPlace BuildSchedule(DateOnly date, JsonElement scheduleObject, Dictionary<int, List<Information>> infoDict)
+    private ScheduleAtStopPlace BuildSchedule(DateOnly date, JsonElement scheduleObject,
+        Dictionary<int, List<Information>> infoDict)
     {
-        var scheduleType = ParseScheduleType(scheduleObject.GetProperty("type").GetString()!);
-        
         var plannedTime = DateTime.Parse(scheduleObject.GetProperty("timeSchedule").GetString() ?? throw new InvalidOperationException("Tried to parse 'timeSchedule' but it was missing."), null, DateTimeStyles.AdjustToUniversal);
-        if (!DateTime.TryParse(scheduleObject.GetProperty("time").GetString() ?? throw new InvalidOperationException("Tried to parse 'time' but it was missing."), null, DateTimeStyles.AdjustToUniversal, out var actualTime))
-            actualTime = plannedTime;
-        
-        var plannedPlatform = string.Empty;
-        if (scheduleObject.TryGetProperty("platformSchedule", out var plannedPlatformElement) && plannedPlatformElement.ValueKind != JsonValueKind.Null)
-            plannedPlatform = plannedPlatformElement.GetString() ?? string.Empty;
+        var actualTime = DateTime.TryParse(scheduleObject.GetProperty("time").GetString(), out var time) ? time : plannedTime;
 
-        string actualPlatform = string.Empty;
-        if (scheduleObject.TryGetProperty("platform", out var actualPlatformElement) && actualPlatformElement.ValueKind != JsonValueKind.Null)
-            actualPlatform = actualPlatformElement.GetString() ?? string.Empty;
-        else actualPlatform = plannedPlatform;
-        
+        var plannedPlatform = scheduleObject.TryGetProperty("platformSchedule", out var plannedPlatformElement) ? plannedPlatformElement.GetString() : null;
+        var actualPlatform = scheduleObject.TryGetProperty("platform", out var actualPlatformElement) ? actualPlatformElement.GetString() : plannedPlatform;
+
         var stopPlace = scheduleObject.GetProperty("stopPlace");
         if (stopPlace.ValueKind != JsonValueKind.Object)
             throw new InvalidOperationException("Tried to parse 'stopPlace' but it was missing.");
 
         return new ScheduleAtStopPlace()
         {
-            Type = scheduleType,
+            Type = ParseScheduleType(scheduleObject.GetProperty("type").GetString()!),
             Date = date,
             Name = stopPlace.GetProperty("name").GetString()!,
-            EvaNumber = int.TryParse(stopPlace.GetProperty("evaNumber").GetString(), out var evaNumber)
-                ? evaNumber
-                : throw new InvalidOperationException("Tried to parse 'evaNumber' but it failed."),
+            EvaNumber = int.TryParse(stopPlace.GetProperty("evaNumber").GetString(), out var evaNumber) ? evaNumber : throw new InvalidOperationException("Tried to parse 'evaNumber' but it failed."),
             PlannedTime = plannedTime,
             ActualTime = actualTime,
             Delay = (int)(actualTime - plannedTime).TotalSeconds,
             PlannedPlatform = plannedPlatform,
             ActualPlatform = actualPlatform,
-            Additional = scheduleObject.TryGetProperty("additional", out var additionalElement) &&
-                         additionalElement.ValueKind == JsonValueKind.True,
-            Cancelled = scheduleObject.TryGetProperty("cancelled", out var cancelledElement) &&
-                        cancelledElement.ValueKind == JsonValueKind.True,
-            Demand = scheduleObject.TryGetProperty("onDemand", out var onDemandElement) &&
-                     onDemandElement.ValueKind == JsonValueKind.True,
-            NoPassengerChange = scheduleObject.TryGetProperty("noPassengerChange", out var noPassengerChangeElement) &&
-                                noPassengerChangeElement.ValueKind == JsonValueKind.True,
+            Additional = scheduleObject.TryGetProperty("additional", out var additionalElement) && additionalElement.ValueKind == JsonValueKind.True,
+            Cancelled = scheduleObject.TryGetProperty("cancelled", out var cancelledElement) && cancelledElement.ValueKind == JsonValueKind.True,
+            Demand = scheduleObject.TryGetProperty("onDemand", out var onDemandElement) && onDemandElement.ValueKind == JsonValueKind.True,
+            NoPassengerChange = scheduleObject.TryGetProperty("noPassengerChange", out var noPassengerChangeElement) && noPassengerChangeElement.ValueKind == JsonValueKind.True,
             Information = scheduleObject.TryGetProperty("messages", out var messagesElement) && messagesElement.ValueKind == JsonValueKind.Array
                 ? messagesElement.EnumerateArray()
                     .Select(messageId => messageId.GetInt32())
@@ -442,43 +355,12 @@ public class GatheringJourneyDaemon(
                 : new List<Information>()
         };
     }
-    
-    private TransportType ParseTransportType(string? input)
-    {
-        if (string.IsNullOrWhiteSpace(input)) 
-            return TransportType.UNKNOWN;
-        if (Enum.TryParse<TransportType>(input, true, out var transportType))
-            return transportType;
-        return TransportType.UNKNOWN;
-    }
 
-    private JourneyType ParseJourneyType(string? input)
-    {
-        if (string.IsNullOrWhiteSpace(input))
-            return JourneyType.REGULAR;
-        if (Enum.TryParse<JourneyType>(input, true, out var journeyType))
-            return journeyType;
-        return JourneyType.REGULAR;
-    }
+    private TEnum ParseEnum<TEnum>(string? input, TEnum defaultValue) where TEnum : struct, Enum => Enum.TryParse<TEnum>(input, true, out var result) ? result : defaultValue;
 
-    private ScheduleType ParseScheduleType(string? input)
-    {
-        if (string.IsNullOrWhiteSpace(input))
-            return ScheduleType.DEPARTURE;
-        if (Enum.TryParse<ScheduleType>(input, true, out var scheduleType))
-            return scheduleType;
-        return ScheduleType.DEPARTURE;
-    }
-    
-    private string SimplifyJourneyDescription(string input)
-    {
-        return Regex.Replace(input, _journeyDescriptionPattern, "");
-    }
-}
+    private TransportType ParseTransportType(string? input) => ParseEnum<TransportType>(input, TransportType.UNKNOWN);
+    private JourneyType ParseJourneyType(string? input) => ParseEnum<JourneyType>(input, JourneyType.REGULAR);
+    private ScheduleType ParseScheduleType(string? input) => ParseEnum<ScheduleType>(input, ScheduleType.DEPARTURE);
 
-class JourneyResponse
-{
-    public required IdentifiedRisId RisId { get; init; }
-    public Journey? Journey { get; set; }
-    public DateTime LastSeen { get; init; }
+    private string SimplifyJourneyDescription(string input) => Regex.Replace(input, _journeyDescriptionPattern, "");
 }
