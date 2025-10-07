@@ -58,13 +58,13 @@ public class GatheringJourneyDaemon(
                     select new SingleJourneyResponse(risId, EvaluateLastSeen(risId), null))
                 .Take(384)
                 .ToList();
-            if (risIds.Count == 0)
+            if (risIdsToProcess.Count == 0)
             {
                 await transaction.RollbackAsync(cancellationToken);
                 return;
             }
 
-            risIds.ForEach(risId => risId.IsLocked = true);
+            risIdsToProcess.ForEach(journeyResponse => journeyResponse.RisId.IsLocked = true);
             await dbContext.SaveChangesAsync(cancellationToken);
             await transaction.CommitAsync(cancellationToken);
         }
