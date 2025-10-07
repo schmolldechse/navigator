@@ -1,5 +1,4 @@
 ﻿using System.Data;
-using System.Globalization;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
@@ -192,7 +191,7 @@ public class GatheringJourneyDaemon(
             };
             dbContext.Administrations.Add(existingAdministration);
         }
-
+        
         var informationDict = journeyElement.TryGetProperty("messages", out var messagesObject) && messagesObject.ValueKind == JsonValueKind.Object ? BuildInformationDict(journeyElement.GetProperty("messages")) : new Dictionary<int, List<Information>>();
         return new Journey()
         {
@@ -320,8 +319,8 @@ public class GatheringJourneyDaemon(
     private ScheduleAtStopPlace BuildSchedule(DateOnly date, JsonElement scheduleObject,
         Dictionary<int, List<Information>> infoDict)
     {
-        var plannedTime = DateTime.Parse(scheduleObject.GetProperty("timeSchedule").GetString() ?? throw new InvalidOperationException("Tried to parse 'timeSchedule' but it was missing."), null, DateTimeStyles.AdjustToUniversal);
-        var actualTime = DateTime.TryParse(scheduleObject.GetProperty("time").GetString(), out var time) ? time : plannedTime;
+        var plannedTime = DateTime.Parse(scheduleObject.GetProperty("timeSchedule").GetString() ?? throw new InvalidOperationException("Tried to parse 'timeSchedule' but it was missing.")).ToUniversalTime();
+        var actualTime = DateTime.TryParse(scheduleObject.GetProperty("time").GetString(), out var time) ? time.ToUniversalTime() : plannedTime;
 
         var plannedPlatform = scheduleObject.TryGetProperty("platformSchedule", out var plannedPlatformElement) ? plannedPlatformElement.GetString() : null;
         var actualPlatform = scheduleObject.TryGetProperty("platform", out var actualPlatformElement) ? actualPlatformElement.GetString() : plannedPlatform;
