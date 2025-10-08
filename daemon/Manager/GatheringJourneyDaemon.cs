@@ -249,7 +249,7 @@ public class GatheringJourneyDaemon(
                             DisruptionCommunicationId = disruption.TryGetProperty("disruptionCommunicationID", out var disruptionCommunicationIdObject) ? disruptionCommunicationIdObject.GetString() : null,
                             DisruptionId = disruption.TryGetProperty("disruptionID", out var disruptionIdObject) ? disruptionIdObject.GetString() : null,
                             Text = langObject.GetProperty("text").GetString()!,
-                            TextShort = langObject.GetProperty("textShort").GetString() ?? null,
+                            TextShort = langObject.TryGetProperty("textShort", out var textShortObject) ? textShortObject.GetString() : null,
                         });
                     }
                 }
