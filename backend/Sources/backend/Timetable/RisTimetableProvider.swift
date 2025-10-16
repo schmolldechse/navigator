@@ -218,13 +218,59 @@ struct RisTimetableProvider: TimetableProvider {
         )
     }
     
+    private func makeMessageKey(for originalMessageKey: String) -> InformationKeyDTO {
+        switch originalMessageKey {
+        case "1", "13", "23", "24", "27", "32", "42", "43", "44", "45", "47", "48", "51", "62", "63", "68", "69", "94", "CK", "EF", "EH", "FT", "HS", "OA", "OC", "RG", "RO", "SI", "SM":
+            return InformationKeyDTO.UNPLANNED_INFO
+        case "2", "3", "5", "6", "7", "8", "9", "10", "11", "12", "14", "15", "16", "17", "18", "19", "21", "22", "28", "31", "33", "34", "35", "36", "38", "39", "40", "41", "49", "50", "52", "53", "54", "55", "58", "59", "60", "61", "64", "65", "66", "67", "72", "96", "97", "98", "99", "1000":
+            return InformationKeyDTO.GENERAL_WARNING
+        case "25":
+            return InformationKeyDTO.ADDITIONAL_COACHES
+        case "26", "79", "82", "85":
+            return InformationKeyDTO.MISSING_COACHES
+        case "37":
+            return InformationKeyDTO.CANCELLED_TRIP
+        case "57":
+            return InformationKeyDTO.ADDITIONAL_STOPS
+        case "70", "71":
+            return InformationKeyDTO.NO_WI_FI
+        case "73", "74", "75", "76", "80", "81":
+            return InformationKeyDTO.CHANGED_SEQUENCE
+        case "77":
+            return InformationKeyDTO.NO_FIRST_CLASS
+        case "29", "78":
+            return InformationKeyDTO.REPLACEMENT_SERVICE
+        case "83", "93", "95", "DC", "OG":
+            return InformationKeyDTO.ACCESSIBILITY_WARNING
+        case "86", "87":
+            return InformationKeyDTO.RESERVATIONS_MISSING
+        case "RP":
+            return InformationKeyDTO.RESERVATIONS_REQUIRED
+        case "90":
+            return InformationKeyDTO.NO_FOOD
+        case "91", "NF":
+            return InformationKeyDTO.NO_BICYCLE_TRANSPORT
+        case "92", "FB", "FK", "FS", "G":
+            return InformationKeyDTO.BICYCLE_WARNING
+        case "AB", "KF", "RF", "TF":
+            return InformationKeyDTO.BICYCLE_TRANSPORT
+        case "FF", "FO", "FR":
+            return InformationKeyDTO.BICYCLE_RESERVATION_REQUIRED
+        case "N+", "NG", "NJ":
+            return InformationKeyDTO.TICKET_INFORMATION
+        default:
+            return InformationKeyDTO.UNPLANNED_INFO
+        }
+    }
+    
     private func buildInformations(for timetableEntry: [String: Any]) -> [InformationDTO] {
         var informations: [InformationDTO] = []
         
-        let messages = (timetableEntry["messages"] as? [[String: Any]] ?? []).compactMap { message -> InformationDTO in
-            InformationDTO(
+        let messages = (timetableEntry["messages"] as? [[String: Any]] ?? []).compactMap { message -> InformationDTO? in
+            guard let keyStr = message["key"] as? String else { return nil }
+            return InformationDTO(
                 type: .MESSAGE,
-                key: "nasty ahhh",
+                key: self.makeMessageKey(for: keyStr),
                 text: message["text"] as! String,
                 textShort: message["textShort"] as? String
             )
@@ -242,16 +288,17 @@ struct RisTimetableProvider: TimetableProvider {
             
             return InformationDTO(
                 type: .DISRUPTION,
-                key: "general-warning",
+                key: .GENERAL_WARNING,
                 text: text,
                 textShort: textShort
             )
         }
         
         let attributes = (timetableEntry["attributes"] as? [[String: Any]] ?? []).compactMap { attribute -> InformationDTO? in
-            InformationDTO(
+            guard let code = attribute["code"] as? String else { return nil }
+            return InformationDTO(
                 type: .JOURNEY_ATTRIBUTE,
-                key: attribute["code"] as! String,
+                key: self.makeMessageKey(for: code),
                 text: attribute["text"] as! String,
                 textShort: attribute["textShort"] as? String
             )
@@ -267,3 +314,4 @@ struct RisTimetableProvider: TimetableProvider {
         return journeyDescription.replacingOccurrences(of: journeyPattern, with: "", options: .regularExpression)
     }
 }
+

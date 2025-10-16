@@ -86,9 +86,31 @@ internal struct AdministrationDTO: Content {
     var operatorName: String
 }
 
+internal enum InformationKeyDTO: String, CaseIterable, Codable {
+    case UNPLANNED_INFO = "UNPLANNED_INFO"
+    case GENERAL_WARNING = "GENERAL_WARNING"
+    case ADDITIONAL_COACHES = "ADDITIONAL_COACHES"
+    case MISSING_COACHES = "MISSING_COACHES"
+    case REPLACEMENT_SERVICE = "REPLACEMENT_SERVICE"
+    case CANCELLED_TRIP = "CANCELLED_TRIP"
+    case ADDITIONAL_STOPS = "ADDITIONAL_STOPS"
+    case NO_WI_FI = "NO_WI_FI"
+    case CHANGED_SEQUENCE = "CHANGED_SEQUENCE"
+    case NO_FIRST_CLASS = "NO_FIRST_CLASS"
+    case ACCESSIBILITY_WARNING = "ACCESSIBILITY_WARNING"
+    case RESERVATIONS_MISSING = "RESERVATIONS_MISSING"
+    case RESERVATIONS_REQUIRED = "RESERVATIONS_REQUIRED"
+    case NO_FOOD = "NO_FOOD"
+    case NO_BICYCLE_TRANSPORT = "NO_BICYCLE_TRANSPORT"
+    case BICYCLE_WARNING = "BICYCLE_WARNING"
+    case BICYCLE_TRANSPORT = "BICYCLE_TRANSPORT"
+    case BICYCLE_RESERVATION_REQUIRED = "BICYCLE_RESERVATION_REQUIRED"
+    case TICKET_INFORMATION = "TICKET_INFORMATION"
+}
+
 internal struct InformationDTO: Content {
     var type: InformationType
-    var key: String
+    var key: InformationKeyDTO
     var text: String
     var textShort: String?
 }
