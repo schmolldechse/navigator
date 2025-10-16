@@ -189,18 +189,13 @@ struct RisTimetableProvider: TimetableProvider {
             guard let replacementTypeObj = transportEntry["replacementTransport"] as? [String: Any] else { return nil }
             return TransportType(rawValue: (replacementTypeObj["realType"] as! String).uppercased()) ?? .UNKNOWN
         }()
-        
-        let journeyDescription: String = {
-            guard let line = transportEntry["line"] as? String else { return self.simplifyDescription(for: transportEntry["journeyDescription"] as! String) }
-            return (transportEntry["category"] as! String) + " " + line
-        }()
                 
         return TransportDTO(
             type: TransportType(rawValue: (transportEntry["type"] as! String).uppercased()) ?? .UNKNOWN,
             replacementType: replacementType,
             category: transportEntry["category"] as! String,
             journeyType: JourneyType(rawValue: type.uppercased())!,
-            journeyDescription: journeyDescription,
+            journeyDescription: transportEntry["journeyDescription"] as! String,
             number: transportEntry["number"] as! Int,
             line: transportEntry["line"] as? String
         )
@@ -308,10 +303,6 @@ struct RisTimetableProvider: TimetableProvider {
         informations.append(contentsOf: disruptions)
         informations.append(contentsOf: attributes)
         return informations
-    }
-    
-    private func simplifyDescription(for journeyDescription: String) -> String {
-        return journeyDescription.replacingOccurrences(of: journeyPattern, with: "", options: .regularExpression)
     }
 }
 
