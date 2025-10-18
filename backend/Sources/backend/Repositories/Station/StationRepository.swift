@@ -9,5 +9,5 @@ import Vapor
 
 protocol StationRepository {
     func query(searchTerm: String) async throws -> [StationDTO]
-    func findByEvaNumber(evaNumber: Int, on req: Request) async throws -> StationDTO?
+    func findByEvaNumber(evaNumber: Int) async throws -> StationDTO
 }

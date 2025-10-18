@@ -36,6 +36,18 @@ struct VendoStationRepository: StationRepository {
             throw Abort(.internalServerError, reason: "Failed to parse JSON response into a dictionary.")
         }
         
+        // eager loading
+        let evaNumbers = jsonObject.compactMap { ($0["evaNr"] as? String).flatMap(Int.init) }
+        let ril100Map = try await Ril100.query(on: self.database)
+            .filter(\.$station.$id ~~ evaNumbers)
+            .all()
+        let transportOccurences = try await TransportOccurence.query(on: self.database)
+            .filter(\.$station.$id ~~ evaNumbers)
+            .all()
+        
+        let rilDictionary = Dictionary(grouping: ril100Map, by: { $0.$station.id })
+        let transportDictionary = Dictionary(grouping: transportOccurences, by: { $0.$station.id })
+        
         var stations: [StationDTO] = []
         stations.reserveCapacity(jsonObject.count)
         
@@ -51,34 +63,43 @@ struct VendoStationRepository: StationRepository {
                 logger.warning("Skipping station entry due to missing or invalid data: \(stationEntry)")
                 continue
             }
-            
-            let ril100 = try await Ril100.query(on: self.database)
-                .filter(\.$station.$id == evaNumber)
-                .all()
-                .map { $0.ril100 }
-            
-            var transports: [TransportType] = try await TransportOccurence.query(on: self.database)
-                .filter(\.$station.$id == evaNumber)
-                .all()
-                .map { $0.transport }
+                        
+            var transports: [TransportType] = transportDictionary[evaNumber]?.map { $0.transport } ?? []
             transports += products.map { mapToRisTransport(for: $0) }
             transports = Array(Set(transports))
-            
-            let position: PositionDTO = PositionDTO(latitude: latitude, longitude: longitude)
-            stations.append(StationDTO(
+                        
+            let station = StationDTO(
                 evaNumber: evaNumber,
                 name: name,
-                position: position,
-                ril100: ril100,
+                position: PositionDTO(latitude: latitude, longitude: longitude),
+                ril100: rilDictionary[evaNumber]?.map { $0.ril100 } ?? [],
                 transports: transports
-            ))
+            )
+            try await self.saveStation(station.toModel(), transports: transports)
+            stations.append(station)
         }
         
         return stations
     }
     
-    func findByEvaNumber(evaNumber: Int, on req: Request) async throws -> StationDTO? {
-        return nil
+    func findByEvaNumber(evaNumber: Int) async throws -> StationDTO {
+        return StationDTO(evaNumber: 1, name: "1", position: PositionDTO(latitude: 1, longitude: 2), ril100: [], transports: [])
+    }
+    
+    private func saveStation(_ station: Station, transports: [TransportType]) async throws {
+        if try await Station.find(station.id, on: self.database) == nil {
+            try await station.create(on: self.database)
+        }
+        
+        let existingTransports = Set(try await TransportOccurence.query(on: self.database)
+            .filter(\.$station.$id == station.id!)
+            .all()
+            .map { $0.transport })
+        
+        for transport in transports where !existingTransports.contains(transport) {
+            let transportOccurence = TransportOccurence(transport: transport, queryingEnabled: false, evaNumber: station.id!)
+            try await transportOccurence.create(on: self.database)
+        }
     }
     
     private func mapToRisTransport(for transportName: String) -> TransportType {

@@ -21,10 +21,27 @@ struct StationController: RouteCollection {
             .response(statusCode: .ok, body: .type([StationDTO].self), description: "Array of stations matching the search criteria")
             .response(statusCode: .badGateway, description: "Failed to query stations from Vendo.")
             .response(statusCode: .internalServerError, description: "Failed to parse the response body.")
+        
+        stations.get("/:evaNumber", use: getStationByEvaNumber)
+            .openAPI(
+                summary: "Get station by EVA number",
+                description: "Loads the station for a specific EVA number.",
+                query: .type(VendoStationSearchRequestDTO.self)
+            )
+            .response(statusCode: .ok, body: .type(StationDTO.self), description: "Station matching the specified EVA number")
+            .response(statusCode: .badGateway, description: "Failed to query stations from Vendo.")
+            .response(statusCode: .internalServerError, description: "Failed to parse the response body.")
     }
 
-    func queryStations(req: Request) async throws -> [StationDTO] {
+    private func queryStations(req: Request) async throws -> [StationDTO] {
         let searchRequest = try req.query.decode(VendoStationSearchRequestDTO.self)
         return try await req.stationRepository.query(searchTerm: searchRequest.searchTerm)
+    }
+    
+    private func getStationByEvaNumber(req: Request) async throws -> StationDTO {
+        guard let evaNumber = req.parameters.get("evaNumber", as: Int.self) else {
+            throw Abort(.badRequest, reason: "Invalid 'evaNumber' specified. It must be an integer.")
+        }
+        return try await req.stationRepository.findByEvaNumber(evaNumber: evaNumber)
     }
 }

@@ -44,13 +44,14 @@ final class Station: Model, @unchecked Sendable {
 
     init() { }
     
-    init(id: Int, name: String, weight: Double, latitude: Double, longitude: Double, queryingEnabled: Bool = true, isLocked: Bool = false) {
+    init(id: Int, name: String, weight: Double = 0, latitude: Double, longitude: Double, queryingEnabled: Bool = false, lastQueried: Date? = nil, isLocked: Bool = false) {
         self.id = id
         self.name = name
         self.weight = weight
         self.latitude = latitude
         self.longitude = longitude
         self.queryingEnabled = queryingEnabled
+        self.lastQueried = lastQueried
         self.isLocked = isLocked
     }
 }
