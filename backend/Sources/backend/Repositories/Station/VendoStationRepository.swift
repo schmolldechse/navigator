@@ -83,7 +83,16 @@ struct VendoStationRepository: StationRepository {
     }
     
     func findByEvaNumber(evaNumber: Int) async throws -> StationDTO {
-        return StationDTO(evaNumber: 1, name: "1", position: PositionDTO(latitude: 1, longitude: 2), ril100: [], transports: [])
+        let station = try await Station.query(on: self.database)
+            .with(\.$ril100)
+            .with(\.$transportOccurences)
+            .filter(\.$id == evaNumber)
+            .first()
+        if station == nil {
+            logger.warning("Station with EVA number \(evaNumber) not found in the database.")
+            throw Abort(.notFound, reason: "Station with EVA number \(evaNumber) not found.")
+        }
+        return station!.toDTO()
     }
     
     private func saveStation(_ station: Station, transports: [TransportType]) async throws {

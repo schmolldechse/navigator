@@ -54,4 +54,17 @@ final class Station: Model, @unchecked Sendable {
         self.lastQueried = lastQueried
         self.isLocked = isLocked
     }
+    
+    func toDTO() -> StationDTO {
+        StationDTO(
+            evaNumber: self.id!,
+            name: self.name,
+            position: PositionDTO(
+                latitude: self.latitude,
+                longitude: self.longitude
+            ),
+            ril100: self.ril100.map { $0.ril100 },
+            transports: self.transportOccurences.map { $0.transport }
+        )
+    }
 }

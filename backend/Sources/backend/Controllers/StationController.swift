@@ -22,13 +22,14 @@ struct StationController: RouteCollection {
             .response(statusCode: .badGateway, description: "Failed to query stations from Vendo.")
             .response(statusCode: .internalServerError, description: "Failed to parse the response body.")
         
-        stations.get("/:evaNumber", use: getStationByEvaNumber)
+        stations.get(":evaNumber", use: getStationByEvaNumber)
             .openAPI(
                 summary: "Get station by EVA number",
                 description: "Loads the station for a specific EVA number.",
-                query: .type(VendoStationSearchRequestDTO.self)
+                path: .type(StationByEvaNumberRequestDTO.self)
             )
             .response(statusCode: .ok, body: .type(StationDTO.self), description: "Station matching the specified EVA number")
+            .response(statusCode: .notFound, description: "No station found for the specified EVA number.")
             .response(statusCode: .badGateway, description: "Failed to query stations from Vendo.")
             .response(statusCode: .internalServerError, description: "Failed to parse the response body.")
     }
