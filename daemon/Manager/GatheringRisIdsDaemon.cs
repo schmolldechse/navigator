@@ -131,7 +131,7 @@ public class GatheringRisIdsDaemon(
         var newRisIds = filteredByProduct.Where(risId => !existingRisIds.ContainsKey(risId.Id)).ToList();
         if (newRisIds.Any()) await dbContext.RisIds.AddRangeAsync(newRisIds, cancellationToken);
 
-        var existingToUpdate = filteredByProduct.Where(risId => existingRisIds.ContainsKey(risId.Id)).ToList();
+        var existingToUpdate = existingRisIds.Values.Where(risId => !risId.Active).ToList();
         existingToUpdate.ForEach(risId => risId.Active = true);
 
         await dbContext.SaveChangesAsync(cancellationToken);
