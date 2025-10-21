@@ -306,7 +306,7 @@ public class GatheringJourneyDaemon(
         return new Transport()
         {
             Type = ParseTransportType(transportAtStartObject.GetProperty("type").GetString()!),
-            ReplacementType = replacementType == string.Empty ? null : ParseTransportType(replacementType),
+            ReplacementType = string.IsNullOrEmpty(replacementType) ? null : ParseTransportType(replacementType),
             Label = transportAtStartObject.GetProperty("label").GetString()!,
             Category = transportAtStartObject.GetProperty("category").GetString()!,
             CategoryInternal = transportAtStartObject.GetProperty("categoryInternal").GetString()!,
