@@ -5,7 +5,7 @@ export const load: LayoutServerLoad = async ({}) => {
 	const pages: NavigationItem[] = [
 		{ href: "/maps", pageName: "Station Map", icon: "Map" },
 		{ href: "/statistics", pageName: "Statistics", icon: "ChartLine" },
-		{ href: "/timetable", pageName: "Timetable", icon: "Clock4" }
+		{ href: "/timetable", pageName: "Timetable", icon: "Clock_4" }
 	];
 
 	return { pages };

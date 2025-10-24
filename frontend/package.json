@@ -30,7 +30,7 @@
 		"vite": "^7.1.11"
 	},
 	"dependencies": {
-		"@fontsource/roboto": "^5.2.8",
+		"@fontsource/roboto-mono": "^5.2.8",
 		"@lucide/svelte": "^0.546.0",
 		"luxon": "^3.7.2"
 	}

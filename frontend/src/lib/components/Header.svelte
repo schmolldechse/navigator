@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from "$app/state";
 	import ChartLine from "@lucide/svelte/icons/chart-line";
-	import Clock4 from "@lucide/svelte/icons/clock-4";
+	import Clock_4 from "@lucide/svelte/icons/clock-4";
 	import Map from "@lucide/svelte/icons/map";
 	import Menu from "@lucide/svelte/icons/menu";
 	import X from "@lucide/svelte/icons/x";
@@ -20,14 +20,15 @@
 	const icons: Record<string, Component> = {
 		Map,
 		ChartLine,
-		Clock4
+		Clock_4
 	};
 </script>
 
 <header class="border-muted border-b">
-	<div class="flex h-16 items-center justify-between px-4">
+	<div class="container mx-auto flex h-16 items-center justify-between px-4">
 		<a href="/" class="flex items-center gap-3">
 			<img src="/logo.svg" alt="Navigator Logo" width="40px" height="40px" class="h-10 w-10" />
+			<span class="text-text text-xl font-bold">Navigator</span>
 		</a>
 
 		<nav class="hidden items-center gap-6 md:flex">
