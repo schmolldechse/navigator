@@ -3,49 +3,68 @@ name: Build Projects
 on:
   workflow_dispatch:
   push:
-    branches: [ master ]
+    branches: [master]
     paths:
-      - 'daemon/**'
-      - 'backend/**'
+      - "daemon/**"
+      - "backend/**"
   pull_request:
     paths:
-      - 'daemon/**'
-      - 'backend/**'
+      - "daemon/**"
+      - "backend/**"
 
 jobs:
   check-daemon-formatting:
     name: Check Code Formatting for Daemon
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '9.0.x'
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
 
-    - name: Install dotnet-format
-      run: dotnet tool install -g dotnet-format
+      - name: Install dotnet-format
+        run: dotnet tool install -g dotnet-format
 
-    - name: Run dotnet-format
-      run: dotnet format daemon/daemon.sln --verify-no-changes
+      - name: Run dotnet-format
+        run: dotnet format daemon/daemon.sln --verify-no-changes
 
-  format-swift:
+  check-backend-formatting:
     name: Check Code Formatting for Backend
     runs-on: macos-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Setup Swift
-      uses: swift-actions/setup-swift@v2
-      with:
-        swift-version: "6.1.0"
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v2
+        with:
+          swift-version: "6.1.0"
 
-    - name: Verify Swift Version
-      run: swift --version
+      - name: Verify Swift Version
+        run: swift --version
 
-    - name: Check Swift formatting
-      run: swift format lint --recursive Sources/ Tests/
-      working-directory: backend
+      - name: Run swift format
+        run: swift format lint --recursive Sources/ Tests/
+        working-directory: backend
+
+  check-frontend-formatting:
+    name: Check Code Formatting for Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --dev
+
+      - name: Run prettier lint
+        run: bun run lint
+        working-directory: frontend
