@@ -11,6 +11,14 @@ import SQLKit
 struct StationMigration: AsyncMigration {
     func prepare(on database: any Database) async throws {
         guard let sql = database as? (any SQLDatabase) else { return }
+        
+        // `cube` and `earthdistance` extensions
+        try await sql.raw("""
+            CREATE EXTENSION IF NOT EXISTS cube;
+            """).run()
+        try await sql.raw("""
+            CREATE EXTENSION IF NOT EXISTS earthdistance;
+            """).run()
                 
         // stations
         try await sql.raw("""
@@ -24,6 +32,9 @@ struct StationMigration: AsyncMigration {
                 "last_queried" timestamp,
                 "is_locked" boolean DEFAULT false NOT NULL
             );
+            """).run()
+        try await sql.raw("""
+            CREATE INDEX "idx_stations_location" ON "\(unsafeRaw: Station.space!)"."\(unsafeRaw: Station.schema)" USING gist (ll_to_earth(latitude, longitude));
             """).run()
         
         // station_transports
@@ -66,6 +77,9 @@ struct StationMigration: AsyncMigration {
             """).run()
         
         // stations
+        try await sql.raw("""
+            DROP INDEX IF EXISTS "idx_stations_location";
+            """).run()
         try await sql.raw("""
             DROP TABLE IF EXISTS "\(unsafeRaw: Station.space!)"."\(unsafeRaw: Station.schema)";
             """).run()

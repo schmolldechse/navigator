@@ -55,8 +55,8 @@ final class Station: Model, @unchecked Sendable {
         self.isLocked = isLocked
     }
     
-    func toDTO() -> StationDTO {
-        StationDTO(
+    func toDTO() -> StationDetailDTO {
+        StationDetailDTO(
             evaNumber: self.id!,
             name: self.name,
             position: PositionDTO(

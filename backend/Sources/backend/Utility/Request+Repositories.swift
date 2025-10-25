@@ -8,7 +8,7 @@
 import Vapor
 
 extension Request {
-    var stationRepository: any StationRepository {
-        VendoStationRepository(client: self.client, logger: self.logger, database: self.db)
+    var stationRepository: StationRepository {
+        StationRepository(client: self.client, logger: self.logger, database: self.db)
     }
 }
