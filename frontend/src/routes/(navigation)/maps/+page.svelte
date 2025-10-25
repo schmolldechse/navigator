@@ -1,11 +1,17 @@
+<script lang="ts">
+	import Map from "$lib/components/Map.svelte";
+</script>
+
 <svelte:head>
 	<title>Station Map - Navigator</title>
 </svelte:head>
 
-<main class="container mx-auto flex min-h-[calc(100vh-80px)] items-center justify-center px-4">
-	<div class="text-center">
-		<h1 class="text-text mb-4 text-4xl font-bold md:text-5xl">Coming Soon</h1>
+<div class="flex-1 p-4 md:p-6">
+	<Map />
+</div>
 
-		<p>The feature is currently under development.</p>
-	</div>
-</main>
+<style>
+	:global(html, body) {
+		@apply flex h-screen flex-col overflow-hidden;
+	}
+</style>
