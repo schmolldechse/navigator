@@ -12,7 +12,7 @@ struct IdentifiedRISIDMigration: AsyncMigration {
     func prepare(on database: any Database) async throws {
         guard let sql = database as? (any SQLDatabase) else { return }
         try await sql.raw("""
-            CREATE TABLE IF NOT EXISTS "\(unsafeRaw: IdentifiedRISID.space!)"."\(unsafeRaw: IdentifiedRISID.schema)" (
+            CREATE TABLE IF NOT EXISTS "\(bind: IdentifiedRISID.space!)"."\(bind: IdentifiedRISID.schema)" (
                 id varchar(128) PRIMARY KEY NOT NULL,
                 transport_type varchar(255) NOT NULL,
                 replacement_transport_type varchar(255),
@@ -24,7 +24,7 @@ struct IdentifiedRISIDMigration: AsyncMigration {
             );
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_ris_id_transport_type" ON "\(unsafeRaw: IdentifiedRISID.space!)"."\(unsafeRaw: IdentifiedRISID.schema)" (transport_type);
+            CREATE INDEX IF NOT EXISTS "idx_ris_id_transport_type" ON "\(bind: IdentifiedRISID.space!)"."\(bind: IdentifiedRISID.schema)" (transport_type);
             """).run()
     }
     
@@ -34,7 +34,7 @@ struct IdentifiedRISIDMigration: AsyncMigration {
             DROP INDEX IF EXISTS "idx_ris_id_transport_type";
             """).run()
         try await sql.raw("""
-            DROP TABLE IF EXISTS "\(unsafeRaw: IdentifiedRISID.space!)"."\(unsafeRaw: IdentifiedRISID.schema)";
+            DROP TABLE IF EXISTS "\(bind: IdentifiedRISID.space!)"."\(bind: IdentifiedRISID.schema)";
             """).run()
     }
 }

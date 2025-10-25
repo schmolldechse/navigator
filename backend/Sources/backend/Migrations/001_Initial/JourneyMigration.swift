@@ -14,7 +14,7 @@ struct JourneyMigration: AsyncMigration {
         
         // journey_administrations
         try await sql.raw("""
-            CREATE TABLE IF NOT EXISTS "\(unsafeRaw: Administration.space!)"."\(unsafeRaw: Administration.schema)" (
+            CREATE TABLE IF NOT EXISTS "\(bind: Administration.space!)"."\(bind: Administration.schema)" (
                 id serial PRIMARY KEY NOT NULL,
                 administration_id varchar(64) NOT NULL,
                 operator_code varchar(64) NOT NULL,
@@ -25,26 +25,26 @@ struct JourneyMigration: AsyncMigration {
         
         // journeys
         try await sql.raw("""
-            CREATE TABLE IF NOT EXISTS "\(unsafeRaw: Journey.space!)"."\(unsafeRaw: Journey.schema)" (
+            CREATE TABLE IF NOT EXISTS "\(bind: Journey.space!)"."\(bind: Journey.schema)" (
                 journey_id varchar(128) PRIMARY KEY NOT NULL,
                 date date NOT NULL,
                 inserted_at timestamp NOT NULL,
                 type varchar(255) NOT NULL,
-                administration_index integer NOT NULL REFERENCES "\(unsafeRaw: Administration.space!)"."\(unsafeRaw: Administration.schema)" (id) ON DELETE CASCADE,
+                administration_index integer NOT NULL REFERENCES "\(bind: Administration.space!)"."\(bind: Administration.schema)" (id) ON DELETE CASCADE,
                 cancelled boolean NOT NULL DEFAULT false
             );
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_journeys_date" ON "\(unsafeRaw: Journey.space!)"."\(unsafeRaw: Journey.schema)" (date);
+            CREATE INDEX IF NOT EXISTS "idx_journeys_date" ON "\(bind: Journey.space!)"."\(bind: Journey.schema)" (date);
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_journeys_cancelled" ON "\(unsafeRaw: Journey.space!)"."\(unsafeRaw: Journey.schema)" (cancelled);
+            CREATE INDEX IF NOT EXISTS "idx_journeys_cancelled" ON "\(bind: Journey.space!)"."\(bind: Journey.schema)" (cancelled);
             """).run()
         
         // journey_transports
         try await sql.raw("""
-            CREATE TABLE IF NOT EXISTS "\(unsafeRaw: Transport.space!)"."\(unsafeRaw: Transport.schema)" (
-                journey_id varchar(128) PRIMARY KEY NOT NULL REFERENCES "\(unsafeRaw: Journey.space!)"."\(unsafeRaw: Journey.schema)" (journey_id) ON DELETE CASCADE,
+            CREATE TABLE IF NOT EXISTS "\(bind: Transport.space!)"."\(bind: Transport.schema)" (
+                journey_id varchar(128) PRIMARY KEY NOT NULL REFERENCES "\(bind: Journey.space!)"."\(bind: Journey.schema)" (journey_id) ON DELETE CASCADE,
                 type varchar(255) NOT NULL,
                 replacement_type varchar(255),
                 category varchar(64) NOT NULL,
@@ -56,26 +56,26 @@ struct JourneyMigration: AsyncMigration {
             );
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_transports_type" ON "\(unsafeRaw: Transport.space!)"."\(unsafeRaw: Transport.schema)" (type);
+            CREATE INDEX IF NOT EXISTS "idx_transports_type" ON "\(bind: Transport.space!)"."\(bind: Transport.schema)" (type);
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_transports_replacement_type" ON "\(unsafeRaw: Transport.space!)"."\(unsafeRaw: Transport.schema)" (replacement_type);
+            CREATE INDEX IF NOT EXISTS "idx_transports_replacement_type" ON "\(bind: Transport.space!)"."\(bind: Transport.schema)" (replacement_type);
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_transports_category" ON "\(unsafeRaw: Transport.space!)"."\(unsafeRaw: Transport.schema)" (category);
+            CREATE INDEX IF NOT EXISTS "idx_transports_category" ON "\(bind: Transport.space!)"."\(bind: Transport.schema)" (category);
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_transports_journey_description" ON "\(unsafeRaw: Transport.space!)"."\(unsafeRaw: Transport.schema)" (journey_description);
+            CREATE INDEX IF NOT EXISTS "idx_transports_journey_description" ON "\(bind: Transport.space!)"."\(bind: Transport.schema)" (journey_description);
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_transports_number" ON "\(unsafeRaw: Transport.space!)"."\(unsafeRaw: Transport.schema)" (number);
+            CREATE INDEX IF NOT EXISTS "idx_transports_number" ON "\(bind: Transport.space!)"."\(bind: Transport.schema)" (number);
             """).run()
         
         // journey_scheduled_stop_places
         try await sql.raw("""
-            CREATE TABLE IF NOT EXISTS "\(unsafeRaw: ScheduleAtStopPlace.space!)"."\(unsafeRaw: ScheduleAtStopPlace.schema)" (
+            CREATE TABLE IF NOT EXISTS "\(bind: ScheduleAtStopPlace.space!)"."\(bind: ScheduleAtStopPlace.schema)" (
                 id serial PRIMARY KEY NOT NULL,
-                journey_id varchar(128) NOT NULL REFERENCES "\(unsafeRaw: Journey.space!)"."\(unsafeRaw: Journey.schema)" (journey_id) ON DELETE CASCADE,
+                journey_id varchar(128) NOT NULL REFERENCES "\(bind: Journey.space!)"."\(bind: Journey.schema)" (journey_id) ON DELETE CASCADE,
                 date date NOT NULL,
                 type varchar(255) NOT NULL,
                 station_name varchar(512) NOT NULL,
@@ -92,23 +92,23 @@ struct JourneyMigration: AsyncMigration {
             );
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_scheduled_stop_places_date" ON "\(unsafeRaw: ScheduleAtStopPlace.space!)"."\(unsafeRaw: ScheduleAtStopPlace.schema)" (date);
+            CREATE INDEX IF NOT EXISTS "idx_scheduled_stop_places_date" ON "\(bind: ScheduleAtStopPlace.space!)"."\(bind: ScheduleAtStopPlace.schema)" (date);
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_scheduled_stop_places_eva_number" ON "\(unsafeRaw: ScheduleAtStopPlace.space!)"."\(unsafeRaw: ScheduleAtStopPlace.schema)" (station_eva_number);
+            CREATE INDEX IF NOT EXISTS "idx_scheduled_stop_places_eva_number" ON "\(bind: ScheduleAtStopPlace.space!)"."\(bind: ScheduleAtStopPlace.schema)" (station_eva_number);
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_scheduled_stop_places_eva_number_journey_id" ON "\(unsafeRaw: ScheduleAtStopPlace.space!)"."\(unsafeRaw: ScheduleAtStopPlace.schema)" (station_eva_number, journey_id);
+            CREATE INDEX IF NOT EXISTS "idx_scheduled_stop_places_eva_number_journey_id" ON "\(bind: ScheduleAtStopPlace.space!)"."\(bind: ScheduleAtStopPlace.schema)" (station_eva_number, journey_id);
             """).run()
         try await sql.raw("""
-            CREATE INDEX IF NOT EXISTS "idx_scheduled_stop_places_eva_number_date" ON "\(unsafeRaw: ScheduleAtStopPlace.space!)"."\(unsafeRaw: ScheduleAtStopPlace.schema)" (station_eva_number, date);
+            CREATE INDEX IF NOT EXISTS "idx_scheduled_stop_places_eva_number_date" ON "\(bind: ScheduleAtStopPlace.space!)"."\(bind: ScheduleAtStopPlace.schema)" (station_eva_number, date);
             """).run()
         
         // journey_stop_place_informations
         try await sql.raw("""
-            CREATE TABLE IF NOT EXISTS "\(unsafeRaw: Information.space!)"."\(unsafeRaw: Information.schema)" (
+            CREATE TABLE IF NOT EXISTS "\(bind: Information.space!)"."\(bind: Information.schema)" (
                 id serial PRIMARY KEY NOT NULL,
-                scheduled_stop_place_id integer NOT NULL REFERENCES "\(unsafeRaw: ScheduleAtStopPlace.space!)"."\(unsafeRaw: ScheduleAtStopPlace.schema)" (id) ON DELETE CASCADE,
+                scheduled_stop_place_id integer NOT NULL REFERENCES "\(bind: ScheduleAtStopPlace.space!)"."\(bind: ScheduleAtStopPlace.schema)" (id) ON DELETE CASCADE,
                 type varchar(255) NOT NULL,
                 key varchar(128) NOT NULL,
                 text varchar(2048) NOT NULL,
@@ -124,7 +124,7 @@ struct JourneyMigration: AsyncMigration {
         
         // journey_stop_place_informations
         try await sql.raw("""
-            DROP TABLE IF EXISTS "\(unsafeRaw: Information.space!)"."\(unsafeRaw: Information.schema)";
+            DROP TABLE IF EXISTS "\(bind: Information.space!)"."\(bind: Information.schema)";
             """).run()
         
         // journey_scheduled_stop_places
@@ -141,7 +141,7 @@ struct JourneyMigration: AsyncMigration {
             DROP INDEX IF EXISTS "idx_scheduled_stop_places_date";
             """).run()
         try await sql.raw("""
-            DROP TABLE IF EXISTS "\(unsafeRaw: ScheduleAtStopPlace.space!)"."\(unsafeRaw: ScheduleAtStopPlace.schema)";
+            DROP TABLE IF EXISTS "\(bind: ScheduleAtStopPlace.space!)"."\(bind: ScheduleAtStopPlace.schema)";
             """).run()
         
         // journey_transports
@@ -161,7 +161,7 @@ struct JourneyMigration: AsyncMigration {
             DROP INDEX IF EXISTS "idx_transports_type";
             """).run()
         try await sql.raw("""
-            DROP TABLE IF EXISTS "\(unsafeRaw: Transport.space!)"."\(unsafeRaw: Transport.schema)";
+            DROP TABLE IF EXISTS "\(bind: Transport.space!)"."\(bind: Transport.schema)";
             """).run()
         
         // journeys
@@ -172,12 +172,12 @@ struct JourneyMigration: AsyncMigration {
             DROP INDEX IF EXISTS "idx_journeys_cancelled";
             """).run()
         try await sql.raw("""
-            DROP TABLE IF EXISTS "\(unsafeRaw: Journey.space!)"."\(unsafeRaw: Journey.schema)";
+            DROP TABLE IF EXISTS "\(bind: Journey.space!)"."\(bind: Journey.schema)";
             """).run()
         
         // journey_administrations
         try await sql.raw("""
-            DROP TABLE IF EXISTS "\(unsafeRaw: Administration.space!)"."\(unsafeRaw: Administration.schema)";
+            DROP TABLE IF EXISTS "\(bind: Administration.space!)"."\(bind: Administration.schema)";
             """).run()
     }
 }
