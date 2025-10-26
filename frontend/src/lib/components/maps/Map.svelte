@@ -35,11 +35,8 @@
 	onMount(async () => {
 		L = await import("leaflet");
 
-		map = L.map(mapContainer).setView([50.1066819, 8.66282825], 14);
-		const tileLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-			maxZoom: 19,
-			attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-		}).addTo(map);
+		map = L.map(mapContainer, { attributionControl: false, zoomControl: false }).setView([50.1066819, 8.66282825], 14);
+		const tileLayer = L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19 }).addTo(map);
 
 		tileLayer.on("load", () => {
 			if (mapLoaded) return;
