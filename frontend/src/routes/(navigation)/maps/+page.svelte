@@ -1,13 +1,29 @@
 <script lang="ts">
-	import Map from "$lib/components/Map.svelte";
+	import Map from "$lib/components/maps/Map.svelte";
+	import type { StationSummaryDTO } from "$lib/models/StationSummaryDTO";
+	import type { PageProps } from "./$types";
+	import { getStations } from "./stations.remote";
+
+	let { data }: PageProps = $props();
+	let stations: StationSummaryDTO[] = $state(data.stations);
 </script>
 
 <svelte:head>
 	<title>Station Map - Navigator</title>
 </svelte:head>
 
-<div class="flex-1 p-4 md:p-6">
-	<Map />
+<div class="flex-1 p-4 md:container md:mx-auto md:px-10 md:py-22">
+	<Map
+		bind:stations
+		onresize={async ({ latitude, longitude, radius }) => {
+			const newStations = await getStations({ latitude, longitude, radius });
+
+			const allStations = [...stations, ...newStations];
+			stations = Array.from(
+				new globalThis.Map(allStations.map((station: StationSummaryDTO) => [station.evaNumber, station])).values()
+			);
+		}}
+	/>
 </div>
 
 <style>
