@@ -1,23 +1,27 @@
 <script lang="ts">
 	import { onMount } from "svelte";
-	import { Marker, type Map as LeafletMap } from "leaflet";
+	import { type Marker as LeafletMarker, type Map as LeafletMap } from "leaflet";
 	import "leaflet/dist/leaflet.css";
 	import type { StationSummaryDTO } from "$lib/models/StationSummaryDTO";
+	import StationPopup from "./StationPopup.svelte";
 
 	let {
 		stations = $bindable(),
-		onresize
+		onresize,
+		onselect
 	}: {
 		stations: StationSummaryDTO[];
 		onresize: (coords: { latitude: number; longitude: number; radius: number }) => void;
+		onselect?: (station: StationSummaryDTO) => void;
 	} = $props();
 
 	let mapLoaded: boolean = $state(false);
+	let selectedStation: StationSummaryDTO | null = $state(null);
 
 	let L: typeof import("leaflet");
 	let map: LeafletMap;
 	let mapContainer: HTMLDivElement;
-	const markers = new Map<number, Marker>();
+	const markers = new Map<number, LeafletMarker>();
 
 	let debounceTimer: NodeJS.Timeout;
 	const debounce = (func: () => void, delay: number) => {
@@ -55,8 +59,12 @@
 		stations.forEach((station: StationSummaryDTO) => {
 			if (markers.has(station.evaNumber)) return;
 
-			const marker = L.marker([station.position.latitude, station.position.longitude]).addTo(map);
-			marker.bindPopup(`<b>${station.name}</b><br/>Eva Number: ${station.evaNumber}`);
+			const marker = L.marker([station.position.latitude, station.position.longitude], { riseOnHover: true }).addTo(map);
+			marker.on("click", () => {
+				onselect?.(station);
+				selectedStation = station;
+			});
+
 			markers.set(station.evaNumber, marker);
 		});
 	});
@@ -66,4 +74,8 @@
 	<meta name="viewport" content="width=device-width; initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
 </svelte:head>
 
-<div bind:this={mapContainer} class="h-full w-full rounded-xl"></div>
+<div bind:this={mapContainer} class={["h-full w-full rounded-xl"]}></div>
+
+{#if selectedStation}
+	<StationPopup bind:station={selectedStation} />
+{/if}

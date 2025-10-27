@@ -12,7 +12,7 @@
 	<title>Station Map - Navigator</title>
 </svelte:head>
 
-<div class="flex-1 p-4 md:container md:mx-auto md:px-10 md:py-22">
+<div class="relative flex-1 p-4 md:py-8">
 	<Map
 		bind:stations
 		onresize={async ({ latitude, longitude, radius }) => {
@@ -23,6 +23,7 @@
 				new globalThis.Map(allStations.map((station: StationSummaryDTO) => [station.evaNumber, station])).values()
 			);
 		}}
+		onselect={(station: StationSummaryDTO) => {}}
 	/>
 </div>
 

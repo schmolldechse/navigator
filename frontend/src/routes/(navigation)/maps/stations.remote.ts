@@ -1,5 +1,6 @@
 import { query } from "$app/server";
 import { PUBLIC_API_URL } from "$env/static/public";
+import type { StationGatheringInfoDTO } from "$lib/models/StationGatheringInfoDTO";
 import type { StationSummaryDTO } from "$lib/models/StationSummaryDTO";
 import * as v from "valibot";
 
@@ -23,10 +24,23 @@ const getStations = query(
 		});
 
 		if (!response.ok) throw new Error(`Error fetching stations: ${response.status} ${response.statusText}`);
-		const stations = await response.json();
-		console.log(stations.length);
-		return stations as StationSummaryDTO[];
+		return (await response.json()) as StationSummaryDTO[];
 	}
 );
 
-export { getStations };
+const getStationGatheringInfo = query(v.object({ evaNumber: v.number() }), async (schema) => {
+	if (!PUBLIC_API_URL) throw new Error("API URL is not defined");
+
+	const response = await fetch(`${PUBLIC_API_URL}/stations/gathering/${schema.evaNumber}`, {
+		method: "GET",
+		headers: {
+			"Content-Type": "application/json",
+			Accept: "*/*"
+		}
+	});
+
+	if (!response.ok) throw new Error(`Error fetching station gathering info: ${response.status} ${response.statusText}`);
+	return (await response.json()) as StationGatheringInfoDTO;
+});
+
+export { getStations, getStationGatheringInfo };
