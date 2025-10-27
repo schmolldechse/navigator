@@ -14,8 +14,8 @@ public func configure(_ app: Application) async throws {
     let jsonDecoder = JSONDecoder()
     
     let dateFormatter = DateFormatter()
-    dateFormatter.locale = Locale(identifier: "en_US_POSIX")
-    dateFormatter.timeZone = TimeZone.current
+    dateFormatter.locale = Locale(identifier: "de_DE")
+    dateFormatter.timeZone = TimeZone(identifier: "Europe/Berlin")!
     dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssXXX"
 
     jsonEncoder.dateEncodingStrategy = .formatted(dateFormatter)
