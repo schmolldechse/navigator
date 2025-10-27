@@ -1,5 +1,5 @@
 import { query } from "$app/server";
-import { PUBLIC_API_URL } from "$env/static/public";
+import { env } from "$env/dynamic/public";
 import type { StationGatheringInfoDTO } from "$lib/models/StationGatheringInfoDTO";
 import type { StationSummaryDTO } from "$lib/models/StationSummaryDTO";
 import * as v from "valibot";
@@ -7,9 +7,9 @@ import * as v from "valibot";
 const getStations = query(
 	v.object({ latitude: v.number(), longitude: v.number(), radius: v.optional(v.number()), limit: v.optional(v.number()) }),
 	async (schema) => {
-		if (!PUBLIC_API_URL) throw new Error("API URL is not defined");
+		if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
 
-		const response = await fetch(`${PUBLIC_API_URL}/stations/nearby`, {
+		const response = await fetch(`${env.PUBLIC_API_URL}/stations/nearby`, {
 			method: "POST",
 			body: JSON.stringify({
 				latitude: schema.latitude,
@@ -29,9 +29,9 @@ const getStations = query(
 );
 
 const getStationGatheringInfo = query(v.object({ evaNumber: v.number() }), async (schema) => {
-	if (!PUBLIC_API_URL) throw new Error("API URL is not defined");
+	if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
 
-	const response = await fetch(`${PUBLIC_API_URL}/stations/gathering/${schema.evaNumber}`, {
+	const response = await fetch(`${env.PUBLIC_API_URL}/stations/gathering/${schema.evaNumber}`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
