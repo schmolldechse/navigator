@@ -101,7 +101,7 @@ struct StationRepository {
             logger.warning("Station with EVA number \(evaNumber) not found in the database.")
             throw Abort(.notFound, reason: "Station with EVA number \(evaNumber) not found.")
         }
-        return station!.toDTO()
+        return station!.toDetailDTO()
     }
     
     func findBy(request: StationByCoordinatesRequestDTO) async throws -> [StationSummaryDTO] {
@@ -138,6 +138,18 @@ struct StationRepository {
                 position: PositionDTO(latitude: result.latitude, longitude: result.longitude)
             )
         }
+    }
+    
+    func getGatheringInfo(evaNumber: Int) async throws -> StationGatheringInfoDTO {
+        let station = try await Station.query(on: self.database)
+            .with(\.$transportOccurences)
+            .filter(\.$id == evaNumber)
+            .first()
+        if station == nil {
+            logger.warning("Station with EVA number \(evaNumber) not found in the database.")
+            throw Abort(.notFound, reason: "Station with EVA number \(evaNumber) not found.")
+        }
+        return station!.toGatheringInfoDTO()
     }
     
     private func saveStation(_ station: Station, transports: [TransportType]) async throws {

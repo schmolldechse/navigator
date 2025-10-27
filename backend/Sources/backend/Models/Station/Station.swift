@@ -55,7 +55,7 @@ final class Station: Model, @unchecked Sendable {
         self.isLocked = isLocked
     }
     
-    func toDTO() -> StationDetailDTO {
+    func toDetailDTO() -> StationDetailDTO {
         StationDetailDTO(
             evaNumber: self.id!,
             name: self.name,
@@ -65,6 +65,15 @@ final class Station: Model, @unchecked Sendable {
             ),
             ril100: self.ril100.map { $0.ril100 },
             transports: self.transportOccurences.map { $0.transport }
+        )
+    }
+    
+    func toGatheringInfoDTO() -> StationGatheringInfoDTO {
+        StationGatheringInfoDTO(
+            queryingEnabled: self.queryingEnabled,
+            lastQueried: self.lastQueried,
+            active: self.transportOccurences.filter { $0.queryingEnabled }.map { $0.transport },
+            inactive: self.transportOccurences.filter { !$0.queryingEnabled }.map { $0.transport }
         )
     }
 }
