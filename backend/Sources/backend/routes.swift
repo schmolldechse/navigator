@@ -24,6 +24,8 @@ func routes(_ app: Application) throws {
     }
     .excludeFromOpenAPI()
 
-    try app.register(collection: StationController())
-    try app.register(collection: TimetableController())
+    let api = app.grouped("api", "v1")
+    try api.register(collection: StationController())
+    try api.register(collection: TimetableController())
+    try api.register(collection: AuthController())
 }

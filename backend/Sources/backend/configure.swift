@@ -24,7 +24,6 @@ public func configure(_ app: Application) async throws {
     ContentConfiguration.global.use(encoder: jsonEncoder, for: .json)
     ContentConfiguration.global.use(decoder: jsonDecoder, for: .json)
 
-    // MARK: - Database & Migrations
     app.databases.use(DatabaseConfigurationFactory.postgres(configuration: .init(
         hostname: Environment.get("DATABASE_HOST") ?? "localhost",
         port: Environment.get("DATABASE_PORT").flatMap(Int.init(_:)) ?? SQLPostgresConfiguration.ianaPortNumber,
@@ -33,20 +32,25 @@ public func configure(_ app: Application) async throws {
         database: Environment.get("DATABASE_NAME") ?? "vapor_database",
         tls: .prefer(try .init(configuration: .clientDefault)))
     ), as: .psql)
-
-    app.migrations.add(CoreSchemaCreation())
-    app.migrations.add(StationMigration())
-    app.migrations.add(IdentifiedRISIDMigration())
-    app.migrations.add(JourneyMigration())
     
+    app.views.use(.leaf)
+        
+    // MARK: - Sessions
+    app.sessions.use(.fluent(.psql))
+    app.sessions.configuration.cookieFactory = { sessionID in
+            .init(string: sessionID.string, isSecure: app.environment.isRelease, sameSite: .lax)
+    }
+    
+    // MARK: - Migrations
+    Migrations.registerAll(on: app)
     if !app.environment.isRelease {
         app.logger.info("Running migrations...")
         try await app.autoMigrate()
         app.logger.info("Migrations complete.")
     }
-
-    app.views.use(.leaf)
     
+    // MARK: - Middleware
+    app.middleware.use(app.sessions.middleware)
     app.middleware.use(RequestIdentificationErrorMiddleware())
     
     // register routes

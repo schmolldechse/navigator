@@ -12,17 +12,20 @@ struct StationMigration: AsyncMigration {
     func prepare(on database: any Database) async throws {
         guard let sql = database as? (any SQLDatabase) else { return }
         
-        // `cube` and `earthdistance` extensions
         try await sql.raw("""
-            CREATE EXTENSION IF NOT EXISTS cube;
+            CREATE SCHEMA IF NOT EXISTS "core";
+        """).run()
+        
+        try await sql.raw("""
+            CREATE EXTENSION IF NOT EXISTS "cube";
             """).run()
         try await sql.raw("""
-            CREATE EXTENSION IF NOT EXISTS earthdistance;
+            CREATE EXTENSION IF NOT EXISTS "earthdistance";
             """).run()
                 
         // stations
         try await sql.raw("""
-            CREATE TABLE IF NOT EXISTS "\(bind: Station.space!)"."\(bind: Station.schema)" (
+            CREATE TABLE IF NOT EXISTS "\(unsafeRaw: Station.space!)"."\(unsafeRaw: Station.schema)" (
                 "eva_number" integer PRIMARY KEY NOT NULL,
                 "name" varchar(512) NOT NULL,
                 "weight" double precision DEFAULT 0 NOT NULL,
@@ -34,27 +37,27 @@ struct StationMigration: AsyncMigration {
             );
             """).run()
         try await sql.raw("""
-            CREATE INDEX "idx_stations_location" ON "\(bind: Station.space!)"."\(bind: Station.schema)" USING gist (ll_to_earth(latitude, longitude));
+            CREATE INDEX "idx_stations_location" ON "\(unsafeRaw: Station.space!)"."\(unsafeRaw: Station.schema)" USING gist (ll_to_earth(latitude, longitude));
             """).run()
         
         // station_transports
         try await sql.raw("""
-            CREATE TABLE IF NOT EXISTS "\(bind: TransportOccurence.space!)"."\(bind: TransportOccurence.schema)" (
+            CREATE TABLE IF NOT EXISTS "\(unsafeRaw: TransportOccurence.space!)"."\(unsafeRaw: TransportOccurence.schema)" (
                 "id" serial PRIMARY KEY NOT NULL,
-                "eva_number" integer NOT NULL REFERENCES "\(bind: Station.space!)"."\(bind: Station.schema)" (eva_number) ON DELETE CASCADE,
+                "eva_number" integer NOT NULL REFERENCES "\(unsafeRaw: Station.space!)"."\(unsafeRaw: Station.schema)" (eva_number) ON DELETE CASCADE,
                 "transport_name" varchar(255) NOT NULL,
                 "querying_enabled" boolean DEFAULT false NOT NULL
             );
             """).run()
         try await sql.raw("""
-            CREATE INDEX "idx_eva_number_transport" ON "\(bind: TransportOccurence.space!)"."\(bind: TransportOccurence.schema)" (eva_number, transport_name)
+            CREATE INDEX "idx_eva_number_transport" ON "\(unsafeRaw: TransportOccurence.space!)"."\(unsafeRaw: TransportOccurence.schema)" (eva_number, transport_name)
             """).run()
             
         // station_ril100
         try await sql.raw("""
-            CREATE TABLE IF NOT EXISTS "\(bind: Ril100.space!)"."\(bind: Ril100.schema)" (
+            CREATE TABLE IF NOT EXISTS "\(unsafeRaw: Ril100.space!)"."\(unsafeRaw: Ril100.schema)" (
                 "id" serial PRIMARY KEY NOT NULL,
-                "eva_number" integer NOT NULL REFERENCES "\(bind: Station.space!)"."\(bind: Station.schema)" (eva_number) ON DELETE CASCADE,
+                "eva_number" integer NOT NULL REFERENCES "\(unsafeRaw: Station.space!)"."\(unsafeRaw: Station.schema)" (eva_number) ON DELETE CASCADE,
                 "ril100" varchar(64) NOT NULL
             );
             """).run()
@@ -65,7 +68,7 @@ struct StationMigration: AsyncMigration {
         
         // station_ril100
         try await sql.raw("""
-            DROP TABLE IF EXISTS "\(bind: Ril100.space!)"."\(bind: Ril100.schema)";
+            DROP TABLE IF EXISTS "\(unsafeRaw: Ril100.space!)"."\(unsafeRaw: Ril100.schema)";
             """).run()
         
         // station_transports
@@ -73,7 +76,7 @@ struct StationMigration: AsyncMigration {
             DROP INDEX IF EXISTS "idx_eva_number_transport";
             """).run()
         try await sql.raw("""
-            DROP TABLE IF EXISTS "\(bind: TransportOccurence.space!)"."\(bind: TransportOccurence.schema)";
+            DROP TABLE IF EXISTS "\(unsafeRaw: TransportOccurence.space!)"."\(unsafeRaw: TransportOccurence.schema)";
             """).run()
         
         // stations
@@ -81,7 +84,11 @@ struct StationMigration: AsyncMigration {
             DROP INDEX IF EXISTS "idx_stations_location";
             """).run()
         try await sql.raw("""
-            DROP TABLE IF EXISTS "\(bind: Station.space!)"."\(bind: Station.schema)";
+            DROP TABLE IF EXISTS "\(unsafeRaw: Station.space!)"."\(unsafeRaw: Station.schema)";
             """).run()
+        
+        try await sql.raw("""
+            DROP SCHEMA IF NOT EXISTS "core";
+        """).run()
     }
 }

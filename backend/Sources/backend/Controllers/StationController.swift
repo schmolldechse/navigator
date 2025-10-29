@@ -54,26 +54,26 @@ struct StationController: RouteCollection {
 
     private func queryStations(req: Request) async throws -> [StationDetailDTO] {
         let searchRequest = try req.query.decode(VendoStationSearchRequestDTO.self)
-        return try await req.stationRepository.queryFor(searchTerm: searchRequest.searchTerm)
+        return try await req.application.stationRepository.queryFor(searchTerm: searchRequest.searchTerm)
     }
     
     private func getStationByEvaNumber(req: Request) async throws -> StationDetailDTO {
         guard let evaNumber = req.parameters.get("evaNumber", as: Int.self) else {
             throw Abort(.badRequest, reason: "Invalid 'evaNumber' specified. It must be an integer.")
         }
-        return try await req.stationRepository.findBy(evaNumber: evaNumber)
+        return try await req.application.stationRepository.findBy(evaNumber: evaNumber)
     }
     
     private func getStationByCoordinates(req: Request) async throws -> [StationSummaryDTO] {
         let coordinateRequest = try req.content.decode(StationByCoordinatesRequestDTO.self)
-        return try await req.stationRepository.findBy(request: coordinateRequest)
+        return try await req.application.stationRepository.findBy(request: coordinateRequest)
     }
     
     private func getStationGatheringInfo(req: Request) async throws -> StationGatheringInfoDTO {
         guard let evaNumber = req.parameters.get("evaNumber", as: Int.self) else {
             throw Abort(.badRequest, reason: "Invalid 'evaNumber' specified. It must be an integer.")
         }
-        return try await req.stationRepository.getGatheringInfo(evaNumber: evaNumber)
+        return try await req.application.stationRepository.getGatheringInfo(evaNumber: evaNumber)
     }
 }
 
