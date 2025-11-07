@@ -1,5 +1,5 @@
 //
-//  Application+AuthRepositoryFactory.swift
+//  Application+Repositories.swift
 //  backend
 //
 //  Created by Christian Knapp on 28.10.25.
@@ -29,5 +29,9 @@ extension Application {
     
     var stationRepository: StationRepository {
         StationRepository(client: self.client, logger: self.logger, database: self.db)
+    }
+    
+    var statisticsRepository: StatisticsRepository {
+        StatisticsRepository(client: self.client, logger: self.logger, database: self.db)
     }
 }

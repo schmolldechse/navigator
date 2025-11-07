@@ -34,6 +34,9 @@ public func configure(_ app: Application) async throws {
     ), as: .psql)
     
     app.views.use(.leaf)
+    
+    // MARK: - Workers
+    app.configureWorkerService()
         
     // MARK: - Sessions
     app.sessions.use(.fluent(.psql))

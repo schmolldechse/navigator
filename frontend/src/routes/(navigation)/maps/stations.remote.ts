@@ -9,7 +9,7 @@ const getStations = query(
 	async (schema) => {
 		if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
 
-		const response = await fetch(`${env.PUBLIC_API_URL}/stations/nearby`, {
+		const response = await fetch(`${env.PUBLIC_API_URL}/api/v1/stations/nearby`, {
 			method: "POST",
 			body: JSON.stringify({
 				latitude: schema.latitude,
@@ -31,7 +31,7 @@ const getStations = query(
 const getStationGatheringInfo = query(v.object({ evaNumber: v.number() }), async (schema) => {
 	if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
 
-	const response = await fetch(`${env.PUBLIC_API_URL}/stations/gathering/${schema.evaNumber}`, {
+	const response = await fetch(`${env.PUBLIC_API_URL}/api/v1/stations/gathering/${schema.evaNumber}`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",

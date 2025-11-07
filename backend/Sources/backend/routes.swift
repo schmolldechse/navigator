@@ -28,4 +28,5 @@ func routes(_ app: Application) throws {
     try api.register(collection: StationController())
     try api.register(collection: TimetableController())
     try api.register(collection: AuthController())
+    try api.register(collection: StatisticsController())
 }

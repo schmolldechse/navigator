@@ -76,4 +76,3 @@ struct StationController: RouteCollection {
         return try await req.application.stationRepository.getGatheringInfo(evaNumber: evaNumber)
     }
 }
-

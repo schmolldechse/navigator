@@ -1,10 +1,13 @@
+import { env } from "$env/dynamic/public";
 import type { Handle } from "@sveltejs/kit";
 
 export const handle: Handle = async ({ event, resolve }) => {
-    const response = await fetch('http://localhost:8080/api/v1/auth/me', {
-        headers: event.request.headers
-    });
+	if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
 
-    console.log(response.status, response.statusText)
-    return await resolve(event);
+	const response = await fetch(`${env.PUBLIC_API_URL}/api/v1/auth/me`, {
+		headers: event.request.headers
+	});
+
+	if (!response.ok) return await resolve(event);
+	return await resolve(event);
 };
