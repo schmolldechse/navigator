@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Navigator.Api/Navigator.Api.csproj" />
+  <Project Path="Navigator.Daemon/Navigator.Daemon.csproj" />
+  <Project Path="Navigator.Data/Navigator.Data.csproj" />
+</Solution>
