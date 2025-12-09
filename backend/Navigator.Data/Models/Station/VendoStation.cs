@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Navigator.Data.DTOs.Station;
+namespace Navigator.Data.Models.Station;
 
-public class StationSearchResponseDTO
+public class VendoStation
 {
     [JsonPropertyName("name")]
     public required string Name { get; set; }
@@ -14,7 +14,7 @@ public class StationSearchResponseDTO
     public required string LocationId { get; set; }
 
     [JsonPropertyName("evaNr")]
-    public required string EvaNr { get; set; }
+    public required string EvaNumber { get; set; }
 
     [JsonPropertyName("coordinates")]
     public required CoordinatesResponse Coordinates { get; set; }
@@ -27,13 +27,13 @@ public class StationSearchResponseDTO
 
     [JsonPropertyName("locationType")]
     public required string LocationType { get; set; }
-}
 
-public class CoordinatesResponse
-{
-    [JsonPropertyName("latitude")]
-    public double Latitude { get; set; }
+    public class CoordinatesResponse
+    {
+        [JsonPropertyName("latitude")]
+        public double Latitude { get; set; }
 
-    [JsonPropertyName("longitude")]
-    public double Longitude { get; set; }
+        [JsonPropertyName("longitude")]
+        public double Longitude { get; set; }
+    }
 }

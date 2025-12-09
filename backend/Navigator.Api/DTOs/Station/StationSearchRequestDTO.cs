@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace Navigator.Data.DTOs.Station;
+namespace Navigator.Api.DTOs.Station;
 
 /// <summary>
 /// Represents a request to search for stations using a search term, with optional filters for result count and location
