@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Navigator.Data.Entities;
+namespace Navigator.Data.Entities.Station;
 
 [Table("stations", Schema = "core")]
 public class Station
@@ -27,4 +27,8 @@ public class Station
 
     [Column("last_queried")]
     public DateTime? LastQueried { get; set; }
+
+    public ICollection<StationRil100> Ril100 { get; set; } = new List<StationRil100>();
+
+    public ICollection<StationTransport> Transports { get; set; } = new List<StationTransport>();
 }
