@@ -8,8 +8,9 @@ public class StationGatheringInfoDTO
     [JsonPropertyName("queryingEnabled")]
     public required bool QueryingEnabled { get; set; }
 
+    [JsonIgnore(Condition = JsonIgnoreCondition.Never)]
     [JsonPropertyName("lastQueried")]
-    public required DateTime LastQueried { get; set; }
+    public DateTime? LastQueried { get; set; }
 
     [JsonPropertyName("active")]
     public required TransportType[] ActiveTransportTypes { get; set; }
