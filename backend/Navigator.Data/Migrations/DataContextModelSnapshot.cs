@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Navigator.Data;
+using Navigator.Data.Enums;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -20,6 +21,7 @@ namespace Navigator.Data.Migrations
                 .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "transport_type", new[] { "BIKE", "BUS", "CAR", "CITY_TRAIN", "FERRY", "FLIGHT", "HIGH_SPEED_TRAIN", "INTERCITY_TRAIN", "INTER_REGIONAL_TRAIN", "REGIONAL_TRAIN", "SCOOTER", "SHUTTLE", "SUBWAY", "TAXI", "TRAM", "UNKNOWN", "WALK" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "cube");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "earthdistance");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -43,12 +45,12 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_insertion_at");
 
-                    b.Property<int?>("ReplacementTransportType")
-                        .HasColumnType("integer")
+                    b.Property<TransportType?>("ReplacementTransportType")
+                        .HasColumnType("core.transport_type")
                         .HasColumnName("replacement_transport_type");
 
-                    b.Property<int>("TransportType")
-                        .HasColumnType("integer")
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
                         .HasColumnName("transport_type");
 
                     b.HasKey("Id");
@@ -137,10 +139,9 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("eva_number");
 
-                    b.Property<string>("TransportType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("transport");
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
 
                     b.HasKey("Id");
 
