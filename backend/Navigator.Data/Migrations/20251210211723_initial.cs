@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Navigator.Data.Enums;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -19,6 +20,7 @@ namespace Navigator.Data.Migrations
                 name: "core");
 
             migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:core.transport_type", "BIKE,BUS,CAR,CITY_TRAIN,FERRY,FLIGHT,HIGH_SPEED_TRAIN,INTERCITY_TRAIN,INTER_REGIONAL_TRAIN,REGIONAL_TRAIN,SCOOTER,SHUTTLE,SUBWAY,TAXI,TRAM,UNKNOWN,WALK")
                 .Annotation("Npgsql:PostgresExtension:cube", ",,")
                 .Annotation("Npgsql:PostgresExtension:earthdistance", ",,");
 
@@ -42,8 +44,8 @@ namespace Navigator.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    transport_type = table.Column<int>(type: "integer", nullable: false),
-                    replacement_transport_type = table.Column<int>(type: "integer", nullable: true),
+                    transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: false),
+                    replacement_transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: true),
                     discovered_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     last_insertion_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     active = table.Column<bool>(type: "boolean", nullable: false)
@@ -102,7 +104,7 @@ namespace Navigator.Data.Migrations
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     eva_number = table.Column<int>(type: "integer", nullable: false),
-                    transport = table.Column<string>(type: "text", nullable: false),
+                    transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: false),
                     enabled = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -124,10 +126,10 @@ namespace Navigator.Data.Migrations
                 column: "eva_number");
 
             migrationBuilder.CreateIndex(
-                name: "IX_station_transports_eva_number_transport",
+                name: "IX_station_transports_eva_number_transport_type",
                 schema: "core",
                 table: "station_transports",
-                columns: new[] { "eva_number", "transport" },
+                columns: new[] { "eva_number", "transport_type" },
                 unique: true);
         }
 
