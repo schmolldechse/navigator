@@ -1,10 +1,13 @@
-﻿using Navigator.Data.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using Navigator.Data.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Navigator.Data.Entities.RisId;
 
 [Table("ris_ids", Schema = "core")]
+[Index(nameof(TransportType))]
+[Index(nameof(ReplacementTransportType))]
 public class RisId
 {
     [Key]

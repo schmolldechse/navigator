@@ -16,7 +16,7 @@ public class StationRil100
     public required int EvaNumber { get; set; }
 
     [ForeignKey(nameof(EvaNumber))]
-    public Station Station { get; set; }
+    public virtual Station? Station { get; set; }
 
     [Column("ril100")]
     public required string Ril100Code { get; set; }
