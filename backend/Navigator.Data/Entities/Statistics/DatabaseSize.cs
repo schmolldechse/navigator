@@ -12,7 +12,7 @@ public class DatabaseSize
     public required Guid Id { get; set; }
 
     [Column("measured_at")]
-    public required DateTime MeasuredAt { get; set; }
+    public required DateTimeOffset MeasuredAt { get; set; }
 
     [Column("size_bytes")]
     public required long SizeBytes { get; set; }

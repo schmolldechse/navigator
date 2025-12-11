@@ -32,7 +32,7 @@ namespace Navigator.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    measured_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    measured_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     size_bytes = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
@@ -63,8 +63,9 @@ namespace Navigator.Data.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: false),
                     replacement_transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: true),
-                    discovered_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    last_insertion_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    discovered_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    last_seen_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    last_insertion_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     active = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -97,8 +98,8 @@ namespace Navigator.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    inserted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    date = table.Column<DateOnly>(type: "date", nullable: false),
+                    inserted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     administration_id = table.Column<Guid>(type: "uuid", nullable: false),
                     cancelled = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -174,8 +175,8 @@ namespace Navigator.Data.Migrations
                     additional = table.Column<bool>(type: "boolean", nullable: false),
                     demand = table.Column<bool>(type: "boolean", nullable: false),
                     no_passenger_change = table.Column<bool>(type: "boolean", nullable: false),
-                    planned_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    actual_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    planned_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    actual_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     delay = table.Column<int>(type: "integer", nullable: false, computedColumnSql: "EXTRACT(EPOCH FROM (actual_time - planned_time))::integer", stored: true),
                     planned_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
                     actual_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true)

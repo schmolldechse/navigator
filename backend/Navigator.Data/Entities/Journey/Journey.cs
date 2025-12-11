@@ -15,10 +15,10 @@ public class Journey
     public required Guid Id { get; set; }
 
     [Column("date")]
-    public required DateTime Date { get; set; }
+    public required DateOnly Date { get; set; }
 
     [Column("inserted_at")]
-    public required DateTime InsertedAt { get; set; }
+    public required DateTimeOffset InsertedAt { get; set; }
 
     [Column("administration_id")]
     public required Guid AdministrationId { get; set; }

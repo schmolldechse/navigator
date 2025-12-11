@@ -82,6 +82,8 @@ public class StationRepository(
                 continue;
             }
 
+            station.LastQueried = incomingStation.LastQueried;
+
             var existingRil = station.Ril100
                 .Select(ril => ril.Ril100Code)
                 .ToHashSet();

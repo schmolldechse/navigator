@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251210220726_initial")]
-    partial class initial
+    [Migration("20251211201131_addStationGeoIndex")]
+    partial class addStationGeoIndex
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,11 +79,11 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("cancelled");
 
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone")
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
                         .HasColumnName("date");
 
-                    b.Property<DateTime>("InsertedAt")
+                    b.Property<DateTimeOffset>("InsertedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("inserted_at");
 
@@ -110,7 +110,7 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("actual_platform");
 
-                    b.Property<DateTime>("ActualTime")
+                    b.Property<DateTimeOffset>("ActualTime")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("actual_time");
 
@@ -149,7 +149,7 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("planned_platform");
 
-                    b.Property<DateTime>("PlannedTime")
+                    b.Property<DateTimeOffset>("PlannedTime")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("planned_time");
 
@@ -306,13 +306,17 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("active");
 
-                    b.Property<DateTime>("DiscoveredAt")
+                    b.Property<DateTimeOffset>("DiscoveredAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("discovered_at");
 
-                    b.Property<DateTime?>("LastInsertedAt")
+                    b.Property<DateTimeOffset?>("LastInsertedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_insertion_at");
+
+                    b.Property<DateTimeOffset?>("LastSeenAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_seen_at");
 
                     b.Property<TransportType?>("ReplacementTransportType")
                         .HasColumnType("core.transport_type")
@@ -430,7 +434,7 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
-                    b.Property<DateTime>("MeasuredAt")
+                    b.Property<DateTimeOffset>("MeasuredAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("measured_at");
 

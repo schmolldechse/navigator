@@ -49,10 +49,10 @@ public class JourneyScheduledStopPlace
     public required bool NoPassengerChange { get; set; }
 
     [Column("planned_time")]
-    public required DateTime PlannedTime { get; set; }
+    public required DateTimeOffset PlannedTime { get; set; }
 
     [Column("actual_time")]
-    public required DateTime ActualTime { get; set; }
+    public required DateTimeOffset ActualTime { get; set; }
 
     [Column("delay")]
     [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
