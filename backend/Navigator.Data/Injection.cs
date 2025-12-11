@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Navigator.Data.Enums;
+using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Data.Repository.StationRilRepository;
 using Navigator.Data.Repository.StationTransportRepository;
@@ -29,7 +30,8 @@ public static class Injection
         services
             .AddTransient<IStationRepository, StationRepository>()
             .AddTransient<IStationRilRepository, StationRilRepository>()
-            .AddTransient<IStationTransportRepository, StationTransportRepository>();
+            .AddTransient<IStationTransportRepository, StationTransportRepository>()
+            .AddTransient<IRisIdRepository, RisIdRepository>();
         return services;
     }
 }
