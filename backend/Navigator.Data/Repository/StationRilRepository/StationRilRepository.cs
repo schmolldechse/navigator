@@ -4,7 +4,7 @@ namespace Navigator.Data.Repository.StationRilRepository;
 
 public class StationRilRepository(DataContext dataContext) : IStationRilRepository
 {
-    public async Task<ILookup<int, string>> GetRilByEvaNumbers(int[] evaNumbers)
+    public async Task<ILookup<int, string>> GetRilByEvaNumbersAsync(int[] evaNumbers)
     {
         var ril100 = await dataContext.StationRil
             .Where(ril => evaNumbers.Contains(ril.EvaNumber))

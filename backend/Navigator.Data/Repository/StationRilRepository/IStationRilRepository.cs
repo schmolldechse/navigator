@@ -2,5 +2,5 @@
 
 public interface IStationRilRepository
 {
-    Task<ILookup<int, string>> GetRilByEvaNumbers(int[] evaNumbers);
+    Task<ILookup<int, string>> GetRilByEvaNumbersAsync(int[] evaNumbers);
 }

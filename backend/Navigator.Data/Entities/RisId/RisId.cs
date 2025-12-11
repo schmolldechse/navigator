@@ -22,10 +22,13 @@ public class RisId
     public TransportType? ReplacementTransportType { get; set; } = null;
 
     [Column("discovered_at")]
-    public required DateTime DiscoveredAt { get; set; }
+    public required DateTimeOffset DiscoveredAt { get; set; }
+
+    [Column("last_seen_at")]
+    public DateTimeOffset? LastSeenAt { get; set; }
 
     [Column("last_insertion_at")]
-    public DateTime? LastInsertedAt { get; set; }
+    public DateTimeOffset? LastInsertedAt { get; set; }
 
     [Column("active")]
     public required bool Active { get; set; }
