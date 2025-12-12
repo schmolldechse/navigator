@@ -1,10 +1,15 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Navigator.Data.Entities.Station;
+using Navigator.Data.Models.Converters;
+using Navigator.Data.Models.Ris;
+using Navigator.Data.Models.StaDa;
 using Navigator.Data.Models.Station;
+using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
+using System.Web;
 
 namespace Navigator.Data.Repository.StationRepository;
 
@@ -15,6 +20,8 @@ public class StationRepository(
 ) : IStationRepository
 {
     private const string _stationsUrl = "https://app.services-bahn.de/mob/location/search";
+    private const string _risStationsByCoordinatesUrl = "https://apis.deutschebahn.com/db-api-marketplace/apis/ris-stations/v1/stop-places/by-position";
+    private const string _staDaUrl = "https://apis.deutschebahn.com/db-api-marketplace/apis/station-data/v2/stations";
 
     public async Task<IEnumerable<VendoStation>> GetVendoStationsAsync(VendoStationsBySearchRequest request)
     {
@@ -36,6 +43,57 @@ public class StationRepository(
 
         var stations = JsonSerializer.Deserialize<VendoStation[]>(await response.Content.ReadAsStringAsync());
         return stations ?? Enumerable.Empty<VendoStation>();
+    }
+
+    public async Task<IEnumerable<RisStations.StopPlaceSearchResult>> GetRisStationsByCoordinatesAsync(RisStationsByCoordinatesRequest request)
+    {
+        using var httpClient = httpClientFactory.CreateClient();
+        httpClient.DefaultRequestHeaders.Add("DB-Client-Id", Environment.GetEnvironmentVariable("STATIONS_CLIENT_ID"));
+        httpClient.DefaultRequestHeaders.Add("DB-Api-Key", Environment.GetEnvironmentVariable("STATIONS_API_KEY"));
+
+        var builder = new UriBuilder(_risStationsByCoordinatesUrl);
+        var query = HttpUtility.ParseQueryString(builder.Query);
+        query["latitude"] = request.Latitude.ToString(CultureInfo.InvariantCulture);
+        query["longitude"] = request.Longitude.ToString(CultureInfo.InvariantCulture);
+        query["radius"] = request.Radius.ToString();
+        query["groupBy"] = request.GroupBy.ToString();
+        query["limit"] = request.Limit?.ToString();
+        query["onlyActive"] = "false";
+
+        builder.Query = query.ToString();
+
+        using var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, builder.Uri));
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.LogError("Failed to fetch stations. Status Code: {StatusCode}", response.StatusCode);
+            return Enumerable.Empty<RisStations.StopPlaceSearchResult>();
+        }
+
+        var stations = JsonSerializer.Deserialize<RisStations.StopPlaceSearchResults>(
+            await response.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions() { Converters = { new __ICanIterateConverterFactory() } }
+        );
+        return stations?.StopPlaces ?? Enumerable.Empty<RisStations.StopPlaceSearchResult>();
+    }
+
+    public async Task<IEnumerable<StaDa.Station>> GetStaDaAsync()
+    {
+        using var httpClient = httpClientFactory.CreateClient();
+        httpClient.DefaultRequestHeaders.Add("DB-Client-Id", Environment.GetEnvironmentVariable("STATIONS_CLIENT_ID"));
+        httpClient.DefaultRequestHeaders.Add("DB-Api-Key", Environment.GetEnvironmentVariable("STATIONS_API_KEY"));
+
+        using var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, _staDaUrl));
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.LogError("Failed to fetch StaDa stations. Status Code: {StatusCode}", response.StatusCode);
+            return Enumerable.Empty<StaDa.Station>();
+        }
+
+        var stations = JsonSerializer.Deserialize<StaDa.StationQuery>(
+            await response.Content.ReadAsStringAsync(),
+            new JsonSerializerOptions() { Converters = { new __ICanIterateConverterFactory() } }
+        );
+        return stations?.Result ?? Enumerable.Empty<StaDa.Station>();
     }
 
     public async Task<IEnumerable<Station>> GetStationsByCoordinatesAsync(StationsByCoordinateRequest request) => await dataContext.Stations

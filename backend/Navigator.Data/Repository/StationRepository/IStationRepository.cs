@@ -1,4 +1,6 @@
 ﻿using Navigator.Data.Entities.Station;
+using Navigator.Data.Models.Ris;
+using Navigator.Data.Models.StaDa;
 using Navigator.Data.Models.Station;
 
 namespace Navigator.Data.Repository.StationRepository;
@@ -6,6 +8,8 @@ namespace Navigator.Data.Repository.StationRepository;
 public interface IStationRepository
 {
     Task<IEnumerable<VendoStation>> GetVendoStationsAsync(VendoStationsBySearchRequest request);
+    Task<IEnumerable<RisStations.StopPlaceSearchResult>> GetRisStationsByCoordinatesAsync(RisStationsByCoordinatesRequest request);
+    Task<IEnumerable<StaDa.Station>> GetStaDaAsync();
     Task<IEnumerable<Station>> GetStationsByCoordinatesAsync(StationsByCoordinateRequest dto);
     Task<Station?> GetByEvaNumberAsync(int evaNumber);
     Task SaveStationsAsync(IEnumerable<Station> stations);

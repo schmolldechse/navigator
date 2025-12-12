@@ -2,4 +2,5 @@
   <Project Path="Navigator.Api/Navigator.Api.csproj" />
   <Project Path="Navigator.Daemon/Navigator.Daemon.csproj" />
   <Project Path="Navigator.Data/Navigator.Data.csproj" />
+  <Project Path="Navigator.Preflight/Navigator.Preflight.csproj" />
 </Solution>
