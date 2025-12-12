@@ -69,10 +69,7 @@ public class StationRepository(
             return Enumerable.Empty<RisStations.StopPlaceSearchResult>();
         }
 
-        var stations = JsonSerializer.Deserialize<RisStations.StopPlaceSearchResults>(
-            await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions() { Converters = { new __ICanIterateConverterFactory() } }
-        );
+        var stations = JsonSerializer.Deserialize<RisStations.StopPlaceSearchResults>(await response.Content.ReadAsStringAsync());
         return stations?.StopPlaces ?? Enumerable.Empty<RisStations.StopPlaceSearchResult>();
     }
 
@@ -89,10 +86,7 @@ public class StationRepository(
             return Enumerable.Empty<StaDa.Station>();
         }
 
-        var stations = JsonSerializer.Deserialize<StaDa.StationQuery>(
-            await response.Content.ReadAsStringAsync(),
-            new JsonSerializerOptions() { Converters = { new __ICanIterateConverterFactory() } }
-        );
+        var stations = JsonSerializer.Deserialize<StaDa.StationQuery>(await response.Content.ReadAsStringAsync());
         return stations?.Result ?? Enumerable.Empty<StaDa.Station>();
     }
 

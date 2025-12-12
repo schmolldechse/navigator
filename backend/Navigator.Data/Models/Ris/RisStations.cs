@@ -1,2686 +1,2980 @@
-﻿namespace Navigator.Data.Models.Ris;
+﻿using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace Navigator.Data.Models.Ris;
 
 public class RisStations
 {
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Accessibility : __ICanIterate
+
+    /// <summary>
+    /// Accessibility [Barrierefreiheit] information for a particular platform.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Accessibility
     {
-        public Accessibility() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Accessibility(AccessibilityStatus audibleSignalsAvailable, AccessibilityStatus automaticDoor, AccessibilityStatus boardingAid, AccessibilityStatus passengerInformationDisplay, AccessibilityStatus platformSign, AccessibilityStatus stairsMarking, AccessibilityStatus standardPlatformHeight, AccessibilityStatus stepFreeAccess, AccessibilityStatus tactileGuidingStrips, AccessibilityStatus tactileHandrailLabel, AccessibilityStatus tactilePlatformAccess)
+        [System.Text.Json.Serialization.JsonPropertyName("audibleSignalsAvailable")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus AudibleSignalsAvailable { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("automaticDoor")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus AutomaticDoor { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("boardingAid")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus BoardingAid { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("passengerInformationDisplay")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus PassengerInformationDisplay { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("platformSign")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus PlatformSign { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("stairsMarking")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus StairsMarking { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("standardPlatformHeight")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus StandardPlatformHeight { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("stepFreeAccess")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus StepFreeAccess { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("tactileGuidingStrips")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus TactileGuidingStrips { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("tactileHandrailLabel")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus TactileHandrailLabel { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("tactilePlatformAccess")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<AccessibilityStatus>))]
+        public AccessibilityStatus TactilePlatformAccess { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            AudibleSignalsAvailable = audibleSignalsAvailable;
-            AutomaticDoor = automaticDoor;
-            BoardingAid = boardingAid;
-            PassengerInformationDisplay = passengerInformationDisplay;
-            PlatformSign = platformSign;
-            StairsMarking = stairsMarking;
-            StandardPlatformHeight = standardPlatformHeight;
-            StepFreeAccess = stepFreeAccess;
-            TactileGuidingStrips = tactileGuidingStrips;
-            TactileHandrailLabel = tactileHandrailLabel;
-            TactilePlatformAccess = tactilePlatformAccess;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required AccessibilityStatus AudibleSignalsAvailable { get; set; }
-        public required AccessibilityStatus AutomaticDoor { get; set; }
-        public required AccessibilityStatus BoardingAid { get; set; }
-        public required AccessibilityStatus PassengerInformationDisplay { get; set; }
-        public required AccessibilityStatus PlatformSign { get; set; }
-        public required AccessibilityStatus StairsMarking { get; set; }
-        public required AccessibilityStatus StandardPlatformHeight { get; set; }
-        public required AccessibilityStatus StepFreeAccess { get; set; }
-        public required AccessibilityStatus TactileGuidingStrips { get; set; }
-        public required AccessibilityStatus TactileHandrailLabel { get; set; }
-        public required AccessibilityStatus TactilePlatformAccess { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("audibleSignalsAvailable", AudibleSignalsAvailable switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("automaticDoor", AutomaticDoor switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("boardingAid", BoardingAid switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("passengerInformationDisplay", PassengerInformationDisplay switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("platformSign", PlatformSign switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("stairsMarking", StairsMarking switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("standardPlatformHeight", StandardPlatformHeight switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("stepFreeAccess", StepFreeAccess switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("tactileGuidingStrips", TactileGuidingStrips switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("tactileHandrailLabel", TactileHandrailLabel switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-            yield return ("tactilePlatformAccess", TactilePlatformAccess switch
-            {
-                AccessibilityStatus.AVAILABLE => "AVAILABLE",
-                AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-                AccessibilityStatus.PARTIAL => "PARTIAL",
-                AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-                AccessibilityStatus.UNKNOWN => "UNKNOWN",
-                _ => null
-            });
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(AccessibilityStatusEnumConverter))]
+    /// <summary>
+    /// Status of platform accessibility [Barrierefreiheit] information.
+    /// <br/>- AVAILABLE (accessibility item is available)
+    /// <br/>- NOT_AVAILABLE (accessibility item is not available)
+    /// <br/>- PARTIAL (accessibility item is only partial available, for instance available for 12a but not for 12b and therefore not for 12 in total)
+    /// <br/>- NOT_APPLICABLE (accessibility item is not applicable because it depends on availability of other items, for instance stair mark depends on step free access)
+    /// <br/>- UNKNOWN (no information on availability for accessibility item)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum AccessibilityStatus
     {
-        AVAILABLE,
-        NOT_AVAILABLE,
-        PARTIAL,
-        NOT_APPLICABLE,
-        UNKNOWN,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"AVAILABLE")]
+        AVAILABLE = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NOT_AVAILABLE")]
+        NOT_AVAILABLE = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PARTIAL")]
+        PARTIAL = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NOT_APPLICABLE")]
+        NOT_APPLICABLE = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"UNKNOWN")]
+        UNKNOWN = 4,
+
     }
 
-    public static class AccessibilityStatusFastEnum
+    /// <summary>
+    /// Address information with www info.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class AddressWithWeb
     {
-        public static string ToString(AccessibilityStatus value) => value switch
-        {
-            AccessibilityStatus.AVAILABLE => "AVAILABLE",
-            AccessibilityStatus.NOT_AVAILABLE => "NOT_AVAILABLE",
-            AccessibilityStatus.PARTIAL => "PARTIAL",
-            AccessibilityStatus.NOT_APPLICABLE => "NOT_APPLICABLE",
-            AccessibilityStatus.UNKNOWN => "UNKNOWN",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static AccessibilityStatus FromString(string? value) => value switch
+        /// <summary>
+        /// Additional information [Addresszusatz] for this address, like for instance 'Hinterm Haus links'.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("additionalInformation")]
+        public string AdditionalInformation { get; set; }
+
+        /// <summary>
+        /// City of address the position should be retrieved for.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("city")]
+        public string City { get; set; }
+
+        /// <summary>
+        /// Country of address the position should be retrieved for.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("country")]
+        public string Country { get; set; }
+
+        /// <summary>
+        /// House-number of address the position should be retrieved for.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("houseNumber")]
+        public string HouseNumber { get; set; }
+
+        /// <summary>
+        /// Postalcode [Postleitzahl] of address the position should be retrieved for.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("postalCode")]
+        public string PostalCode { get; set; }
+
+        /// <summary>
+        /// State of address the position should be retrieved for.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("state")]
+        public string State { get; set; }
+
+        /// <summary>
+        /// Street name of address the position should be retrieved for.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("street")]
+        public string Street { get; set; }
+
+        /// <summary>
+        /// Web site for address.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("website")]
+        public string Website { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "AVAILABLE" => AccessibilityStatus.AVAILABLE,
-            "NOT_AVAILABLE" => AccessibilityStatus.NOT_AVAILABLE,
-            "PARTIAL" => AccessibilityStatus.PARTIAL,
-            "NOT_APPLICABLE" => AccessibilityStatus.NOT_APPLICABLE,
-            "UNKNOWN" => AccessibilityStatus.UNKNOWN,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class AccessibilityStatusEnumConverter : System.Text.Json.Serialization.JsonConverter<AccessibilityStatus>
+    /// <summary>
+    /// Connecting time [Umsteigezeit] from a particular stop place [Haltestelle], platform [Gleis, Bahnsteig, Plattform] and optional sector [Gleisabschnitt, Steigabschnitt] to a particular station, platform and optional sector.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ConnectingTime
     {
-        public override AccessibilityStatus Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (AccessibilityStatus)reader.GetInt32();
-            }
 
-            return AccessibilityStatusFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// Eva number of stop place [Haltestelle] to connect from.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("fromEvaNumber")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string FromEvaNumber { get; set; }
+
+        /// <summary>
+        /// Platform [Gleis, Bahnsteig, Plattform] of stop place to connect from.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("fromPlatform")]
+        public string FromPlatform { get; set; }
+
+        /// <summary>
+        /// Sector [Gleisabschnitt, Steigabschnitt] of stop place to connect from.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("fromSector")]
+        public string FromSector { get; set; }
+
+        /// <summary>
+        /// Indicates whether connection takes place on the same physical platform [Bahnsteig] (platform '12' and '13' belong to physical platform '12/13' for instance).
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("identicalPhysicalPlatform")]
+        public bool IdenticalPhysicalPlatform { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("source")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ConnectingTimeSource>))]
+        public ConnectingTimeSource Source { get; set; }
+
+        /// <summary>
+        /// Connecting times fo different personae.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("times")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<ConnectionTime> Times { get; set; } = new System.Collections.ObjectModel.Collection<ConnectionTime>();
+
+        /// <summary>
+        /// Eva number stop place to connect to.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("toEvaNumber")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string ToEvaNumber { get; set; }
+
+        /// <summary>
+        /// Platform [Gleis, Bahnsteig, Plattform] of stop place [Haltestelle] to connect to.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("toPlatform")]
+        public string ToPlatform { get; set; }
+
+        /// <summary>
+        /// Sector [Gleisabschnitt, Steigabschnitt] of stop place [Haltestelle] to connect to.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("toSector")]
+        public string ToSector { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, AccessibilityStatus value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(AccessibilityStatusFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class AddressWithWeb : __ICanIterate
-    {
-        public AddressWithWeb() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public AddressWithWeb(string additionalInformation, string city, string country, string houseNumber, string postalCode, string state, string street, string website)
-        {
-            AdditionalInformation = additionalInformation;
-            City = city;
-            Country = country;
-            HouseNumber = houseNumber;
-            PostalCode = postalCode;
-            State = state;
-            Street = street;
-            Website = website;
-        }
-
-        public required string AdditionalInformation { get; set; }
-        public required string City { get; set; }
-        public required string Country { get; set; }
-        public required string HouseNumber { get; set; }
-        public required string PostalCode { get; set; }
-        public required string State { get; set; }
-        public required string Street { get; set; }
-        public required string Website { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("additionalInformation", AdditionalInformation);
-            yield return ("city", City);
-            yield return ("country", Country);
-            yield return ("houseNumber", HouseNumber);
-            yield return ("postalCode", PostalCode);
-            yield return ("state", State);
-            yield return ("street", Street);
-            yield return ("website", Website);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ConnectingTime : __ICanIterate
-    {
-        public ConnectingTime() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ConnectingTime(string fromEvaNumber, string fromPlatform, string fromSector, bool identicalPhysicalPlatform, ConnectingTimeSource source, System.Collections.Generic.List<ConnectionTime> times, string toEvaNumber, string toPlatform, string toSector)
-        {
-            FromEvaNumber = fromEvaNumber;
-            FromPlatform = fromPlatform;
-            FromSector = fromSector;
-            IdenticalPhysicalPlatform = identicalPhysicalPlatform;
-            Source = source;
-            Times = times;
-            ToEvaNumber = toEvaNumber;
-            ToPlatform = toPlatform;
-            ToSector = toSector;
-        }
-
-        public required string FromEvaNumber { get; set; }
-        public required string FromPlatform { get; set; }
-        public required string FromSector { get; set; }
-        public required bool IdenticalPhysicalPlatform { get; set; }
-        public required ConnectingTimeSource Source { get; set; }
-        public required System.Collections.Generic.List<ConnectionTime> Times { get; set; }
-        public required string ToEvaNumber { get; set; }
-        public required string ToPlatform { get; set; }
-        public required string ToSector { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("fromEvaNumber", FromEvaNumber);
-            yield return ("fromPlatform", FromPlatform);
-            yield return ("fromSector", FromSector);
-            yield return ("identicalPhysicalPlatform", IdenticalPhysicalPlatform);
-            yield return ("source", Source switch
-            {
-                ConnectingTimeSource.RIL420 => "RIL420",
-                ConnectingTimeSource.EFZ => "EFZ",
-                ConnectingTimeSource.INDOOR_ROUTING => "INDOOR_ROUTING",
-                _ => null
-            });
-            yield return ("times", Times);
-            yield return ("toEvaNumber", ToEvaNumber);
-            yield return ("toPlatform", ToPlatform);
-            yield return ("toSector", ToSector);
-        }
-    }
-
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(ConnectingTimeGroupEnumConverter))]
+    /// <summary>
+    /// Possible groups to consider when returning connecting-times for particular stop-place.
+    /// <br/>- STATION (return connecting-times for stop-place and all members of the same station [Bahnhof]
+    /// <br/>- SALES (return connecting-times for stop-place and all members of the sales group [EFZ / Vertrieb inkl. ÖPNV]
+    /// <br/>- ALL (return connecting-times for stop-place and all members of all groups the stop-place belongs to [all we have]
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum ConnectingTimeGroup
     {
-        STATION,
-        SALES,
-        ALL,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"STATION")]
+        STATION = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SALES")]
+        SALES = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"ALL")]
+        ALL = 2,
+
     }
 
-    public static class ConnectingTimeGroupFastEnum
-    {
-        public static string ToString(ConnectingTimeGroup value) => value switch
-        {
-            ConnectingTimeGroup.STATION => "STATION",
-            ConnectingTimeGroup.SALES => "SALES",
-            ConnectingTimeGroup.ALL => "ALL",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
-
-        public static ConnectingTimeGroup FromString(string? value) => value switch
-        {
-            "STATION" => ConnectingTimeGroup.STATION,
-            "SALES" => ConnectingTimeGroup.SALES,
-            "ALL" => ConnectingTimeGroup.ALL,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
-    }
-
-    public class ConnectingTimeGroupEnumConverter : System.Text.Json.Serialization.JsonConverter<ConnectingTimeGroup>
-    {
-        public override ConnectingTimeGroup Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (ConnectingTimeGroup)reader.GetInt32();
-            }
-
-            return ConnectingTimeGroupFastEnum.FromString(reader.GetString());
-        }
-
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, ConnectingTimeGroup value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(ConnectingTimeGroupFastEnum.ToString(value));
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ConnectingTimesBatch : __ICanIterate
-    {
-        public ConnectingTimesBatch() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ConnectingTimesBatch(System.Collections.Generic.List<ConnectingTime> connectingTimesList)
-        {
-            ConnectingTimesList = connectingTimesList;
-        }
-
-        public required System.Collections.Generic.List<ConnectingTime> ConnectingTimesList { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("connectingTimesList", ConnectingTimesList);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(ConnectingTimeSourceEnumConverter))]
+    /// <summary>
+    /// Enumerates all possible sources for connecting times [Umsteigezeiten].
+    /// <br/>- RIL420 (connecting time is based on DB guideline RIL420)
+    /// <br/>- EFZ (connecting time is based on EFZ = Europäisches Fahrplanzentrum)
+    /// <br/>- INDOOR_ROUTING (connecting time is based on real indoor routing information from ris-maps system)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum ConnectingTimeSource
     {
-        RIL420,
-        EFZ,
-        INDOOR_ROUTING,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RIL420")]
+        RIL420 = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EFZ")]
+        EFZ = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"INDOOR_ROUTING")]
+        INDOOR_ROUTING = 2,
+
     }
 
-    public static class ConnectingTimeSourceFastEnum
+    /// <summary>
+    /// List of connecting times [Umsteigezeiten] for requested list of stop-places [Haltestellen].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ConnectingTimesBatch
     {
-        public static string ToString(ConnectingTimeSource value) => value switch
-        {
-            ConnectingTimeSource.RIL420 => "RIL420",
-            ConnectingTimeSource.EFZ => "EFZ",
-            ConnectingTimeSource.INDOOR_ROUTING => "INDOOR_ROUTING",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static ConnectingTimeSource FromString(string? value) => value switch
+        /// <summary>
+        /// List of connecting times.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("connectingTimesList")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<ConnectingTime> ConnectingTimesList { get; set; } = new System.Collections.ObjectModel.Collection<ConnectingTime>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "RIL420" => ConnectingTimeSource.RIL420,
-            "EFZ" => ConnectingTimeSource.EFZ,
-            "INDOOR_ROUTING" => ConnectingTimeSource.INDOOR_ROUTING,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class ConnectingTimeSourceEnumConverter : System.Text.Json.Serialization.JsonConverter<ConnectingTimeSource>
+    /// <summary>
+    /// Connecting time [Umsteigezeit] for a particular combination of stop-places, platforms and sectors.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ConnectingTimesSingle
     {
-        public override ConnectingTimeSource Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (ConnectingTimeSource)reader.GetInt32();
-            }
 
-            return ConnectingTimeSourceFastEnum.FromString(reader.GetString());
+        [System.Text.Json.Serialization.JsonPropertyName("connectingTime")]
+        public ConnectingTime ConnectingTime { get; set; }
+
+        /// <summary>
+        /// Fallback times for different personae in case no information is available.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("fallbackTimes")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<ConnectionTimeFallback> FallbackTimes { get; set; } = new System.Collections.ObjectModel.Collection<ConnectionTimeFallback>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, ConnectingTimeSource value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(ConnectingTimeSourceFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ConnectingTimesSingle : __ICanIterate
+    /// <summary>
+    /// Connection time [Anschlusszeit] for persona.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ConnectionTime
     {
-        public ConnectingTimesSingle() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ConnectingTimesSingle(ConnectingTime connectingTime, System.Collections.Generic.List<ConnectionTimeFallback> fallbackTimes)
+        /// <summary>
+        /// Distance in meters.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("distance")]
+        public double Distance { get; set; }
+
+        /// <summary>
+        /// Duration of connect in ISO8601 (for instance 'P3Y6M4DT12H30M17S').
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("duration")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.TimeSpan Duration { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("persona")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<PersonaType>))]
+        public PersonaType Persona { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            ConnectingTime = connectingTime;
-            FallbackTimes = fallbackTimes;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required ConnectingTime ConnectingTime { get; set; }
-        public required System.Collections.Generic.List<ConnectionTimeFallback> FallbackTimes { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("connectingTime", ConnectingTime);
-            yield return ("fallbackTimes", FallbackTimes);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ConnectionTime : __ICanIterate
+    /// <summary>
+    /// Fallback connection time [Anschlusszeit] for persona in case no information on stop-places and or plattform is available.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ConnectionTimeFallback
     {
-        public ConnectionTime() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ConnectionTime(double distance, string duration, PersonaType persona)
+        /// <summary>
+        /// Duration of connect in ISO8601 (for instance 'P3Y6M4DT12H30M17S').
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("duration")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.TimeSpan Duration { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("persona")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<PersonaType>))]
+        public PersonaType Persona { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("source")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ConnectingTimeSource>))]
+        public ConnectingTimeSource Source { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Distance = distance;
-            Duration = duration;
-            Persona = persona;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required double Distance { get; set; }
-        public required string Duration { get; set; }
-        public required PersonaType Persona { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("distance", Distance);
-            yield return ("duration", Duration);
-            yield return ("persona", Persona switch
-            {
-                PersonaType.HANDICAPPED => "HANDICAPPED",
-                PersonaType.OCCASIONAL_TRAVELLER => "OCCASIONAL_TRAVELLER",
-                PersonaType.FREQUENT_TRAVELLER => "FREQUENT_TRAVELLER",
-                _ => null
-            });
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ConnectionTimeFallback : __ICanIterate
+    /// <summary>
+    /// Contact details for public use.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Contact
     {
-        public ConnectionTimeFallback() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ConnectionTimeFallback(string duration, PersonaType persona, ConnectingTimeSource source)
+        /// <summary>
+        /// Name of a person.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("contactPerson")]
+        public string ContactPerson { get; set; }
+
+        /// <summary>
+        /// EMail address in iso-format.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("email")]
+        public string Email { get; set; }
+
+        /// <summary>
+        /// further details of contact.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("furtherDetails")]
+        public string FurtherDetails { get; set; }
+
+        /// <summary>
+        /// phone number of contact.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("phoneNumbers")]
+        public System.Collections.Generic.ICollection<PhoneNumber> PhoneNumbers { get; set; }
+
+        /// <summary>
+        /// contact url.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("url")]
+        public string Url { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Duration = duration;
-            Persona = persona;
-            Source = source;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string Duration { get; set; }
-        public required PersonaType Persona { get; set; }
-        public required ConnectingTimeSource Source { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("duration", Duration);
-            yield return ("persona", Persona switch
-            {
-                PersonaType.HANDICAPPED => "HANDICAPPED",
-                PersonaType.OCCASIONAL_TRAVELLER => "OCCASIONAL_TRAVELLER",
-                PersonaType.FREQUENT_TRAVELLER => "FREQUENT_TRAVELLER",
-                _ => null
-            });
-            yield return ("source", Source switch
-            {
-                ConnectingTimeSource.RIL420 => "RIL420",
-                ConnectingTimeSource.EFZ => "EFZ",
-                ConnectingTimeSource.INDOOR_ROUTING => "INDOOR_ROUTING",
-                _ => null
-            });
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Contact : __ICanIterate
+    /// <summary>
+    /// 2D coordinate within geo reference system.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Coordinate2D
     {
-        public Contact() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Contact(string contactPerson, string email, string furtherDetails, System.Collections.Generic.List<PhoneNumber> phoneNumbers, string url)
+        /// <summary>
+        /// Latitude position in reference system.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("latitude")]
+        public double Latitude { get; set; }
+
+        /// <summary>
+        /// Longitude position in reference system.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("longitude")]
+        public double Longitude { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            ContactPerson = contactPerson;
-            Email = email;
-            FurtherDetails = furtherDetails;
-            PhoneNumbers = phoneNumbers;
-            Url = url;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string ContactPerson { get; set; }
-        public required string Email { get; set; }
-        public required string FurtherDetails { get; set; }
-        public required System.Collections.Generic.List<PhoneNumber> PhoneNumbers { get; set; }
-        public required string Url { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("contactPerson", ContactPerson);
-            yield return ("email", Email);
-            yield return ("furtherDetails", FurtherDetails);
-            yield return ("phoneNumbers", PhoneNumbers);
-            yield return ("url", Url);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Coordinate2D : __ICanIterate
+    /// <summary>
+    /// Locker [Schließfächer] equipments of a station [Bahnhof] search result. Take care that one particular equipment id may result in multiple lockers.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class EquipmentLocker
     {
-        public Coordinate2D() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Coordinate2D(double latitude, double longitude)
+        /// <summary>
+        /// Unique id of a locker equipment.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("equipmentID")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string EquipmentID { get; set; }
+
+        /// <summary>
+        /// Lockers that are provided for this equipment id. (explanation: one locker rack may have one equipment id but may contain multiple lockers.)
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("lockers")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<Locker> Lockers { get; set; } = new System.Collections.ObjectModel.Collection<Locker>();
+
+        /// <summary>
+        /// Unique id of station [Bahnhof], usually the STADA for DB InfraGO Pbf owned stations.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stationID")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string StationID { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Latitude = latitude;
-            Longitude = longitude;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required double Latitude { get; set; }
-        public required double Longitude { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("latitude", Latitude);
-            yield return ("longitude", Longitude);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class EquipmentLocker : __ICanIterate
-    {
-        public EquipmentLocker() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public EquipmentLocker(string equipmentID, System.Collections.Generic.List<Locker> lockers, string stationID)
-        {
-            EquipmentID = equipmentID;
-            Lockers = lockers;
-            StationID = stationID;
-        }
-
-        public required string EquipmentID { get; set; }
-        public required System.Collections.Generic.List<Locker> Lockers { get; set; }
-        public required string StationID { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("equipmentID", EquipmentID);
-            yield return ("lockers", Lockers);
-            yield return ("stationID", StationID);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(EquipmentLockerKeyTypeEnumConverter))]
+    /// <summary>
+    /// Enumerates all identifiers a locker [Schließfach] equipment of a particular station [Bahnhof] can be mapped into or mapped from.
+    /// <br/>- EVA (eva number of stop-place [Haltestelle])
+    /// <br/>- STATION_ID (id of the station [Bahnhof], usually the STADA for DB InfraGO Pbf owned stations)
+    /// <br/>
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum EquipmentLockerKeyType
     {
-        EVA,
-        STATION_ID,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EVA")]
+        EVA = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"STATION_ID")]
+        STATION_ID = 1,
+
     }
 
-    public static class EquipmentLockerKeyTypeFastEnum
+    /// <summary>
+    /// Locker [Schließfächer] equipments of a station [Bahnhof] search result.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class EquipmentLockers
     {
-        public static string ToString(EquipmentLockerKeyType value) => value switch
-        {
-            EquipmentLockerKeyType.EVA => "EVA",
-            EquipmentLockerKeyType.STATION_ID => "STATION_ID",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static EquipmentLockerKeyType FromString(string? value) => value switch
+        /// <summary>
+        /// List of lockers [Schließfach] that matched the search result.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("lockerList")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<EquipmentLocker> LockerList { get; set; } = new System.Collections.ObjectModel.Collection<EquipmentLocker>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "EVA" => EquipmentLockerKeyType.EVA,
-            "STATION_ID" => EquipmentLockerKeyType.STATION_ID,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class EquipmentLockerKeyTypeEnumConverter : System.Text.Json.Serialization.JsonConverter<EquipmentLockerKeyType>
+    /// <summary>
+    /// Detailed error information on field level.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ErrorDetail
     {
-        public override EquipmentLockerKeyType Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (EquipmentLockerKeyType)reader.GetInt32();
-            }
 
-            return EquipmentLockerKeyTypeFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// Detailed information for error.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("detail")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Detail { get; set; }
+
+        /// <summary>
+        /// Unique code that identifies error.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("errorCode")]
+        public string ErrorCode { get; set; }
+
+        /// <summary>
+        /// Name of field / element that raised the error.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("field")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Field { get; set; }
+
+        /// <summary>
+        /// Common description of error.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("title")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Title { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, EquipmentLockerKeyType value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(EquipmentLockerKeyTypeFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class EquipmentLockers : __ICanIterate
+    /// <summary>
+    /// API error object according to RFC7807.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ErrorResponse
     {
-        public EquipmentLockers() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public EquipmentLockers(System.Collections.Generic.List<EquipmentLocker> lockerList)
+        /// <summary>
+        /// Detailed information for error.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("detail")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Detail { get; set; }
+
+        /// <summary>
+        /// Unique code that identifies error.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("errorCode")]
+        public string ErrorCode { get; set; }
+
+        /// <summary>
+        /// List of detailed errors in case multiple errors have lead to the surrounding error.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("errors")]
+        public System.Collections.Generic.ICollection<ErrorDetail> Errors { get; set; }
+
+        /// <summary>
+        /// Unique identifier for instance that raised the error.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("instanceId")]
+        public string InstanceId { get; set; }
+
+        /// <summary>
+        /// Http status for error origin.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        public string Status { get; set; }
+
+        /// <summary>
+        /// Common description of error.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("title")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Title { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            LockerList = lockerList;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required System.Collections.Generic.List<EquipmentLocker> LockerList { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("lockerList", LockerList);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ErrorDetail : __ICanIterate
+    /// <summary>
+    /// Escalator [Fahrtreppe / Rolltreppe] equipment of a particular station [Bahnhof] or platform [Gleis / Bahnsteig].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Escalator
     {
-        public ErrorDetail() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ErrorDetail(string detail, string errorCode, string field, string title)
+        /// <summary>
+        /// Platforms [Bahnsteige / Gleise] that are associated to this equipment.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("associatedPlatforms")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<EscalatorAndLiftPlatforms> AssociatedPlatforms { get; set; } = new System.Collections.ObjectModel.Collection<EscalatorAndLiftPlatforms>();
+
+        /// <summary>
+        /// Description of equipment.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        /// <summary>
+        /// The name of the operator of the equipment.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("operatorName")]
+        public string OperatorName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("position")]
+        public Coordinate2D Position { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("state")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public State State { get; set; } = new State();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Detail = detail;
-            ErrorCode = errorCode;
-            Field = field;
-            Title = title;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string Detail { get; set; }
-        public required string ErrorCode { get; set; }
-        public required string Field { get; set; }
-        public required string Title { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("detail", Detail);
-            yield return ("errorCode", ErrorCode);
-            yield return ("field", Field);
-            yield return ("title", Title);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ErrorResponse : __ICanIterate
+    /// <summary>
+    /// Associated platforms [Bahnsteige / Gleise] for escalators and lifts.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class EscalatorAndLiftPlatforms
     {
-        public ErrorResponse() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ErrorResponse(string detail, string errorCode, System.Collections.Generic.List<ErrorDetail> errors, string instanceId, string status, string title)
+        /// <summary>
+        /// Unique ids of stop-place [Haltestelle] associated with the escalators / lift.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("evaNumber")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string EvaNumber { get; set; }
+
+        /// <summary>
+        /// List of platforms [Bahnsteige / Gleise] associated with the escalators / lift.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("platforms")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<string> Platforms { get; set; } = new System.Collections.ObjectModel.Collection<string>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Detail = detail;
-            ErrorCode = errorCode;
-            Errors = errors;
-            InstanceId = instanceId;
-            Status = status;
-            Title = title;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string Detail { get; set; }
-        public required string ErrorCode { get; set; }
-        public required System.Collections.Generic.List<ErrorDetail> Errors { get; set; }
-        public required string InstanceId { get; set; }
-        public required string Status { get; set; }
-        public required string Title { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("detail", Detail);
-            yield return ("errorCode", ErrorCode);
-            yield return ("errors", Errors);
-            yield return ("instanceId", InstanceId);
-            yield return ("status", Status);
-            yield return ("title", Title);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Escalator : __ICanIterate
+    /// <summary>
+    /// Lift [Aufzug] equipment of a particular station [Bahnhof] or platform [Gleis / Bahnsteig].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Lift
     {
-        public Escalator() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Escalator(System.Collections.Generic.List<EscalatorAndLiftPlatforms> associatedPlatforms, string description, string operatorName, Coordinate2D position, State state)
+        /// <summary>
+        /// Platforms [Bahnsteige / Gleise] that are associated to this equipment.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("associatedPlatforms")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<EscalatorAndLiftPlatforms> AssociatedPlatforms { get; set; } = new System.Collections.ObjectModel.Collection<EscalatorAndLiftPlatforms>();
+
+        /// <summary>
+        /// Description of equipment.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        /// <summary>
+        /// The name of the operator of the equipment.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("operatorName")]
+        public string OperatorName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("position")]
+        public Coordinate2D Position { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("state")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public State State { get; set; } = new State();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            AssociatedPlatforms = associatedPlatforms;
-            Description = description;
-            OperatorName = operatorName;
-            Position = position;
-            State = state;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required System.Collections.Generic.List<EscalatorAndLiftPlatforms> AssociatedPlatforms { get; set; }
-        public required string Description { get; set; }
-        public required string OperatorName { get; set; }
-        public required Coordinate2D Position { get; set; }
-        public required State State { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("associatedPlatforms", AssociatedPlatforms);
-            yield return ("description", Description);
-            yield return ("operatorName", OperatorName);
-            yield return ("position", Position);
-            yield return ("state", State);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class EscalatorAndLiftPlatforms : __ICanIterate
+    /// <summary>
+    /// Information on local service [Bahnhofsnahe Dienstleistungen].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class LocalService
     {
-        public EscalatorAndLiftPlatforms() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public EscalatorAndLiftPlatforms(string evaNumber, System.Collections.Generic.List<string> platforms)
+        [System.Text.Json.Serialization.JsonPropertyName("address")]
+        public AddressWithWeb Address { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("contact")]
+        public Contact Contact { get; set; }
+
+        /// <summary>
+        /// Description of the local service.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        /// <summary>
+        /// ID of the local service for external usage.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("externalID")]
+        public string ExternalID { get; set; }
+
+        /// <summary>
+        /// Unique id of the local service [Bahnhofsnahe Dienstleistungen].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("localServiceID")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string LocalServiceID { get; set; }
+
+        /// <summary>
+        /// Name of the local service.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Opening times for local-service in OSM notation (see https://wiki.openstreetmap.org/wiki/DE:Key:opening_hours).
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("openingHours")]
+        public string OpeningHours { get; set; }
+
+        /// <summary>
+        /// Collection of available payment methods. Possible values are:
+        /// <br/>- CASH
+        /// <br/>- GIROGO
+        /// <br/>- MASTERCARD
+        /// <br/>- VISA
+        /// <br/>- EC
+        /// <br/>- AMEX
+        /// <br/>- GOOGLE_PAY
+        /// <br/>- APPLE_PAY
+        /// <br/>
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("paymentMethods")]
+        public System.Collections.Generic.ICollection<string> PaymentMethods { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("position")]
+        public Coordinate2D Position { get; set; }
+
+        /// <summary>
+        /// Unique id of station [Bahnhof], usually the STADA for DB InfraGO Pbf owned stations. This can be an empty string if the local service cannot be linked to a station.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stationID")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string StationID { get; set; }
+
+        /// <summary>
+        /// Types of local service. Possible values are:
+        /// <br/>- INFORMATION_COUNTER [Informationsstand für Belange im Bahnhof (kein Fahrkartenverkauf)]
+        /// <br/>- TRAVEL_CENTER [Reisezentrum]
+        /// <br/>- VIDEO_TRAVEL_CENTER [Video Reisezentrum]
+        /// <br/>- TRIPLE_S_CENTER [3S Zentrale für Service, Sicherheit &amp; Sauberkeit]
+        /// <br/>- TRAVEL_LOUNGE [Lounge (DB Lounge z.B.)]
+        /// <br/>- LOST_PROPERTY_OFFICE [Fundstelle]
+        /// <br/>- RAILWAY_MISSION [Bahnhofsmission]
+        /// <br/>- HANDICAPPED_TRAVELLER_SERVICE [Service für mobilitätseingeschränkte Reisende]
+        /// <br/>- LOCKER [Schließfächer]
+        /// <br/>- WIFI [WLan]
+        /// <br/>- CAR_PARKING [Autoparkplatz, ggf. kostenpflichtig]
+        /// <br/>- BICYCLE_PARKING [Fahrradparkplätze, ggf. kostenpflichtig]
+        /// <br/>- PUBLIC_RESTROOM [Öffentliches WC, ggf. kostenpflichtig]
+        /// <br/>- TRAVEL_NECESSITIES [Geschäft für den Reisendenbedarf]
+        /// <br/>- CAR_RENTAL [Car-Sharer oder Mietwagen]
+        /// <br/>- BICYCLE_RENTAL [Mieträder]
+        /// <br/>- TAXI_RANK [Taxi Stand]
+        /// <br/>- MOBILE_TRAVEL_SERVICE [Mobiler Service]
+        /// <br/>- RAD_PLUS (Rad+ Gebiet)
+        /// <br/>                     - MOBILITY_HUB (Mobility Hub)
+        /// <br/>
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Type { get; set; }
+
+        /// <summary>
+        /// Date the local service is valid from.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+        public System.DateTimeOffset ValidFrom { get; set; }
+
+        /// <summary>
+        /// Date the local service is valid to.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("validTo")]
+        public System.DateTimeOffset ValidTo { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            EvaNumber = evaNumber;
-            Platforms = platforms;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string EvaNumber { get; set; }
-        public required System.Collections.Generic.List<string> Platforms { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("evaNumber", EvaNumber);
-            yield return ("platforms", Platforms);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Lift : __ICanIterate
-    {
-        public Lift() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Lift(System.Collections.Generic.List<EscalatorAndLiftPlatforms> associatedPlatforms, string description, string operatorName, Coordinate2D position, State state)
-        {
-            AssociatedPlatforms = associatedPlatforms;
-            Description = description;
-            OperatorName = operatorName;
-            Position = position;
-            State = state;
-        }
-
-        public required System.Collections.Generic.List<EscalatorAndLiftPlatforms> AssociatedPlatforms { get; set; }
-        public required string Description { get; set; }
-        public required string OperatorName { get; set; }
-        public required Coordinate2D Position { get; set; }
-        public required State State { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("associatedPlatforms", AssociatedPlatforms);
-            yield return ("description", Description);
-            yield return ("operatorName", OperatorName);
-            yield return ("position", Position);
-            yield return ("state", State);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(LocaleEnumConverter))]
-    public enum Locale
-    {
-        CS,
-        DA,
-        DE,
-        EN,
-        ES,
-        FR,
-        IT,
-        NL,
-        PL,
-    }
-
-    public static class LocaleFastEnum
-    {
-        public static string ToString(Locale value) => value switch
-        {
-            Locale.CS => "CS",
-            Locale.DA => "DA",
-            Locale.DE => "DE",
-            Locale.EN => "EN",
-            Locale.ES => "ES",
-            Locale.FR => "FR",
-            Locale.IT => "IT",
-            Locale.NL => "NL",
-            Locale.PL => "PL",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
-
-        public static Locale FromString(string? value) => value switch
-        {
-            "CS" => Locale.CS,
-            "DA" => Locale.DA,
-            "DE" => Locale.DE,
-            "EN" => Locale.EN,
-            "ES" => Locale.ES,
-            "FR" => Locale.FR,
-            "IT" => Locale.IT,
-            "NL" => Locale.NL,
-            "PL" => Locale.PL,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
-    }
-
-    public class LocaleEnumConverter : System.Text.Json.Serialization.JsonConverter<Locale>
-    {
-        public override Locale Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (Locale)reader.GetInt32();
-            }
-
-            return LocaleFastEnum.FromString(reader.GetString());
-        }
-
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, Locale value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(LocaleFastEnum.ToString(value));
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class LocalService : __ICanIterate
-    {
-        public LocalService() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public LocalService(AddressWithWeb address, Contact contact, string description, string externalID, string localServiceID, string name, string openingHours, System.Collections.Generic.List<string> paymentMethods, Coordinate2D position, string stationID, string type, System.DateTime validFrom, System.DateTime validTo)
-        {
-            Address = address;
-            Contact = contact;
-            Description = description;
-            ExternalID = externalID;
-            LocalServiceID = localServiceID;
-            Name = name;
-            OpeningHours = openingHours;
-            PaymentMethods = paymentMethods;
-            Position = position;
-            StationID = stationID;
-            Type = type;
-            ValidFrom = validFrom;
-            ValidTo = validTo;
-        }
-
-        public required AddressWithWeb Address { get; set; }
-        public required Contact Contact { get; set; }
-        public required string Description { get; set; }
-        public required string ExternalID { get; set; }
-        public required string LocalServiceID { get; set; }
-        public required string Name { get; set; }
-        public required string OpeningHours { get; set; }
-        public required System.Collections.Generic.List<string> PaymentMethods { get; set; }
-        public required Coordinate2D Position { get; set; }
-        public required string StationID { get; set; }
-        public required string Type { get; set; }
-        public required System.DateTime ValidFrom { get; set; }
-        public required System.DateTime ValidTo { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("address", Address);
-            yield return ("contact", Contact);
-            yield return ("description", Description);
-            yield return ("externalID", ExternalID);
-            yield return ("localServiceID", LocalServiceID);
-            yield return ("name", Name);
-            yield return ("openingHours", OpeningHours);
-            yield return ("paymentMethods", PaymentMethods);
-            yield return ("position", Position);
-            yield return ("stationID", StationID);
-            yield return ("type", Type);
-            yield return ("validFrom", ValidFrom);
-            yield return ("validTo", ValidTo);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(LocalServiceKeyTypeEnumConverter))]
+    /// <summary>
+    /// Enumerates all identifiers a travel-center [Reisezentrum] can be mapped into or mapped from.
+    /// <br/>- EVA (eva number of stop-place [Haltestelle])
+    /// <br/>- STATION_ID (id of the station [Bahnhof], usually the STADA for DB InfraGO Pbf owned stations)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum LocalServiceKeyType
     {
-        EVA,
-        STATION_ID,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EVA")]
+        EVA = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"STATION_ID")]
+        STATION_ID = 1,
+
     }
 
-    public static class LocalServiceKeyTypeFastEnum
+    /// <summary>
+    /// List of local services [Bahnhofsnahe Dienstleistungen].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class LocalServices
     {
-        public static string ToString(LocalServiceKeyType value) => value switch
-        {
-            LocalServiceKeyType.EVA => "EVA",
-            LocalServiceKeyType.STATION_ID => "STATION_ID",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static LocalServiceKeyType FromString(string? value) => value switch
+        /// <summary>
+        /// List of local services.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("localServices")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<LocalService> LocalServices1 { get; set; } = new System.Collections.ObjectModel.Collection<LocalService>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "EVA" => LocalServiceKeyType.EVA,
-            "STATION_ID" => LocalServiceKeyType.STATION_ID,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class LocalServiceKeyTypeEnumConverter : System.Text.Json.Serialization.JsonConverter<LocalServiceKeyType>
+    /// <summary>
+    /// Cursoring local-services [Bahnhofsnahe Dienstleistungen] search result.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class LocalServicesCursoring
     {
-        public override LocalServiceKeyType Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (LocalServiceKeyType)reader.GetInt32();
-            }
 
-            return LocalServiceKeyTypeFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// Value for the next page.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("after")]
+        public string After { get; set; }
+
+        /// <summary>
+        /// Value for the previous page.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("before")]
+        public string Before { get; set; }
+
+        /// <summary>
+        /// List of local-services.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("localServices")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<LocalService> LocalServices { get; set; } = new System.Collections.ObjectModel.Collection<LocalService>();
+
+        /// <summary>
+        /// Total number of items.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public int Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, LocalServiceKeyType value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(LocalServiceKeyTypeFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class LocalServices : __ICanIterate
+    /// <summary>
+    /// Locale to use, defaults to DE.
+    /// <br/>- CS (Czech)
+    /// <br/>- DA (Danish)
+    /// <br/>- DE (German)
+    /// <br/>- EN (English)
+    /// <br/>- ES (Spanish)
+    /// <br/>- FR (French)
+    /// <br/>- IT (Italian)
+    /// <br/>- NL (Dutch)
+    /// <br/>- PL (Polish)
+    /// <br/>
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum Locale
     {
-        public LocalServices() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public LocalServices(System.Collections.Generic.List<LocalService> localServices)
-        {
-            LocalServicesList = localServices;
-        }
+        [System.Runtime.Serialization.EnumMember(Value = @"CS")]
+        CS = 0,
 
-        public required System.Collections.Generic.List<LocalService> LocalServicesList { get; set; }
+        [System.Runtime.Serialization.EnumMember(Value = @"DA")]
+        DA = 1,
 
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("localServices", LocalServicesList);
-        }
+        [System.Runtime.Serialization.EnumMember(Value = @"DE")]
+        DE = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EN")]
+        EN = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"ES")]
+        ES = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"FR")]
+        FR = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"IT")]
+        IT = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NL")]
+        NL = 7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PL")]
+        PL = 8,
+
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class LocalServicesCursoring : __ICanIterate
+    /// <summary>
+    /// Locker [Schließfach] equipment of a particular station [Bahnhof].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Locker
     {
-        public LocalServicesCursoring() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public LocalServicesCursoring(string after, string before, System.Collections.Generic.List<LocalService> localServices, int total)
+        /// <summary>
+        /// Amount of units of the locker.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("amount")]
+        public int Amount { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("dimension")]
+        public LockerDimension Dimension { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("fee")]
+        public LockerFee Fee { get; set; }
+
+        /// <summary>
+        /// Maximum lease duration [Mietdauer] for use of a single unit of the locker in ISO8601 (for instance 'P3Y6M4DT12H30M17S').
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("maxLeaseDuration")]
+        public System.TimeSpan MaxLeaseDuration { get; set; }
+
+        /// <summary>
+        /// Supported payment types for locker usage. Possible values are:
+        /// <br/>- CASH (cash payment available)
+        /// <br/>- CASHLESS (other payment options than cash available)
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("paymentTypes")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<string> PaymentTypes { get; set; } = new System.Collections.ObjectModel.Collection<string>();
+
+        /// <summary>
+        /// Size of the locker. Possible values are:
+        /// <br/>- SMALL
+        /// <br/>- MEDIUM
+        /// <br/>- LARGE
+        /// <br/>- JUMBO
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("size")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Size { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            After = after;
-            Before = before;
-            LocalServices = localServices;
-            Total = total;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string After { get; set; }
-        public required string Before { get; set; }
-        public required System.Collections.Generic.List<LocalService> LocalServices { get; set; }
-        public required int Total { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("after", After);
-            yield return ("before", Before);
-            yield return ("localServices", LocalServices);
-            yield return ("total", Total);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Locker : __ICanIterate
+    /// <summary>
+    /// Dimension [Ausmaße] for lockers [Schließfächer].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class LockerDimension
     {
-        public Locker() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Locker(int amount, LockerDimension dimension, LockerFee fee, string maxLeaseDuration, System.Collections.Generic.List<string> paymentTypes, string size)
+        /// <summary>
+        /// Locker depth of a single unit in mm of the locker.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("depth")]
+        public int Depth { get; set; }
+
+        /// <summary>
+        /// Locker height of a single unit in mm of the locker.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("height")]
+        public int Height { get; set; }
+
+        /// <summary>
+        /// Locker width of a single unit in mm of the locker.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("width")]
+        public int Width { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Amount = amount;
-            Dimension = dimension;
-            Fee = fee;
-            MaxLeaseDuration = maxLeaseDuration;
-            PaymentTypes = paymentTypes;
-            Size = size;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required int Amount { get; set; }
-        public required LockerDimension Dimension { get; set; }
-        public required LockerFee Fee { get; set; }
-        public required string MaxLeaseDuration { get; set; }
-        public required System.Collections.Generic.List<string> PaymentTypes { get; set; }
-        public required string Size { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("amount", Amount);
-            yield return ("dimension", Dimension);
-            yield return ("fee", Fee);
-            yield return ("maxLeaseDuration", MaxLeaseDuration);
-            yield return ("paymentTypes", PaymentTypes);
-            yield return ("size", Size);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class LockerDimension : __ICanIterate
+    /// <summary>
+    /// Fee [Mietgebühr] for leasing lockers [Schließfächer].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class LockerFee
     {
-        public LockerDimension() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public LockerDimension(int depth, int height, int width)
+        /// <summary>
+        /// Fee for locker usage in cents (currency is EUR). Refers to fee period.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("fee")]
+        public int Fee { get; set; }
+
+        /// <summary>
+        /// Period the refers to. Possible values are:
+        /// <br/>- PER_MAX_LEASE_DURATION (fee must be payed per max lease duration)
+        /// <br/>- PER_HOUR (fee must be payed per hour)
+        /// <br/>- PER_DAY (fee must be payed per day)
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("feePeriod")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string FeePeriod { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Depth = depth;
-            Height = height;
-            Width = width;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required int Depth { get; set; }
-        public required int Height { get; set; }
-        public required int Width { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("depth", Depth);
-            yield return ("height", Height);
-            yield return ("width", Width);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class LockerFee : __ICanIterate
+    /// <summary>
+    /// Locker [Schließfächer] equipments of a station [Bahnhof] search result. Take care that one particular equipment id may result in multiple lockers.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class LockerRack
     {
-        public LockerFee() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public LockerFee(int fee, string feePeriod)
+        /// <summary>
+        /// Lockers that are provided for this equipment id. (explanation: one locker rack may have one equipment id but may contain multiple lockers.)
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("lockers")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<Locker> Lockers { get; set; } = new System.Collections.ObjectModel.Collection<Locker>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Fee = fee;
-            FeePeriod = feePeriod;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required int Fee { get; set; }
-        public required string FeePeriod { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("fee", Fee);
-            yield return ("feePeriod", FeePeriod);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class LockerRack : __ICanIterate
+    /// <summary>
+    /// Detailed operational [Betrieb] information.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Operational
     {
-        public LockerRack() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public LockerRack(System.Collections.Generic.List<Locker> lockers)
+        /// <summary>
+        /// Names of the network platforms [Netzgleis] that belong to the platform.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("networkPlatforms")]
+        public System.Collections.Generic.ICollection<string> NetworkPlatforms { get; set; }
+
+        /// <summary>
+        /// Names of the operational units [Optiken] that belong to the platform.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("optics")]
+        public System.Collections.Generic.ICollection<string> Optics { get; set; }
+
+        /// <summary>
+        /// Orientation of the platform in degrees (north=0, east=90, ...), seen from the origin of the local coordinates.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("orientation")]
+        public double Orientation { get; set; }
+
+        /// <summary>
+        /// Positions of the reference points that determine the position of a stopping train at the platform.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("referencePoints")]
+        public System.Collections.Generic.ICollection<ReferencePoint> ReferencePoints { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Lockers = lockers;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required System.Collections.Generic.List<Locker> Lockers { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("lockers", Lockers);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Operational : __ICanIterate
-    {
-        public Operational() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Operational(System.Collections.Generic.List<string> networkPlatforms, System.Collections.Generic.List<string> optics, double orientation, System.Collections.Generic.List<ReferencePoint> referencePoints)
-        {
-            NetworkPlatforms = networkPlatforms;
-            Optics = optics;
-            Orientation = orientation;
-            ReferencePoints = referencePoints;
-        }
-
-        public required System.Collections.Generic.List<string> NetworkPlatforms { get; set; }
-        public required System.Collections.Generic.List<string> Optics { get; set; }
-        public required double Orientation { get; set; }
-        public required System.Collections.Generic.List<ReferencePoint> ReferencePoints { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("networkPlatforms", NetworkPlatforms);
-            yield return ("optics", Optics);
-            yield return ("orientation", Orientation);
-            yield return ("referencePoints", ReferencePoints);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(PersonaTypeEnumConverter))]
+    /// <summary>
+    /// Specifies different personae.
+    /// <br/>- HANDICAPPED (Handicaped [MER] slow traveller, not able to use stairs and escalators)
+    /// <br/>- OCCASIONAL_TRAVELLER (Occasional traveller [Gelegenheits-Reisender / Standard-Reisender] having mean walking speed. This is the default traveller.)
+    /// <br/>- FREQUENT_TRAVELLER (Frequent traveller [Pendler] having higher speed than occasional traveller.)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum PersonaType
     {
-        HANDICAPPED,
-        OCCASIONAL_TRAVELLER,
-        FREQUENT_TRAVELLER,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"HANDICAPPED")]
+        HANDICAPPED = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"OCCASIONAL_TRAVELLER")]
+        OCCASIONAL_TRAVELLER = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"FREQUENT_TRAVELLER")]
+        FREQUENT_TRAVELLER = 2,
+
     }
 
-    public static class PersonaTypeFastEnum
+    /// <summary>
+    /// a phone number.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class PhoneNumber
     {
-        public static string ToString(PersonaType value) => value switch
-        {
-            PersonaType.HANDICAPPED => "HANDICAPPED",
-            PersonaType.OCCASIONAL_TRAVELLER => "OCCASIONAL_TRAVELLER",
-            PersonaType.FREQUENT_TRAVELLER => "FREQUENT_TRAVELLER",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static PersonaType FromString(string? value) => value switch
+        /// <summary>
+        /// phone number of contact.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("number")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Number { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<PhoneNumberType>))]
+        public PhoneNumberType Type { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "HANDICAPPED" => PersonaType.HANDICAPPED,
-            "OCCASIONAL_TRAVELLER" => PersonaType.OCCASIONAL_TRAVELLER,
-            "FREQUENT_TRAVELLER" => PersonaType.FREQUENT_TRAVELLER,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class PersonaTypeEnumConverter : System.Text.Json.Serialization.JsonConverter<PersonaType>
-    {
-        public override PersonaType Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (PersonaType)reader.GetInt32();
-            }
-
-            return PersonaTypeFastEnum.FromString(reader.GetString());
-        }
-
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, PersonaType value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(PersonaTypeFastEnum.ToString(value));
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class PhoneNumber : __ICanIterate
-    {
-        public PhoneNumber() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public PhoneNumber(string number, PhoneNumberType type)
-        {
-            Number = number;
-            Type = type;
-        }
-
-        public required string Number { get; set; }
-        public required PhoneNumberType Type { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("number", Number);
-            yield return ("type", Type switch
-            {
-                PhoneNumberType.BUSINESS => "BUSINESS",
-                PhoneNumberType.MOBILE => "MOBILE",
-                PhoneNumberType.FAX => "FAX",
-                _ => null
-            });
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(PhoneNumberTypeEnumConverter))]
+    /// <summary>
+    /// Enumerates all phone types.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum PhoneNumberType
     {
-        BUSINESS,
-        MOBILE,
-        FAX,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"BUSINESS")]
+        BUSINESS = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"MOBILE")]
+        MOBILE = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"FAX")]
+        FAX = 2,
+
     }
 
-    public static class PhoneNumberTypeFastEnum
+    /// <summary>
+    /// Platform [Gleis, Bahnsteig, Plattform] information. All ranges and positions of objects are given in meter in local coordinates, e.g. as a distance to a fixed point somewhere on the platform and differentiating between the two possible directions by a plus- and a minus-sign.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Platform
     {
-        public static string ToString(PhoneNumberType value) => value switch
-        {
-            PhoneNumberType.BUSINESS => "BUSINESS",
-            PhoneNumberType.MOBILE => "MOBILE",
-            PhoneNumberType.FAX => "FAX",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static PhoneNumberType FromString(string? value) => value switch
+        [System.Text.Json.Serialization.JsonPropertyName("accessibility")]
+        public Accessibility Accessibility { get; set; }
+
+        /// <summary>
+        /// End of the usable part of the platform given in meter in local coordinates.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("end")]
+        public double End { get; set; }
+
+        /// <summary>
+        /// Indicates whether platform is a head platform [Kopfgleis].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("headPlatform")]
+        public bool HeadPlatform { get; set; }
+
+        /// <summary>
+        /// List of platform heights [Bahnsteighöhen]. Please note that currently only one platform height, with start and end information from platform, is supported due to missing source systems that are able to deliver this information in reasonable quality.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("heights")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<PlatformHeight> Heights { get; set; } = new System.Collections.ObjectModel.Collection<PlatformHeight>();
+
+        /// <summary>
+        /// IFOPT (transmodel identifier for fixed objects, in germany DHID = Deutschlandweite Halte ID also known as global id) of the platform [Gleis] (for instance 'de:06412:10:17:18').
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("ifopt")]
+        public string Ifopt { get; set; }
+
+        /// <summary>
+        /// Total length of platform [Baulicher Bereich].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("length")]
+        public double Length { get; set; }
+
+        /// <summary>
+        /// List of platforms [Gleise] that share the same physical platform [Bahnsteig].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("linkedPlatforms")]
+        public System.Collections.Generic.ICollection<string> LinkedPlatforms { get; set; }
+
+        /// <summary>
+        /// Name of the platform (12, 1a, Nord, Süd etc.).
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("operational")]
+        public Operational Operational { get; set; }
+
+        /// <summary>
+        /// Name of parent platform in case this is a sub platform [Teilgleis].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("parentPlatform")]
+        public string ParentPlatform { get; set; }
+
+        /// <summary>
+        /// List of sectors [Sektoren] that belong to the platform.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("sectors")]
+        public System.Collections.Generic.ICollection<Sector> Sectors { get; set; }
+
+        /// <summary>
+        /// Start of the usable part of the platform given in meter in local coordinates. Value is &gt;= 0 which means that we asume that the zero-point [Nullpunkt] is always at 0m.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("start")]
+        public double Start { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "BUSINESS" => PhoneNumberType.BUSINESS,
-            "MOBILE" => PhoneNumberType.MOBILE,
-            "FAX" => PhoneNumberType.FAX,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class PhoneNumberTypeEnumConverter : System.Text.Json.Serialization.JsonConverter<PhoneNumberType>
+    /// <summary>
+    /// Platform [Gleise, Bahnsteige, Plattformen] height information that may split a particular platform in mutiple chunks, defined by start and end, that may have differing heights.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class PlatformHeight
     {
-        public override PhoneNumberType Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (PhoneNumberType)reader.GetInt32();
-            }
 
-            return PhoneNumberTypeFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// End of the platform height information given in meter in local coordinates.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("end")]
+        public double End { get; set; }
+
+        /// <summary>
+        /// Height of the platform in cm.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("height")]
+        public double Height { get; set; }
+
+        /// <summary>
+        /// Start of the platform height information given in meter in local coordinates.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("start")]
+        public double Start { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, PhoneNumberType value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(PhoneNumberTypeFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Platform : __ICanIterate
+    /// <summary>
+    /// List of platforms [Gleise, Bahnsteige, Plattformen] for a station.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Platforms
     {
-        public Platform() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Platform(Accessibility accessibility, double end, bool headPlatform, System.Collections.Generic.List<PlatformHeight> heights, string ifopt, double length, System.Collections.Generic.List<string> linkedPlatforms, string name, Operational operational, string parentPlatform, System.Collections.Generic.List<Sector> sectors, double start)
+        /// <summary>
+        /// List of platforms.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("platforms")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<Platform> Platforms1 { get; set; } = new System.Collections.ObjectModel.Collection<Platform>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Accessibility = accessibility;
-            End = end;
-            HeadPlatform = headPlatform;
-            Heights = heights;
-            Ifopt = ifopt;
-            Length = length;
-            LinkedPlatforms = linkedPlatforms;
-            Name = name;
-            Operational = operational;
-            ParentPlatform = parentPlatform;
-            Sectors = sectors;
-            Start = start;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required Accessibility Accessibility { get; set; }
-        public required double End { get; set; }
-        public required bool HeadPlatform { get; set; }
-        public required System.Collections.Generic.List<PlatformHeight> Heights { get; set; }
-        public required string Ifopt { get; set; }
-        public required double Length { get; set; }
-        public required System.Collections.Generic.List<string> LinkedPlatforms { get; set; }
-        public required string Name { get; set; }
-        public required Operational Operational { get; set; }
-        public required string ParentPlatform { get; set; }
-        public required System.Collections.Generic.List<Sector> Sectors { get; set; }
-        public required double Start { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("accessibility", Accessibility);
-            yield return ("end", End);
-            yield return ("headPlatform", HeadPlatform);
-            yield return ("heights", Heights);
-            yield return ("ifopt", Ifopt);
-            yield return ("length", Length);
-            yield return ("linkedPlatforms", LinkedPlatforms);
-            yield return ("name", Name);
-            yield return ("operational", Operational);
-            yield return ("parentPlatform", ParentPlatform);
-            yield return ("sectors", Sectors);
-            yield return ("start", Start);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class PlatformHeight : __ICanIterate
+    /// <summary>
+    /// Reference point that indicates where a vehicle [Fahrzeug] stops at a platform [Gleis, Bahnsteig, Plattform].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ReferencePoint
     {
-        public PlatformHeight() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public PlatformHeight(double end, double height, double start)
+        /// <summary>
+        /// Length up to the reference point is to be used by a stopping formation.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("maxLength")]
+        public double MaxLength { get; set; }
+
+        /// <summary>
+        /// Name of the reference point.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Position of the reference point in meter in local coordinates.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("position")]
+        public double Position { get; set; }
+
+        /// <summary>
+        /// Determines the direction the reference point is to be used. If true, the formation moves from origin to positive values in local coordinates.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("readableFromOrigin")]
+        public bool ReadableFromOrigin { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("referencePointType")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<ReferencePointType>))]
+        public ReferencePointType ReferencePointType { get; set; }
+
+        /// <summary>
+        /// Unique ID of reference point.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("uuid")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Uuid { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            End = end;
-            Height = height;
-            Start = start;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required double End { get; set; }
-        public required double Height { get; set; }
-        public required double Start { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("end", End);
-            yield return ("height", Height);
-            yield return ("start", Start);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Platforms : __ICanIterate
-    {
-        public Platforms() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Platforms(System.Collections.Generic.List<Platform> platforms)
-        {
-            PlatformsList = platforms;
-        }
-
-        public required System.Collections.Generic.List<Platform> PlatformsList { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("platforms", PlatformsList);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ReferencePoint : __ICanIterate
-    {
-        public ReferencePoint() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ReferencePoint(double maxLength, string name, double position, bool readableFromOrigin, ReferencePointType referencePointType, string uuid)
-        {
-            MaxLength = maxLength;
-            Name = name;
-            Position = position;
-            ReadableFromOrigin = readableFromOrigin;
-            ReferencePointType = referencePointType;
-            Uuid = uuid;
-        }
-
-        public required double MaxLength { get; set; }
-        public required string Name { get; set; }
-        public required double Position { get; set; }
-        public required bool ReadableFromOrigin { get; set; }
-        public required ReferencePointType ReferencePointType { get; set; }
-        public required string Uuid { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("maxLength", MaxLength);
-            yield return ("name", Name);
-            yield return ("position", Position);
-            yield return ("readableFromOrigin", ReadableFromOrigin);
-            yield return ("referencePointType", ReferencePointType switch
-            {
-                ReferencePointType.STOP_SIGNAL => "STOP_SIGNAL",
-                ReferencePointType.STOP_BOARD => "STOP_BOARD",
-                _ => null
-            });
-            yield return ("uuid", Uuid);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(ReferencePointTypeEnumConverter))]
+    /// <summary>
+    /// Type of a reference point.
+    /// <br/>- STOP_SIGNAL (Haltesignal)
+    /// <br/>- STOP_BOARD (Haltetafel)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum ReferencePointType
     {
-        STOP_SIGNAL,
-        STOP_BOARD,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"STOP_SIGNAL")]
+        STOP_SIGNAL = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"STOP_BOARD")]
+        STOP_BOARD = 1,
+
     }
 
-    public static class ReferencePointTypeFastEnum
+    /// <summary>
+    /// Base information for replacement transport stop [EV-Halt].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ReplacementTransportStop
     {
-        public static string ToString(ReferencePointType value) => value switch
-        {
-            ReferencePointType.STOP_SIGNAL => "STOP_SIGNAL",
-            ReferencePointType.STOP_BOARD => "STOP_BOARD",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static ReferencePointType FromString(string? value) => value switch
+        /// <summary>
+        /// Language dependent names for replacement transport stop, may contain different stop place names for a specific language depending on names filter.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("names")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.IDictionary<string, StopPlaceName> Names { get; set; } = new System.Collections.Generic.Dictionary<string, StopPlaceName>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("position")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public Coordinate2D Position { get; set; } = new Coordinate2D();
+
+        /// <summary>
+        /// ID of replacement transport stop [EV-Halt] belongs to [usually the DHID in Germany]
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("replacementTransportStopID")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string ReplacementTransportStopID { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "STOP_SIGNAL" => ReferencePointType.STOP_SIGNAL,
-            "STOP_BOARD" => ReferencePointType.STOP_BOARD,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class ReferencePointTypeEnumConverter : System.Text.Json.Serialization.JsonConverter<ReferencePointType>
+    /// <summary>
+    /// Replacement transport stops [EV-Halte] search result.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ReplacementTransportStopResult
     {
-        public override ReferencePointType Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (ReferencePointType)reader.GetInt32();
-            }
 
-            return ReferencePointTypeFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// Replacement transport stops [EV-Halte] matching provided search criterias.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("replacementTransportStops")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<ReplacementTransportStop> ReplacementTransportStops { get; set; } = new System.Collections.ObjectModel.Collection<ReplacementTransportStop>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, ReferencePointType value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(ReferencePointTypeFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ReplacementTransportStop : __ICanIterate
+    /// <summary>
+    /// Platform [Gleis, Bahnsteig, Plattform] sector [Gleisabschnitt, Steigabschnitt] information.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Sector
     {
-        public ReplacementTransportStop() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ReplacementTransportStop(System.Collections.Generic.Dictionary<string, object> names, Coordinate2D position, string replacementTransportStopID)
+        /// <summary>
+        /// Position of the cube [Sektorwürfel] given in meters in local coordinates.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("cubePosition")]
+        public double CubePosition { get; set; }
+
+        /// <summary>
+        /// Indicates whether cube [Sektorwürfel] has signage [Beschilderung] nor not.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("cubeSignage")]
+        public bool CubeSignage { get; set; }
+
+        /// <summary>
+        /// End of the sector given in meters in local coordinates.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("end")]
+        public double End { get; set; }
+
+        /// <summary>
+        /// Name of the sector [Sektor / Mast etc.].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Start of the sector given in meters in local coordinates.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("start")]
+        public double Start { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Names = names;
-            Position = position;
-            ReplacementTransportStopID = replacementTransportStopID;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required System.Collections.Generic.Dictionary<string, object> Names { get; set; }
-        public required Coordinate2D Position { get; set; }
-        public required string ReplacementTransportStopID { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("names", Names);
-            yield return ("position", Position);
-            yield return ("replacementTransportStopID", ReplacementTransportStopID);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class ReplacementTransportStopResult : __ICanIterate
+    /// <summary>
+    /// Operational state of the station equipment.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class State
     {
-        public ReplacementTransportStopResult() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public ReplacementTransportStopResult(System.Collections.Generic.List<ReplacementTransportStop> replacementTransportStops)
+        /// <summary>
+        /// Detailed explanation for operational state, may contain further information like construction hints.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("explanation")]
+        public string Explanation { get; set; }
+
+        /// <summary>
+        /// Date ('YYYY-MM-dd') of recommissioning [Wiederinbetriebnahme-Datum]
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("recommissioningDate")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(DateFormatConverter))]
+        public System.DateTimeOffset RecommissioningDate { get; set; }
+
+        /// <summary>
+        /// Operational state of the station equipment. Possible values are: 
+        /// <br/> - ACTIVE
+        /// <br/>- INACTIVE
+        /// <br/>- UNKNOWN
+        /// <br/>
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Type { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            ReplacementTransportStops = replacementTransportStops;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required System.Collections.Generic.List<ReplacementTransportStop> ReplacementTransportStops { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("replacementTransportStops", ReplacementTransportStops);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Sector : __ICanIterate
+    /// <summary>
+    /// Base information for a station [Bahnhof].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Station
     {
-        public Sector() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Sector(double cubePosition, bool cubeSignage, double end, string name, double start)
+        [System.Text.Json.Serialization.JsonPropertyName("address")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public AddressWithWeb Address { get; set; } = new AddressWithWeb();
+
+        /// <summary>
+        /// Deprecated: Use for example '/local-services/by-key?keyType=STATION_ID&amp;key=1866' to get all available local-services for Frankfurt Hbf.
+        /// <br/>All local services [Bahnhofsnahe Dienstleistungen] that are available at the station.
+        /// <br/>- INFORMATION_COUNTER [Informationsstand für Belange im Bahnhof (kein Fahrkartenverkauf)]
+        /// <br/>- TRAVEL_CENTER [Reisezentrum]
+        /// <br/>- VIDEO_TRAVEL_CENTER [Video Reisezentrum]
+        /// <br/>- TRIPLE_S_CENTER [3S Zentrale für Service, Sicherheit &amp; Sauberkeit]
+        /// <br/>- TRAVEL_LOUNGE [Lounge (DB Lounge z.B.)]
+        /// <br/>- LOST_PROPERTY_OFFICE [Fundstelle]
+        /// <br/>- RAILWAY_MISSION [Bahnhofsmission]
+        /// <br/>- HANDICAPPED_TRAVELLER_SERVICE [Service für mobilitätseingeschränkte Reisende]
+        /// <br/>- LOCKER [Schließfächer]
+        /// <br/>- WIFI [WLan]
+        /// <br/>- CAR_PARKING [Autoparkplatz, ggf. kostenpflichtig]
+        /// <br/>- BICYCLE_PARKING [Fahrradparkplätze, ggf. kostenpflichtig]
+        /// <br/>- PUBLIC_RESTROOM [Öffentliches WC, ggf. kostenpflichtig]
+        /// <br/>- TRAVEL_NECESSITIES [Geschäft für den Reisendenbedarf]
+        /// <br/>- CAR_RENTAL [Car-Sharer oder Mietwagen]
+        /// <br/>- BICYCLE_RENTAL [Mieträder]
+        /// <br/>- TAXI_RANK [Taxi Stand]
+        /// <br/>- MOBILE_TRAVEL_SERVICE [Mobiler Service]
+        /// <br/>- RAD_PLUS (Rad+ Gebiet)
+        /// <br/>                     - MOBILITY_HUB (Mobility Hub)
+        /// <br/>
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("availableLocalServices")]
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.Obsolete]
+        public System.Collections.Generic.ICollection<string> AvailableLocalServices { get; set; } = new System.Collections.ObjectModel.Collection<string>();
+
+        /// <summary>
+        /// Available transport types [Verkehrsarten] at station.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("availableTransports")]
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.Obsolete]
+        public System.Collections.Generic.ICollection<TransportType> AvailableTransports { get; set; } = new System.Collections.ObjectModel.Collection<TransportType>();
+
+        /// <summary>
+        /// Country [Staat / Land] the station belongs to as ISO 3166-1 alpha-2 code [germany = 'DE' for instance].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("countryCode")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string CountryCode { get; set; }
+
+        /// <summary>
+        /// Language dependent names for metropolis [Metropole].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("metropolis")]
+        public System.Collections.Generic.IDictionary<string, string> Metropolis { get; set; }
+
+        /// <summary>
+        /// Mobility Service staff on site
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("mobilityServiceStaffOnSite")]
+        public bool MobilityServiceStaffOnSite { get; set; }
+
+        /// <summary>
+        /// The municipality key [Amtlicher Gemeindeschlüssel (AGS)] the station belongs to. Only available for germany and may be empty.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("municipalityKey")]
+        public string MunicipalityKey { get; set; }
+
+        /// <summary>
+        /// Language dependent names for a station, may contain different station names for a specific language depending on names filter.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("names")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.IDictionary<string, StationName> Names { get; set; } = new System.Collections.Generic.Dictionary<string, StationName>();
+
+        /// <summary>
+        /// Opening times for station in OSM notation (see https://wiki.openstreetmap.org/wiki/DE:Key:opening_hours).
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("openingHours")]
+        public string OpeningHours { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("owner")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public StationOwner Owner { get; set; } = new StationOwner();
+
+        [System.Text.Json.Serialization.JsonPropertyName("position")]
+        public Coordinate2D Position { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("roofing")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StationRoofingType>))]
+        public StationRoofingType Roofing { get; set; }
+
+        /// <summary>
+        /// The state code [Bundeslandkürzel] the station belongs to.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("state")]
+        public string State { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("stationCategory")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StationCategory>))]
+        public StationCategory StationCategory { get; set; }
+
+        /// <summary>
+        /// Unique id of station [Bahnhof], usually the STADA for DB InfraGO Pbf owned stations.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stationID")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string StationID { get; set; }
+
+        /// <summary>
+        /// Timezone the station belongs to, for instance 'Europe/Berlin'. Must not necessarily be the time zone of the geo coordinate.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("timeZone")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string TimeZone { get; set; }
+
+        /// <summary>
+        /// Available transport associations [Verkehrsverbünde] at station.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("transportAssociations")]
+        [System.Obsolete]
+        public System.Collections.Generic.ICollection<string> TransportAssociations { get; set; }
+
+        /// <summary>
+        /// Date the station is valid from.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("validFrom")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public System.DateTimeOffset ValidFrom { get; set; }
+
+        /// <summary>
+        /// Date the station is valid to.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("validTo")]
+        public System.DateTimeOffset ValidTo { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            CubePosition = cubePosition;
-            CubeSignage = cubeSignage;
-            End = end;
-            Name = name;
-            Start = start;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required double CubePosition { get; set; }
-        public required bool CubeSignage { get; set; }
-        public required double End { get; set; }
-        public required string Name { get; set; }
-        public required double Start { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("cubePosition", CubePosition);
-            yield return ("cubeSignage", CubeSignage);
-            yield return ("end", End);
-            yield return ("name", Name);
-            yield return ("start", Start);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class State : __ICanIterate
-    {
-        public State() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public State(string explanation, System.DateTime recommissioningDate, string type)
-        {
-            Explanation = explanation;
-            RecommissioningDate = recommissioningDate;
-            Type = type;
-        }
-
-        public required string Explanation { get; set; }
-        public required System.DateTime RecommissioningDate { get; set; }
-        public required string Type { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("explanation", Explanation);
-            yield return ("recommissioningDate", RecommissioningDate);
-            yield return ("type", Type);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Station : __ICanIterate
-    {
-        public Station() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Station(AddressWithWeb address, System.Collections.Generic.List<string> availableLocalServices, System.Collections.Generic.List<TransportType> availableTransports, string countryCode, System.Collections.Generic.Dictionary<string, string> metropolis, bool mobilityServiceStaffOnSite, string municipalityKey, System.Collections.Generic.Dictionary<string, object> names, string openingHours, StationOwner owner, Coordinate2D position, StationRoofingType roofing, string state, StationCategory stationCategory, string stationID, string timeZone, System.Collections.Generic.List<string> transportAssociations, System.DateTime validFrom, System.DateTime validTo)
-        {
-            Address = address;
-            AvailableLocalServices = availableLocalServices;
-            AvailableTransports = availableTransports;
-            CountryCode = countryCode;
-            Metropolis = metropolis;
-            MobilityServiceStaffOnSite = mobilityServiceStaffOnSite;
-            MunicipalityKey = municipalityKey;
-            Names = names;
-            OpeningHours = openingHours;
-            Owner = owner;
-            Position = position;
-            Roofing = roofing;
-            State = state;
-            StationCategory = stationCategory;
-            StationID = stationID;
-            TimeZone = timeZone;
-            TransportAssociations = transportAssociations;
-            ValidFrom = validFrom;
-            ValidTo = validTo;
-        }
-
-        public required AddressWithWeb Address { get; set; }
-        public required System.Collections.Generic.List<string> AvailableLocalServices { get; set; }
-        public required System.Collections.Generic.List<TransportType> AvailableTransports { get; set; }
-        public required string CountryCode { get; set; }
-        public required System.Collections.Generic.Dictionary<string, string> Metropolis { get; set; }
-        public required bool MobilityServiceStaffOnSite { get; set; }
-        public required string MunicipalityKey { get; set; }
-        public required System.Collections.Generic.Dictionary<string, object> Names { get; set; }
-        public required string OpeningHours { get; set; }
-        public required StationOwner Owner { get; set; }
-        public required Coordinate2D Position { get; set; }
-        public required StationRoofingType Roofing { get; set; }
-        public required string State { get; set; }
-        public required StationCategory StationCategory { get; set; }
-        public required string StationID { get; set; }
-        public required string TimeZone { get; set; }
-        public required System.Collections.Generic.List<string> TransportAssociations { get; set; }
-        public required System.DateTime ValidFrom { get; set; }
-        public required System.DateTime ValidTo { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("address", Address);
-            yield return ("availableLocalServices", AvailableLocalServices);
-            yield return ("availableTransports", AvailableTransports);
-            yield return ("countryCode", CountryCode);
-            yield return ("metropolis", Metropolis);
-            yield return ("mobilityServiceStaffOnSite", MobilityServiceStaffOnSite);
-            yield return ("municipalityKey", MunicipalityKey);
-            yield return ("names", Names);
-            yield return ("openingHours", OpeningHours);
-            yield return ("owner", Owner);
-            yield return ("position", Position);
-            yield return ("roofing", Roofing switch
-            {
-                StationRoofingType.COVERED => "COVERED",
-                StationRoofingType.PARTIALLY_COVERED => "PARTIALLY_COVERED",
-                StationRoofingType.NOT_COVERED => "NOT_COVERED",
-                _ => null
-            });
-            yield return ("state", State);
-            yield return ("stationCategory", StationCategory switch
-            {
-                StationCategory.CATEGORY_1 => "CATEGORY_1",
-                StationCategory.CATEGORY_2 => "CATEGORY_2",
-                StationCategory.CATEGORY_3 => "CATEGORY_3",
-                StationCategory.CATEGORY_4 => "CATEGORY_4",
-                StationCategory.CATEGORY_5 => "CATEGORY_5",
-                StationCategory.CATEGORY_6 => "CATEGORY_6",
-                StationCategory.CATEGORY_7 => "CATEGORY_7",
-                _ => null
-            });
-            yield return ("stationID", StationID);
-            yield return ("timeZone", TimeZone);
-            yield return ("transportAssociations", TransportAssociations);
-            yield return ("validFrom", ValidFrom);
-            yield return ("validTo", ValidTo);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(StationCategoryEnumConverter))]
+    /// <summary>
+    /// Category of station conforming to DB InfraGO Pbf..
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum StationCategory
     {
-        CATEGORY_1,
-        CATEGORY_2,
-        CATEGORY_3,
-        CATEGORY_4,
-        CATEGORY_5,
-        CATEGORY_6,
-        CATEGORY_7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CATEGORY_1")]
+        CATEGORY_1 = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CATEGORY_2")]
+        CATEGORY_2 = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CATEGORY_3")]
+        CATEGORY_3 = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CATEGORY_4")]
+        CATEGORY_4 = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CATEGORY_5")]
+        CATEGORY_5 = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CATEGORY_6")]
+        CATEGORY_6 = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CATEGORY_7")]
+        CATEGORY_7 = 6,
+
     }
 
-    public static class StationCategoryFastEnum
+    /// <summary>
+    /// Station equipment for a particular station [Bahnhof].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StationEquipment
     {
-        public static string ToString(StationCategory value) => value switch
-        {
-            StationCategory.CATEGORY_1 => "CATEGORY_1",
-            StationCategory.CATEGORY_2 => "CATEGORY_2",
-            StationCategory.CATEGORY_3 => "CATEGORY_3",
-            StationCategory.CATEGORY_4 => "CATEGORY_4",
-            StationCategory.CATEGORY_5 => "CATEGORY_5",
-            StationCategory.CATEGORY_6 => "CATEGORY_6",
-            StationCategory.CATEGORY_7 => "CATEGORY_7",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static StationCategory FromString(string? value) => value switch
+        /// <summary>
+        /// Unique id of a station equipment.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("equipmentID")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string EquipmentID { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("escalator")]
+        public Escalator Escalator { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lift")]
+        public Lift Lift { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lockerRack")]
+        public LockerRack LockerRack { get; set; }
+
+        /// <summary>
+        /// Unique id of station [Bahnhof], usually the STADA for DB InfraGO Pbf owned stations.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stationID")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string StationID { get; set; }
+
+        /// <summary>
+        /// Type of station equipment. Possible values are: 
+        /// <br/> - LOCKER_RACK [Schließfach]
+        /// <br/>- LIFT [Aufzug]
+        /// <br/>- ESCALATOR [Fahrtreppe / Rolltreppe]
+        /// <br/>
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Type { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "CATEGORY_1" => StationCategory.CATEGORY_1,
-            "CATEGORY_2" => StationCategory.CATEGORY_2,
-            "CATEGORY_3" => StationCategory.CATEGORY_3,
-            "CATEGORY_4" => StationCategory.CATEGORY_4,
-            "CATEGORY_5" => StationCategory.CATEGORY_5,
-            "CATEGORY_6" => StationCategory.CATEGORY_6,
-            "CATEGORY_7" => StationCategory.CATEGORY_7,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class StationCategoryEnumConverter : System.Text.Json.Serialization.JsonConverter<StationCategory>
+    /// <summary>
+    /// Result of station equipments.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StationEquipments
     {
-        public override StationCategory Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (StationCategory)reader.GetInt32();
-            }
 
-            return StationCategoryFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// List of station equipments.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stationEquipments")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<StationEquipment> StationEquipments1 { get; set; } = new System.Collections.ObjectModel.Collection<StationEquipment>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, StationCategory value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(StationCategoryFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StationEquipment : __ICanIterate
+    /// <summary>
+    /// Name information for a station [Bahnhof].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StationName
     {
-        public StationEquipment() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StationEquipment(string equipmentID, Escalator escalator, Lift lift, LockerRack lockerRack, string stationID, string type)
+        /// <summary>
+        /// Name for station.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Name { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            EquipmentID = equipmentID;
-            Escalator = escalator;
-            Lift = lift;
-            LockerRack = lockerRack;
-            StationID = stationID;
-            Type = type;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string EquipmentID { get; set; }
-        public required Escalator Escalator { get; set; }
-        public required Lift Lift { get; set; }
-        public required LockerRack LockerRack { get; set; }
-        public required string StationID { get; set; }
-        public required string Type { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("equipmentID", EquipmentID);
-            yield return ("escalator", Escalator);
-            yield return ("lift", Lift);
-            yield return ("lockerRack", LockerRack);
-            yield return ("stationID", StationID);
-            yield return ("type", Type);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StationEquipments : __ICanIterate
+    /// <summary>
+    /// Organisational unit [Regionalbereich] information, usually from DB Netz.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StationOrganisationalUnit
     {
-        public StationEquipments() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StationEquipments(System.Collections.Generic.List<StationEquipment> stationEquipments)
+        /// <summary>
+        /// Number of organisational unit.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public int Id { get; set; }
+
+        /// <summary>
+        /// Name of organisational unit.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Short name of organisational unit, may be empty.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("nameShort")]
+        public string NameShort { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            StationEquipmentsList = stationEquipments;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required System.Collections.Generic.List<StationEquipment> StationEquipmentsList { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("stationEquipments", StationEquipmentsList);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StationName : __ICanIterate
+    /// <summary>
+    /// Base information for a stations [Bahnhof] owner [Eigentümer / Betreiber].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StationOwner
     {
-        public StationName() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StationName(string name)
+        /// <summary>
+        /// Name of owner.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("organisationalUnit")]
+        public StationOrganisationalUnit OrganisationalUnit { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Name = name;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string Name { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("name", Name);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StationOrganisationalUnit : __ICanIterate
-    {
-        public StationOrganisationalUnit() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StationOrganisationalUnit(int id, string name, string nameShort)
-        {
-            Id = id;
-            Name = name;
-            NameShort = nameShort;
-        }
-
-        public required int Id { get; set; }
-        public required string Name { get; set; }
-        public required string NameShort { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("id", Id);
-            yield return ("name", Name);
-            yield return ("nameShort", NameShort);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StationOwner : __ICanIterate
-    {
-        public StationOwner() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StationOwner(string name, StationOrganisationalUnit organisationalUnit)
-        {
-            Name = name;
-            OrganisationalUnit = organisationalUnit;
-        }
-
-        public required string Name { get; set; }
-        public required StationOrganisationalUnit OrganisationalUnit { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("name", Name);
-            yield return ("organisationalUnit", OrganisationalUnit);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(StationRoofingTypeEnumConverter))]
+    /// <summary>
+    /// Defines station roofing [Bahnhofsüberdachung].
+    /// <br/>- COVERED [überdacht]
+    /// <br/>- PARTIALLY_COVERED [teilweise überdacht]
+    /// <br/>- NOT_COVERED [nicht überdacht]
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum StationRoofingType
     {
-        COVERED,
-        PARTIALLY_COVERED,
-        NOT_COVERED,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"COVERED")]
+        COVERED = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PARTIALLY_COVERED")]
+        PARTIALLY_COVERED = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NOT_COVERED")]
+        NOT_COVERED = 2,
+
     }
 
-    public static class StationRoofingTypeFastEnum
+    /// <summary>
+    /// Transport companies [Verkehrsunternehmen] result.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StationTransportCompanies
     {
-        public static string ToString(StationRoofingType value) => value switch
-        {
-            StationRoofingType.COVERED => "COVERED",
-            StationRoofingType.PARTIALLY_COVERED => "PARTIALLY_COVERED",
-            StationRoofingType.NOT_COVERED => "NOT_COVERED",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static StationRoofingType FromString(string? value) => value switch
+        /// <summary>
+        /// List of transport companies.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("transportCompanies")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<StationTransportCompany> TransportCompanies { get; set; } = new System.Collections.ObjectModel.Collection<StationTransportCompany>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "COVERED" => StationRoofingType.COVERED,
-            "PARTIALLY_COVERED" => StationRoofingType.PARTIALLY_COVERED,
-            "NOT_COVERED" => StationRoofingType.NOT_COVERED,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class StationRoofingTypeEnumConverter : System.Text.Json.Serialization.JsonConverter<StationRoofingType>
+    /// <summary>
+    /// Basic information about a transport company [Verkehrsunternehmen]:
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StationTransportCompany
     {
-        public override StationRoofingType Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (StationRoofingType)reader.GetInt32();
-            }
 
-            return StationRoofingTypeFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// Email of transport company.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("email")]
+        public string Email { get; set; }
+
+        /// <summary>
+        /// Name of transport company.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Name { get; set; }
+
+        /// <summary>
+        /// Phone number of transport company.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("phoneNumber")]
+        public string PhoneNumber { get; set; }
+
+        /// <summary>
+        /// Short name of transport company.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("shortName")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string ShortName { get; set; }
+
+        /// <summary>
+        /// Website of transport company.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("website")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Website { get; set; }
+
+        /// <summary>
+        /// Deep link to website of digital assistant [digitaler Assistent, Chatbot etc.] of transport company.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("websiteDigitalAssistant")]
+        public string WebsiteDigitalAssistant { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, StationRoofingType value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(StationRoofingTypeFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class Stations : __ICanIterate
+    /// <summary>
+    /// Stations [Bahnhof] result.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class Stations
     {
-        public Stations() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public Stations(System.Collections.Generic.List<Station> stations)
+        /// <summary>
+        /// List of stations.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stations")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<Station> Stations1 { get; set; } = new System.Collections.ObjectModel.Collection<Station>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            StationsList = stations;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required System.Collections.Generic.List<Station> StationsList { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("stations", StationsList);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StationsPageable : __ICanIterate
+    /// <summary>
+    /// Pageable stations search result.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StationsPageable
     {
-        public StationsPageable() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StationsPageable(int limit, int offset, System.Collections.Generic.List<Station> stations, int total)
+        /// <summary>
+        /// Maximum number of results the caller has requested to return from provided offset.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("limit")]
+        public int Limit { get; set; }
+
+        /// <summary>
+        /// Pagination offset the caller has requested in order to navigate through results.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("offset")]
+        public int Offset { get; set; }
+
+        /// <summary>
+        /// List of stations.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stations")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<Station> Stations { get; set; } = new System.Collections.ObjectModel.Collection<Station>();
+
+        /// <summary>
+        /// Total number of available results.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("total")]
+        public int Total { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Limit = limit;
-            Offset = offset;
-            Stations = stations;
-            Total = total;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required int Limit { get; set; }
-        public required int Offset { get; set; }
-        public required System.Collections.Generic.List<Station> Stations { get; set; }
-        public required int Total { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("limit", Limit);
-            yield return ("offset", Offset);
-            yield return ("stations", Stations);
-            yield return ("total", Total);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StationTransportCompanies : __ICanIterate
+    /// <summary>
+    /// Base information for a stop-place [Haltestelle].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlace
     {
-        public StationTransportCompanies() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StationTransportCompanies(System.Collections.Generic.List<StationTransportCompany> transportCompanies)
+        /// <summary>
+        /// Available physical transport types [physische Verkehrsarten] at stop place, that may differ in case of replacement transports [Ersatzverkehren] (ie a 'REGIONAL_TRAIN' gets usually replaced by a 'BUS').
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("availablePhysicalTransports")]
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<TransportType> AvailablePhysicalTransports { get; set; } = new System.Collections.ObjectModel.Collection<TransportType>();
+
+        /// <summary>
+        /// Available transport types [Verkehrsarten] at stop place, may include replacement transports [Ersatzverkehre].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("availableTransports")]
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<TransportType> AvailableTransports { get; set; } = new System.Collections.ObjectModel.Collection<TransportType>();
+
+        /// <summary>
+        /// Country [Staat / Land] the stop place belongs to as ISO 3166-1 alpha-2 code [germany = 'DE' for instance].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("countryCode")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string CountryCode { get; set; }
+
+        /// <summary>
+        /// Eva number of stop-place.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("evaNumber")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string EvaNumber { get; set; }
+
+        /// <summary>
+        /// Language dependent name for metropolis [Metropole].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("metropolis")]
+        public System.Collections.Generic.IDictionary<string, string> Metropolis { get; set; }
+
+        /// <summary>
+        /// The municipality key [Amtlicher Gemeindeschlüssel (AGS)] the stop place belongs to. Only available for germany and may be empty.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("municipalityKey")]
+        public string MunicipalityKey { get; set; }
+
+        /// <summary>
+        /// Language dependent names for stop place, may contain different stop place names for a specific language depending on names filter.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("names")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.IDictionary<string, StopPlaceName> Names { get; set; } = new System.Collections.Generic.Dictionary<string, StopPlaceName>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("position")]
+        public Coordinate2D Position { get; set; }
+
+        /// <summary>
+        /// Postal code [Postleitzahl] the stop place belongs to.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("postalCode")]
+        public string PostalCode { get; set; }
+
+        /// <summary>
+        /// Indicates whether replacement transports [Ersatzverkehre] are available at this stop place.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("replacementTransportsAvailable")]
+        public bool ReplacementTransportsAvailable { get; set; }
+
+        /// <summary>
+        /// The state code [Bundeslandkürzel] the stop place belongs to.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("state")]
+        public string State { get; set; }
+
+        /// <summary>
+        /// ID of station [Bahnhof] the stop place belongs to [usually the STADA code for DB DB InfraGO Pbf], may be empty when stop place is not part of a station.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stationID")]
+        public string StationID { get; set; }
+
+        /// <summary>
+        /// Timezone the stop place belongs to, for instance 'Europe/Berlin'. Must not necessarily be the time zone of the geo coordinate.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("timeZone")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string TimeZone { get; set; }
+
+        /// <summary>
+        /// Available transport associations [Verkehrsverbünde] at stop place.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("transportAssociations")]
+        public System.Collections.Generic.ICollection<string> TransportAssociations { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            TransportCompanies = transportCompanies;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required System.Collections.Generic.List<StationTransportCompany> TransportCompanies { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("transportCompanies", TransportCompanies);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StationTransportCompany : __ICanIterate
+    /// <summary>
+    /// Group for stop places [Haltestellen] with all group members.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaceGroup
     {
-        public StationTransportCompany() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StationTransportCompany(string email, string name, string phoneNumber, string shortName, string website, string websiteDigitalAssistant)
+        /// <summary>
+        /// Identifier for group.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("groupIdentifier")]
+        public string GroupIdentifier { get; set; }
+
+        /// <summary>
+        /// List of stop place ids [Eva-Number] that belong to the group.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("members")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<string> Members { get; set; } = new System.Collections.ObjectModel.Collection<string>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StopPlaceGroupType>))]
+        public StopPlaceGroupType Type { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Email = email;
-            Name = name;
-            PhoneNumber = phoneNumber;
-            ShortName = shortName;
-            Website = website;
-            WebsiteDigitalAssistant = websiteDigitalAssistant;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string Email { get; set; }
-        public required string Name { get; set; }
-        public required string PhoneNumber { get; set; }
-        public required string ShortName { get; set; }
-        public required string Website { get; set; }
-        public required string WebsiteDigitalAssistant { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("email", Email);
-            yield return ("name", Name);
-            yield return ("phoneNumber", PhoneNumber);
-            yield return ("shortName", ShortName);
-            yield return ("website", Website);
-            yield return ("websiteDigitalAssistant", WebsiteDigitalAssistant);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlace : __ICanIterate
-    {
-        public StopPlace() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlace(System.Collections.Generic.List<TransportType> availablePhysicalTransports, System.Collections.Generic.List<TransportType> availableTransports, string countryCode, string evaNumber, System.Collections.Generic.Dictionary<string, string> metropolis, string municipalityKey, System.Collections.Generic.Dictionary<string, object> names, Coordinate2D position, string postalCode, bool replacementTransportsAvailable, string state, string stationID, string timeZone, System.Collections.Generic.List<string> transportAssociations)
-        {
-            AvailablePhysicalTransports = availablePhysicalTransports;
-            AvailableTransports = availableTransports;
-            CountryCode = countryCode;
-            EvaNumber = evaNumber;
-            Metropolis = metropolis;
-            MunicipalityKey = municipalityKey;
-            Names = names;
-            Position = position;
-            PostalCode = postalCode;
-            ReplacementTransportsAvailable = replacementTransportsAvailable;
-            State = state;
-            StationID = stationID;
-            TimeZone = timeZone;
-            TransportAssociations = transportAssociations;
-        }
-
-        public required System.Collections.Generic.List<TransportType> AvailablePhysicalTransports { get; set; }
-        public required System.Collections.Generic.List<TransportType> AvailableTransports { get; set; }
-        public required string CountryCode { get; set; }
-        public required string EvaNumber { get; set; }
-        public required System.Collections.Generic.Dictionary<string, string> Metropolis { get; set; }
-        public required string MunicipalityKey { get; set; }
-        public required System.Collections.Generic.Dictionary<string, object> Names { get; set; }
-        public required Coordinate2D Position { get; set; }
-        public required string PostalCode { get; set; }
-        public required bool ReplacementTransportsAvailable { get; set; }
-        public required string State { get; set; }
-        public required string StationID { get; set; }
-        public required string TimeZone { get; set; }
-        public required System.Collections.Generic.List<string> TransportAssociations { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("availablePhysicalTransports", AvailablePhysicalTransports);
-            yield return ("availableTransports", AvailableTransports);
-            yield return ("countryCode", CountryCode);
-            yield return ("evaNumber", EvaNumber);
-            yield return ("metropolis", Metropolis);
-            yield return ("municipalityKey", MunicipalityKey);
-            yield return ("names", Names);
-            yield return ("position", Position);
-            yield return ("postalCode", PostalCode);
-            yield return ("replacementTransportsAvailable", ReplacementTransportsAvailable);
-            yield return ("state", State);
-            yield return ("stationID", StationID);
-            yield return ("timeZone", TimeZone);
-            yield return ("transportAssociations", TransportAssociations);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaceGroup : __ICanIterate
-    {
-        public StopPlaceGroup() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaceGroup(string groupIdentifier, System.Collections.Generic.List<string> members, StopPlaceGroupType type)
-        {
-            GroupIdentifier = groupIdentifier;
-            Members = members;
-            Type = type;
-        }
-
-        public required string GroupIdentifier { get; set; }
-        public required System.Collections.Generic.List<string> Members { get; set; }
-        public required StopPlaceGroupType Type { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("groupIdentifier", GroupIdentifier);
-            yield return ("members", Members);
-            yield return ("type", Type switch
-            {
-                StopPlaceGroupType.STATION => "STATION",
-                StopPlaceGroupType.SALES => "SALES",
-                StopPlaceGroupType.METROPOLITAN_AREA => "METROPOLITAN_AREA",
-                _ => null
-            });
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaceGroups : __ICanIterate
-    {
-        public StopPlaceGroups() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaceGroups(System.Collections.Generic.List<StopPlaceGroup> groups)
-        {
-            Groups = groups;
-        }
-
-        public required System.Collections.Generic.List<StopPlaceGroup> Groups { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("groups", Groups);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(StopPlaceGroupTypeEnumConverter))]
+    /// <summary>
+    /// Possible groups [Station] a set of stop places [Haltestellen] may belong to.
+    /// <br/>- STATION (group defined by station, for instance FFM = Hoch + Tief, maintained by DB InfraGO Pbf STADA hierarchy)
+    /// <br/>- SALES (group defined by sales [Vertrieb], for instance FFM = Hoch + Tief + Bus + Tram + Subway, maintained by DB Vertrieb via EFZ [Europäisches Fahrplanzentrum])
+    /// <br/>- METROPOLITAN_AREA (group defined by sales [Vertrieb], for instance Stadtgebiet FFM = all big stations within FFM, maintained by DB Vertrieb via EFZ [Europäisches Fahrplanzentrum])
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum StopPlaceGroupType
     {
-        STATION,
-        SALES,
-        METROPOLITAN_AREA,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"STATION")]
+        STATION = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SALES")]
+        SALES = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"METROPOLITAN_AREA")]
+        METROPOLITAN_AREA = 2,
+
     }
 
-    public static class StopPlaceGroupTypeFastEnum
+    /// <summary>
+    /// List of groups a stop place [Haltestelle] belongs to with all associated group members.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaceGroups
     {
-        public static string ToString(StopPlaceGroupType value) => value switch
-        {
-            StopPlaceGroupType.STATION => "STATION",
-            StopPlaceGroupType.SALES => "SALES",
-            StopPlaceGroupType.METROPOLITAN_AREA => "METROPOLITAN_AREA",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static StopPlaceGroupType FromString(string? value) => value switch
+        /// <summary>
+        /// List of groups the passed eva numbers belongs to including group members.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("groups")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<StopPlaceGroup> Groups { get; set; } = new System.Collections.ObjectModel.Collection<StopPlaceGroup>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "STATION" => StopPlaceGroupType.STATION,
-            "SALES" => StopPlaceGroupType.SALES,
-            "METROPOLITAN_AREA" => StopPlaceGroupType.METROPOLITAN_AREA,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class StopPlaceGroupTypeEnumConverter : System.Text.Json.Serialization.JsonConverter<StopPlaceGroupType>
+    /// <summary>
+    /// Key mapping for a stop place [Haltestelle].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaceKey
     {
-        public override StopPlaceGroupType Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (StopPlaceGroupType)reader.GetInt32();
-            }
 
-            return StopPlaceGroupTypeFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// Key value.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("key")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Key { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter<StopPlaceKeyType>))]
+        public StopPlaceKeyType Type { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, StopPlaceGroupType value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(StopPlaceGroupTypeFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaceKey : __ICanIterate
-    {
-        public StopPlaceKey() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaceKey(string key, StopPlaceKeyType type)
-        {
-            Key = key;
-            Type = type;
-        }
-
-        public required string Key { get; set; }
-        public required StopPlaceKeyType Type { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("key", Key);
-            yield return ("type", Type switch
-            {
-                StopPlaceKeyType.IFOPT => "IFOPT",
-                StopPlaceKeyType.EVA => "EVA",
-                StopPlaceKeyType.RL100 => "RL100",
-                StopPlaceKeyType.RL100_ALTERNATIVE => "RL100_ALTERNATIVE",
-                StopPlaceKeyType.EPA => "EPA",
-                StopPlaceKeyType.STADA => "STADA",
-                StopPlaceKeyType.IBNR => "IBNR",
-                StopPlaceKeyType.EBHF => "EBHF",
-                StopPlaceKeyType.UIC => "UIC",
-                StopPlaceKeyType.PLC => "PLC",
-                _ => null
-            });
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(StopPlaceKeyFilterEnumConverter))]
+    /// <summary>
+    /// Enumerates all identifiers a stop-place [Haltestelle] can be mapped from.
+    /// <br/>- IFOPT (Transmodel identifier for fixed objects, in germany DHID = Deutschlandweite Halt ID also known as global id)
+    /// <br/>- EVA (eva number)
+    /// <br/>- RL100 (primary or alternative rl100 / ds100)
+    /// <br/>- EPA (epa uic number)
+    /// <br/>- STADA (Stationsdatenbank number)
+    /// <br/>- IBNR (internal station number [interne bahnhofsnummer])
+    /// <br/>- EBHF ([Tarifpunktnummer / Einheitliche Bahnhofsdatei Nr.])
+    /// <br/>- UIC (international station number)
+    /// <br/>- PLC (primary location code)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum StopPlaceKeyFilter
     {
-        IFOPT,
-        EVA,
-        RL100,
-        EPA,
-        STADA,
-        IBNR,
-        EBHF,
-        UIC,
-        PLC,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"IFOPT")]
+        IFOPT = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EVA")]
+        EVA = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RL100")]
+        RL100 = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EPA")]
+        EPA = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"STADA")]
+        STADA = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"IBNR")]
+        IBNR = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EBHF")]
+        EBHF = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"UIC")]
+        UIC = 7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PLC")]
+        PLC = 8,
+
     }
 
-    public static class StopPlaceKeyFilterFastEnum
-    {
-        public static string ToString(StopPlaceKeyFilter value) => value switch
-        {
-            StopPlaceKeyFilter.IFOPT => "IFOPT",
-            StopPlaceKeyFilter.EVA => "EVA",
-            StopPlaceKeyFilter.RL100 => "RL100",
-            StopPlaceKeyFilter.EPA => "EPA",
-            StopPlaceKeyFilter.STADA => "STADA",
-            StopPlaceKeyFilter.IBNR => "IBNR",
-            StopPlaceKeyFilter.EBHF => "EBHF",
-            StopPlaceKeyFilter.UIC => "UIC",
-            StopPlaceKeyFilter.PLC => "PLC",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
-
-        public static StopPlaceKeyFilter FromString(string? value) => value switch
-        {
-            "IFOPT" => StopPlaceKeyFilter.IFOPT,
-            "EVA" => StopPlaceKeyFilter.EVA,
-            "RL100" => StopPlaceKeyFilter.RL100,
-            "EPA" => StopPlaceKeyFilter.EPA,
-            "STADA" => StopPlaceKeyFilter.STADA,
-            "IBNR" => StopPlaceKeyFilter.IBNR,
-            "EBHF" => StopPlaceKeyFilter.EBHF,
-            "UIC" => StopPlaceKeyFilter.UIC,
-            "PLC" => StopPlaceKeyFilter.PLC,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
-    }
-
-    public class StopPlaceKeyFilterEnumConverter : System.Text.Json.Serialization.JsonConverter<StopPlaceKeyFilter>
-    {
-        public override StopPlaceKeyFilter Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (StopPlaceKeyFilter)reader.GetInt32();
-            }
-
-            return StopPlaceKeyFilterFastEnum.FromString(reader.GetString());
-        }
-
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, StopPlaceKeyFilter value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(StopPlaceKeyFilterFastEnum.ToString(value));
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaceKeys : __ICanIterate
-    {
-        public StopPlaceKeys() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaceKeys(System.Collections.Generic.List<StopPlaceKey> keys)
-        {
-            Keys = keys;
-        }
-
-        public required System.Collections.Generic.List<StopPlaceKey> Keys { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("keys", Keys);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(StopPlaceKeyTypeEnumConverter))]
+    /// <summary>
+    /// Enumerates all identifiers a stop-place [Haltestelle] can be mapped into or mapped from.
+    /// <br/>- IFOPT (Transmodel identifier for fixed objects, in germany DHID = Deutschlandweite Halt ID also known as global id)
+    /// <br/>- EVA (eva number)
+    /// <br/>- RL100 (primary rl100 / ds100)
+    /// <br/>- RL100_ALTERNATIVE (alternative rl100 / ds100)
+    /// <br/>- EPA (epa number)
+    /// <br/>- STADA (Stationsdatenbank number)
+    /// <br/>- IBNR (internal station number [interne bahnhofsnummer])
+    /// <br/>- EBHF ([Tarifpunktnummer / Einheitliche Bahnhofsdatei Nr.])
+    /// <br/>- UIC (international station number)
+    /// <br/>- PLC (primary location code)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum StopPlaceKeyType
     {
-        IFOPT,
-        EVA,
-        RL100,
-        RL100_ALTERNATIVE,
-        EPA,
-        STADA,
-        IBNR,
-        EBHF,
-        UIC,
-        PLC,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"IFOPT")]
+        IFOPT = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EVA")]
+        EVA = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RL100")]
+        RL100 = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RL100_ALTERNATIVE")]
+        RL100_ALTERNATIVE = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EPA")]
+        EPA = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"STADA")]
+        STADA = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"IBNR")]
+        IBNR = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"EBHF")]
+        EBHF = 7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"UIC")]
+        UIC = 8,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PLC")]
+        PLC = 9,
+
     }
 
-    public static class StopPlaceKeyTypeFastEnum
+    /// <summary>
+    /// Different key mappings a stop place [Haltestelle] may have.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaceKeys
     {
-        public static string ToString(StopPlaceKeyType value) => value switch
-        {
-            StopPlaceKeyType.IFOPT => "IFOPT",
-            StopPlaceKeyType.EVA => "EVA",
-            StopPlaceKeyType.RL100 => "RL100",
-            StopPlaceKeyType.RL100_ALTERNATIVE => "RL100_ALTERNATIVE",
-            StopPlaceKeyType.EPA => "EPA",
-            StopPlaceKeyType.STADA => "STADA",
-            StopPlaceKeyType.IBNR => "IBNR",
-            StopPlaceKeyType.EBHF => "EBHF",
-            StopPlaceKeyType.UIC => "UIC",
-            StopPlaceKeyType.PLC => "PLC",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static StopPlaceKeyType FromString(string? value) => value switch
+        /// <summary>
+        /// List of stop place keys.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("keys")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<StopPlaceKey> Keys { get; set; } = new System.Collections.ObjectModel.Collection<StopPlaceKey>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "IFOPT" => StopPlaceKeyType.IFOPT,
-            "EVA" => StopPlaceKeyType.EVA,
-            "RL100" => StopPlaceKeyType.RL100,
-            "RL100_ALTERNATIVE" => StopPlaceKeyType.RL100_ALTERNATIVE,
-            "EPA" => StopPlaceKeyType.EPA,
-            "STADA" => StopPlaceKeyType.STADA,
-            "IBNR" => StopPlaceKeyType.IBNR,
-            "EBHF" => StopPlaceKeyType.EBHF,
-            "UIC" => StopPlaceKeyType.UIC,
-            "PLC" => StopPlaceKeyType.PLC,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class StopPlaceKeyTypeEnumConverter : System.Text.Json.Serialization.JsonConverter<StopPlaceKeyType>
+    /// <summary>
+    /// Group for stop places [Haltestellen] with all group members.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaceMultiGroup
     {
-        public override StopPlaceKeyType Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (StopPlaceKeyType)reader.GetInt32();
-            }
 
-            return StopPlaceKeyTypeFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// Identifier for group.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("groupIdentifier")]
+        public string GroupIdentifier { get; set; }
+
+        /// <summary>
+        /// List of stop place ids that belong to the group.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("members")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<string> Members { get; set; } = new System.Collections.ObjectModel.Collection<string>();
+
+        /// <summary>
+        /// Type of stop place group.
+        /// <br/>- STATION (group defined by station, for instance FFM = Hoch + Tief, maintained by DB InfraGO Pbf STADA hierarchy)
+        /// <br/>- SALES (group defined by sales [Vertrieb], for instance FFM = Hoch + Tief + Bus + Tram + Subway, maintained by DB Fernverkehr via EFZ [Europäisches Fahrplanzentrum])
+        /// <br/>- DIRECT_SALES (group defined by sales [Vertrieb], for instance FFM = Hoch + Tief + Bus + Tram + Subway, maintained by DB Fernverkehr via EFZ [Europäisches Fahrplanzentrum])
+        /// <br/>- METROPOLITAN_AREA (group defined by sales [Vertrieb], for instance Stadtgebiet FFM = all big stations within FFM, maintained by DB Fernverkehr via EFZ [Europäisches Fahrplanzentrum])
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("type")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Type { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, StopPlaceKeyType value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(StopPlaceKeyTypeFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaceMultiGroup : __ICanIterate
+    /// <summary>
+    /// List of groups a stop place [Haltestelle] belongs to with all associated group members.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaceMultiGroups
     {
-        public StopPlaceMultiGroup() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaceMultiGroup(string groupIdentifier, System.Collections.Generic.List<string> members, string type)
+        /// <summary>
+        /// List of groups the passed eva numbers belongs to including group members.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("groups")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<StopPlaceMultiGroup> Groups { get; set; } = new System.Collections.ObjectModel.Collection<StopPlaceMultiGroup>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            GroupIdentifier = groupIdentifier;
-            Members = members;
-            Type = type;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required string GroupIdentifier { get; set; }
-        public required System.Collections.Generic.List<string> Members { get; set; }
-        public required string Type { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("groupIdentifier", GroupIdentifier);
-            yield return ("members", Members);
-            yield return ("type", Type);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaceMultiGroups : __ICanIterate
+    /// <summary>
+    /// Name information for stop place [Haltestelle].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaceName
     {
-        public StopPlaceMultiGroups() { }
 
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaceMultiGroups(System.Collections.Generic.List<StopPlaceMultiGroup> groups)
+        /// <summary>
+        /// Name that is applicable for local areas, for instance 'Berlin Zoologischer Garten' may become 'B Zoologischer Garten'.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("nameLocal")]
+        public string NameLocal { get; set; }
+
+        /// <summary>
+        /// Primary full long name for stop place.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("nameLong")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string NameLong { get; set; }
+
+        /// <summary>
+        /// Short name (max. 20 characters) for stop place, if available.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("nameShort")]
+        public string NameShort { get; set; }
+
+        /// <summary>
+        /// Long name speech information for stop place [Haltestelle].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("speechLong")]
+        public string SpeechLong { get; set; }
+
+        /// <summary>
+        /// Short name speech information for stop place [Haltestelle].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("speechShort")]
+        public string SpeechShort { get; set; }
+
+        /// <summary>
+        /// Symbol information [UTF-8] for stop place [Haltestelle].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("symbol")]
+        public string Symbol { get; set; }
+
+        /// <summary>
+        /// Synonyms [alternative Namen] for this stop place
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("synonyms")]
+        public System.Collections.Generic.ICollection<string> Synonyms { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            Groups = groups;
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public required System.Collections.Generic.List<StopPlaceMultiGroup> Groups { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("groups", Groups);
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaceName : __ICanIterate
-    {
-        public StopPlaceName() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaceName(string nameLocal, string nameLong, string nameShort, string speechLong, string speechShort, string symbol, System.Collections.Generic.List<string> synonyms)
-        {
-            NameLocal = nameLocal;
-            NameLong = nameLong;
-            NameShort = nameShort;
-            SpeechLong = speechLong;
-            SpeechShort = speechShort;
-            Symbol = symbol;
-            Synonyms = synonyms;
-        }
-
-        public required string NameLocal { get; set; }
-        public required string NameLong { get; set; }
-        public required string NameShort { get; set; }
-        public required string SpeechLong { get; set; }
-        public required string SpeechShort { get; set; }
-        public required string Symbol { get; set; }
-        public required System.Collections.Generic.List<string> Synonyms { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("nameLocal", NameLocal);
-            yield return ("nameLong", NameLong);
-            yield return ("nameShort", NameShort);
-            yield return ("speechLong", SpeechLong);
-            yield return ("speechShort", SpeechShort);
-            yield return ("symbol", Symbol);
-            yield return ("synonyms", Synonyms);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaces : __ICanIterate
-    {
-        public StopPlaces() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaces(System.Collections.Generic.List<StopPlace> stopPlaces)
-        {
-            StopPlacesList = stopPlaces;
-        }
-
-        public required System.Collections.Generic.List<StopPlace> StopPlacesList { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("stopPlaces", StopPlacesList);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlacesByKeysEntry : __ICanIterate
-    {
-        public StopPlacesByKeysEntry() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlacesByKeysEntry(string key)
-        {
-            Key = key;
-        }
-
-        public required string Key { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("key", Key);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlacesByKeysRequest : __ICanIterate
-    {
-        public StopPlacesByKeysRequest() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlacesByKeysRequest(string keyType, System.Collections.Generic.List<StopPlacesByKeysEntry> keys)
-        {
-            KeyType = keyType;
-            Keys = keys;
-        }
-
-        public required string KeyType { get; set; }
-        public required System.Collections.Generic.List<StopPlacesByKeysEntry> Keys { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("keyType", KeyType);
-            yield return ("keys", Keys);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(StopPlaceSearchGroupByKeyEnumConverter))]
+    /// <summary>
+    /// Different grouping options for stop places name query.
+    /// <br/>- STATION (group by parent station that is defined by DB InfraGO Pbf STADA-ID)
+    /// <br/>- SALES (group defined by sales [Vertrieb], for instance FFM = Hoch + Tief + Bus + Tram + Subway, maintained by DB Vertrieb via EFZ [Europäisches Fahrplanzentrum])
+    /// <br/>- NONE (no grouping is applied, just stop-places are returned)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum StopPlaceSearchGroupByKey
     {
-        STATION,
-        SALES,
-        NONE,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"STATION")]
+        STATION = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SALES")]
+        SALES = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"NONE")]
+        NONE = 2,
+
     }
 
-    public static class StopPlaceSearchGroupByKeyFastEnum
+    /// <summary>
+    /// Search result information for a stop place [Haltestelle].
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaceSearchResult
     {
-        public static string ToString(StopPlaceSearchGroupByKey value) => value switch
-        {
-            StopPlaceSearchGroupByKey.STATION => "STATION",
-            StopPlaceSearchGroupByKey.SALES => "SALES",
-            StopPlaceSearchGroupByKey.NONE => "NONE",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static StopPlaceSearchGroupByKey FromString(string? value) => value switch
+        /// <summary>
+        /// Available transport types [Verkehrsarten] at stop place.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("availableTransports")]
+        // TODO(system.text.json): Add ItemConverterType with enum converter when supported
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<TransportType> AvailableTransports { get; set; } = new System.Collections.ObjectModel.Collection<TransportType>();
+
+        /// <summary>
+        /// Eva number of stop place.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("evaNumber")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string EvaNumber { get; set; }
+
+        /// <summary>
+        /// TBD
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("groupMembers")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.ICollection<string> GroupMembers { get; set; } = new System.Collections.ObjectModel.Collection<string>();
+
+        /// <summary>
+        /// Language dependent names for stop place.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("names")]
+        [System.ComponentModel.DataAnnotations.Required]
+        public System.Collections.Generic.IDictionary<string, StopPlaceName> Names { get; set; } = new System.Collections.Generic.Dictionary<string, StopPlaceName>();
+
+        [System.Text.Json.Serialization.JsonPropertyName("position")]
+        public Coordinate2D Position { get; set; }
+
+        /// <summary>
+        /// Indicates whether replacement transports [Ersatzverkehre] are available at this stop place.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("replacementTransportsAvailable")]
+        public bool ReplacementTransportsAvailable { get; set; }
+
+        /// <summary>
+        /// ID of station [Bahnhof] the stop place belongs to [usually the STADA code for DB DB InfraGO Pbf], may be empty when stop place is not part of a station.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stationID")]
+        public string StationID { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
         {
-            "STATION" => StopPlaceSearchGroupByKey.STATION,
-            "SALES" => StopPlaceSearchGroupByKey.SALES,
-            "NONE" => StopPlaceSearchGroupByKey.NONE,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
     }
 
-    public class StopPlaceSearchGroupByKeyEnumConverter : System.Text.Json.Serialization.JsonConverter<StopPlaceSearchGroupByKey>
+    /// <summary>
+    /// Stop place [Haltestelle] search result.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaceSearchResults
     {
-        public override StopPlaceSearchGroupByKey Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (StopPlaceSearchGroupByKey)reader.GetInt32();
-            }
 
-            return StopPlaceSearchGroupByKeyFastEnum.FromString(reader.GetString());
+        /// <summary>
+        /// Stop places matching provided search criteria.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stopPlaces")]
+        public System.Collections.Generic.ICollection<StopPlaceSearchResult> StopPlaces { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, StopPlaceSearchGroupByKey value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(StopPlaceSearchGroupByKeyFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaceSearchResult : __ICanIterate
-    {
-        public StopPlaceSearchResult() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaceSearchResult(System.Collections.Generic.List<TransportType> availableTransports, string evaNumber, System.Collections.Generic.List<string> groupMembers, System.Collections.Generic.Dictionary<string, object> names, Coordinate2D position, bool replacementTransportsAvailable, string stationID)
-        {
-            AvailableTransports = availableTransports;
-            EvaNumber = evaNumber;
-            GroupMembers = groupMembers;
-            Names = names;
-            Position = position;
-            ReplacementTransportsAvailable = replacementTransportsAvailable;
-            StationID = stationID;
-        }
-
-        public required System.Collections.Generic.List<TransportType> AvailableTransports { get; set; }
-        public required string EvaNumber { get; set; }
-        public required System.Collections.Generic.List<string> GroupMembers { get; set; }
-        public required System.Collections.Generic.Dictionary<string, object> Names { get; set; }
-        public required Coordinate2D Position { get; set; }
-        public required bool ReplacementTransportsAvailable { get; set; }
-        public required string StationID { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("availableTransports", AvailableTransports);
-            yield return ("evaNumber", EvaNumber);
-            yield return ("groupMembers", GroupMembers);
-            yield return ("names", Names);
-            yield return ("position", Position);
-            yield return ("replacementTransportsAvailable", ReplacementTransportsAvailable);
-            yield return ("stationID", StationID);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    public sealed class StopPlaceSearchResults : __ICanIterate
-    {
-        public StopPlaceSearchResults() { }
-
-        [System.Diagnostics.CodeAnalysis.SetsRequiredMembers]
-        [System.Text.Json.Serialization.JsonConstructor]
-        public StopPlaceSearchResults(System.Collections.Generic.List<StopPlaceSearchResult> stopPlaces)
-        {
-            StopPlaces = stopPlaces;
-        }
-
-        public required System.Collections.Generic.List<StopPlaceSearchResult> StopPlaces { get; set; }
-
-        System.Collections.Generic.IEnumerable<(string name, object? value)> __ICanIterate.IterateProperties()
-        {
-            yield return ("stopPlaces", StopPlaces);
-        }
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(StopPlaceSortKeyEnumConverter))]
+    /// <summary>
+    /// Different sorting keys for stop place queries.
+    /// <br/>- RELEVANCE (stop places are sorted by relevance descending (central stations etc. first))
+    /// <br/>- QUERY_MATCH (stop places are sorted by matching the provided query descending)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public enum StopPlaceSortKey
     {
-        RELEVANCE,
-        QUERY_MATCH,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"RELEVANCE")]
+        RELEVANCE = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"QUERY_MATCH")]
+        QUERY_MATCH = 1,
+
     }
 
-    public static class StopPlaceSortKeyFastEnum
+    /// <summary>
+    /// Stop place [Haltestelle] result.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlaces
     {
-        public static string ToString(StopPlaceSortKey value) => value switch
-        {
-            StopPlaceSortKey.RELEVANCE => "RELEVANCE",
-            StopPlaceSortKey.QUERY_MATCH => "QUERY_MATCH",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
 
-        public static StopPlaceSortKey FromString(string? value) => value switch
-        {
-            "RELEVANCE" => StopPlaceSortKey.RELEVANCE,
-            "QUERY_MATCH" => StopPlaceSortKey.QUERY_MATCH,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
-    }
+        /// <summary>
+        /// Stop places matching provided criteria.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("stopPlaces")]
+        public System.Collections.Generic.ICollection<StopPlace> StopPlaces1 { get; set; }
 
-    public class StopPlaceSortKeyEnumConverter : System.Text.Json.Serialization.JsonConverter<StopPlaceSortKey>
-    {
-        public override StopPlaceSortKey Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (StopPlaceSortKey)reader.GetInt32();
-            }
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
 
-            return StopPlaceSortKeyFastEnum.FromString(reader.GetString());
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, StopPlaceSortKey value, System.Text.Json.JsonSerializerOptions options)
-        {
-            writer.WriteStringValue(StopPlaceSortKeyFastEnum.ToString(value));
-        }
     }
 
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    [System.Text.Json.Serialization.JsonConverter(typeof(TransportTypeEnumConverter))]
+    /// <summary>
+    /// Single batch request for stop places [Haltestellen] by keys.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlacesByKeysEntry
+    {
+
+        /// <summary>
+        /// Key for stop place [Haltestelle].
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("key")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string Key { get; set; }
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    /// <summary>
+    /// Request for stop places [Haltestellen] by keys.
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class StopPlacesByKeysRequest
+    {
+
+        /// <summary>
+        /// Specifies the key-type that is passed in the keys collection. Supported key-types are:
+        /// <br/>- EVA (eva number)
+        /// <br/>- RL100 (primary or alternative rl100 / ds100)
+        /// <br/>- STADA (Stationsdatenbank number)
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("keyType")]
+        [System.ComponentModel.DataAnnotations.Required(AllowEmptyStrings = true)]
+        public string KeyType { get; set; }
+
+        /// <summary>
+        /// Keys for stop places [Haltestellen]. A maximum of 500 keys is allowed.
+        /// </summary>
+        [System.Text.Json.Serialization.JsonPropertyName("keys")]
+        [System.ComponentModel.DataAnnotations.Required]
+        [System.ComponentModel.DataAnnotations.MaxLength(500)]
+        public System.Collections.Generic.ICollection<StopPlacesByKeysEntry> Keys { get; set; } = new System.Collections.ObjectModel.Collection<StopPlacesByKeysEntry>();
+
+        private System.Collections.Generic.IDictionary<string, object> _additionalProperties;
+
+        [System.Text.Json.Serialization.JsonExtensionData]
+        public System.Collections.Generic.IDictionary<string, object> AdditionalProperties
+        {
+            get { return _additionalProperties ?? (_additionalProperties = new System.Collections.Generic.Dictionary<string, object>()); }
+            set { _additionalProperties = value; }
+        }
+
+    }
+
+    /// <summary>
+    /// Type of transport.
+    /// <br/>- HIGH_SPEED_TRAIN (High speed train [Hochgeschwindigkeitszug] like ICE or TGV etc.)
+    /// <br/>- INTERCITY_TRAIN (Inter city train [Intercityzug])
+    /// <br/>- INTER_REGIONAL_TRAIN (Inter regional train [Interregiozug])
+    /// <br/>- REGIONAL_TRAIN (Regional train [Regionalzug])
+    /// <br/>- CITY_TRAIN (City train [S-Bahn])
+    /// <br/>- SUBWAY (Subway [U-Bahn])
+    /// <br/>- TRAM (Tram [Strassenbahn])
+    /// <br/>- BUS (Bus [Bus])
+    /// <br/>- FERRY (Ferry [Faehre])
+    /// <br/>- FLIGHT (Flight [Flugzeug])
+    /// <br/>- CAR (Car [Auto])
+    /// <br/>- TAXI (Taxi)
+    /// <br/>- SHUTTLE (Shuttle [Ruftaxi])
+    /// <br/>- BIKE ((E-)Bike [Fahrrad])
+    /// <br/>- SCOOTER ((E-)Scooter [Roller])
+    /// <br/>- WALK (Walk ([Laufen])
+    /// <br/>- UNKNOWN (Unknown)
+    /// </summary>
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    [System.Text.Json.Serialization.JsonConverter(typeof(TolerantTransportTypeConverter))]
     public enum TransportType
     {
-        HIGH_SPEED_TRAIN,
-        INTERCITY_TRAIN,
-        INTER_REGIONAL_TRAIN,
-        REGIONAL_TRAIN,
-        CITY_TRAIN,
-        SUBWAY,
-        TRAM,
-        BUS,
-        FERRY,
-        FLIGHT,
-        CAR,
-        TAXI,
-        SHUTTLE,
-        BIKE,
-        SCOOTER,
-        WALK,
-        UNKNOWN,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"HIGH_SPEED_TRAIN")]
+        HIGH_SPEED_TRAIN = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"INTERCITY_TRAIN")]
+        INTERCITY_TRAIN = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"INTER_REGIONAL_TRAIN")]
+        INTER_REGIONAL_TRAIN = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"REGIONAL_TRAIN")]
+        REGIONAL_TRAIN = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CITY_TRAIN")]
+        CITY_TRAIN = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SUBWAY")]
+        SUBWAY = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"TRAM")]
+        TRAM = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"BUS")]
+        BUS = 7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"FERRY")]
+        FERRY = 8,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"FLIGHT")]
+        FLIGHT = 9,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"CAR")]
+        CAR = 10,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"TAXI")]
+        TAXI = 11,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SHUTTLE")]
+        SHUTTLE = 12,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"BIKE")]
+        BIKE = 13,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"SCOOTER")]
+        SCOOTER = 14,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"WALK")]
+        WALK = 15,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"UNKNOWN")]
+        UNKNOWN = 16,
+
     }
 
-    public static class TransportTypeFastEnum
+    internal class TolerantTransportTypeConverter : System.Text.Json.Serialization.JsonConverter<TransportType>
     {
-        public static string ToString(TransportType value) => value switch
+        public override TransportType Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            TransportType.HIGH_SPEED_TRAIN => "HIGH_SPEED_TRAIN",
-            TransportType.INTERCITY_TRAIN => "INTERCITY_TRAIN",
-            TransportType.INTER_REGIONAL_TRAIN => "INTER_REGIONAL_TRAIN",
-            TransportType.REGIONAL_TRAIN => "REGIONAL_TRAIN",
-            TransportType.CITY_TRAIN => "CITY_TRAIN",
-            TransportType.SUBWAY => "SUBWAY",
-            TransportType.TRAM => "TRAM",
-            TransportType.BUS => "BUS",
-            TransportType.FERRY => "FERRY",
-            TransportType.FLIGHT => "FLIGHT",
-            TransportType.CAR => "CAR",
-            TransportType.TAXI => "TAXI",
-            TransportType.SHUTTLE => "SHUTTLE",
-            TransportType.BIKE => "BIKE",
-            TransportType.SCOOTER => "SCOOTER",
-            TransportType.WALK => "WALK",
-            TransportType.UNKNOWN => "UNKNOWN",
-            _ => throw new System.NotSupportedException(value + " is not a supported Enum value")
-        };
-
-        public static TransportType FromString(string? value) => value switch
-        {
-            "HIGH_SPEED_TRAIN" => TransportType.HIGH_SPEED_TRAIN,
-            "INTERCITY_TRAIN" => TransportType.INTERCITY_TRAIN,
-            "INTER_REGIONAL_TRAIN" => TransportType.INTER_REGIONAL_TRAIN,
-            "REGIONAL_TRAIN" => TransportType.REGIONAL_TRAIN,
-            "CITY_TRAIN" => TransportType.CITY_TRAIN,
-            "SUBWAY" => TransportType.SUBWAY,
-            "TRAM" => TransportType.TRAM,
-            "BUS" => TransportType.BUS,
-            "FERRY" => TransportType.FERRY,
-            "FLIGHT" => TransportType.FLIGHT,
-            "CAR" => TransportType.CAR,
-            "TAXI" => TransportType.TAXI,
-            "SHUTTLE" => TransportType.SHUTTLE,
-            "BIKE" => TransportType.BIKE,
-            "SCOOTER" => TransportType.SCOOTER,
-            "WALK" => TransportType.WALK,
-            "UNKNOWN" => TransportType.UNKNOWN,
-            _ => throw new System.NotSupportedException((value ?? "NULL") + " is not a supported Enum value")
-        };
-    }
-
-    public class TransportTypeEnumConverter : System.Text.Json.Serialization.JsonConverter<TransportType>
-    {
-        public override TransportType Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
-        {
-            if (reader.TokenType is System.Text.Json.JsonTokenType.Number)
-            {
-                return (TransportType)reader.GetInt32();
-            }
-
-            return TransportTypeFastEnum.FromString(reader.GetString());
+            string transportType = reader.GetString();
+            if (Enum.TryParse<TransportType>(transportType, true, out var result)) return result;
+            return TransportType.UNKNOWN;
         }
 
-        public override void Write(System.Text.Json.Utf8JsonWriter writer, TransportType value, System.Text.Json.JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, TransportType value, JsonSerializerOptions options)
         {
-            writer.WriteStringValue(TransportTypeFastEnum.ToString(value));
+            writer.WriteStringValue(value.ToString());
+        }
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    internal class DateFormatConverter : System.Text.Json.Serialization.JsonConverter<System.DateTimeOffset>
+    {
+        public override System.DateTimeOffset Read(ref System.Text.Json.Utf8JsonReader reader, System.Type typeToConvert, System.Text.Json.JsonSerializerOptions options)
+        {
+            var dateTime = reader.GetString();
+            if (dateTime == null)
+            {
+                throw new System.Text.Json.JsonException("Unexpected JsonTokenType.Null");
+            }
+
+            return System.DateTimeOffset.Parse(dateTime);
+        }
+
+        public override void Write(System.Text.Json.Utf8JsonWriter writer, System.DateTimeOffset value, System.Text.Json.JsonSerializerOptions options)
+        {
+            writer.WriteStringValue(value.ToString("yyyy-MM-dd"));
         }
     }
 }
