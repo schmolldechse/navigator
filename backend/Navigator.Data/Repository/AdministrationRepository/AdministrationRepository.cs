@@ -5,15 +5,13 @@ namespace Navigator.Data.Repository.AdministrationRepository;
 
 public class AdministrationRepository(DataContext dataContext) : IAdministrationRepository
 {
-    public async Task<Administration?> GetAdministrationAsync(string administrationId, string operatorCode, string operatorName) => await dataContext.Administrations
-        .FirstOrDefaultAsync(administration => administration.AdministrationId == administrationId
-            && administration.OperatorCode == operatorCode
-            && administration.OperatorName == operatorName);
-
-    public async Task SaveAdministrationAsync(Administration administration)
+    public async Task<Administration> GetOrCreateAdministrationAsync(string administrationId, string operatorCode, string operatorName)
     {
-        if (await GetAdministrationAsync(administration.AdministrationId, administration.OperatorCode, administration.OperatorName) != null) return;
+        var administration = await dataContext.Administrations.FirstOrDefaultAsync(a => a.AdministrationId == administrationId && a.OperatorCode == operatorCode && a.OperatorName == operatorName);
+        if (administration != null) return administration;
+
         await dataContext.Administrations.AddAsync(administration);
         await dataContext.SaveChangesAsync();
+        return administration;
     }
 }
