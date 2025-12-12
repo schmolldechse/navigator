@@ -2,15 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+	<ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>1f935281-aa02-412c-830d-c21200f33bfa</UserSecretsId>
-    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<OutputType>Exe</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-	  <PackageReference Include="AutoMapper" Version="[14.0.0]" />
-	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
+	<PackageReference Include="AutoMapper" Version="[14.0.0]" />
+	<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.1" />
     <PackageReference Include="Scalar.AspNetCore" Version="2.11.2" />
   </ItemGroup>
 

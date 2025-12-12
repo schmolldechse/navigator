@@ -1,17 +1,7 @@
-﻿using Microsoft.Build.Tasks;
-using System.Security.Cryptography.Xml;
-using static Navigator.Data.Models.Ris.RisBoards;
-
-namespace Navigator.Data.Models.Ris;
+﻿namespace Navigator.Data.Models.Ris;
 
 public class RisJourneys
 {
-    [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
-    internal interface __ICanIterate
-    {
-        System.Collections.Generic.IEnumerable<(string name, object? value)> IterateProperties();
-    }
-
     [System.CodeDom.Compiler.GeneratedCode("dotnet-openapi-generator", "10.0.0-preview.17+fdb6bff775a5f7dd92355871c893ded52c7af04b")]
     public sealed class Administration : __ICanIterate
     {
