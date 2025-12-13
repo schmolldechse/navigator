@@ -26,7 +26,7 @@ public class Station
     public required bool QueryingEnabled { get; set; }
 
     [Column("last_queried")]
-    public DateTime? LastQueried { get; set; }
+    public DateTimeOffset? LastQueried { get; set; }
 
     public ICollection<StationRil100> Ril100 { get; set; } = new List<StationRil100>();
 

@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251211201125_initial")]
+    [Migration("20251213135851_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -344,7 +344,7 @@ namespace Navigator.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EvaNumber"));
 
-                    b.Property<DateTime?>("LastQueried")
+                    b.Property<DateTimeOffset?>("LastQueried")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_queried");
 

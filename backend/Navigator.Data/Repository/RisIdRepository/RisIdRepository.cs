@@ -24,6 +24,10 @@ public class RisIdRepository(DataContext dataContext) : IRisIdRepository
         return risIds.Take(request.Limit);
     }
 
+    public async Task<IEnumerable<RisId>> GetRisIdsBatchAsync(IEnumerable<Guid> ids) => await dataContext.RisIds
+        .Where(risId => ids.Contains(risId.Id))
+        .ToListAsync();
+
     public async Task SaveRisIdsBatchAsync(IEnumerable<RisId> risIds)
     {
         var ids = risIds.Select(risId => risId.Id).ToList();

@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251211201131_addStationGeoIndex")]
+    [Migration("20251213135902_addStationGeoIndex")]
     partial class addStationGeoIndex
     {
         /// <inheritdoc />
@@ -344,7 +344,7 @@ namespace Navigator.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EvaNumber"));
 
-                    b.Property<DateTime?>("LastQueried")
+                    b.Property<DateTimeOffset?>("LastQueried")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_queried");
 

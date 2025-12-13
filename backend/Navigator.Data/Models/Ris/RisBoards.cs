@@ -1896,13 +1896,13 @@ public class RisBoards
         /// Display priority [Anzeigereihenfolge aka 'Priorität*] for message. Order is ascending.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("displayPriority")]
-        public int DisplayPriority { get; set; }
+        public int? DisplayPriority { get; set; }
 
         /// <summary>
         /// Detailed display priority [detaillierte Anzeigereihenfolge aka 'Feinsortierung'] for message. Order is ascending.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("displayPriorityDetail")]
-        public int DisplayPriorityDetail { get; set; }
+        public int? DisplayPriorityDetail { get; set; }
 
         /// <summary>
         /// Text for attribute.
@@ -1951,7 +1951,7 @@ public class RisBoards
         /// Display priority [Anzeigereihenfolge] for message. Order is by display priority asc. May be empty.
         /// </summary>
         [System.Text.Json.Serialization.JsonPropertyName("displayPriority")]
-        public int DisplayPriority { get; set; }
+        public int? DisplayPriority { get; set; }
 
         /// <summary>
         /// Freetext of message.
