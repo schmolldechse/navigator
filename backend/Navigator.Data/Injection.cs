@@ -8,6 +8,7 @@ using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Data.Repository.StationRilRepository;
 using Navigator.Data.Repository.StationTransportRepository;
+using Navigator.Data.Repository.TimetableRepository;
 
 namespace Navigator.Data;
 
@@ -31,11 +32,12 @@ public static class Injection
         services.AddSingleton<ProxyHttpClientFactory>();
 
         services
+            .AddTransient<IAdministrationRepository, AdministrationRepository>()
+            .AddTransient<IRisIdRepository, RisIdRepository>()
             .AddTransient<IStationRepository, StationRepository>()
             .AddTransient<IStationRilRepository, StationRilRepository>()
             .AddTransient<IStationTransportRepository, StationTransportRepository>()
-            .AddTransient<IRisIdRepository, RisIdRepository>()
-            .AddTransient<IAdministrationRepository, AdministrationRepository>();
+            .AddTransient<ITimetableRepository, TimetableRepository>();
         return services;
     }
 }

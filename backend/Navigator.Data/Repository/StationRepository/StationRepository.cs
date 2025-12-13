@@ -111,6 +111,14 @@ public class StationRepository(
             LIMIT {request.Limit}")
         .ToListAsync();
 
+    public async Task<Station?> GetRandomStationAsync(ShuffledStationRequest request) => await dataContext.Stations
+        .Include(station => station.Ril100)
+        .Include(station => station.Transports)
+        .Where(station => request.OnlyIncludeActive ? station.QueryingEnabled : true)
+        .Where(station => station.LastQueried == null || station.LastQueried < request.LastSeen)
+        .OrderBy(_ => Guid.NewGuid())
+        .FirstOrDefaultAsync();
+
     public async Task<Station?> GetByEvaNumberAsync(int evaNumber) => await dataContext.Stations
         .Include(station => station.Ril100)
         .Include(station => station.Transports)
@@ -134,6 +142,8 @@ public class StationRepository(
                 continue;
             }
 
+            station.LastQueried = incomingStation.LastQueried;
+            station.QueryingEnabled = incomingStation.QueryingEnabled;
             station.LastQueried = incomingStation.LastQueried;
 
             var existingRil = station.Ril100

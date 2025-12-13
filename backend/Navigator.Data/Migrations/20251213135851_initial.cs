@@ -85,7 +85,7 @@ namespace Navigator.Data.Migrations
                     latitude = table.Column<double>(type: "double precision", nullable: false),
                     longitude = table.Column<double>(type: "double precision", nullable: false),
                     querying_enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    last_queried = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                    last_queried = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {

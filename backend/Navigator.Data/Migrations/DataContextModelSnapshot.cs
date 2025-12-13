@@ -341,7 +341,7 @@ namespace Navigator.Data.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EvaNumber"));
 
-                    b.Property<DateTime?>("LastQueried")
+                    b.Property<DateTimeOffset?>("LastQueried")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_queried");
 
