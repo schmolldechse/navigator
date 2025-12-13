@@ -2,11 +2,15 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Navigator.Data;
-using Navigator.Data.Models.Ris;
 using Navigator.Data.Repository.StationRepository;
+using Navigator.Preflight.Infrastructure.Discovery;
+using Navigator.Preflight.Infrastructure.Merging;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddServices(builder.Configuration);
+
+builder.Services.AddTransient<IStationDiscovery, StationDiscovery>()
+    .AddTransient<IStationMerging, StationMerging>();
 
 var host = builder.Build();
 
@@ -15,17 +19,14 @@ using (var scope = host.Services.CreateScope())
     var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
     await dataContext.Database.MigrateAsync();
 
-    var stationsRepository = scope.ServiceProvider.GetRequiredService<IStationRepository>();
-    await stationsRepository.GetRisStationsByCoordinatesAsync(new RisStationsByCoordinatesRequest()
-    {
-        Latitude = 48.539725,
-        Longitude = 9.290156,
-        GroupBy = RisStations.StopPlaceSearchGroupByKey.NONE,
-        Radius = 1000,
-        Limit = 100
-    });
+    var stationDiscovery = scope.ServiceProvider.GetRequiredService<IStationDiscovery>();
+    await stationDiscovery.StartDiscoveringAsync();
 
-    await stationsRepository.GetStaDaAsync();
+    var stationMering = scope.ServiceProvider.GetRequiredService<IStationMerging>();
+    var mappedStations = await stationMering.StartMergingAsync();
+
+    var stationRepository = scope.ServiceProvider.GetRequiredService<IStationRepository>();
+    await stationRepository.SaveStationsAsync(mappedStations);
 }
 
 host.Run();

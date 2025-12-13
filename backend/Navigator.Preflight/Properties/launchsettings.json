@@ -4,8 +4,8 @@
       "commandName": "Project",
       "environmentVariables": {
         "DOTNET_ENVIRONMENT": "Development",
-        "STATIONS_CLIENT_ID": "6fcfdd4c1cc13a16325c52ffad9c0c4a",
-        "STATIONS_API_KEY": "eae67a4c151cd8f288d13e608344ea11"
+        "STATIONS_CLIENT_ID": "",
+        "STATIONS_API_KEY": ""
       }
     }
   }
