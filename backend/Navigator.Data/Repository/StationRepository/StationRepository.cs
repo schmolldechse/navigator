@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Navigator.Data.Entities.Station;
-using Navigator.Data.Models.Converters;
+using Navigator.Data.Infrastructure;
 using Navigator.Data.Models.Ris;
 using Navigator.Data.Models.StaDa;
 using Navigator.Data.Models.Station;
@@ -14,7 +14,7 @@ using System.Web;
 namespace Navigator.Data.Repository.StationRepository;
 
 public class StationRepository(
-    IHttpClientFactory httpClientFactory, 
+    ProxyHttpClientFactory proxyHttpClientFactory, 
     DataContext dataContext, 
     ILogger<StationRepository> logger
 ) : IStationRepository
@@ -25,7 +25,7 @@ public class StationRepository(
 
     public async Task<IEnumerable<VendoStation>> GetVendoStationsAsync(VendoStationsBySearchRequest request)
     {
-        using var httpClient = httpClientFactory.CreateClient();
+        using var httpClient = proxyHttpClientFactory.CreateClient();
 
         var message = new HttpRequestMessage(HttpMethod.Post, _stationsUrl);
         message.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/x.db.vendo.mob.location.v3+json"));
@@ -47,7 +47,7 @@ public class StationRepository(
 
     public async Task<IEnumerable<RisStations.StopPlaceSearchResult>> GetRisStationsByCoordinatesAsync(RisStationsByCoordinatesRequest request)
     {
-        using var httpClient = httpClientFactory.CreateClient();
+        using var httpClient = proxyHttpClientFactory.CreateClient();
         httpClient.DefaultRequestHeaders.Add("DB-Client-Id", Environment.GetEnvironmentVariable("STATIONS_CLIENT_ID"));
         httpClient.DefaultRequestHeaders.Add("DB-Api-Key", Environment.GetEnvironmentVariable("STATIONS_API_KEY"));
 
@@ -75,7 +75,7 @@ public class StationRepository(
 
     public async Task<IEnumerable<StaDa.Station>> GetStaDaAsync()
     {
-        using var httpClient = httpClientFactory.CreateClient();
+        using var httpClient = proxyHttpClientFactory.CreateClient();
         httpClient.DefaultRequestHeaders.Add("DB-Client-Id", Environment.GetEnvironmentVariable("STATIONS_CLIENT_ID"));
         httpClient.DefaultRequestHeaders.Add("DB-Api-Key", Environment.GetEnvironmentVariable("STATIONS_API_KEY"));
 
