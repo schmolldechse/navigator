@@ -15,8 +15,8 @@ public class JourneyTransport
 {
     [Key]
     [Column("journey_id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public required Guid Id { get; set; }
+    [MaxLength(82)]
+    public required string Id { get; set; }
 
     [ForeignKey(nameof(Id))]
     public Journey? Journey { get; set; }

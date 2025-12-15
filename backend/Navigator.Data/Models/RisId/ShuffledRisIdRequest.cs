@@ -8,5 +8,5 @@ public class ShuffledRisIdRequest
     public required DateTime LastSeen { get; set; } = DateTime.UtcNow;
 
     [Range(1, 500)]
-    public required int Limit { get; set; } = 384;
+    public int Limit { get; set; } = 384;
 }

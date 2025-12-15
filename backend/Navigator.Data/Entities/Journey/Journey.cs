@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Navigator.Data.Entities.Journey.Message;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -7,18 +8,20 @@ namespace Navigator.Data.Entities.Journey;
 [Table("journeys", Schema = "core")]
 [Index(nameof(Date))]
 [Index(nameof(Cancelled))]
+[Index(nameof(InsertedAt))]
+[Index(nameof(Cancelled))]
 public class Journey
 {
     [Key]
     [Column("id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public required Guid Id { get; set; }
+    [MaxLength(82)]
+    public required string Id { get; set; }
 
     [Column("date")]
     public required DateOnly Date { get; set; }
 
     [Column("inserted_at")]
-    public required DateTimeOffset InsertedAt { get; set; }
+    public required DateTime InsertedAt { get; set; }
 
     [Column("administration_id")]
     public required Guid AdministrationId { get; set; }
@@ -31,5 +34,7 @@ public class Journey
 
     public required virtual JourneyTransport Transport { get; set; }
 
-    public virtual ICollection<JourneyScheduledStopPlace> ScheduledStopPlaces { get; set; } = [];
+    public virtual ICollection<JourneyStopPlace> StopPlaces { get; set; } = [];
+
+    public virtual ICollection<JourneyMessage> Messages { get; set; } = [];
 }

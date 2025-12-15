@@ -27,7 +27,7 @@ public class GatheringRisIdsJob(
         });
         if (randomStation == null) return;
 
-        DateTimeOffset? lastQueried = EstimateLastQueried(randomStation);
+        DateTime? lastQueried = EstimateLastQueried(randomStation);
         if (lastQueried == null) return;
 
         logger.LogInformation("Querying {Station} (EvaNumber: {EvaNumber}) with last queried to {LastQueried}.",
@@ -64,7 +64,7 @@ public class GatheringRisIdsJob(
             .Select(transport => transport.TransportType)
             .ToHashSet();
 
-        DateTimeOffset discoveryDate = DateTimeOffset.UtcNow;
+        DateTime discoveryDate = DateTime.UtcNow;
         var filteredByTransports = risIds
             .Where(risId =>
             {
@@ -131,16 +131,13 @@ public class GatheringRisIdsJob(
             randomStation.EvaNumber);
     }
 
-    private DateTimeOffset? EstimateLastQueried(Station station)
+    private DateTime? EstimateLastQueried(Station station)
     {
-        if (station.LastQueried == null)
-            return DateTimeOffset.UtcNow.AddDays(-7);
-        if (station.LastQueried.Value.Date < DateTimeOffset.UtcNow.Date)
-            return new DateTimeOffset(
-                DateOnly.FromDateTime(station.LastQueried.Value.UtcDateTime.AddDays(1)),
-                TimeOnly.FromTimeSpan(DateTimeOffset.UtcNow.TimeOfDay),
-                TimeSpan.Zero
-            );
+        if (station.LastQueried == null) return DateTime.UtcNow.AddDays(-7);
+        if (station.LastQueried.Value.Date < DateTime.UtcNow.Date) return new DateTime(
+            DateOnly.FromDateTime(station.LastQueried.Value.AddDays(1)),
+            TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),
+            DateTimeKind.Utc);
         return null;
     }
 }

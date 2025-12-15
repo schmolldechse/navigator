@@ -21,7 +21,10 @@ namespace Navigator.Data.Migrations
 
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:core.information_type", "DISRUPTION,JOURNEY_ATTRIBUTE,MESSAGE,RIS_CAUSE_REASON,RIS_QUALITY_DEVIATION")
+                .Annotation("Npgsql:Enum:core.message_reference_type", "ATTACHMENT,IMAGE,LINK")
+                .Annotation("Npgsql:Enum:core.message_type", "ATTRIBUTE,DISRUPTION,NOTE,RIS_CAUSE,RIS_QUALITY_DEVIATION")
                 .Annotation("Npgsql:Enum:core.schedule_type", "ARRIVAL,DEPARTURE")
+                .Annotation("Npgsql:Enum:core.time_type", "PREVIEW,REAL,SCHEDULE")
                 .Annotation("Npgsql:Enum:core.transport_type", "BIKE,BUS,CAR,CITY_TRAIN,FERRY,FLIGHT,HIGH_SPEED_TRAIN,INTERCITY_TRAIN,INTER_REGIONAL_TRAIN,REGIONAL_TRAIN,SCOOTER,SHUTTLE,SUBWAY,TAXI,TRAM,UNKNOWN,WALK")
                 .Annotation("Npgsql:PostgresExtension:cube", ",,")
                 .Annotation("Npgsql:PostgresExtension:earthdistance", ",,");
@@ -32,7 +35,7 @@ namespace Navigator.Data.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    measured_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    measured_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     size_bytes = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
@@ -63,9 +66,9 @@ namespace Navigator.Data.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: false),
                     replacement_transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: true),
-                    discovered_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    last_seen_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    last_insertion_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    discovered_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    last_seen = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    last_inserted = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     active = table.Column<bool>(type: "boolean", nullable: false)
                 },
                 constraints: table =>
@@ -78,14 +81,13 @@ namespace Navigator.Data.Migrations
                 schema: "core",
                 columns: table => new
                 {
-                    eva_number = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    eva_number = table.Column<int>(type: "integer", nullable: false),
                     name = table.Column<string>(type: "text", nullable: false),
                     weight = table.Column<double>(type: "double precision", nullable: false),
                     latitude = table.Column<double>(type: "double precision", nullable: false),
                     longitude = table.Column<double>(type: "double precision", nullable: false),
                     querying_enabled = table.Column<bool>(type: "boolean", nullable: false),
-                    last_queried = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true)
+                    last_queried = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -97,9 +99,9 @@ namespace Navigator.Data.Migrations
                 schema: "core",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
                     date = table.Column<DateOnly>(type: "date", nullable: false),
-                    inserted_at = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    inserted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     administration_id = table.Column<Guid>(type: "uuid", nullable: false),
                     cancelled = table.Column<bool>(type: "boolean", nullable: false)
                 },
@@ -161,12 +163,39 @@ namespace Navigator.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "journey_scheduled_stop_places",
+                name: "journey_messages",
                 schema: "core",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    journey_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
+                    message_type = table.Column<MessageType>(type: "core.message_type", nullable: false),
+                    code = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
+                    text = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    text_short = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
+                    disruption_cause = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    disruption_effect = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    note_category = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_journey_messages", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_journey_messages_journeys_journey_id",
+                        column: x => x.journey_id,
+                        principalSchema: "core",
+                        principalTable: "journeys",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "journey_stop_places",
+                schema: "core",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
                     date = table.Column<DateOnly>(type: "date", nullable: false),
                     schedule_type = table.Column<ScheduleType>(type: "core.schedule_type", nullable: false),
                     station_name = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: false),
@@ -175,17 +204,20 @@ namespace Navigator.Data.Migrations
                     additional = table.Column<bool>(type: "boolean", nullable: false),
                     demand = table.Column<bool>(type: "boolean", nullable: false),
                     no_passenger_change = table.Column<bool>(type: "boolean", nullable: false),
-                    planned_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    actual_time = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    delay = table.Column<int>(type: "integer", nullable: false, computedColumnSql: "EXTRACT(EPOCH FROM (actual_time - planned_time))::integer", stored: true),
+                    time_type = table.Column<TimeType>(type: "core.time_type", nullable: false),
+                    delay = table.Column<int>(type: "integer", nullable: false, computedColumnSql: "EXTRACT(EPOCH FROM (actual_time_utc - planned_time_utc))::integer", stored: true),
                     planned_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
-                    actual_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true)
+                    actual_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    planned_time_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    planned_time_offset_minutes = table.Column<short>(type: "smallint", nullable: false),
+                    actual_time_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    actual_time_offset_minutes = table.Column<short>(type: "smallint", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_journey_scheduled_stop_places", x => x.id);
+                    table.PrimaryKey("PK_journey_stop_places", x => x.id);
                     table.ForeignKey(
-                        name: "FK_journey_scheduled_stop_places_journeys_journey_id",
+                        name: "FK_journey_stop_places_journeys_journey_id",
                         column: x => x.journey_id,
                         principalSchema: "core",
                         principalTable: "journeys",
@@ -198,7 +230,7 @@ namespace Navigator.Data.Migrations
                 schema: "core",
                 columns: table => new
                 {
-                    journey_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
                     transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: false),
                     replacement_transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: true),
                     category = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
@@ -221,30 +253,60 @@ namespace Navigator.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "journey_stop_place_informations",
+                name: "journey_message_references",
                 schema: "core",
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    scheduled_stop_place_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    information_type = table.Column<InformationType>(type: "core.information_type", nullable: false),
-                    key = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    text = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: false),
-                    text_short = table.Column<string>(type: "character varying(2048)", maxLength: 2048, nullable: true),
-                    disruption_communication_id = table.Column<Guid>(type: "uuid", nullable: true),
-                    disruption_id = table.Column<Guid>(type: "uuid", nullable: true)
+                    message_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    message_reference_type = table.Column<MessageReferenceType>(type: "core.message_reference_type", nullable: false),
+                    url = table.Column<string>(type: "text", nullable: true),
+                    label = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_journey_stop_place_informations", x => x.id);
+                    table.PrimaryKey("PK_journey_message_references", x => x.id);
                     table.ForeignKey(
-                        name: "FK_journey_stop_place_informations_journey_scheduled_stop_plac~",
-                        column: x => x.scheduled_stop_place_id,
+                        name: "FK_journey_message_references_journey_messages_message_id",
+                        column: x => x.message_id,
                         principalSchema: "core",
-                        principalTable: "journey_scheduled_stop_places",
+                        principalTable: "journey_messages",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.CreateTable(
+                name: "journey_stop_place_messages",
+                schema: "core",
+                columns: table => new
+                {
+                    journey_stop_place_id = table.Column<Guid>(type: "uuid", nullable: false),
+                    journey_message_id = table.Column<Guid>(type: "uuid", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_journey_stop_place_messages", x => new { x.journey_stop_place_id, x.journey_message_id });
+                    table.ForeignKey(
+                        name: "FK_journey_stop_place_messages_journey_messages_journey_messag~",
+                        column: x => x.journey_message_id,
+                        principalSchema: "core",
+                        principalTable: "journey_messages",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_journey_stop_place_messages_journey_stop_places_journey_sto~",
+                        column: x => x.journey_stop_place_id,
+                        principalSchema: "core",
+                        principalTable: "journey_stop_places",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_database_size_measured_at",
+                schema: "statistics",
+                table: "database_size",
+                column: "measured_at");
 
             migrationBuilder.CreateIndex(
                 name: "IX_journey_administrations_administration_id_operator_code_ope~",
@@ -254,52 +316,64 @@ namespace Navigator.Data.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_scheduled_stop_places_date",
+                name: "IX_journey_message_references_message_id",
                 schema: "core",
-                table: "journey_scheduled_stop_places",
-                column: "date");
+                table: "journey_message_references",
+                column: "message_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_scheduled_stop_places_journey_id",
+                name: "IX_journey_messages_journey_id",
                 schema: "core",
-                table: "journey_scheduled_stop_places",
+                table: "journey_messages",
                 column: "journey_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_scheduled_stop_places_station_eva_number",
+                name: "IX_journey_stop_place_messages_journey_message_id",
                 schema: "core",
-                table: "journey_scheduled_stop_places",
+                table: "journey_stop_place_messages",
+                column: "journey_message_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journey_stop_places_actual_time_utc",
+                schema: "core",
+                table: "journey_stop_places",
+                column: "actual_time_utc");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journey_stop_places_date",
+                schema: "core",
+                table: "journey_stop_places",
+                column: "date");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journey_stop_places_journey_id",
+                schema: "core",
+                table: "journey_stop_places",
+                column: "journey_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journey_stop_places_planned_time_utc",
+                schema: "core",
+                table: "journey_stop_places",
+                column: "planned_time_utc");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journey_stop_places_station_eva_number",
+                schema: "core",
+                table: "journey_stop_places",
                 column: "station_eva_number");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_scheduled_stop_places_station_eva_number_date",
+                name: "IX_journey_stop_places_station_eva_number_date",
                 schema: "core",
-                table: "journey_scheduled_stop_places",
+                table: "journey_stop_places",
                 columns: new[] { "station_eva_number", "date" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_scheduled_stop_places_station_eva_number_journey_id",
+                name: "IX_journey_stop_places_station_eva_number_journey_id",
                 schema: "core",
-                table: "journey_scheduled_stop_places",
+                table: "journey_stop_places",
                 columns: new[] { "station_eva_number", "journey_id" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_place_informations_information_type",
-                schema: "core",
-                table: "journey_stop_place_informations",
-                column: "information_type");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_place_informations_key",
-                schema: "core",
-                table: "journey_stop_place_informations",
-                column: "key");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_place_informations_scheduled_stop_place_id",
-                schema: "core",
-                table: "journey_stop_place_informations",
-                column: "scheduled_stop_place_id");
 
             migrationBuilder.CreateIndex(
                 name: "IX_journey_transports_category",
@@ -350,6 +424,36 @@ namespace Navigator.Data.Migrations
                 column: "date");
 
             migrationBuilder.CreateIndex(
+                name: "IX_journeys_inserted_at",
+                schema: "core",
+                table: "journeys",
+                column: "inserted_at");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ris_ids_active",
+                schema: "core",
+                table: "ris_ids",
+                column: "active");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ris_ids_discovered_at",
+                schema: "core",
+                table: "ris_ids",
+                column: "discovered_at");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ris_ids_last_inserted",
+                schema: "core",
+                table: "ris_ids",
+                column: "last_inserted");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ris_ids_last_seen",
+                schema: "core",
+                table: "ris_ids",
+                column: "last_seen");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ris_ids_replacement_transport_type",
                 schema: "core",
                 table: "ris_ids",
@@ -373,6 +477,18 @@ namespace Navigator.Data.Migrations
                 table: "station_transports",
                 columns: new[] { "eva_number", "transport_type" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_stations_last_queried",
+                schema: "core",
+                table: "stations",
+                column: "last_queried");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_stations_querying_enabled",
+                schema: "core",
+                table: "stations",
+                column: "querying_enabled");
         }
 
         /// <inheritdoc />
@@ -383,7 +499,11 @@ namespace Navigator.Data.Migrations
                 schema: "statistics");
 
             migrationBuilder.DropTable(
-                name: "journey_stop_place_informations",
+                name: "journey_message_references",
+                schema: "core");
+
+            migrationBuilder.DropTable(
+                name: "journey_stop_place_messages",
                 schema: "core");
 
             migrationBuilder.DropTable(
@@ -403,7 +523,11 @@ namespace Navigator.Data.Migrations
                 schema: "core");
 
             migrationBuilder.DropTable(
-                name: "journey_scheduled_stop_places",
+                name: "journey_messages",
+                schema: "core");
+
+            migrationBuilder.DropTable(
+                name: "journey_stop_places",
                 schema: "core");
 
             migrationBuilder.DropTable(

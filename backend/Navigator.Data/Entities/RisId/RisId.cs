@@ -8,11 +8,15 @@ namespace Navigator.Data.Entities.RisId;
 [Table("ris_ids", Schema = "core")]
 [Index(nameof(TransportType))]
 [Index(nameof(ReplacementTransportType))]
+[Index(nameof(DiscoveredAt))]
+[Index(nameof(LastSeen))]
+[Index(nameof(LastInserted))]
+[Index(nameof(Active))]
 public class RisId
 {
     [Key]
     [Column("id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public required Guid Id { get; set; }
 
     [Column("transport_type")]
@@ -22,13 +26,13 @@ public class RisId
     public TransportType? ReplacementTransportType { get; set; } = null;
 
     [Column("discovered_at")]
-    public required DateTimeOffset DiscoveredAt { get; set; }
+    public required DateTime DiscoveredAt { get; set; }
 
-    [Column("last_seen_at")]
-    public DateTimeOffset? LastSeenAt { get; set; }
+    [Column("last_seen")]
+    public DateTime? LastSeen { get; set; }
 
-    [Column("last_insertion_at")]
-    public DateTimeOffset? LastInsertedAt { get; set; }
+    [Column("last_inserted")]
+    public DateTime? LastInserted { get; set; }
 
     [Column("active")]
     public required bool Active { get; set; }
