@@ -509,6 +509,7 @@ namespace Navigator.Data.Migrations
             modelBuilder.Entity("Navigator.Data.Entities.Statistics.DatabaseSize", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -516,9 +517,9 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("measured_at");
 
-                    b.Property<long>("SizeBytes")
+                    b.Property<long>("SizeInBytes")
                         .HasColumnType("bigint")
-                        .HasColumnName("size_bytes");
+                        .HasColumnName("size_in_bytes");
 
                     b.HasKey("Id");
 

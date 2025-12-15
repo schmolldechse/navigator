@@ -1,0 +1,25 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Navigator.Data.Entities.Statistics;
+using Navigator.Data.Models.Statistics;
+
+namespace Navigator.Data.Repository.StatisticsRepository;
+
+public class StatisticsRepository(
+    DataContext dataContext
+) : IStatisticsRepository
+{
+    public async Task<DatabaseSizeQueryResult?> EstimateDatabaseSizeAsync() => await dataContext.Database
+        .SqlQuery<DatabaseSizeQueryResult>($@"
+            SELECT COALESCE(SUM(pg_total_relation_size(c.oid))::bigint, 0) AS ""SizeInBytes""
+            FROM pg_class c
+                JOIN pg_namespace n ON n.oid = c.relnamespace
+            WHERE n.nspname = 'core'
+            AND c.relkind = 'r'")
+        .SingleOrDefaultAsync();
+
+    public async Task SaveDatabaseSizeAsync(DatabaseSize databaseSize)
+    {
+        await dataContext.DatabaseSizes.AddAsync(databaseSize);
+        await dataContext.SaveChangesAsync();
+    }
+}

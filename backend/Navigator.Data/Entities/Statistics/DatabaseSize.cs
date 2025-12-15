@@ -10,12 +10,12 @@ public class DatabaseSize
 {
     [Key]
     [Column("id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid Id { get; set; }
 
     [Column("measured_at")]
     public required DateTime MeasuredAt { get; set; }
 
-    [Column("size_bytes")]
-    public required long SizeBytes { get; set; }
+    [Column("size_in_bytes")]
+    public required long SizeInBytes { get; set; }
 }

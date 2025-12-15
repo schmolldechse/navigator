@@ -9,6 +9,7 @@ using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Data.Repository.StationRilRepository;
 using Navigator.Data.Repository.StationTransportRepository;
+using Navigator.Data.Repository.StatisticsRepository;
 using Navigator.Data.Repository.TimetableRepository;
 
 namespace Navigator.Data;
@@ -42,6 +43,7 @@ public static class Injection
             .AddTransient<IStationRepository, StationRepository>()
             .AddTransient<IStationRilRepository, StationRilRepository>()
             .AddTransient<IStationTransportRepository, StationTransportRepository>()
+            .AddTransient<IStatisticsRepository, StatisticsRepository>()
             .AddTransient<ITimetableRepository, TimetableRepository>();
         return services;
     }

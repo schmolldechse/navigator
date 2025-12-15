@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251215123515_addStationGeoIndex")]
-    partial class addStationGeoIndex
+    [Migration("20251215135206_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -512,6 +512,7 @@ namespace Navigator.Data.Migrations
             modelBuilder.Entity("Navigator.Data.Entities.Statistics.DatabaseSize", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -519,9 +520,9 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("measured_at");
 
-                    b.Property<long>("SizeBytes")
+                    b.Property<long>("SizeInBytes")
                         .HasColumnType("bigint")
-                        .HasColumnName("size_bytes");
+                        .HasColumnName("size_in_bytes");
 
                     b.HasKey("Id");
 

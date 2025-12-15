@@ -36,7 +36,7 @@ namespace Navigator.Data.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     measured_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    size_bytes = table.Column<long>(type: "bigint", nullable: false)
+                    size_in_bytes = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
