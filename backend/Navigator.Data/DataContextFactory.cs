@@ -20,6 +20,7 @@ public class DataContextFactory : IDesignTimeDbContextFactory<DataContext>
             npgsqlOptions.MapEnum<TimeType>("time_type", "core");
             npgsqlOptions.MapEnum<MessageType>("message_type", "core");
             npgsqlOptions.MapEnum<MessageReferenceType>("message_reference_type", "core");
+            npgsqlOptions.MapEnum<JourneyType>("journey_type", "core");
         });
         return new DataContext(optionsBuilder.Options);
     }

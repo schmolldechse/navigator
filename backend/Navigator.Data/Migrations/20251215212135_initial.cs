@@ -21,6 +21,7 @@ namespace Navigator.Data.Migrations
 
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:core.information_type", "DISRUPTION,JOURNEY_ATTRIBUTE,MESSAGE,RIS_CAUSE_REASON,RIS_QUALITY_DEVIATION")
+                .Annotation("Npgsql:Enum:core.journey_type", "EXTRA,REGULAR,RELIEF,REPLACEMENT")
                 .Annotation("Npgsql:Enum:core.message_reference_type", "ATTACHMENT,IMAGE,LINK")
                 .Annotation("Npgsql:Enum:core.message_type", "ATTRIBUTE,DISRUPTION,NOTE,RIS_CAUSE,RIS_QUALITY_DEVIATION")
                 .Annotation("Npgsql:Enum:core.schedule_type", "ARRIVAL,DEPARTURE")
@@ -103,7 +104,8 @@ namespace Navigator.Data.Migrations
                     date = table.Column<DateOnly>(type: "date", nullable: false),
                     inserted_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     administration_id = table.Column<Guid>(type: "uuid", nullable: false),
-                    cancelled = table.Column<bool>(type: "boolean", nullable: false)
+                    cancelled = table.Column<bool>(type: "boolean", nullable: false),
+                    journey_type = table.Column<JourneyType>(type: "core.journey_type", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -428,6 +430,12 @@ namespace Navigator.Data.Migrations
                 schema: "core",
                 table: "journeys",
                 column: "inserted_at");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_journeys_journey_type",
+                schema: "core",
+                table: "journeys",
+                column: "journey_type");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ris_ids_active",
