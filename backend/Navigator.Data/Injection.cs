@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Navigator.Data.Enums;
 using Navigator.Data.Infrastructure;
 using Navigator.Data.Repository.AdministrationRepository;
+using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Data.Repository.StationRilRepository;
@@ -26,6 +27,9 @@ public static class Injection
                 npgsqlOptions.MapEnum<InformationType>("information_type", "core");
                 npgsqlOptions.MapEnum<ScheduleType>("schedule_type", "core");
                 npgsqlOptions.MapEnum<TransportType>("transport_type", "core");
+                npgsqlOptions.MapEnum<TimeType>("time_type", "core");
+                npgsqlOptions.MapEnum<MessageType>("message_type", "core");
+                npgsqlOptions.MapEnum<MessageReferenceType>("message_reference_type", "core");
             }));
 
         services.AddHttpClient();
@@ -33,6 +37,7 @@ public static class Injection
 
         services
             .AddTransient<IAdministrationRepository, AdministrationRepository>()
+            .AddTransient<IJourneyRepository, JourneyRepository>()
             .AddTransient<IRisIdRepository, RisIdRepository>()
             .AddTransient<IStationRepository, StationRepository>()
             .AddTransient<IStationRilRepository, StationRilRepository>()

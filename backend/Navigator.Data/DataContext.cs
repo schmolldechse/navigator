@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Navigator.Data.Entities.Journey;
+using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Entities.RisId;
 using Navigator.Data.Entities.Station;
 using Navigator.Data.Entities.Statistics;
@@ -20,8 +21,11 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<Administration> Administrations { get; set; }
     public DbSet<Journey> Journeys { get; set; }
     public DbSet<JourneyTransport> JourneyTransports { get; set; }
-    public DbSet<JourneyScheduledStopPlace> JourneyScheduledStopPlaces { get; set; }
-    public DbSet<JourneyStopPlaceInformation> JourneyStopPlaceInformation { get; set; }
+    public DbSet<JourneyStopPlace> JourneyStopPlaces { get; set; }
+    // journey messages
+    public DbSet<JourneyMessage> JourneyMessages { get; set; }
+    public DbSet<JourneyMessageReference> JourneyMessageReferences { get; set; }
+    public DbSet<JourneyStopPlaceMessage> JourneyStopPlaceMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -47,20 +51,38 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
                 .WithOne(transport => transport.Journey)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasMany(journey => journey.ScheduledStopPlaces)
+            entity.HasMany(journey => journey.StopPlaces)
                 .WithOne(stopPlace => stopPlace.Journey)
                 .HasForeignKey(stopPlace => stopPlace.JourneyId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(journey => journey.Messages)
+                .WithOne(message => message.Journey)
+                .HasForeignKey(message => message.JourneyId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
-        modelBuilder.Entity<JourneyScheduledStopPlace>(entity =>
+        modelBuilder.Entity<JourneyStopPlace>(entity =>
         {
             entity.Property(stopPlace => stopPlace.Delay)
-                .HasComputedColumnSql("EXTRACT(EPOCH FROM (actual_time - planned_time))::integer", stored: true);
+                .HasComputedColumnSql("EXTRACT(EPOCH FROM (actual_time_utc - planned_time_utc))::integer", stored: true);
 
-            entity.HasMany(stopPlace => stopPlace.Informations)
-                .WithOne(info => info.ScheduledStopPlace)
-                .HasForeignKey(info => info.ScheduledStopPlaceId)
+            entity.HasMany(stopPlace => stopPlace.Messages)
+                .WithOne(join => join.StopPlace)
+                .HasForeignKey(join => join.StopPlaceId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<JourneyMessage>(entity =>
+        {
+            entity.HasMany(message => message.References)
+                .WithOne(reference => reference.Message)
+                .HasForeignKey(reference => reference.MessageId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(message => message.JourneyStopPlaceMessages)
+                .WithOne(join => join.Message)
+                .HasForeignKey(join => join.MessageId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 

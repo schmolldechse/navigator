@@ -15,8 +15,8 @@ public class RisIdRepository(DataContext dataContext) : IRisIdRepository
     {
         var risIds = await dataContext.RisIds
             .Where(risId => request.OnlyIncludeActive ? risId.Active : true)
-            .Where(risId => risId.LastSeenAt == null || risId.LastSeenAt < request.LastSeen.Date)
-            .OrderBy(risId => risId.LastSeenAt)
+            .Where(risId => risId.LastSeen == null || risId.LastSeen < request.LastSeen)
+            .OrderBy(risId => risId.LastSeen)
             .Take(15_000)
             .ToListAsync();
 

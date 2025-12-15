@@ -142,7 +142,6 @@ public class StationRepository(
                 continue;
             }
 
-            station.LastQueried = incomingStation.LastQueried;
             station.QueryingEnabled = incomingStation.QueryingEnabled;
             station.LastQueried = incomingStation.LastQueried;
 

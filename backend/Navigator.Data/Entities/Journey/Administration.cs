@@ -11,7 +11,7 @@ public class Administration
     [Key]
     [Column("id")]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public required Guid Id { get; set; }
+    public Guid Id { get; set; }
 
     [MaxLength(32)]
     [Column("administration_id")]

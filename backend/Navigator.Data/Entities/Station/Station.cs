@@ -1,13 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Navigator.Data.Entities.Station;
 
 [Table("stations", Schema = "core")]
+[Index(nameof(QueryingEnabled))]
+[Index(nameof(LastQueried))]
 public class Station
 {
     [Key]
     [Column("eva_number")]
+    [DatabaseGenerated(DatabaseGeneratedOption.None)]
     public required int EvaNumber { get; set; }
 
     [Column("name")]
@@ -26,9 +30,9 @@ public class Station
     public required bool QueryingEnabled { get; set; }
 
     [Column("last_queried")]
-    public DateTimeOffset? LastQueried { get; set; }
+    public DateTime? LastQueried { get; set; }
 
-    public ICollection<StationRil100> Ril100 { get; set; } = new List<StationRil100>();
+    public virtual ICollection<StationRil100> Ril100 { get; set; } = new List<StationRil100>();
 
-    public ICollection<StationTransport> Transports { get; set; } = new List<StationTransport>();
+    public virtual ICollection<StationTransport> Transports { get; set; } = new List<StationTransport>();
 }
