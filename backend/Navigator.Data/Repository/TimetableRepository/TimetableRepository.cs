@@ -23,8 +23,8 @@ public class TimetableRepository(
             _risBoardsUrl,
             "arrivals",
             request.EvaNumber,
-            request.TimeStart.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-            request.TimeStart.AddMinutes(request.Duration).ToString("yyyy-MM-ddTHH:mm:ssZ")
+            Uri.EscapeDataString(request.TimeStart.ToString("yyyy-MM-ddTHH:mm:sszzz")),
+            Uri.EscapeDataString(request.TimeStart.AddMinutes(request.Duration).ToString("yyyy-MM-ddTHH:mm:sszzz"))
         );
         logger.LogInformation("Fetching arrivals from URL: {Url}", url);
         var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, url));
@@ -56,8 +56,8 @@ public class TimetableRepository(
             _risBoardsUrl,
             "departures",
             request.EvaNumber,
-            request.TimeStart.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-            request.TimeStart.AddMinutes(request.Duration).ToString("yyyy-MM-ddTHH:mm:ssZ")
+            Uri.EscapeDataString(request.TimeStart.ToString("yyyy-MM-ddTHH:mm:sszzz")),
+            Uri.EscapeDataString(request.TimeStart.AddMinutes(request.Duration).ToString("yyyy-MM-ddTHH:mm:sszzz"))
         );
         var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, url));
         if (!response.IsSuccessStatusCode)

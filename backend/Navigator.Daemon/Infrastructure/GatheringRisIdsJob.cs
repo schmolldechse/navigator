@@ -35,13 +35,15 @@ public class GatheringRisIdsJob(
             randomStation.EvaNumber,
             lastQueried);
 
+        // it is necessary to create separate time variable here, we want to use ISO 8601 format with offset when querying the boards
+        DateTimeOffset boardRequestTime = lastQueried.Value;
         var (arrivalBoard1, arrivalBoard2) = (
-            timetableRepository.GetArrivalsAsync(new() { EvaNumber = randomStation.EvaNumber, TimeStart = lastQueried.Value!.Date, Duration = 720 }), 
-            timetableRepository.GetArrivalsAsync(new() { EvaNumber = randomStation.EvaNumber, TimeStart = lastQueried.Value!.Date.AddHours(12), Duration = 720 })
+            timetableRepository.GetArrivalsAsync(new() { EvaNumber = randomStation.EvaNumber, TimeStart = boardRequestTime.Date, Duration = 720 }), 
+            timetableRepository.GetArrivalsAsync(new() { EvaNumber = randomStation.EvaNumber, TimeStart = boardRequestTime.Date.AddHours(12), Duration = 720 })
         );
         var (departureBoard1, departureBoard2) = (
-            timetableRepository.GetDeparturesAsync(new() { EvaNumber = randomStation.EvaNumber, TimeStart = lastQueried.Value!.Date, Duration = 720 }),
-            timetableRepository.GetDeparturesAsync(new() { EvaNumber = randomStation.EvaNumber, TimeStart = lastQueried.Value!.Date.AddHours(12), Duration = 720 })
+            timetableRepository.GetDeparturesAsync(new() { EvaNumber = randomStation.EvaNumber, TimeStart = boardRequestTime.Date, Duration = 720 }),
+            timetableRepository.GetDeparturesAsync(new() { EvaNumber = randomStation.EvaNumber, TimeStart = boardRequestTime.Date.AddHours(12), Duration = 720 })
         );
         await Task.WhenAll(arrivalBoard1, arrivalBoard2, departureBoard1, departureBoard2);
         var boards = (
