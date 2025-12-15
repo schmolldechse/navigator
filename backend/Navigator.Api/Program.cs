@@ -20,6 +20,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddServices(builder.Configuration);
 
 builder.Services.AddAutoMapper(typeof(StationProfile))
+    .AddAutoMapper(typeof(StatisticsProfile))
     .AddAutoMapper(typeof(TimetableProfile));
 
 var app = builder.Build();
