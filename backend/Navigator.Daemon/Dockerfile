@@ -4,7 +4,6 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 8080
 
 # This stage is used to build the service project
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
@@ -12,21 +11,21 @@ ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 
 # Copy Navigator dependencies
-COPY ["Navigator.Api/Navigator.Api.csproj", "Navigator.Api/"]
+COPY ["Navigator.Daemon/Navigator.Daemon.csproj", "Navigator.Daemon/"]
 COPY ["Navigator.Data/Navigator.Data.csproj", "Navigator.Data/"]
 
-RUN dotnet restore "./Navigator.Api/Navigator.Api.csproj"
+RUN dotnet restore "./Navigator.Daemon/Navigator.Daemon.csproj"
 COPY . .
-WORKDIR "/src/Navigator.Api"
-RUN dotnet build "./Navigator.Api.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/Navigator.Daemon"
+RUN dotnet build "./Navigator.Daemon.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 # This stage is used to publish the service project to be copied to the final stage
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./Navigator.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "./Navigator.Daemon.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 # This stage is used in production or when running from VS in regular mode (Default when not using the Debug configuration)
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "Navigator.Api.dll"]
+ENTRYPOINT ["dotnet", "Navigator.Daemon.dll"]
