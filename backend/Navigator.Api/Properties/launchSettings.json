@@ -3,7 +3,11 @@
     "http": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "BOARDS_CLIENT_ID": "",
+        "BOARDS_API_KEY": "",
+        "JOURNEYS_CLIENT_ID": "",
+        "JOURNEYS_API_KEY": ""
       },
       "dotnetRunMessages": true,
       "applicationUrl": "http://localhost:5019"
@@ -11,7 +15,11 @@
     "https": {
       "commandName": "Project",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "BOARDS_CLIENT_ID": "",
+        "BOARDS_API_KEY": "",
+        "JOURNEYS_CLIENT_ID": "",
+        "JOURNEYS_API_KEY": ""
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7243;http://localhost:5019"

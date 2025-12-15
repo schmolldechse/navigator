@@ -22,6 +22,7 @@ namespace Navigator.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "information_type", new[] { "DISRUPTION", "JOURNEY_ATTRIBUTE", "MESSAGE", "RIS_CAUSE_REASON", "RIS_QUALITY_DEVIATION" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "journey_type", new[] { "EXTRA", "REGULAR", "RELIEF", "REPLACEMENT" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "message_reference_type", new[] { "ATTACHMENT", "IMAGE", "LINK" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "message_type", new[] { "ATTRIBUTE", "DISRUPTION", "NOTE", "RIS_CAUSE", "RIS_QUALITY_DEVIATION" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "schedule_type", new[] { "ARRIVAL", "DEPARTURE" });
@@ -87,6 +88,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("inserted_at");
 
+                    b.Property<JourneyType>("JourneyType")
+                        .HasColumnType("core.journey_type")
+                        .HasColumnName("journey_type");
+
                     b.HasKey("Id");
 
                     b.HasIndex("AdministrationId");
@@ -96,6 +101,8 @@ namespace Navigator.Data.Migrations
                     b.HasIndex("Date");
 
                     b.HasIndex("InsertedAt");
+
+                    b.HasIndex("JourneyType");
 
                     b.ToTable("journeys", "core");
                 });

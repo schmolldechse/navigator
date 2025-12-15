@@ -1,4 +1,5 @@
 using Navigator.Api.Converters;
+using Navigator.Api.Mapping;
 using Navigator.Data;
 using Navigator.Data.Mapping;
 using Scalar.AspNetCore;
@@ -18,7 +19,8 @@ builder.Services.AddOpenApi();
 // include Navigator.Data
 builder.Services.AddServices(builder.Configuration);
 
-builder.Services.AddAutoMapper(typeof(StationProfile));
+builder.Services.AddAutoMapper(typeof(StationProfile))
+    .AddAutoMapper(typeof(TimetableProfile));
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
@@ -28,6 +30,18 @@ if (app.Environment.IsDevelopment())
     {
         options.WithTitle("Navigator Backend");
         options.WithTheme(ScalarTheme.Default);
+    });
+
+    app.MapGet("/", [ExcludeFromDescription] () => Results.Redirect("/swagger"));
+    app.MapGet("/swagger.json", [ExcludeFromDescription] async (HttpContext context) =>
+    {
+        var response = await context.RequestServices
+            .GetRequiredService<IHttpClientFactory>()
+            .CreateClient()
+            .GetAsync($"{context.Request.Scheme}://{context.Request.Host}/openapi/v1.json");
+
+        var content = await response.Content.ReadAsStringAsync();
+        return Results.Text(content, "application/json");
     });
 }
 

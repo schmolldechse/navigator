@@ -23,13 +23,13 @@ public class StationController(
     /// Search for stations based on the provided criteria.
     /// </summary>
     [HttpPost]
-    [ProducesResponseType<StationDTO[]>(StatusCodes.Status200OK)]
+    [ProducesResponseType<IEnumerable<StationDTO>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> SearchStations([FromBody] StationSearchRequestDTO dto)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var stations = mapper.Map<StationDTO[]>(await stationsRepository.GetVendoStationsAsync(mapper.Map<VendoStationsBySearchRequest>(dto)));
+        var stations = mapper.Map<IEnumerable<StationDTO>>(await stationsRepository.GetVendoStationsAsync(mapper.Map<VendoStationsBySearchRequest>(dto)));
         var evaNumbers = stations.Select(station => station.EvaNumber).ToList();
 
         var (ril100, transports) = (
@@ -51,7 +51,7 @@ public class StationController(
     /// Search for stations based on geographic coordinates.
     /// <summary>
     [HttpPost("nearby")]
-    [ProducesResponseType<StationSummaryDTO[]>(StatusCodes.Status200OK)]
+    [ProducesResponseType<IEnumerable<StationSummaryDTO>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> SearchStationByCoordinates([FromBody] CoordinatesRequestDTO dto)

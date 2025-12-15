@@ -17,6 +17,7 @@ public class RisJourneysProfile : Profile
             .ForMember(dest => dest.Date, opt => opt.Ignore())
             .ForMember(dest => dest.Cancelled, opt => opt.MapFrom(src => src.Info.JourneyCancelled))
             .ForMember(dest => dest.Transport, opt => opt.MapFrom(src => MapJourneyTransport(src)))
+            .ForMember(dest => dest.JourneyType, opt => opt.MapFrom(src => MapJourneyOrThrow(src.Info.Type)))
             .ForMember(dest => dest.InsertedAt, opt => opt.Ignore())
             .ForMember(dest => dest.StopPlaces, opt => opt.Ignore())
             .ForMember(dest => dest.Messages, opt => opt.Ignore())
@@ -259,7 +260,16 @@ public class RisJourneysProfile : Profile
         return evaNumber;
     }
 
-    private Navigator.Data.Enums.TimeType MapTimeOrThrow(string? timeType) => timeType switch
+    private Navigator.Data.Enums.JourneyType MapJourneyOrThrow(string? journeyType) => journeyType?.ToUpperInvariant() switch
+    {
+        "REGULAR" => Navigator.Data.Enums.JourneyType.Regular,
+        "REPLACEMENT" => Navigator.Data.Enums.JourneyType.Replacement,
+        "RELIEF" => Navigator.Data.Enums.JourneyType.Relief,
+        "EXTRA" => Navigator.Data.Enums.JourneyType.Extra,
+        _ => throw new AutoMapperMappingException($"Value '{journeyType}' is not a valid JourneyType"),
+    };
+
+    private Navigator.Data.Enums.TimeType MapTimeOrThrow(string? timeType) => timeType?.ToUpperInvariant() switch
     {
         "SCHEDULE" => Navigator.Data.Enums.TimeType.Schedule,
         "PREVIEW" => Navigator.Data.Enums.TimeType.Preview,
