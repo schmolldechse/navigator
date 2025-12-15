@@ -33,8 +33,8 @@ public class StationController(
         var evaNumbers = stations.Select(station => station.EvaNumber).ToList();
 
         var (ril100, transports) = (
-            await stationRilRepository.GetRilByEvaNumbers(evaNumbers.ToArray()), 
-            await stationTransportRepository.GetTransportByEvaNumbers(evaNumbers.ToArray())
+            await stationRilRepository.GetRilByEvaNumbersAsync(evaNumbers.ToArray()), 
+            await stationTransportRepository.GetTransportByEvaNumbersAsync(evaNumbers.ToArray())
         );
 
         foreach (var station in stations)
