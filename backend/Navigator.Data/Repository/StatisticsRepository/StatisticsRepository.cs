@@ -8,6 +8,11 @@ public class StatisticsRepository(
     DataContext dataContext
 ) : IStatisticsRepository
 {
+    public async Task<IEnumerable<DatabaseSize>> GetSizesByTimeframeAsync(DateTimeOffset start, DateTimeOffset end) => await dataContext.DatabaseSizes
+        .Where(size => size.MeasuredAt >= start.UtcDateTime && size.MeasuredAt <= end.UtcDateTime)
+        .OrderBy(size => size.MeasuredAt)
+        .ToListAsync();
+
     public async Task<DatabaseSizeQueryResult?> EstimateDatabaseSizeAsync() => await dataContext.Database
         .SqlQuery<DatabaseSizeQueryResult>($@"
             SELECT COALESCE(SUM(pg_total_relation_size(c.oid))::bigint, 0) AS ""SizeInBytes""
