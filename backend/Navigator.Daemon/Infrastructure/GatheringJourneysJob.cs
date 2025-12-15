@@ -124,6 +124,8 @@ public class GatheringJourneysJob(
                 mappedJourney.Administration = journeyAdministration!.Result;
             }
             await journeyRepository.SaveJourneysBatchAsync(mappedJourneys);
+
+            logger.LogInformation("Gathered {Count} journeys for {RisIdCount} RisIds.", mappedJourneys.Count(), successfulRisIds.Count);
         }
     }
 
