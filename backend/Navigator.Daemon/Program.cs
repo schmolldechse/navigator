@@ -19,5 +19,7 @@ builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete
 
 builder.Services.AddAutoMapper(typeof(RisJourneysProfile));
 
+builder.Services.Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(2));
+
 var host = builder.Build();
 host.Run();
