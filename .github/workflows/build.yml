@@ -5,50 +5,29 @@ on:
   push:
     branches: [master]
     paths:
-      - "daemon/**"
       - "backend/**"
   pull_request:
     paths:
-      - "daemon/**"
       - "backend/**"
 
 jobs:
-  check-daemon-formatting:
-    name: Check Code Formatting for Daemon
+  check-backend-formatting:
+    name: Check Code Formatting for Backend
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "9.0.x"
+          dotnet-version: "10.0.x"
 
       - name: Install dotnet-format
         run: dotnet tool install -g dotnet-format
 
       - name: Run dotnet-format
-        run: dotnet format daemon/daemon.sln --verify-no-changes
-
-  check-backend-formatting:
-    name: Check Code Formatting for Backend
-    runs-on: macos-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Swift
-        uses: swift-actions/setup-swift@v2
-        with:
-          swift-version: "6.1.0"
-
-      - name: Verify Swift Version
-        run: swift --version
-
-      - name: Run swift format
-        run: swift format lint --recursive Sources/ Tests/
-        working-directory: backend
+        run: dotnet format backend/backend.slnx --verify-no-changes
 
   check-frontend-formatting:
     name: Check Code Formatting for Frontend

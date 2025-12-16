@@ -275,7 +275,7 @@ public class RisJourneysProfile : Profile
         "PREVIEW" => Navigator.Data.Enums.TimeType.Preview,
         "REAL" => Navigator.Data.Enums.TimeType.Real,
         _ => throw new AutoMapperMappingException($"Value '{timeType}' is not a valid TimeType"),
-    }; 
+    };
 
     private Navigator.Data.Enums.ScheduleType MapScheduleOrThrow(RisJourneys.EventType eventType) => eventType switch
     {
@@ -286,11 +286,11 @@ public class RisJourneysProfile : Profile
 
     private JourneyTransport MapJourneyTransport(RisJourneys.JourneyEventBased source)
     {
-        if (source.Info.TransportAtStart == null) 
+        if (source.Info.TransportAtStart == null)
             throw new AutoMapperMappingException($"Cannot map Journey {source.JourneyID}: Missing 'Info.TransportAtStart'.");
 
         TransportType? transportType = TransportTypeConverter.StringTransportToNavigatorTransport(source.Info.TransportAtStart.Type);
-        if (transportType == null) 
+        if (transportType == null)
             throw new AutoMapperMappingException($"Cannot map Journey {source.JourneyID}: Invalid or unknown Transport Type '{source.Info.TransportAtStart.Type}'");
 
         TransportType? replacementTransportType = null;

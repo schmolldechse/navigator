@@ -140,7 +140,7 @@ public class GatheringJourneysJob(
                 DateTimeKind.Utc
             );
         }
-           
+
         return new DateTime(
             DateOnly.FromDateTime(risId.LastSeen.Value.Date.AddDays(1)),
             TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),

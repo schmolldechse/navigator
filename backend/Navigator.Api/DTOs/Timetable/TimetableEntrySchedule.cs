@@ -13,7 +13,7 @@ public class TimetableEntrySchedule
     [JsonPropertyName("delay")]
     public int Delay
     {
-        get => (int) (ActualTime - PlannedTime).TotalSeconds;
+        get => (int)(ActualTime - PlannedTime).TotalSeconds;
         private set => _ = value;
     }
 

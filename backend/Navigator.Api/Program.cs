@@ -24,27 +24,24 @@ builder.Services.AddAutoMapper(typeof(StationProfile))
     .AddAutoMapper(typeof(TimetableProfile));
 
 var app = builder.Build();
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+app.MapScalarApiReference("/swagger", options =>
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference("/swagger", options =>
-    {
-        options.WithTitle("Navigator Backend");
-        options.WithTheme(ScalarTheme.Default);
-    });
+    options.WithTitle("Navigator Backend");
+    options.WithTheme(ScalarTheme.Default);
+});
 
-    app.MapGet("/", [ExcludeFromDescription] () => Results.Redirect("/swagger"));
-    app.MapGet("/swagger.json", [ExcludeFromDescription] async (HttpContext context) =>
-    {
-        var response = await context.RequestServices
-            .GetRequiredService<IHttpClientFactory>()
-            .CreateClient()
-            .GetAsync($"{context.Request.Scheme}://{context.Request.Host}/openapi/v1.json");
+app.MapGet("/", [ExcludeFromDescription] () => Results.Redirect("/swagger"));
+app.MapGet("/swagger.json", [ExcludeFromDescription] async (HttpContext context) =>
+{
+    var response = await context.RequestServices
+        .GetRequiredService<IHttpClientFactory>()
+        .CreateClient()
+        .GetAsync($"{context.Request.Scheme}://{context.Request.Host}/openapi/v1.json");
 
-        var content = await response.Content.ReadAsStringAsync();
-        return Results.Text(content, "application/json");
-    });
-}
+    var content = await response.Content.ReadAsStringAsync();
+    return Results.Text(content, "application/json");
+});
 
 app.UseHttpsRedirection();
 app.UseAuthorization();

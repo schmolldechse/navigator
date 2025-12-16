@@ -30,7 +30,7 @@ public class JourneyRepository(
             SeparateCancelled = false,
             JourneyIDs = request.Select(entry => entry.FetchingDate.ToString("yyyyMMdd") + "-" + entry.Id).ToArray()
         }), Encoding.UTF8, "application/json");
-        
+
         var response = await httpClient.SendAsync(message);
         if (!response.IsSuccessStatusCode)
         {

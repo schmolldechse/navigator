@@ -11,7 +11,7 @@ public class DataContextFactory : IDesignTimeDbContextFactory<DataContext>
     {
         var optionsBuilder = new DbContextOptionsBuilder<DataContext>();
         optionsBuilder.UseNpgsql(
-            "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=password", 
+            "Host=localhost;Port=5432;Database=postgres;Username=postgres;Password=password",
             npgsqlOptions =>
         {
             npgsqlOptions.MapEnum<InformationType>("information_type", "core");

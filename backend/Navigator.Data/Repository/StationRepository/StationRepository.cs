@@ -14,8 +14,8 @@ using System.Web;
 namespace Navigator.Data.Repository.StationRepository;
 
 public class StationRepository(
-    ProxyHttpClientFactory proxyHttpClientFactory, 
-    DataContext dataContext, 
+    ProxyHttpClientFactory proxyHttpClientFactory,
+    DataContext dataContext,
     ILogger<StationRepository> logger
 ) : IStationRepository
 {

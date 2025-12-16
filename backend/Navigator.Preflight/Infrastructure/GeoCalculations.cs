@@ -33,8 +33,8 @@ public class GeoCalculations
         var quadrantCol = quarter % 2;
 
         return new(
-            North: boundingBox.North - quadrantRow * halfY, 
-            West: boundingBox.West + quadrantCol * halfX, 
+            North: boundingBox.North - quadrantRow * halfY,
+            West: boundingBox.West + quadrantCol * halfX,
             South: boundingBox.South + (1 - quadrantRow) * halfY,
             East: boundingBox.East - (1 - quadrantCol) * halfX
         );
