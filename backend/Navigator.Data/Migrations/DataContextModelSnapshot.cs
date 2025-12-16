@@ -374,8 +374,9 @@ namespace Navigator.Data.Migrations
 
             modelBuilder.Entity("Navigator.Data.Entities.RisId.RisId", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .HasColumnType("uuid")
+                    b.Property<string>("Id")
+                        .HasMaxLength(73)
+                        .HasColumnType("character varying(73)")
                         .HasColumnName("id");
 
                     b.Property<bool>("Active")

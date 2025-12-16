@@ -79,12 +79,9 @@ public class GatheringRisIdsJob(
                 var datePart = risId.JourneyID.Substring(0, 8);
                 if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out _)) return null;
 
-                Guid? journeyId = Guid.TryParse(risId.JourneyID.Substring(9), out var parsedId) ? parsedId : null;
-                if (journeyId == null) return null;
-
                 return new RisId()
                 {
-                    Id = parsedId,
+                    Id = risId.JourneyID.Substring(9),
                     TransportType = TransportTypeConverter.BoardsTransportToNavigatorTransport(risId.Type),
                     ReplacementTransportType = TransportTypeConverter.StringTransportToNavigatorTransport(risId.ReplacementTransport?.RealType),
                     DiscoveredAt = discoveryDate,

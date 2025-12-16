@@ -54,10 +54,10 @@ public class GatheringJourneysJob(
                     if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out _))
                         return null;
 
-                    return Guid.TryParse(erroneousJourney.JourneyID.Substring(9), out var parsedId) ? (Guid?) parsedId : null;
+                    return erroneousJourney.JourneyID.Substring(9);
                 })
                 .Where(journeyId => journeyId != null)
-                .Select(journeyId => journeyId!.Value)
+                .Select(journeyId => journeyId!)
                 .ToHashSet();
             var failedRisIds = risIds
                 .Where(risId => journeyIds.Contains(risId.Id))
@@ -83,10 +83,10 @@ public class GatheringJourneysJob(
                     if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out _))
                         return null;
 
-                    return Guid.TryParse(journey.JourneyID.Substring(9), out var parsedId) ? (Guid?)parsedId : null;
+                    return journey.JourneyID.Substring(9);
                 })
                 .Where(journeyId => journeyId != null)
-                .Select(journeyId => journeyId!.Value)
+                .Select(journeyId => journeyId!)
                 .ToHashSet();
             var successfulRisIds = risIds
                 .Where(risId => journeyIds.Contains(risId.Id))

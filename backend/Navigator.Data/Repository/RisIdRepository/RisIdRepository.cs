@@ -7,7 +7,7 @@ namespace Navigator.Data.Repository.RisIdRepository;
 
 public class RisIdRepository(DataContext dataContext) : IRisIdRepository
 {
-    public async Task<RisId?> GetRisIdAsync(Guid id) => await dataContext.RisIds
+    public async Task<RisId?> GetRisIdAsync(string id) => await dataContext.RisIds
         .Where(risId => risId.Id == id)
         .FirstOrDefaultAsync();
 
@@ -24,7 +24,7 @@ public class RisIdRepository(DataContext dataContext) : IRisIdRepository
         return risIds.Take(request.Limit);
     }
 
-    public async Task<IEnumerable<RisId>> GetRisIdsBatchAsync(IEnumerable<Guid> ids) => await dataContext.RisIds
+    public async Task<IEnumerable<RisId>> GetRisIdsBatchAsync(IEnumerable<string> ids) => await dataContext.RisIds
         .Where(risId => ids.Contains(risId.Id))
         .ToListAsync();
 

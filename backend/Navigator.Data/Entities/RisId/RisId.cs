@@ -14,10 +14,11 @@ namespace Navigator.Data.Entities.RisId;
 [Index(nameof(Active))]
 public class RisId
 {
+    /// This is because RIS IDs can have a UUID-UUID format.
     [Key]
     [Column("id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.None)]
-    public required Guid Id { get; set; }
+    [MaxLength(73)]
+    public required string Id { get; set; }
 
     [Column("transport_type")]
     public required TransportType TransportType { get; set; }

@@ -64,7 +64,7 @@ namespace Navigator.Data.Migrations
                 schema: "core",
                 columns: table => new
                 {
-                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    id = table.Column<string>(type: "character varying(73)", maxLength: 73, nullable: false),
                     transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: false),
                     replacement_transport_type = table.Column<TransportType>(type: "core.transport_type", nullable: true),
                     discovered_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
