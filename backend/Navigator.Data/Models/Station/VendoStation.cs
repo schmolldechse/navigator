@@ -13,8 +13,15 @@ public class VendoStation
     [JsonPropertyName("locationId")]
     public required string LocationId { get; set; }
 
+    /// <summary>
+    /// EvaNumber for the station 
+    /// </summary>
+    /// <remarks>
+    /// It happens that the EvaNumber is not available when the location type is "ADR" (address)
+    /// See <see cref="https://github.com/schmolldechse/navigator/issues/172">issue #172</see> for details
+    /// </remarks>
     [JsonPropertyName("evaNr")]
-    public required string EvaNumber { get; set; }
+    public string? EvaNumber { get; set; }
 
     [JsonPropertyName("coordinates")]
     public required CoordinatesResponse Coordinates { get; set; }

@@ -19,7 +19,7 @@ public class StationProfile : Profile
 
         CreateMap<VendoStation, StationDTO>()
             .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name))
-            .ForMember(dest => dest.EvaNumber, opt => opt.MapFrom(src => int.Parse(src.EvaNumber)))
+            .ForMember(dest => dest.EvaNumber, opt => opt.MapFrom(src => int.Parse(src.EvaNumber!)))
             .ForMember(dest => dest.Position, opt => opt.MapFrom(src => src.Coordinates))
             .ForMember(dest => dest.Transports, opt => opt.MapFrom(src => src.Products.Select(product => TransportTypeConverter.StringTransportToNavigatorTransport(product))));
 

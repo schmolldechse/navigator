@@ -20,6 +20,6 @@ public class MeasuredTimeframeStatistic
     [JsonPropertyName("changedBy")]
     public required long ChangedBy { get; set; }
 
-    [JsonPropertyName("Total")]
+    [JsonPropertyName("total")]
     public required long Total { get; set; }
 }

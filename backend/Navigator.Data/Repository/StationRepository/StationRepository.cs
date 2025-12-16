@@ -42,7 +42,7 @@ public class StationRepository(
         }
 
         var stations = JsonSerializer.Deserialize<VendoStation[]>(await response.Content.ReadAsStringAsync());
-        return stations ?? Enumerable.Empty<VendoStation>();
+        return stations?.Where(station => !string.IsNullOrEmpty(station.EvaNumber)) ?? Enumerable.Empty<VendoStation>();
     }
 
     public async Task<IEnumerable<RisStations.StopPlaceSearchResult>> GetRisStationsByCoordinatesAsync(RisStationsByCoordinatesRequest request)
