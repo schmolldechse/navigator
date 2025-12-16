@@ -48,10 +48,19 @@ public class ProxyHttpClientFactory : IDisposable
                 PooledConnectionLifetime = TimeSpan.FromMinutes(15)
             };
 
+            var uri = new Uri(key);
             var proxy = new WebProxy(key)
             {
                 UseDefaultCredentials = false
             };
+
+            if (!string.IsNullOrEmpty(uri.UserInfo))
+            {
+                var userInfoParts = uri.UserInfo.Split(':', 2);
+                var username = userInfoParts[0];
+                var password = userInfoParts.Length > 1 ? userInfoParts[1] : string.Empty;
+                proxy.Credentials = new NetworkCredential(username, password);
+            }
 
             return new SocketsHttpHandler
             {
