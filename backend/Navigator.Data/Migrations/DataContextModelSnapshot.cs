@@ -200,8 +200,6 @@ namespace Navigator.Data.Migrations
 
                     b.HasIndex("PlannedTimeUtc");
 
-                    b.HasIndex("StationEvaNumber");
-
                     b.HasIndex("StationEvaNumber", "Date");
 
                     b.HasIndex("StationEvaNumber", "JourneyId");
@@ -322,6 +320,8 @@ namespace Navigator.Data.Migrations
 
                     b.HasIndex("JourneyId");
 
+                    b.HasIndex("Type");
+
                     b.ToTable("journey_messages", "core");
                 });
 
@@ -369,6 +369,8 @@ namespace Navigator.Data.Migrations
 
                     b.HasIndex("MessageId");
 
+                    b.HasIndex("StopPlaceId");
+
                     b.ToTable("journey_stop_place_messages", "core");
                 });
 
@@ -405,17 +407,15 @@ namespace Navigator.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Active");
-
                     b.HasIndex("DiscoveredAt");
 
                     b.HasIndex("LastInserted");
 
-                    b.HasIndex("LastSeen");
-
                     b.HasIndex("ReplacementTransportType");
 
                     b.HasIndex("TransportType");
+
+                    b.HasIndex("Active", "LastSeen");
 
                     b.ToTable("ris_ids", "core");
                 });
@@ -453,9 +453,7 @@ namespace Navigator.Data.Migrations
 
                     b.HasKey("EvaNumber");
 
-                    b.HasIndex("LastQueried");
-
-                    b.HasIndex("QueryingEnabled");
+                    b.HasIndex("QueryingEnabled", "LastQueried");
 
                     b.ToTable("stations", "core");
                 });

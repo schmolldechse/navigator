@@ -5,6 +5,8 @@ namespace Navigator.Data.Entities.Journey.Message;
 
 [Table("journey_stop_place_messages", Schema = "core")]
 [PrimaryKey(nameof(StopPlaceId), nameof(MessageId))]
+[Index(nameof(MessageId))]
+[Index(nameof(StopPlaceId))]
 public class JourneyStopPlaceMessage
 {
     [Column("journey_stop_place_id")]

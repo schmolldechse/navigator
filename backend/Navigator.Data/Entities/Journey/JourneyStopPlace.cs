@@ -9,7 +9,6 @@ namespace Navigator.Data.Entities.Journey;
 [Table("journey_stop_places", Schema = "core")]
 [Index(nameof(JourneyId))]
 [Index(nameof(Date))]
-[Index(nameof(StationEvaNumber))]
 [Index(nameof(StationEvaNumber), nameof(JourneyId))]
 [Index(nameof(StationEvaNumber), nameof(Date))]
 [Index(nameof(PlannedTimeUtc))]

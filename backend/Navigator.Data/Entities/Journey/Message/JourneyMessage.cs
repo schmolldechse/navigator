@@ -1,10 +1,13 @@
-﻿using Navigator.Data.Enums;
+﻿using Microsoft.EntityFrameworkCore;
+using Navigator.Data.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Navigator.Data.Entities.Journey.Message;
 
 [Table("journey_messages", Schema = "core")]
+[Index(nameof(JourneyId))]
+[Index(nameof(Type))]
 public class JourneyMessage
 {
     [Key]

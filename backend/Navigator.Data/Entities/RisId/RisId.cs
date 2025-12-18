@@ -9,9 +9,8 @@ namespace Navigator.Data.Entities.RisId;
 [Index(nameof(TransportType))]
 [Index(nameof(ReplacementTransportType))]
 [Index(nameof(DiscoveredAt))]
-[Index(nameof(LastSeen))]
 [Index(nameof(LastInserted))]
-[Index(nameof(Active))]
+[Index(nameof(Active), nameof(LastSeen))]
 public class RisId
 {
     /// This is because RIS IDs can have a UUID-UUID format.

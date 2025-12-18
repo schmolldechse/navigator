@@ -5,8 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Navigator.Data.Entities.Station;
 
 [Table("stations", Schema = "core")]
-[Index(nameof(QueryingEnabled))]
-[Index(nameof(LastQueried))]
+[Index(nameof(QueryingEnabled), nameof(LastQueried))]
 public class Station
 {
     [Key]
