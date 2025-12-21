@@ -26,7 +26,6 @@ public class TimetableRepository(
             Uri.EscapeDataString(request.TimeStart.ToString("yyyy-MM-ddTHH:mm:sszzz")),
             Uri.EscapeDataString(request.TimeStart.AddMinutes(request.Duration).ToString("yyyy-MM-ddTHH:mm:sszzz"))
         );
-        logger.LogInformation("Fetching arrivals from URL: {Url}", url);
         var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, url));
         if (!response.IsSuccessStatusCode)
         {

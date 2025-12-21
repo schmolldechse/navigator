@@ -15,10 +15,9 @@ public class StatisticsController(
 ) : Controller
 {
     /// <summary>
-    /// Estimates the database size over a specified timeframe and returns measured statistics, including an up-to-date
-    /// estimate if the timeframe includes the current time.
+    /// Estimates database size
     /// </summary>
-    [HttpPost]
+    [HttpPost("estimate-size")]
     [ProducesResponseType<MeasuredTimeframeStatistic>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> EstimateSize([FromBody] EstimateSizeRequest request)

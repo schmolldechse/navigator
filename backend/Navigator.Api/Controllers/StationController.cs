@@ -20,7 +20,7 @@ public class StationController(
 ) : ControllerBase
 {
     /// <summary>
-    /// Search for stations based on the provided criteria.
+    /// Searches for stations that match the specified criteria
     /// </summary>
     [HttpPost]
     [ProducesResponseType<IEnumerable<StationDTO>>(StatusCodes.Status200OK)]
@@ -48,8 +48,8 @@ public class StationController(
     }
 
     /// <summary>
-    /// Search for stations based on geographic coordinates.
-    /// <summary>
+    /// Search for stations based on geographic coordinates
+    /// </summary>
     [HttpPost("nearby")]
     [ProducesResponseType<IEnumerable<StationSummaryDTO>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -65,7 +65,7 @@ public class StationController(
     }
 
     /// <summary>
-    /// Searches for stations using the specified EVA number and returns the matching results.
+    /// Searches for stations using the specified EVA number
     /// </summary>
     [HttpGet]
     [ProducesResponseType<StationDTO>(StatusCodes.Status200OK)]
@@ -81,6 +81,9 @@ public class StationController(
         return Ok(mapper.Map<StationDTO>(station));
     }
 
+    /// <summary>
+    /// Retrieves gathering information for a station identified by its EVA number
+    /// </summary>
     [HttpGet("gathering")]
     [ProducesResponseType<StationGatheringInfoDTO>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

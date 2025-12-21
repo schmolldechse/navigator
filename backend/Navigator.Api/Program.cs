@@ -34,13 +34,20 @@ app.MapScalarApiReference("/swagger", options =>
 app.MapGet("/", [ExcludeFromDescription] () => Results.Redirect("/swagger"));
 app.MapGet("/swagger.json", [ExcludeFromDescription] async (HttpContext context) =>
 {
-    var response = await context.RequestServices
+    var client = context.RequestServices
         .GetRequiredService<IHttpClientFactory>()
-        .CreateClient()
-        .GetAsync($"{context.Request.Scheme}://{context.Request.Host}/openapi/v1.json");
+        .CreateClient();
 
-    var content = await response.Content.ReadAsStringAsync();
-    return Results.Text(content, "application/json");
+    var response = await client
+        .GetAsync($"{context.Request.Scheme}://{context.Request.Host}/openapi/v1.json",
+        HttpCompletionOption.ResponseHeadersRead);
+
+    response.EnsureSuccessStatusCode();
+
+    return Results.File(
+        await response.Content.ReadAsStreamAsync(),
+        "application/json",
+        "swagger.json");
 });
 
 app.UseHttpsRedirection();

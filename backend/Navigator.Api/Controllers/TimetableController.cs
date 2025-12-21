@@ -15,7 +15,7 @@ public class TimetableController(
 ) : Controller
 {
     /// <summary>
-    /// Retrieve a departure-timetable for a specific station. 
+    /// Lookup departures
     /// </summary>
     [HttpPost("departures")]
     [ProducesResponseType<IEnumerable<TimetableDeparture>>(StatusCodes.Status200OK)]
@@ -35,7 +35,7 @@ public class TimetableController(
     }
 
     /// <summary>
-    /// Retrieve a arrival-timetable for a specific station. 
+    /// Lookup arrivals
     /// </summary>
     [HttpPost("arrivals")]
     [ProducesResponseType<IEnumerable<TimetableArrival>>(StatusCodes.Status200OK)]
