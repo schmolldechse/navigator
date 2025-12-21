@@ -1,5 +1,6 @@
 using Navigator.Api.Converters;
 using Navigator.Api.Mapping;
+using Navigator.Api.OpenApi;
 using Navigator.Data;
 using Navigator.Data.Mapping;
 using Scalar.AspNetCore;
@@ -14,7 +15,7 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter(JsonNamingPolicy.SnakeCaseUpper));
         options.JsonSerializerOptions.Converters.Add(new LocalDateTimeOffsetConverter());
     });
-builder.Services.AddOpenApi();
+builder.Services.AddOpenApi(options => options.AddSchemaTransformer<StringEnumSchemaTransformer>());
 
 // include Navigator.Data
 builder.Services.AddServices(builder.Configuration);
