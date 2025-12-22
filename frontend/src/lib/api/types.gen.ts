@@ -60,9 +60,9 @@ export type MeasuredStatisticValue = {
 	value: number | string;
 };
 
-export type MeasuredTimeframeStatistic = {
+export type MeasuredTimerangeStatistic = {
 	unit: StatisticUnit;
-	timeframe: Timeframe;
+	timerange: Timerange;
 	values: Array<MeasuredStatisticValue>;
 	startedWith: number | string;
 	changedBy: number | string;
@@ -126,7 +126,7 @@ export enum StatisticUnit {
 	BYTES = "BYTES"
 }
 
-export type Timeframe = {
+export type Timerange = {
 	start: string;
 	end: string;
 };
@@ -387,7 +387,7 @@ export type PostApiV1StatisticsEstimateSizeResponses = {
 	/**
 	 * OK
 	 */
-	200: MeasuredTimeframeStatistic;
+	200: MeasuredTimerangeStatistic;
 };
 
 export type PostApiV1StatisticsEstimateSizeResponse =

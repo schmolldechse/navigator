@@ -2,7 +2,7 @@
 
 namespace Navigator.Api.DTOs.Statistics;
 
-public class Timeframe
+public class Timerange
 {
     [JsonPropertyName("start")]
     public required DateTimeOffset Start { get; set; }

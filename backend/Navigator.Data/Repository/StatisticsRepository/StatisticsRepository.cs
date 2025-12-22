@@ -8,7 +8,7 @@ public class StatisticsRepository(
     DataContext dataContext
 ) : IStatisticsRepository
 {
-    public async Task<IEnumerable<DatabaseSize>> GetSizesByTimeframeAsync(DateTimeOffset start, DateTimeOffset end) => await dataContext.DatabaseSizes
+    public async Task<IEnumerable<DatabaseSize>> GetSizesByTimerangeAsync(DateTimeOffset start, DateTimeOffset end) => await dataContext.DatabaseSizes
         .Where(size => size.MeasuredAt >= start.UtcDateTime && size.MeasuredAt <= end.UtcDateTime)
         .OrderBy(size => size.MeasuredAt)
         .ToListAsync();

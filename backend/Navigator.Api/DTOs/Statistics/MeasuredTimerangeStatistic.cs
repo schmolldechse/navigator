@@ -3,13 +3,13 @@ using System.Text.Json.Serialization;
 
 namespace Navigator.Api.DTOs.Statistics;
 
-public class MeasuredTimeframeStatistic
+public class MeasuredTimerangeStatistic
 {
     [JsonPropertyName("unit")]
     public required StatisticUnit Unit { get; set; }
 
-    [JsonPropertyName("timeframe")]
-    public required Timeframe Timeframe { get; set; }
+    [JsonPropertyName("timerange")]
+    public required Timerange Timerange { get; set; }
 
     [JsonPropertyName("values")]
     public required IEnumerable<MeasuredStatisticValue> Values { get; set; }

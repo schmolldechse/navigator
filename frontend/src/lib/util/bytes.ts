@@ -1,5 +1,3 @@
-const isUnitBytes = (unit: string) => unit.toLowerCase().includes("bytes");
-
 const getUnit = (bytes: number, useDecimal: boolean = false): string => {
 	if (bytes === 0) return "Bytes";
 
@@ -21,4 +19,4 @@ const formatBytes = (bytes: number, useDecimal: boolean = false, decimals = 2): 
 	return parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
 };
 
-export { isUnitBytes, getUnit, formatBytes };
+export { getUnit, formatBytes };

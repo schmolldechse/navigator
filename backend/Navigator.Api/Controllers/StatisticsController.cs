@@ -18,7 +18,7 @@ public class StatisticsController(
     /// Estimates database size
     /// </summary>
     [HttpPost("estimate-size")]
-    [ProducesResponseType<MeasuredTimeframeStatistic>(StatusCodes.Status200OK)]
+    [ProducesResponseType<MeasuredTimerangeStatistic>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> EstimateSize([FromBody] EstimateSizeRequest request)
     {
@@ -27,7 +27,7 @@ public class StatisticsController(
         var now = DateTimeOffset.UtcNow;
         var isInbetween = request.Start <= now && now <= request.End;
 
-        var values = mapper.Map<IEnumerable<MeasuredStatisticValue>>(await statisticsRepository.GetSizesByTimeframeAsync(request.Start, request.End));
+        var values = mapper.Map<IEnumerable<MeasuredStatisticValue>>(await statisticsRepository.GetSizesByTimerangeAsync(request.Start, request.End));
         if (isInbetween)
         {
             var estimatedSize = await statisticsRepository.EstimateDatabaseSizeAsync();
@@ -38,9 +38,9 @@ public class StatisticsController(
             });
         }
 
-        return Ok(new MeasuredTimeframeStatistic()
+        return Ok(new MeasuredTimerangeStatistic()
         {
-            Timeframe = new Timeframe()
+            Timerange = new Timerange()
             {
                 Start = request.Start,
                 End = request.End
