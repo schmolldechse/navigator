@@ -1,12 +1,12 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace Navigator.Api.DTOs.Station;
 
-public class PositionDTO
+public class StationPosition
 {
     [JsonPropertyName("latitude")]
     public required double Latitude { get; set; }
-
+    
     [JsonPropertyName("longitude")]
     public required double Longitude { get; set; }
 }

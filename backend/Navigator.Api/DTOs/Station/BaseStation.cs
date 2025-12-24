@@ -2,7 +2,7 @@
 
 namespace Navigator.Api.DTOs.Station;
 
-public class StationSummaryDTO
+public class BaseStation
 {
     [JsonPropertyName("evaNumber")]
     public required int EvaNumber { get; set; }
@@ -11,5 +11,5 @@ public class StationSummaryDTO
     public required string Name { get; set; }
 
     [JsonPropertyName("position")]
-    public required PositionDTO Position { get; set; }
+    public required StationPosition Position { get; set; }
 }

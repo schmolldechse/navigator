@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace Navigator.Api.DTOs.Station;
 
-public class StationGatheringInfoDTO
+public class StationGatheringInfo
 {
     [JsonPropertyName("queryingEnabled")]
     public required bool QueryingEnabled { get; set; }

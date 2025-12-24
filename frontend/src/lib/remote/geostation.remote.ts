@@ -1,11 +1,15 @@
 import { query } from "$app/server";
 import { env } from "$env/dynamic/public";
-import type { StationGatheringInfoDTO } from "$lib/models/StationGatheringInfoDTO";
-import type { StationSummaryDTO } from "$lib/models/StationSummaryDTO";
+import type { BaseStation, StationGatheringInfo } from "$lib/api";
 import * as v from "valibot";
 
-const getStations = query(
-	v.object({ latitude: v.number(), longitude: v.number(), radius: v.optional(v.number()), limit: v.optional(v.number()) }),
+const findNearbyStations = query(
+	v.object({
+		latitude: v.number(),
+		longitude: v.number(),
+		limit: v.optional(v.number()),
+		maxDistance: v.optional(v.number())
+	}),
 	async (schema) => {
 		if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
 
@@ -14,24 +18,23 @@ const getStations = query(
 			body: JSON.stringify({
 				latitude: schema.latitude,
 				longitude: schema.longitude,
-				maxDistanceMeters: schema.radius,
-				limit: schema.limit
+				limit: schema.limit,
+				maxDistance: schema.maxDistance
 			}),
 			headers: {
-				"Content-Type": "application/json",
-				Accept: "*/*"
+				"Content-Type": "application/json"
 			}
 		});
 
 		if (!response.ok) throw new Error(`Error fetching stations: ${response.status} ${response.statusText}`);
-		return (await response.json()) as StationSummaryDTO[];
+		return (await response.json()) as BaseStation[];
 	}
 );
 
 const getStationGatheringInfo = query(v.object({ evaNumber: v.number() }), async (schema) => {
 	if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
 
-	const response = await fetch(`${env.PUBLIC_API_URL}/api/v1/stations/gathering/${schema.evaNumber}`, {
+	const response = await fetch(`${env.PUBLIC_API_URL}/api/v1/stations/gathering/?evaNumber=${schema.evaNumber}`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
@@ -40,7 +43,7 @@ const getStationGatheringInfo = query(v.object({ evaNumber: v.number() }), async
 	});
 
 	if (!response.ok) throw new Error(`Error fetching station gathering info: ${response.status} ${response.statusText}`);
-	return (await response.json()) as StationGatheringInfoDTO;
+	return (await response.json()) as StationGatheringInfo;
 });
 
-export { getStations, getStationGatheringInfo };
+export { findNearbyStations, getStationGatheringInfo };

@@ -4,12 +4,11 @@ using System.Text.Json.Serialization;
 
 namespace Navigator.Api.DTOs.Station;
 
-
 /// <summary>
 /// Represents a request to find stations near specific geographic coordinates.
 /// </summary>
 [Description("Represents a request to find stations near specific geographic coordinates.")]
-public class CoordinatesRequestDTO
+public class StationByGeographicCoordinatesRequest
 {
     [JsonPropertyName("latitude")]
     [Required(ErrorMessage = "Latitude is required")]

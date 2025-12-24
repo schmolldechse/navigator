@@ -58,7 +58,7 @@
 	const handleClose = () => {
 		isVisible = false;
 		onclose?.();
-	}
+	};
 
 	const selectDate = (date: DateTime) => {
 		if (!multiSelect) {
@@ -88,48 +88,50 @@
 	onclick={(event) => event.target === dialog && handleClose()}
 	class={[
 		"m-0 h-fit max-h-none w-full max-w-none bg-transparent p-0 outline-none",
-		"fixed inset-x-0 bottom-0 top-auto", // mobile: bottom sheet
-		"md:inset-auto md:left-1/2 md:top-1/2 md:max-w-md md:-translate-x-1/2 md:-translate-y-1/2", // desktop: centered
+		"fixed inset-x-0 top-auto bottom-0", // mobile: bottom sheet
+		"md:inset-auto md:top-1/2 md:left-1/2 md:max-w-md md:-translate-x-1/2 md:-translate-y-1/2", // desktop: centered
 		classes
 	]}
 >
-	<div class="flex w-full flex-col space-y-4 rounded-t-2xl border-t-2 border-muted-foreground/20 bg-background p-6 shadow-2xl md:rounded-2xl md:border-2">
+	<div
+		class="border-muted-foreground/20 bg-background flex w-full flex-col space-y-4 rounded-t-2xl border-t-2 p-6 shadow-2xl md:rounded-2xl md:border-2"
+	>
 		<!-- Header -->
 		<div class="flex items-center justify-between">
-			<h2 class="text-lg font-bold text-text">{title}</h2>
+			<h2 class="text-text text-lg font-bold">{title}</h2>
 			<button
 				onclick={() => handleClose()}
-				class="rounded-full p-1 transition-colors hover:bg-muted-foreground/10 hover:stroke-accent cursor-pointer"
+				class="hover:bg-muted-foreground/10 hover:stroke-accent cursor-pointer rounded-full p-1 transition-colors"
 			>
-				<X class="h-5 w-5 stroke-muted-foreground hover:stroke-accent" />
+				<X class="stroke-muted-foreground hover:stroke-accent h-5 w-5" />
 			</button>
 		</div>
 
 		<!-- Navigation -->
-		<div class="flex items-center justify-between bg-muted/30 rounded-lg p-1">
+		<div class="bg-muted/30 flex items-center justify-between rounded-lg p-1">
 			<button
-				class="group flex items-center gap-1 rounded-md px-2 py-1 duration-300 transition-colors hover:bg-accent/10 cursor-pointer"
+				class="group hover:bg-accent/10 flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 transition-colors duration-300"
 				onclick={() => (currentMonth = currentMonth.minus({ months: 1 }))}
 			>
-				<ChevronLeft class="h-5 w-5 text-muted-foreground group-hover:text-accent" />
-				<span class="hidden text-sm sm:inline text-text">{currentMonth.minus({ months: 1 }).toFormat("MMMM")}</span>
+				<ChevronLeft class="text-muted-foreground group-hover:text-accent h-5 w-5" />
+				<span class="text-text hidden text-sm sm:inline">{currentMonth.minus({ months: 1 }).toFormat("MMMM")}</span>
 			</button>
 
-			<span class="text-base font-semibold text-text">{currentMonth.toFormat("MMMM yyyy")}</span>
+			<span class="text-text text-base font-semibold">{currentMonth.toFormat("MMMM yyyy")}</span>
 
 			<button
-				class="group flex items-center gap-1 rounded-md px-2 py-1 duration-300 transition-colors hover:bg-accent/10 cursor-pointer"
+				class="group hover:bg-accent/10 flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 transition-colors duration-300"
 				onclick={() => (currentMonth = currentMonth.plus({ months: 1 }))}
 			>
-				<span class="hidden text-sm sm:inline text-text">{currentMonth.plus({ months: 1 }).toFormat("MMMM")}</span>
-				<ChevronRight class="h-5 w-5 text-muted-foreground group-hover:text-accent" />
+				<span class="text-text hidden text-sm sm:inline">{currentMonth.plus({ months: 1 }).toFormat("MMMM")}</span>
+				<ChevronRight class="text-muted-foreground group-hover:text-accent h-5 w-5" />
 			</button>
 		</div>
 
 		<!-- Calendar -->
 		<div class="grid grid-cols-7 gap-y-1">
 			{#each weekdays as weekday}
-				<span class="py-2 text-center text-xs font-bold uppercase tracking-wider text-muted-foreground">{weekday}</span>
+				<span class="text-muted-foreground py-2 text-center text-xs font-bold tracking-wider uppercase">{weekday}</span>
 			{/each}
 
 			{#each getCalendarDays as calendarDay}
@@ -144,11 +146,11 @@
 				<!-- clickable wrapper to provide a larger hitbox -->
 				<button
 					class={[
-						"cursor-pointer relative flex aspect-square items-center justify-center text-sm duration-300 transition-colors",
+						"relative flex aspect-square cursor-pointer items-center justify-center text-sm transition-colors duration-300",
 						{ "font-bold underline underline-offset-4": isToday },
 						{ "text-text": isCurrentMonth && !(isInRange || isSelected) },
 						{ "text-muted-foreground": !isCurrentMonth && !isInRange && !isSelected },
-						{ "bg-accent font-bold text-background z-10": isSelected },
+						{ "bg-accent text-background z-10 font-bold": isSelected },
 						{ "rounded-l-2xl": isSelectedStart && multiSelect },
 						{ "rounded-r-2xl": isSelectedEnd && multiSelect },
 						{ "bg-accent/20 text-accent font-medium": isInRange && !(isSelectedStart || isSelectedEnd) },
@@ -167,14 +169,14 @@
 		</div>
 
 		<!-- Interactions -->
-		<div class="flex items-center justify-end pt-2 gap-x-2">
-			<button 
-				class="text-sm font-medium text-muted-foreground rounded-md px-2 py-1 duration-300 transition-colors hover:bg-accent/10 cursor-pointer" 
+		<div class="flex items-center justify-end gap-x-2 pt-2">
+			<button
+				class="text-muted-foreground hover:bg-accent/10 cursor-pointer rounded-md px-2 py-1 text-sm font-medium transition-colors duration-300"
 				onclick={() => {
 					selectedStartDate = DateTime.now();
 					if (multiSelect) selectedEndDate = DateTime.now();
 					else selectedEndDate = null;
-					
+
 					currentMonth = DateTime.now().startOf("month");
 				}}
 			>
@@ -182,7 +184,7 @@
 			</button>
 
 			<button
-				class="cursor-pointer rounded-md bg-accent px-2 py-1 text-sm font-bold text-background"
+				class="bg-accent text-background cursor-pointer rounded-md px-2 py-1 text-sm font-bold"
 				onclick={() => {
 					onchange({ start: selectedStartDate, end: selectedEndDate ?? undefined });
 					handleClose();
@@ -200,14 +202,18 @@
 		backdrop-filter: blur(8px);
 	}
 
-    @media (max-width: 767px) {
-        dialog[open] {
-            animation: slide-up 0.3s ease-out;
-        }
-    }
+	@media (max-width: 767px) {
+		dialog[open] {
+			animation: slide-up 0.3s ease-out;
+		}
+	}
 
-    @keyframes slide-up {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-    }
+	@keyframes slide-up {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
 </style>

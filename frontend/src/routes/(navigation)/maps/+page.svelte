@@ -1,31 +1,52 @@
 <script lang="ts">
-	import Map from "$lib/components/maps/Map.svelte";
-	import type { StationSummaryDTO } from "$lib/models/StationSummaryDTO";
+	import StationMap from "@lib/components/maps/StationMap.svelte";
 	import type { PageProps } from "./$types";
-	import { getStations } from "./stations.remote";
+	import type { BaseStation } from "@lib/api/types.gen";
+	import { findNearbyStations } from "@lib/remote/geostation.remote";
+	import SelectedStationDialog from "@lib/components/maps/SelectedStationDialog.svelte";
 
 	let { data }: PageProps = $props();
-	let stations: StationSummaryDTO[] = $state(data.stations);
+
+	let stations: BaseStation[] = $state(data.stations);
+
+	let stationDialogVisible: boolean = $state(false);
+	let selectedStation: BaseStation | null = $state(null);
 </script>
 
 <svelte:head>
 	<title>Station Map - Navigator</title>
 </svelte:head>
 
-<div class="relative flex-1 p-4 md:py-8">
-	<Map
-		bind:stations
+<main class="flex-1 p-4 sm:py-8">
+	<StationMap
+		{stations}
 		onresize={async ({ latitude, longitude, radius }) => {
-			const newStations = await getStations({ latitude, longitude, radius });
+			const newStations = await findNearbyStations({ latitude, longitude, maxDistance: radius });
 
 			const allStations = [...stations, ...newStations];
 			stations = Array.from(
-				new globalThis.Map(allStations.map((station: StationSummaryDTO) => [station.evaNumber, station])).values()
+				new globalThis.Map(allStations.map((station: BaseStation) => [station.evaNumber, station])).values()
 			);
 		}}
-		onselect={(station: StationSummaryDTO) => {}}
+		onselect={(station: BaseStation) => {
+			selectedStation = station;
+			stationDialogVisible = true;
+		}}
+		class="z-10"
 	/>
-</div>
+
+	{#if selectedStation}
+		<SelectedStationDialog
+			isVisible={stationDialogVisible}
+			station={selectedStation}
+			onclose={() => {
+				stationDialogVisible = false;
+				selectedStation = null;
+			}}
+			class="z-20"
+		/>
+	{/if}
+</main>
 
 <style>
 	:global(html, body) {

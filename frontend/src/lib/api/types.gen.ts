@@ -4,26 +4,10 @@ export type ClientOptions = {
 	baseUrl: "https://navigator.voldechse.wtf/" | (string & {});
 };
 
-/**
- * Represents a request to find stations near specific geographic coordinates.
- */
-export type CoordinatesRequestDto = {
-	/**
-	 * The latitude of the location.
-	 */
-	latitude: number | string;
-	/**
-	 * The longitude of the location.
-	 */
-	longitude: number | string;
-	/**
-	 * The maximum number of stations to return. Defaults to 100.
-	 */
-	limit?: null | number | string;
-	/**
-	 * The maximum distance in meters to search for stations. Defaults to 1000.
-	 */
-	maxDistance?: null | number | string;
+export type BaseStation = {
+	evaNumber: number | string;
+	name: string;
+	position: StationPosition;
 };
 
 /**
@@ -69,11 +53,6 @@ export type MeasuredTimerangeStatistic = {
 	total: number | string;
 };
 
-export type PositionDto = {
-	latitude: number | string;
-	longitude: number | string;
-};
-
 export type ProblemDetails = {
 	type?: null | string;
 	title?: null | string;
@@ -82,26 +61,41 @@ export type ProblemDetails = {
 	instance?: null | string;
 };
 
-export type StationDto = {
-	evaNumber: number | string;
-	name: string;
-	position: PositionDto;
+export type Station = {
 	transports: Array<TransportType>;
 	ril100?: null | Array<string>;
+	evaNumber: number | string;
+	name: string;
+	position: StationPosition;
 };
 
-export type StationGatheringInfoDto = {
-	queryingEnabled: boolean;
-	lastQueried?: null | string;
-	active: Array<TransportType>;
-	disabled: Array<TransportType>;
+/**
+ * Represents a request to find stations near specific geographic coordinates.
+ */
+export type StationByGeographicCoordinatesRequest = {
+	/**
+	 * The latitude of the location.
+	 */
+	latitude: number | string;
+	/**
+	 * The longitude of the location.
+	 */
+	longitude: number | string;
+	/**
+	 * The maximum number of stations to return. Defaults to 100.
+	 */
+	limit?: null | number | string;
+	/**
+	 * The maximum distance in meters to search for stations. Defaults to 1000.
+	 */
+	maxDistance?: null | number | string;
 };
 
 /**
  * Represents a request to search for stations using a search term, with optional filters for result count and location
  * types.
  */
-export type StationSearchRequestDto = {
+export type StationBySerchtermRequest = {
 	/**
 	 * The term to search for in station names or codes.
 	 */
@@ -116,10 +110,16 @@ export type StationSearchRequestDto = {
 	locationTypes?: null | Array<string>;
 };
 
-export type StationSummaryDto = {
-	evaNumber: number | string;
-	name: string;
-	position: PositionDto;
+export type StationGatheringInfo = {
+	queryingEnabled: boolean;
+	lastQueried?: null | string;
+	active: Array<TransportType>;
+	disabled: Array<TransportType>;
+};
+
+export type StationPosition = {
+	latitude: number | string;
+	longitude: number | string;
 };
 
 export enum StatisticUnit {
@@ -276,13 +276,13 @@ export type GetApiV1StationsResponses = {
 	/**
 	 * OK
 	 */
-	200: StationDto;
+	200: Station;
 };
 
 export type GetApiV1StationsResponse = GetApiV1StationsResponses[keyof GetApiV1StationsResponses];
 
 export type PostApiV1StationsData = {
-	body: StationSearchRequestDto;
+	body: StationBySerchtermRequest;
 	path?: never;
 	query?: never;
 	url: "/api/v1/stations";
@@ -301,13 +301,13 @@ export type PostApiV1StationsResponses = {
 	/**
 	 * OK
 	 */
-	200: Array<StationDto>;
+	200: Array<Station>;
 };
 
 export type PostApiV1StationsResponse = PostApiV1StationsResponses[keyof PostApiV1StationsResponses];
 
 export type PostApiV1StationsNearbyData = {
-	body: CoordinatesRequestDto;
+	body: StationByGeographicCoordinatesRequest;
 	path?: never;
 	query?: never;
 	url: "/api/v1/stations/nearby";
@@ -330,7 +330,7 @@ export type PostApiV1StationsNearbyResponses = {
 	/**
 	 * OK
 	 */
-	200: Array<StationSummaryDto>;
+	200: Array<BaseStation>;
 };
 
 export type PostApiV1StationsNearbyResponse = PostApiV1StationsNearbyResponses[keyof PostApiV1StationsNearbyResponses];
@@ -361,7 +361,7 @@ export type GetApiV1StationsGatheringResponses = {
 	/**
 	 * OK
 	 */
-	200: StationGatheringInfoDto;
+	200: StationGatheringInfo;
 };
 
 export type GetApiV1StationsGatheringResponse = GetApiV1StationsGatheringResponses[keyof GetApiV1StationsGatheringResponses];

@@ -45,25 +45,23 @@
 
 		await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
 		// invalidate("project:dimensions");
-	}
+	};
 
-	let statistics = [
-		{ id: "DATABASE_ESTIMATION", label: "Total Database Size", promise: () => data.dimensions.databaseSize }
-	];
+	let statistics = [{ id: "DATABASE_ESTIMATION", label: "Total Database Size", promise: () => data.dimensions.databaseSize }];
 
-	let selectedStatistic: { statistic: MeasuredTimerangeStatistic, label: string } | null = $state(null);
+	let selectedStatistic: { statistic: MeasuredTimerangeStatistic; label: string } | null = $state(null);
 </script>
 
 <svelte:head>
 	<title>Navigator</title>
 </svelte:head>
 
-<main class="container mx-auto flex flex-col p-4 sm:py-8 space-y-8">
+<main class="container mx-auto flex flex-col space-y-8 p-4 sm:py-8">
 	<!-- Hero Section -->
 	<section class="mx-auto max-w-7xl">
 		<div class="relative mb-4">
-			<div class="bg-accent absolute bottom-0 top-0 w-0.5 sm:-left-4 sm:w-1"></div>
-			<h1 class="text-balance pl-4 text-3xl font-bold sm:mb-6 sm:pl-8 sm:text-4xl md:text-6xl">
+			<div class="bg-accent absolute top-0 bottom-0 w-0.5 sm:-left-4 sm:w-1"></div>
+			<h1 class="pl-4 text-3xl font-bold text-balance sm:mb-6 sm:pl-8 sm:text-4xl md:text-6xl">
 				Visualizing Public Transport Performance
 			</h1>
 		</div>
@@ -81,16 +79,16 @@
 				<h2 class="text-3xl font-bold">About the Project</h2>
 			</div>
 
-			<div class="flex flex-col space-y-2 text-pretty px-10">
+			<div class="flex flex-col space-y-2 px-10 text-pretty">
 				<p class="about text-sm leading-relaxed sm:text-base lg:text-lg">
-					Detailed and freely accessible statistics on the <span>punctuality</span> of German rail transport are not available
-					from Deutsche Bahn. There is no way to view the performance of specific stations for a user-definable period,
-					as only an annual summary report exists.
+					Detailed and freely accessible statistics on the <span>punctuality</span> of German rail transport are not available from
+					Deutsche Bahn. There is no way to view the performance of specific stations for a user-definable period, as only an annual
+					summary report exists.
 				</p>
 
 				<p class="about text-sm leading-relaxed sm:text-base lg:text-lg">
-					<span>Navigator</span> addresses this lack of <span>transparency</span> by specifically collecting journey
-					data. Since <span>March 2025</span>, all relevant information on train services, including
+					<span>Navigator</span> addresses this lack of <span>transparency</span> by specifically collecting journey data. Since
+					<span>March 2025</span>, all relevant information on train services, including
 					<span>delays</span>
 					and <span>cancellations</span>, has been systematically recorded, starting in the Stuttgart area.
 				</p>
@@ -98,22 +96,25 @@
 				<p class="about text-sm leading-relaxed sm:text-base lg:text-lg">
 					The dataset is continuously expanding to gradually cover more stations. The long-term goal is to achieve <span
 						>nationwide coverage</span
-					>. In this way, Navigator creates <span>data-based transparency</span> that allows users to get a clear picture
-					of the reliability of rail transport.
+					>. In this way, Navigator creates <span>data-based transparency</span> that allows users to get a clear picture of the reliability
+					of rail transport.
 				</p>
 			</div>
 		</div>
 	</section>
 
 	<!-- Project Dimensions -->
-	<section class="mx-auto max-w-7xl w-full overflow-hidden">
-		<div class="mb-6 flex flex-col gap-y-2 sm:gap-0 sm:flex-row sm:items-center sm:justify-between">
+	<section class="mx-auto w-full max-w-7xl overflow-hidden">
+		<div class="mb-6 flex flex-col gap-y-2 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
 			<h2 class="text-2xl font-medium">Project Dimensions</h2>
 
 			<div class="w-full sm:w-auto">
 				<PillSelector
 					selected={selectedTimerange.id}
-					items={timeranges.map((timerangeOption: TimerangeOption) => ({ id: timerangeOption.id, label: timerangeOption.label }))}
+					items={timeranges.map((timerangeOption: TimerangeOption) => ({
+						id: timerangeOption.id,
+						label: timerangeOption.label
+					}))}
 					onselect={async (id: string) => {
 						const timerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === id);
 						if (!timerange) return;
@@ -134,7 +135,7 @@
 				/>
 			</div>
 
-			<TimePickerDialog 
+			<TimePickerDialog
 				bind:isVisible={pickingCustomRange}
 				title="Select Custom Time Range"
 				multiSelect
@@ -149,7 +150,7 @@
 
 					selectedTimerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === "CUSTOM")!;
 					previouslySelectedTimerange = selectedTimerange;
-					
+
 					await updateTimerange(start.startOf("day"), end.endOf("day"));
 				}}
 				onclose={() => {
@@ -164,17 +165,17 @@
 				<StatisticCard
 					title={localStatistic.label}
 					statisticPromise={localStatistic.promise()}
-					onselect={(statistic: MeasuredTimerangeStatistic) => selectedStatistic = { statistic, label: localStatistic.label }}
+					onselect={(statistic: MeasuredTimerangeStatistic) => (selectedStatistic = { statistic, label: localStatistic.label })}
 				/>
 			{/each}
 		</div>
 
 		{#if selectedStatistic}
-			<StatisticChartDialog 
+			<StatisticChartDialog
 				isVisible={true}
 				title={selectedStatistic.label}
 				measuredStatistic={selectedStatistic.statistic}
-				onclose={() => selectedStatistic = null}
+				onclose={() => (selectedStatistic = null)}
 			/>
 		{/if}
 	</section>

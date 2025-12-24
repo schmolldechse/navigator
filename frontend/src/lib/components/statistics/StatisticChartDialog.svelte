@@ -14,10 +14,12 @@
 
 	let { isVisible = $bindable(), title, measuredStatistic, onclose }: Props = $props();
 
-	const chartData = $derived(measuredStatistic.values.map((statisticValue: MeasuredStatisticValue) => ({
-		date: DateTime.fromISO(statisticValue.date).toJSDate(),
-		value: Number(statisticValue.value)
-	})) ?? []);
+	const chartData = $derived(
+		measuredStatistic.values.map((statisticValue: MeasuredStatisticValue) => ({
+			date: DateTime.fromISO(statisticValue.date).toJSDate(),
+			value: Number(statisticValue.value)
+		})) ?? []
+	);
 
 	let dialog: HTMLDialogElement | undefined = $state(undefined);
 
@@ -43,62 +45,55 @@
 	onclick={(event) => event.target === dialog && handleClose()}
 	class={[
 		"m-0 h-fit max-h-none w-full max-w-none bg-transparent p-0 outline-none",
-		"fixed inset-x-0 bottom-0 top-auto", // mobile: bottom sheet
-		"md:inset-auto md:left-1/2 md:top-1/2 md:max-w-5xl md:w-[90vw] md:-translate-x-1/2 md:-translate-y-1/2", // desktop: centered
+		"fixed inset-x-0 top-auto bottom-0", // mobile: bottom sheet
+		"md:inset-auto md:top-1/2 md:left-1/2 md:w-[90vw] md:max-w-5xl md:-translate-x-1/2 md:-translate-y-1/2" // desktop: centered
 	]}
 >
-	<div class="flex w-full flex-col space-y-4 rounded-t-2xl border-t-2 border-muted-foreground/20 bg-background p-6 shadow-2xl md:rounded-2xl md:border-2">
+	<div
+		class="border-muted-foreground/20 bg-background flex w-full flex-col space-y-4 rounded-t-2xl border-t-2 p-6 shadow-2xl md:rounded-2xl md:border-2"
+	>
 		<!-- Header -->
 		<div class="flex items-center justify-between">
-			<h2 class="text-lg font-bold text-text">{title}</h2>
+			<h2 class="text-text text-lg font-bold">{title}</h2>
 			<button
 				onclick={() => handleClose()}
-				class="rounded-full p-1 transition-colors hover:bg-muted-foreground/10 hover:stroke-accent cursor-pointer"
+				class="hover:bg-muted-foreground/10 hover:stroke-accent cursor-pointer rounded-full p-1 transition-colors"
 			>
-				<X class="h-5 w-5 stroke-muted-foreground hover:stroke-accent" />
+				<X class="stroke-muted-foreground hover:stroke-accent h-5 w-5" />
 			</button>
 		</div>
 
 		{#if !measuredStatistic || chartData.length === 0}
-			<div class="flex h-75 md:h-125 items-center justify-center rounded-xl bg-muted/30 animate-pulse">
-            	<span class="text-muted-foreground italic">Loading chart data...</span>
-        	</div>
+			<div class="bg-muted/30 flex h-75 animate-pulse items-center justify-center rounded-xl md:h-125">
+				<span class="text-muted-foreground italic">Loading chart data...</span>
+			</div>
 		{:else}
-			<div class="h-75 md:h-125 p-4">
-				<LineChart
-					data={chartData}
-					x="date"
-					y="value"
-					yNice
-					yDomain={null}
-					padding={{ left: 16, bottom: 24, right: -16 }}
-				>
+			<div class="h-75 p-4 md:h-125">
+				<LineChart data={chartData} x="date" y="value" yNice yDomain={null} padding={{ left: 16, bottom: 24, right: -16 }}>
 					<Svg>
-						<Axis 
-							placement="left" 
-							grid 
-							rule
-							format={(value) => String(formatBytes(value, true))}
-                            class="text-xs"
-						/>
-						<Axis 
-							placement="bottom" 
-							rule
-                            class="text-xs"
-						/>
+						<Axis placement="left" grid rule format={(value) => String(formatBytes(value, true))} class="text-xs" />
+						<Axis placement="bottom" rule class="text-xs" />
 						<Spline class="stroke-accent stroke-3" />
-						<Highlight points={{ r: 5, class: "fill-accent stroke-background stroke-2" }} lines={{ class: "stroke-accent/50" }} />
+						<Highlight
+							points={{ r: 5, class: "fill-accent stroke-background stroke-2" }}
+							lines={{ class: "stroke-accent/50" }}
+						/>
 					</Svg>
 
-					<Tooltip.Root class="rounded-lg border border-white/10! bg-background/90! p-3 shadow-xl backdrop-blur-md">
+					<Tooltip.Root class="bg-background/90! rounded-lg border border-white/10! p-3 shadow-xl backdrop-blur-md">
 						{#snippet children({ data })}
 							{@const isUnitBytes = measuredStatistic.unit === "BYTES"}
 
-							<Tooltip.Header class="mb-1 text-xs font-medium text-muted-foreground!">{DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}</Tooltip.Header>
+							<Tooltip.Header class="text-muted-foreground! mb-1 text-xs font-medium"
+								>{DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}</Tooltip.Header
+							>
 							<Tooltip.List>
 								<div class="flex flex-row items-center gap-x-2">
-									<div class="h-2 w-2 rounded-full bg-accent"></div>
-									<Tooltip.Item class="text-sm font-bold text-text!" value={isUnitBytes ? formatBytes(data.value, true) + " " + getUnit(data.value, true) : data.value} />
+									<div class="bg-accent h-2 w-2 rounded-full"></div>
+									<Tooltip.Item
+										class="text-text! text-sm font-bold"
+										value={isUnitBytes ? formatBytes(data.value, true) + " " + getUnit(data.value, true) : data.value}
+									/>
 								</div>
 							</Tooltip.List>
 						{/snippet}
@@ -123,8 +118,8 @@
 
 	/** bottom-axis tick */
 	:global(g:nth-child(2) svg > text > tspan) {
-    	stroke-width: 0 !important;
-    	fill: var(--color-text) !important;
+		stroke-width: 0 !important;
+		fill: var(--color-text) !important;
 	}
 
 	dialog::backdrop {
@@ -132,14 +127,18 @@
 		backdrop-filter: blur(8px);
 	}
 
-    @media (max-width: 767px) {
-        dialog[open] {
-            animation: slide-up 0.3s ease-out;
-        }
-    }
+	@media (max-width: 767px) {
+		dialog[open] {
+			animation: slide-up 0.3s ease-out;
+		}
+	}
 
-    @keyframes slide-up {
-        from { transform: translateY(100%); }
-        to { transform: translateY(0); }
-    }
+	@keyframes slide-up {
+		from {
+			transform: translateY(100%);
+		}
+		to {
+			transform: translateY(0);
+		}
+	}
 </style>

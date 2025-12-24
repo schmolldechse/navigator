@@ -1,16 +1,13 @@
 <script lang="ts">
-	let {
-		width = "35px",
-		height = "35px",
-		type = "rounded-corners"
-	}: {
-		width?: string;
-		height?: string;
+	interface Props {
 		type?: "rounded-corners" | "rectangle";
-	} = $props();
+		class?: string;
+	}
+
+	let { type = "rounded-corners", class: classes = "" }: Props = $props();
 </script>
 
-<svg {width} {height} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" id="transport-products">
+<svg class={classes} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" id="transport-products">
 	<g id="tram">
 		{#if type === "rectangle"}
 			<rect class="cls-1" width="1024" height="1024" />

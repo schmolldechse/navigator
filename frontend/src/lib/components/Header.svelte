@@ -63,7 +63,7 @@
 			<div class="fixed inset-0 z-50 bg-black/70 md:hidden" onclick={() => (isMenuOpen = false)}></div>
 
 			<nav
-				class="bg-background border-secondary fixed right-0 top-0 z-50 flex h-full w-3/4 flex-col border-2 px-4 py-16 shadow-lg md:hidden"
+				class="bg-background border-secondary fixed top-0 right-0 z-50 flex h-full w-3/4 flex-col border-2 px-4 py-16 shadow-lg md:hidden"
 			>
 				{#each navigationItems as navigationItem}
 					{@const isVisited = page.url.pathname === navigationItem.href}

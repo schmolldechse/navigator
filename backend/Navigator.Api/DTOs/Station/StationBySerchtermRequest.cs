@@ -9,7 +9,7 @@ namespace Navigator.Api.DTOs.Station;
 /// types.
 /// </summary>
 [Description("Represents a request to search for stations using a search term, with optional filters for result count and location types.")]
-public class StationSearchRequestDTO
+public class StationBySerchtermRequest
 {
     [JsonPropertyName("searchTerm")]
     [Required(ErrorMessage = "SearchTerm is required")]
