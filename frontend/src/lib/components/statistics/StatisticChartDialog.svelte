@@ -14,19 +14,30 @@
 
 	let { isVisible = $bindable(), title, measuredStatistic, onclose }: Props = $props();
 
-	const chartData = $derived(
-		measuredStatistic.values.map((statisticValue: MeasuredStatisticValue) => ({
+	let isCumulative: boolean = $state(true);
+
+	const chartData = $derived.by(() => {
+		if (!measuredStatistic || !measuredStatistic.values) return [];
+
+		const rawValues = measuredStatistic.values.map((statisticValue: MeasuredStatisticValue) => ({
 			date: DateTime.fromISO(statisticValue.date).toJSDate(),
 			value: Number(statisticValue.value)
-		})) ?? []
-	);
+		}));
+		if (isCumulative) return rawValues;
+
+		return rawValues.map((currentItem, index) => {
+			if (index === 0) return { ...currentItem, value: 0 };
+
+			const difference = currentItem.value - rawValues[index - 1].value;
+			return { ...currentItem, value: Math.max(0, difference) };
+		});
+	});
 
 	let dialog: HTMLDialogElement | undefined = $state(undefined);
 
 	$effect(() => {
 		if (!dialog) return;
-		if (isVisible) dialog.showModal();
-		else dialog.close();
+		isVisible ? dialog.showModal() : dialog.close();
 	});
 
 	const handleClose = () => {
@@ -54,13 +65,37 @@
 	>
 		<!-- Header -->
 		<div class="flex items-center justify-between">
-			<h2 class="text-text text-lg font-bold">{title}</h2>
+			<div class="space-y-1">
+				<h2 class="text-text text-xl font-bold tracking-tight">{title}</h2>
+				<p class="text-muted-foreground text-sm">Historical performance data</p>
+			</div>
 			<button
-				onclick={() => handleClose()}
+				onclick={handleClose}
 				class="hover:bg-muted-foreground/10 hover:stroke-accent cursor-pointer rounded-full p-1 transition-colors"
 			>
 				<X class="stroke-muted-foreground hover:stroke-accent h-5 w-5" />
 			</button>
+		</div>
+
+		<!-- Settings -->
+		<div class="bg-muted/30 flex items-center gap-x-3 rounded-xl p-3">
+			<span class="text-text/80 text-sm font-medium">View Mode:</span>
+			<div class="flex items-center gap-2">
+				{#snippet button(label: string, isActive: boolean, onclick: () => void)}
+					<button
+						{onclick}
+						class={[
+							"rounded-md px-3 py-1 text-xs font-bold transition-all",
+							isActive ? "bg-accent text-background" : "text-muted-foreground hover:text-text"
+						]}
+					>
+						{label}
+					</button>
+				{/snippet}
+
+				{@render button("Absolute", !isCumulative, () => (isCumulative = false))}
+				{@render button("Cumulative", isCumulative, () => (isCumulative = true))}
+			</div>
 		</div>
 
 		{#if !measuredStatistic || chartData.length === 0}

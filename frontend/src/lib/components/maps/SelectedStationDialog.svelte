@@ -26,9 +26,7 @@
 
 	$effect(() => {
 		if (!dialog) return;
-
-		if (isVisible) dialog?.showModal();
-		else dialog?.close();
+		isVisible ? dialog.showModal() : dialog.close();
 	});
 
 	const handleClose = () => {
