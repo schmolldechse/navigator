@@ -103,10 +103,21 @@
 				<span class="text-muted-foreground italic">Loading chart data...</span>
 			</div>
 		{:else}
+			{@const isUnitBytes = measuredStatistic.unit === "BYTES"}
+
 			<div class="h-75 p-4 md:h-125">
 				<LineChart data={chartData} x="date" y="value" yNice yDomain={null} padding={{ left: 16, bottom: 24, right: -16 }}>
 					<Svg>
-						<Axis placement="left" grid rule format={(value) => String(formatBytes(value, true))} class="text-xs" />
+						<Axis
+							placement="left"
+							grid
+							rule
+							format={(value) => {
+								if (isUnitBytes) return String(formatBytes(value, true)) + " " + getUnit(value, true);
+								return value.toLocaleString();
+							}}
+							class="text-xs"
+						/>
 						<Axis placement="bottom" rule class="text-xs" />
 						<Spline class="stroke-accent stroke-3" />
 						<Highlight
@@ -117,8 +128,6 @@
 
 					<Tooltip.Root class="bg-background/90! rounded-lg border border-white/10! p-3 shadow-xl backdrop-blur-md">
 						{#snippet children({ data })}
-							{@const isUnitBytes = measuredStatistic.unit === "BYTES"}
-
 							<Tooltip.Header class="text-muted-foreground! mb-1 text-xs font-medium"
 								>{DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}</Tooltip.Header
 							>
@@ -127,7 +136,9 @@
 									<div class="bg-accent h-2 w-2 rounded-full"></div>
 									<Tooltip.Item
 										class="text-text! text-sm font-bold"
-										value={isUnitBytes ? formatBytes(data.value, true) + " " + getUnit(data.value, true) : data.value}
+										value={isUnitBytes
+											? formatBytes(data.value, true) + " " + getUnit(data.value, true)
+											: data.value.toLocaleString()}
 									/>
 								</div>
 							</Tooltip.List>
