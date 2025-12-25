@@ -4,24 +4,24 @@ export type ClientOptions = {
 	baseUrl: "https://navigator.voldechse.wtf/" | (string & {});
 };
 
+/**
+ * Represents a request to estimate the size of data within a specified time range.
+ */
+export type BaseEstimationByTimerangeRequest = {
+	/**
+	 * The start time of the range for which to estimate the data.
+	 */
+	start: string;
+	/**
+	 * The start time of the range for which to estimate the data.
+	 */
+	end: string;
+};
+
 export type BaseStation = {
 	evaNumber: number | string;
 	name: string;
 	position: StationPosition;
-};
-
-/**
- * Represents a request to estimate the size of data within a specified time range.
- */
-export type EstimateSizeRequest = {
-	/**
-	 * The start time of the range for which to estimate size.
-	 */
-	start: string;
-	/**
-	 * The start time of the range for which to estimate size.
-	 */
-	end: string;
 };
 
 export enum InformationType {
@@ -123,7 +123,8 @@ export type StationPosition = {
 };
 
 export enum StatisticUnit {
-	BYTES = "BYTES"
+	BYTES = "BYTES",
+	COUNT = "COUNT"
 }
 
 export type Timerange = {
@@ -318,10 +319,6 @@ export type PostApiV1StationsNearbyErrors = {
 	 * Bad Request
 	 */
 	400: ProblemDetails;
-	/**
-	 * Not Found
-	 */
-	404: ProblemDetails;
 };
 
 export type PostApiV1StationsNearbyError = PostApiV1StationsNearbyErrors[keyof PostApiV1StationsNearbyErrors];
@@ -331,6 +328,10 @@ export type PostApiV1StationsNearbyResponses = {
 	 * OK
 	 */
 	200: Array<BaseStation>;
+	/**
+	 * No Content
+	 */
+	204: void;
 };
 
 export type PostApiV1StationsNearbyResponse = PostApiV1StationsNearbyResponses[keyof PostApiV1StationsNearbyResponses];
@@ -367,7 +368,7 @@ export type GetApiV1StationsGatheringResponses = {
 export type GetApiV1StationsGatheringResponse = GetApiV1StationsGatheringResponses[keyof GetApiV1StationsGatheringResponses];
 
 export type PostApiV1StatisticsEstimateSizeData = {
-	body: EstimateSizeRequest;
+	body: BaseEstimationByTimerangeRequest;
 	path?: never;
 	query?: never;
 	url: "/api/v1/statistics/estimate-size";
@@ -392,6 +393,33 @@ export type PostApiV1StatisticsEstimateSizeResponses = {
 
 export type PostApiV1StatisticsEstimateSizeResponse =
 	PostApiV1StatisticsEstimateSizeResponses[keyof PostApiV1StatisticsEstimateSizeResponses];
+
+export type PostApiV1StatisticsEstimateRisIdsData = {
+	body: BaseEstimationByTimerangeRequest;
+	path?: never;
+	query?: never;
+	url: "/api/v1/statistics/estimate-ris-ids";
+};
+
+export type PostApiV1StatisticsEstimateRisIdsErrors = {
+	/**
+	 * Bad Request
+	 */
+	400: ProblemDetails;
+};
+
+export type PostApiV1StatisticsEstimateRisIdsError =
+	PostApiV1StatisticsEstimateRisIdsErrors[keyof PostApiV1StatisticsEstimateRisIdsErrors];
+
+export type PostApiV1StatisticsEstimateRisIdsResponses = {
+	/**
+	 * OK
+	 */
+	200: MeasuredTimerangeStatistic;
+};
+
+export type PostApiV1StatisticsEstimateRisIdsResponse =
+	PostApiV1StatisticsEstimateRisIdsResponses[keyof PostApiV1StatisticsEstimateRisIdsResponses];
 
 export type PostApiV1TimetableDeparturesData = {
 	body: TimetableRequest;

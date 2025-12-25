@@ -22,6 +22,23 @@ public class StatisticsRepository(
             AND c.relkind = 'r'")
         .SingleOrDefaultAsync();
 
+    public async Task<RisIdEstimationResult> GetRisIdEstimationByTimerangeAsync(DateTimeOffset start, DateTimeOffset end)
+    {
+        var startedWith = await dataContext.RisIds
+            .CountAsync(risId => risId.DiscoveredAt < start.UtcDateTime);
+
+        var risIds = await dataContext.RisIds
+            .Where(risId => risId.DiscoveredAt >= start.UtcDateTime && risId.DiscoveredAt <= end.UtcDateTime)
+            .ToListAsync();
+
+        return new RisIdEstimationResult()
+        {
+            StartedWith = startedWith,
+            Total = startedWith + risIds.Count,
+            RisIds = risIds
+        };
+    }
+
     public async Task SaveDatabaseSizeAsync(DatabaseSize databaseSize)
     {
         await dataContext.DatabaseSizes.AddAsync(databaseSize);

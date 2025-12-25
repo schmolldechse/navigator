@@ -7,5 +7,6 @@ public interface IStatisticsRepository
 {
     Task<IEnumerable<DatabaseSize>> GetSizesByTimerangeAsync(DateTimeOffset start, DateTimeOffset end);
     Task<DatabaseSizeQueryResult?> EstimateDatabaseSizeAsync();
+    Task<RisIdEstimationResult> GetRisIdEstimationByTimerangeAsync(DateTimeOffset start, DateTimeOffset end);
     Task SaveDatabaseSizeAsync(DatabaseSize databaseSize);
 }

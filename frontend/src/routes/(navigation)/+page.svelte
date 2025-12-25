@@ -47,7 +47,10 @@
 		// invalidate("project:dimensions");
 	};
 
-	let statistics = [{ id: "DATABASE_ESTIMATION", label: "Total Database Size", promise: () => data.dimensions.databaseSize }];
+	let statistics = [
+		{ id: "DATABASE_ESTIMATION", label: "Total Database Size", promise: () => data.dimensions.databaseSize },
+		{ id: "RECORDED_RIS_IDS", label: "Recorded RIS IDs", promise: () => data.dimensions.risIds }
+	];
 
 	let selectedStatistic: { statistic: MeasuredTimerangeStatistic; label: string } | null = $state(null);
 </script>

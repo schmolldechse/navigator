@@ -2,5 +2,6 @@
 
 public enum StatisticUnit
 {
-    Bytes
+    Bytes,
+    Count
 }

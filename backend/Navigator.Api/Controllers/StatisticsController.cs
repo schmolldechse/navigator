@@ -20,7 +20,7 @@ public class StatisticsController(
     [HttpPost("estimate-size")]
     [ProducesResponseType<MeasuredTimerangeStatistic>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> EstimateSize([FromBody] EstimateSizeRequest request)
+    public async Task<IActionResult> EstimateSize([FromBody] BaseEstimationByTimerangeRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -50,6 +50,46 @@ public class StatisticsController(
             Total = values.LastOrDefault()?.Value ?? 0,
             StartedWith = values.FirstOrDefault()?.Value ?? 0,
             ChangedBy = (values.LastOrDefault()?.Value ?? 0) - (values.FirstOrDefault()?.Value ?? 0)
+        });
+    }
+
+    /// <summary>
+    /// Estimates RIS IDs count
+    /// </summary>
+    [HttpPost("estimate-ris-ids")]
+    [ProducesResponseType<MeasuredTimerangeStatistic>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> EstimateRisIds([FromBody] BaseEstimationByTimerangeRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var risIdEstimation = await statisticsRepository.GetRisIdEstimationByTimerangeAsync(request.Start, request.End);
+
+        long cumulativeSum = risIdEstimation.StartedWith;
+        return Ok(new MeasuredTimerangeStatistic()
+        {
+            Timerange = new Timerange()
+            {
+                Start = request.Start,
+                End = request.End
+            },
+            Values = risIdEstimation.RisIds
+                .GroupBy(risId => risId.DiscoveredAt)
+                .OrderBy(group => group.Key)
+                .Select(group =>
+                {
+                    cumulativeSum += group.Count();
+                    return new MeasuredStatisticValue
+                    {
+                        Date = group.Key,
+                        Value = cumulativeSum
+                    };
+                })
+                .ToList(),
+            Unit = StatisticUnit.Count,
+            Total = risIdEstimation.Total,
+            StartedWith = risIdEstimation.StartedWith,
+            ChangedBy = risIdEstimation.Total - risIdEstimation.StartedWith
         });
     }
 }
