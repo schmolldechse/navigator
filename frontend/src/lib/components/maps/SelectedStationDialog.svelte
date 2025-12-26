@@ -69,15 +69,14 @@
 	bind:this={dialog}
 	onclose={handleClose}
 	onclick={(event) => event.target === dialog && handleClose()}
-	class={[
-		"m-0 h-fit w-full max-w-none overflow-visible bg-transparent p-0 outline-none",
-		"fixed inset-x-0 top-auto bottom-0", // mobile: bottom sheet
-		"md:top-1/2 md:right-0 md:bottom-auto md:left-auto md:w-115 md:-translate-y-1/2", // desktop: right sidebar, y-centered
-		classes
-	]}
+	class={["m-0 w-full max-w-none bg-transparent p-0 outline-none", classes]}
 >
 	<div
-		class="bg-background border-muted-foreground/20 flex h-full max-h-[90vh] w-full flex-col space-y-6 rounded-t-2xl border-t-2 p-8 shadow-2xl md:rounded-t-none md:rounded-l-3xl md:border-y-2 md:border-t-0 md:border-l-2"
+		class={[
+			"bg-background border-muted-foreground/20 flex max-h-[90vh] w-full flex-col space-y-6",
+			"fixed inset-x-0 top-auto bottom-0 rounded-t-2xl border-t-2 p-8 shadow-2xl", // mobile: bottom sheet
+			"md:top-1/2 md:right-0 md:bottom-auto md:left-auto md:w-115 md:-translate-y-1/2 md:rounded-t-none md:rounded-l-3xl md:border-y-2 md:border-t-0 md:border-l-2" // desktop: right side dialog, y-centered
+		]}
 	>
 		<!-- Header -->
 		<div class="flex items-center justify-between">
@@ -188,13 +187,13 @@
 	}
 
 	@media (max-width: 767px) {
-		dialog[open] {
+		dialog[open] > div {
 			animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 		}
 	}
 
 	@media (min-width: 768px) {
-		dialog[open] {
+		dialog[open] > div {
 			animation: slide-left 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 		}
 	}
