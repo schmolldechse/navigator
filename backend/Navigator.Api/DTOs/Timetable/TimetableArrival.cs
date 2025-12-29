@@ -1,9 +1,11 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Navigator.Api.DTOs.Timetable;
 
 public class TimetableArrival
 {
+    [MaxLength(82)]
     [JsonPropertyName("journeyId")]
     public required string JourneyId { get; set; }
 

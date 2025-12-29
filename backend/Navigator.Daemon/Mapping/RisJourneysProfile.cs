@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Microsoft.CodeAnalysis;
 using Navigator.Data.Entities.Journey;
 using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Enums;
@@ -295,8 +294,8 @@ public class RisJourneysProfile : Profile
 
         TransportType? replacementTransportType = null;
         var journeyEventReplacements = source.Events
-            .Where(journyEvent => journyEvent.Transport != null && journyEvent.Transport.ReplacementTransport != null && !string.IsNullOrEmpty(journyEvent.Transport.ReplacementTransport.RealType))
-            .Select(journyEvent => TransportTypeConverter.StringTransportToNavigatorTransport(journyEvent.Transport.ReplacementTransport.RealType))
+            .Where(journeyEvent => journeyEvent.Transport != null && journeyEvent.Transport.ReplacementTransport != null && !string.IsNullOrEmpty(journeyEvent.Transport.ReplacementTransport.RealType))
+            .Select(journeyEvent => TransportTypeConverter.StringTransportToNavigatorTransport(journeyEvent.Transport.ReplacementTransport.RealType))
             .OfType<TransportType>()
             .ToList();
         if (journeyEventReplacements.Any()) replacementTransportType = journeyEventReplacements

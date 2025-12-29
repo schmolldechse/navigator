@@ -15,7 +15,27 @@ public class JourneyRepository(
     DataContext dataContext
 ) : IJourneyRepository
 {
-    private const string _risJourneysBatchUrl = "https://apis.deutschebahn.com/db/apis/ris-journeys/v2/batch";
+    private const string _risJourneysBatchMatchUrl = "https://apis.deutschebahn.com/db/apis/ris-journeys/v2/batch";
+    private const string _risJourneysMatchUrl = "https://apis.deutschebahn.com/db/apis/ris-journeys/v2/{0}";
+
+    public async Task<RisJourneys.JourneyEventBased?> GetJourneyAsync(string journeyId)
+    {
+        using var httpClient = proxyHttpClientFactory.CreateClient();
+        httpClient.DefaultRequestHeaders.Add("DB-Client-Id", Environment.GetEnvironmentVariable("JOURNEYS_CLIENT_ID"));
+        httpClient.DefaultRequestHeaders.Add("DB-Api-Key", Environment.GetEnvironmentVariable("JOURNEYS_API_KEY"));
+
+        using var message = new HttpRequestMessage(HttpMethod.Get, string.Format(_risJourneysMatchUrl, journeyId));
+
+        var response = await httpClient.SendAsync(message);
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.LogError("Failed to fetch journey by JourneyId {JourneyId}. Status Code: {StatusCode}", journeyId, response.StatusCode);
+            return null;
+        }
+        
+        var journey = JsonSerializer.Deserialize<RisJourneys.JourneyEventBased>(await response.Content.ReadAsStringAsync());
+        return journey ?? null;
+    }
 
     public async Task<RisJourneys.JourneyBatchResponse?> GetJourneysBatchAsync(IEnumerable<JourneyOnDateRequest> request)
     {
@@ -23,7 +43,7 @@ public class JourneyRepository(
         httpClient.DefaultRequestHeaders.Add("DB-Client-Id", Environment.GetEnvironmentVariable("JOURNEYS_CLIENT_ID"));
         httpClient.DefaultRequestHeaders.Add("DB-Api-Key", Environment.GetEnvironmentVariable("JOURNEYS_API_KEY"));
 
-        using var message = new HttpRequestMessage(HttpMethod.Post, _risJourneysBatchUrl);
+        using var message = new HttpRequestMessage(HttpMethod.Post, _risJourneysBatchMatchUrl);
         message.Content = new StringContent(JsonSerializer.Serialize(new RisJourneys.JourneyBatchRequest()
         {
             IncludeReferences = true,

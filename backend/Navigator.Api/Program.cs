@@ -22,7 +22,8 @@ builder.Services.AddServices(builder.Configuration);
 
 builder.Services.AddAutoMapper(typeof(StationProfile))
     .AddAutoMapper(typeof(StatisticsProfile))
-    .AddAutoMapper(typeof(TimetableProfile));
+    .AddAutoMapper(typeof(TimetableProfile))
+    .AddAutoMapper(typeof(JourneyProfile));
 
 var app = builder.Build();
 app.MapOpenApi();
