@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Navigator.Api.Enums;
 using Navigator.Data.Enums;
 
 namespace Navigator.Api.DTOs.Journey.Message;
@@ -15,7 +16,7 @@ public abstract class JourneyMessage
     public required int MessageId { get; set; }
     
     [JsonPropertyName("key")]
-    public required string Key { get; set; }
+    public required MessageKey Key { get; set; }
     
     [JsonPropertyName("text")]
     public required string Text { get; set; }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Navigator.Api.DTOs.Timetable;
+using Navigator.Api.Enums;
 using Navigator.Data.Enums;
 using Navigator.Data.Models.Ris;
 
@@ -72,6 +73,7 @@ public class TimetableProfile : Profile
                 if (src.Attributes.Any()) informations.AddRange(src.Attributes.Select(attribute => new TimetableEntryInformation()
                 {
                     Type = InformationType.JourneyAttribute,
+                    Key = MessageKeyConverter.MapToMessageKey(attribute.Code),
                     Text = attribute.Text,
                     TextShort = attribute.TextShort
                 }));
@@ -79,6 +81,7 @@ public class TimetableProfile : Profile
                 if (src.Disruptions.Any(disruption => disruption.Descriptions.ContainsKey("DE"))) informations.AddRange(src.Disruptions.Select(disruption => new TimetableEntryInformation()
                 {
                     Type = InformationType.Disruption,
+                    Key = MessageKey.UNPLANNED_INFO,
                     Text = disruption.Descriptions["DE"].Text,
                     TextShort = disruption.Descriptions["DE"].TextShort
                 }));
@@ -86,6 +89,7 @@ public class TimetableProfile : Profile
                 if (src.Messages.Any()) informations.AddRange(src.Messages.Select(message => new TimetableEntryInformation()
                 {
                     Type = InformationType.Message,
+                    Key = MessageKeyConverter.MapToMessageKey(message.Code),
                     Text = message.Text,
                     TextShort = message.TextShort
                 }));
@@ -130,6 +134,7 @@ public class TimetableProfile : Profile
                 if (src.Attributes.Any()) informations.AddRange(src.Attributes.Select(attribute => new TimetableEntryInformation()
                 {
                     Type = InformationType.JourneyAttribute,
+                    Key = MessageKeyConverter.MapToMessageKey(attribute.Code),
                     Text = attribute.Text,
                     TextShort = attribute.TextShort
                 }));
@@ -137,6 +142,7 @@ public class TimetableProfile : Profile
                 if (src.Disruptions.Any(disruption => disruption.Descriptions.ContainsKey("DE"))) informations.AddRange(src.Disruptions.Select(disruption => new TimetableEntryInformation()
                 {
                     Type = InformationType.Disruption,
+                    Key = MessageKey.UNPLANNED_INFO,
                     Text = disruption.Descriptions["DE"].Text,
                     TextShort = disruption.Descriptions["DE"].TextShort
                 }));
@@ -144,6 +150,7 @@ public class TimetableProfile : Profile
                 if (src.Messages.Any()) informations.AddRange(src.Messages.Select(message => new TimetableEntryInformation()
                 {
                     Type = InformationType.Message,
+                    Key = MessageKeyConverter.MapToMessageKey(message.Code),
                     Text = message.Text,
                     TextShort = message.TextShort
                 }));
