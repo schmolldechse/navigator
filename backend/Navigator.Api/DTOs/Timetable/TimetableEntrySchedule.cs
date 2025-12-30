@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Navigator.Data.Enums;
 
 namespace Navigator.Api.DTOs.Timetable;
 
@@ -22,4 +23,7 @@ public class TimetableEntrySchedule
 
     [JsonPropertyName("actualPlatform")]
     public string? ActualPlatform { get; set; }
+    
+    [JsonPropertyName("timeType")]
+    public required TimeType TimeType { get; set; }
 }

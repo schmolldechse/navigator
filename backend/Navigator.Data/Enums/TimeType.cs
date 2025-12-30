@@ -1,4 +1,5 @@
-﻿using NpgsqlTypes;
+﻿using Navigator.Data.Models.Ris;
+using NpgsqlTypes;
 
 namespace Navigator.Data.Enums;
 
@@ -16,11 +17,19 @@ public enum TimeType
 
 public static class TimeTypeConverter
 {
-    public static Navigator.Data.Enums.TimeType StringToNavigatorTime(string? timeType) => timeType?.ToUpperInvariant() switch
+    public static TimeType StringToNavigatorTime(string? timeType) => timeType?.ToUpperInvariant() switch
     {
-        "SCHEDULE" => Navigator.Data.Enums.TimeType.Schedule,
-        "PREVIEW" => Navigator.Data.Enums.TimeType.Preview,
-        "REAL" => Navigator.Data.Enums.TimeType.Real,
-        _ => Navigator.Data.Enums.TimeType.Schedule,
+        "SCHEDULE" => TimeType.Schedule,
+        "PREVIEW" => TimeType.Preview,
+        "REAL" => TimeType.Real,
+        _ => TimeType.Schedule,
+    };
+    
+    public static TimeType BoardsTimeTypeToNavigatorTime(RisBoards.TimeType timeType) => timeType switch
+    {
+        RisBoards.TimeType.SCHEDULE => TimeType.Schedule,
+        RisBoards.TimeType.PREVIEW => TimeType.Preview,
+        RisBoards.TimeType.REAL => TimeType.Real,
+        _ => TimeType.Schedule,
     };
 }

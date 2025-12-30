@@ -57,7 +57,8 @@ public class TimetableProfile : Profile
                 PlannedTime = src.TimeSchedule,
                 ActualTime = src.Time,
                 PlannedPlatform = src.PlatformSchedule,
-                ActualPlatform = src.Platform
+                ActualPlatform = src.Platform,
+                TimeType = TimeTypeConverter.BoardsTimeTypeToNavigatorTime(src.TimeType)
             }))
             .ForMember(dest => dest.Informations, opt => opt.Ignore())
             .ForMember(dest => dest.Cancelled, opt => opt.MapFrom(src => src.Canceled))
@@ -118,7 +119,8 @@ public class TimetableProfile : Profile
                 PlannedTime = src.TimeSchedule,
                 ActualTime = src.Time,
                 PlannedPlatform = src.PlatformSchedule,
-                ActualPlatform = src.Platform
+                ActualPlatform = src.Platform,
+                TimeType = TimeTypeConverter.BoardsTimeTypeToNavigatorTime(src.TimeType)
             }))
             .ForMember(dest => dest.Informations, opt => opt.Ignore())
             .ForMember(dest => dest.Cancelled, opt => opt.MapFrom(src => src.Canceled))
