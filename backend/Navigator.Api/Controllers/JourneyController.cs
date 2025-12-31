@@ -48,6 +48,6 @@ public class JourneyController(
             FetchingDate = DateTime.ParseExact(journeyId.Substring(0, 8), "yyyyMMdd", null)
         });
         var journeys = await journeyRepository.GetJourneysBatchAsync(batchRequest);
-        return Ok(mapper.Map<IEnumerable<Journey>>(journeys));
+        return Ok(mapper.Map<IEnumerable<Journey>>(journeys?.Journeys));
     }
 }

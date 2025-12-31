@@ -133,19 +133,19 @@ public class JourneyProfile : Profile
             .AfterMap((src, dest, context) =>
             {
                 var references = new List<JourneyMessageReference>();
-                if (src.LangDe.Attachments.Any()) references.AddRange(src.LangDe.Attachments.Select(attachment => new JourneyMessageReference() {
+                if (src.LangDe.Attachments != null && src.LangDe.Attachments.Any()) references.AddRange(src.LangDe.Attachments.Select(attachment => new JourneyMessageReference() {
                     ReferenceType = MessageReferenceType.Attachment, 
                     Label = attachment.Label, 
                     Url = attachment.Url
                 }));
                 
-                if (src.LangDe.Images.Any()) references.AddRange(src.LangDe.Images.Select(image => new JourneyMessageReference() {
+                if (src.LangDe.Images != null && src.LangDe.Images.Any()) references.AddRange(src.LangDe.Images.Select(image => new JourneyMessageReference() {
                     ReferenceType = MessageReferenceType.Image, 
                     Label = image.Label, 
                     Url = image.Url
                 }));
                 
-                if (src.LangDe.Links.Any()) references.AddRange(src.LangDe.Links.Select(link => new JourneyMessageReference() {
+                if (src.LangDe.Links != null && src.LangDe.Links.Any()) references.AddRange(src.LangDe.Links.Select(link => new JourneyMessageReference() {
                     ReferenceType = MessageReferenceType.Link, 
                     Label = link.Label, 
                     Url = link.Url
@@ -164,19 +164,19 @@ public class JourneyProfile : Profile
             .AfterMap((src, dest, context) =>
             {
                 var references = new List<JourneyMessageReference>();
-                if (src.LangDe.Attachments.Any()) references.AddRange(src.LangDe.Attachments.Select(attachment => new JourneyMessageReference() {
+                if (src.LangDe.Attachments != null && src.LangDe.Attachments.Any()) references.AddRange(src.LangDe.Attachments.Select(attachment => new JourneyMessageReference() {
                     ReferenceType = MessageReferenceType.Attachment, 
                     Label = attachment.Label, 
                     Url = attachment.Url
                 }));
                 
-                if (src.LangDe.Images.Any()) references.AddRange(src.LangDe.Images.Select(image => new JourneyMessageReference() {
+                if (src.LangDe.Images != null && src.LangDe.Images.Any()) references.AddRange(src.LangDe.Images.Select(image => new JourneyMessageReference() {
                     ReferenceType = MessageReferenceType.Image, 
                     Label = image.Label, 
                     Url = image.Url
                 }));
                 
-                if (src.LangDe.Links.Any()) references.AddRange(src.LangDe.Links.Select(link => new JourneyMessageReference() {
+                if (src.LangDe.Links != null && src.LangDe.Links.Any()) references.AddRange(src.LangDe.Links.Select(link => new JourneyMessageReference() {
                     ReferenceType = MessageReferenceType.Link, 
                     Label = link.Label, 
                     Url = link.Url

@@ -33,13 +33,13 @@ public class Journey
     public required JourneyRichStopPlace Destination { get; set; }
     
     [JsonPropertyName("differingDestination")]
-    public JourneyRichStopPlace? DifferingDestination { get; set; }
+    public JourneyStopPlace? DifferingDestination { get; set; }
     
     [JsonPropertyName("origin")]
     public required JourneyRichStopPlace Origin { get; set; }
     
     [JsonPropertyName("differingOrigin")]
-    public JourneyRichStopPlace? DifferingOrigin { get; set; }
+    public JourneyStopPlace? DifferingOrigin { get; set; }
     
     [JsonPropertyName("scheduledEvents")]
     public required IEnumerable<JourneyScheduledEvent> ScheduledEvents { get; set; } = [];
