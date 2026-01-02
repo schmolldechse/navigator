@@ -32,6 +32,133 @@ export enum InformationType {
 	RIS_CAUSE_REASON = "RIS_CAUSE_REASON"
 }
 
+export type Journey = {
+	journeyId: string;
+	administration: JourneyAdministration;
+	type: JourneyType;
+	transport: JourneyTransport;
+	continuationBy?: Array<string>;
+	continuationFor?: Array<string>;
+	cancelled: boolean;
+	destination: JourneyRichStopPlace;
+	differingDestination?: null | JourneyStopPlace;
+	origin: JourneyRichStopPlace;
+	differingOrigin?: null | JourneyStopPlace;
+	scheduledEvents: Array<JourneyScheduledEvent>;
+	messages: Array<JourneyMessage>;
+};
+
+export type JourneyAdministration = {
+	administrationId: string;
+	operatorCode: string;
+	operatorName: string;
+};
+
+export type JourneyMessage =
+	| ({
+			type?: "ATTRIBUTE";
+	  } & JourneyMessageAttributeMessage)
+	| ({
+			type?: "DISRUPTION";
+	  } & JourneyMessageDisruptionMessage)
+	| ({
+			type?: "NOTE";
+	  } & JourneyMessageNoteMessage)
+	| ({
+			type?: "RIS_CAUSE";
+	  } & JourneyMessageRisCauseMessage)
+	| ({
+			type?: "RIS_QUALITY_DEVIATION";
+	  } & JourneyMessageRisQualityDeviationMessage);
+
+export type JourneyMessageAttributeMessage = {
+	type?: "ATTRIBUTE";
+	messageId: number | string;
+	key: MessageKey;
+	text: string;
+};
+
+export type JourneyMessageDisruptionMessage = {
+	type?: "DISRUPTION";
+	cause?: null | string;
+	effect?: null | string;
+	disruptionId?: null | string;
+	textShort?: null | string;
+	references?: null | Array<JourneyMessageReference>;
+	messageId: number | string;
+	key: MessageKey;
+	text: string;
+};
+
+export type JourneyMessageNoteMessage = {
+	type?: "NOTE";
+	category?: null | string;
+	textShort?: null | string;
+	references?: null | Array<JourneyMessageReference>;
+	messageId: number | string;
+	key: MessageKey;
+	text: string;
+};
+
+export type JourneyMessageReference = {
+	referenceType: MessageReferenceType;
+	url?: null | string;
+	label?: null | string;
+};
+
+export type JourneyMessageRisCauseMessage = {
+	type?: "RIS_CAUSE";
+	messageId: number | string;
+	key: MessageKey;
+	text: string;
+};
+
+export type JourneyMessageRisQualityDeviationMessage = {
+	type?: "RIS_QUALITY_DEVIATION";
+	messageId: number | string;
+	key: MessageKey;
+	text: string;
+};
+
+export type JourneyRichStopPlace = {
+	cancelled: boolean;
+	name: string;
+	evaNumber: number | string;
+};
+
+export type JourneyScheduledEvent = {
+	stopPlace: JourneyStopPlace;
+	differingStopPlace: JourneyStopPlace;
+	cancelled: boolean;
+	additional: boolean;
+	noPassengerChange: boolean;
+	demand: boolean;
+	scheduleType: ScheduleType;
+	plannedTime: string;
+	actualTime: string;
+	delay: number | string;
+	plannedPlatform?: null | string;
+	actualPlatform?: null | string;
+	timeType: TimeType;
+	travelsWith?: null | Array<string>;
+	messageIds?: null | Array<number | string>;
+};
+
+export type JourneyStopPlace = {
+	name: string;
+	evaNumber: number | string;
+};
+
+export type JourneyTransport = {
+	type: TransportType;
+	replacementType?: null | TransportType;
+	category?: null | string;
+	categoryInternal?: null | string;
+	journeyDescription: string;
+	number: number | string;
+	line?: null | string;
+};
+
 export enum JourneyType {
 	REGULAR = "REGULAR",
 	REPLACEMENT = "REPLACEMENT",
@@ -53,6 +180,33 @@ export type MeasuredTimerangeStatistic = {
 	total: number | string;
 };
 
+export enum MessageKey {
+	UNPLANNED_INFO = "UNPLANNED_INFO",
+	GENERAL_WARNING = "GENERAL_WARNING",
+	ADDITIONAL_COACHES = "ADDITIONAL_COACHES",
+	MISSING_COACHES = "MISSING_COACHES",
+	CHANGED_COACH_SEQUENCE = "CHANGED_COACH_SEQUENCE",
+	REPLACEMENT_SERVICE = "REPLACEMENT_SERVICE",
+	ADDITIONAL_STOP = "ADDITIONAL_STOP",
+	WIFI_DISTRIBUTION = "WIFI_DISTRIBUTION",
+	NO_FIRST_CLASS = "NO_FIRST_CLASS",
+	ACCESSIBILITY_WARNING = "ACCESSIBILITY_WARNING",
+	RESERVATIONS_MISSING = "RESERVATIONS_MISSING",
+	RESERVATIONS_REQUIRED = "RESERVATIONS_REQUIRED",
+	NO_FOOD = "NO_FOOD",
+	BICYCLE_WARNING = "BICYCLE_WARNING",
+	BICYCLE_TRANSPORT = "BICYCLE_TRANSPORT",
+	BICYCLE_TRANSPORT_NOT_POSSIBLE = "BICYCLE_TRANSPORT_NOT_POSSIBLE",
+	BICYCLE_RESERVATION_REQUIRED = "BICYCLE_RESERVATION_REQUIRED",
+	TICKET_INFORMATION = "TICKET_INFORMATION"
+}
+
+export enum MessageReferenceType {
+	LINK = "LINK",
+	IMAGE = "IMAGE",
+	ATTACHMENT = "ATTACHMENT"
+}
+
 export type ProblemDetails = {
 	type?: null | string;
 	title?: null | string;
@@ -60,6 +214,11 @@ export type ProblemDetails = {
 	detail?: null | string;
 	instance?: null | string;
 };
+
+export enum ScheduleType {
+	ARRIVAL = "ARRIVAL",
+	DEPARTURE = "DEPARTURE"
+}
 
 export type Station = {
 	transports: Array<TransportType>;
@@ -177,6 +336,7 @@ export type TimetableEntryCoupledTransport = {
 
 export type TimetableEntryInformation = {
 	type: InformationType;
+	key: MessageKey;
 	text: string;
 	textShort?: null | string;
 };
@@ -194,6 +354,7 @@ export type TimetableEntrySchedule = {
 	delay?: number | string;
 	plannedPlatform?: null | string;
 	actualPlatform?: null | string;
+	timeType: TimeType;
 };
 
 export type TimetableEntryStopPlace = {
@@ -231,6 +392,12 @@ export type TimetableRequest = {
 	duration?: null | number | string;
 };
 
+export enum TimeType {
+	SCHEDULE = "SCHEDULE",
+	PREVIEW = "PREVIEW",
+	REAL = "REAL"
+}
+
 export enum TransportType {
 	UNKNOWN = "UNKNOWN",
 	HIGH_SPEED_TRAIN = "HIGH_SPEED_TRAIN",
@@ -250,6 +417,58 @@ export enum TransportType {
 	SCOOTER = "SCOOTER",
 	WALK = "WALK"
 }
+
+export type GetApiV1JourneyData = {
+	body?: never;
+	path?: never;
+	query?: {
+		journeyId?: string;
+	};
+	url: "/api/v1/journey";
+};
+
+export type GetApiV1JourneyErrors = {
+	/**
+	 * Bad Request
+	 */
+	400: ProblemDetails;
+};
+
+export type GetApiV1JourneyError = GetApiV1JourneyErrors[keyof GetApiV1JourneyErrors];
+
+export type GetApiV1JourneyResponses = {
+	/**
+	 * OK
+	 */
+	200: Journey;
+};
+
+export type GetApiV1JourneyResponse = GetApiV1JourneyResponses[keyof GetApiV1JourneyResponses];
+
+export type PostApiV1JourneyBatchData = {
+	body: Array<string>;
+	path?: never;
+	query?: never;
+	url: "/api/v1/journey/batch";
+};
+
+export type PostApiV1JourneyBatchErrors = {
+	/**
+	 * Bad Request
+	 */
+	400: ProblemDetails;
+};
+
+export type PostApiV1JourneyBatchError = PostApiV1JourneyBatchErrors[keyof PostApiV1JourneyBatchErrors];
+
+export type PostApiV1JourneyBatchResponses = {
+	/**
+	 * OK
+	 */
+	200: Array<Journey>;
+};
+
+export type PostApiV1JourneyBatchResponse = PostApiV1JourneyBatchResponses[keyof PostApiV1JourneyBatchResponses];
 
 export type GetApiV1StationsData = {
 	body?: never;
@@ -420,6 +639,33 @@ export type PostApiV1StatisticsEstimateRisIdsResponses = {
 
 export type PostApiV1StatisticsEstimateRisIdsResponse =
 	PostApiV1StatisticsEstimateRisIdsResponses[keyof PostApiV1StatisticsEstimateRisIdsResponses];
+
+export type PostApiV1StatisticsEstimateJourneysData = {
+	body: BaseEstimationByTimerangeRequest;
+	path?: never;
+	query?: never;
+	url: "/api/v1/statistics/estimate-journeys";
+};
+
+export type PostApiV1StatisticsEstimateJourneysErrors = {
+	/**
+	 * Bad Request
+	 */
+	400: ProblemDetails;
+};
+
+export type PostApiV1StatisticsEstimateJourneysError =
+	PostApiV1StatisticsEstimateJourneysErrors[keyof PostApiV1StatisticsEstimateJourneysErrors];
+
+export type PostApiV1StatisticsEstimateJourneysResponses = {
+	/**
+	 * OK
+	 */
+	200: MeasuredTimerangeStatistic;
+};
+
+export type PostApiV1StatisticsEstimateJourneysResponse =
+	PostApiV1StatisticsEstimateJourneysResponses[keyof PostApiV1StatisticsEstimateJourneysResponses];
 
 export type PostApiV1TimetableDeparturesData = {
 	body: TimetableRequest;

@@ -8,6 +8,7 @@
 	import type { TimerangeOption } from "$lib/types/timerange.js";
 	import Info from "@lucide/svelte/icons/info";
 	import { DateTime } from "luxon";
+	import { onMount } from "svelte";
 
 	let { data } = $props();
 
@@ -49,10 +50,18 @@
 
 	let statistics = [
 		{ id: "DATABASE_ESTIMATION", label: "Total Database Size", promise: () => data.dimensions.databaseSize },
-		{ id: "RECORDED_RIS_IDS", label: "Recorded RIS IDs", promise: () => data.dimensions.risIds }
+		{ id: "RECORDED_RIS_IDS", label: "Recorded RIS IDs", promise: () => data.dimensions.risIds },
+		{ id: "RECORDED_JOURNEYS", label: "Recorded Journeys", promise: () => data.dimensions.journeys }
 	];
 
 	let selectedStatistic: { statistic: MeasuredTimerangeStatistic; label: string } | null = $state(null);
+
+	onMount(() => {
+		if (!data.timerange.start || !data.timerange.end) return;
+
+		selectedTimerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === "CUSTOM")!;
+		previouslySelectedTimerange = selectedTimerange;
+	});
 </script>
 
 <svelte:head>

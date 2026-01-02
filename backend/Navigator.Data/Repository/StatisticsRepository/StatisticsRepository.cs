@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Navigator.Data.Entities.Journey;
+using Navigator.Data.Entities.RisId;
 using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Models.Statistics;
 
@@ -22,7 +24,7 @@ public class StatisticsRepository(
             AND c.relkind = 'r'")
         .SingleOrDefaultAsync();
 
-    public async Task<RisIdEstimationResult> GetRisIdEstimationByTimerangeAsync(DateTimeOffset start, DateTimeOffset end)
+    public async Task<BaseEstimationResult<RisId>> GetRisIdEstimationByTimerangeAsync(DateTimeOffset start, DateTimeOffset end)
     {
         var startedWith = await dataContext.RisIds
             .CountAsync(risId => risId.DiscoveredAt < start.UtcDateTime);
@@ -35,7 +37,24 @@ public class StatisticsRepository(
         {
             StartedWith = startedWith,
             Total = startedWith + risIds.Count,
-            RisIds = risIds
+            Values = risIds
+        };
+    }
+
+    public async Task<BaseEstimationResult<Journey>> GetJourneyEstimationByTimerangeAsync(DateTimeOffset start, DateTimeOffset end)
+    {
+        var startedWith = await dataContext.Journeys
+            .CountAsync(journey => journey.InsertedAt < start.UtcDateTime);
+
+        var journeys = await dataContext.Journeys
+            .Where(journey => journey.InsertedAt >= start.UtcDateTime && journey.InsertedAt <= end.UtcDateTime)
+            .ToListAsync();
+
+        return new JourneyEstimationResult()
+        {
+            StartedWith = startedWith,
+            Total = startedWith + journeys.Count,
+            Values = journeys
         };
     }
 

@@ -40,4 +40,22 @@ const estimateRisIds = query(v.object({ start: v.date(), end: v.date() }), async
 	return (await response.json()) as MeasuredTimerangeStatistic;
 });
 
-export { estimateDatabaseSize, estimateRisIds };
+const estimateJourneys = query(v.object({ start: v.date(), end: v.date() }), async (schema) => {
+	if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
+
+	const response = await fetch(`${env.PUBLIC_API_URL}/api/v1/statistics/estimate-journeys`, {
+		method: "POST",
+		body: JSON.stringify({
+			start: DateTime.fromJSDate(schema.start).set({ millisecond: 0 }).toISO({ suppressMilliseconds: true }),
+			end: DateTime.fromJSDate(schema.end).set({ millisecond: 0 }).toISO({ suppressMilliseconds: true })
+		}),
+		headers: {
+			"Content-Type": "application/json"
+		}
+	});
+
+	if (!response.ok) throw new Error(`Error fetching Journey count: ${response.status} ${response.statusText}`);
+	return (await response.json()) as MeasuredTimerangeStatistic;
+});
+
+export { estimateDatabaseSize, estimateRisIds, estimateJourneys };

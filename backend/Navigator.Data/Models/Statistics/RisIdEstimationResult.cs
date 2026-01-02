@@ -2,11 +2,9 @@
 
 namespace Navigator.Data.Models.Statistics;
 
-public class RisIdEstimationResult
+public class RisIdEstimationResult : BaseEstimationResult<RisIdEntity>
 {
-    public required int StartedWith { get; set; }
-
-    public required int Total { get; set; }
-
-    public required IEnumerable<RisIdEntity> RisIds { get; set; }
+    public override required int StartedWith { get; set; }
+    public override required int Total { get; set; }
+    public override required IEnumerable<RisIdEntity> Values { get; set; }
 }

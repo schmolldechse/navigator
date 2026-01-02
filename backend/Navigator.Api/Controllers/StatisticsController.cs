@@ -73,8 +73,8 @@ public class StatisticsController(
                 Start = request.Start,
                 End = request.End
             },
-            Values = risIdEstimation.RisIds
-                .GroupBy(risId => risId.DiscoveredAt)
+            Values = risIdEstimation.Values
+                .GroupBy(risId => new DateTimeOffset(risId.DiscoveredAt.Ticks - (risId.DiscoveredAt.Ticks % TimeSpan.TicksPerSecond), TimeSpan.Zero))
                 .OrderBy(group => group.Key)
                 .Select(group =>
                 {
@@ -90,6 +90,44 @@ public class StatisticsController(
             Total = risIdEstimation.Total,
             StartedWith = risIdEstimation.StartedWith,
             ChangedBy = risIdEstimation.Total - risIdEstimation.StartedWith
+        });
+    }
+
+    [HttpPost("estimate-journeys")]
+    [ProducesResponseType<MeasuredTimerangeStatistic>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> EstimateJourneys([FromBody] BaseEstimationByTimerangeRequest request)
+    {
+        if (!ModelState.IsValid) return BadRequest(ModelState);
+
+        var journeyEstimation =
+            await statisticsRepository.GetJourneyEstimationByTimerangeAsync(request.Start, request.End);
+        
+        long cumulativeSum = journeyEstimation.StartedWith;
+        return Ok(new MeasuredTimerangeStatistic()
+        {
+            Timerange = new Timerange()
+            {
+                Start = request.Start,
+                End = request.End
+            },
+            Values = journeyEstimation.Values
+                .GroupBy(journey => new DateTimeOffset(journey.InsertedAt.Ticks - (journey.InsertedAt.Ticks % TimeSpan.TicksPerSecond), TimeSpan.Zero))
+                .OrderBy(group => group.Key)
+                .Select(group =>
+                {
+                    cumulativeSum += group.Count();
+                    return new MeasuredStatisticValue
+                    {
+                        Date = group.Key,
+                        Value = cumulativeSum
+                    };
+                })
+                .ToList(),
+            Unit = StatisticUnit.Count,
+            Total = journeyEstimation.Total,
+            StartedWith = journeyEstimation.StartedWith,
+            ChangedBy = journeyEstimation.Total - journeyEstimation.StartedWith
         });
     }
 }
