@@ -62,7 +62,6 @@ public class RisJourneysProfile : Profile
                     {
                         var destStop = context.Mapper.Map<JourneyStopPlace>(srcEvent);
                         destStop.JourneyId = dest.Id;
-                        destStop.Date = date;
 
                         if (srcEvent.Messages is null || !srcEvent.Messages.Any()) continue;
 
@@ -84,7 +83,6 @@ public class RisJourneysProfile : Profile
         CreateMap<RisJourneys.JourneyEvent, JourneyStopPlace>()
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.JourneyId, opt => opt.Ignore())
-            .ForMember(dest => dest.Date, opt => opt.Ignore())
             .ForMember(dest => dest.ScheduleType, opt => opt.MapFrom(src => MapScheduleOrThrow(src.Type)))
             .ForMember(dest => dest.StationName, opt => opt.MapFrom(src => src.StopPlace.Name))
             .ForMember(dest => dest.StationEvaNumber, opt => opt.MapFrom(src => ParseEvaOrThrow(src.StopPlace.EvaNumber)))

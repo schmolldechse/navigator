@@ -227,7 +227,6 @@ namespace Navigator.Data.Migrations
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
-                    date = table.Column<DateOnly>(type: "date", nullable: false),
                     schedule_type = table.Column<ScheduleType>(type: "core.schedule_type", nullable: false),
                     station_name = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: false),
                     station_eva_number = table.Column<int>(type: "integer", nullable: false),
@@ -235,14 +234,12 @@ namespace Navigator.Data.Migrations
                     additional = table.Column<bool>(type: "boolean", nullable: false),
                     demand = table.Column<bool>(type: "boolean", nullable: false),
                     no_passenger_change = table.Column<bool>(type: "boolean", nullable: false),
+                    planned_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    actual_time = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     time_type = table.Column<TimeType>(type: "core.time_type", nullable: false),
-                    delay = table.Column<int>(type: "integer", nullable: false, computedColumnSql: "EXTRACT(EPOCH FROM (actual_time_utc - planned_time_utc))::integer", stored: true),
+                    delay = table.Column<int>(type: "integer", nullable: false, computedColumnSql: "EXTRACT(EPOCH FROM (actual_time - planned_time))::integer", stored: true),
                     planned_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
-                    actual_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
-                    planned_time_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    planned_time_offset_minutes = table.Column<short>(type: "smallint", nullable: false),
-                    actual_time_utc = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    actual_time_offset_minutes = table.Column<short>(type: "smallint", nullable: false)
+                    actual_platform = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -383,16 +380,10 @@ namespace Navigator.Data.Migrations
                 column: "journey_stop_place_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_places_actual_time_utc",
+                name: "IX_journey_stop_places_actual_time",
                 schema: "core",
                 table: "journey_stop_places",
-                column: "actual_time_utc");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_places_date",
-                schema: "core",
-                table: "journey_stop_places",
-                column: "date");
+                column: "actual_time");
 
             migrationBuilder.CreateIndex(
                 name: "IX_journey_stop_places_journey_id",
@@ -401,22 +392,17 @@ namespace Navigator.Data.Migrations
                 column: "journey_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_places_planned_time_utc",
+                name: "IX_journey_stop_places_planned_time",
                 schema: "core",
                 table: "journey_stop_places",
-                column: "planned_time_utc");
+                column: "planned_time");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_places_station_eva_number_date",
+                name: "IX_journey_stop_places_station_analytics",
                 schema: "core",
                 table: "journey_stop_places",
-                columns: new[] { "station_eva_number", "date" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_places_station_eva_number_journey_id",
-                schema: "core",
-                table: "journey_stop_places",
-                columns: new[] { "station_eva_number", "journey_id" });
+                columns: new[] { "station_eva_number", "planned_time" })
+                .Annotation("Npgsql:IndexInclude", new[] { "journey_id", "schedule_type", "delay", "cancelled", "additional", "demand", "no_passenger_change", "planned_platform", "actual_platform" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_journey_transports_category",

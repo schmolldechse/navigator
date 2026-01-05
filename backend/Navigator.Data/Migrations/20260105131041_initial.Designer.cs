@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260103192732_addStationGeoIndex")]
-    partial class addStationGeoIndex
+    [Migration("20260105131041_initial")]
+    partial class initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -122,13 +122,9 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("actual_platform");
 
-                    b.Property<short>("ActualTimeOffsetMinutes")
-                        .HasColumnType("smallint")
-                        .HasColumnName("actual_time_offset_minutes");
-
-                    b.Property<DateTime>("ActualTimeUtc")
+                    b.Property<DateTime>("ActualTime")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("actual_time_utc");
+                        .HasColumnName("actual_time");
 
                     b.Property<bool>("Additional")
                         .HasColumnType("boolean")
@@ -138,15 +134,11 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("cancelled");
 
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date")
-                        .HasColumnName("date");
-
                     b.Property<int>("Delay")
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("integer")
                         .HasColumnName("delay")
-                        .HasComputedColumnSql("EXTRACT(EPOCH FROM (actual_time_utc - planned_time_utc))::integer", true);
+                        .HasComputedColumnSql("EXTRACT(EPOCH FROM (actual_time - planned_time))::integer", true);
 
                     b.Property<bool>("Demand")
                         .HasColumnType("boolean")
@@ -167,13 +159,9 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("character varying(32)")
                         .HasColumnName("planned_platform");
 
-                    b.Property<short>("PlannedTimeOffsetMinutes")
-                        .HasColumnType("smallint")
-                        .HasColumnName("planned_time_offset_minutes");
-
-                    b.Property<DateTime>("PlannedTimeUtc")
+                    b.Property<DateTime>("PlannedTime")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("planned_time_utc");
+                        .HasColumnName("planned_time");
 
                     b.Property<ScheduleType>("ScheduleType")
                         .HasColumnType("core.schedule_type")
@@ -195,17 +183,16 @@ namespace Navigator.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActualTimeUtc");
-
-                    b.HasIndex("Date");
+                    b.HasIndex("ActualTime");
 
                     b.HasIndex("JourneyId");
 
-                    b.HasIndex("PlannedTimeUtc");
+                    b.HasIndex("PlannedTime");
 
-                    b.HasIndex("StationEvaNumber", "Date");
+                    b.HasIndex("StationEvaNumber", "PlannedTime")
+                        .HasDatabaseName("IX_journey_stop_places_station_analytics");
 
-                    b.HasIndex("StationEvaNumber", "JourneyId");
+                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("StationEvaNumber", "PlannedTime"), new[] { "JourneyId", "ScheduleType", "Delay", "Cancelled", "Additional", "Demand", "NoPassengerChange", "PlannedPlatform", "ActualPlatform" });
 
                     b.ToTable("journey_stop_places", "core");
                 });
