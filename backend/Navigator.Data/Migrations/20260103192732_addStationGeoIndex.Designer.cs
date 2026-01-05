@@ -13,7 +13,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20251219192108_addStationGeoIndex")]
+    [Migration("20260103192732_addStationGeoIndex")]
     partial class addStationGeoIndex
     {
         /// <inheritdoc />
@@ -535,6 +535,54 @@ namespace Navigator.Data.Migrations
                     b.HasIndex("MeasuredAt");
 
                     b.ToTable("database_size", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.JourneySnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("MeasuredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("measured_at");
+
+                    b.Property<int>("Total")
+                        .HasColumnType("integer")
+                        .HasColumnName("total");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MeasuredAt");
+
+                    b.ToTable("journey_snapshot", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.RisIdSnapshot", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Active")
+                        .HasColumnType("integer")
+                        .HasColumnName("active");
+
+                    b.Property<int>("Inactive")
+                        .HasColumnType("integer")
+                        .HasColumnName("inactive");
+
+                    b.Property<DateTime>("MeasuredAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("measured_at");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MeasuredAt");
+
+                    b.ToTable("risid_snapshot", "statistics");
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Journey", b =>

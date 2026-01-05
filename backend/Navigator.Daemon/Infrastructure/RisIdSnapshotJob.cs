@@ -4,17 +4,18 @@ using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
 
-public class DatabaseSizeEstimationJob(IStatisticsRepository statisticsRepository) : IJob
+public class RisIdSnapshotJob(IStatisticsRepository statisticsRepository) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
-        var result = await statisticsRepository.EstimateCurrentDatabaseSizeAsync();
+        var result = await statisticsRepository.EstimateCurrentRisIdsAsync();
         if (!result.HasValue) return;
 
-        await statisticsRepository.SaveDatabaseSizeAsync(new DatabaseSize()
+        await statisticsRepository.SaveRisIdSnapshotAsync(new RisIdSnapshot()
         {
             MeasuredAt = DateTime.UtcNow,
-            SizeInBytes = result.Value
+            Active = result.Value.Active,
+            Inactive = result.Value.Inactive
         });
     }
 }

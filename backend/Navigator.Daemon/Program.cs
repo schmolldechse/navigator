@@ -14,6 +14,8 @@ builder.Services.AddQuartz(options =>
     options.AddQuartzJobs<GatheringRisIdsJob>(builder.Configuration);
     options.AddQuartzJobs<GatheringJourneysJob>(builder.Configuration);
     options.AddQuartzJobs<DatabaseSizeEstimationJob>(builder.Configuration);
+    options.AddQuartzJobs<RisIdSnapshotJob>(builder.Configuration);
+    options.AddQuartzJobs<JourneySnapshotJob>(builder.Configuration);
 });
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 

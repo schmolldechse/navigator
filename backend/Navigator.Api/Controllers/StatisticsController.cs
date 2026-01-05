@@ -15,119 +15,33 @@ public class StatisticsController(
 ) : Controller
 {
     /// <summary>
-    /// Estimates database size
+    /// Retrieves measured metric statistics for the specified time range.
     /// </summary>
-    [HttpPost("estimate-size")]
-    [ProducesResponseType<MeasuredTimerangeStatistic>(StatusCodes.Status200OK)]
+    [HttpPost("metrics")]
+    [ProducesResponseType<IEnumerable<MetricSeries>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> EstimateSize([FromBody] BaseEstimationByTimerangeRequest request)
+    public async Task<IActionResult> GetMetric([FromBody] MetricQueryResult request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var now = DateTimeOffset.UtcNow;
-        var isInbetween = request.Start <= now && now <= request.End;
-
-        var values = mapper.Map<IEnumerable<MeasuredStatisticValue>>(await statisticsRepository.GetSizesByTimerangeAsync(request.Start, request.End));
-        if (isInbetween)
+        object repositoryResult = request.MetricType switch
         {
-            var estimatedSize = await statisticsRepository.EstimateDatabaseSizeAsync();
-            if (estimatedSize is not null) values = values.Append(new MeasuredStatisticValue
+            MetricType.DatabaseSize => await statisticsRepository.GetDatabaseSizeSnapshotAsync(request.Start, request.End),
+            MetricType.RecordedRisIds => await statisticsRepository.GetRisIdSnapshotAsync(request.Start, request.End),
+            MetricType.RecordedJourneys => await statisticsRepository.GetJourneySnapshotAsync(request.Start, request.End),
+            _ => throw new InvalidOperationException("Unreachable code reached.")
+        };
+
+        var seriesResponse = mapper.Map<IEnumerable<MetricSeries>>(repositoryResult);
+        foreach (var series in seriesResponse)
+        {
+            series.Timerange = new Timerange()
             {
-                Date = now,
-                Value = estimatedSize.SizeInBytes
-            });
+                Start = request.Start,
+                End = request.End
+            };
         }
 
-        return Ok(new MeasuredTimerangeStatistic()
-        {
-            Timerange = new Timerange()
-            {
-                Start = request.Start,
-                End = request.End
-            },
-            Values = values,
-            Unit = StatisticUnit.Bytes,
-            Total = values.LastOrDefault()?.Value ?? 0,
-            StartedWith = values.FirstOrDefault()?.Value ?? 0,
-            ChangedBy = (values.LastOrDefault()?.Value ?? 0) - (values.FirstOrDefault()?.Value ?? 0)
-        });
-    }
-
-    /// <summary>
-    /// Estimates RIS IDs count
-    /// </summary>
-    [HttpPost("estimate-ris-ids")]
-    [ProducesResponseType<MeasuredTimerangeStatistic>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> EstimateRisIds([FromBody] BaseEstimationByTimerangeRequest request)
-    {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        var risIdEstimation = await statisticsRepository.GetRisIdEstimationByTimerangeAsync(request.Start, request.End);
-
-        long cumulativeSum = risIdEstimation.StartedWith;
-        return Ok(new MeasuredTimerangeStatistic()
-        {
-            Timerange = new Timerange()
-            {
-                Start = request.Start,
-                End = request.End
-            },
-            Values = risIdEstimation.Values
-                .GroupBy(risId => new DateTimeOffset(risId.DiscoveredAt.Ticks - (risId.DiscoveredAt.Ticks % TimeSpan.TicksPerSecond), TimeSpan.Zero))
-                .OrderBy(group => group.Key)
-                .Select(group =>
-                {
-                    cumulativeSum += group.Count();
-                    return new MeasuredStatisticValue
-                    {
-                        Date = group.Key,
-                        Value = cumulativeSum
-                    };
-                })
-                .ToList(),
-            Unit = StatisticUnit.Count,
-            Total = risIdEstimation.Total,
-            StartedWith = risIdEstimation.StartedWith,
-            ChangedBy = risIdEstimation.Total - risIdEstimation.StartedWith
-        });
-    }
-
-    [HttpPost("estimate-journeys")]
-    [ProducesResponseType<MeasuredTimerangeStatistic>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> EstimateJourneys([FromBody] BaseEstimationByTimerangeRequest request)
-    {
-        if (!ModelState.IsValid) return BadRequest(ModelState);
-
-        var journeyEstimation =
-            await statisticsRepository.GetJourneyEstimationByTimerangeAsync(request.Start, request.End);
-        
-        long cumulativeSum = journeyEstimation.StartedWith;
-        return Ok(new MeasuredTimerangeStatistic()
-        {
-            Timerange = new Timerange()
-            {
-                Start = request.Start,
-                End = request.End
-            },
-            Values = journeyEstimation.Values
-                .GroupBy(journey => new DateTimeOffset(journey.InsertedAt.Ticks - (journey.InsertedAt.Ticks % TimeSpan.TicksPerSecond), TimeSpan.Zero))
-                .OrderBy(group => group.Key)
-                .Select(group =>
-                {
-                    cumulativeSum += group.Count();
-                    return new MeasuredStatisticValue
-                    {
-                        Date = group.Key,
-                        Value = cumulativeSum
-                    };
-                })
-                .ToList(),
-            Unit = StatisticUnit.Count,
-            Total = journeyEstimation.Total,
-            StartedWith = journeyEstimation.StartedWith,
-            ChangedBy = journeyEstimation.Total - journeyEstimation.StartedWith
-        });
+        return Ok(seriesResponse);
     }
 }

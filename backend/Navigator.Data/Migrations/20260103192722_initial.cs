@@ -60,6 +60,20 @@ namespace Navigator.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "journey_snapshot",
+                schema: "statistics",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    measured_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    total = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_journey_snapshot", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ris_ids",
                 schema: "core",
                 columns: table => new
@@ -75,6 +89,21 @@ namespace Navigator.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ris_ids", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "risid_snapshot",
+                schema: "statistics",
+                columns: table => new
+                {
+                    id = table.Column<Guid>(type: "uuid", nullable: false),
+                    measured_at = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    active = table.Column<int>(type: "integer", nullable: false),
+                    inactive = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_risid_snapshot", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -336,6 +365,12 @@ namespace Navigator.Data.Migrations
                 column: "message_type");
 
             migrationBuilder.CreateIndex(
+                name: "IX_journey_snapshot_measured_at",
+                schema: "statistics",
+                table: "journey_snapshot",
+                column: "measured_at");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_journey_stop_place_messages_journey_message_id",
                 schema: "core",
                 table: "journey_stop_place_messages",
@@ -474,6 +509,12 @@ namespace Navigator.Data.Migrations
                 column: "transport_type");
 
             migrationBuilder.CreateIndex(
+                name: "IX_risid_snapshot_measured_at",
+                schema: "statistics",
+                table: "risid_snapshot",
+                column: "measured_at");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_station_ril100_eva_number",
                 schema: "core",
                 table: "station_ril100",
@@ -505,6 +546,10 @@ namespace Navigator.Data.Migrations
                 schema: "core");
 
             migrationBuilder.DropTable(
+                name: "journey_snapshot",
+                schema: "statistics");
+
+            migrationBuilder.DropTable(
                 name: "journey_stop_place_messages",
                 schema: "core");
 
@@ -515,6 +560,10 @@ namespace Navigator.Data.Migrations
             migrationBuilder.DropTable(
                 name: "ris_ids",
                 schema: "core");
+
+            migrationBuilder.DropTable(
+                name: "risid_snapshot",
+                schema: "statistics");
 
             migrationBuilder.DropTable(
                 name: "station_ril100",

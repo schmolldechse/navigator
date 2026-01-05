@@ -1,6 +1,6 @@
 ﻿namespace Navigator.Api.Enums;
 
-public enum StatisticUnit
+public enum MetricUnit
 {
     Bytes,
     Count
