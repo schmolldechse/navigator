@@ -1,4 +1,4 @@
-﻿namespace Navigator.Api.Enums;
+﻿namespace Navigator.Data.Enums.Metric;
 
 public enum MetricUnit
 {

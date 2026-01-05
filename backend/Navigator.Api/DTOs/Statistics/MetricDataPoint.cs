@@ -2,7 +2,7 @@
 
 namespace Navigator.Api.DTOs.Statistics;
 
-public class MetricDataPoints
+public class MetricDataPoint
 {
     [JsonPropertyName("timestamp")]
     public required DateTimeOffset Timestamp { get; set; }

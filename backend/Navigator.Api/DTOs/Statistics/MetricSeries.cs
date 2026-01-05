@@ -1,4 +1,4 @@
-﻿using Navigator.Api.Enums;
+﻿using Navigator.Data.Enums.Metric;
 using System.Text.Json.Serialization;
 
 namespace Navigator.Api.DTOs.Statistics;
@@ -8,14 +8,17 @@ namespace Navigator.Api.DTOs.Statistics;
 /// </summary>
 public class MetricSeries
 {
+    [JsonPropertyName("seriesType")]
+    public required MetricSeriesType SeriesType { get; set; }
+
     [JsonPropertyName("unit")]
     public required MetricUnit Unit { get; set; }
 
-    [JsonPropertyName("type")]
-    public required MetricType Type { get; set; }
-
     [JsonPropertyName("timerange")]
     public required Timerange Timerange { get; set; }
+
+    [JsonPropertyName("isCumulative")]
+    public bool IsCumulative { get; set; }
 
     /// <summary>
     /// Aggregated statistics about this series (e.g. totals, deltas).
@@ -24,5 +27,5 @@ public class MetricSeries
     public required MetricSummary Summary { get; set; }
 
     [JsonPropertyName("dataPoints")]
-    public required IEnumerable<MetricDataPoints> DataPoints { get; set; }
+    public required IEnumerable<MetricDataPoint> DataPoints { get; set; }
 }

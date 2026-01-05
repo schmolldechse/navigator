@@ -5,17 +5,17 @@ namespace Navigator.Api.DTOs.Statistics;
 public class MetricSummary
 {
     [JsonPropertyName("startValue")]
-    public decimal? StartValue { get; set; }
+    public required decimal StartValue { get; set; }
 
     [JsonPropertyName("endValue")]
-    public decimal? EndValue { get; set; }
+    public required decimal EndValue { get; set; }
 
     [JsonPropertyName("absoluteChange")]
-    public decimal? AbsoluteChange { get; set; }
+    public required decimal AbsoluteChange { get; set; }
 
     [JsonPropertyName("minValue")]
-    public decimal? MinValue { get; set; }
+    public required decimal MinValue { get; set; }
 
     [JsonPropertyName("maxValue")]
-    public decimal? MaxValue { get; set; }
+    public required decimal MaxValue { get; set; }
 }

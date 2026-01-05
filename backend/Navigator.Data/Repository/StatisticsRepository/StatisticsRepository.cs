@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Navigator.Data.Entities.Statistics;
+using Navigator.Data.Enums.Metric;
 using Navigator.Data.Models.Statistics;
 
 namespace Navigator.Data.Repository.StatisticsRepository;
@@ -35,145 +36,173 @@ public class StatisticsRepository(
         .AsNoTracking()
         .CountAsync();
 
-    public async Task<BaseSnapshot<DatabaseSize>> GetDatabaseSizeSnapshotAsync(DateTimeOffset start, DateTimeOffset end)
+    public async Task<IEnumerable<MetricDataSet>> GetMetricAsync(MetricQueryType type, DateTimeOffset start, DateTimeOffset end, bool isCumulative)
     {
-        var now = DateTime.UtcNow;
+        var metrics = type switch
+        {
+            MetricQueryType.DatabaseSize => await GetDatabaseSizeMetricsAsync(start, end),
+            MetricQueryType.RisIds => await GetRisIdMetricsAsync(start, end),
+            MetricQueryType.Journeys => await GetJourneyMetricsAsync(start, end),
+            _ => throw new NotSupportedException($"Metric type '{type}' is not supported.")
+        };
 
-        var snapshots = await dataContext.DatabaseSizes
+        if (!isCumulative)
+        {
+            metrics = metrics.Select(metric =>
+            {
+                var sortedDataPoints = metric.DataPoints
+                    .OrderBy(dataPoint => dataPoint.Timestamp)
+                    .ToList();
+                var deltaDataPoints = new List<MetricDataPoint>();
+
+                for (int i = 0; i < sortedDataPoints.Count; i++)
+                {
+                    decimal deltaValue;
+
+                    if (i == 0) deltaValue = sortedDataPoints[i].Value;
+                    else deltaValue = sortedDataPoints[i].Value - sortedDataPoints[i - 1].Value;
+
+                    deltaDataPoints.Add(new MetricDataPoint()
+                    {
+                        Timestamp = sortedDataPoints[i].Timestamp,
+                        Value = deltaValue
+                    });
+                }
+
+                return new MetricDataSet()
+                {
+                    SeriesType = metric.SeriesType,
+                    Unit = metric.Unit,
+                    IsCumulative = false,
+                    DataPoints = deltaDataPoints,
+                    Summary = CalculateSummary(deltaDataPoints)
+                };
+            });
+        }
+
+        return metrics;
+    }
+
+    private async Task<IEnumerable<MetricDataSet>> GetDatabaseSizeMetricsAsync(DateTimeOffset start, DateTimeOffset end)
+    {
+        var dataPoints = await dataContext.DatabaseSizes
             .AsNoTracking()
             .Where(snapshot => snapshot.MeasuredAt >= start.UtcDateTime && snapshot.MeasuredAt <= end.UtcDateTime)
             .OrderBy(snapshot => snapshot.MeasuredAt)
+            .Select(snapshot => new MetricDataPoint()
+            {
+                Timestamp = snapshot.MeasuredAt,
+                Value = snapshot.SizeInBytes
+            })
             .ToListAsync();
 
-        var previousEntry = await dataContext.DatabaseSizes
-            .AsNoTracking()
-            .Where(snapshot => snapshot.MeasuredAt < start.UtcDateTime)
-            .OrderByDescending(snapshot => snapshot.MeasuredAt)
-            .FirstOrDefaultAsync();
-
-        DatabaseSize? currentEstimate = null;
+        DateTimeOffset now = DateTime.UtcNow;
         if (start <= now && now <= end)
         {
-            var estimate = await EstimateCurrentDatabaseSizeAsync();
-            if (estimate.HasValue)
+            var currentEstimate = await EstimateCurrentDatabaseSizeAsync() ?? 0;
+            dataPoints.Add(new MetricDataPoint()
             {
-                currentEstimate = new DatabaseSize()
-                {
-                    MeasuredAt = now,
-                    SizeInBytes = estimate.Value
-                };
-                snapshots.Add(currentEstimate);
-            }
+                Timestamp = now,
+                Value = currentEstimate
+            });
         }
 
-        long endingValue;
-        if (currentEstimate is not null) endingValue = currentEstimate.SizeInBytes;
-        else if (snapshots.Any()) endingValue = snapshots.Last().SizeInBytes;
-        else
+        return [new MetricDataSet()
         {
-            var lastEntry = await dataContext.DatabaseSizes
-                .AsNoTracking()
-                .Where(snapshot => snapshot.MeasuredAt <= end.UtcDateTime)
-                .OrderByDescending(snapshot => snapshot.MeasuredAt)
-                .FirstOrDefaultAsync();
-            endingValue = lastEntry?.SizeInBytes ?? 0;
-        }
-        
-        return new BaseSnapshot<DatabaseSize>()
-        {
-            StartedWith = previousEntry?.SizeInBytes ?? 0,
-            Total = endingValue,
-            Values = snapshots
-        };
+            SeriesType = MetricSeriesType.DatabaseSize,
+            Unit = MetricUnit.Bytes,
+            IsCumulative = true,
+            DataPoints = dataPoints,
+            Summary = CalculateSummary(dataPoints)
+        }];
     }
 
-    public async Task<BaseSnapshot<RisIdSnapshot>> GetRisIdSnapshotAsync(DateTimeOffset start, DateTimeOffset end)
+    public async Task<IEnumerable<MetricDataSet>> GetRisIdMetricsAsync(DateTimeOffset start, DateTimeOffset end)
     {
-        var now = DateTime.UtcNow;
-
         var snapshots = await dataContext.RisIdSnapshots
             .AsNoTracking()
             .Where(snapshot => snapshot.MeasuredAt >= start.UtcDateTime && snapshot.MeasuredAt <= end.UtcDateTime)
             .OrderBy(snapshot => snapshot.MeasuredAt)
             .ToListAsync();
 
-        var previousEntry = await dataContext.RisIdSnapshots
-            .AsNoTracking()
-            .Where(snapshot => snapshot.MeasuredAt < start.UtcDateTime)
-            .OrderByDescending(snapshot => snapshot.MeasuredAt)
-            .FirstOrDefaultAsync();
+        var activePoints = snapshots.Select(snapshot => new MetricDataPoint()
+        {
+            Timestamp = snapshot.MeasuredAt,
+            Value = snapshot.Active
+        }).ToList();
+        var inactivePoints = snapshots.Select(snapshot => new MetricDataPoint()
+        {
+            Timestamp = snapshot.MeasuredAt,
+            Value = snapshot.Inactive
+        }).ToList();
 
-        RisIdSnapshot? currentEstimate = null;
+        DateTimeOffset now = DateTime.UtcNow;
         if (start <= now && now <= end)
         {
-            var estimate = await EstimateCurrentRisIdsAsync();
-            if (estimate.HasValue)
+            var currentEstimate = await EstimateCurrentRisIdsAsync();
+            if (currentEstimate is null) currentEstimate = (0, 0);
+
+            activePoints.Add(new MetricDataPoint()
             {
-                currentEstimate = new RisIdSnapshot()
-                {
-                    MeasuredAt = now,
-                    Active = estimate.Value.Active,
-                    Inactive = estimate.Value.Inactive
-                };
-                snapshots.Add(currentEstimate);
+                Timestamp = now,
+                Value = currentEstimate.Value.Active
+            });
+            inactivePoints.Add(new MetricDataPoint()
+            {
+                Timestamp = now,
+                Value = currentEstimate.Value.Inactive
+            });
+        }
+
+        return [
+            new MetricDataSet() {
+                SeriesType = MetricSeriesType.RisIdsActive,
+                Unit = MetricUnit.Count,
+                IsCumulative = true,
+                DataPoints = activePoints,
+                Summary = CalculateSummary(activePoints)
+            },
+            new MetricDataSet() {
+                SeriesType = MetricSeriesType.RisIdsInactive,
+                Unit = MetricUnit.Count,
+                IsCumulative = true,
+                DataPoints = inactivePoints,
+                Summary = CalculateSummary(inactivePoints)
             }
-        }
-
-        long endingValue;
-        if (currentEstimate is not null) endingValue = currentEstimate.Active + currentEstimate.Inactive;
-        else if (snapshots.Any()) endingValue = snapshots.Last().Active + snapshots.Last().Inactive;
-        else
-        {
-            var estimate = await EstimateCurrentRisIdsAsync();
-            endingValue = (estimate?.Active ?? 0) + (estimate?.Inactive ?? 0);
-        }
-
-        return new BaseSnapshot<RisIdSnapshot>()
-        {
-            StartedWith = (previousEntry?.Active + previousEntry?.Inactive) ?? 0,
-            Total = endingValue,
-            Values = snapshots
-        };
+        ];
     }
 
-    public async Task<BaseSnapshot<JourneySnapshot>> GetJourneySnapshotAsync(DateTimeOffset start, DateTimeOffset end)
+    public async Task<IEnumerable<MetricDataSet>> GetJourneyMetricsAsync(DateTimeOffset start, DateTimeOffset end)
     {
-        var now = DateTime.UtcNow;
-
         var snapshots = await dataContext.JourneySnapshots
             .AsNoTracking()
             .Where(snapshot => snapshot.MeasuredAt >= start.UtcDateTime && snapshot.MeasuredAt <= end.UtcDateTime)
-            .OrderBy(snapshot => snapshot.MeasuredAt)
+            .Select(snapshot => new MetricDataPoint()
+            {
+                Timestamp = snapshot.MeasuredAt,
+                Value = snapshot.Total
+            })
+            .OrderBy(point => point.Timestamp)
             .ToListAsync();
 
-        var previousEntry = await dataContext.JourneySnapshots
-            .AsNoTracking()
-            .Where(snapshot => snapshot.MeasuredAt < start.UtcDateTime)
-            .OrderByDescending(snapshot => snapshot.MeasuredAt)
-            .FirstOrDefaultAsync();
-
-        JourneySnapshot? currentEstimate = null;
-        if (start <= now && now <= end)
+        DateTimeOffset now = DateTime.UtcNow;
+        if (now >= start && now <= end)
         {
-            currentEstimate = new JourneySnapshot()
+            var currentEstimate = await EstimateCurrentJourneysAsync() ?? 0;
+            snapshots.Add(new MetricDataPoint()
             {
-                MeasuredAt = now,
-                Total = await EstimateCurrentJourneysAsync() ?? 0
-            };
-            snapshots.Add(currentEstimate);
+                Timestamp = now,
+                Value = currentEstimate
+            });
         }
 
-        long endingValue;
-        if (currentEstimate is not null) endingValue = currentEstimate.Total;
-        else if (snapshots.Any()) endingValue = snapshots.Last().Total;
-        else endingValue = await EstimateCurrentJourneysAsync() ?? 0;
-
-        return new BaseSnapshot<JourneySnapshot>()
-        {
-            StartedWith = previousEntry?.Total ?? 0,
-            Total = endingValue,
-            Values = snapshots
-        };
+        return [new MetricDataSet() {
+            SeriesType = MetricSeriesType.JourneyTotal,
+            Unit = MetricUnit.Count,
+            IsCumulative = true,
+            DataPoints = snapshots,
+            Summary = CalculateSummary(snapshots)
+        }];
     }
 
     public async Task SaveDatabaseSizeAsync(DatabaseSize databaseSize)
@@ -192,5 +221,33 @@ public class StatisticsRepository(
     {
         await dataContext.JourneySnapshots.AddAsync(journeySnapshot);
         await dataContext.SaveChangesAsync();
+    }
+
+    private MetricDataSummary CalculateSummary(IEnumerable<MetricDataPoint> points)
+    {
+        if (!points.Any()) return new MetricDataSummary()
+        {
+            StartValue = 0,
+            EndValue = 0,
+            MinValue = 0,
+            MaxValue = 0,
+            AbsoluteChange = 0,
+        };
+
+        var values = points
+            .OrderBy(point => point.Timestamp)
+            .Select(point => point.Value)
+            .ToList();
+        var first = values.First();
+        var last = values.Last();
+
+        return new MetricDataSummary
+        {
+            StartValue = first,
+            EndValue = last,
+            MinValue = values.Min(),
+            MaxValue = values.Max(),
+            AbsoluteChange = last - first,
+        };
     }
 }

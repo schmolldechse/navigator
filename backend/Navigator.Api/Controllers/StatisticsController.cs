@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Navigator.Api.DTOs.Statistics;
-using Navigator.Api.Enums;
 using Navigator.Data.Repository.StatisticsRepository;
 
 namespace Navigator.Api.Controllers;
@@ -20,20 +19,14 @@ public class StatisticsController(
     [HttpPost("metrics")]
     [ProducesResponseType<IEnumerable<MetricSeries>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetMetric([FromBody] MetricQueryResult request)
+    public async Task<IActionResult> GetMetric([FromBody] MetricQueryRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        object repositoryResult = request.MetricType switch
-        {
-            MetricType.DatabaseSize => await statisticsRepository.GetDatabaseSizeSnapshotAsync(request.Start, request.End),
-            MetricType.RecordedRisIds => await statisticsRepository.GetRisIdSnapshotAsync(request.Start, request.End),
-            MetricType.RecordedJourneys => await statisticsRepository.GetJourneySnapshotAsync(request.Start, request.End),
-            _ => throw new InvalidOperationException("Unreachable code reached.")
-        };
+        var metricDataSets = await statisticsRepository.GetMetricAsync(request.MetricQueryType, request.Start, request.End, request.CumulativeValues);
 
-        var seriesResponse = mapper.Map<IEnumerable<MetricSeries>>(repositoryResult);
-        foreach (var series in seriesResponse)
+        var responseSeries = mapper.Map<IEnumerable<MetricSeries>>(metricDataSets);
+        foreach (var series in responseSeries)
         {
             series.Timerange = new Timerange()
             {
@@ -42,6 +35,6 @@ public class StatisticsController(
             };
         }
 
-        return Ok(seriesResponse);
+        return Ok(responseSeries);
     }
 }
