@@ -46,40 +46,43 @@ public class StatisticsRepository(
             _ => throw new NotSupportedException($"Metric type '{type}' is not supported.")
         };
 
-        if (!isCumulative)
+        if (isCumulative)
         {
             metrics = metrics.Select(metric =>
             {
-                var sortedDataPoints = metric.DataPoints
-                    .OrderBy(dataPoint => dataPoint.Timestamp)
-                    .ToList();
-                var deltaDataPoints = new List<MetricDataPoint>();
-
-                for (int i = 0; i < sortedDataPoints.Count; i++)
-                {
-                    decimal deltaValue;
-
-                    if (i == 0) deltaValue = sortedDataPoints[i].Value;
-                    else deltaValue = sortedDataPoints[i].Value - sortedDataPoints[i - 1].Value;
-
-                    deltaDataPoints.Add(new MetricDataPoint()
-                    {
-                        Timestamp = sortedDataPoints[i].Timestamp,
-                        Value = deltaValue
-                    });
-                }
-
-                return new MetricDataSet()
-                {
-                    SeriesType = metric.SeriesType,
-                    Unit = metric.Unit,
-                    IsCumulative = false,
-                    DataPoints = deltaDataPoints,
-                    Summary = CalculateSummary(deltaDataPoints)
-                };
+                metric.IsCumulative = true;
+                metric.Summary = CalculateSummary(metric.DataPoints, isCumulative: true);
+                return metric;
             });
+            return metrics;
         }
 
+        metrics = metrics.Select(metric =>
+        {
+            var sortedDataPoints = metric.DataPoints
+                .OrderBy(dataPoint => dataPoint.Timestamp)
+                .ToList();
+            var deltaDataPoints = new List<MetricDataPoint>();
+
+            for (int i = 0; i < sortedDataPoints.Count; i++)
+            {
+                decimal deltaValue;
+
+                if (i == 0) deltaValue = sortedDataPoints[i].Value;
+                else deltaValue = sortedDataPoints[i].Value - sortedDataPoints[i - 1].Value;
+
+                deltaDataPoints.Add(new MetricDataPoint()
+                {
+                    Timestamp = sortedDataPoints[i].Timestamp,
+                    Value = deltaValue
+                });
+            }
+
+            metric.IsCumulative = false;
+            metric.DataPoints = deltaDataPoints;
+            metric.Summary = CalculateSummary(deltaDataPoints, isCumulative: false);
+            return metric;
+        });
         return metrics;
     }
 
@@ -111,9 +114,8 @@ public class StatisticsRepository(
         {
             SeriesType = MetricSeriesType.DatabaseSize,
             Unit = MetricUnit.Bytes,
-            IsCumulative = true,
             DataPoints = dataPoints,
-            Summary = CalculateSummary(dataPoints)
+            Summary = null!
         }];
     }
 
@@ -160,14 +162,14 @@ public class StatisticsRepository(
                 Unit = MetricUnit.Count,
                 IsCumulative = true,
                 DataPoints = activePoints,
-                Summary = CalculateSummary(activePoints)
+                Summary = null!
             },
             new MetricDataSet() {
                 SeriesType = MetricSeriesType.RisIdsInactive,
                 Unit = MetricUnit.Count,
                 IsCumulative = true,
                 DataPoints = inactivePoints,
-                Summary = CalculateSummary(inactivePoints)
+                Summary = null!
             }
         ];
     }
@@ -201,7 +203,7 @@ public class StatisticsRepository(
             Unit = MetricUnit.Count,
             IsCumulative = true,
             DataPoints = snapshots,
-            Summary = CalculateSummary(snapshots)
+            Summary = null!
         }];
     }
 
@@ -223,7 +225,7 @@ public class StatisticsRepository(
         await dataContext.SaveChangesAsync();
     }
 
-    private MetricDataSummary CalculateSummary(IEnumerable<MetricDataPoint> points)
+    private MetricDataSummary CalculateSummary(IEnumerable<MetricDataPoint> points, bool isCumulative)
     {
         if (!points.Any()) return new MetricDataSummary()
         {
@@ -241,13 +243,17 @@ public class StatisticsRepository(
         var first = values.First();
         var last = values.Last();
 
+        // Cumulative: The total change is the difference between the last and first values.
+        // Non-cumulative (Deltas): The total change is the sum of all individual changes.
+        decimal absoluteChange = isCumulative ? (last - first) : values.Sum();
+
         return new MetricDataSummary
         {
             StartValue = first,
             EndValue = last,
             MinValue = values.Min(),
             MaxValue = values.Max(),
-            AbsoluteChange = last - first,
+            AbsoluteChange = absoluteChange,
         };
     }
 }
