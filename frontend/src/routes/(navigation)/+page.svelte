@@ -1,10 +1,17 @@
+<script lang="ts" module>
+	export interface SeriesTypeTitles {
+		seriesType: MetricSeriesType;
+		title: string;
+	}
+</script>
+
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import type { MeasuredTimerangeStatistic } from "$lib/api/types.gen.js";
+	import { MetricSeriesType, type MetricSeries } from "$lib/api/types.gen.js";
 	import PillSelector from "$lib/components/interactable/PillSelector.svelte";
 	import TimePickerDialog from "$lib/components/interactable/TimePickerDialog.svelte";
-	import StatisticCard from "$lib/components/statistics/StatisticCard.svelte";
-	import StatisticChartDialog from "$lib/components/statistics/StatisticChartDialog.svelte";
+	import MetricCard from "@lib/components/statistics/MetricCard.svelte";
+	import MetricChartDialog from "@lib/components/statistics/MetricChartDialog.svelte";
 	import type { TimerangeOption } from "$lib/types/timerange.js";
 	import Info from "@lucide/svelte/icons/info";
 	import { DateTime } from "luxon";
@@ -48,13 +55,36 @@
 		// invalidate("project:dimensions");
 	};
 
-	let statistics = [
-		{ id: "DATABASE_ESTIMATION", label: "Total Database Size", promise: () => data.dimensions.databaseSize },
-		{ id: "RECORDED_RIS_IDS", label: "Recorded RIS IDs", promise: () => data.dimensions.risIds },
-		{ id: "RECORDED_JOURNEYS", label: "Recorded Journeys", promise: () => data.dimensions.journeys }
+	let statistics: {
+		id: string;
+		label: string;
+		promise: () => Promise<MetricSeries[]>;
+		seriesTitles: SeriesTypeTitles[];
+	}[] = [
+		{
+			id: "DATABASE_ESTIMATION",
+			label: "Total Database Size",
+			promise: () => data.dimensions.databaseSize,
+			seriesTitles: [{ seriesType: MetricSeriesType.DATABASE_SIZE, title: "Database Size" }]
+		},
+		{
+			id: "RECORDED_RIS_IDS",
+			label: "Recorded RIS IDs",
+			promise: () => data.dimensions.risIds,
+			seriesTitles: [
+				{ seriesType: MetricSeriesType.RIS_IDS_ACTIVE, title: "Active" },
+				{ seriesType: MetricSeriesType.RIS_IDS_INACTIVE, title: "Inactive" }
+			]
+		},
+		{
+			id: "RECORDED_JOURNEYS",
+			label: "Recorded Journeys",
+			promise: () => data.dimensions.journeys,
+			seriesTitles: [{ seriesType: MetricSeriesType.JOURNEY_TOTAL, title: "Journeys" }]
+		}
 	];
 
-	let selectedStatistic: { statistic: MeasuredTimerangeStatistic; label: string } | null = $state(null);
+	let selectedMetrics: { metric: MetricSeries[]; seriesTitles: SeriesTypeTitles[]; label: string } | null = $state(null);
 
 	onMount(() => {
 		if (!data.timerange.start || !data.timerange.end) return;
@@ -172,22 +202,26 @@
 			/>
 		</div>
 
-		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
+		<div class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
 			{#each statistics as localStatistic}
-				<StatisticCard
+				<MetricCard
 					title={localStatistic.label}
-					statisticPromise={localStatistic.promise()}
-					onselect={(statistic: MeasuredTimerangeStatistic) => (selectedStatistic = { statistic, label: localStatistic.label })}
+					metricPromise={localStatistic.promise()}
+					onselect={(metric: MetricSeries[]) => {
+						selectedMetrics = { metric, seriesTitles: localStatistic.seriesTitles, label: localStatistic.label };
+					}}
+					seriesTitles={localStatistic.seriesTitles}
 				/>
 			{/each}
 		</div>
 
-		{#if selectedStatistic}
-			<StatisticChartDialog
+		{#if selectedMetrics}
+			<MetricChartDialog
 				isVisible={true}
-				title={selectedStatistic.label}
-				measuredStatistic={selectedStatistic.statistic}
-				onclose={() => (selectedStatistic = null)}
+				title={selectedMetrics.label}
+				metrics={selectedMetrics.metric}
+				seriesTitles={selectedMetrics.seriesTitles}
+				onclose={() => (selectedMetrics = null)}
 			/>
 		{/if}
 	</section>

@@ -4,20 +4,6 @@ export type ClientOptions = {
 	baseUrl: "https://navigator.voldechse.wtf/" | (string & {});
 };
 
-/**
- * Represents a request to estimate the size of data within a specified time range.
- */
-export type BaseEstimationByTimerangeRequest = {
-	/**
-	 * The start time of the range for which to estimate the data.
-	 */
-	start: string;
-	/**
-	 * The start time of the range for which to estimate the data.
-	 */
-	end: string;
-};
-
 export type BaseStation = {
 	evaNumber: number | string;
 	name: string;
@@ -166,20 +152,6 @@ export enum JourneyType {
 	EXTRA = "EXTRA"
 }
 
-export type MeasuredStatisticValue = {
-	date: string;
-	value: number | string;
-};
-
-export type MeasuredTimerangeStatistic = {
-	unit: StatisticUnit;
-	timerange: Timerange;
-	values: Array<MeasuredStatisticValue>;
-	startedWith: number | string;
-	changedBy: number | string;
-	total: number | string;
-};
-
 export enum MessageKey {
 	UNPLANNED_INFO = "UNPLANNED_INFO",
 	GENERAL_WARNING = "GENERAL_WARNING",
@@ -205,6 +177,72 @@ export enum MessageReferenceType {
 	LINK = "LINK",
 	IMAGE = "IMAGE",
 	ATTACHMENT = "ATTACHMENT"
+}
+
+export type MetricDataPoint = {
+	timestamp: string;
+	value: number | string;
+};
+
+/**
+ * Represents a request to query specific metrics within a time range.
+ */
+export type MetricQueryRequest = {
+	/**
+	 * The start time of the range for which to retrieve metrics.
+	 */
+	start: string;
+	/**
+	 * The start time of the range for which to retrieve metrics.
+	 */
+	end: string;
+	/**
+	 * The specific type of metric to retrieve.
+	 */
+	queryType: MetricQueryType;
+	cumulativeValues: boolean;
+};
+
+export enum MetricQueryType {
+	DATABASE_SIZE = "DATABASE_SIZE",
+	RIS_IDS = "RIS_IDS",
+	JOURNEYS = "JOURNEYS"
+}
+
+/**
+ * Represents a series of measured data points for a specific metric over a time range.
+ */
+export type MetricSeries = {
+	seriesType: MetricSeriesType;
+	unit: MetricUnit;
+	timerange: Timerange;
+	isCumulative?: boolean;
+	/**
+	 * Aggregated statistics about this series (e.g. totals, deltas).
+	 */
+	summary: MetricSummary;
+	dataPoints: Array<MetricDataPoint>;
+};
+
+export enum MetricSeriesType {
+	DATABASE_SIZE = "DATABASE_SIZE",
+	RIS_IDS_ACTIVE = "RIS_IDS_ACTIVE",
+	RIS_IDS_INACTIVE = "RIS_IDS_INACTIVE",
+	JOURNEY_TOTAL = "JOURNEY_TOTAL",
+	JOURNEY_DAILY = "JOURNEY_DAILY"
+}
+
+export type MetricSummary = {
+	startValue: number | string;
+	endValue: number | string;
+	absoluteChange: number | string;
+	minValue: number | string;
+	maxValue: number | string;
+};
+
+export enum MetricUnit {
+	BYTES = "BYTES",
+	COUNT = "COUNT"
 }
 
 export type ProblemDetails = {
@@ -280,11 +318,6 @@ export type StationPosition = {
 	latitude: number | string;
 	longitude: number | string;
 };
-
-export enum StatisticUnit {
-	BYTES = "BYTES",
-	COUNT = "COUNT"
-}
 
 export type Timerange = {
 	start: string;
@@ -586,86 +619,30 @@ export type GetApiV1StationsGatheringResponses = {
 
 export type GetApiV1StationsGatheringResponse = GetApiV1StationsGatheringResponses[keyof GetApiV1StationsGatheringResponses];
 
-export type PostApiV1StatisticsEstimateSizeData = {
-	body: BaseEstimationByTimerangeRequest;
+export type PostApiV1StatisticsMetricsData = {
+	body: MetricQueryRequest;
 	path?: never;
 	query?: never;
-	url: "/api/v1/statistics/estimate-size";
+	url: "/api/v1/statistics/metrics";
 };
 
-export type PostApiV1StatisticsEstimateSizeErrors = {
+export type PostApiV1StatisticsMetricsErrors = {
 	/**
 	 * Bad Request
 	 */
 	400: ProblemDetails;
 };
 
-export type PostApiV1StatisticsEstimateSizeError =
-	PostApiV1StatisticsEstimateSizeErrors[keyof PostApiV1StatisticsEstimateSizeErrors];
+export type PostApiV1StatisticsMetricsError = PostApiV1StatisticsMetricsErrors[keyof PostApiV1StatisticsMetricsErrors];
 
-export type PostApiV1StatisticsEstimateSizeResponses = {
+export type PostApiV1StatisticsMetricsResponses = {
 	/**
 	 * OK
 	 */
-	200: MeasuredTimerangeStatistic;
+	200: Array<MetricSeries>;
 };
 
-export type PostApiV1StatisticsEstimateSizeResponse =
-	PostApiV1StatisticsEstimateSizeResponses[keyof PostApiV1StatisticsEstimateSizeResponses];
-
-export type PostApiV1StatisticsEstimateRisIdsData = {
-	body: BaseEstimationByTimerangeRequest;
-	path?: never;
-	query?: never;
-	url: "/api/v1/statistics/estimate-ris-ids";
-};
-
-export type PostApiV1StatisticsEstimateRisIdsErrors = {
-	/**
-	 * Bad Request
-	 */
-	400: ProblemDetails;
-};
-
-export type PostApiV1StatisticsEstimateRisIdsError =
-	PostApiV1StatisticsEstimateRisIdsErrors[keyof PostApiV1StatisticsEstimateRisIdsErrors];
-
-export type PostApiV1StatisticsEstimateRisIdsResponses = {
-	/**
-	 * OK
-	 */
-	200: MeasuredTimerangeStatistic;
-};
-
-export type PostApiV1StatisticsEstimateRisIdsResponse =
-	PostApiV1StatisticsEstimateRisIdsResponses[keyof PostApiV1StatisticsEstimateRisIdsResponses];
-
-export type PostApiV1StatisticsEstimateJourneysData = {
-	body: BaseEstimationByTimerangeRequest;
-	path?: never;
-	query?: never;
-	url: "/api/v1/statistics/estimate-journeys";
-};
-
-export type PostApiV1StatisticsEstimateJourneysErrors = {
-	/**
-	 * Bad Request
-	 */
-	400: ProblemDetails;
-};
-
-export type PostApiV1StatisticsEstimateJourneysError =
-	PostApiV1StatisticsEstimateJourneysErrors[keyof PostApiV1StatisticsEstimateJourneysErrors];
-
-export type PostApiV1StatisticsEstimateJourneysResponses = {
-	/**
-	 * OK
-	 */
-	200: MeasuredTimerangeStatistic;
-};
-
-export type PostApiV1StatisticsEstimateJourneysResponse =
-	PostApiV1StatisticsEstimateJourneysResponses[keyof PostApiV1StatisticsEstimateJourneysResponses];
+export type PostApiV1StatisticsMetricsResponse = PostApiV1StatisticsMetricsResponses[keyof PostApiV1StatisticsMetricsResponses];
 
 export type PostApiV1TimetableDeparturesData = {
 	body: TimetableRequest;

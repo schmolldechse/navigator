@@ -1,15 +1,15 @@
 import { DateTime } from "luxon";
 import type { PageServerLoad } from "./maps/$types";
-import { estimateDatabaseSize, estimateJourneys, estimateRisIds } from "./projectdimensions.remote";
-import type { MeasuredTimerangeStatistic } from "$lib/api";
+import { MetricQueryType, type MetricSeries } from "@lib/api";
+import { loadMetric } from "./projectdimensions.remote";
 
 export const load: PageServerLoad = async ({
 	url
 }): Promise<{
 	dimensions: {
-		databaseSize: Promise<MeasuredTimerangeStatistic>;
-		risIds: Promise<MeasuredTimerangeStatistic>;
-		journeys: Promise<MeasuredTimerangeStatistic>;
+		databaseSize: Promise<MetricSeries[]>;
+		risIds: Promise<MetricSeries[]>;
+		journeys: Promise<MetricSeries[]>;
 	};
 	timerange: { start?: DateTime; end?: DateTime };
 }> => {
@@ -21,9 +21,9 @@ export const load: PageServerLoad = async ({
 
 	return {
 		dimensions: {
-			databaseSize: estimateDatabaseSize({ start: start.toJSDate(), end: end.toJSDate() }),
-			risIds: estimateRisIds({ start: start.toJSDate(), end: end.toJSDate() }),
-			journeys: estimateJourneys({ start: start.toJSDate(), end: end.toJSDate() })
+			databaseSize: loadMetric({ start: start.toJSDate(), end: end.toJSDate(), metric: MetricQueryType.DATABASE_SIZE }),
+			risIds: loadMetric({ start: start.toJSDate(), end: end.toJSDate(), metric: MetricQueryType.RIS_IDS }),
+			journeys: loadMetric({ start: start.toJSDate(), end: end.toJSDate(), metric: MetricQueryType.JOURNEYS })
 		},
 		timerange: {
 			start: startParam ? start : undefined,
