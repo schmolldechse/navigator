@@ -6,24 +6,33 @@
 	import { Area, AreaChart, Axis, chartDataArray, Highlight, LinearGradient, Svg, Tooltip } from "layerchart";
 	import { formatBytes, getUnit } from "@lib/util/bytes";
 	import { DateTime } from "luxon";
-	import type { SeriesTypeTitles } from "../../../routes/(navigation)/+page.svelte";
+	import type { UnknownTypeTitle } from "../../../routes/(navigation)/+page.svelte";
+	import { ChartType } from "@lib/util/chart";
 
 	interface Props {
 		isVisible: boolean;
 		title: string;
-		metrics: MetricSeries[];
-		seriesTitles?: SeriesTypeTitles[];
+		metrics?: MetricSeries[];
+		typeTitles?: UnknownTypeTitle<any>[];
+		chartType?: ChartType;
 		onclose?: () => void;
 	}
 
-	let { isVisible = $bindable(), title, metrics, seriesTitles, onclose }: Props = $props();
+	let { isVisible = $bindable(), title, metrics = [], typeTitles = [], chartType = ChartType.AREA, onclose }: Props = $props();
 
-	let isUnitBytes: boolean = $derived(metrics.every((metric: MetricSeries) => metric.unit === MetricUnit.BYTES));
-	let isCumulative: boolean = $derived(metrics.every((metric: MetricSeries) => metric.isCumulative));
+	let isUnitBytes: boolean = $derived(
+		metrics.length > 0 && metrics.every((metric: MetricSeries) => metric.unit === MetricUnit.BYTES)
+	);
+	let isCumulative: boolean = $derived(metrics.length > 0 && metrics.every((metric: MetricSeries) => metric.isCumulative));
+
+	$effect(() => {
+		if (metrics.length === 0) return;
+		isCumulative = metrics.every((metric: MetricSeries) => metric.isCumulative);
+	});
 
 	const colorScale = scaleOrdinal(schemeTableau10);
 	const chartSeries = $derived.by(() => {
-		if (!metrics || metrics.length === 0) return [];
+		if (metrics.length === 0) return [];
 
 		return metrics.map((metric: MetricSeries) => {
 			const sortedDataPoints = [...metric.dataPoints].sort(

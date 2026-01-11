@@ -4,5 +4,6 @@ public enum MetricQueryType
 {
     DatabaseSize,
     RisIds,
-    Journeys
+    Journeys,
+    TransportTypes,
 }

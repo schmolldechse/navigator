@@ -10,7 +10,7 @@ public interface IStatisticsRepository
     Task<(int Active, int Inactive)?> EstimateCurrentRisIdsAsync();
     Task<int?> EstimateCurrentJourneysAsync();
 
-    Task<IEnumerable<MetricDataSet>> GetMetricAsync(MetricQueryType type, DateTimeOffset start, DateTimeOffset end, bool isCumulative);
+    Task<IEnumerable<MetricDataSet>> GetMetricAsync(MetricQueryType type, DateTimeOffset? start, DateTimeOffset? end, bool isCumulative);
 
     Task SaveDatabaseSizeAsync(DatabaseSize databaseSize);
     Task SaveRisIdSnapshotAsync(RisIdSnapshot risIdSnapshot);

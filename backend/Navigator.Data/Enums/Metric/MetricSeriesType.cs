@@ -8,5 +8,6 @@ public enum MetricSeriesType
     RisIdsInactive,
 
     JourneyTotal,
-    JourneyDaily
+
+    TransportTypesTotal,
 }

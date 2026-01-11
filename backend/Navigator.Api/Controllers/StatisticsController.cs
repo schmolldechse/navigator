@@ -23,18 +23,11 @@ public class StatisticsController(
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var metricDataSets = await statisticsRepository.GetMetricAsync(request.MetricQueryType, request.Start, request.End, request.CumulativeValues);
-
-        var responseSeries = mapper.Map<IEnumerable<MetricSeries>>(metricDataSets);
-        foreach (var series in responseSeries)
-        {
-            series.Timerange = new Timerange()
-            {
-                Start = request.Start,
-                End = request.End
-            };
-        }
-
-        return Ok(responseSeries);
+        var metricDataSets = await statisticsRepository.GetMetricAsync(
+            request.MetricQueryType, 
+            request.Start, 
+            request.End, 
+            request.CumulativeValues);
+        return Ok(mapper.Map<IEnumerable<MetricSeries>>(metricDataSets));
     }
 }

@@ -9,7 +9,15 @@ public class StatisticsProfile : Profile
     public StatisticsProfile()
     {
         CreateMap<Data.Models.Statistics.MetricDataPoint, Api.DTOs.Statistics.MetricDataPoint>()
+            .Include<Data.Models.Statistics.DataPoint.TimestampMetricDataPoint, Api.DTOs.Statistics.DataPoint.TimestampMetricDataPoint>()
+            .Include<Data.Models.Statistics.DataPoint.TransportTypeMetricDataPoint, Api.DTOs.Statistics.DataPoint.TransportTypeMetricDataPoint>();
+
+        CreateMap<Data.Models.Statistics.DataPoint.TimestampMetricDataPoint, Api.DTOs.Statistics.DataPoint.TimestampMetricDataPoint>()
             .ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.Timestamp))
+            .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value));
+
+        CreateMap<Data.Models.Statistics.DataPoint.TransportTypeMetricDataPoint, Api.DTOs.Statistics.DataPoint.TransportTypeMetricDataPoint>()
+            .ForMember(dest => dest.TransportType, opt => opt.MapFrom(src => src.TransportType))
             .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value));
 
         CreateMap<MetricDataSummary, MetricSummary>()
@@ -20,7 +28,6 @@ public class StatisticsProfile : Profile
             .ForMember(dest => dest.AbsoluteChange, opt => opt.MapFrom(src => src.AbsoluteChange));
 
         CreateMap<MetricDataSet, MetricSeries>()
-            .ForMember(dest => dest.Timerange, opt => opt.Ignore())
             .ForMember(dest => dest.SeriesType, opt => opt.MapFrom(src => src.SeriesType))
             .ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Unit))
             .ForMember(dest => dest.IsCumulative, opt => opt.MapFrom(src => src.IsCumulative))

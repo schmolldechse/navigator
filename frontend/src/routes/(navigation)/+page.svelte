@@ -1,21 +1,34 @@
 <script lang="ts" module>
-	export interface SeriesTypeTitles {
-		seriesType: MetricSeriesType;
+	interface UnknownTypeTitle<T> {
+		type: T;
 		title: string;
 	}
+
+	interface MetricCardData {
+		title: string;
+		requestMetricType: MetricQueryType;
+		promise: () => Promise<MetricSeries[]>;
+		typeTitles: UnknownTypeTitle<any>[];
+		chartDialogDetails: {
+			isOpenable: boolean;
+			chartType?: ChartType;
+		};
+	}
+
+	export type { MetricCardData, UnknownTypeTitle };
 </script>
 
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { MetricSeriesType, type MetricSeries } from "$lib/api/types.gen.js";
-	import PillSelector from "$lib/components/interactable/PillSelector.svelte";
-	import TimePickerDialog from "$lib/components/interactable/TimePickerDialog.svelte";
+	import { MetricSeriesType, TransportType, type MetricSeries, MetricQueryType } from "$lib/api/types.gen.js";
+	import TimePickerDialog from "@lib/components/interactable/TimePickerDialog.svelte";
 	import MetricCard from "@lib/components/statistics/MetricCard.svelte";
 	import MetricChartDialog from "@lib/components/statistics/MetricChartDialog.svelte";
-	import type { TimerangeOption } from "$lib/types/timerange.js";
+	import { ChartType } from "@lib/util/chart.js";
+	import type { TimerangeOption } from "@lib/util/timerange.js";
 	import Info from "@lucide/svelte/icons/info";
+	import Calendar from "@lucide/svelte/icons/calendar";
 	import { DateTime } from "luxon";
-	import { onMount } from "svelte";
 
 	let { data } = $props();
 
@@ -41,10 +54,9 @@
 			isCustom: true
 		}
 	];
-	let selectedTimerange: TimerangeOption = $state(timeranges[0]);
-	let previouslySelectedTimerange: TimerangeOption = $state(timeranges[0]);
 
-	let pickingCustomRange: boolean = $state(false);
+	let selectingTimerange: boolean = $state(true);
+	let selectedTimerange: TimerangeOption = $state(timeranges[0]);
 
 	const updateTimerange = async (start: DateTime, end: DateTime) => {
 		const url = new URL(window.location.href);
@@ -55,43 +67,64 @@
 		// invalidate("project:dimensions");
 	};
 
-	let statistics: {
-		id: string;
-		label: string;
-		promise: () => Promise<MetricSeries[]>;
-		seriesTitles: SeriesTypeTitles[];
-	}[] = [
+	let metricCards: MetricCardData[] = [
 		{
-			id: "DATABASE_ESTIMATION",
-			label: "Total Database Size",
-			promise: () => data.dimensions.databaseSize,
-			seriesTitles: [{ seriesType: MetricSeriesType.DATABASE_SIZE, title: "Database Size" }]
+			title: "Total Database Size",
+			requestMetricType: data.dimensions.databaseSize.requestMetricType,
+			promise: () => data.dimensions.databaseSize.promise,
+			typeTitles: [{ type: MetricSeriesType.DATABASE_SIZE, title: "Database Size" }],
+			chartDialogDetails: {
+				isOpenable: true,
+				chartType: ChartType.AREA
+			}
 		},
 		{
-			id: "RECORDED_RIS_IDS",
-			label: "Recorded RIS IDs",
-			promise: () => data.dimensions.risIds,
-			seriesTitles: [
-				{ seriesType: MetricSeriesType.RIS_IDS_ACTIVE, title: "Active" },
-				{ seriesType: MetricSeriesType.RIS_IDS_INACTIVE, title: "Inactive" }
-			]
+			title: "Distribution of Transport Types",
+			requestMetricType: data.dimensions.transportTypes.requestMetricType,
+			promise: () => data.dimensions.transportTypes.promise,
+			typeTitles: [
+				{ type: TransportType.HIGH_SPEED_TRAIN, title: "Long-distance transport" },
+				{ type: TransportType.INTERCITY_TRAIN, title: "Intercity train" },
+				{ type: TransportType.INTER_REGIONAL_TRAIN, title: "Inter-regional transport" },
+				{ type: TransportType.REGIONAL_TRAIN, title: "Regional transport" },
+				{ type: TransportType.CITY_TRAIN, title: "City train" },
+				{ type: TransportType.TRAM, title: "Tram" },
+				{ type: TransportType.BUS, title: "Bus" },
+				{ type: TransportType.UNKNOWN, title: "Unknown" }
+			],
+			chartDialogDetails: { isOpenable: false }
 		},
 		{
-			id: "RECORDED_JOURNEYS",
-			label: "Recorded Journeys",
-			promise: () => data.dimensions.journeys,
-			seriesTitles: [{ seriesType: MetricSeriesType.JOURNEY_TOTAL, title: "Journeys" }]
+			title: "Recorded RIS IDs",
+			requestMetricType: data.dimensions.totalRisIds.requestMetricType,
+			promise: () => data.dimensions.totalRisIds.promise,
+			typeTitles: [
+				{ type: MetricSeriesType.RIS_IDS_ACTIVE, title: "Active RIS IDs" },
+				{ type: MetricSeriesType.RIS_IDS_INACTIVE, title: "Inactive RIS IDs" }
+			],
+			chartDialogDetails: { isOpenable: true, chartType: ChartType.AREA }
+		},
+		{
+			title: "Recorded Journeys",
+			requestMetricType: data.dimensions.totalJourneys.requestMetricType,
+			promise: () => data.dimensions.totalJourneys.promise,
+			typeTitles: [{ type: MetricSeriesType.JOURNEY_TOTAL, title: "Total Journeys" }],
+			chartDialogDetails: { isOpenable: true, chartType: ChartType.AREA }
 		}
 	];
 
-	let selectedMetrics: { metric: MetricSeries[]; seriesTitles: SeriesTypeTitles[]; label: string } | null = $state(null);
+	let chartDialogOpen: boolean = $state(false);
+	let selectedMetricCard: {
+		title: string;
+		metrics: MetricSeries[];
+		typeTitles: UnknownTypeTitle<any>[];
+		chartType?: ChartType;
+	} | null = $state(null);
 
-	onMount(() => {
-		if (!data.timerange.start || !data.timerange.end) return;
-
-		selectedTimerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === "CUSTOM")!;
-		previouslySelectedTimerange = selectedTimerange;
-	});
+	/**
+	 * TODO:
+	 * 1) Change metricCards which hold the Card Component as Snippet, uses MetricCard as base
+	 */
 </script>
 
 <svelte:head>
@@ -147,44 +180,32 @@
 
 	<!-- Project Dimensions -->
 	<section class="mx-auto w-full max-w-7xl overflow-hidden">
-		<div class="mb-6 flex flex-col gap-y-2 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+		<div class="flex items-center justify-between gap-y-2">
 			<h2 class="text-2xl font-medium">Project Dimensions</h2>
 
-			<div class="w-full sm:w-auto">
-				<PillSelector
-					selected={selectedTimerange.id}
-					items={timeranges.map((timerangeOption: TimerangeOption) => ({
-						id: timerangeOption.id,
-						label: timerangeOption.label
-					}))}
-					onselect={async (id: string) => {
-						const timerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === id);
-						if (!timerange) return;
+			<div class="relative">
+				<button
+					class="bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 flex cursor-pointer items-center justify-center gap-x-2 rounded-md border px-2 py-1"
+					onclick={() => (selectingTimerange = true)}
+				>
+					<Calendar size={20} />
 
-						if (timerange.isCustom) {
-							previouslySelectedTimerange = selectedTimerange;
-							selectedTimerange = timerange;
-							pickingCustomRange = true;
-							return;
-						}
+					<div class="hidden gap-x-1 md:flex">
+						<span>{data.timerange.start?.toLocaleString(DateTime.DATE_MED)}</span>
+						<span>&nbsp;–&nbsp;</span>
+						<span>{data.timerange.end?.toLocaleString(DateTime.DATE_MED)}</span>
+					</div>
+				</button>
 
-						selectedTimerange = timerange;
-						previouslySelectedTimerange = timerange;
-
-						if (!selectedTimerange.value) return;
-						await updateTimerange(selectedTimerange.value.start, selectedTimerange.value.end);
-					}}
-				/>
-			</div>
-
-			<TimePickerDialog
-				bind:isVisible={pickingCustomRange}
-				title="Select Custom Time Range"
-				multiSelect
-				startDate={DateTime.now().minus({ days: 1 })}
-				endDate={DateTime.now()}
-				onchange={async ({ start, end }) => {
-					pickingCustomRange = false;
+				<TimePickerDialog
+					bind:isVisible={selectingTimerange}
+					title="Select Custom Time Range"
+					multiSelect
+					startDate={DateTime.now().minus({ days: 1 })}
+					endDate={DateTime.now()}
+					onchange={async ({ start, end }) => {
+						selectingTimerange = false;
+						/*
 					if (!start || !end) {
 						selectedTimerange = previouslySelectedTimerange;
 						return;
@@ -192,38 +213,53 @@
 
 					selectedTimerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === "CUSTOM")!;
 					previouslySelectedTimerange = selectedTimerange;
+					*/
 
-					await updateTimerange(start.startOf("day"), end.endOf("day"));
-				}}
-				onclose={() => {
-					pickingCustomRange = false;
-					selectedTimerange = previouslySelectedTimerange;
-				}}
-			/>
+						await updateTimerange(start.startOf("day"), end!.endOf("day"));
+					}}
+					onclose={() => {
+						selectingTimerange = false;
+					}}
+					class="mt-2"
+				/>
+			</div>
 		</div>
 
-		<div class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-			{#each statistics as localStatistic}
+		<div class="columns-1 gap-4 sm:columns-2 xl:columns-3">
+			{#each metricCards as metricCard}
+				{@const title = metricCard.title}
+				{@const promise = metricCard.promise()}
+				{@const typeTitles = metricCard.typeTitles}
+
 				<MetricCard
-					title={localStatistic.label}
-					metricPromise={localStatistic.promise()}
-					onselect={(metric: MetricSeries[]) => {
-						selectedMetrics = { metric, seriesTitles: localStatistic.seriesTitles, label: localStatistic.label };
+					{title}
+					{promise}
+					onselect={(metrics: MetricSeries[]) => {
+						if (!metricCard.chartDialogDetails.isOpenable) return;
+
+						chartDialogOpen = true;
+						selectedMetricCard = {
+							title: metricCard.title,
+							metrics,
+							typeTitles: metricCard.typeTitles,
+							chartType: metricCard.chartDialogDetails.chartType
+						};
 					}}
-					seriesTitles={localStatistic.seriesTitles}
+					{typeTitles}
+					class="mb-4 w-full"
 				/>
 			{/each}
 		</div>
 
-		{#if selectedMetrics}
-			<MetricChartDialog
-				isVisible={true}
-				title={selectedMetrics.label}
-				metrics={selectedMetrics.metric}
-				seriesTitles={selectedMetrics.seriesTitles}
-				onclose={() => (selectedMetrics = null)}
-			/>
-		{/if}
+		<MetricChartDialog
+			bind:isVisible={chartDialogOpen}
+			title={selectedMetricCard?.title!}
+			metrics={selectedMetricCard?.metrics}
+			typeTitles={selectedMetricCard?.typeTitles}
+			onclose={() => {
+				selectedMetricCard = null;
+			}}
+		/>
 	</section>
 </main>
 

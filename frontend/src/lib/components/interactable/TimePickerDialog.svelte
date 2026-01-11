@@ -31,7 +31,7 @@
 	$effect(() => {
 		if (!dialog) return;
 
-		if (isVisible) dialog?.showModal();
+		if (isVisible) dialog?.show();
 		else dialog?.close();
 	});
 
@@ -86,16 +86,9 @@
 	bind:this={dialog}
 	onclose={handleClose}
 	onclick={(event) => event.target === dialog && handleClose()}
-	class={[
-		"m-0 h-fit max-h-none w-full max-w-none bg-transparent p-0 outline-none",
-		"fixed inset-x-0 top-auto bottom-0", // mobile: bottom sheet
-		"md:inset-auto md:top-1/2 md:left-1/2 md:max-w-md md:-translate-x-1/2 md:-translate-y-1/2", // desktop: centered
-		classes
-	]}
+	class={["bg-background border-muted-foreground/20 absolute right-0 left-auto z-100 w-[600px] rounded-2xl border-2", classes]}
 >
-	<div
-		class="border-muted-foreground/20 bg-background flex w-full flex-col space-y-4 rounded-t-2xl border-t-2 p-6 shadow-2xl md:rounded-2xl md:border-2"
-	>
+	<div class=" flex w-full flex-col space-y-4 p-6 shadow-2xl">
 		<!-- Header -->
 		<div class="flex items-center justify-between">
 			<h2 class="text-text text-lg font-bold">{title}</h2>
@@ -200,20 +193,5 @@
 	dialog::backdrop {
 		background: rgba(0, 0, 0, 0.7);
 		backdrop-filter: blur(8px);
-	}
-
-	@media (max-width: 767px) {
-		dialog[open] {
-			animation: slide-up 0.3s ease-out;
-		}
-	}
-
-	@keyframes slide-up {
-		from {
-			transform: translateY(100%);
-		}
-		to {
-			transform: translateY(0);
-		}
 	}
 </style>
