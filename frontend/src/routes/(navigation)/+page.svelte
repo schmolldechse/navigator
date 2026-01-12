@@ -25,38 +25,13 @@
 	import MetricCard from "@lib/components/statistics/MetricCard.svelte";
 	import MetricChartDialog from "@lib/components/statistics/MetricChartDialog.svelte";
 	import { ChartType } from "@lib/util/chart.js";
-	import type { TimerangeOption } from "@lib/util/timerange.js";
 	import Info from "@lucide/svelte/icons/info";
 	import Calendar from "@lucide/svelte/icons/calendar";
 	import { DateTime } from "luxon";
 
 	let { data } = $props();
 
-	let timeranges: TimerangeOption[] = [
-		{
-			id: "24H",
-			label: "24 Hours",
-			value: { start: DateTime.now().minus({ days: 1 }), end: DateTime.now() }
-		},
-		{
-			id: "7D",
-			label: "7 Days",
-			value: { start: DateTime.now().minus({ days: 7 }), end: DateTime.now() }
-		},
-		{
-			id: "30D",
-			label: "30 Days",
-			value: { start: DateTime.now().minus({ days: 30 }), end: DateTime.now() }
-		},
-		{
-			id: "CUSTOM",
-			label: "Custom Range",
-			isCustom: true
-		}
-	];
-
-	let selectingTimerange: boolean = $state(true);
-	let selectedTimerange: TimerangeOption = $state(timeranges[0]);
+	let selectingTimerange: boolean = $state(false);
 
 	const updateTimerange = async (start: DateTime, end: DateTime) => {
 		const url = new URL(window.location.href);
@@ -185,41 +160,26 @@
 
 			<div class="relative">
 				<button
-					class="bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 flex cursor-pointer items-center justify-center gap-x-2 rounded-md border px-2 py-1"
-					onclick={() => (selectingTimerange = true)}
+					class="bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 flex cursor-pointer items-center justify-center gap-x-2 rounded-md border px-4 py-1"
+					onclick={(event: MouseEvent) => {
+						event.stopPropagation();
+						selectingTimerange = !selectingTimerange;
+					}}
 				>
 					<Calendar size={20} />
 
 					<div class="hidden gap-x-1 md:flex">
-						<span>{data.timerange.start?.toLocaleString(DateTime.DATE_MED)}</span>
+						<span class="text-sm tracking-tight">{data.timerange.start?.toLocaleString(DateTime.DATE_MED)}</span>
 						<span>&nbsp;–&nbsp;</span>
-						<span>{data.timerange.end?.toLocaleString(DateTime.DATE_MED)}</span>
+						<span class="text-sm tracking-tight">{data.timerange.end?.toLocaleString(DateTime.DATE_MED)}</span>
 					</div>
 				</button>
 
 				<TimePickerDialog
 					bind:isVisible={selectingTimerange}
-					title="Select Custom Time Range"
 					multiSelect
-					startDate={DateTime.now().minus({ days: 1 })}
-					endDate={DateTime.now()}
-					onchange={async ({ start, end }) => {
-						selectingTimerange = false;
-						/*
-					if (!start || !end) {
-						selectedTimerange = previouslySelectedTimerange;
-						return;
-					}
-
-					selectedTimerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === "CUSTOM")!;
-					previouslySelectedTimerange = selectedTimerange;
-					*/
-
-						await updateTimerange(start.startOf("day"), end!.endOf("day"));
-					}}
-					onclose={() => {
-						selectingTimerange = false;
-					}}
+					dates={{ start: data.timerange.start, end: data.timerange.end }}
+					onchange={async ({ start, end }) => await updateTimerange(start.startOf("day"), end!.endOf("day"))}
 					class="mt-2"
 				/>
 			</div>
