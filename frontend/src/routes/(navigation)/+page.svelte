@@ -1,33 +1,24 @@
 <script lang="ts" module>
-	interface UnknownTypeTitle<T> {
-		type: T;
-		title: string;
-	}
-
 	interface MetricCardData {
-		title: string;
-		requestMetricType: MetricQueryType;
 		promise: () => Promise<MetricSeries[]>;
-		typeTitles: UnknownTypeTitle<any>[];
-		chartDialogDetails: {
-			isOpenable: boolean;
-			chartType?: ChartType;
-		};
+		metricComponent: Component<{ promise: Promise<MetricSeries[]>; class?: ClassValue }>;
+		scale: CardScale;
 	}
 
-	export type { MetricCardData, UnknownTypeTitle };
+	export type { MetricCardData };
 </script>
 
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { MetricSeriesType, TransportType, type MetricSeries, MetricQueryType } from "$lib/api/types.gen.js";
+	import { type MetricSeries } from "$lib/api/types.gen.js";
 	import TimePickerDialog from "@lib/components/interactable/TimePickerDialog.svelte";
-	import MetricCard from "@lib/components/statistics/MetricCard.svelte";
-	import MetricChartDialog from "@lib/components/statistics/MetricChartDialog.svelte";
-	import { ChartType } from "@lib/util/chart.js";
 	import Info from "@lucide/svelte/icons/info";
 	import Calendar from "@lucide/svelte/icons/calendar";
 	import { DateTime } from "luxon";
+	import type { Component } from "svelte";
+	import DatabaseSizeMetricCard from "@lib/components/statistics/projectdimensions/DatabaseSizeMetricCard.svelte";
+	import type { ClassValue } from "svelte/elements";
+	import { CardScale } from "@lib/util/card.js";
 
 	let { data } = $props();
 
@@ -44,62 +35,24 @@
 
 	let metricCards: MetricCardData[] = [
 		{
-			title: "Total Database Size",
-			requestMetricType: data.dimensions.databaseSize.requestMetricType,
 			promise: () => data.dimensions.databaseSize.promise,
-			typeTitles: [{ type: MetricSeriesType.DATABASE_SIZE, title: "Database Size" }],
-			chartDialogDetails: {
-				isOpenable: true,
-				chartType: ChartType.AREA
-			}
-		},
-		{
-			title: "Distribution of Transport Types",
-			requestMetricType: data.dimensions.transportTypes.requestMetricType,
-			promise: () => data.dimensions.transportTypes.promise,
-			typeTitles: [
-				{ type: TransportType.HIGH_SPEED_TRAIN, title: "Long-distance transport" },
-				{ type: TransportType.INTERCITY_TRAIN, title: "Intercity train" },
-				{ type: TransportType.INTER_REGIONAL_TRAIN, title: "Inter-regional transport" },
-				{ type: TransportType.REGIONAL_TRAIN, title: "Regional transport" },
-				{ type: TransportType.CITY_TRAIN, title: "City train" },
-				{ type: TransportType.TRAM, title: "Tram" },
-				{ type: TransportType.BUS, title: "Bus" },
-				{ type: TransportType.UNKNOWN, title: "Unknown" }
-			],
-			chartDialogDetails: { isOpenable: false }
-		},
-		{
-			title: "Recorded RIS IDs",
-			requestMetricType: data.dimensions.totalRisIds.requestMetricType,
-			promise: () => data.dimensions.totalRisIds.promise,
-			typeTitles: [
-				{ type: MetricSeriesType.RIS_IDS_ACTIVE, title: "Active RIS IDs" },
-				{ type: MetricSeriesType.RIS_IDS_INACTIVE, title: "Inactive RIS IDs" }
-			],
-			chartDialogDetails: { isOpenable: true, chartType: ChartType.AREA }
-		},
-		{
-			title: "Recorded Journeys",
-			requestMetricType: data.dimensions.totalJourneys.requestMetricType,
-			promise: () => data.dimensions.totalJourneys.promise,
-			typeTitles: [{ type: MetricSeriesType.JOURNEY_TOTAL, title: "Total Journeys" }],
-			chartDialogDetails: { isOpenable: true, chartType: ChartType.AREA }
+			metricComponent: DatabaseSizeMetricCard,
+			scale: CardScale.MEDIUM
 		}
 	];
 
-	let chartDialogOpen: boolean = $state(false);
-	let selectedMetricCard: {
-		title: string;
-		metrics: MetricSeries[];
-		typeTitles: UnknownTypeTitle<any>[];
-		chartType?: ChartType;
-	} | null = $state(null);
-
-	/**
-	 * TODO:
-	 * 1) Change metricCards which hold the Card Component as Snippet, uses MetricCard as base
-	 */
+	const getSpanLength = (scale: MetricCardData): string => {
+		switch (scale.scale) {
+			case CardScale.SMALL:
+				return "col-span-1";
+			case CardScale.MEDIUM:
+				return "col-span-2";
+			case CardScale.LARGE:
+				return "col-span-3";
+			default:
+				return "col-span-1";
+		}
+	};
 </script>
 
 <svelte:head>
@@ -154,7 +107,7 @@
 	</section>
 
 	<!-- Project Dimensions -->
-	<section class="mx-auto w-full max-w-7xl overflow-hidden">
+	<section class="mx-auto w-full max-w-7xl space-y-2">
 		<div class="flex items-center justify-between gap-y-2">
 			<h2 class="text-2xl font-medium">Project Dimensions</h2>
 
@@ -185,41 +138,12 @@
 			</div>
 		</div>
 
-		<div class="columns-1 gap-4 sm:columns-2 xl:columns-3">
+		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each metricCards as metricCard}
-				{@const title = metricCard.title}
-				{@const promise = metricCard.promise()}
-				{@const typeTitles = metricCard.typeTitles}
-
-				<MetricCard
-					{title}
-					{promise}
-					onselect={(metrics: MetricSeries[]) => {
-						if (!metricCard.chartDialogDetails.isOpenable) return;
-
-						chartDialogOpen = true;
-						selectedMetricCard = {
-							title: metricCard.title,
-							metrics,
-							typeTitles: metricCard.typeTitles,
-							chartType: metricCard.chartDialogDetails.chartType
-						};
-					}}
-					{typeTitles}
-					class="mb-4 w-full"
-				/>
+				{@const MetricComponent = metricCard.metricComponent}
+				<MetricComponent promise={metricCard.promise()} class={getSpanLength(metricCard)} />
 			{/each}
 		</div>
-
-		<MetricChartDialog
-			bind:isVisible={chartDialogOpen}
-			title={selectedMetricCard?.title!}
-			metrics={selectedMetricCard?.metrics}
-			typeTitles={selectedMetricCard?.typeTitles}
-			onclose={() => {
-				selectedMetricCard = null;
-			}}
-		/>
 	</section>
 </main>
 

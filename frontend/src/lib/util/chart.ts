@@ -1,11 +1,5 @@
 import { MetricSeriesType, type MetricSeries } from "@lib/api";
 
-enum ChartType {
-	PIE = "PIE",
-	ARC = "ARC",
-	AREA = "AREA"
-}
-
 const isTrendAvailable = (metrics: MetricSeries[]): boolean =>
 	metrics.some((metric: MetricSeries) => metric.seriesType !== MetricSeriesType.TRANSPORT_TYPES_TOTAL);
 
@@ -29,4 +23,4 @@ const calculateChange = (metrics: MetricSeries[]): { percentage: number; isUp: b
 	};
 };
 
-export { ChartType, isTrendAvailable, calculateChange };
+export { isTrendAvailable, calculateChange };
