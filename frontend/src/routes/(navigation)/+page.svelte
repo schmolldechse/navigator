@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	interface MetricCardData {
-		promise: () => Promise<MetricSeries[]>;
-		metricComponent: Component<{ promise: Promise<MetricSeries[]>; class?: ClassValue }>;
+		metricComponent: Component<any>;
+		props: Record<string, any>;
 		scale: CardScale;
 	}
 
@@ -10,15 +10,14 @@
 
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { type MetricSeries } from "$lib/api/types.gen.js";
 	import TimePickerDialog from "@lib/components/interactable/TimePickerDialog.svelte";
 	import Info from "@lucide/svelte/icons/info";
 	import Calendar from "@lucide/svelte/icons/calendar";
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
 	import DatabaseSizeMetricCard from "@lib/components/statistics/projectdimensions/DatabaseSizeMetricCard.svelte";
-	import type { ClassValue } from "svelte/elements";
 	import { CardScale } from "@lib/util/card.js";
+	import RisIdDistributionMetricCard from "@lib/components/statistics/projectdimensions/RisIdDistributionMetricCard.svelte";
 
 	let { data } = $props();
 
@@ -33,13 +32,22 @@
 		// invalidate("project:dimensions");
 	};
 
-	let metricCards: MetricCardData[] = [
+	let metricCards: MetricCardData[] = $derived([
 		{
-			promise: () => data.dimensions.databaseSize.promise,
 			metricComponent: DatabaseSizeMetricCard,
+			props: {
+				promise: data.dimensions.databaseSize
+			},
+			scale: CardScale.MEDIUM
+		},
+		{
+			metricComponent: RisIdDistributionMetricCard,
+			props: {
+				promise: data.dimensions.totalRisIds
+			},
 			scale: CardScale.MEDIUM
 		}
-	];
+	]);
 
 	const getSpanLength = (scale: MetricCardData): string => {
 		switch (scale.scale) {
@@ -141,7 +149,7 @@
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each metricCards as metricCard}
 				{@const MetricComponent = metricCard.metricComponent}
-				<MetricComponent promise={metricCard.promise()} class={getSpanLength(metricCard)} />
+				<MetricComponent {...metricCard.props} class="col-span-3" />
 			{/each}
 		</div>
 	</section>

@@ -8,22 +8,10 @@ export const load: PageServerLoad = async ({
 	getClientAddress
 }): Promise<{
 	dimensions: {
-		databaseSize: {
-			requestMetricType: MetricQueryType;
-			promise: Promise<MetricSeries[]>;
-		};
-		totalRisIds: {
-			requestMetricType: MetricQueryType;
-			promise: Promise<MetricSeries[]>;
-		};
-		totalJourneys: {
-			requestMetricType: MetricQueryType;
-			promise: Promise<MetricSeries[]>;
-		};
-		transportTypes: {
-			requestMetricType: MetricQueryType;
-			promise: Promise<MetricSeries[]>;
-		};
+		databaseSize: Promise<MetricSeries[]>;
+		totalRisIds: Promise<MetricSeries[]>;
+		totalJourneys: Promise<MetricSeries[]>;
+		transportTypes: Promise<MetricSeries[]>;
 	};
 	timerange: { start: DateTime; end: DateTime };
 }> => {
@@ -35,37 +23,24 @@ export const load: PageServerLoad = async ({
 
 	return {
 		dimensions: {
-			databaseSize: {
-				requestMetricType: MetricQueryType.DATABASE_SIZE,
-				promise: loadMetric({
-					start: start.toJSDate(),
-					end: end.toJSDate(),
-					metric: MetricQueryType.DATABASE_SIZE,
-					userIp: getClientAddress()
-				})
-			},
-			totalRisIds: {
-				requestMetricType: MetricQueryType.RIS_IDS,
-				promise: loadMetric({
-					start: start.toJSDate(),
-					end: end.toJSDate(),
-					metric: MetricQueryType.RIS_IDS,
-					userIp: getClientAddress()
-				})
-			},
-			totalJourneys: {
-				requestMetricType: MetricQueryType.JOURNEYS,
-				promise: loadMetric({
-					start: start.toJSDate(),
-					end: end.toJSDate(),
-					metric: MetricQueryType.JOURNEYS,
-					userIp: getClientAddress()
-				})
-			},
-			transportTypes: {
-				requestMetricType: MetricQueryType.TRANSPORT_TYPES,
-				promise: loadMetric({ metric: MetricQueryType.TRANSPORT_TYPES, userIp: getClientAddress() })
-			}
+			databaseSize: loadMetric({
+				start: start.toJSDate(),
+				end: end.toJSDate(),
+				metric: MetricQueryType.DATABASE_SIZE,
+				userIp: getClientAddress()
+			}),
+			totalRisIds: loadMetric({
+				start: start.toJSDate(),
+				end: end.toJSDate(),
+				metric: MetricQueryType.RIS_IDS
+			}),
+			totalJourneys: loadMetric({
+				start: start.toJSDate(),
+				end: end.toJSDate(),
+				metric: MetricQueryType.JOURNEYS,
+				userIp: getClientAddress()
+			}),
+			transportTypes: loadMetric({ metric: MetricQueryType.TRANSPORT_TYPES, userIp: getClientAddress() })
 		},
 		timerange: { start, end }
 	};

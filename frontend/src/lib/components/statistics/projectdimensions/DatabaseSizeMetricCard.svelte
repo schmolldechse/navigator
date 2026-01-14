@@ -136,8 +136,6 @@
 								{#snippet children({ payload })}
 									<div class="flex flex-col gap-y-1">
 										{#each [...payload].reverse() as item}
-											{@const _ = console.log(item)}
-
 											{@const title =
 												seriesTitles?.find((title: SeriesTypeTitles) => title.seriesType === item.rawSeriesData?.key)?.title ??
 												item.rawSeriesData?.key}
