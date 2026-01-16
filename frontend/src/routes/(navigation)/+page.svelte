@@ -129,7 +129,7 @@
 				>
 					<Calendar size={20} />
 
-					<div class="hidden gap-x-1 md:flex">
+					<div class="hidden items-baseline gap-x-1 md:flex">
 						<span class="text-sm tracking-tight">{data.timerange.start?.toLocaleString(DateTime.DATE_MED)}</span>
 						<span>&nbsp;–&nbsp;</span>
 						<span class="text-sm tracking-tight">{data.timerange.end?.toLocaleString(DateTime.DATE_MED)}</span>
