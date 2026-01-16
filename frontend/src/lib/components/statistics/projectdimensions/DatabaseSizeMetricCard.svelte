@@ -16,6 +16,12 @@
 	import { formatBytes, getUnit } from "@lib/util/bytes";
 	import { DateTime } from "luxon";
 
+	interface LineChartSeries {
+		key: string;
+		values: { date: Date; value: number }[];
+		color: string;
+	}
+
 	interface SeriesTypeTitles {
 		seriesType: MetricSeriesType;
 		title: string;
@@ -40,7 +46,7 @@
 	});
 
 	const colorScale = scaleOrdinal(schemeTableau10);
-	const getChartSeries = (metrics: MetricSeries[]) => {
+	const getChartSeries = (metrics: MetricSeries[]): LineChartSeries[] => {
 		if (!metrics.length) return [];
 
 		return metrics.map((metric: MetricSeries) => {
@@ -74,20 +80,20 @@
 			{#if metrics === null || metrics.length === 0}
 				<MetricLoadingFailedWarning />
 			{:else}
-				<div class="h-75 p-2">
+				<div class="h-64">
 					<AreaChart
 						data={getChartSeries(metrics).flatMap((series) => series.values)}
 						series={getChartSeries(metrics)}
 						x="date"
 						y="value"
-						padding={{ left: 48, right: -8 }}
+						padding={{ left: 64, top: 16, bottom: 12 }}
 						yNice
 						yDomain={null}
 						tooltip={{ mode: "quadtree-x" }}
 					>
 						{#snippet children({ context })}
 							<Svg>
-								<Highlight points lines={{ class: "stroke-muted-foreground/70" }} />
+								<Highlight points lines={{ class: "stroke-muted-foreground/30" }} />
 								<Axis
 									placement="left"
 									grid
@@ -157,7 +163,7 @@
 							<!-- Date Tooltip on x-Axis -->
 							<Tooltip.Root
 								x="pointer"
-								y={context.height + context.padding.bottom}
+								y={context.height + context.padding.bottom + 8}
 								anchor="top"
 								variant="none"
 								class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"

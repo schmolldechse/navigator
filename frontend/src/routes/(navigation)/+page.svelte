@@ -16,8 +16,8 @@
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
 	import DatabaseSizeMetricCard from "@lib/components/statistics/projectdimensions/DatabaseSizeMetricCard.svelte";
+	import RecordedRisIdsMetricCard from "@lib/components/statistics/projectdimensions/RecordedRisIdsMetricCard.svelte";
 	import { CardScale } from "@lib/util/card.js";
-	import RisIdDistributionMetricCard from "@lib/components/statistics/projectdimensions/RisIdDistributionMetricCard.svelte";
 
 	let { data } = $props();
 
@@ -41,7 +41,7 @@
 			scale: CardScale.MEDIUM
 		},
 		{
-			metricComponent: RisIdDistributionMetricCard,
+			metricComponent: RecordedRisIdsMetricCard,
 			props: {
 				promise: data.dimensions.totalRisIds
 			},
