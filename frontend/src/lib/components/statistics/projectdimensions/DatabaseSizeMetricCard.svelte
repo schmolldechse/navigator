@@ -75,7 +75,7 @@
 		<p class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Database Size</p>
 
 		{#await promise}
-			<div class="bg-muted h-6 w-16 animate-pulse rounded-full"></div>
+			<div class="bg-muted h-64 w-full animate-pulse rounded-md"></div>
 		{:then metrics}
 			{#if metrics === null || metrics.length === 0}
 				<MetricLoadingFailedWarning />
