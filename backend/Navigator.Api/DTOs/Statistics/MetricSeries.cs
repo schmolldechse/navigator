@@ -14,9 +14,6 @@ public class MetricSeries
     [JsonPropertyName("unit")]
     public required MetricUnit Unit { get; set; }
 
-    [JsonPropertyName("timerange")]
-    public required Timerange Timerange { get; set; }
-
     [JsonPropertyName("isCumulative")]
     public bool IsCumulative { get; set; }
 

@@ -1,50 +1,28 @@
 <script lang="ts" module>
-	export interface SeriesTypeTitles {
-		seriesType: MetricSeriesType;
-		title: string;
+	interface MetricCardData {
+		metricComponent: Component<any>;
+		props: Record<string, any>;
+		scale: CardScale;
 	}
+
+	export type { MetricCardData };
 </script>
 
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { MetricSeriesType, type MetricSeries } from "$lib/api/types.gen.js";
-	import PillSelector from "$lib/components/interactable/PillSelector.svelte";
-	import TimePickerDialog from "$lib/components/interactable/TimePickerDialog.svelte";
-	import MetricCard from "@lib/components/statistics/MetricCard.svelte";
-	import MetricChartDialog from "@lib/components/statistics/MetricChartDialog.svelte";
-	import type { TimerangeOption } from "$lib/types/timerange.js";
+	import TimePickerDialog from "@lib/components/interactable/TimePickerDialog.svelte";
 	import Info from "@lucide/svelte/icons/info";
+	import Calendar from "@lucide/svelte/icons/calendar";
 	import { DateTime } from "luxon";
-	import { onMount } from "svelte";
+	import type { Component } from "svelte";
+	import DatabaseSizeMetricCard from "@lib/components/statistics/projectdimensions/DatabaseSizeMetricCard.svelte";
+	import RecordedRisIdsMetricCard from "@lib/components/statistics/projectdimensions/RecordedRisIdsMetricCard.svelte";
+	import RecordedJourneysMetricCard from "@lib/components/statistics/projectdimensions/RecordedJourneysMetricCard.svelte";
+	import { CardScale } from "@lib/util/card.js";
 
 	let { data } = $props();
 
-	let timeranges: TimerangeOption[] = [
-		{
-			id: "24H",
-			label: "24 Hours",
-			value: { start: DateTime.now().minus({ days: 1 }), end: DateTime.now() }
-		},
-		{
-			id: "7D",
-			label: "7 Days",
-			value: { start: DateTime.now().minus({ days: 7 }), end: DateTime.now() }
-		},
-		{
-			id: "30D",
-			label: "30 Days",
-			value: { start: DateTime.now().minus({ days: 30 }), end: DateTime.now() }
-		},
-		{
-			id: "CUSTOM",
-			label: "Custom Range",
-			isCustom: true
-		}
-	];
-	let selectedTimerange: TimerangeOption = $state(timeranges[0]);
-	let previouslySelectedTimerange: TimerangeOption = $state(timeranges[0]);
-
-	let pickingCustomRange: boolean = $state(false);
+	let selectingTimerange: boolean = $state(false);
 
 	const updateTimerange = async (start: DateTime, end: DateTime) => {
 		const url = new URL(window.location.href);
@@ -55,43 +33,43 @@
 		// invalidate("project:dimensions");
 	};
 
-	let statistics: {
-		id: string;
-		label: string;
-		promise: () => Promise<MetricSeries[]>;
-		seriesTitles: SeriesTypeTitles[];
-	}[] = [
+	let metricCards: MetricCardData[] = $derived([
 		{
-			id: "DATABASE_ESTIMATION",
-			label: "Total Database Size",
-			promise: () => data.dimensions.databaseSize,
-			seriesTitles: [{ seriesType: MetricSeriesType.DATABASE_SIZE, title: "Database Size" }]
+			metricComponent: DatabaseSizeMetricCard,
+			props: {
+				promise: data.dimensions.databaseSize
+			},
+			scale: CardScale.LARGE
 		},
 		{
-			id: "RECORDED_RIS_IDS",
-			label: "Recorded RIS IDs",
-			promise: () => data.dimensions.risIds,
-			seriesTitles: [
-				{ seriesType: MetricSeriesType.RIS_IDS_ACTIVE, title: "Active" },
-				{ seriesType: MetricSeriesType.RIS_IDS_INACTIVE, title: "Inactive" }
-			]
+			metricComponent: RecordedRisIdsMetricCard,
+			props: {
+				promise: data.dimensions.totalRisIds
+			},
+			scale: CardScale.LARGE
 		},
 		{
-			id: "RECORDED_JOURNEYS",
-			label: "Recorded Journeys",
-			promise: () => data.dimensions.journeys,
-			seriesTitles: [{ seriesType: MetricSeriesType.JOURNEY_TOTAL, title: "Journeys" }]
+			metricComponent: RecordedJourneysMetricCard,
+			props: {
+				journeyPromise: data.dimensions.totalJourneys,
+				transportTypePromise: data.dimensions.transportTypes
+			},
+			scale: CardScale.LARGE
 		}
-	];
+	]);
 
-	let selectedMetrics: { metric: MetricSeries[]; seriesTitles: SeriesTypeTitles[]; label: string } | null = $state(null);
-
-	onMount(() => {
-		if (!data.timerange.start || !data.timerange.end) return;
-
-		selectedTimerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === "CUSTOM")!;
-		previouslySelectedTimerange = selectedTimerange;
-	});
+	const getSpanLength = (scale: MetricCardData): string => {
+		switch (scale.scale) {
+			case CardScale.SMALL:
+				return "col-span-1";
+			case CardScale.MEDIUM:
+				return "col-span-2";
+			case CardScale.LARGE:
+				return "col-span-3";
+			default:
+				return "col-span-1";
+		}
+	};
 </script>
 
 <svelte:head>
@@ -146,84 +124,43 @@
 	</section>
 
 	<!-- Project Dimensions -->
-	<section class="mx-auto w-full max-w-7xl overflow-hidden">
-		<div class="mb-6 flex flex-col gap-y-2 sm:flex-row sm:items-center sm:justify-between sm:gap-0">
+	<section class="mx-auto w-full max-w-7xl space-y-2">
+		<div class="flex items-center justify-between gap-y-2">
 			<h2 class="text-2xl font-medium">Project Dimensions</h2>
 
-			<div class="w-full sm:w-auto">
-				<PillSelector
-					selected={selectedTimerange.id}
-					items={timeranges.map((timerangeOption: TimerangeOption) => ({
-						id: timerangeOption.id,
-						label: timerangeOption.label
-					}))}
-					onselect={async (id: string) => {
-						const timerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === id);
-						if (!timerange) return;
-
-						if (timerange.isCustom) {
-							previouslySelectedTimerange = selectedTimerange;
-							selectedTimerange = timerange;
-							pickingCustomRange = true;
-							return;
-						}
-
-						selectedTimerange = timerange;
-						previouslySelectedTimerange = timerange;
-
-						if (!selectedTimerange.value) return;
-						await updateTimerange(selectedTimerange.value.start, selectedTimerange.value.end);
+			<div class="relative">
+				<button
+					class="bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 flex cursor-pointer items-center justify-center gap-x-2 rounded-md border px-4 py-1"
+					onclick={(event: MouseEvent) => {
+						event.stopPropagation();
+						selectingTimerange = !selectingTimerange;
 					}}
+				>
+					<Calendar size={20} />
+
+					<div class="hidden items-baseline gap-x-1 md:flex">
+						<span class="text-sm tracking-tight">{data.timerange.start?.toLocaleString(DateTime.DATE_MED)}</span>
+						<span>&nbsp;–&nbsp;</span>
+						<span class="text-sm tracking-tight">{data.timerange.end?.toLocaleString(DateTime.DATE_MED)}</span>
+					</div>
+				</button>
+
+				<TimePickerDialog
+					bind:isVisible={selectingTimerange}
+					multiSelect
+					dates={{ start: data.timerange.start, end: data.timerange.end }}
+					onchange={async ({ start, end }) => await updateTimerange(start.startOf("day"), end!.endOf("day"))}
+					class="mt-2"
 				/>
 			</div>
-
-			<TimePickerDialog
-				bind:isVisible={pickingCustomRange}
-				title="Select Custom Time Range"
-				multiSelect
-				startDate={DateTime.now().minus({ days: 1 })}
-				endDate={DateTime.now()}
-				onchange={async ({ start, end }) => {
-					pickingCustomRange = false;
-					if (!start || !end) {
-						selectedTimerange = previouslySelectedTimerange;
-						return;
-					}
-
-					selectedTimerange = timeranges.find((timerangeOption: TimerangeOption) => timerangeOption.id === "CUSTOM")!;
-					previouslySelectedTimerange = selectedTimerange;
-
-					await updateTimerange(start.startOf("day"), end.endOf("day"));
-				}}
-				onclose={() => {
-					pickingCustomRange = false;
-					selectedTimerange = previouslySelectedTimerange;
-				}}
-			/>
 		</div>
 
-		<div class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
-			{#each statistics as localStatistic}
-				<MetricCard
-					title={localStatistic.label}
-					metricPromise={localStatistic.promise()}
-					onselect={(metric: MetricSeries[]) => {
-						selectedMetrics = { metric, seriesTitles: localStatistic.seriesTitles, label: localStatistic.label };
-					}}
-					seriesTitles={localStatistic.seriesTitles}
-				/>
+		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+			{#each metricCards as metricCard}
+				{@const MetricComponent = metricCard.metricComponent}
+				<MetricComponent {...metricCard.props} class="col-span-3" />
 			{/each}
 		</div>
-
-		{#if selectedMetrics}
-			<MetricChartDialog
-				isVisible={true}
-				title={selectedMetrics.label}
-				metrics={selectedMetrics.metric}
-				seriesTitles={selectedMetrics.seriesTitles}
-				onclose={() => (selectedMetrics = null)}
-			/>
-		{/if}
 	</section>
 </main>
 

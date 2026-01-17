@@ -1,7 +1,7 @@
 import { defineConfig } from "@hey-api/openapi-ts";
 
 export default defineConfig({
-	input: "https://navigator.voldechse.wtf/swagger.json",
+	input: "http://localhost:5019/swagger.json",
 	output: "./src/lib/api",
 	plugins: [
 		{

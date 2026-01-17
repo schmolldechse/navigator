@@ -5,6 +5,7 @@ namespace Navigator.Data.Models.Statistics;
 public class MetricDataSet
 {
     public required MetricSeriesType SeriesType { get; set; }
+    public required MetricDimension Dimension { get; set; }
     public required MetricUnit Unit { get; set; }
 
     public bool IsCumulative { get; set; }
