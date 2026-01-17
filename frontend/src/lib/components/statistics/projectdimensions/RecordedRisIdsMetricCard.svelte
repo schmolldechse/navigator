@@ -12,7 +12,7 @@
 	import type { ClassValue } from "svelte/elements";
 	import MetricCardBase from "../MetricCardBase.svelte";
 	import MetricLoadingFailedWarning from "../MetricLoadingFailedWarning.svelte";
-	import { Axis, Highlight, Legend, LineChart, PieChart, Spline, Svg, Text, Tooltip } from "layerchart";
+	import { Axis, ChartClipPath, Highlight, Legend, LineChart, PieChart, Spline, Svg, Text, Tooltip } from "layerchart";
 	import { DateTime } from "luxon";
 
 	interface ArcChartSeries {
@@ -211,6 +211,7 @@
 							padding={{ left: 64, top: 16, bottom: 12 }}
 							yDomain={null}
 							tooltip={{ mode: "quadtree-x" }}
+							brush
 						>
 							{#snippet children({ context, visibleSeries, getSplineProps, getHighlightProps })}
 								<Svg>
@@ -229,10 +230,12 @@
 										classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground", rule: "stroke-0" }}
 									/>
 
-									{#each visibleSeries as series, i (series.key)}
-										<Spline {...getSplineProps(series, i)} class="stroke-2" />
-										<Highlight {...getHighlightProps(series, i)} points lines={{ class: "stroke-muted-foreground/30" }} />
-									{/each}
+									<ChartClipPath>
+										{#each visibleSeries as series, i (series.key)}
+											<Spline {...getSplineProps(series, i)} class="stroke-2" />
+											<Highlight {...getHighlightProps(series, i)} points lines={{ class: "stroke-muted-foreground/30" }} />
+										{/each}
+									</ChartClipPath>
 								</Svg>
 
 								<!-- Data Tooltip -->

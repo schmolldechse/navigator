@@ -12,7 +12,7 @@
 	import { scaleOrdinal } from "d3-scale";
 	import { schemeTableau10 } from "d3-scale-chromatic";
 	import MetricLoadingFailedWarning from "../MetricLoadingFailedWarning.svelte";
-	import { Area, AreaChart, Axis, chartDataArray, Highlight, LinearGradient, Svg, Tooltip } from "layerchart";
+	import { Area, AreaChart, Axis, ChartClipPath, chartDataArray, Highlight, LinearGradient, Svg, Tooltip } from "layerchart";
 	import { formatBytes, getUnit } from "@lib/util/bytes";
 	import { DateTime } from "luxon";
 
@@ -90,6 +90,7 @@
 						yNice
 						yDomain={null}
 						tooltip={{ mode: "quadtree-x" }}
+						brush
 					>
 						{#snippet children({ context })}
 							<Svg>
@@ -113,24 +114,26 @@
 									classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground", rule: "stroke-0" }}
 								/>
 
-								{#each chartDataArray(getChartSeries(metrics)) as seriesData}
-									<LinearGradient
-										vertical
-										stops={[
-											[0, seriesData.color],
-											[1, "transparent"]
-										]}
-									>
-										{#snippet children({ gradient })}
-											<Area
-												data={seriesData.data}
-												fill={gradient}
-												fillOpacity={0.5}
-												line={{ stroke: seriesData.color, strokeWidth: 2 }}
-											/>
-										{/snippet}
-									</LinearGradient>
-								{/each}
+								<ChartClipPath>
+									{#each chartDataArray(getChartSeries(metrics)) as seriesData}
+										<LinearGradient
+											vertical
+											stops={[
+												[0, seriesData.color],
+												[1, "transparent"]
+											]}
+										>
+											{#snippet children({ gradient })}
+												<Area
+													data={seriesData.data}
+													fill={gradient}
+													fillOpacity={0.5}
+													line={{ stroke: seriesData.color, strokeWidth: 2 }}
+												/>
+											{/snippet}
+										</LinearGradient>
+									{/each}
+								</ChartClipPath>
 							</Svg>
 
 							<!-- Data Tooltip -->
