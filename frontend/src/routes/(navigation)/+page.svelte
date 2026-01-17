@@ -17,6 +17,7 @@
 	import type { Component } from "svelte";
 	import DatabaseSizeMetricCard from "@lib/components/statistics/projectdimensions/DatabaseSizeMetricCard.svelte";
 	import RecordedRisIdsMetricCard from "@lib/components/statistics/projectdimensions/RecordedRisIdsMetricCard.svelte";
+	import RecordedJourneysMetricCard from "@lib/components/statistics/projectdimensions/RecordedJourneysMetricCard.svelte";
 	import { CardScale } from "@lib/util/card.js";
 
 	let { data } = $props();
@@ -38,14 +39,22 @@
 			props: {
 				promise: data.dimensions.databaseSize
 			},
-			scale: CardScale.MEDIUM
+			scale: CardScale.LARGE
 		},
 		{
 			metricComponent: RecordedRisIdsMetricCard,
 			props: {
 				promise: data.dimensions.totalRisIds
 			},
-			scale: CardScale.MEDIUM
+			scale: CardScale.LARGE
+		},
+		{
+			metricComponent: RecordedJourneysMetricCard,
+			props: {
+				journeyPromise: data.dimensions.totalJourneys,
+				transportTypePromise: data.dimensions.transportTypes
+			},
+			scale: CardScale.LARGE
 		}
 	]);
 

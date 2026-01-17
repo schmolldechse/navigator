@@ -16,19 +16,18 @@
 	import { formatBytes, getUnit } from "@lib/util/bytes";
 	import { DateTime } from "luxon";
 
-	interface LineChartSeries {
+	interface DatabaseSizeSeries {
 		key: string;
 		values: { date: Date; value: number }[];
 		color: string;
 	}
 
-	interface SeriesTypeTitles {
-		seriesType: MetricSeriesType;
+	interface KeyTitles {
+		key: MetricSeriesType;
 		title: string;
 	}
 
-	const seriesTitles: SeriesTypeTitles[] = [{ seriesType: MetricSeriesType.DATABASE_SIZE, title: "Database Size" }];
-
+	const keyTitles: KeyTitles[] = [{ key: MetricSeriesType.DATABASE_SIZE, title: "Database Size" }];
 	interface Props {
 		promise: Promise<MetricSeries[]>;
 		class?: ClassValue;
@@ -46,7 +45,7 @@
 	});
 
 	const colorScale = scaleOrdinal(schemeTableau10);
-	const getChartSeries = (metrics: MetricSeries[]): LineChartSeries[] => {
+	const getChartSeries = (metrics: MetricSeries[]): DatabaseSizeSeries[] => {
 		if (!metrics.length) return [];
 
 		return metrics.map((metric: MetricSeries) => {
@@ -146,7 +145,7 @@
 									<div class="flex flex-col gap-y-1">
 										{#each [...payload].reverse() as item}
 											{@const title =
-												seriesTitles?.find((title: SeriesTypeTitles) => title.seriesType === item.rawSeriesData?.key)?.title ??
+												keyTitles?.find((title: KeyTitles) => title.key === item.rawSeriesData?.key)?.title ??
 												item.rawSeriesData?.key}
 											<div class="flex justify-between gap-x-4">
 												<div class="flex items-center gap-x-2">

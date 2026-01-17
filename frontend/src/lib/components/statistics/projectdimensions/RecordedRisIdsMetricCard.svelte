@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		MetricSeriesType,
-		TransportType,
 		type MetricDataPoint,
 		type MetricDataPointTimestampMetricDataPoint,
 		type MetricSeries
@@ -15,26 +14,26 @@
 	import { Axis, ChartClipPath, Highlight, Legend, LineChart, PieChart, Spline, Svg, Text, Tooltip } from "layerchart";
 	import { DateTime } from "luxon";
 
-	interface ArcChartSeries {
+	interface RisIdDistributionSeries {
 		seriesType: MetricSeriesType;
 		value: number;
 		color: string;
 	}
 
-	interface LineChartSeries {
+	interface RisIdLineChartSeries {
 		key: string;
 		data: { date: Date; value: number }[];
 		color: string;
 	}
 
-	interface SeriesTypeTitles {
-		seriesType: MetricSeriesType | TransportType;
+	interface KeyTitles {
+		key: MetricSeriesType;
 		title: string;
 	}
 
-	const seriesTitles: SeriesTypeTitles[] = [
-		{ seriesType: MetricSeriesType.RIS_IDS_ACTIVE, title: "Active RIS IDs" },
-		{ seriesType: MetricSeriesType.RIS_IDS_INACTIVE, title: "Inactive RIS IDs" }
+	const keyTitles: KeyTitles[] = [
+		{ key: MetricSeriesType.RIS_IDS_ACTIVE, title: "Active RIS IDs" },
+		{ key: MetricSeriesType.RIS_IDS_INACTIVE, title: "Inactive RIS IDs" }
 	];
 
 	interface Props {
@@ -57,7 +56,7 @@
 	});
 
 	const colorScale = scaleOrdinal(schemeTableau10);
-	const getAreaChartSeries = (metrics: MetricSeries[]) => {
+	const getAreaChartSeries = (metrics: MetricSeries[]): RisIdLineChartSeries[] => {
 		if (!metrics.length) return [];
 
 		return metrics.map((metric: MetricSeries) => {
@@ -80,17 +79,14 @@
 		});
 	};
 
-	const getArcSeries = (metrics: MetricSeries[]): ArcChartSeries[] => {
+	const getArcSeries = (metrics: MetricSeries[]): RisIdDistributionSeries[] => {
 		if (!metrics.length) return [];
 
-		return metrics.map(
-			(metric: MetricSeries) =>
-				({
-					seriesType: metric.seriesType,
-					value: Number(metric.summary.endValue),
-					color: colorScale(metric.seriesType)
-				}) as ArcChartSeries
-		);
+		return metrics.map((metric: MetricSeries) => ({
+			seriesType: metric.seriesType,
+			value: Number(metric.summary.endValue),
+			color: colorScale(metric.seriesType)
+		}));
 	};
 </script>
 
@@ -111,14 +107,14 @@
 							data={getArcSeries(metrics)}
 							key="seriesType"
 							value="value"
-							c={(data: ArcChartSeries) => data.color}
+							c={(data: RisIdDistributionSeries) => data.color}
 							range={[-90, 90]}
 							outerRadius={120}
 							innerRadius={-20}
 							cornerRadius={4}
 							padAngle={0.02}
 							placement="center"
-							props={{ group: { y: 40 } }}
+							props={{ group: { y: 40 }, pie: { motion: "spring" } }}
 						>
 							{#snippet legend({ getLegendProps })}
 								<Legend
@@ -133,20 +129,18 @@
 										item: "gap-x-2 cursor-pointer"
 									}}
 									tickFormat={(seriesType: string) => {
-										const typeTitle = seriesTitles.find(
-											(seriesTypeTitle: SeriesTypeTitles) => seriesTypeTitle.seriesType === (seriesType as MetricSeriesType)
-										);
-										return typeTitle ? typeTitle.title : seriesType;
+										const keyTitle = keyTitles.find((keyTitle: KeyTitles) => keyTitle.key === seriesType)?.title ?? seriesType;
+										return keyTitle;
 									}}
 								/>
 							{/snippet}
 
 							{#snippet aboveMarks({ visibleData, highlightKey })}
-								{@const total = visibleData.reduce((acc: number, curr: ArcChartSeries) => acc + curr.value, 0)}
+								{@const total = visibleData.reduce((acc: number, curr: RisIdDistributionSeries) => acc + curr.value, 0)}
 								{@const formatter = new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 })}
 
 								{#if highlightKey}
-									{@const hoveredItem = visibleData.find((data: ArcChartSeries) => data.seriesType === highlightKey)}
+									{@const hoveredItem = visibleData.find((data: RisIdDistributionSeries) => data.seriesType === highlightKey)}
 									{#if hoveredItem}
 										{@const percentage = ((hoveredItem.value / total) * 100).toFixed(2)}
 										<Text
@@ -177,14 +171,13 @@
 							{/snippet}
 
 							{#snippet tooltip({ context })}
-								{@const total = context.flatData.reduce((acc: number, curr: ArcChartSeries) => acc + curr.value, 0)}
+								{@const total = context.flatData.reduce((acc: number, curr: RisIdDistributionSeries) => acc + curr.value, 0)}
 								{@const formatter = new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 })}
 
 								<Tooltip.Root class="bg-background/90! rounded-lg border border-white/10! p-3 shadow-xl backdrop-blur-md">
-									{#snippet children({ data }: { data: ArcChartSeries })}
+									{#snippet children({ data })}
 										{@const title =
-											seriesTitles.find((seriesTypeTitle: SeriesTypeTitles) => seriesTypeTitle.seriesType === data.seriesType)
-												?.title ?? data.seriesType}
+											keyTitles.find((keyTitle: KeyTitles) => keyTitle.key === data.seriesType)?.title ?? data.seriesType}
 
 										{@const percentage = ((data.value / total) * 100).toFixed(2)}
 										{@const formattedValue = formatter.format(data.value)}
@@ -204,7 +197,7 @@
 					<!-- Area Chart for Historical Changes -->
 					<div class="h-64 w-full lg:min-w-2/3">
 						<LineChart
-							data={getAreaChartSeries(metrics).flatMap((series: LineChartSeries) => series.data)}
+							data={getAreaChartSeries(metrics).flatMap((series: RisIdLineChartSeries) => series.data)}
 							series={getAreaChartSeries(metrics)}
 							x="date"
 							y="value"
@@ -251,8 +244,8 @@
 										<div class="flex flex-col gap-y-1">
 											{#each [...payload].reverse() as item}
 												{@const title =
-													seriesTitles?.find((title: SeriesTypeTitles) => title.seriesType === item.rawSeriesData?.key)
-														?.title ?? item.rawSeriesData?.key}
+													keyTitles?.find((title: KeyTitles) => title.key === item.rawSeriesData?.key)?.title ??
+													item.rawSeriesData?.key}
 												<div class="flex justify-between gap-x-4">
 													<div class="flex items-center gap-x-2">
 														<div class="h-1.5 w-1.5 rounded-full" style:background-color={item.color}></div>
