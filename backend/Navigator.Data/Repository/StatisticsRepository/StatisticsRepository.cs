@@ -39,16 +39,12 @@ public class StatisticsRepository(
 
     public async Task<IEnumerable<MetricDataSet>> GetMetricAsync(MetricQueryType type, DateTimeOffset? start, DateTimeOffset? end, bool isCumulative)
     {
-        var allTimeMetrics = new[] { MetricQueryType.TransportTypes };
-        if (!allTimeMetrics.Contains(type) && (start is null || end is null))
-            throw new ArgumentNullException("Start and End dates are required for time-series metrics.");
-
         var metrics = type switch
         {
             MetricQueryType.DatabaseSize => await GetDatabaseSizeMetricsAsync(start!.Value, end!.Value),
             MetricQueryType.RisIds => await GetRisIdMetricsAsync(start!.Value, end!.Value),
             MetricQueryType.Journeys => await GetJourneyMetricsAsync(start!.Value, end!.Value),
-            MetricQueryType.TransportTypes => await GetTransportDistributionsAsync(),
+            MetricQueryType.TransportTypes => await GetTransportDistributionsAsync(end!.Value),
             _ => throw new NotSupportedException($"Metric type '{type}' is not supported.")
         };
         
@@ -85,7 +81,7 @@ public class StatisticsRepository(
                 });
             }
 
-            metric.IsCumulative = true;
+            metric.IsCumulative = false;
             metric.DataPoints = deltaDataPoints;
             metric.Summary = CalculateSummary(metric.DataPoints, dimension: MetricDimension.Time, isCumulative: metric.IsCumulative);
             return metric;
@@ -217,10 +213,12 @@ public class StatisticsRepository(
         }];
     }
 
-    public async Task<IEnumerable<MetricDataSet>> GetTransportDistributionsAsync()
+    public async Task<IEnumerable<MetricDataSet>> GetTransportDistributionsAsync(DateTimeOffset end)
     {
         var dataPoints = (await dataContext.JourneyTransports
+            .Include(transport => transport.Journey)
             .AsNoTracking()
+            .Where(transport => transport.Journey!.Date <= DateOnly.FromDateTime(end.DateTime))
             .GroupBy(journey => journey.TransportType)
             .Select(group => new { TransportType = group.Key, Value = group.Count() })
             .ToListAsync())

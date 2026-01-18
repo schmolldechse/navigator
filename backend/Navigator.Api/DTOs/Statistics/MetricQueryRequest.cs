@@ -27,8 +27,8 @@ public class MetricQueryRequest : IValidatableObject
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
-        var allTimeMetrics = new[] { MetricQueryType.TransportTypes };
-        if (allTimeMetrics.Contains(MetricQueryType)) yield break;
+        //var allTimeMetrics = new[] { MetricQueryType.TransportTypes };
+        //if (allTimeMetrics.Contains(MetricQueryType)) yield break;
 
         if (Start is null)
         {
