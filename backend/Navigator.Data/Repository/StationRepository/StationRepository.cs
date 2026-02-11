@@ -142,12 +142,9 @@ public class StationRepository(
                 continue;
             }
 
-            station.QueryingEnabled = incomingStation.QueryingEnabled;
-            station.LastQueried = incomingStation.LastQueried;
-
             var existingRil = station.Ril100
-                .Select(ril => ril.Ril100Code)
-                .ToHashSet();
+                    .Select(ril => ril.Ril100Code)
+                    .ToHashSet();
             foreach (var incomingRil in incomingStation.Ril100)
             {
                 if (existingRil.Contains(incomingRil.Ril100Code)) continue;
@@ -159,8 +156,8 @@ public class StationRepository(
             }
 
             var existingTransports = station.Transports
-                .Select(transport => transport.TransportType)
-                .ToHashSet();
+                    .Select(transport => transport.TransportType)
+                    .ToHashSet();
             foreach (var incomingTransport in incomingStation.Transports)
             {
                 if (existingTransports.Contains(incomingTransport.TransportType)) continue;
