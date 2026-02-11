@@ -13,7 +13,8 @@ namespace Navigator.Data.Entities.RisId;
 [Index(nameof(Active), nameof(LastSeen))]
 public class RisId
 {
-    /// This is because RIS IDs can have a UUID-UUID format.
+    /// Format: {UUID}-{UUID}
+    /// Keep in mind that the second UUID is optional. In most cases it is only {UUID}.
     [Key]
     [Column("id")]
     [MaxLength(73)]

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Navigator.Data.Entities.Journey;
 using Navigator.Data.Entities.RisId;
+using Navigator.Data.Enums;
 using Navigator.Data.Models.Journey;
 using Navigator.Data.Models.RisId;
 using Navigator.Data.Repository.AdministrationRepository;
@@ -29,11 +30,14 @@ public class GatheringJourneysJob(
 
     public async Task Execute(IJobExecutionContext context)
     {
-        var risIds = await risIdRepository.GetRisIdsBatchAsync(new ShuffledRisIdRequest()
+        var currentDate = DateTime.UtcNow;
+
+        var risIds = await risIdRepository.GetRisIdsBatchAsync(new RisIdBatchRequest()
         {
-            OnlyIncludeActive = true,
-            LastSeen = DateTime.UtcNow.Date.AddDays(-2),
-            Limit = 384
+            OnlyActive = true,
+            IncludeNullDates = true,
+            CutoffLastSeen = currentDate.Date.AddDays(-2),
+            OrderBy = RisIdOrder.LastSeen
         });
         if (!risIds.Any()) return;
 
@@ -106,11 +110,10 @@ public class GatheringJourneysJob(
 
             await risIdRepository.SaveRisIdsBatchAsync(successfulRisIds);
 
-            DateTime now = DateTime.UtcNow;
             var mappedJourneys = mapper.Map<IEnumerable<Journey>>(journeys.Journeys);
             foreach (var mappedJourney in mappedJourneys)
             {
-                mappedJourney.InsertedAt = now;
+                mappedJourney.InsertedAt = currentDate;
 
                 var journeyAdministration = journeys.Journeys
                     .Where(journey => journey.JourneyID == mappedJourney.Id)
