@@ -31,7 +31,7 @@ public class TimetableController(
             Duration = request.Duration!.Value
         });
 
-        return Ok(mapper.Map<IEnumerable<TimetableDeparture>>(timetable.Departures));
+        return Ok(mapper.Map<IEnumerable<TimetableDeparture>>(timetable.Departures.DistinctBy(entry => entry.JourneyID)));
     }
 
     /// <summary>
@@ -51,6 +51,6 @@ public class TimetableController(
             Duration = request.Duration!.Value
         });
 
-        return Ok(mapper.Map<IEnumerable<TimetableArrival>>(timetable.Arrivals));
+        return Ok(mapper.Map<IEnumerable<TimetableArrival>>(timetable.Arrivals.DistinctBy(entry => entry.JourneyID)));
     }
 }
