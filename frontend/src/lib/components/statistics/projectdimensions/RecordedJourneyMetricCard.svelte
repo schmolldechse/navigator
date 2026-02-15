@@ -1,26 +1,24 @@
 <script lang="ts">
 	import {
 		MetricSeriesType,
-		MetricUnit,
 		type MetricDataPoint,
 		type MetricDataPointTimestampMetricDataPoint,
 		type MetricSeries,
 		type MetricSummary
 	} from "@lib/api";
-	import MetricCardBase from "../MetricCardBase.svelte";
-	import type { ClassValue } from "svelte/elements";
-	import { onMount } from "svelte";
 	import { scaleOrdinal } from "d3-scale";
 	import { schemeTableau10 } from "d3-scale-chromatic";
-	import MetricLoadingFailedWarning from "../MetricLoadingFailedWarning.svelte";
-	import { Axis, ChartClipPath, Highlight, LineChart, Spline, Svg, Tooltip } from "layerchart";
-	import { formatBytes, getUnit } from "@lib/util/bytes";
-	import { DateTime } from "luxon";
+	import { onMount } from "svelte";
+	import type { ClassValue } from "svelte/elements";
+	import MetricCardBase from "../MetricCardBase.svelte";
 	import MetricCardTitle from "../MetricCardTitle.svelte";
 	import MetricTrend from "../MetricTrend.svelte";
+	import MetricLoadingFailedWarning from "../MetricLoadingFailedWarning.svelte";
 	import MetricCardSummary from "../MetricCardSummary.svelte";
+	import { Axis, ChartClipPath, chartDataArray, Highlight, LineChart, Spline, Svg, Tooltip } from "layerchart";
+	import { DateTime } from "luxon";
 
-	interface DatabaseSizeSeries {
+	interface RecordedJourneySeries {
 		key: string;
 		data: { date: Date; value: number }[];
 		color: string;
@@ -30,7 +28,7 @@
 		key: MetricSeriesType;
 		title: string;
 	}
-	const keyTitles: KeyTitles[] = [{ key: MetricSeriesType.DATABASE_SIZE, title: "Database Size" }];
+	const keyTitles: KeyTitles[] = [{ key: MetricSeriesType.JOURNEY_TOTAL, title: "Total Journeys" }];
 
 	interface Props {
 		promise: Promise<MetricSeries[]>;
@@ -42,14 +40,12 @@
 	onMount(async () => {
 		const metrics = await promise;
 
-		if (metrics.some((metric: MetricSeries) => metric.seriesType !== MetricSeriesType.DATABASE_SIZE))
-			throw new Error("DatabaseSizeMetricCard received invalid metric series type.");
-		if (metrics.some((metric: MetricSeries) => metric.unit !== MetricUnit.BYTES))
-			throw new Error("DatabaseSizeMetricCard received invalid metric unit.");
+		if (metrics.some((metric: MetricSeries) => metric.seriesType !== MetricSeriesType.JOURNEY_TOTAL))
+			throw new Error("RecordedJourneyMetricCard received invalid metric series type.");
 	});
 
 	const colorScale = scaleOrdinal(schemeTableau10);
-	const getChartSeries = (metrics: MetricSeries[]): DatabaseSizeSeries[] => {
+	const getChartSeries = (metrics: MetricSeries[]): RecordedJourneySeries[] => {
 		if (!metrics.length) return [];
 
 		return metrics.map((metric: MetricSeries) => {
@@ -61,7 +57,7 @@
 				)
 				.map((dataPoint: MetricDataPoint) => ({
 					date: new Date((dataPoint as MetricDataPointTimestampMetricDataPoint).timestamp),
-					value: dataPoint.value as number
+					value: Number(dataPoint.value)
 				}));
 
 			return {
@@ -75,7 +71,7 @@
 
 <MetricCardBase class={["gap-y-2", className]}>
 	{#snippet head()}
-		<MetricCardTitle title="Database Size" class="justify-between">
+		<MetricCardTitle title="Recorded Journeys" class="justify-between">
 			{#snippet children()}
 				{#await promise then metrics}
 					<MetricTrend {metrics} />
@@ -94,14 +90,13 @@
 				<MetricCardSummary {metrics} class="items-end">
 					{#snippet title({ summary })}
 						{@const endValue = summary.reduce((acc: number, summary: MetricSummary) => acc + Number(summary.endValue), 0)}
-						<span class="text-text text-2xl font-bold">{formatBytes(endValue, true)}</span>
-						<span class="text-muted-foreground text-base font-medium">{getUnit(endValue, true)}</span>
+						<span class="text-text text-2xl font-bold">{endValue.toLocaleString()}</span>
 					{/snippet}
 				</MetricCardSummary>
 
 				<div class="h-48">
 					<LineChart
-						data={getChartSeries(metrics).flatMap((series: DatabaseSizeSeries) => series.data)}
+						data={getChartSeries(metrics).flatMap((series: RecordedJourneySeries) => series.data)}
 						series={getChartSeries(metrics)}
 						x="date"
 						y="value"
@@ -148,9 +143,7 @@
 													<span class="text-muted-foreground text-left">{title}</span>
 												</div>
 
-												<span class="text-text">
-													{formatBytes(item.payload.value, true) + " " + getUnit(item.payload.value, true)}
-												</span>
+												<span class="text-text">{item.payload.value.toLocaleString()}</span>
 											</div>
 										{/each}
 									</div>

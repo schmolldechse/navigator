@@ -1,7 +1,4 @@
-import { MetricSeriesType, type MetricSeries } from "@lib/api";
-
-const isTrendAvailable = (metrics: MetricSeries[]): boolean =>
-	metrics.some((metric: MetricSeries) => metric.seriesType !== MetricSeriesType.TRANSPORT_TYPES_TOTAL);
+import { type MetricSeries } from "@lib/api";
 
 const calculateChange = (metrics: MetricSeries[]): { percentage: number; isUp: boolean } => {
 	const endValue = metrics.reduce((a, metric: MetricSeries) => {
@@ -23,4 +20,4 @@ const calculateChange = (metrics: MetricSeries[]): { percentage: number; isUp: b
 	};
 };
 
-export { isTrendAvailable, calculateChange };
+export { calculateChange };

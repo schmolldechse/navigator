@@ -3,11 +3,12 @@
 	import type { ClassValue } from "svelte/elements";
 
 	interface Props {
-		children: Snippet;
+		head?: Snippet;
+		body?: Snippet;
 		class?: ClassValue;
 	}
 
-	let { children, class: className }: Props = $props();
+	let { head, body, class: className }: Props = $props();
 </script>
 
 <div
@@ -16,5 +17,6 @@
 		className
 	]}
 >
-	{@render children()}
+	{@render head?.()}
+	{@render body?.()}
 </div>

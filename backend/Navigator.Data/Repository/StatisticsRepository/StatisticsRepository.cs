@@ -3,6 +3,7 @@ using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Enums.Metric;
 using Navigator.Data.Models.Statistics;
 using Navigator.Data.Models.Statistics.DataPoint;
+using Navigator.Data.Models.Statistics.Request;
 
 namespace Navigator.Data.Repository.StatisticsRepository;
 
@@ -37,62 +38,52 @@ public class StatisticsRepository(
         .AsNoTracking()
         .CountAsync();
 
-    public async Task<IEnumerable<MetricDataSet>> GetMetricAsync(MetricQueryType type, DateTimeOffset? start, DateTimeOffset? end, bool isCumulative)
+    public async Task<IEnumerable<MetricDataSet>> GetMetricAsync(BaseMetricRequest request)
     {
-        var metrics = type switch
+        var metrics = (request, request.MetricQueryType) switch
         {
-            MetricQueryType.DatabaseSize => await GetDatabaseSizeMetricsAsync(start!.Value, end!.Value),
-            MetricQueryType.RisIds => await GetRisIdMetricsAsync(start!.Value, end!.Value),
-            MetricQueryType.Journeys => await GetJourneyMetricsAsync(start!.Value, end!.Value),
-            MetricQueryType.TransportTypes => await GetTransportDistributionsAsync(end!.Value),
-            _ => throw new NotSupportedException($"Metric type '{type}' is not supported.")
+            (MetricTimeRequest, MetricQueryType.DatabaseSize) => await GetDatabaseSizeMetricsAsync((MetricTimeRequest)request),
+            (MetricTimeRequest, MetricQueryType.RisIds) => await GetRisIdMetricsAsync((MetricTimeRequest)request),
+            (MetricTimeRequest, MetricQueryType.Journeys) => await GetJourneyMetricsAsync((MetricTimeRequest)request),
+            
+            (MetricCategoricalRequest, MetricQueryType.TransportTypes) => await GetTransportDistributionsAsync((MetricCategoricalRequest)request),
+
+            _ => throw new NotSupportedException($"Metric type '{request.MetricQueryType}' is not supported.")
         };
-        
-        return metrics.Select(metric =>
+
+        if (request is MetricTimeRequest {  CumulativeValues: false })
         {
-            if (metric.Dimension == MetricDimension.Categorical)
+            foreach (var metric in metrics)
             {
-                metric.Summary = CalculateSummary(metric.DataPoints, dimension: metric.Dimension);
-                return metric;
-            }
+                var sortedDataPoints = metric.DataPoints.Cast<TimestampMetricDataPoint>()
+                    .OrderBy(dataPoint => dataPoint.Timestamp)
+                    .ToList();
+                var deltaDataPoints = new List<TimestampMetricDataPoint>();
 
-            var timeDataPoints = metric.DataPoints.Cast<TimestampMetricDataPoint>().ToList();
-            if (isCumulative)
-            {
-                metric.IsCumulative = true;
-                metric.Summary = CalculateSummary(timeDataPoints, dimension: MetricDimension.Time, isCumulative);
-                return metric;
-            }
-
-            var sortedDataPoints = timeDataPoints
-                .OrderBy(dataPoint => dataPoint.Timestamp)
-                .ToList();
-            var deltaDataPoints = new List<TimestampMetricDataPoint>();
-
-            for (int i = 0; i < sortedDataPoints.Count; i++)
-            {
-                decimal deltaValue = (i == 0)
-                    ? sortedDataPoints[i].Value
-                    : sortedDataPoints[i].Value - sortedDataPoints[i - 1].Value;
-                deltaDataPoints.Add(new TimestampMetricDataPoint()
+                for (int i = 0; i < sortedDataPoints.Count; i++)
                 {
-                    Timestamp = sortedDataPoints[i].Timestamp,
-                    Value = deltaValue
-                });
-            }
+                    decimal deltaValue = (i == 0)
+                        ? sortedDataPoints[i].Value
+                        : sortedDataPoints[i].Value - sortedDataPoints[i - 1].Value;
+                    deltaDataPoints.Add(new TimestampMetricDataPoint()
+                    {
+                        Timestamp = sortedDataPoints[i].Timestamp,
+                        Value = deltaValue
+                    });
+                }
 
-            metric.IsCumulative = false;
-            metric.DataPoints = deltaDataPoints;
-            metric.Summary = CalculateSummary(metric.DataPoints, dimension: MetricDimension.Time, isCumulative: metric.IsCumulative);
-            return metric;
-        });
+                metric.DataPoints = deltaDataPoints;
+            }
+        }
+
+        return metrics;
     }
 
-    private async Task<IEnumerable<MetricDataSet>> GetDatabaseSizeMetricsAsync(DateTimeOffset start, DateTimeOffset end)
+    private async Task<IEnumerable<MetricDataSet>> GetDatabaseSizeMetricsAsync(MetricTimeRequest request)
     {
         var dataPoints = await dataContext.DatabaseSizes
             .AsNoTracking()
-            .Where(snapshot => snapshot.MeasuredAt >= start.UtcDateTime && snapshot.MeasuredAt <= end.UtcDateTime)
+            .Where(snapshot => snapshot.MeasuredAt >= request.Start.UtcDateTime && snapshot.MeasuredAt <= request.End.UtcDateTime)
             .OrderBy(snapshot => snapshot.MeasuredAt)
             .Select(snapshot => new TimestampMetricDataPoint()
             {
@@ -102,7 +93,7 @@ public class StatisticsRepository(
             .ToListAsync();
 
         DateTimeOffset now = DateTime.UtcNow;
-        if (start <= now && now <= end)
+        if (request.Start <= now && now <= request.End)
         {
             var currentEstimate = await EstimateCurrentDatabaseSizeAsync() ?? 0;
             dataPoints.Add(new TimestampMetricDataPoint()
@@ -117,16 +108,17 @@ public class StatisticsRepository(
             SeriesType = MetricSeriesType.DatabaseSize,
             Dimension = MetricDimension.Time,
             Unit = MetricUnit.Bytes,
+            IsCumulative = request.CumulativeValues,
             DataPoints = dataPoints,
-            Summary = null!
+            Summary = CalculateSummary(dataPoints, MetricDimension.Time, request.CumulativeValues)
         }];
     }
 
-    public async Task<IEnumerable<MetricDataSet>> GetRisIdMetricsAsync(DateTimeOffset start, DateTimeOffset end)
+    private async Task<IEnumerable<MetricDataSet>> GetRisIdMetricsAsync(MetricTimeRequest request)
     {
         var snapshots = await dataContext.RisIdSnapshots
             .AsNoTracking()
-            .Where(snapshot => snapshot.MeasuredAt >= start.UtcDateTime && snapshot.MeasuredAt <= end.UtcDateTime)
+            .Where(snapshot => snapshot.MeasuredAt >= request.Start.UtcDateTime && snapshot.MeasuredAt <= request.End.UtcDateTime)
             .OrderBy(snapshot => snapshot.MeasuredAt)
             .ToListAsync();
 
@@ -142,7 +134,7 @@ public class StatisticsRepository(
         }).ToList();
 
         DateTimeOffset now = DateTime.UtcNow;
-        if (start <= now && now <= end)
+        if (request.Start <= now && now <= request.End)
         {
             var currentEstimate = await EstimateCurrentRisIdsAsync();
             if (currentEstimate is null) currentEstimate = (0, 0);
@@ -164,9 +156,9 @@ public class StatisticsRepository(
                 SeriesType = MetricSeriesType.RisIdsActive,
                 Dimension = MetricDimension.Time,
                 Unit = MetricUnit.Count,
-                IsCumulative = true,
+                IsCumulative = request.CumulativeValues,
                 DataPoints = activePoints,
-                Summary = null!
+                Summary = CalculateSummary(activePoints, MetricDimension.Time, request.CumulativeValues)
             },
             new MetricDataSet() {
                 SeriesType = MetricSeriesType.RisIdsInactive,
@@ -174,16 +166,16 @@ public class StatisticsRepository(
                 Unit = MetricUnit.Count,
                 IsCumulative = true,
                 DataPoints = inactivePoints,
-                Summary = null!
+                Summary = CalculateSummary(inactivePoints, MetricDimension.Time, request.CumulativeValues)
             }
         ];
     }
 
-    public async Task<IEnumerable<MetricDataSet>> GetJourneyMetricsAsync(DateTimeOffset start, DateTimeOffset end)
+    private async Task<IEnumerable<MetricDataSet>> GetJourneyMetricsAsync(MetricTimeRequest request)
     {
         var snapshots = await dataContext.JourneySnapshots
             .AsNoTracking()
-            .Where(snapshot => snapshot.MeasuredAt >= start.UtcDateTime && snapshot.MeasuredAt <= end.UtcDateTime)
+            .Where(snapshot => snapshot.MeasuredAt >= request.Start.UtcDateTime && snapshot.MeasuredAt <= request.End.UtcDateTime)
             .OrderBy(snapshot => snapshot.MeasuredAt)
             .Select(snapshot => new TimestampMetricDataPoint()
             {
@@ -193,7 +185,7 @@ public class StatisticsRepository(
             .ToListAsync();
 
         DateTimeOffset now = DateTime.UtcNow;
-        if (now >= start && now <= end)
+        if (request.Start <= now && now <= request.End)
         {
             var currentEstimate = await EstimateCurrentJourneysAsync() ?? 0;
             snapshots.Add(new TimestampMetricDataPoint()
@@ -207,21 +199,27 @@ public class StatisticsRepository(
             SeriesType = MetricSeriesType.JourneyTotal,
             Dimension = MetricDimension.Time,
             Unit = MetricUnit.Count,
-            IsCumulative = true,
+            IsCumulative = request.CumulativeValues,
             DataPoints = snapshots,
-            Summary = null!
+            Summary = CalculateSummary(snapshots, MetricDimension.Time, request.CumulativeValues)
         }];
     }
 
-    public async Task<IEnumerable<MetricDataSet>> GetTransportDistributionsAsync(DateTimeOffset end)
+    private async Task<IEnumerable<MetricDataSet>> GetTransportDistributionsAsync(MetricCategoricalRequest request)
     {
-        var dataPoints = (await dataContext.JourneyTransports
+        var query = dataContext.JourneyTransports
             .Include(transport => transport.Journey)
             .AsNoTracking()
-            .Where(transport => transport.Journey!.Date <= DateOnly.FromDateTime(end.DateTime))
-            .GroupBy(journey => journey.TransportType)
+            .Where(transport => transport.Journey!.Date <= DateOnly.FromDateTime(request.End.DateTime));
+
+        if (request.Start.HasValue) 
+            query = query.Where(transport => transport.Journey!.Date >= DateOnly.FromDateTime(request.Start.Value.DateTime));
+
+        var results = await query
+            .GroupBy(query => query.TransportType)
             .Select(group => new { TransportType = group.Key, Value = group.Count() })
-            .ToListAsync())
+            .ToListAsync();
+        var dataPoints = results
             .Select(dataPoint => new TransportTypeMetricDataPoint()
             {
                 TransportType = dataPoint.TransportType,
@@ -235,7 +233,7 @@ public class StatisticsRepository(
             Dimension = MetricDimension.Categorical,
             Unit = MetricUnit.Count,
             DataPoints = dataPoints,
-            Summary = null!
+            Summary = CalculateSummary(dataPoints, dimension: MetricDimension.Categorical, true)
         }];
     }
 
@@ -267,9 +265,9 @@ public class StatisticsRepository(
         var values = points
             .Select(point => point.Value)
             .ToList();
-
         decimal absoluteChange = 0, startValue = 0, endValue = 0;
-        if (dimension == MetricDimension.Time)
+
+        if (dimension == MetricDimension.Time && points.FirstOrDefault() is TimestampMetricDataPoint)
         {
             var timestampDataPoints = points.Cast<TimestampMetricDataPoint>()
                 .OrderBy(dataPoint => dataPoint.Timestamp)

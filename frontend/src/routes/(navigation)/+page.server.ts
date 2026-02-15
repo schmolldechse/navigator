@@ -32,7 +32,8 @@ export const load: PageServerLoad = async ({
 			totalRisIds: loadMetric({
 				start: start.toJSDate(),
 				end: end.toJSDate(),
-				metric: MetricQueryType.RIS_IDS
+				metric: MetricQueryType.RIS_IDS,
+				userIp: getClientAddress()
 			}),
 			totalJourneys: loadMetric({
 				start: start.toJSDate(),
@@ -40,7 +41,7 @@ export const load: PageServerLoad = async ({
 				metric: MetricQueryType.JOURNEYS,
 				userIp: getClientAddress()
 			}),
-			transportTypes: loadMetric({ metric: MetricQueryType.TRANSPORT_TYPES, userIp: getClientAddress() })
+			transportTypes: loadMetric({ end: end.toJSDate(), metric: MetricQueryType.TRANSPORT_TYPES, userIp: getClientAddress() })
 		},
 		timerange: { start, end }
 	};

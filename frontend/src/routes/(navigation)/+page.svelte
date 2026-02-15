@@ -1,7 +1,7 @@
 <script lang="ts" module>
 	interface MetricCardData {
 		metricComponent: Component<any>;
-		props: Record<string, any>;
+		props: Record<string, unknown>;
 		scale: CardScale;
 	}
 
@@ -16,8 +16,9 @@
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
 	import DatabaseSizeMetricCard from "@lib/components/statistics/projectdimensions/DatabaseSizeMetricCard.svelte";
+	import RecordedJourneyMetricCard from "@lib/components/statistics/projectdimensions/RecordedJourneyMetricCard.svelte";
+	import TransportTypeDistributionMetricCard from "@lib/components/statistics/projectdimensions/TransportTypeDistributionMetricCard.svelte";
 	import RecordedRisIdsMetricCard from "@lib/components/statistics/projectdimensions/RecordedRisIdsMetricCard.svelte";
-	import RecordedJourneysMetricCard from "@lib/components/statistics/projectdimensions/RecordedJourneysMetricCard.svelte";
 	import { CardScale } from "@lib/util/card.js";
 
 	let { data } = $props();
@@ -39,37 +40,30 @@
 			props: {
 				promise: data.dimensions.databaseSize
 			},
-			scale: CardScale.LARGE
+			scale: CardScale.SMALL
+		},
+		{
+			metricComponent: RecordedJourneyMetricCard,
+			props: {
+				promise: data.dimensions.totalJourneys
+			},
+			scale: CardScale.MEDIUM
 		},
 		{
 			metricComponent: RecordedRisIdsMetricCard,
 			props: {
 				promise: data.dimensions.totalRisIds
 			},
-			scale: CardScale.LARGE
+			scale: CardScale.MEDIUM
 		},
 		{
-			metricComponent: RecordedJourneysMetricCard,
+			metricComponent: TransportTypeDistributionMetricCard,
 			props: {
-				journeyPromise: data.dimensions.totalJourneys,
-				transportTypePromise: data.dimensions.transportTypes
+				promise: data.dimensions.transportTypes
 			},
-			scale: CardScale.LARGE
+			scale: CardScale.SMALL
 		}
 	]);
-
-	const getSpanLength = (scale: MetricCardData): string => {
-		switch (scale.scale) {
-			case CardScale.SMALL:
-				return "col-span-1";
-			case CardScale.MEDIUM:
-				return "col-span-2";
-			case CardScale.LARGE:
-				return "col-span-3";
-			default:
-				return "col-span-1";
-		}
-	};
 </script>
 
 <svelte:head>
@@ -158,7 +152,14 @@
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each metricCards as metricCard}
 				{@const MetricComponent = metricCard.metricComponent}
-				<MetricComponent {...metricCard.props} class="col-span-3" />
+				{@const cardScale = metricCard.scale}
+				<MetricComponent
+					{...metricCard.props}
+					class={[
+						cardScale === CardScale.MEDIUM && "sm:col-span-2",
+						cardScale === CardScale.LARGE && "sm:col-span-2 lg:col-span-3"
+					]}
+				/>
 			{/each}
 		</div>
 	</section>

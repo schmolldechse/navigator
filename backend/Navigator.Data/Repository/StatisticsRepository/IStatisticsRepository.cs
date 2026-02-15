@@ -1,6 +1,6 @@
 ﻿using Navigator.Data.Entities.Statistics;
-using Navigator.Data.Enums.Metric;
 using Navigator.Data.Models.Statistics;
+using Navigator.Data.Models.Statistics.Request;
 
 namespace Navigator.Data.Repository.StatisticsRepository;
 
@@ -10,7 +10,7 @@ public interface IStatisticsRepository
     Task<(int Active, int Inactive)?> EstimateCurrentRisIdsAsync();
     Task<int?> EstimateCurrentJourneysAsync();
 
-    Task<IEnumerable<MetricDataSet>> GetMetricAsync(MetricQueryType type, DateTimeOffset? start, DateTimeOffset? end, bool isCumulative);
+    Task<IEnumerable<MetricDataSet>> GetMetricAsync(BaseMetricRequest request);
 
     Task SaveDatabaseSizeAsync(DatabaseSize databaseSize);
     Task SaveRisIdSnapshotAsync(RisIdSnapshot risIdSnapshot);

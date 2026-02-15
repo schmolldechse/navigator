@@ -13,6 +13,8 @@
 	import MetricLoadingFailedWarning from "../MetricLoadingFailedWarning.svelte";
 	import { Axis, ChartClipPath, Highlight, Legend, LineChart, PieChart, Spline, Svg, Text, Tooltip } from "layerchart";
 	import { DateTime } from "luxon";
+	import MetricCardTitle from "../MetricCardTitle.svelte";
+	import MetricTrend from "../MetricTrend.svelte";
 
 	interface RisIdDistributionSeries {
 		seriesType: MetricSeriesType;
@@ -30,7 +32,6 @@
 		key: MetricSeriesType;
 		title: string;
 	}
-
 	const keyTitles: KeyTitles[] = [
 		{ key: MetricSeriesType.RIS_IDS_ACTIVE, title: "Active RIS IDs" },
 		{ key: MetricSeriesType.RIS_IDS_INACTIVE, title: "Inactive RIS IDs" }
@@ -56,7 +57,7 @@
 	});
 
 	const colorScale = scaleOrdinal(schemeTableau10);
-	const getAreaChartSeries = (metrics: MetricSeries[]): RisIdLineChartSeries[] => {
+	const getLineSeries = (metrics: MetricSeries[]): RisIdLineChartSeries[] => {
 		if (!metrics.length) return [];
 
 		return metrics.map((metric: MetricSeries) => {
@@ -79,7 +80,7 @@
 		});
 	};
 
-	const getArcSeries = (metrics: MetricSeries[]): RisIdDistributionSeries[] => {
+	const getDistributionSeries = (metrics: MetricSeries[]): RisIdDistributionSeries[] => {
 		if (!metrics.length) return [];
 
 		return metrics.map((metric: MetricSeries) => ({
@@ -91,25 +92,33 @@
 </script>
 
 <MetricCardBase class={["gap-y-2", className]}>
-	{#snippet children()}
-		<p class="text-muted-foreground text-xs font-semibold tracking-wider uppercase">Recorded RIS IDs</p>
+	{#snippet head()}
+		<MetricCardTitle title="Total RIS IDs" class="justify-between">
+			{#snippet children()}
+				{#await promise then metrics}
+					<MetricTrend {metrics} />
+				{/await}
+			{/snippet}
+		</MetricCardTitle>
+	{/snippet}
 
+	{#snippet body()}
 		{#await promise}
 			<div class="bg-muted h-64 w-full animate-pulse rounded-md"></div>
 		{:then metrics}
-			{#if metrics === null || metrics.length === 0}
+			{#if !metrics.length}
 				<MetricLoadingFailedWarning />
 			{:else}
 				<div class="flex flex-col items-center lg:flex-row">
 					<!-- Distribution of RIS IDs -->
-					<div class="h-48 w-full lg:w-1/3">
+					<div class="h-48 lg:min-w-1/3">
 						<PieChart
-							data={getArcSeries(metrics)}
+							data={getDistributionSeries(metrics)}
 							key="seriesType"
 							value="value"
 							c={(data: RisIdDistributionSeries) => data.color}
 							range={[-90, 90]}
-							outerRadius={120}
+							outerRadius={100}
 							innerRadius={-20}
 							cornerRadius={4}
 							padAngle={0.02}
@@ -120,7 +129,7 @@
 								<Legend
 									{...getLegendProps()}
 									placement="bottom"
-									orientation="horizontal"
+									orientation="vertical"
 									variant="swatches"
 									classes={{
 										root: "pointer-events-auto",
@@ -135,39 +144,24 @@
 								/>
 							{/snippet}
 
-							{#snippet aboveMarks({ visibleData, highlightKey })}
+							{#snippet aboveMarks({ visibleData })}
 								{@const total = visibleData.reduce((acc: number, curr: RisIdDistributionSeries) => acc + curr.value, 0)}
 								{@const formatter = new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 })}
 
-								{#if highlightKey}
-									{@const hoveredItem = visibleData.find((data: RisIdDistributionSeries) => data.seriesType === highlightKey)}
-									{#if hoveredItem}
-										{@const percentage = ((hoveredItem.value / total) * 100).toFixed(2)}
-										<Text
-											value={formatter.format(hoveredItem.value) + " / " + formatter.format(total)}
-											textAnchor="middle"
-											verticalAnchor="middle"
-											dy={4}
-											class="text-base"
-										/>
-										<Text
-											value={percentage + " %"}
-											textAnchor="middle"
-											verticalAnchor="middle"
-											dy={26}
-											class="text-muted-foreground text-sm"
-										/>
-									{/if}
-								{:else}
-									<Text value={formatter.format(total)} textAnchor="middle" verticalAnchor="middle" dy={4} class="text-2xl" />
-									<Text
-										value="Total"
-										textAnchor="middle"
-										verticalAnchor="middle"
-										dy={26}
-										class="text-muted-foreground text-sm"
-									/>
-								{/if}
+								<Text
+									value={formatter.format(total)}
+									textAnchor="middle"
+									verticalAnchor="middle"
+									dy={4}
+									class="text-xl font-bold"
+								/>
+								<Text
+									value="IDs Total"
+									textAnchor="middle"
+									verticalAnchor="middle"
+									dy={26}
+									class="text-muted-foreground text-sm"
+								/>
 							{/snippet}
 
 							{#snippet tooltip({ context })}
@@ -182,11 +176,11 @@
 										{@const percentage = ((data.value / total) * 100).toFixed(2)}
 										{@const formattedValue = formatter.format(data.value)}
 
-										<p class="text-base font-bold" style:color={data.color}>{title}</p>
+										<p class="text-sm font-bold" style:color={data.color}>{title}</p>
 										<Tooltip.Separator class="border-muted-foreground/20 my-1 border-t" />
-										<div class="flex flex-row justify-between gap-x-4">
-											<span class="text-sm font-medium">{formattedValue}</span>
-											<span class="text-xs text-emerald-400 italic">({percentage} %)</span>
+										<div class="flex flex-row justify-between gap-x-4 text-xs">
+											<span class="font-medium">{formattedValue}</span>
+											<span class="text-emerald-400 italic">({percentage} %)</span>
 										</div>
 									{/snippet}
 								</Tooltip.Root>
@@ -195,13 +189,13 @@
 					</div>
 
 					<!-- Area Chart for Historical Changes -->
-					<div class="h-64 w-full lg:min-w-2/3">
+					<div class="h-64 lg:min-w-2/3">
 						<LineChart
-							data={getAreaChartSeries(metrics).flatMap((series: RisIdLineChartSeries) => series.data)}
-							series={getAreaChartSeries(metrics)}
+							data={getLineSeries(metrics).flatMap((series: RisIdLineChartSeries) => series.data)}
+							series={getLineSeries(metrics)}
 							x="date"
 							y="value"
-							padding={{ left: 64, top: 16, bottom: 12 }}
+							padding={{ bottom: 12 }}
 							yDomain={null}
 							tooltip={{ mode: "quadtree-x" }}
 							brush
@@ -216,17 +210,25 @@
 											tickLabel: "text-xs stroke-0 text-muted-foreground",
 											rule: "stroke-muted-foreground/20"
 										}}
-									/>
+										tickMarks={false}
+									>
+										{#snippet tickLabel()}{/snippet}
+									</Axis>
 									<Axis
 										placement="bottom"
 										rule
 										classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground", rule: "stroke-0" }}
 									/>
 
+									<!-- ChartClipPath needed for brush -->
 									<ChartClipPath>
 										{#each visibleSeries as series, i (series.key)}
-											<Spline {...getSplineProps(series, i)} class="stroke-2" />
-											<Highlight {...getHighlightProps(series, i)} points lines={{ class: "stroke-muted-foreground/30" }} />
+											<Spline {...getSplineProps(series, i)} stroke={series.color} strokeWidth={2} />
+											<Highlight
+												{...getHighlightProps(series, i)}
+												points={{ stroke: series.color }}
+												lines={{ class: "stroke-muted-foreground/30" }}
+											/>
 										{/each}
 									</ChartClipPath>
 								</Svg>
@@ -235,10 +237,9 @@
 								<Tooltip.Root
 									anchor="bottom"
 									contained="container"
-									class="bg-background/90! rounded-lg border border-white/10! p-3 shadow-xl backdrop-blur-md"
+									class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"
 								>
 									{#snippet children({ payload })}
-										{@const formatter = new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 })}
 										{@const total = payload.reduce((acc: number, curr) => acc + curr.value, 0)}
 
 										<div class="flex flex-col gap-y-1">
@@ -246,21 +247,21 @@
 												{@const title =
 													keyTitles?.find((title: KeyTitles) => title.key === item.rawSeriesData?.key)?.title ??
 													item.rawSeriesData?.key}
-												<div class="flex justify-between gap-x-4">
+												<div class="flex justify-between gap-x-4 text-xs">
 													<div class="flex items-center gap-x-2">
 														<div class="h-1.5 w-1.5 rounded-full" style:background-color={item.color}></div>
 														<span class="text-muted-foreground text-left">{title}</span>
 													</div>
 
-													<span class="text-text">{formatter.format(item.value)}</span>
+													<span class="text-text">{item.value.toLocaleString()}</span>
 												</div>
 											{/each}
 
 											<Tooltip.Separator class="border-muted-foreground/20 my-1 border-t" />
 
-											<div class="flex flex-row justify-between gap-x-4">
+											<div class="flex flex-row justify-between gap-x-4 text-xs">
 												<span>Total</span>
-												<span>{formatter.format(total)}</span>
+												<span>{total.toLocaleString()}</span>
 											</div>
 										</div>
 									{/snippet}
@@ -269,15 +270,15 @@
 								<!-- Date Tooltip on x-Axis -->
 								<Tooltip.Root
 									x="pointer"
-									y={context.height + context.padding.bottom + 8}
+									y={context.height + context.padding.bottom - 16}
 									anchor="top"
 									variant="none"
 									class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"
 								>
 									{#snippet children({ data })}
-										<Tooltip.Item class="text-text text-xs">
+										<span class="text-text text-xs">
 											{DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}
-										</Tooltip.Item>
+										</span>
 									{/snippet}
 								</Tooltip.Root>
 							{/snippet}
@@ -285,8 +286,6 @@
 					</div>
 				</div>
 			{/if}
-		{:catch}
-			<MetricLoadingFailedWarning />
 		{/await}
 	{/snippet}
 </MetricCardBase>
