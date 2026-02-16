@@ -14,12 +14,11 @@ public class TimetableController(
     IMapper mapper
 ) : Controller
 {
-    /// <summary>
-    /// Lookup departures
-    /// </summary>
     [HttpPost("departures")]
     [ProducesResponseType<IEnumerable<TimetableDeparture>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Lookup departures")]
+    [EndpointDescription("Retrieves upcoming departures for a station by its EVA number. The time window is defined by a start time (defaults to now) and a duration in minutes (defaults to 60).")]
     public async Task<IActionResult> GetDepartures([FromBody] TimetableRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -34,12 +33,11 @@ public class TimetableController(
         return Ok(mapper.Map<IEnumerable<TimetableDeparture>>(timetable.Departures.DistinctBy(entry => entry.JourneyID)));
     }
 
-    /// <summary>
-    /// Lookup arrivals
-    /// </summary>
     [HttpPost("arrivals")]
     [ProducesResponseType<IEnumerable<TimetableArrival>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Lookup arrivals")]
+    [EndpointDescription("Retrieves upcoming arrivals for a station by its EVA number. The time window is defined by a start time (defaults to now) and a duration in minutes (defaults to 60).")]
     public async Task<IActionResult> GetArrivals([FromBody] TimetableRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);

@@ -27,10 +27,6 @@ public class JourneyStopPlace
     [Column("schedule_type")]
     public required ScheduleType ScheduleType { get; set; }
 
-    [MaxLength(1024)]
-    [Column("station_name")]
-    public required string StationName { get; set; }
-
     [Column("station_eva_number")]
     public required int StationEvaNumber { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿namespace Navigator.Data.Models.Statistics.DataPoint;
 
-public class TimestampMetricDataPoint : MetricDataPoint
+public class TimestampMetricDataPoint : BaseMetricDataPoint
 {
     public required DateTimeOffset Timestamp { get; set; }
 }

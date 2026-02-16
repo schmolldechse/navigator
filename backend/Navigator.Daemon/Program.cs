@@ -17,6 +17,7 @@ builder.Services.AddQuartz(options =>
     options.AddQuartzJobs<RisIdSnapshotJob>(builder.Configuration);
     options.AddQuartzJobs<JourneySnapshotJob>(builder.Configuration);
     options.AddQuartzJobs<StaleRisIdDeactivationJob>(builder.Configuration);
+    options.AddQuartzJobs<ViewHourlyStopRefreshJob>(builder.Configuration);
 });
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 

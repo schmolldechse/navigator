@@ -11,10 +11,7 @@ public class MetricSummary
     public decimal? EndValue { get; set; }
 
     [JsonPropertyName("absoluteChange")]
-    public decimal? AbsoluteChange { get; set; }
-
-    [JsonPropertyName("total")]
-    public required decimal Total { get; set; }
+    public required decimal AbsoluteChange { get; set; }
 
     [JsonPropertyName("minValue")]
     public required decimal MinValue { get; set; }

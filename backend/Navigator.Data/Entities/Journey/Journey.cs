@@ -8,7 +8,6 @@ namespace Navigator.Data.Entities.Journey;
 
 [Table("journeys", Schema = "core")]
 [Index(nameof(Date))]
-[Index(nameof(Cancelled))]
 [Index(nameof(InsertedAt))]
 [Index(nameof(JourneyType))]
 public class Journey

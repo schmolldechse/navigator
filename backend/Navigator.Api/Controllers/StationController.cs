@@ -18,12 +18,11 @@ public class StationController(
     IMapper mapper
 ) : ControllerBase
 {
-    /// <summary>
-    /// Searches for stations that match the specified criteria
-    /// </summary>
     [HttpPost]
     [ProducesResponseType<IEnumerable<Navigator.Api.DTOs.Station.Station>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Search stations")]
+    [EndpointDescription("Searches for stations by a search term.")]
     public async Task<IActionResult> SearchStations([FromBody] StationBySerchtermRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -46,13 +45,12 @@ public class StationController(
         return Ok(stations);
     }
 
-    /// <summary>
-    /// Search for stations based on geographic coordinates
-    /// </summary>
     [HttpPost("nearby")]
     [ProducesResponseType<IEnumerable<BaseStation>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Stations by geographic coordinates")]
+    [EndpointDescription("Finds nearby stations based on latitude and longitude. Supports optional filters for maximum distance (in meters) and result limit.")]
     public async Task<IActionResult> SearchStationByCoordinates([FromBody] StationByGeographicCoordinatesRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -63,13 +61,12 @@ public class StationController(
         return Ok(mapper.Map<IEnumerable<BaseStation>>(stations));
     }
 
-    /// <summary>
-    /// Searches for stations using the specified EVA number
-    /// </summary>
     [HttpGet]
     [ProducesResponseType<Navigator.Api.DTOs.Station.Station>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [EndpointSummary("Stations by EVA number")]
+    [EndpointDescription("Retrieves a single station by its EVA number.")]
     public async Task<IActionResult> SearchStationByEvaNumber([FromQuery] int evaNumber)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -80,13 +77,12 @@ public class StationController(
         return Ok(mapper.Map<Navigator.Api.DTOs.Station.Station>(station));
     }
 
-    /// <summary>
-    /// Retrieves gathering information for a station identified by its EVA number
-    /// </summary>
     [HttpGet("gathering")]
     [ProducesResponseType<StationGatheringInfo>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [EndpointSummary("Gathering Information")]
+    [EndpointDescription("Retrieves gathering information for a station by its EVA number, including whether querying is enabled, the last queried timestamp, and the active and disabled transport types. Returns 404 Not Found if no station matches.")]
     public async Task<IActionResult> GetGatheringInfoByEvaNumber([FromQuery] int evaNumber)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);

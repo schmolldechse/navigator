@@ -228,7 +228,6 @@ namespace Navigator.Data.Migrations
                     id = table.Column<Guid>(type: "uuid", nullable: false),
                     journey_id = table.Column<string>(type: "character varying(82)", maxLength: 82, nullable: false),
                     schedule_type = table.Column<ScheduleType>(type: "core.schedule_type", nullable: false),
-                    station_name = table.Column<string>(type: "character varying(1024)", maxLength: 1024, nullable: false),
                     station_eva_number = table.Column<int>(type: "integer", nullable: false),
                     cancelled = table.Column<bool>(type: "boolean", nullable: false),
                     additional = table.Column<bool>(type: "boolean", nullable: false),
@@ -374,12 +373,6 @@ namespace Navigator.Data.Migrations
                 column: "journey_message_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_place_messages_journey_stop_place_id",
-                schema: "core",
-                table: "journey_stop_place_messages",
-                column: "journey_stop_place_id");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_journey_stop_places_actual_time",
                 schema: "core",
                 table: "journey_stop_places",
@@ -403,12 +396,6 @@ namespace Navigator.Data.Migrations
                 table: "journey_stop_places",
                 columns: new[] { "station_eva_number", "planned_time" })
                 .Annotation("Npgsql:IndexInclude", new[] { "journey_id", "schedule_type", "delay", "cancelled", "additional", "demand", "no_passenger_change", "planned_platform", "actual_platform" });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journey_transports_category",
-                schema: "core",
-                table: "journey_transports",
-                column: "category");
 
             migrationBuilder.CreateIndex(
                 name: "IX_journey_transports_journey_description",
@@ -439,12 +426,6 @@ namespace Navigator.Data.Migrations
                 schema: "core",
                 table: "journeys",
                 column: "administration_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journeys_cancelled",
-                schema: "core",
-                table: "journeys",
-                column: "cancelled");
 
             migrationBuilder.CreateIndex(
                 name: "IX_journeys_date",

@@ -2,8 +2,11 @@
 
 public enum MetricQueryType
 {
-    DatabaseSize,
-    RisIds,
-    Journeys,
-    TransportTypes,
+    DatabaseSizeSnapshot,
+    RisIdSnapshot,
+    JourneySnapshot,
+
+    TransportTypeDistribution,
+
+    HourlyStopSummary
 }

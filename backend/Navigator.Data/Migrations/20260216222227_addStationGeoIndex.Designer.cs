@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Navigator.Data;
 using Navigator.Data.Enums;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260216222227_addStationGeoIndex")]
+    partial class addStationGeoIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -600,9 +603,9 @@ namespace Navigator.Data.Migrations
                         .HasColumnName("transport_type");
 
                     b.ToTable("hourly_stop_summary", "statistics", t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    {
+                        t.ExcludeFromMigrations();
+                    });
 
                     b.ToView("hourly_stop_summary", "statistics");
                 });

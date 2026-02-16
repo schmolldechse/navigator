@@ -5,8 +5,9 @@ namespace Navigator.Api.DTOs.Statistics;
 
 [JsonDerivedType(typeof(TimestampMetricDataPoint), typeDiscriminator: "timestamp")]
 [JsonDerivedType(typeof(TransportTypeMetricDataPoint), typeDiscriminator: "transportType")]
+[JsonDerivedType(typeof(TimestampTransportTypeMetricDataPoint), typeDiscriminator: "timestampTransportType")]
 [JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
-public class MetricDataPoint
+public class BaseMetricDataPoint
 {
     [JsonPropertyName("value")]
     public required decimal Value { get; set; }

@@ -10,4 +10,11 @@ public enum MetricSeriesType
     JourneyTotal,
 
     TransportTypesTotal,
+    
+    HourlyStopArrivalsCount,
+    HourlyStopArrivalCancellations,
+    HourlyStopArrivalDelays,
+    HourlyStopDeparturesCount,
+    HourlyStopDepartureCancellations,
+    HourlyStopDepartureDelays
 }

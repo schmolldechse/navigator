@@ -15,12 +15,11 @@ public class JourneyController(
     IMapper mapper
 ) : Controller
 {
-    /// <summary>
-    /// Load a journey by its JourneyID
-    /// </summary>
     [HttpGet]
     [ProducesResponseType<Journey>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Journey by ID")]
+    [EndpointDescription("Retrieves a single journey by its unique journey ID. The journey ID (max 82 characters) is expected to encode a date (yyyyMMdd) in the first 8 characters followed by the journey identifier.")]
     public async Task<IActionResult> GetJourney([FromQuery] [MaxLength(82)] string journeyId)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
@@ -29,12 +28,11 @@ public class JourneyController(
         return Ok(mapper.Map<Journey>(journey));
     }
     
-    /// <summary>
-    /// Load a batch of journeys
-    /// </summary>
     [HttpPost("batch")]
     [ProducesResponseType<IEnumerable<Journey>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [EndpointSummary("Journey batch")]
+    [EndpointDescription("Retrieves multiple journeys in a single request. Each journey ID (max 82 characters) is expected to encode a date (yyyyMMdd) in the first 8 characters followed by the journey identifier.")]
     public async Task<IActionResult> GetJourneyBatch([FromBody] IEnumerable<string> journeyIds)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);

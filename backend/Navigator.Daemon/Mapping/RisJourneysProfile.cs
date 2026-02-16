@@ -84,7 +84,7 @@ public class RisJourneysProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.Ignore())
             .ForMember(dest => dest.JourneyId, opt => opt.Ignore())
             .ForMember(dest => dest.ScheduleType, opt => opt.MapFrom(src => MapScheduleOrThrow(src.Type)))
-            .ForMember(dest => dest.StationName, opt => opt.MapFrom(src => src.StopPlace.Name))
+            //.ForMember(dest => dest.StationName, opt => opt.MapFrom(src => src.StopPlace.Name))
             .ForMember(dest => dest.StationEvaNumber, opt => opt.MapFrom(src => ParseEvaOrThrow(src.StopPlace.EvaNumber)))
             .ForMember(dest => dest.Cancelled, opt => opt.MapFrom(src => src.Cancelled))
             .ForMember(dest => dest.Additional, opt => opt.MapFrom(src => src.Additional))

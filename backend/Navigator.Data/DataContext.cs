@@ -4,6 +4,7 @@ using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Entities.RisId;
 using Navigator.Data.Entities.Station;
 using Navigator.Data.Entities.Statistics;
+using Navigator.Data.Entities.Views;
 
 namespace Navigator.Data;
 
@@ -29,11 +30,22 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<JourneyMessageReference> JourneyMessageReferences { get; set; }
     public DbSet<JourneyStopPlaceMessage> JourneyStopPlaceMessages { get; set; }
 
+    // views
+    public DbSet<HourlyStopSummary> HourlyStopSummaries { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
             .HasPostgresExtension("cube")
             .HasPostgresExtension("earthdistance");
+
+        // views
+        modelBuilder.Entity<HourlyStopSummary>(entity =>
+        {
+            entity.HasNoKey();
+            entity.ToView("hourly_stop_summary", "statistics");
+            entity.ToTable("hourly_stop_summary", "statistics", table => table.ExcludeFromMigrations());
+        });
 
         modelBuilder.Entity<Station>(entity =>
         {

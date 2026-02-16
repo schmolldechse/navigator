@@ -1,11 +1,10 @@
 ﻿using Navigator.Data.Enums.Metric;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
 
 namespace Navigator.Api.DTOs.Statistics;
 
-/// <summary>
-/// Represents a series of measured data points for a specific metric over a time range.
-/// </summary>
+[Description("Represents a series of measured data points for a specific metric.")]
 public class MetricSeries
 {
     [JsonPropertyName("seriesType")]
@@ -14,15 +13,10 @@ public class MetricSeries
     [JsonPropertyName("unit")]
     public required MetricUnit Unit { get; set; }
 
-    [JsonPropertyName("isCumulative")]
-    public bool IsCumulative { get; set; }
-
-    /// <summary>
-    /// Aggregated statistics about this series (e.g. totals, deltas).
-    /// </summary>
     [JsonPropertyName("summary")]
+    [Description("Aggregated statistics about this series (e.g. totals, deltas).")]
     public required MetricSummary Summary { get; set; }
 
     [JsonPropertyName("dataPoints")]
-    public required IEnumerable<MetricDataPoint> DataPoints { get; set; }
+    public required IEnumerable<BaseMetricDataPoint> DataPoints { get; set; }
 }

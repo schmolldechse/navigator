@@ -5,8 +5,8 @@ namespace Navigator.Data.Entities.Journey.Message;
 
 [Table("journey_stop_place_messages", Schema = "core")]
 [PrimaryKey(nameof(StopPlaceId), nameof(MessageId))]
+// We do not need a separate index for `StopPlaceId` as it is already part of the primary key.
 [Index(nameof(MessageId))]
-[Index(nameof(StopPlaceId))]
 public class JourneyStopPlaceMessage
 {
     [Column("journey_stop_place_id")]

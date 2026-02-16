@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260105131041_initial")]
-    partial class initial
+    [Migration("20260216222231_addHourlyStopSummaryView")]
+    partial class addHourlyStopSummaryView
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -99,8 +99,6 @@ namespace Navigator.Data.Migrations
 
                     b.HasIndex("AdministrationId");
 
-                    b.HasIndex("Cancelled");
-
                     b.HasIndex("Date");
 
                     b.HasIndex("InsertedAt");
@@ -171,12 +169,6 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("station_eva_number");
 
-                    b.Property<string>("StationName")
-                        .IsRequired()
-                        .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)")
-                        .HasColumnName("station_name");
-
                     b.Property<TimeType>("TimeType")
                         .HasColumnType("core.time_type")
                         .HasColumnName("time_type");
@@ -245,8 +237,6 @@ namespace Navigator.Data.Migrations
                         .HasColumnName("transport_type");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Category");
 
                     b.HasIndex("JourneyDescription");
 
@@ -358,8 +348,6 @@ namespace Navigator.Data.Migrations
                     b.HasKey("StopPlaceId", "MessageId");
 
                     b.HasIndex("MessageId");
-
-                    b.HasIndex("StopPlaceId");
 
                     b.ToTable("journey_stop_place_messages", "core");
                 });
@@ -570,6 +558,56 @@ namespace Navigator.Data.Migrations
                     b.HasIndex("MeasuredAt");
 
                     b.ToTable("risid_snapshot", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.HourlyStopSummary", b =>
+                {
+                    b.Property<int>("ArrivalCancellationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_cancellations_count");
+
+                    b.Property<double>("ArrivalDelayAvg")
+                        .HasColumnType("double precision")
+                        .HasColumnName("arrival_delay_avg");
+
+                    b.Property<double>("ArrivalDelaySum")
+                        .HasColumnType("double precision")
+                        .HasColumnName("arrival_delay_sum");
+
+                    b.Property<int>("ArrivalsCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrivals_count");
+
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<int>("DepartureCancellationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_cancellations_count");
+
+                    b.Property<double>("DepartureDelayAvg")
+                        .HasColumnType("double precision")
+                        .HasColumnName("departure_delay_avg");
+
+                    b.Property<double>("DepartureDelaySum")
+                        .HasColumnType("double precision")
+                        .HasColumnName("departure_delay_sum");
+
+                    b.Property<int>("DeparturesCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departures_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("hourly_stop_summary", "statistics", t =>
+                    {
+                        t.ExcludeFromMigrations();
+                    });
+
+                    b.ToView("hourly_stop_summary", "statistics");
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Journey", b =>
