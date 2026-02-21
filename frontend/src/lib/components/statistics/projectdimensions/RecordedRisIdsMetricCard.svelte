@@ -1,8 +1,8 @@
 <script lang="ts">
 	import {
 		MetricSeriesType,
-		type MetricDataPoint,
-		type MetricDataPointTimestampMetricDataPoint,
+		type BaseMetricDataPoint,
+		type BaseMetricDataPointTimestampMetricDataPoint,
 		type MetricSeries
 	} from "@lib/api";
 	import { scaleOrdinal } from "d3-scale";
@@ -63,12 +63,12 @@
 		return metrics.map((metric: MetricSeries) => {
 			const dataPoints = [...metric.dataPoints]
 				.sort(
-					(a: MetricDataPoint, b: MetricDataPoint) =>
-						new Date((a as MetricDataPointTimestampMetricDataPoint).timestamp).getTime() -
-						new Date((b as MetricDataPointTimestampMetricDataPoint).timestamp).getTime()
+					(a: BaseMetricDataPoint, b: BaseMetricDataPoint) =>
+						new Date((a as BaseMetricDataPointTimestampMetricDataPoint).timestamp).getTime() -
+						new Date((b as BaseMetricDataPointTimestampMetricDataPoint).timestamp).getTime()
 				)
-				.map((dataPoint: MetricDataPoint) => ({
-					date: new Date((dataPoint as MetricDataPointTimestampMetricDataPoint).timestamp),
+				.map((dataPoint: BaseMetricDataPoint) => ({
+					date: new Date((dataPoint as BaseMetricDataPointTimestampMetricDataPoint).timestamp),
 					value: Number(dataPoint.value)
 				}));
 
@@ -111,7 +111,7 @@
 			{:else}
 				<div class="flex flex-col items-center lg:flex-row">
 					<!-- Distribution of RIS IDs -->
-					<div class="h-48 lg:min-w-1/3">
+					<div class="w-full lg:min-w-1/3">
 						<PieChart
 							data={getDistributionSeries(metrics)}
 							key="seriesType"
@@ -124,6 +124,7 @@
 							padAngle={0.02}
 							placement="center"
 							props={{ group: { y: 40 }, pie: { motion: "spring" } }}
+							height={192}
 						>
 							{#snippet legend({ getLegendProps })}
 								<Legend
@@ -189,7 +190,7 @@
 					</div>
 
 					<!-- Area Chart for Historical Changes -->
-					<div class="h-64 lg:min-w-2/3">
+					<div class="w-full lg:min-w-2/3">
 						<LineChart
 							data={getLineSeries(metrics).flatMap((series: RisIdLineChartSeries) => series.data)}
 							series={getLineSeries(metrics)}
@@ -199,6 +200,7 @@
 							yDomain={null}
 							tooltip={{ mode: "quadtree-x" }}
 							brush
+							height={256}
 						>
 							{#snippet children({ context, visibleSeries, getSplineProps, getHighlightProps })}
 								<Svg>

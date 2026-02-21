@@ -1,13 +1,15 @@
 <script lang="ts">
-	interface Props {
-		type?: "rounded-corners" | "circle";
-		class?: string;
-	}
+	import type { ClassValue } from "svelte/elements";
 
-	let { type = "rounded-corners", class: classes = "" }: Props = $props();
+	type Props = {
+		type?: "rounded-corners" | "circle";
+		class?: ClassValue;
+	};
+
+	let { type = "rounded-corners", class: classNames }: Props = $props();
 </script>
 
-<svg class={classes} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" id="transport-products">
+<svg class={classNames} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" id="transport-products">
 	<g id="bus">
 		{#if type === "rounded-corners"}
 			<rect class="cls-1" x="24.55" y="24.5" width="975" height="975" rx="256" ry="256" />

@@ -8,5 +8,5 @@ public enum MetricQueryType
 
     TransportTypeDistribution,
 
-    HourlyStopSummary
+    GlobalStopSummary
 }

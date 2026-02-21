@@ -49,7 +49,7 @@ public class StatisticsRepository(
         RisIdSnapshotMetricRequest => await GetRisIdMetricsAsync((RisIdSnapshotMetricRequest)request),
         
         TransportTypeDistributionMetricRequest => await GetTransportDistributionsAsync((TransportTypeDistributionMetricRequest)request),
-        HourlyStopSummaryMetricRequest => await GetHourlyStopSummaryAsync((HourlyStopSummaryMetricRequest)request),
+        GlobalStopSummaryMetricRequest => await GetGlobalStopSummaryAsync((GlobalStopSummaryMetricRequest)request),
         
         _ => throw new NotSupportedException($"Metric type '{request.MetricQueryType}' is not supported.")
     };
@@ -210,7 +210,7 @@ public class StatisticsRepository(
         }];
     }
 
-    private async Task<IEnumerable<MetricSeries>> GetHourlyStopSummaryAsync(HourlyStopSummaryMetricRequest request)
+    private async Task<IEnumerable<MetricSeries>> GetGlobalStopSummaryAsync(GlobalStopSummaryMetricRequest request)
     {
         request.TransportTypes = (request.TransportTypes is null || request.TransportTypes.Length == 0)
             ? Enum.GetValues<TransportType>()
@@ -221,8 +221,14 @@ public class StatisticsRepository(
             .Where(summary => summary.BucketHour >= request.Start.UtcDateTime && summary.BucketHour <= request.End.UtcDateTime)
             .Where(summary => request.TransportTypes.Contains(summary.TransportType));
 
-        var results = await query
-            .GroupBy(summary => new { summary.BucketHour, summary.TransportType })
+        var rawResults = await query.ToListAsync();
+
+        var results = rawResults
+            .GroupBy(summary => new 
+            { 
+                BucketHour = summary.BucketHour.AddHours(-(summary.BucketHour.Hour % request.Stepping)), 
+                summary.TransportType 
+            })
             .Select(group => new
             {
                 group.Key.BucketHour,
@@ -236,7 +242,7 @@ public class StatisticsRepository(
                 DepartureDelayAvg = group.Sum(x => x.DeparturesCount) > 0 ? group.Sum(x => x.DepartureDelaySum) / group.Sum(x => x.DeparturesCount) : 0,
             })
             .OrderBy(r => r.BucketHour)
-            .ToListAsync();
+            .ToList();
 
         var arrivalsCountPoints = results
             .Select(result => new TimestampTransportTypeMetricDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.ArrivalsCount })
@@ -260,37 +266,37 @@ public class StatisticsRepository(
 
         return [
             new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyStopArrivalsCount,
+                SeriesType = MetricSeriesType.GlobalStopArrivalsCount,
                 Unit = MetricUnit.Count,
                 DataPoints = arrivalsCountPoints,
                 Summary = CalculateSummary(arrivalsCountPoints)
             },
             new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyStopArrivalCancellations,
+                SeriesType = MetricSeriesType.GlobalStopArrivalCancellations,
                 Unit = MetricUnit.Count,
                 DataPoints = arrivalCancellationsPoints,
                 Summary = CalculateSummary(arrivalCancellationsPoints)
             },
             new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyStopArrivalDelays,
+                SeriesType = MetricSeriesType.GlobalStopArrivalDelays,
                 Unit = MetricUnit.Seconds,
                 DataPoints = arrivalDelayPoints,
                 Summary = CalculateSummary(arrivalDelayPoints)
             },
             new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyStopDeparturesCount,
+                SeriesType = MetricSeriesType.GlobalStopDeparturesCount,
                 Unit = MetricUnit.Count,
                 DataPoints = departuresCountPoints,
                 Summary = CalculateSummary(departuresCountPoints)
             },
             new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyStopDepartureCancellations,
+                SeriesType = MetricSeriesType.GlobalStopDepartureCancellations,
                 Unit = MetricUnit.Count,
                 DataPoints = departureCancellationsPoints,
                 Summary = CalculateSummary(departureCancellationsPoints)
             },
             new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyStopDepartureDelays,
+                SeriesType = MetricSeriesType.GlobalStopDepartureDelays,
                 Unit = MetricUnit.Seconds,
                 DataPoints = departureDelayPoints,
                 Summary = CalculateSummary(departureDelayPoints)

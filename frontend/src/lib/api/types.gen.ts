@@ -4,6 +4,93 @@ export type ClientOptions = {
 	baseUrl: "http://localhost:5019/" | (string & {});
 };
 
+export type BaseMetricDataPoint =
+	| BaseMetricDataPointTimestampMetricDataPoint
+	| BaseMetricDataPointTransportTypeMetricDataPoint
+	| BaseMetricDataPointTimestampTransportTypeMetricDataPoint
+	| BaseMetricDataPointBase;
+
+export type BaseMetricDataPointBase = {
+	value: number | string;
+};
+
+export type BaseMetricDataPointTimestampMetricDataPoint = {
+	$type: "timestamp";
+	timestamp: string;
+	value: number | string;
+};
+
+export type BaseMetricDataPointTimestampTransportTypeMetricDataPoint = {
+	$type: "timestampTransportType";
+	timestamp: string;
+	transportType: TransportType;
+	value: number | string;
+};
+
+export type BaseMetricDataPointTransportTypeMetricDataPoint = {
+	$type: "transportType";
+	transportType: TransportType;
+	value: number | string;
+};
+
+export type BaseMetricRequest =
+	| ({
+			queryType?: "DATABASE_SIZE_SNAPSHOT";
+	  } & BaseMetricRequestDatabaseSizeSnapshotMetricRequest)
+	| ({
+			queryType?: "RIS_ID_SNAPSHOT";
+	  } & BaseMetricRequestRisIdSnapshotMetricRequest)
+	| ({
+			queryType?: "JOURNEY_SNAPSHOT";
+	  } & BaseMetricRequestJourneySnapshotMetricRequest)
+	| ({
+			queryType?: "TRANSPORT_TYPE_DISTRIBUTION";
+	  } & BaseMetricRequestTransportTypeDistributionMetricRequest)
+	| ({
+			queryType?: "GLOBAL_STOP_SUMMARY";
+	  } & BaseMetricRequestGlobalStopSummaryMetricRequest);
+
+export type BaseMetricRequestDatabaseSizeSnapshotMetricRequest = {
+	queryType?: "DATABASE_SIZE_SNAPSHOT";
+	start: string;
+	end: string;
+};
+
+export type BaseMetricRequestGlobalStopSummaryMetricRequest = {
+	queryType?: "GLOBAL_STOP_SUMMARY";
+	start: string;
+	end: string;
+	/**
+	 * Optional list of transport types to filter the metric by. If not provided, all transport types will be included.
+	 */
+	transportTypes?: null | Array<TransportType>;
+	/**
+	 * Time step in hours for aggregation. Must divide 24 evenly. Allowed: 1,2,3,4,6,8,12,24. Default: 1
+	 */
+	stepping?: number | string;
+};
+
+export type BaseMetricRequestJourneySnapshotMetricRequest = {
+	queryType?: "JOURNEY_SNAPSHOT";
+	start: string;
+	end: string;
+};
+
+export type BaseMetricRequestRisIdSnapshotMetricRequest = {
+	queryType?: "RIS_ID_SNAPSHOT";
+	start: string;
+	end: string;
+};
+
+export type BaseMetricRequestTransportTypeDistributionMetricRequest = {
+	queryType?: "TRANSPORT_TYPE_DISTRIBUTION";
+	end: string;
+	/**
+	 * Optional list of transport types to filter the metric by. If not provided, all transport types will be included.
+	 */
+	transportTypes?: null | Array<TransportType>;
+};
+
 export type BaseStation = {
 	evaNumber: number | string;
 	name: string;
@@ -179,65 +266,17 @@ export enum MessageReferenceType {
 	ATTACHMENT = "ATTACHMENT"
 }
 
-export type MetricDataPoint =
-	| MetricDataPointTimestampMetricDataPoint
-	| MetricDataPointTransportTypeMetricDataPoint
-	| MetricDataPointBase;
-
-export type MetricDataPointBase = {
-	value: number | string;
-};
-
-export type MetricDataPointTimestampMetricDataPoint = {
-	$type: "timestamp";
-	timestamp: string;
-	value: number | string;
-};
-
-export type MetricDataPointTransportTypeMetricDataPoint = {
-	$type: "transportType";
-	transportType: TransportType;
-	value: number | string;
-};
-
 /**
- * Represents a request to query specific metrics within a time range.
- */
-export type MetricQueryRequest = {
-	/**
-	 * The start time of the range for which to retrieve metrics.
-	 */
-	start?: null | string;
-	/**
-	 * The start time of the range for which to retrieve metrics.
-	 */
-	end?: null | string;
-	/**
-	 * The specific type of metric to retrieve.
-	 */
-	queryType: MetricQueryType;
-	cumulativeValues?: boolean;
-};
-
-export enum MetricQueryType {
-	DATABASE_SIZE = "DATABASE_SIZE",
-	RIS_IDS = "RIS_IDS",
-	JOURNEYS = "JOURNEYS",
-	TRANSPORT_TYPES = "TRANSPORT_TYPES"
-}
-
-/**
- * Represents a series of measured data points for a specific metric over a time range.
+ * Represents a series of measured data points for a specific metric.
  */
 export type MetricSeries = {
 	seriesType: MetricSeriesType;
 	unit: MetricUnit;
-	isCumulative?: boolean;
 	/**
 	 * Aggregated statistics about this series (e.g. totals, deltas).
 	 */
 	summary: MetricSummary;
-	dataPoints: Array<MetricDataPoint>;
+	dataPoints: Array<BaseMetricDataPoint>;
 };
 
 export enum MetricSeriesType {
@@ -245,21 +284,27 @@ export enum MetricSeriesType {
 	RIS_IDS_ACTIVE = "RIS_IDS_ACTIVE",
 	RIS_IDS_INACTIVE = "RIS_IDS_INACTIVE",
 	JOURNEY_TOTAL = "JOURNEY_TOTAL",
-	TRANSPORT_TYPES_TOTAL = "TRANSPORT_TYPES_TOTAL"
+	TRANSPORT_TYPES_TOTAL = "TRANSPORT_TYPES_TOTAL",
+	GLOBAL_STOP_ARRIVALS_COUNT = "GLOBAL_STOP_ARRIVALS_COUNT",
+	GLOBAL_STOP_ARRIVAL_CANCELLATIONS = "GLOBAL_STOP_ARRIVAL_CANCELLATIONS",
+	GLOBAL_STOP_ARRIVAL_DELAYS = "GLOBAL_STOP_ARRIVAL_DELAYS",
+	GLOBAL_STOP_DEPARTURES_COUNT = "GLOBAL_STOP_DEPARTURES_COUNT",
+	GLOBAL_STOP_DEPARTURE_CANCELLATIONS = "GLOBAL_STOP_DEPARTURE_CANCELLATIONS",
+	GLOBAL_STOP_DEPARTURE_DELAYS = "GLOBAL_STOP_DEPARTURE_DELAYS"
 }
 
 export type MetricSummary = {
 	startValue?: null | number | string;
 	endValue?: null | number | string;
-	absoluteChange?: null | number | string;
-	total: number | string;
+	absoluteChange: number | string;
 	minValue: number | string;
 	maxValue: number | string;
 };
 
 export enum MetricUnit {
 	BYTES = "BYTES",
-	COUNT = "COUNT"
+	COUNT = "COUNT",
+	SECONDS = "SECONDS"
 }
 
 export type ProblemDetails = {
@@ -306,8 +351,7 @@ export type StationByGeographicCoordinatesRequest = {
 };
 
 /**
- * Represents a request to search for stations using a search term, with optional filters for result count and location
- * types.
+ * Represents a request to search for stations using a search term, with optional filters for result count and location types.
  */
 export type StationBySerchtermRequest = {
 	/**
@@ -419,8 +463,7 @@ export type TimetableEntryTransport = {
 };
 
 /**
- * Represents a request to retrieve a timetable for a specific station, including the station's EVA number, the desired
- * date and time, and the duration for which to retrieve timetable data.
+ * Represents a request to search for stations using a search term, with optional filters for result count and location types.
  */
 export type TimetableRequest = {
 	/**
@@ -632,7 +675,7 @@ export type GetApiV1StationsGatheringResponses = {
 export type GetApiV1StationsGatheringResponse = GetApiV1StationsGatheringResponses[keyof GetApiV1StationsGatheringResponses];
 
 export type PostApiV1StatisticsMetricsData = {
-	body: MetricQueryRequest;
+	body: BaseMetricRequest;
 	path?: never;
 	query?: never;
 	url: "/api/v1/statistics/metrics";

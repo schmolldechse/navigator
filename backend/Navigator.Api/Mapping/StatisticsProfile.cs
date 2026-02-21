@@ -28,7 +28,7 @@ public class StatisticsProfile : Profile
         // --- Incoming Metric Request ---
         CreateMap<Data.Models.Statistics.BaseMetricRequest, Api.DTOs.Statistics.BaseMetricRequest>()
             .Include<Data.Models.Statistics.Request.DatabaseSizeSnapshotMetricRequest, Api.DTOs.Statistics.Request.DatabaseSizeSnapshotMetricRequest>()
-            .Include<Data.Models.Statistics.Request.HourlyStopSummaryMetricRequest, Api.DTOs.Statistics.Request.HourlyStopSummaryMetricRequest>()
+            .Include<Data.Models.Statistics.Request.GlobalStopSummaryMetricRequest, Api.DTOs.Statistics.Request.GlobalStopSummaryMetricRequest>()
             .Include<Data.Models.Statistics.Request.JourneySnapshotMetricRequest, Api.DTOs.Statistics.Request.JourneySnapshotMetricRequest>()
             .Include<Data.Models.Statistics.Request.RisIdSnapshotMetricRequest, Api.DTOs.Statistics.Request.RisIdSnapshotMetricRequest>()
             .Include<Data.Models.Statistics.Request.TransportTypeDistributionMetricRequest, Api.DTOs.Statistics.Request.TransportTypeDistributionMetricRequest>();
@@ -38,7 +38,7 @@ public class StatisticsProfile : Profile
             .ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
             .ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End));
 
-        CreateMap<Data.Models.Statistics.Request.HourlyStopSummaryMetricRequest, Api.DTOs.Statistics.Request.HourlyStopSummaryMetricRequest>()
+        CreateMap<Data.Models.Statistics.Request.GlobalStopSummaryMetricRequest, Api.DTOs.Statistics.Request.GlobalStopSummaryMetricRequest>()
             .ForMember(dest => dest.MetricQueryType, opt => opt.MapFrom(src => src.MetricQueryType))
             .ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
             .ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End))

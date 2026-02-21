@@ -10,6 +10,9 @@ export default defineConfig({
 				mode: "typescript",
 				case: "SCREAMING_SNAKE_CASE"
 			}
+		},
+		{
+			name: "valibot"
 		}
 	]
 });

@@ -1,39 +1,26 @@
-<script lang="ts" module>
-	interface MetricCardData {
-		metricComponent: Component<any>;
-		props: Record<string, unknown>;
-		scale: CardScale;
-	}
-
-	export type { MetricCardData };
-</script>
-
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import TimePickerDialog from "@lib/components/interactable/TimePickerDialog.svelte";
 	import Info from "@lucide/svelte/icons/info";
-	import Calendar from "@lucide/svelte/icons/calendar";
+	import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
 	import DatabaseSizeMetricCard from "@lib/components/statistics/projectdimensions/DatabaseSizeMetricCard.svelte";
 	import RecordedJourneyMetricCard from "@lib/components/statistics/projectdimensions/RecordedJourneyMetricCard.svelte";
 	import TransportTypeDistributionMetricCard from "@lib/components/statistics/projectdimensions/TransportTypeDistributionMetricCard.svelte";
 	import RecordedRisIdsMetricCard from "@lib/components/statistics/projectdimensions/RecordedRisIdsMetricCard.svelte";
+	import SettingsDialog from "@lib/components/statistics/settings/SettingsDialog.svelte";
 	import { CardScale } from "@lib/util/card.js";
+	import { TransportType } from "@lib/api/types.gen.js";
 
 	let { data } = $props();
 
-	let selectingTimerange: boolean = $state(false);
+	let isSettingsOpen: boolean = $state(false);
 
-	const updateTimerange = async (start: DateTime, end: DateTime) => {
-		const url = new URL(window.location.href);
-		url.searchParams.set("start", start.toISO()!);
-		url.searchParams.set("end", end.toISO()!);
-
-		await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
-		// invalidate("project:dimensions");
+	type MetricCardData = {
+		metricComponent: Component<any>;
+		props: Record<string, unknown>;
+		scale: CardScale;
 	};
-
 	let metricCards: MetricCardData[] = $derived([
 		{
 			metricComponent: DatabaseSizeMetricCard,
@@ -72,7 +59,7 @@
 
 <main class="container mx-auto flex flex-col space-y-8 p-4 sm:py-8">
 	<!-- Hero Section -->
-	<section class="mx-auto max-w-7xl">
+	<section class="mx-auto w-full max-w-7xl">
 		<div class="relative mb-4">
 			<div class="bg-accent absolute top-0 bottom-0 w-0.5 sm:-left-4 sm:w-1"></div>
 			<h1 class="pl-4 text-3xl font-bold text-balance sm:mb-6 sm:pl-8 sm:text-4xl md:text-6xl">
@@ -86,7 +73,7 @@
 	</section>
 
 	<!-- Project Overview -->
-	<section class="mx-auto max-w-7xl">
+	<section class="mx-auto w-full max-w-7xl">
 		<div class="border-accent/20 flex flex-col gap-y-6 rounded-lg border-2 p-4 backdrop-blur">
 			<div class="flex items-baseline gap-x-4">
 				<Info />
@@ -118,19 +105,19 @@
 	</section>
 
 	<!-- Project Dimensions -->
-	<section class="mx-auto w-full max-w-7xl space-y-2">
-		<div class="flex items-center justify-between gap-y-2">
+	<section class="mx-auto w-full max-w-7xl space-y-4">
+		<div class="flex flex-row items-center justify-between gap-y-4">
 			<h2 class="text-2xl font-medium">Project Dimensions</h2>
 
 			<div class="relative">
 				<button
-					class="bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 flex cursor-pointer items-center justify-center gap-x-2 rounded-md border px-4 py-1"
+					class="bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 flex w-fit cursor-pointer items-center justify-center gap-x-2 rounded-md border px-4 py-2 transition-colors"
 					onclick={(event: MouseEvent) => {
 						event.stopPropagation();
-						selectingTimerange = !selectingTimerange;
+						isSettingsOpen = !isSettingsOpen;
 					}}
 				>
-					<Calendar size={20} />
+					<SlidersHorizontal size={18} />
 
 					<div class="hidden items-baseline gap-x-1 md:flex">
 						<span class="text-sm tracking-tight">{data.timerange.start?.toLocaleString(DateTime.DATE_MED)}</span>
@@ -139,11 +126,20 @@
 					</div>
 				</button>
 
-				<TimePickerDialog
-					bind:isVisible={selectingTimerange}
-					multiSelect
+				<SettingsDialog
+					bind:isVisible={isSettingsOpen}
 					dates={{ start: data.timerange.start, end: data.timerange.end }}
-					onchange={async ({ start, end }) => await updateTimerange(start.startOf("day"), end!.endOf("day"))}
+					onapply={async ({ start, end, filter }) => {
+						const url = new URL(window.location.href);
+						if (start) url.searchParams.set("start", start.toISO() as string);
+						if (end) url.searchParams.set("end", end.toISO() as string);
+						else url.searchParams.delete("end");
+
+						url.searchParams.delete("transportTypes");
+						filter.forEach((transportType: TransportType) => url.searchParams.append("transportTypes", transportType));
+
+						await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
+					}}
 					class="mt-2"
 				/>
 			</div>
