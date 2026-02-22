@@ -76,6 +76,7 @@
 		if (!isVisible) return;
 		isVisible = false;
 
+		if (!localTimerange.start.isValid || !localTimerange.end.isValid) return;
 		onapply({ start: localTimerange.start, end: localTimerange.end, filter: localFilter });
 	};
 

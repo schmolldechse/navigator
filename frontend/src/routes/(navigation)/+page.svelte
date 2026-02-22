@@ -8,6 +8,7 @@
 	import RecordedJourneyMetricCard from "@lib/components/statistics/projectdimensions/RecordedJourneyMetricCard.svelte";
 	import TransportTypeDistributionMetricCard from "@lib/components/statistics/projectdimensions/TransportTypeDistributionMetricCard.svelte";
 	import RecordedRisIdsMetricCard from "@lib/components/statistics/projectdimensions/RecordedRisIdsMetricCard.svelte";
+	import GlobalStopSummaryMetricCard from "@lib/components/statistics/projectdimensions/GlobalStopSummaryMetricCard.svelte";
 	import SettingsDialog from "@lib/components/statistics/settings/SettingsDialog.svelte";
 	import { CardScale } from "@lib/util/card.js";
 	import { TransportType } from "@lib/api/types.gen.js";
@@ -49,6 +50,13 @@
 				promise: data.dimensions.transportTypes
 			},
 			scale: CardScale.SMALL
+		},
+		{
+			metricComponent: GlobalStopSummaryMetricCard,
+			props: {
+				promise: data.dimensions.globalStopSummary
+			},
+			scale: CardScale.LARGE
 		}
 	]);
 </script>
@@ -131,9 +139,8 @@
 					dates={{ start: data.timerange.start, end: data.timerange.end }}
 					onapply={async ({ start, end, filter }) => {
 						const url = new URL(window.location.href);
-						if (start) url.searchParams.set("start", start.toISO() as string);
-						if (end) url.searchParams.set("end", end.toISO() as string);
-						else url.searchParams.delete("end");
+						url.searchParams.set("start", start.startOf("day").toISO() as string);
+						url.searchParams.set("end", end.endOf("day").toISO() as string);
 
 						url.searchParams.delete("transportTypes");
 						filter.forEach((transportType: TransportType) => url.searchParams.append("transportTypes", transportType));
