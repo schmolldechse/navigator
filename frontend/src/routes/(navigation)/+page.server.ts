@@ -12,22 +12,21 @@ export const load: PageServerLoad = async ({
 		totalRisIds: Promise<MetricSeries[]>;
 		totalJourneys: Promise<MetricSeries[]>;
 		transportTypes: Promise<MetricSeries[]>;
+		globalStopSummary: Promise<MetricSeries[]>;
 	};
 	timerange: { start: DateTime; end: DateTime };
 }> => {
+	const userDefinedTimerange = url.searchParams.has("start") && url.searchParams.has("end");
 	let start: DateTime, end: DateTime;
 
-	if (url.searchParams.has("start") && url.searchParams.has("end")) {
+	if (userDefinedTimerange) {
 		const parsedStart = DateTime.fromISO(url.searchParams.get("start")!);
 		const parsedEnd = DateTime.fromISO(url.searchParams.get("end")!);
 
-		if (parsedStart.isValid) start = parsedStart;
-		else start = DateTime.now().minus({ days: 1 });
-
-		if (parsedEnd.isValid) end = parsedEnd;
-		else end = DateTime.now();
+		start = parsedStart.isValid ? parsedStart : DateTime.now().minus({ days: 7 });
+		end = parsedEnd.isValid ? parsedEnd : DateTime.now();
 	} else {
-		start = DateTime.now().minus({ days: 1 });
+		start = DateTime.now().minus({ days: 7 });
 		end = DateTime.now();
 	}
 
@@ -54,6 +53,15 @@ export const load: PageServerLoad = async ({
 			transportTypes: loadMetric({
 				request: {
 					queryType: "TRANSPORT_TYPE_DISTRIBUTION",
+					end: end.toISO()!,
+					...(transportTypesFilter.length > 0 ? { transportTypes: transportTypesFilter } : {})
+				},
+				userIp: getClientAddress()
+			}),
+			globalStopSummary: loadMetric({
+				request: {
+					queryType: "GLOBAL_STOP_SUMMARY",
+					start: start.toISO()!,
 					end: end.toISO()!,
 					...(transportTypesFilter.length > 0 ? { transportTypes: transportTypesFilter } : {})
 				},

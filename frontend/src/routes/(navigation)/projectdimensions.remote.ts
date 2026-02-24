@@ -22,7 +22,7 @@ const loadMetric = query(
 
 		if (!response.ok) {
 			const error = await response.text();
-			throw new Error(`Error fetching metric: ${response.status} - ${error}`);
+			throw new Error(`Error fetching metric ${request.queryType}: ${response.status} - ${error}`);
 		}
 
 		return (await response.json()) as MetricSeries[];

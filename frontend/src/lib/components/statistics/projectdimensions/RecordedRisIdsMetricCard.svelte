@@ -189,7 +189,7 @@
 						</PieChart>
 					</div>
 
-					<!-- Area Chart for Historical Changes -->
+					<!-- Line Chart for Historical Changes -->
 					<div class="w-full lg:min-w-2/3">
 						<LineChart
 							data={getLineSeries(metrics).flatMap((series: RisIdLineChartSeries) => series.data)}
