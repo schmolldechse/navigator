@@ -17,6 +17,7 @@
 	import MetricCardSummary from "../MetricCardSummary.svelte";
 	import { Axis, ChartClipPath, Highlight, LineChart, Spline, Svg, Tooltip } from "layerchart";
 	import { DateTime } from "luxon";
+	import DateTooltip from "../charts/tooltips/DateTooltip.svelte";
 
 	interface RecordedJourneySeries {
 		key: string;
@@ -151,19 +152,11 @@
 						</Tooltip.Root>
 
 						<!-- Date Tooltip on x-Axis -->
-						<Tooltip.Root
-							x="pointer"
-							y={context.height + context.padding.bottom - 16}
-							anchor="top"
-							variant="none"
-							class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"
-						>
-							{#snippet children({ data })}
-								<span class="text-text text-xs">
-									{DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}
-								</span>
-							{/snippet}
-						</Tooltip.Root>
+						<DateTooltip
+							{context}
+							value={(data: { date: Date; value: number }) =>
+								DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}
+						/>
 					{/snippet}
 				</LineChart>
 			{/if}

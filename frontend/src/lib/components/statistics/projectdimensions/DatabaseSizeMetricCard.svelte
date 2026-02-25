@@ -19,6 +19,7 @@
 	import MetricCardTitle from "../MetricCardTitle.svelte";
 	import MetricTrend from "../MetricTrend.svelte";
 	import MetricCardSummary from "../MetricCardSummary.svelte";
+	import DateTooltip from "../charts/tooltips/DateTooltip.svelte";
 
 	interface DatabaseSizeSeries {
 		key: string;
@@ -158,19 +159,11 @@
 						</Tooltip.Root>
 
 						<!-- Date Tooltip on x-Axis -->
-						<Tooltip.Root
-							x="pointer"
-							y={context.height + context.padding.bottom - 16}
-							anchor="top"
-							variant="none"
-							class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"
-						>
-							{#snippet children({ data })}
-								<span class="text-text text-xs">
-									{DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}
-								</span>
-							{/snippet}
-						</Tooltip.Root>
+						<DateTooltip
+							{context}
+							value={(data: { date: Date; value: number }) =>
+								DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}
+						/>
 					{/snippet}
 				</LineChart>
 			{/if}
