@@ -41,7 +41,7 @@
 	import MetricCardTitle from "../MetricCardTitle.svelte";
 	import MetricLoadingFailedWarning from "../MetricLoadingFailedWarning.svelte";
 	import { DateTime } from "luxon";
-	import { Axis, BarChart, Bars, ChartClipPath, Highlight, Spline, Svg, Tooltip } from "layerchart";
+	import { Axis, BarChart, Bars, ChartClipPath, Highlight, Svg, Tooltip } from "layerchart";
 
 	type Props = {
 		promise: Promise<MetricSeries[]>;
@@ -131,13 +131,13 @@
 				<MetricLoadingFailedWarning />
 			{:else}
 				{@const { series, chartData } = hourlyStopHistogram(metrics)}
-				<BarChart data={chartData} {series} x="date" height={192} seriesLayout="stack" bandPadding={0.2}>
-					{#snippet children({ context, visibleSeries, getBarsProps, getHighlightProps })}
+				<BarChart data={chartData} {series} x="date" height={256} seriesLayout="stack" bandPadding={0.2}>
+					{#snippet children({ visibleSeries, getBarsProps, getHighlightProps })}
 						<Svg>
 							<Axis
 								placement="bottom"
 								rule
-								classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground", rule: "stroke-0" }}
+								classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground max-sm:hidden", rule: "stroke-0" }}
 								tickLabelProps={{
 									rotate: 315,
 									textAnchor: "end"
@@ -162,14 +162,21 @@
 							contained="container"
 							class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"
 						>
-							{#snippet children({ payload })}
-								{@const total = payload.reduce((acc: number, curr) => acc + curr.value, 0)}
+							{#snippet children({ data, payload })}
+								{@const total = payload.reduce((acc: number, current) => acc + current.value, 0)}
+
+								<Tooltip.Header>
+									{@const startDate = DateTime.fromJSDate(data.date)}
+									{@const endDate = startDate.plus({ hour: 1 })}
+
+									<span class="text-text text-xs">
+										{startDate.toLocaleString(DateTime.TIME_SIMPLE)} – {endDate.toLocaleString(DateTime.TIME_SIMPLE)}
+									</span>
+								</Tooltip.Header>
 
 								<div class="flex flex-col gap-y-1">
 									{#each [...payload].reverse() as item}
-										{@const title =
-											keyTitles?.find((title: KeyTitles) => title.key === item.rawSeriesData?.key)?.title ??
-											item.rawSeriesData?.key}
+										{@const title = keyTitles?.find((title: KeyTitles) => title.key === item.key)!.title}
 										<div class="flex justify-between gap-x-4 text-xs">
 											<div class="flex items-center gap-x-2">
 												<div class="h-1.5 w-1.5 rounded-full" style:background-color={item.color}></div>
