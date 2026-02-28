@@ -235,11 +235,11 @@ public class StatisticsRepository(
                 group.Key.TransportType,
                 ArrivalsCount = group.Sum(x => x.ArrivalsCount),
                 ArrivalCancellationCount = group.Sum(x => x.ArrivalCancellationCount),
-                ArrivalDelayAvg = group.Sum(x => x.ArrivalsCount) > 0 ? group.Sum(x => x.ArrivalDelaySum) / group.Sum(x => x.ArrivalsCount) : 0,
+                ArrivalDelaySum = group.Sum(x => x.ArrivalDelaySum),
 
                 DeparturesCount = group.Sum(x => x.DeparturesCount),
                 DepartureCancellationCount = group.Sum(x => x.DepartureCancellationCount),
-                DepartureDelayAvg = group.Sum(x => x.DeparturesCount) > 0 ? group.Sum(x => x.DepartureDelaySum) / group.Sum(x => x.DeparturesCount) : 0,
+                DepartureDelaySum = group.Sum(x => x.DepartureDelaySum),
             })
             .OrderBy(r => r.BucketHour)
             .ToList();
@@ -251,7 +251,7 @@ public class StatisticsRepository(
             .Select(result => new TimestampTransportTypeMetricDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.ArrivalCancellationCount })
             .ToList();
         var arrivalDelayPoints = results
-            .Select(result => new TimestampTransportTypeMetricDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = (decimal)result.ArrivalDelayAvg })
+            .Select(result => new TimestampTransportTypeMetricDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = (decimal)result.ArrivalDelaySum })
             .ToList();
 
         var departuresCountPoints = results
@@ -261,12 +261,12 @@ public class StatisticsRepository(
             .Select(result => new TimestampTransportTypeMetricDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.DepartureCancellationCount })
             .ToList();
         var departureDelayPoints = results
-            .Select(result => new TimestampTransportTypeMetricDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = (decimal)result.DepartureDelayAvg })
+            .Select(result => new TimestampTransportTypeMetricDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = (decimal)result.DepartureDelaySum })
             .ToList();
 
         return [
             new MetricSeries {
-                SeriesType = MetricSeriesType.GlobalStopArrivalsCount,
+                SeriesType = MetricSeriesType.GlobalStopArrivals,
                 Unit = MetricUnit.Count,
                 DataPoints = arrivalsCountPoints,
                 Summary = CalculateSummary(arrivalsCountPoints)
@@ -278,13 +278,13 @@ public class StatisticsRepository(
                 Summary = CalculateSummary(arrivalCancellationsPoints)
             },
             new MetricSeries {
-                SeriesType = MetricSeriesType.GlobalStopArrivalDelays,
+                SeriesType = MetricSeriesType.GlobalStopArrivalDelaySum,
                 Unit = MetricUnit.Seconds,
                 DataPoints = arrivalDelayPoints,
                 Summary = CalculateSummary(arrivalDelayPoints)
             },
             new MetricSeries {
-                SeriesType = MetricSeriesType.GlobalStopDeparturesCount,
+                SeriesType = MetricSeriesType.GlobalStopDepartures,
                 Unit = MetricUnit.Count,
                 DataPoints = departuresCountPoints,
                 Summary = CalculateSummary(departuresCountPoints)
@@ -296,7 +296,7 @@ public class StatisticsRepository(
                 Summary = CalculateSummary(departureCancellationsPoints)
             },
             new MetricSeries {
-                SeriesType = MetricSeriesType.GlobalStopDepartureDelays,
+                SeriesType = MetricSeriesType.GlobalStopDepartureDelaySum,
                 Unit = MetricUnit.Seconds,
                 DataPoints = departureDelayPoints,
                 Summary = CalculateSummary(departureDelayPoints)

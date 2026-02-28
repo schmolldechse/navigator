@@ -11,10 +11,10 @@ public enum MetricSeriesType
 
     TransportTypesTotal,
     
-    GlobalStopArrivalsCount,
+    GlobalStopArrivals,
     GlobalStopArrivalCancellations,
-    GlobalStopArrivalDelays,
-    GlobalStopDeparturesCount,
+    GlobalStopArrivalDelaySum,
+    GlobalStopDepartures,
     GlobalStopDepartureCancellations,
-    GlobalStopDepartureDelays
+    GlobalStopDepartureDelaySum
 }

@@ -4,13 +4,13 @@
 
 	type Props = {
 		title: string;
-		content: Snippet;
+		children: Snippet;
 		class?: ClassValue;
 	};
-	let { title, content, class: classNames }: Props = $props();
+	let { title, children, class: classNames }: Props = $props();
 </script>
 
 <div class={["flex flex-col gap-y-2", classNames]}>
 	<h4 class="text-muted-foreground text-sm font-medium tracking-wider uppercase">{title}</h4>
-	{@render content()}
+	{@render children()}
 </div>

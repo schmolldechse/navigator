@@ -34,11 +34,12 @@
 
 <script lang="ts">
 	import { DateTime } from "luxon";
-	import TimePicker from "../../interactable/TimePicker.svelte";
 	import type { ClassValue } from "svelte/elements";
 	import { onMount } from "svelte";
 	import { page } from "$app/state";
-	import SettingsItem from "./SettingsItem.svelte";
+	import DialogItem from "@lib/components/interactable/dialog/DialogItem.svelte";
+	import TimePicker from "@lib/components/interactable/timepicker/TimePicker.svelte";
+	import ToggleStateButton from "@lib/components/interactable/ToggleStateButton.svelte";
 
 	type Props = {
 		isVisible: boolean;
@@ -123,62 +124,43 @@
 
 		<div class="divide-muted-foreground/20 flex flex-col divide-y sm:flex-row sm:divide-x sm:divide-y-0">
 			<!-- Timerange Section -->
-			<SettingsItem title="Timerange" class="shrink-0 pb-4 sm:pr-4 sm:pb-0">
-				{#snippet content()}
-					<TimePicker
-						multiSelect
-						dates={localTimerange}
-						onchange={({ start, end }) => {
-							if (!end) return;
+			<DialogItem title="Timerange" class="shrink-0 pb-4 sm:pr-4 sm:pb-0">
+				<TimePicker
+					multiSelect
+					dates={localTimerange}
+					onchange={({ start, end }) => {
+						if (!end) return;
 
-							localTimerange = { start, end };
-						}}
-						class="sm:w-fit"
-					/>
-				{/snippet}
-			</SettingsItem>
+						localTimerange = { start, end };
+					}}
+					class="sm:w-fit"
+				/>
+			</DialogItem>
 
 			<!-- Transport Types Section -->
-			<SettingsItem title="Transport Types" class="pt-4 sm:pt-0 sm:pl-4">
-				{#snippet content()}
-					<div class="flex flex-wrap gap-2">
-						<button
-							class={[
-								"flex cursor-pointer items-center gap-x-2 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-all",
-								{
-									"border-emerald-500/20 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20": localFilter.length === 0
-								},
-								{
-									"border-muted-foreground/10 bg-muted/10 text-muted-foreground hover:bg-muted-foreground/10 opacity-75":
-										localFilter.length > 0
-								}
-							]}
-							onclick={() => (localFilter = [])}
-						>
-							Include All
-						</button>
+			<DialogItem title="Transport Types" class="pt-4 sm:pt-0 sm:pl-4">
+				<div class="flex flex-wrap gap-2">
+					<ToggleStateButton state={localFilter.length === 0} ontoggle={() => (localFilter = [])}>
+						Include All
+					</ToggleStateButton>
 
-						{#each availableTransportTypeFilters as transportFilter}
-							{@const isActive =
-								localFilter.length > 0 &&
-								transportFilter.transportTypes.every((transportType: TransportType) => localFilter.includes(transportType))}
-							{@const Icon = transportFilter.icon}
-							<button
-								class={[
-									"flex cursor-pointer items-center gap-x-2 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-all",
-									isActive && "border-emerald-500/20 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20",
-									!isActive &&
-										"border-muted-foreground/10 bg-muted/10 text-muted-foreground hover:bg-muted-foreground/10 opacity-75"
-								]}
-								onclick={() => toggleFilterItem(transportFilter)}
-							>
-								<Icon class="h-4 w-4" />
-								{transportFilter.label}
-							</button>
-						{/each}
-					</div>
-				{/snippet}
-			</SettingsItem>
+					{#each availableTransportTypeFilters as transportFilter}
+						{@const isActive =
+							localFilter.length > 0 &&
+							transportFilter.transportTypes.every((transportType: TransportType) => localFilter.includes(transportType))}
+						{@const Icon = transportFilter.icon}
+
+						<ToggleStateButton
+							state={isActive}
+							ontoggle={() => toggleFilterItem(transportFilter)}
+							class="flex items-center gap-x-2"
+						>
+							<Icon class="h-4 w-4" />
+							{transportFilter.label}
+						</ToggleStateButton>
+					{/each}
+				</div>
+			</DialogItem>
 		</div>
 
 		<!-- Actions -->

@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({
 		totalRisIds: Promise<MetricSeries[]>;
 		totalJourneys: Promise<MetricSeries[]>;
 		transportTypes: Promise<MetricSeries[]>;
-		globalStopSummary: Promise<MetricSeries[]>;
+		stopSummary: Promise<MetricSeries[]>;
 	};
 	timerange: { start: DateTime; end: DateTime };
 }> => {
@@ -58,7 +58,7 @@ export const load: PageServerLoad = async ({
 				},
 				userIp: getClientAddress()
 			}),
-			globalStopSummary: loadMetric({
+			stopSummary: loadMetric({
 				request: {
 					queryType: "GLOBAL_STOP_SUMMARY",
 					start: start.toISO()!,
