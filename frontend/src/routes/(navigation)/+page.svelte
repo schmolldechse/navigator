@@ -7,8 +7,8 @@
 	import DatabaseSizeMetricCard from "@lib/components/statistics/projectdimensions/DatabaseSizeMetricCard.svelte";
 	import RecordedJourneyMetricCard from "@lib/components/statistics/projectdimensions/RecordedJourneyMetricCard.svelte";
 	import TransportTypeDistributionMetricCard from "@lib/components/statistics/projectdimensions/TransportTypeDistributionMetricCard.svelte";
-	import RecordedRisIdsMetricCard from "@lib/components/statistics/projectdimensions/RecordedRisIdsMetricCard.svelte";
-	import StopSummaryMetricCard from "@lib/components/statistics/projectdimensions/stopSummary/StopSummaryMetricCard.svelte";
+	import RecordedRisIdsMetricCard from "@lib/components/statistics/projectdimensions/risids/RecordedRisIdsMetricCard.svelte";
+	import StopSummaryMetricCard from "@lib/components/statistics/projectdimensions/stopsummary/StopSummaryMetricCard.svelte";
 	import SettingsDialog from "@lib/components/statistics/settings/SettingsDialog.svelte";
 	import { CardScale } from "@lib/util/card.js";
 	import { TransportType } from "@lib/api/types.gen.js";

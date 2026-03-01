@@ -9,13 +9,15 @@
 	import { schemeTableau10 } from "d3-scale-chromatic";
 	import { onMount } from "svelte";
 	import type { ClassValue } from "svelte/elements";
-	import MetricCardBase from "../MetricCardBase.svelte";
-	import MetricLoadingFailedWarning from "../MetricLoadingFailedWarning.svelte";
+	import MetricCardBase from "../../MetricCardBase.svelte";
+	import MetricLoadingFailedWarning from "../../MetricLoadingFailedWarning.svelte";
 	import { Axis, ChartClipPath, Highlight, Legend, LineChart, PieChart, Spline, Svg, Text, Tooltip } from "layerchart";
 	import { DateTime } from "luxon";
-	import MetricCardTitle from "../MetricCardTitle.svelte";
-	import MetricTrend from "../MetricTrend.svelte";
-	import DateTooltip from "../charts/tooltips/DateTooltip.svelte";
+	import MetricCardTitle from "../../MetricCardTitle.svelte";
+	import MetricTrend from "../../MetricTrend.svelte";
+	import DateTooltip from "../../charts/tooltips/DateTooltip.svelte";
+	import Info from "@lucide/svelte/icons/info";
+	import RecordedRisIdsInformationDialog from "./RecordedRisIdsInformationDialog.svelte";
 
 	interface RisIdDistributionSeries {
 		seriesType: MetricSeriesType;
@@ -44,6 +46,8 @@
 	}
 
 	let { promise, class: className }: Props = $props();
+
+	let informationDialogVisible: boolean = $state(false);
 
 	onMount(async () => {
 		const metrics = await promise;
@@ -95,11 +99,28 @@
 <MetricCardBase class={["gap-y-2", className]}>
 	{#snippet head()}
 		<MetricCardTitle title="Total RIS IDs" class="justify-between">
-			{#snippet children()}
+			<div class="flex gap-x-2">
+				<!-- Info Button -->
+				<button
+					class={[
+						"cursor-pointer transition-colors",
+						informationDialogVisible && "text-accent",
+						!informationDialogVisible && "text-muted-foreground hover:text-accent"
+					]}
+					onclick={(event: MouseEvent) => {
+						event.stopPropagation();
+						informationDialogVisible = !informationDialogVisible;
+					}}
+				>
+					<Info size={18} />
+				</button>
+
 				{#await promise then metrics}
 					<MetricTrend {metrics} />
 				{/await}
-			{/snippet}
+			</div>
+
+			<RecordedRisIdsInformationDialog bind:isVisible={informationDialogVisible} />
 		</MetricCardTitle>
 	{/snippet}
 

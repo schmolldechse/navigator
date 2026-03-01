@@ -367,7 +367,11 @@
 						<div class="flex items-center gap-x-3">
 							<!-- Info Button -->
 							<button
-								class="text-muted-foreground hover:text-accent cursor-pointer transition-colors"
+								class={[
+									"cursor-pointer transition-colors",
+									delayInfoVisible && "text-accent",
+									!delayInfoVisible && "text-muted-foreground hover:text-accent"
+								]}
 								onclick={(event: MouseEvent) => {
 									event.stopPropagation();
 									delayInfoVisible = !delayInfoVisible;
@@ -378,7 +382,11 @@
 
 							<!-- Settings Button -->
 							<button
-								class="text-muted-foreground hover:text-accent cursor-pointer transition-colors"
+								class={[
+									"cursor-pointer transition-colors",
+									delayOptionsVisible && "text-accent",
+									!delayOptionsVisible && "text-muted-foreground hover:text-accent"
+								]}
 								onclick={(event: MouseEvent) => {
 									event.stopPropagation();
 									delayOptionsVisible = !delayOptionsVisible;
