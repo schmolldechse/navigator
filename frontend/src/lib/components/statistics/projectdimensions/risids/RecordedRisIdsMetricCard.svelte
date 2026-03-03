@@ -11,7 +11,19 @@
 	import type { ClassValue } from "svelte/elements";
 	import MetricCardBase from "../../MetricCardBase.svelte";
 	import MetricLoadingFailedWarning from "../../MetricLoadingFailedWarning.svelte";
-	import { Axis, ChartClipPath, Highlight, Legend, LineChart, PieChart, Spline, Svg, Text, Tooltip } from "layerchart";
+	import {
+		Axis,
+		ChartClipPath,
+		defaultChartPadding,
+		Highlight,
+		Legend,
+		LineChart,
+		PieChart,
+		Spline,
+		Svg,
+		Text,
+		Tooltip
+	} from "layerchart";
 	import { DateTime } from "luxon";
 	import MetricCardTitle from "../../MetricCardTitle.svelte";
 	import MetricTrend from "../../MetricTrend.svelte";
@@ -131,7 +143,7 @@
 			{#if !metrics.length}
 				<MetricLoadingFailedWarning />
 			{:else}
-				<div class="flex flex-col items-center lg:flex-row">
+				<div class="flex flex-col items-center gap-y-6 lg:flex-row">
 					<!-- Distribution of RIS IDs -->
 					<div class="w-full lg:min-w-1/3">
 						<PieChart
@@ -146,6 +158,7 @@
 							padAngle={0.02}
 							placement="center"
 							props={{ group: { y: 40 }, pie: { motion: "spring" } }}
+							padding={defaultChartPadding()}
 							height={192}
 						>
 							{#snippet legend({ getLegendProps })}
@@ -191,7 +204,9 @@
 								{@const total = context.flatData.reduce((acc: number, curr: RisIdDistributionSeries) => acc + curr.value, 0)}
 								{@const formatter = new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 })}
 
-								<Tooltip.Root class="bg-background/90! rounded-lg border border-white/10! p-3 shadow-xl backdrop-blur-md">
+								<Tooltip.Root
+									class="bg-background/90! rounded-lg border border-white/10! p-3 shadow-xl backdrop-blur-md select-none"
+								>
 									{#snippet children({ data })}
 										{@const title =
 											keyTitles.find((keyTitle: KeyTitles) => keyTitle.key === data.seriesType)?.title ?? data.seriesType}
@@ -218,7 +233,7 @@
 							series={getLineSeries(metrics)}
 							x="date"
 							y="value"
-							padding={{ bottom: 12 }}
+							padding={defaultChartPadding()}
 							yDomain={null}
 							tooltip={{ mode: "quadtree-x" }}
 							brush
@@ -228,21 +243,17 @@
 								<Svg>
 									<Axis
 										placement="left"
+										rule
 										grid
-										rule
-										classes={{
-											tickLabel: "text-xs stroke-0 text-muted-foreground",
-											rule: "stroke-muted-foreground/20"
+										tickLabelProps={{
+											textAnchor: "start",
+											dx: 8
 										}}
-										tickMarks={false}
-									>
-										{#snippet tickLabel()}{/snippet}
-									</Axis>
-									<Axis
-										placement="bottom"
-										rule
-										classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground", rule: "stroke-0" }}
+										classes={{
+											tickLabel: "text-xs stroke-0 text-muted-foreground select-none"
+										}}
 									/>
+									<Axis placement="bottom" rule classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none" }} />
 
 									<!-- ChartClipPath needed for brush -->
 									<ChartClipPath>
@@ -261,7 +272,7 @@
 								<Tooltip.Root
 									anchor="bottom"
 									contained="container"
-									class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"
+									class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
 								>
 									{#snippet children({ payload })}
 										{@const total = payload.reduce((acc: number, curr) => acc + curr.value, 0)}

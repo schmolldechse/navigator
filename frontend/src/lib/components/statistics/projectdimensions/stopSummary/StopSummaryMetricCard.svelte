@@ -51,7 +51,18 @@
 	import MetricCardTitle from "../../MetricCardTitle.svelte";
 	import MetricLoadingFailedWarning from "../../MetricLoadingFailedWarning.svelte";
 	import { DateTime } from "luxon";
-	import { Axis, BarChart, Bars, ChartClipPath, Highlight, LineChart, Spline, Svg, Tooltip } from "layerchart";
+	import {
+		Axis,
+		BarChart,
+		Bars,
+		ChartClipPath,
+		defaultChartPadding,
+		Highlight,
+		LineChart,
+		Spline,
+		Svg,
+		Tooltip
+	} from "layerchart";
 	import DateTooltip from "../../charts/tooltips/DateTooltip.svelte";
 	import DelayChartOptionsDialog, {
 		type ScheduleType,
@@ -284,26 +295,26 @@
 						height={256}
 						seriesLayout="stack"
 						bandPadding={0.2}
-						padding={{ left: 48 }}
+						padding={defaultChartPadding({ left: 48 })}
 					>
 						{#snippet children({ visibleSeries, getBarsProps, getHighlightProps })}
 							<Svg>
 								<Axis
+									placement="left"
+									rule
+									grid
+									classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none" }}
+								/>
+								<Axis
 									placement="bottom"
 									rule
 									classes={{
-										tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden",
-										rule: "stroke-0"
+										tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
 									}}
 									tickLabelProps={{
 										rotate: 315,
 										textAnchor: "end"
 									}}
-								/>
-								<Axis
-									placement="left"
-									rule
-									classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none", rule: "stroke-0" }}
 								/>
 
 								<ChartClipPath>
@@ -321,7 +332,7 @@
 							<Tooltip.Root
 								anchor="bottom"
 								contained="container"
-								class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"
+								class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
 							>
 								{#snippet children({ data, payload })}
 									{@const total = payload.reduce((acc: number, current) => acc + current.value, 0)}
@@ -417,22 +428,31 @@
 						yDomain={null}
 						brush
 						height={384}
-						padding={{ left: 48 }}
+						padding={defaultChartPadding({ left: 48 })}
 					>
 						{#snippet children({ context, visibleSeries, getSplineProps, getHighlightProps })}
 							<Svg>
 								<Axis
-									placement="bottom"
-									rule
-									classes={{
-										tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden",
-										rule: "stroke-0"
-									}}
-								/>
-								<Axis
 									placement="left"
 									rule
-									classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none", rule: "stroke-0" }}
+									grid
+									tickLabelProps={{
+										textAnchor: "start",
+										dx: 8
+									}}
+									classes={{
+										tickLabel: "text-xs stroke-0 text-muted-foreground select-none",
+										label: "text-xs stroke-0 text-muted-foreground select-none"
+									}}
+									label="Delay (s)"
+								/>
+								<Axis
+									placement="bottom"
+									rule
+									grid
+									classes={{
+										tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
+									}}
 								/>
 
 								<ChartClipPath>
@@ -451,7 +471,7 @@
 							<Tooltip.Root
 								anchor="bottom"
 								contained="container"
-								class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"
+								class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
 							>
 								{#snippet children({ payload })}
 									<div class="flex flex-col gap-y-1">

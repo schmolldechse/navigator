@@ -100,6 +100,7 @@
 	import Suburban from "@lib/components/icons/transport-types/Suburban.svelte";
 	import Tram from "@lib/components/icons/transport-types/Tram.svelte";
 	import Bus from "@lib/components/icons/transport-types/Bus.svelte";
+	import Input from "@lib/components/interactable/Input.svelte";
 
 	interface Props {
 		isVisible: boolean;
@@ -220,16 +221,15 @@
 				</label>
 
 				<div class="flex items-center gap-x-2">
-					<input
+					<Input
 						type="number"
-						bind:value={delayThreshold}
+						value={delayThreshold}
 						disabled={!handleCancelledAsDelayed}
 						min={0}
+						onchange={(value) => typeof value === "number" && (delayThreshold = value)}
 						class={[
-							"w-24 rounded-lg border px-3 py-1.5 text-sm font-semibold transition-all outline-none",
-							handleCancelledAsDelayed
-								? "border-emerald-500/20 bg-emerald-500/10 text-emerald-500 focus:border-emerald-500/40"
-								: "border-muted-foreground/10 bg-muted/10 text-muted-foreground/40 cursor-not-allowed opacity-75"
+							"w-24",
+							handleCancelledAsDelayed && "border-emerald-500/20 bg-emerald-500/10 text-emerald-500 focus:border-emerald-500/40"
 						]}
 					/>
 					<span class={["text-sm", handleCancelledAsDelayed ? "text-muted-foreground" : "text-muted-foreground/50"]}>

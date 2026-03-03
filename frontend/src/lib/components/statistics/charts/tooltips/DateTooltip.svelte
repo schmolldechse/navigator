@@ -15,7 +15,7 @@
 	y={context.height + context.padding.bottom - 12}
 	anchor="top"
 	variant="none"
-	class="bg-background/90! rounded-lg border border-white/10! px-2 shadow-xl backdrop-blur-md"
+	class="bg-background/90! rounded-lg border border-white/10! px-2 shadow-xl backdrop-blur-md select-none"
 >
 	{#snippet children({ data }: { data: T })}
 		<span class="text-text text-xs">

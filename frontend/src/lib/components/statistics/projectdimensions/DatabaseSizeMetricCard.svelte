@@ -13,7 +13,7 @@
 	import { scaleOrdinal } from "d3-scale";
 	import { schemeTableau10 } from "d3-scale-chromatic";
 	import MetricLoadingFailedWarning from "../MetricLoadingFailedWarning.svelte";
-	import { Axis, ChartClipPath, Highlight, LineChart, Spline, Svg, Tooltip } from "layerchart";
+	import { Axis, ChartClipPath, defaultChartPadding, Highlight, LineChart, Spline, Svg, Tooltip } from "layerchart";
 	import { formatBytes, getUnit } from "@lib/util/bytes";
 	import { DateTime } from "luxon";
 	import MetricCardTitle from "../MetricCardTitle.svelte";
@@ -77,11 +77,9 @@
 <MetricCardBase class={["gap-y-2", className]}>
 	{#snippet head()}
 		<MetricCardTitle title="Database Size" class="justify-between">
-			{#snippet children()}
-				{#await promise then metrics}
-					<MetricTrend {metrics} />
-				{/await}
-			{/snippet}
+			{#await promise then metrics}
+				<MetricTrend {metrics} />
+			{/await}
 		</MetricCardTitle>
 	{/snippet}
 
@@ -105,7 +103,7 @@
 					series={getChartSeries(metrics)}
 					x="date"
 					y="value"
-					padding={{ bottom: 12 }}
+					padding={defaultChartPadding({ left: 48 })}
 					yDomain={null}
 					brush
 					height={192}
@@ -113,10 +111,13 @@
 					{#snippet children({ context, visibleSeries, getSplineProps, getHighlightProps })}
 						<Svg>
 							<Axis
-								placement="bottom"
+								placement="left"
 								rule
-								classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground", rule: "stroke-0" }}
+								grid
+								classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none" }}
+								format={(value: number) => formatBytes(value, true) + " " + getUnit(value, true)}
 							/>
+							<Axis placement="bottom" rule classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none" }} />
 
 							<!-- ChartClipPath needed for brush -->
 							<ChartClipPath>
@@ -135,7 +136,7 @@
 						<Tooltip.Root
 							anchor="bottom"
 							contained="container"
-							class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md"
+							class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
 						>
 							{#snippet children({ payload })}
 								<div class="flex flex-col gap-y-1">

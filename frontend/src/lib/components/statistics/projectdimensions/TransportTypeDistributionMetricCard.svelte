@@ -13,7 +13,7 @@
 	import MetricCardBase from "../MetricCardBase.svelte";
 	import MetricCardTitle from "../MetricCardTitle.svelte";
 	import MetricLoadingFailedWarning from "../MetricLoadingFailedWarning.svelte";
-	import { Legend, PieChart, Tooltip } from "layerchart";
+	import { defaultChartPadding, Legend, PieChart, Tooltip } from "layerchart";
 
 	interface TransportTypeSeries {
 		transportType: TransportType;
@@ -90,6 +90,7 @@
 					padAngle={0.02}
 					placement="left"
 					props={{ pie: { motion: "spring" } }}
+					padding={defaultChartPadding()}
 					height={256}
 				>
 					{#snippet legend({ getLegendProps })}
@@ -116,7 +117,9 @@
 						{@const total = context.flatData.reduce((acc: number, curr: TransportTypeSeries) => acc + curr.value, 0)}
 						{@const formatter = new Intl.NumberFormat(undefined, { notation: "compact", maximumFractionDigits: 1 })}
 
-						<Tooltip.Root class="bg-background/90! rounded-lg border border-white/10! p-3 shadow-xl backdrop-blur-md">
+						<Tooltip.Root
+							class="bg-background/90! rounded-lg border border-white/10! p-3 shadow-xl backdrop-blur-md select-none"
+						>
 							{#snippet children({ data }: { data: TransportTypeSeries })}
 								{@const title =
 									keyTitles.find((keyTitle: KeyTitles) => keyTitle.key === data.transportType)?.title ?? data.transportType}
