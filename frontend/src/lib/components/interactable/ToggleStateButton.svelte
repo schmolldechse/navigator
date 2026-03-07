@@ -14,7 +14,11 @@
 
 <button
 	type="button"
-	onclick={() => changeable && ontoggle && ontoggle(!state)}
+	onclick={() => {
+		if (!changeable) return;
+		state = !state;
+		ontoggle?.(state);
+	}}
 	class={[
 		"cursor-pointer rounded-lg border px-3 py-1.5 text-sm  font-semibold transition-all",
 		state && "border-emerald-500/20 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500/20",
