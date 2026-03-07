@@ -39,7 +39,7 @@
 	import { page } from "$app/state";
 	import DialogItem from "@lib/components/interactable/dialog/DialogItem.svelte";
 	import TimePicker from "@lib/components/interactable/timepicker/TimePicker.svelte";
-	import ToggleStateButton from "@lib/components/interactable/ToggleStateButton.svelte";
+	import ToggleStateButton from "@lib/components/interactable/togglestate/ToggleStateButton.svelte";
 
 	type Props = {
 		isVisible: boolean;

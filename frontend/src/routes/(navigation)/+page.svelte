@@ -4,12 +4,14 @@
 	import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
-	import DatabaseSizeMetricCard from "@lib/components/statistics/projectdimensions/DatabaseSizeMetricCard.svelte";
-	import RecordedJourneyMetricCard from "@lib/components/statistics/projectdimensions/RecordedJourneyMetricCard.svelte";
-	import TransportTypeDistributionMetricCard from "@lib/components/statistics/projectdimensions/TransportTypeDistributionMetricCard.svelte";
-	import RecordedRisIdsMetricCard from "@lib/components/statistics/projectdimensions/risids/RecordedRisIdsMetricCard.svelte";
-	import StopSummaryMetricCard from "@lib/components/statistics/projectdimensions/stopsummary/StopSummaryMetricCard.svelte";
 	import SettingsDialog from "@lib/components/statistics/settings/SettingsDialog.svelte";
+	import DatabaseSize from "@lib/components/statistics/projectdimensions/DatabaseSize.svelte";
+	import RecordedJourneys from "@lib/components/statistics/projectdimensions/RecordedJourneys.svelte";
+	import TransportTypeDistribution from "@lib/components/statistics/projectdimensions/TransportTypeDistribution.svelte";
+	import RecordedRisIds from "@lib/components/statistics/projectdimensions/risids/RecordedRisIds.svelte";
+	import HourlyStopRate from "@lib/components/statistics/projectdimensions/globalstop/HourlyStopRate.svelte";
+	import DelayAnalysis from "@lib/components/statistics/projectdimensions/globalstop/stopdelayanalysis/DelayAnalysis.svelte";
+	import CancellationRate from "@lib/components/statistics/projectdimensions/globalstop/cancellationrate/CancellationRate.svelte";
 	import { CardScale } from "@lib/util/card.js";
 	import { TransportType } from "@lib/api/types.gen.js";
 
@@ -24,35 +26,49 @@
 	};
 	let metricCards: MetricCardData[] = $derived([
 		{
-			metricComponent: DatabaseSizeMetricCard,
+			metricComponent: DatabaseSize,
 			props: {
 				promise: data.dimensions.databaseSize
 			},
 			scale: CardScale.SMALL
 		},
 		{
-			metricComponent: RecordedJourneyMetricCard,
+			metricComponent: RecordedJourneys,
 			props: {
 				promise: data.dimensions.totalJourneys
 			},
 			scale: CardScale.MEDIUM
 		},
 		{
-			metricComponent: RecordedRisIdsMetricCard,
+			metricComponent: RecordedRisIds,
 			props: {
 				promise: data.dimensions.totalRisIds
 			},
 			scale: CardScale.MEDIUM
 		},
 		{
-			metricComponent: TransportTypeDistributionMetricCard,
+			metricComponent: TransportTypeDistribution,
 			props: {
 				promise: data.dimensions.transportTypes
 			},
 			scale: CardScale.SMALL
 		},
 		{
-			metricComponent: StopSummaryMetricCard,
+			metricComponent: HourlyStopRate,
+			props: {
+				promise: data.dimensions.stopSummary
+			},
+			scale: CardScale.LARGE
+		},
+		{
+			metricComponent: DelayAnalysis,
+			props: {
+				promise: data.dimensions.stopSummary
+			},
+			scale: CardScale.LARGE
+		},
+		{
+			metricComponent: CancellationRate,
 			props: {
 				promise: data.dimensions.stopSummary
 			},

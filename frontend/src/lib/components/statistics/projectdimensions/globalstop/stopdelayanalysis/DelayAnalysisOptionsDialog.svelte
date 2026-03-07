@@ -1,53 +1,6 @@
 <script lang="ts" module>
-	export type ScheduleType = "both" | "departures" | "arrivals";
-	export type DelayMode = "sum" | "avg";
-
-	export const DelayAnalysisSeriesType = {
-		TOTAL_ARRIVAL: "TOTAL_ARRIVAL",
-		TOTAL_DEPARTURE: "TOTAL_DEPARTURE",
-		HIGH_SPEED_TRAIN_ARRIVAL: "HIGH_SPEED_TRAIN_ARRIVAL",
-		HIGH_SPEED_TRAIN_DEPARTURE: "HIGH_SPEED_TRAIN_DEPARTURE",
-		INTERCITY_TRAIN_ARRIVAL: "INTERCITY_TRAIN_ARRIVAL",
-		INTERCITY_TRAIN_DEPARTURE: "INTERCITY_TRAIN_DEPARTURE",
-		INTER_REGIONAL_TRAIN_ARRIVAL: "INTER_REGIONAL_TRAIN_ARRIVAL",
-		INTER_REGIONAL_TRAIN_DEPARTURE: "INTER_REGIONAL_TRAIN_DEPARTURE",
-		REGIONAL_TRAIN_ARRIVAL: "REGIONAL_TRAIN_ARRIVAL",
-		REGIONAL_TRAIN_DEPARTURE: "REGIONAL_TRAIN_DEPARTURE",
-		CITY_TRAIN_ARRIVAL: "CITY_TRAIN_ARRIVAL",
-		CITY_TRAIN_DEPARTURE: "CITY_TRAIN_DEPARTURE",
-		SUBWAY_ARRIVAL: "SUBWAY_ARRIVAL",
-		SUBWAY_DEPARTURE: "SUBWAY_DEPARTURE",
-		TRAM_ARRIVAL: "TRAM_ARRIVAL",
-		TRAM_DEPARTURE: "TRAM_DEPARTURE",
-		BUS_ARRIVAL: "BUS_ARRIVAL",
-		BUS_DEPARTURE: "BUS_DEPARTURE",
-		UNKNOWN_ARRIVAL: "UNKNOWN_ARRIVAL",
-		UNKNOWN_DEPARTURE: "UNKNOWN_DEPARTURE"
-	} as const;
-	export type DelayAnalysisSeriesType = (typeof DelayAnalysisSeriesType)[keyof typeof DelayAnalysisSeriesType];
-
-	export const delayAnalysisKeyTitles: Record<DelayAnalysisSeriesType, string> = {
-		[DelayAnalysisSeriesType.TOTAL_ARRIVAL]: "Total (Arrival)",
-		[DelayAnalysisSeriesType.TOTAL_DEPARTURE]: "Total (Departure)",
-		[DelayAnalysisSeriesType.HIGH_SPEED_TRAIN_ARRIVAL]: "High Speed (Arrival)",
-		[DelayAnalysisSeriesType.HIGH_SPEED_TRAIN_DEPARTURE]: "High Speed (Departure)",
-		[DelayAnalysisSeriesType.INTERCITY_TRAIN_ARRIVAL]: "Intercity (Arrival)",
-		[DelayAnalysisSeriesType.INTERCITY_TRAIN_DEPARTURE]: "Intercity (Departure)",
-		[DelayAnalysisSeriesType.INTER_REGIONAL_TRAIN_ARRIVAL]: "Inter Regional (Arrival)",
-		[DelayAnalysisSeriesType.INTER_REGIONAL_TRAIN_DEPARTURE]: "Inter Regional (Departure)",
-		[DelayAnalysisSeriesType.REGIONAL_TRAIN_ARRIVAL]: "Regional (Arrival)",
-		[DelayAnalysisSeriesType.REGIONAL_TRAIN_DEPARTURE]: "Regional (Departure)",
-		[DelayAnalysisSeriesType.CITY_TRAIN_ARRIVAL]: "Suburban (Arrival)",
-		[DelayAnalysisSeriesType.CITY_TRAIN_DEPARTURE]: "Suburban (Departure)",
-		[DelayAnalysisSeriesType.SUBWAY_ARRIVAL]: "Subway (Arrival)",
-		[DelayAnalysisSeriesType.SUBWAY_DEPARTURE]: "Subway (Departure)",
-		[DelayAnalysisSeriesType.TRAM_ARRIVAL]: "Tram (Arrival)",
-		[DelayAnalysisSeriesType.TRAM_DEPARTURE]: "Tram (Departure)",
-		[DelayAnalysisSeriesType.BUS_ARRIVAL]: "Bus (Arrival)",
-		[DelayAnalysisSeriesType.BUS_DEPARTURE]: "Bus (Departure)",
-		[DelayAnalysisSeriesType.UNKNOWN_ARRIVAL]: "Unknown (Arrival)",
-		[DelayAnalysisSeriesType.UNKNOWN_DEPARTURE]: "Unknown (Departure)"
-	};
+	type ScheduleType = "both" | "departures" | "arrivals";
+	type DelayMode = "sum" | "avg";
 
 	type TransportFilter = {
 		id: string;
@@ -85,6 +38,8 @@
 		{ id: "bus", label: "Bus", icon: Bus, transportType: TransportType.BUS },
 		{ id: "unknown", label: "Unknown", transportType: TransportType.UNKNOWN }
 	];
+
+	export { type ScheduleType, type DelayMode, type TransportFilter, availableTransportTypeFilters };
 </script>
 
 <script lang="ts">
@@ -93,7 +48,6 @@
 	import Dialog from "@lib/components/interactable/dialog/Dialog.svelte";
 	import DialogItem from "@lib/components/interactable/dialog/DialogItem.svelte";
 	import Checkbox from "@lib/components/interactable/Checkbox.svelte";
-	import ToggleStateButton from "@lib/components/interactable/ToggleStateButton.svelte";
 	import type { Component } from "svelte";
 	import LongDistance from "@lib/components/icons/transport-types/LongDistance.svelte";
 	import Regional from "@lib/components/icons/transport-types/Regional.svelte";
@@ -101,46 +55,38 @@
 	import Tram from "@lib/components/icons/transport-types/Tram.svelte";
 	import Bus from "@lib/components/icons/transport-types/Bus.svelte";
 	import Input from "@lib/components/interactable/Input.svelte";
+	import ToggleStateGroup, { type ToggleStateOption } from "@lib/components/interactable/togglestate/ToggleStateGroup.svelte";
+	import ToggleStateButton from "@lib/components/interactable/togglestate/ToggleStateButton.svelte";
 
-	interface Props {
+	type Props = {
 		isVisible: boolean;
 		availableTransportTypes: TransportType[];
+		selectedTransportTypes: TransportType[];
+		showTotalSeries: boolean;
 		scheduleType: ScheduleType;
 		delayMode: DelayMode;
-		selectedSeries: DelayAnalysisSeriesType[];
 		handleCancelledAsDelayed: boolean;
 		delayThreshold: number;
 		class?: ClassValue;
-	}
-
+	};
 	let {
 		isVisible = $bindable(false),
 		availableTransportTypes,
+		selectedTransportTypes = $bindable([]),
+		showTotalSeries = $bindable(true),
 		scheduleType = $bindable("both"),
 		delayMode = $bindable("avg"),
-		selectedSeries = $bindable([]),
 		handleCancelledAsDelayed = $bindable(false),
 		delayThreshold = $bindable(359),
 		class: classNames
 	}: Props = $props();
 
-	const getGroupPair = (transportType: TransportType | "TOTAL"): [DelayAnalysisSeriesType, DelayAnalysisSeriesType] => {
-		if (transportType === "TOTAL") return [DelayAnalysisSeriesType.TOTAL_ARRIVAL, DelayAnalysisSeriesType.TOTAL_DEPARTURE];
-		return [`${transportType}_ARRIVAL` as DelayAnalysisSeriesType, `${transportType}_DEPARTURE` as DelayAnalysisSeriesType];
-	};
-
-	const isGroupActive = (transportType: TransportType | "TOTAL"): boolean => {
-		const [arrival, departure] = getGroupPair(transportType);
-		return selectedSeries.includes(arrival) || selectedSeries.includes(departure);
-	};
-
-	const toggleGroup = (transportType: TransportType | "TOTAL") => {
-		const [arrival, departure] = getGroupPair(transportType);
-		if (isGroupActive(transportType))
-			return (selectedSeries = selectedSeries.filter(
-				(seriesType: DelayAnalysisSeriesType) => seriesType !== arrival && seriesType !== departure
-			));
-		return (selectedSeries = [...selectedSeries, arrival, departure]);
+	const toggleFilterItem = (selectedTransportType: TransportType) => {
+		if (selectedTransportTypes.includes(selectedTransportType))
+			selectedTransportTypes = selectedTransportTypes.filter(
+				(transportType: TransportType) => transportType !== selectedTransportType
+			);
+		else selectedTransportTypes = [...selectedTransportTypes, selectedTransportType];
 	};
 </script>
 
@@ -159,43 +105,50 @@
 		<div class="grid grid-cols-2 gap-4">
 			<!-- Schedule Type -->
 			<DialogItem title="Scheduling" class="col-span-2 sm:col-span-1">
-				<div class="flex flex-wrap gap-2">
-					{#each [{ value: "both", label: "Both" }, { value: "arrivals", label: "Arrivals" }, { value: "departures", label: "Departures" }] as option (option.value)}
-						<ToggleStateButton
-							state={scheduleType === option.value}
-							ontoggle={() => (scheduleType = option.value as ScheduleType)}
-						>
-							{option.label}
-						</ToggleStateButton>
-					{/each}
-				</div>
+				{@const scheduleTypeOptions = [
+					{ id: "both", value: "Both" },
+					{ id: "arrivals", value: "Arrivals" },
+					{ id: "departures", value: "Departures" }
+				]}
+				{@const scheduleTypeOption = scheduleTypeOptions.find((option: ToggleStateOption) => option.id === scheduleType)!}
+
+				<ToggleStateGroup
+					options={scheduleTypeOptions}
+					selected={scheduleTypeOption}
+					onselect={(option: ToggleStateOption) => (scheduleType = option.id as ScheduleType)}
+				/>
 			</DialogItem>
 
 			<!-- Delay Mode -->
 			<DialogItem title="Delay Mode" class="col-span-2 sm:col-span-1">
-				<div class="flex flex-wrap gap-2">
-					{#each [{ value: "sum", label: "Sum" }, { value: "avg", label: "Average" }] as option (option.value)}
-						<ToggleStateButton state={delayMode === option.value} ontoggle={() => (delayMode = option.value as DelayMode)}>
-							{option.label}
-						</ToggleStateButton>
-					{/each}
-				</div>
+				{@const delayModeOptions = [
+					{ id: "sum", value: "Sum" },
+					{ id: "avg", value: "Average" }
+				]}
+				{@const delayModeOption = delayModeOptions.find((option: ToggleStateOption) => option.id === delayMode)!}
+
+				<ToggleStateGroup
+					options={delayModeOptions}
+					selected={delayModeOption}
+					onselect={(option: ToggleStateOption) => (delayMode = option.id as DelayMode)}
+				/>
 			</DialogItem>
 
 			<!-- Series -->
 			<DialogItem title="Series" class="col-span-2">
 				<div class="flex flex-wrap gap-2">
 					{#if availableTransportTypes.length > 1}
-						<ToggleStateButton state={isGroupActive("TOTAL")} ontoggle={() => toggleGroup("TOTAL")}>Total</ToggleStateButton>
+						<ToggleStateButton bind:state={showTotalSeries}>Total</ToggleStateButton>
 					{/if}
+
 					{#each availableTransportTypes as transportType (transportType)}
 						{@const transportTypeFilter = availableTransportTypeFilters.find(
 							(filter: TransportFilter) => filter.transportType === transportType
 						)}
 						{@const Icon = transportTypeFilter?.icon}
 						<ToggleStateButton
-							state={isGroupActive(transportType)}
-							ontoggle={() => toggleGroup(transportType)}
+							state={selectedTransportTypes.includes(transportType)}
+							ontoggle={() => toggleFilterItem(transportType)}
 							class="flex items-center gap-x-2"
 						>
 							{#if Icon}
