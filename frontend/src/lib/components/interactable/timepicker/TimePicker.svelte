@@ -6,6 +6,8 @@
 
 	interface Props {
 		multiSelect?: boolean;
+		min?: DateTime;
+		max?: DateTime;
 		dates: {
 			start: DateTime;
 			end?: DateTime;
@@ -14,11 +16,28 @@
 		class?: ClassValue;
 	}
 
-	let { multiSelect = false, dates = $bindable({ start: DateTime.now() }), onchange, class: className }: Props = $props();
+	let {
+		multiSelect = false,
+		min,
+		max,
+		dates = $bindable({ start: DateTime.now() }),
+		onchange,
+		class: className
+	}: Props = $props();
 
 	let currentMonth: DateTime = $state(dates.start.startOf("month"));
 
 	const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+	const canGoBack: boolean = $derived(!min || currentMonth > min.startOf("month"));
+
+	const canGoForward: boolean = $derived(!max || currentMonth < max.startOf("month"));
+
+	const isDayDisabled = (day: DateTime): boolean => {
+		if (min && day.startOf("day") < min.startOf("day")) return true;
+		if (max && day.startOf("day") > max.startOf("day")) return true;
+		return false;
+	};
 
 	const getCalendarDays: DateTime[] = $derived.by(() => {
 		const startDate: DateTime = currentMonth.startOf("month").startOf("week");
@@ -35,6 +54,8 @@
 	});
 
 	const selectDate = (date: DateTime) => {
+		if (isDayDisabled(date)) return;
+
 		if (!multiSelect) {
 			dates.start = date;
 			dates.end = undefined;
@@ -57,12 +78,17 @@
 	};
 </script>
 
-<div class={["flex flex-col space-y-2", className]}>
+<div class={["flex min-w-48 flex-col space-y-2", className]}>
 	<!-- Navigation -->
 	<div class="flex items-center justify-between">
 		<button
-			class="group hover:bg-accent/10 flex cursor-pointer items-center rounded-md p-2 transition-colors duration-300"
-			onclick={() => (currentMonth = currentMonth.minus({ months: 1 }))}
+			class={[
+				"flex items-center rounded-md p-2 transition-colors duration-300",
+				canGoBack && "group hover:bg-accent/10 cursor-pointer",
+				!canGoBack && "cursor-not-allowed opacity-30"
+			]}
+			disabled={!canGoBack}
+			onclick={() => canGoBack && (currentMonth = currentMonth.minus({ months: 1 }))}
 		>
 			<ChevronLeft class="text-muted-foreground group-hover:text-accent h-5 w-5" />
 		</button>
@@ -70,8 +96,13 @@
 		<span class="text-text text-base font-semibold">{currentMonth.toFormat("MMMM yyyy")}</span>
 
 		<button
-			class="group hover:bg-accent/10 flex cursor-pointer items-center rounded-md p-2 transition-colors duration-300"
-			onclick={() => (currentMonth = currentMonth.plus({ months: 1 }))}
+			class={[
+				"flex items-center rounded-md p-2 transition-colors duration-300",
+				canGoForward && "group hover:bg-accent/10 cursor-pointer",
+				!canGoForward && "cursor-not-allowed opacity-30"
+			]}
+			disabled={!canGoForward}
+			onclick={() => canGoForward && (currentMonth = currentMonth.plus({ months: 1 }))}
 		>
 			<ChevronRight class="text-muted-foreground group-hover:text-accent h-5 w-5" />
 		</button>
@@ -88,6 +119,7 @@
 			{@const isEnd = !!dates.end && day.hasSame(dates.end, "day")}
 			{@const inRange = multiSelect && dates.end && day > dates.start && day < dates.end}
 			{@const isCurrentMonth = day.hasSame(currentMonth, "month")}
+			{@const disabled = isDayDisabled(day)}
 
 			<div class="relative py-0.5">
 				{#if multiSelect && dates.end}
@@ -103,13 +135,16 @@
 
 				<button
 					onclick={() => selectDate(day)}
+					{disabled}
 					class={[
-						"relative z-10 mx-auto flex h-7.5 w-7.5 cursor-pointer items-center justify-center text-sm transition-all duration-300",
-						day.hasSame(DateTime.now(), "day") ? "font-bold underline underline-offset-4" : "",
-						isStart || isEnd ? "bg-accent text-background rounded-lg font-bold" : "",
-						isCurrentMonth && !isStart && !isEnd ? "text-text" : "",
-						!isCurrentMonth && !isStart && !isEnd ? "text-muted-foreground opacity-75" : "",
-						!isStart && !isEnd && !inRange ? "hover:bg-accent/20 rounded-lg" : ""
+						"relative z-10 mx-auto flex h-7.5 w-7.5 items-center justify-center text-sm transition-all duration-300",
+						disabled && "cursor-not-allowed opacity-30",
+						!disabled && "cursor-pointer",
+						day.hasSame(DateTime.now(), "day") && "font-bold underline underline-offset-4",
+						{ "bg-accent text-background rounded-lg font-bold": isStart || isEnd },
+						{ "text-text": isCurrentMonth && !isStart && !isEnd },
+						{ "text-muted-foreground opacity-75": !isCurrentMonth && !isStart && !isEnd },
+						{ "hover:bg-accent/20 rounded-lg": !disabled && !isStart && !isEnd && !inRange }
 					]}
 				>
 					{day.day}

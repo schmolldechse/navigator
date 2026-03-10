@@ -12,7 +12,7 @@ export const load: PageServerLoad = async ({
 		totalRisIds: Promise<MetricSeries[]>;
 		totalJourneys: Promise<MetricSeries[]>;
 		transportTypes: Promise<MetricSeries[]>;
-		stopSummary: Promise<MetricSeries[]>;
+		hourlyTransports: Promise<MetricSeries[]>;
 	};
 	timerange: { start: DateTime; end: DateTime };
 }> => {
@@ -58,9 +58,9 @@ export const load: PageServerLoad = async ({
 				},
 				userIp: getClientAddress()
 			}),
-			stopSummary: loadMetric({
+			hourlyTransports: loadMetric({
 				request: {
-					queryType: "GLOBAL_STOP_SUMMARY",
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
 					start: start.toISO()!,
 					end: end.toISO()!,
 					...(transportTypesFilter.length > 0 ? { transportTypes: transportTypesFilter } : {})

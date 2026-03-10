@@ -557,23 +557,19 @@ namespace Navigator.Data.Migrations
                     b.ToTable("risid_snapshot", "statistics");
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.Views.HourlyStopSummary", b =>
+            modelBuilder.Entity("Navigator.Data.Entities.Views.HourlyTransportSnapshot", b =>
                 {
                     b.Property<int>("ArrivalCancellationCount")
                         .HasColumnType("integer")
-                        .HasColumnName("arrival_cancellations_count");
-
-                    b.Property<double>("ArrivalDelayAvg")
-                        .HasColumnType("double precision")
-                        .HasColumnName("arrival_delay_avg");
+                        .HasColumnName("arrival_cancellation_count");
 
                     b.Property<double>("ArrivalDelaySum")
                         .HasColumnType("double precision")
                         .HasColumnName("arrival_delay_sum");
 
-                    b.Property<int>("ArrivalsCount")
+                    b.Property<int>("ArrivalCount")
                         .HasColumnType("integer")
-                        .HasColumnName("arrivals_count");
+                        .HasColumnName("arrival_count");
 
                     b.Property<DateTime>("BucketHour")
                         .HasColumnType("timestamp with time zone")
@@ -581,30 +577,72 @@ namespace Navigator.Data.Migrations
 
                     b.Property<int>("DepartureCancellationCount")
                         .HasColumnType("integer")
-                        .HasColumnName("departure_cancellations_count");
-
-                    b.Property<double>("DepartureDelayAvg")
-                        .HasColumnType("double precision")
-                        .HasColumnName("departure_delay_avg");
+                        .HasColumnName("departure_cancellation_count");
 
                     b.Property<double>("DepartureDelaySum")
                         .HasColumnType("double precision")
                         .HasColumnName("departure_delay_sum");
 
-                    b.Property<int>("DeparturesCount")
+                    b.Property<int>("DepartureCount")
                         .HasColumnType("integer")
-                        .HasColumnName("departures_count");
+                        .HasColumnName("departure_count");
 
                     b.Property<TransportType>("TransportType")
                         .HasColumnType("core.transport_type")
                         .HasColumnName("transport_type");
 
-                    b.ToTable("hourly_stop_summary", "statistics", t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("hourly_global_stop_summary", "statistics", t =>
+                    {
+                        t.ExcludeFromMigrations();
+                    });
 
-                    b.ToView("hourly_stop_summary", "statistics");
+                    b.ToView("hourly_global_stop_summary", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.HourlyStationSnapshot", b =>
+                {
+                    b.Property<int>("ArrivalCancellationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_cancellation_count");
+
+                    b.Property<double>("ArrivalDelaySum")
+                        .HasColumnType("double precision")
+                        .HasColumnName("arrival_delay_sum");
+
+                    b.Property<int>("ArrivalCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_count");
+
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<int>("DepartureCancellationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_cancellation_count");
+
+                    b.Property<double>("DepartureDelaySum")
+                        .HasColumnType("double precision")
+                        .HasColumnName("departure_delay_sum");
+
+                    b.Property<int>("DepartureCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_count");
+
+                    b.Property<int>("EvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("eva_number");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("hourly_station_summary", "statistics", t =>
+                    {
+                        t.ExcludeFromMigrations();
+                    });
+
+                    b.ToView("hourly_station_summary", "statistics");
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Journey", b =>

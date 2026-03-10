@@ -13,10 +13,6 @@ public class MetricSeries
     [JsonPropertyName("unit")]
     public required MetricUnit Unit { get; set; }
 
-    [JsonPropertyName("summary")]
-    [Description("Aggregated statistics about this series (e.g. totals, deltas).")]
-    public required MetricSummary Summary { get; set; }
-
     [JsonPropertyName("dataPoints")]
     public required IEnumerable<BaseMetricDataPoint> DataPoints { get; set; }
 }

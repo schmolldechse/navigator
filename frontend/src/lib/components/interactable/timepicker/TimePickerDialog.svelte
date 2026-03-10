@@ -6,6 +6,8 @@
 	interface Props {
 		isVisible: boolean;
 		multiSelect?: boolean;
+		min?: DateTime;
+		max?: DateTime;
 		dates: {
 			start: DateTime;
 			end?: DateTime;
@@ -14,7 +16,7 @@
 		class?: ClassValue;
 	}
 
-	let { isVisible = $bindable(false), multiSelect = false, dates, onchange, class: classNames }: Props = $props();
+	let { isVisible = $bindable(false), multiSelect = false, min, max, dates, onchange, class: classNames }: Props = $props();
 
 	let dialog: HTMLDialogElement | undefined = $state(undefined);
 
@@ -47,12 +49,14 @@
 	onclose={handleClose}
 	onclick={handleDialogClick}
 	class={[
-		"bg-background border-muted-foreground/20 absolute right-0 left-auto z-100 w-[400px] rounded-lg border-2",
+		"bg-background border-muted-foreground/20 absolute right-0 left-auto z-100 w-[400px] rounded-lg border-2 p-1.5",
 		classNames
 	]}
 >
 	<TimePicker
 		{multiSelect}
+		{min}
+		{max}
 		bind:dates
 		onchange={({ start, end }) => {
 			if (!multiSelect || (multiSelect && start && end)) handleClose();

@@ -5,29 +5,36 @@ export type ClientOptions = {
 };
 
 export type BaseMetricDataPoint =
-	| BaseMetricDataPointTimestampMetricDataPoint
-	| BaseMetricDataPointTransportTypeMetricDataPoint
-	| BaseMetricDataPointTimestampTransportTypeMetricDataPoint
+	| BaseMetricDataPointTimestampDataPoint
+	| BaseMetricDataPointTransportTypeDataPoint
+	| BaseMetricDataPointTimestampTransportTypeDataPoint
+	| BaseMetricDataPointStationDataPoint
 	| BaseMetricDataPointBase;
 
 export type BaseMetricDataPointBase = {
 	value: number | string;
 };
 
-export type BaseMetricDataPointTimestampMetricDataPoint = {
+export type BaseMetricDataPointStationDataPoint = {
+	$type: "evaNumber";
+	evaNumber: number | string;
+	value: number | string;
+};
+
+export type BaseMetricDataPointTimestampDataPoint = {
 	$type: "timestamp";
 	timestamp: string;
 	value: number | string;
 };
 
-export type BaseMetricDataPointTimestampTransportTypeMetricDataPoint = {
+export type BaseMetricDataPointTimestampTransportTypeDataPoint = {
 	$type: "timestampTransportType";
 	timestamp: string;
 	transportType: TransportType;
 	value: number | string;
 };
 
-export type BaseMetricDataPointTransportTypeMetricDataPoint = {
+export type BaseMetricDataPointTransportTypeDataPoint = {
 	$type: "transportType";
 	transportType: TransportType;
 	value: number | string;
@@ -47,8 +54,11 @@ export type BaseMetricRequest =
 			queryType?: "TRANSPORT_TYPE_DISTRIBUTION";
 	  } & BaseMetricRequestTransportTypeDistributionMetricRequest)
 	| ({
-			queryType?: "GLOBAL_STOP_SUMMARY";
-	  } & BaseMetricRequestGlobalStopSummaryMetricRequest);
+			queryType?: "HOURLY_TRANSPORT_SNAPSHOT";
+	  } & BaseMetricRequestHourlyTransportSnapshotMetricRequest)
+	| ({
+			queryType?: "STATION_SUMMARY";
+	  } & BaseMetricRequestStationSummaryMetricRequest);
 
 export type BaseMetricRequestDatabaseSizeSnapshotMetricRequest = {
 	queryType?: "DATABASE_SIZE_SNAPSHOT";
@@ -56,8 +66,8 @@ export type BaseMetricRequestDatabaseSizeSnapshotMetricRequest = {
 	end: string;
 };
 
-export type BaseMetricRequestGlobalStopSummaryMetricRequest = {
-	queryType?: "GLOBAL_STOP_SUMMARY";
+export type BaseMetricRequestHourlyTransportSnapshotMetricRequest = {
+	queryType?: "HOURLY_TRANSPORT_SNAPSHOT";
 	start: string;
 	end: string;
 	/**
@@ -80,6 +90,21 @@ export type BaseMetricRequestRisIdSnapshotMetricRequest = {
 	queryType?: "RIS_ID_SNAPSHOT";
 	start: string;
 	end: string;
+};
+
+export type BaseMetricRequestStationSummaryMetricRequest = {
+	queryType?: "STATION_SUMMARY";
+	snapshot: StationSnapshotType;
+	start?: null | string;
+	end: string;
+	/**
+	 * Optional list of transport types to filter the metric by. If not provided, all transport types will be included.
+	 */
+	transportTypes?: null | Array<TransportType>;
+	/**
+	 * Optional list of EVA numbers to filter the metric by stations. If not provided, all stations will be included.
+	 */
+	evaNumbers?: null | Array<number | string>;
 };
 
 export type BaseMetricRequestTransportTypeDistributionMetricRequest = {
@@ -272,10 +297,6 @@ export enum MessageReferenceType {
 export type MetricSeries = {
 	seriesType: MetricSeriesType;
 	unit: MetricUnit;
-	/**
-	 * Aggregated statistics about this series (e.g. totals, deltas).
-	 */
-	summary: MetricSummary;
 	dataPoints: Array<BaseMetricDataPoint>;
 };
 
@@ -285,21 +306,17 @@ export enum MetricSeriesType {
 	RIS_IDS_INACTIVE = "RIS_IDS_INACTIVE",
 	JOURNEY_TOTAL = "JOURNEY_TOTAL",
 	TRANSPORT_TYPES_TOTAL = "TRANSPORT_TYPES_TOTAL",
-	GLOBAL_STOP_ARRIVALS = "GLOBAL_STOP_ARRIVALS",
-	GLOBAL_STOP_ARRIVAL_CANCELLATIONS = "GLOBAL_STOP_ARRIVAL_CANCELLATIONS",
-	GLOBAL_STOP_ARRIVAL_DELAY_SUM = "GLOBAL_STOP_ARRIVAL_DELAY_SUM",
-	GLOBAL_STOP_DEPARTURES = "GLOBAL_STOP_DEPARTURES",
-	GLOBAL_STOP_DEPARTURE_CANCELLATIONS = "GLOBAL_STOP_DEPARTURE_CANCELLATIONS",
-	GLOBAL_STOP_DEPARTURE_DELAY_SUM = "GLOBAL_STOP_DEPARTURE_DELAY_SUM"
+	HOURLY_GLOBAL_ARRIVALS = "HOURLY_GLOBAL_ARRIVALS",
+	HOURLY_GLOBAL_ARRIVAL_CANCELLATIONS = "HOURLY_GLOBAL_ARRIVAL_CANCELLATIONS",
+	HOURLY_GLOBAL_ARRIVAL_DELAY_SUM = "HOURLY_GLOBAL_ARRIVAL_DELAY_SUM",
+	HOURLY_GLOBAL_DEPARTURES = "HOURLY_GLOBAL_DEPARTURES",
+	HOURLY_GLOBAL_DEPARTURE_CANCELLATIONS = "HOURLY_GLOBAL_DEPARTURE_CANCELLATIONS",
+	HOURLY_GLOBAL_DEPARTURE_DELAY_SUM = "HOURLY_GLOBAL_DEPARTURE_DELAY_SUM",
+	STATION_ARRIVALS = "STATION_ARRIVALS",
+	STATION_ARRIVAL_CANCELLATIONS = "STATION_ARRIVAL_CANCELLATIONS",
+	STATION_DEPARTURES = "STATION_DEPARTURES",
+	STATION_DEPARTURE_CANCELLATIONS = "STATION_DEPARTURE_CANCELLATIONS"
 }
-
-export type MetricSummary = {
-	startValue?: null | number | string;
-	endValue?: null | number | string;
-	absoluteChange: number | string;
-	minValue: number | string;
-	maxValue: number | string;
-};
 
 export enum MetricUnit {
 	BYTES = "BYTES",
@@ -379,6 +396,15 @@ export type StationPosition = {
 	latitude: number | string;
 	longitude: number | string;
 };
+
+export enum StationSnapshotType {
+	ARRIVALS = "ARRIVALS",
+	ARRIVAL_CANCELLATIONS = "ARRIVAL_CANCELLATIONS",
+	ARRIVAL_DELAY_AVG = "ARRIVAL_DELAY_AVG",
+	DEPARTURES = "DEPARTURES",
+	DEPARTURE_CANCELLATIONS = "DEPARTURE_CANCELLATIONS",
+	DEPARTURE_DELAY_AVG = "DEPARTURE_DELAY_AVG"
+}
 
 export type TimetableArrival = {
 	journeyId: string;
@@ -558,61 +584,30 @@ export type PostApiV1JourneyBatchResponses = {
 
 export type PostApiV1JourneyBatchResponse = PostApiV1JourneyBatchResponses[keyof PostApiV1JourneyBatchResponses];
 
-export type GetApiV1StationsData = {
-	body?: never;
-	path?: never;
-	query?: {
-		evaNumber?: number | string;
-	};
-	url: "/api/v1/stations";
-};
-
-export type GetApiV1StationsErrors = {
-	/**
-	 * Bad Request
-	 */
-	400: ProblemDetails;
-	/**
-	 * Not Found
-	 */
-	404: ProblemDetails;
-};
-
-export type GetApiV1StationsError = GetApiV1StationsErrors[keyof GetApiV1StationsErrors];
-
-export type GetApiV1StationsResponses = {
-	/**
-	 * OK
-	 */
-	200: Station;
-};
-
-export type GetApiV1StationsResponse = GetApiV1StationsResponses[keyof GetApiV1StationsResponses];
-
-export type PostApiV1StationsData = {
+export type PostApiV1StationsSearchData = {
 	body: StationBySerchtermRequest;
 	path?: never;
 	query?: never;
-	url: "/api/v1/stations";
+	url: "/api/v1/stations/search";
 };
 
-export type PostApiV1StationsErrors = {
+export type PostApiV1StationsSearchErrors = {
 	/**
 	 * Bad Request
 	 */
 	400: ProblemDetails;
 };
 
-export type PostApiV1StationsError = PostApiV1StationsErrors[keyof PostApiV1StationsErrors];
+export type PostApiV1StationsSearchError = PostApiV1StationsSearchErrors[keyof PostApiV1StationsSearchErrors];
 
-export type PostApiV1StationsResponses = {
+export type PostApiV1StationsSearchResponses = {
 	/**
 	 * OK
 	 */
 	200: Array<Station>;
 };
 
-export type PostApiV1StationsResponse = PostApiV1StationsResponses[keyof PostApiV1StationsResponses];
+export type PostApiV1StationsSearchResponse = PostApiV1StationsSearchResponses[keyof PostApiV1StationsSearchResponses];
 
 export type PostApiV1StationsNearbyData = {
 	body: StationByGeographicCoordinatesRequest;
@@ -643,16 +638,16 @@ export type PostApiV1StationsNearbyResponses = {
 
 export type PostApiV1StationsNearbyResponse = PostApiV1StationsNearbyResponses[keyof PostApiV1StationsNearbyResponses];
 
-export type GetApiV1StationsGatheringData = {
+export type GetApiV1StationsByEvaNumberData = {
 	body?: never;
-	path?: never;
-	query?: {
-		evaNumber?: number | string;
+	path: {
+		evaNumber: number;
 	};
-	url: "/api/v1/stations/gathering";
+	query?: never;
+	url: "/api/v1/stations/{evaNumber}";
 };
 
-export type GetApiV1StationsGatheringErrors = {
+export type GetApiV1StationsByEvaNumberErrors = {
 	/**
 	 * Bad Request
 	 */
@@ -663,16 +658,75 @@ export type GetApiV1StationsGatheringErrors = {
 	404: ProblemDetails;
 };
 
-export type GetApiV1StationsGatheringError = GetApiV1StationsGatheringErrors[keyof GetApiV1StationsGatheringErrors];
+export type GetApiV1StationsByEvaNumberError = GetApiV1StationsByEvaNumberErrors[keyof GetApiV1StationsByEvaNumberErrors];
 
-export type GetApiV1StationsGatheringResponses = {
+export type GetApiV1StationsByEvaNumberResponses = {
+	/**
+	 * OK
+	 */
+	200: Station;
+};
+
+export type GetApiV1StationsByEvaNumberResponse =
+	GetApiV1StationsByEvaNumberResponses[keyof GetApiV1StationsByEvaNumberResponses];
+
+export type GetApiV1StationsByEvaNumberGatheringData = {
+	body?: never;
+	path: {
+		evaNumber: number;
+	};
+	query?: never;
+	url: "/api/v1/stations/{evaNumber}/gathering";
+};
+
+export type GetApiV1StationsByEvaNumberGatheringErrors = {
+	/**
+	 * Bad Request
+	 */
+	400: ProblemDetails;
+	/**
+	 * Not Found
+	 */
+	404: ProblemDetails;
+};
+
+export type GetApiV1StationsByEvaNumberGatheringError =
+	GetApiV1StationsByEvaNumberGatheringErrors[keyof GetApiV1StationsByEvaNumberGatheringErrors];
+
+export type GetApiV1StationsByEvaNumberGatheringResponses = {
 	/**
 	 * OK
 	 */
 	200: StationGatheringInfo;
 };
 
-export type GetApiV1StationsGatheringResponse = GetApiV1StationsGatheringResponses[keyof GetApiV1StationsGatheringResponses];
+export type GetApiV1StationsByEvaNumberGatheringResponse =
+	GetApiV1StationsByEvaNumberGatheringResponses[keyof GetApiV1StationsByEvaNumberGatheringResponses];
+
+export type PostApiV1StationsBatchData = {
+	body: Array<number | string>;
+	path?: never;
+	query?: never;
+	url: "/api/v1/stations/batch";
+};
+
+export type PostApiV1StationsBatchErrors = {
+	/**
+	 * Bad Request
+	 */
+	400: ProblemDetails;
+};
+
+export type PostApiV1StationsBatchError = PostApiV1StationsBatchErrors[keyof PostApiV1StationsBatchErrors];
+
+export type PostApiV1StationsBatchResponses = {
+	/**
+	 * OK
+	 */
+	200: BaseStation;
+};
+
+export type PostApiV1StationsBatchResponse = PostApiV1StationsBatchResponses[keyof PostApiV1StationsBatchResponses];
 
 export type PostApiV1StatisticsMetricsData = {
 	body: BaseMetricRequest;

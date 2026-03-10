@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Hosting;
 using Navigator.Daemon;
 using Navigator.Daemon.Infrastructure;
+using Navigator.Daemon.Infrastructure.MaterializedViews;
 using Navigator.Daemon.Mapping;
 using Navigator.Data;
 using Quartz;
@@ -17,7 +18,8 @@ builder.Services.AddQuartz(options =>
     options.AddQuartzJobs<RisIdSnapshotJob>(builder.Configuration);
     options.AddQuartzJobs<JourneySnapshotJob>(builder.Configuration);
     options.AddQuartzJobs<StaleRisIdDeactivationJob>(builder.Configuration);
-    options.AddQuartzJobs<ViewHourlyStopRefreshJob>(builder.Configuration);
+    options.AddQuartzJobs<RefreshTransportViewJob>(builder.Configuration);
+    options.AddQuartzJobs<RefreshStationViewJob>(builder.Configuration);
 });
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 

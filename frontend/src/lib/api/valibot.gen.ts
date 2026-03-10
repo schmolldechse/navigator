@@ -6,7 +6,21 @@ export const vBaseMetricDataPointBase = v.object({
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
-export const vBaseMetricDataPointTimestampMetricDataPoint = v.object({
+export const vBaseMetricDataPointStationDataPoint = v.object({
+	$type: v.picklist(["evaNumber"]),
+	evaNumber: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
+});
+
+export const vBaseMetricDataPointTimestampDataPoint = v.object({
 	$type: v.picklist(["timestamp"]),
 	timestamp: v.pipe(v.string(), v.isoTimestamp()),
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
@@ -224,21 +238,17 @@ export const vMetricSeriesType = v.picklist([
 	"RIS_IDS_INACTIVE",
 	"JOURNEY_TOTAL",
 	"TRANSPORT_TYPES_TOTAL",
-	"GLOBAL_STOP_ARRIVALS",
-	"GLOBAL_STOP_ARRIVAL_CANCELLATIONS",
-	"GLOBAL_STOP_ARRIVAL_DELAY_SUM",
-	"GLOBAL_STOP_DEPARTURES",
-	"GLOBAL_STOP_DEPARTURE_CANCELLATIONS",
-	"GLOBAL_STOP_DEPARTURE_DELAY_SUM"
+	"HOURLY_GLOBAL_ARRIVALS",
+	"HOURLY_GLOBAL_ARRIVAL_CANCELLATIONS",
+	"HOURLY_GLOBAL_ARRIVAL_DELAY_SUM",
+	"HOURLY_GLOBAL_DEPARTURES",
+	"HOURLY_GLOBAL_DEPARTURE_CANCELLATIONS",
+	"HOURLY_GLOBAL_DEPARTURE_DELAY_SUM",
+	"STATION_ARRIVALS",
+	"STATION_ARRIVAL_CANCELLATIONS",
+	"STATION_DEPARTURES",
+	"STATION_DEPARTURE_CANCELLATIONS"
 ]);
-
-export const vMetricSummary = v.object({
-	startValue: v.optional(v.union([v.null(), v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])),
-	endValue: v.optional(v.union([v.null(), v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])),
-	absoluteChange: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))]),
-	minValue: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))]),
-	maxValue: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
-});
 
 export const vMetricUnit = v.picklist(["BYTES", "COUNT", "SECONDS"]);
 
@@ -337,6 +347,15 @@ export const vBaseStation = v.object({
 	name: v.string(),
 	position: vStationPosition
 });
+
+export const vStationSnapshotType = v.picklist([
+	"ARRIVALS",
+	"ARRIVAL_CANCELLATIONS",
+	"ARRIVAL_DELAY_AVG",
+	"DEPARTURES",
+	"DEPARTURE_CANCELLATIONS",
+	"DEPARTURE_DELAY_AVG"
+]);
 
 export const vTimetableEntryAdministration = v.object({
 	administrationId: v.string(),
@@ -498,28 +517,29 @@ export const vTransportType = v.picklist([
 	"WALK"
 ]);
 
-export const vBaseMetricDataPointTimestampTransportTypeMetricDataPoint = v.object({
+export const vBaseMetricDataPointTimestampTransportTypeDataPoint = v.object({
 	$type: v.picklist(["timestampTransportType"]),
 	timestamp: v.pipe(v.string(), v.isoTimestamp()),
 	transportType: vTransportType,
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
-export const vBaseMetricDataPointTransportTypeMetricDataPoint = v.object({
+export const vBaseMetricDataPointTransportTypeDataPoint = v.object({
 	$type: v.picklist(["transportType"]),
 	transportType: vTransportType,
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
 export const vBaseMetricDataPoint = v.union([
-	vBaseMetricDataPointTimestampMetricDataPoint,
-	vBaseMetricDataPointTransportTypeMetricDataPoint,
-	vBaseMetricDataPointTimestampTransportTypeMetricDataPoint,
+	vBaseMetricDataPointTimestampDataPoint,
+	vBaseMetricDataPointTransportTypeDataPoint,
+	vBaseMetricDataPointTimestampTransportTypeDataPoint,
+	vBaseMetricDataPointStationDataPoint,
 	vBaseMetricDataPointBase
 ]);
 
-export const vBaseMetricRequestGlobalStopSummaryMetricRequest = v.object({
-	queryType: v.optional(v.picklist(["GLOBAL_STOP_SUMMARY"])),
+export const vBaseMetricRequestHourlyTransportSnapshotMetricRequest = v.object({
+	queryType: v.optional(v.picklist(["HOURLY_TRANSPORT_SNAPSHOT"])),
 	start: v.pipe(v.string(), v.isoTimestamp()),
 	end: v.pipe(v.string(), v.isoTimestamp()),
 	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)])),
@@ -532,6 +552,30 @@ export const vBaseMetricRequestGlobalStopSummaryMetricRequest = v.object({
 				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
 			),
 			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+		])
+	)
+});
+
+export const vBaseMetricRequestStationSummaryMetricRequest = v.object({
+	queryType: v.optional(v.picklist(["STATION_SUMMARY"])),
+	snapshot: vStationSnapshotType,
+	start: v.optional(v.union([v.null(), v.pipe(v.string(), v.isoTimestamp())])),
+	end: v.pipe(v.string(), v.isoTimestamp()),
+	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)])),
+	evaNumbers: v.optional(
+		v.union([
+			v.null(),
+			v.array(
+				v.union([
+					v.pipe(
+						v.number(),
+						v.integer(),
+						v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+						v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+					),
+					v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+				])
+			)
 		])
 	)
 });
@@ -569,9 +613,15 @@ export const vBaseMetricRequest = v.union([
 	]),
 	v.intersect([
 		v.object({
-			queryType: v.optional(v.literal("GLOBAL_STOP_SUMMARY"))
+			queryType: v.optional(v.literal("HOURLY_TRANSPORT_SNAPSHOT"))
 		}),
-		vBaseMetricRequestGlobalStopSummaryMetricRequest
+		vBaseMetricRequestHourlyTransportSnapshotMetricRequest
+	]),
+	v.intersect([
+		v.object({
+			queryType: v.optional(v.literal("STATION_SUMMARY"))
+		}),
+		vBaseMetricRequestStationSummaryMetricRequest
 	])
 ]);
 
@@ -615,7 +665,6 @@ export const vJourney = v.object({
 export const vMetricSeries = v.object({
 	seriesType: vMetricSeriesType,
 	unit: vMetricUnit,
-	summary: vMetricSummary,
 	dataPoints: v.array(vBaseMetricDataPoint)
 });
 
@@ -719,32 +768,7 @@ export const vPostApiV1JourneyBatchData = v.object({
  */
 export const vPostApiV1JourneyBatchResponse = v.array(vJourney);
 
-export const vGetApiV1StationsData = v.object({
-	body: v.optional(v.never()),
-	path: v.optional(v.never()),
-	query: v.optional(
-		v.object({
-			evaNumber: v.optional(
-				v.union([
-					v.pipe(
-						v.number(),
-						v.integer(),
-						v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-						v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-					),
-					v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-				])
-			)
-		})
-	)
-});
-
-/**
- * OK
- */
-export const vGetApiV1StationsResponse = vStation;
-
-export const vPostApiV1StationsData = v.object({
+export const vPostApiV1StationsSearchData = v.object({
 	body: vStationBySerchtermRequest,
 	path: v.optional(v.never()),
 	query: v.optional(v.never())
@@ -753,7 +777,7 @@ export const vPostApiV1StationsData = v.object({
 /**
  * OK
  */
-export const vPostApiV1StationsResponse = v.array(vStation);
+export const vPostApiV1StationsSearchResponse = v.array(vStation);
 
 export const vPostApiV1StationsNearbyData = v.object({
 	body: vStationByGeographicCoordinatesRequest,
@@ -763,30 +787,62 @@ export const vPostApiV1StationsNearbyData = v.object({
 
 export const vPostApiV1StationsNearbyResponse = v.union([v.array(vBaseStation), v.void()]);
 
-export const vGetApiV1StationsGatheringData = v.object({
+export const vGetApiV1StationsByEvaNumberData = v.object({
 	body: v.optional(v.never()),
-	path: v.optional(v.never()),
-	query: v.optional(
-		v.object({
-			evaNumber: v.optional(
-				v.union([
-					v.pipe(
-						v.number(),
-						v.integer(),
-						v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-						v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-					),
-					v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-				])
-			)
-		})
-	)
+	path: v.object({
+		evaNumber: v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+		)
+	}),
+	query: v.optional(v.never())
 });
 
 /**
  * OK
  */
-export const vGetApiV1StationsGatheringResponse = vStationGatheringInfo;
+export const vGetApiV1StationsByEvaNumberResponse = vStation;
+
+export const vGetApiV1StationsByEvaNumberGatheringData = v.object({
+	body: v.optional(v.never()),
+	path: v.object({
+		evaNumber: v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+		)
+	}),
+	query: v.optional(v.never())
+});
+
+/**
+ * OK
+ */
+export const vGetApiV1StationsByEvaNumberGatheringResponse = vStationGatheringInfo;
+
+export const vPostApiV1StationsBatchData = v.object({
+	body: v.array(
+		v.union([
+			v.pipe(
+				v.number(),
+				v.integer(),
+				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			),
+			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+		])
+	),
+	path: v.optional(v.never()),
+	query: v.optional(v.never())
+});
+
+/**
+ * OK
+ */
+export const vPostApiV1StationsBatchResponse = vBaseStation;
 
 export const vPostApiV1StatisticsMetricsData = v.object({
 	body: vBaseMetricRequest,

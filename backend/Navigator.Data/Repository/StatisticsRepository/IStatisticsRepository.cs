@@ -8,7 +8,8 @@ public interface IStatisticsRepository
     Task<long?> EstimateCurrentDatabaseSizeAsync();
     Task<(int Active, int Inactive)?> EstimateCurrentRisIdsAsync();
     Task<int?> EstimateCurrentJourneysAsync();
-    Task RefreshHourlyStopView();
+    Task RefreshHourlyTransportView();
+    Task RefreshHourlyStationView();
 
     Task<IEnumerable<MetricSeries>> GetMetricAsync(BaseMetricRequest request);
 

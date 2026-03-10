@@ -2,11 +2,11 @@ import { type MetricSeries } from "@lib/api";
 
 const calculateChange = (metrics: MetricSeries[]): { percentage: number; isUp: boolean } => {
 	const endValue = metrics.reduce((a, metric: MetricSeries) => {
-		const value = Number(metric.summary.endValue);
+		const value = Number(metric.dataPoints[metric.dataPoints.length - 1].value);
 		return a + (isNaN(value) ? 0 : value);
 	}, 0);
 	const startValue = metrics.reduce((a, metric: MetricSeries) => {
-		const value = Number(metric.summary.startValue);
+		const value = Number(metric.dataPoints[0].value);
 		return a + (isNaN(value) ? 0 : value);
 	}, 0);
 	const changedBy = endValue - startValue;

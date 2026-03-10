@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Activity from "@lucide/svelte/icons/activity";
 	import X from "@lucide/svelte/icons/x";
-	import { getStationGatheringInfo } from "../../remote/geostation.remote";
+	import { getStationGatheringInfo } from "@lib/remote/station.remote";
 	import { DateTime } from "luxon";
 	import { onMount, type Component } from "svelte";
 	import LongDistance from "../icons/transport-types/LongDistance.svelte";

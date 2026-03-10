@@ -20,14 +20,14 @@ public class JourneyController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [EndpointSummary("Journey by ID")]
     [EndpointDescription("Retrieves a single journey by its unique journey ID. The journey ID (max 82 characters) is expected to encode a date (yyyyMMdd) in the first 8 characters followed by the journey identifier.")]
-    public async Task<IActionResult> GetJourney([FromQuery] [MaxLength(82)] string journeyId)
+    public async Task<IActionResult> GetJourney([FromQuery][MaxLength(82)] string journeyId)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var journey = await journeyRepository.GetJourneyAsync(journeyId);
         return Ok(mapper.Map<Journey>(journey));
     }
-    
+
     [HttpPost("batch")]
     [ProducesResponseType<IEnumerable<Journey>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

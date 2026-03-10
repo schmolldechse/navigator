@@ -111,6 +111,11 @@ public class StationRepository(
             LIMIT {request.Limit}")
         .ToListAsync();
 
+
+    public async Task<IEnumerable<Station>> GetStationBatch(IEnumerable<int> evaNumbers) => await dataContext.Stations
+        .Where(station => evaNumbers.Contains(station.EvaNumber))
+        .ToListAsync();
+
     public async Task<Station?> GetRandomStationAsync(ShuffledStationRequest request) => await dataContext.Stations
         .Include(station => station.Ril100)
         .Include(station => station.Transports)

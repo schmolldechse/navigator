@@ -31,7 +31,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<JourneyStopPlaceMessage> JourneyStopPlaceMessages { get; set; }
 
     // views
-    public DbSet<HourlyStopSummary> HourlyStopSummaries { get; set; }
+    public DbSet<HourlyStationSnapshot> HourlyStationSnapshots { get; set; }
+    public DbSet<HourlyTransportSnapshot> HourlyTransportSnapshots { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -40,13 +41,20 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
             .HasPostgresExtension("earthdistance");
 
         // views
-        modelBuilder.Entity<HourlyStopSummary>(entity =>
+        modelBuilder.Entity<HourlyTransportSnapshot>(entity =>
         {
             entity.HasNoKey();
-            entity.ToView("hourly_stop_summary", "statistics");
-            entity.ToTable("hourly_stop_summary", "statistics", table => table.ExcludeFromMigrations());
+            entity.ToView("hourly_transport_snapshots", "statistics");
+            entity.ToTable("hourly_transport_snapshots", "statistics", table => table.ExcludeFromMigrations());
         });
 
+        modelBuilder.Entity<HourlyStationSnapshot>(entity => {
+            entity.HasNoKey();
+            entity.ToView("hourly_station_snapshots", "statistics");
+            entity.ToTable("hourly_station_snapshots", "statistics", table => table.ExcludeFromMigrations());
+        });
+
+        // tables
         modelBuilder.Entity<Station>(entity =>
         {
             entity.HasMany(station => station.Ril100)

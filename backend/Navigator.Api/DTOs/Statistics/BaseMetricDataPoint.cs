@@ -3,9 +3,10 @@ using System.Text.Json.Serialization;
 
 namespace Navigator.Api.DTOs.Statistics;
 
-[JsonDerivedType(typeof(TimestampMetricDataPoint), typeDiscriminator: "timestamp")]
-[JsonDerivedType(typeof(TransportTypeMetricDataPoint), typeDiscriminator: "transportType")]
-[JsonDerivedType(typeof(TimestampTransportTypeMetricDataPoint), typeDiscriminator: "timestampTransportType")]
+[JsonDerivedType(typeof(TimestampDataPoint), typeDiscriminator: "timestamp")]
+[JsonDerivedType(typeof(TransportTypeDataPoint), typeDiscriminator: "transportType")]
+[JsonDerivedType(typeof(TimestampTransportTypeDataPoint), typeDiscriminator: "timestampTransportType")]
+[JsonDerivedType(typeof(StationDataPoint), typeDiscriminator: "evaNumber")]
 [JsonPolymorphic(UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FallBackToBaseType)]
 public class BaseMetricDataPoint
 {

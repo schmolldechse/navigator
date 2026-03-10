@@ -11,6 +11,7 @@ public interface IStationRepository
     Task<IEnumerable<RisStations.StopPlaceSearchResult>> GetRisStationsByCoordinatesAsync(RisStationsByCoordinatesRequest request);
     Task<IEnumerable<StaDa.Station>> GetStaDaAsync();
     Task<IEnumerable<Station>> GetStationsByCoordinatesAsync(StationsByCoordinateRequest dto);
+    Task<IEnumerable<Station>> GetStationBatch(IEnumerable<int> evaNumbers);
     Task<Station?> GetRandomStationAsync(ShuffledStationRequest request);
     Task<Station?> GetByEvaNumberAsync(int evaNumber);
     Task SaveStationsAsync(IEnumerable<Station> stations);

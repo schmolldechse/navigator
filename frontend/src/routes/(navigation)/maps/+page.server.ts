@@ -1,4 +1,4 @@
-import { findNearbyStations } from "$lib/remote/geostation.remote";
+import { findNearbyStations } from "@lib/remote/station.remote";
 import type { BaseStation } from "@lib/api";
 import type { PageServerLoad } from "./$types";
 

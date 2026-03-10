@@ -4,16 +4,16 @@
 	import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
-	import SettingsDialog from "@lib/components/statistics/settings/SettingsDialog.svelte";
-	import DatabaseSize from "@lib/components/statistics/projectdimensions/DatabaseSize.svelte";
-	import RecordedJourneys from "@lib/components/statistics/projectdimensions/RecordedJourneys.svelte";
-	import TransportTypeDistribution from "@lib/components/statistics/projectdimensions/TransportTypeDistribution.svelte";
-	import RecordedRisIds from "@lib/components/statistics/projectdimensions/risids/RecordedRisIds.svelte";
-	import HourlyStopRate from "@lib/components/statistics/projectdimensions/globalstop/HourlyStopRate.svelte";
-	import DelayAnalysis from "@lib/components/statistics/projectdimensions/globalstop/stopdelayanalysis/DelayAnalysis.svelte";
-	import CancellationRate from "@lib/components/statistics/projectdimensions/globalstop/cancellationrate/CancellationRate.svelte";
-	import { CardScale } from "@lib/util/card.js";
-	import { TransportType } from "@lib/api/types.gen.js";
+	import ProjectDimensionsSettingsDialog from "@lib/components/projectdimensions/settings/ProjectDimensionsSettingsDialog.svelte";
+	import DatabaseSize from "@lib/components/projectdimensions/charts/DatabaseSize.svelte";
+	import RecordedJourneys from "@lib/components/projectdimensions/charts/RecordedJourneys.svelte";
+	import TransportTypeDistribution from "@lib/components/projectdimensions/charts/TransportTypeDistribution.svelte";
+	import RecordedRisIds from "@lib/components/projectdimensions/charts/risids/RecordedRisIds.svelte";
+	import HourlyStopRate from "@lib/components/projectdimensions/charts/HourlyStopRate.svelte";
+	import DelayAnalysis from "@lib/components/projectdimensions/charts/stopdelayanalysis/DelayAnalysis.svelte";
+	import CancellationRate from "@lib/components/projectdimensions/charts/cancellationrate/CancellationRate.svelte";
+	import { CardScale } from "@lib/util/card";
+	import { TransportType } from "@lib/api/types.gen";
 
 	let { data } = $props();
 
@@ -56,21 +56,21 @@
 		{
 			metricComponent: HourlyStopRate,
 			props: {
-				promise: data.dimensions.stopSummary
+				promise: data.dimensions.hourlyTransports
 			},
 			scale: CardScale.LARGE
 		},
 		{
 			metricComponent: DelayAnalysis,
 			props: {
-				promise: data.dimensions.stopSummary
+				promise: data.dimensions.hourlyTransports
 			},
 			scale: CardScale.LARGE
 		},
 		{
 			metricComponent: CancellationRate,
 			props: {
-				promise: data.dimensions.stopSummary
+				promise: data.dimensions.hourlyTransports
 			},
 			scale: CardScale.LARGE
 		}
@@ -150,7 +150,7 @@
 					</div>
 				</button>
 
-				<SettingsDialog
+				<ProjectDimensionsSettingsDialog
 					bind:isVisible={isSettingsOpen}
 					dates={{ start: data.timerange.start, end: data.timerange.end }}
 					onapply={async ({ start, end, filter }) => {

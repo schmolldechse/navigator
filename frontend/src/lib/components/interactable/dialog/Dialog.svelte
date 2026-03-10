@@ -5,11 +5,12 @@
 	type Props = {
 		isVisible: boolean;
 		isModal?: boolean;
+		title: string | Snippet;
 		children: Snippet;
 		class?: ClassValue;
 		onclose?: () => void;
 	};
-	let { isVisible = $bindable(false), isModal = false, children, class: classNames, onclose }: Props = $props();
+	let { isVisible = $bindable(false), isModal = false, title, children, class: classNames, onclose }: Props = $props();
 
 	let dialog: HTMLDialogElement | undefined = $state(undefined);
 
@@ -45,7 +46,23 @@
 	onclick={handleDialogClick}
 	class={["bg-background border-muted-foreground/20 z-100 rounded-lg border-2", classNames]}
 >
-	{@render children()}
+	<div class="flex flex-col space-y-3 p-2">
+		{#if typeof title === "string"}
+			<h3 class="text-muted-foreground text-xl font-semibold">{title}</h3>
+		{:else}
+			{@render title()}
+		{/if}
+
+		{@render children()}
+
+		<!-- Actions -->
+		<button
+			class="bg-accent text-background hover:bg-accent/90 cursor-pointer self-end rounded-lg px-4 py-1.5 font-semibold transition-colors"
+			onclick={handleClose}
+		>
+			Done
+		</button>
+	</div>
 </dialog>
 
 <style>

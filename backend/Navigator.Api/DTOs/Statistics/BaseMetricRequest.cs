@@ -10,7 +10,8 @@ namespace Navigator.Api.DTOs.Statistics;
 [JsonDerivedType(typeof(RisIdSnapshotMetricRequest), "RIS_ID_SNAPSHOT")]
 [JsonDerivedType(typeof(JourneySnapshotMetricRequest), "JOURNEY_SNAPSHOT")]
 [JsonDerivedType(typeof(TransportTypeDistributionMetricRequest), "TRANSPORT_TYPE_DISTRIBUTION")]
-[JsonDerivedType(typeof(GlobalStopSummaryMetricRequest), "GLOBAL_STOP_SUMMARY")]
+[JsonDerivedType(typeof(HourlyTransportSnapshotMetricRequest), "HOURLY_TRANSPORT_SNAPSHOT")]
+[JsonDerivedType(typeof(StationSummaryMetricRequest), "STATION_SUMMARY")]
 public abstract class BaseMetricRequest : IValidatableObject
 {
     [JsonIgnore]
