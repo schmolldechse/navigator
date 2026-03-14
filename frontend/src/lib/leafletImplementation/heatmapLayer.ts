@@ -1,25 +1,16 @@
 import { DomUtil, Layer, Map } from "leaflet";
+import { interpolateTurbo } from "d3-scale-chromatic";
 
-type Gradient = {
-	[key: number]: string;
-};
+type ColorScale = (t: number) => string;
 
 // [latitude, longitude, intensity]
 type HeatPoint = [number, number, number];
-
-const DEFAULT_GRADIENT: Gradient = {
-	0.0: "#440154",
-	0.25: "#3b528b",
-	0.5: "#21918c",
-	0.75: "#5ec962",
-	1.0: "#fde725"
-};
 
 type HeatmapOptions = {
 	radius?: number;
 	blur?: number;
 	maxIntensity?: number;
-	gradient?: Gradient;
+	gradient?: ColorScale;
 };
 
 /**
@@ -36,7 +27,7 @@ class HeatmapLayer extends Layer {
 	private _radius: number;
 	private _blur: number;
 	private _maxIntensity: number;
-	private _gradient: Gradient;
+	private _gradient: ColorScale;
 
 	constructor(data: HeatPoint[] = [], options: HeatmapOptions = {}) {
 		super();
@@ -44,7 +35,7 @@ class HeatmapLayer extends Layer {
 		this._radius = options.radius ?? 25;
 		this._blur = options.blur ?? 15;
 		this._maxIntensity = options.maxIntensity ?? 0;
-		this._gradient = options.gradient ?? DEFAULT_GRADIENT;
+		this._gradient = options.gradient ?? interpolateTurbo;
 	}
 
 	onAdd(map: Map): this {
@@ -94,9 +85,10 @@ class HeatmapLayer extends Layer {
 		const ctx = paletteCanvas.getContext("2d")!;
 
 		const grad = ctx.createLinearGradient(0, 0, 256, 0);
-		for (const [stop, color] of Object.entries(this._gradient)) {
-			grad.addColorStop(parseFloat(stop), color);
+		for (let i = 0; i <= 20; i++) {
+			grad.addColorStop(i / 20, this._gradient(i / 20));
 		}
+
 		ctx.fillStyle = grad;
 		ctx.fillRect(0, 0, 256, 1);
 

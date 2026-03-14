@@ -5,7 +5,6 @@
 	import Suburban from "@lib/components/icons/transport-types/Suburban.svelte";
 	import Bus from "@lib/components/icons/transport-types/Bus.svelte";
 	import { TransportType } from "@lib/api";
-	import type { TransportFilterOption } from "@lib/components/interactable/filters/TransportFilter.svelte";
 
 	const availableTransportFilters: TransportFilterOption[] = [
 		{
@@ -37,10 +36,20 @@
 		{ id: "bus", label: "Bus", icon: Bus, transportTypes: [TransportType.BUS] }
 	];
 
+	type StationHeatmapSettings = {
+		dates: {
+			start: DateTime;
+			end: DateTime;
+		};
+		scheduleType: StationHeatmapScheduleType;
+		plotType: StationHeatmapPlotType;
+		transportTypes: TransportType[];
+	};
+
 	type StationHeatmapScheduleType = "arrivals" | "departures";
 	type StationHeatmapPlotType = "count" | "cancellations" | "delay_avg";
 
-	export { type StationHeatmapScheduleType, type StationHeatmapPlotType };
+	export { type StationHeatmapScheduleType, type StationHeatmapPlotType, type StationHeatmapSettings };
 </script>
 
 <script lang="ts">
@@ -52,53 +61,30 @@
 	import type { ClassValue } from "svelte/elements";
 	import type { ToggleStateOption } from "@lib/components/interactable/togglestate/ToggleStateGroup.svelte";
 	import ToggleStateGroup from "@lib/components/interactable/togglestate/ToggleStateGroup.svelte";
+	import type { TransportFilterOption } from "@lib/components/interactable/filters/TransportFilter.svelte";
 
 	type Props = {
 		isVisible: boolean;
-		initialDates: {
-			start: DateTime;
-			end: DateTime;
-		};
-		initialScheduleType: StationHeatmapScheduleType;
-		initialPlotType: StationHeatmapPlotType;
-		initialTransportTypes: TransportType[];
-		onapply: (params: {
-			start: DateTime;
-			end: DateTime;
-			scheduleType: StationHeatmapScheduleType;
-			plotType: StationHeatmapPlotType;
-			transportTypes: TransportType[];
-		}) => void;
+		initialSettings: StationHeatmapSettings;
+		onapply: (settings: StationHeatmapSettings) => void;
 		class?: ClassValue;
 	};
-	let {
-		isVisible = $bindable(false),
-		initialDates,
-		initialScheduleType,
-		initialPlotType,
-		initialTransportTypes,
-		onapply,
-		class: classNames
-	}: Props = $props();
+	let { isVisible = $bindable(false), initialSettings, onapply, class: classNames }: Props = $props();
 
-	// svelte_ignore state_referenced_locally
-	let localTimerange: { start: DateTime; end: DateTime } = $state(initialDates);
-	// svelte_ignore state_referenced_locally
-	let localTransportFilter: TransportType[] = $state(initialTransportTypes);
-	// svelte_ignore state_referenced_locally
-	let localScheduleType: StationHeatmapScheduleType = $state(initialScheduleType);
-	// svelte_ignore state_referenced_locally
-	let localPlotType: StationHeatmapPlotType = $state(initialPlotType);
+	// svelte-ignore state_referenced_locally
+	let localSettings: StationHeatmapSettings = $state(initialSettings);
 
 	const handleClose = () => {
-		if (!localTimerange.start.isValid || !localTimerange.end?.isValid) return;
+		if (!localSettings.dates.start.isValid || !localSettings.dates.end?.isValid) return;
 
 		onapply({
-			start: localTimerange.start,
-			end: localTimerange.end!,
-			scheduleType: localScheduleType,
-			plotType: localPlotType,
-			transportTypes: localTransportFilter
+			dates: {
+				start: localSettings.dates.start,
+				end: localSettings.dates.end!
+			},
+			scheduleType: localSettings.scheduleType,
+			plotType: localSettings.plotType,
+			transportTypes: localSettings.transportTypes
 		});
 	};
 </script>
@@ -109,10 +95,10 @@
 		<DialogItem title="Timerange" class="col-span-2 sm:col-span-1">
 			<TimePicker
 				multiSelect
-				dates={localTimerange}
+				dates={localSettings.dates}
 				onchange={({ start, end }) => {
 					if (!end) return;
-					localTimerange = { start, end };
+					localSettings.dates = { start, end };
 				}}
 			/>
 		</DialogItem>
@@ -124,12 +110,14 @@
 					{ id: "arrivals", value: "Arrivals" },
 					{ id: "departures", value: "Departures" }
 				]}
-				{@const scheduleTypeOption = scheduleTypeOptions.find((option: ToggleStateOption) => option.id === localScheduleType)!}
+				{@const scheduleTypeOption = scheduleTypeOptions.find(
+					(option: ToggleStateOption) => option.id === localSettings.scheduleType
+				)!}
 
 				<ToggleStateGroup
 					options={scheduleTypeOptions}
 					selected={scheduleTypeOption}
-					onselect={(option: ToggleStateOption) => (localScheduleType = option.id as StationHeatmapScheduleType)}
+					onselect={(option: ToggleStateOption) => (localSettings.scheduleType = option.id as StationHeatmapScheduleType)}
 				/>
 			</DialogItem>
 
@@ -140,12 +128,12 @@
 					{ id: "cancellations", value: "Cancellations" },
 					{ id: "delay_avg", value: "Delay (avg)" }
 				]}
-				{@const snapshotOption = snapshotOptions.find((option: ToggleStateOption) => option.id === localPlotType)!}
+				{@const snapshotOption = snapshotOptions.find((option: ToggleStateOption) => option.id === localSettings.plotType)!}
 
 				<ToggleStateGroup
 					options={snapshotOptions}
 					selected={snapshotOption}
-					onselect={(option: ToggleStateOption) => (localPlotType = option.id as StationHeatmapPlotType)}
+					onselect={(option: ToggleStateOption) => (localSettings.plotType = option.id as StationHeatmapPlotType)}
 				/>
 			</DialogItem>
 		</div>
@@ -154,7 +142,7 @@
 			<TransportFilter
 				options={availableTransportFilters}
 				includeTotalFilter
-				onchange={(transportTypes: TransportType[]) => (localTransportFilter = transportTypes)}
+				onchange={(transportTypes: TransportType[]) => (localSettings.transportTypes = transportTypes)}
 			/>
 		</DialogItem>
 	</div>

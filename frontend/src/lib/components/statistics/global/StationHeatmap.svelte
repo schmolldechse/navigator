@@ -1,15 +1,25 @@
+<script module lang="ts">
+	type StationHeatmapPoint = {
+		station: BaseStation;
+		value: number;
+	};
+
+	export { type StationHeatmapPoint };
+</script>
+
 <script lang="ts">
 	import { onMount } from "svelte";
 	import "leaflet/dist/leaflet.css";
-	import { Map as LeafletMap, TileLayer, LatLngBounds } from "leaflet";
+	import { Map as LeafletMap, TileLayer } from "leaflet";
 	import { HeatmapLayer, type HeatPoint } from "@lib/leafletImplementation/heatmapLayer";
+	import { type BaseStation } from "@lib/api";
 
-	interface Props {
-		heatPoints: HeatPoint[];
+	type Props = {
+		stationHeatmapPoints: StationHeatmapPoint[];
 		class?: string;
-	}
+	};
 
-	let { heatPoints, class: classes = "" }: Props = $props();
+	let { stationHeatmapPoints, class: classes = "" }: Props = $props();
 
 	let mapContainer: HTMLDivElement | undefined = $state(undefined);
 
@@ -36,20 +46,21 @@
 	});
 
 	const updateHeatmap = () => {
-		if (!map || !heatLayer || heatPoints.length === 0) return;
+		if (!map || !heatLayer || stationHeatmapPoints.length === 0) return;
 
-		heatLayer.setData(heatPoints);
-
-		// fit map bounds to the data points with padding
-		const bounds = new LatLngBounds(heatPoints.map((p) => [p[0], p[1]]));
-		map.fitBounds(bounds, { padding: [40, 40] });
+		const heatmapPoints = stationHeatmapPoints.map((point: StationHeatmapPoint) => [
+			Number(point.station.position.latitude),
+			Number(point.station.position.longitude),
+			point.value
+		]) as HeatPoint[];
+		heatLayer.setData(heatmapPoints);
 	};
 
 	$effect(() => {
-		// reactive dependency on heatPoints
-		if (heatPoints && map && heatLayer) {
-			updateHeatmap();
-		}
+		if (!map || !heatLayer) return;
+		if (!stationHeatmapPoints) return;
+
+		updateHeatmap();
 	});
 </script>
 
