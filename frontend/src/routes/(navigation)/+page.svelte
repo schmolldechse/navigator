@@ -14,8 +14,10 @@
 	import CancellationRate from "@lib/components/projectdimensions/charts/cancellationrate/CancellationRate.svelte";
 	import { CardScale } from "@lib/util/card";
 	import { TransportType } from "@lib/api/types.gen";
+	import type { PageProps } from "./$types";
+	import Button from "@lib/components/interactable/button/Button.svelte";
 
-	let { data } = $props();
+	let { data }: PageProps = $props();
 
 	let isSettingsOpen: boolean = $state(false);
 
@@ -134,8 +136,8 @@
 			<h2 class="text-2xl font-medium">Project Dimensions</h2>
 
 			<div class="relative">
-				<button
-					class="bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 flex w-fit cursor-pointer items-center justify-center gap-x-2 rounded-md border px-4 py-2 transition-colors"
+				<Button
+					mode="secondary"
 					onclick={(event: MouseEvent) => {
 						event.stopPropagation();
 						isSettingsOpen = !isSettingsOpen;
@@ -148,7 +150,7 @@
 						<span>&nbsp;–&nbsp;</span>
 						<span class="text-sm tracking-tight">{data.timerange.end?.toLocaleString(DateTime.DATE_MED)}</span>
 					</div>
-				</button>
+				</Button>
 
 				<ProjectDimensionsSettingsDialog
 					bind:isVisible={isSettingsOpen}

@@ -167,18 +167,9 @@
 		<div class="relative flex flex-row items-center justify-between">
 			<h2 class="text-2xl font-medium">Station Heatmap</h2>
 
-			<div class="flex items-center gap-x-2">
-				<Button mode="primary" disabled={isGenerating} onclick={loadHeatmap}>
-					{#if isGenerating}
-						<LoaderCircle size={16} class="animate-spin" />
-					{:else}
-						<Layers size={16} />
-					{/if}
-					<span class="hidden font-medium md:block">Generate</span>
-				</Button>
-
-				<button
-					class="bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 flex w-fit cursor-pointer items-center justify-center gap-x-2 rounded-md border px-4 py-2 transition-colors"
+			<Button
+				mode="secondary"
+				disabled={isGenerating}
 					onclick={(event: MouseEvent) => {
 						event.stopPropagation();
 						isSettingsDialogOpen = !isSettingsDialogOpen;
@@ -191,8 +182,7 @@
 						<span>&nbsp;–&nbsp;</span>
 						<span class="text-sm tracking-tight">{heatmapSettings.dates.end.toLocaleString(DateTime.DATE_MED)}</span>
 					</div>
-				</button>
-			</div>
+			</Button>
 
 			<StationHeatmapSettingsDialog
 				bind:isVisible={isSettingsDialogOpen}

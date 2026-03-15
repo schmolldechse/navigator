@@ -27,7 +27,8 @@
 		mode === "primary" && disabled && "bg-accent/50 text-background/50",
 
 		// secondary
-		mode === "secondary" && "border-muted-foreground/20 bg-muted/10 hover:bg-muted-foreground/10 border",
+		mode === "secondary" && "bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 border",
+		mode === "secondary" && disabled && "bg-muted/50 border-muted-foreground/10",
 
 		// destructive
 		mode === "destructive" && "bg-destructive hover:opacity-90",
