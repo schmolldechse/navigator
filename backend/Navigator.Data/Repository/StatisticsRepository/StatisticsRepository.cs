@@ -331,7 +331,7 @@ public class StatisticsRepository(
                 .Select(element => new StationDataPoint
                 {
                     EvaNumber = element.EvaNumber,
-                    Value = element.ValidArrivals == 0 ? 0 : (decimal) (element.DelaySum / element.ValidArrivals) / 60
+                    Value = element.ValidArrivals == 0 ? 0 : (decimal) element.DelaySum / element.ValidArrivals
                 })
                 .ToListAsync(),
             StationSnapshotType.Departures => await groupedQuery
@@ -350,7 +350,7 @@ public class StatisticsRepository(
                 .Select(element => new StationDataPoint
                 {
                     EvaNumber = element.EvaNumber,
-                    Value = element.ValidDepartures == 0 ? 0 : (decimal) (element.DelaySum / element.ValidDepartures) / 60
+                    Value = element.ValidDepartures == 0 ? 0 : (decimal) element.DelaySum / element.ValidDepartures
                 })
                 .ToListAsync(),
             _ => []
