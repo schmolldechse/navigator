@@ -76,6 +76,28 @@ class HeatmapLayer extends Layer {
 		return this;
 	}
 
+	setOptions(options: Partial<HeatmapOptions>): this {
+		let needsBrushUpdate: boolean = false;
+
+		if (options.radius !== undefined && options.radius !== this._radius) {
+			this._radius = options.radius;
+			needsBrushUpdate = true;
+		}
+
+		if (options.blur !== undefined && options.blur !== this._blur) {
+			this._blur = options.blur;
+			needsBrushUpdate = true;
+		}
+
+		if (options.maxIntensity !== undefined && options.maxIntensity !== this._maxIntensity)
+			this._maxIntensity = options.maxIntensity;
+
+		if (needsBrushUpdate) this._buildCircleBrush();
+
+		this._redraw();
+		return this;
+	}
+
 	/** Build a 256-color palette from the gradient stops */
 	private _buildPalette(): void {
 		const paletteCanvas = document.createElement("canvas");

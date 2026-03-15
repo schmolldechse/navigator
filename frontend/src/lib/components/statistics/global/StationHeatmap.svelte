@@ -38,12 +38,41 @@
 		heatLayer = new HeatmapLayer([], {
 			radius: 20,
 			blur: 15,
-			maxIntensity: 0 // auto-detect
+			maxIntensity: 0
 		});
 		heatLayer.addTo(map);
 
+		map.on("zoomend", () => updateDynamicHeatmapRadius());
+
 		updateHeatmap();
+		updateDynamicHeatmapRadius();
 	});
+
+	const updateDynamicHeatmapRadius = () => {
+		if (!map || !heatLayer) return;
+
+		const zoom = map.getZoom();
+
+		const baseZoom = 14;
+		const baseRadius = 20;
+
+		const scaleFactor = 1.25;
+
+		let dynamicRadius = baseRadius * Math.pow(scaleFactor, zoom - baseZoom);
+
+		const minRadius = 10;
+		const maxRadius = 60;
+
+		dynamicRadius = Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
+
+		const radiusRange = maxRadius - minRadius;
+		const currentProgress = (dynamicRadius - minRadius) / (radiusRange || 1);
+		const blurRatio = 0.8 - currentProgress * 0.4;
+
+		const dynamicBlur = dynamicRadius * blurRatio;
+
+		heatLayer.setOptions({ radius: dynamicRadius, blur: dynamicBlur });
+	};
 
 	const updateHeatmap = () => {
 		if (!map || !heatLayer || stationHeatmapPoints.length === 0) return;
