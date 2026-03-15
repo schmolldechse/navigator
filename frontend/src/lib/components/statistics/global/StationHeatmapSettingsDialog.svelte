@@ -71,8 +71,14 @@
 	};
 	let { isVisible = $bindable(false), initialSettings, onapply, class: classNames }: Props = $props();
 
+	// deep clone to prevent modifying the original settings object before applying
 	// svelte-ignore state_referenced_locally
-	let localSettings: StationHeatmapSettings = $state(initialSettings);
+	let localSettings: StationHeatmapSettings = $state({
+		dates: { start: initialSettings.dates.start, end: initialSettings.dates.end },
+		scheduleType: initialSettings.scheduleType,
+		plotType: initialSettings.plotType,
+		transportTypes: [...initialSettings.transportTypes]
+	});
 
 	const handleClose = () => {
 		if (!localSettings.dates.start.isValid || !localSettings.dates.end?.isValid) return;
@@ -80,7 +86,7 @@
 		onapply({
 			dates: {
 				start: localSettings.dates.start,
-				end: localSettings.dates.end!
+				end: localSettings.dates.end
 			},
 			scheduleType: localSettings.scheduleType,
 			plotType: localSettings.plotType,
@@ -93,14 +99,7 @@
 	<div class="grid grid-cols-2 gap-4">
 		<!-- Timerange Section -->
 		<DialogItem title="Timerange" class="col-span-2 sm:col-span-1">
-			<TimePicker
-				multiSelect
-				dates={localSettings.dates}
-				onchange={({ start, end }) => {
-					if (!end) return;
-					localSettings.dates = { start, end };
-				}}
-			/>
+			<TimePicker multiSelect bind:dates={localSettings.dates} />
 		</DialogItem>
 
 		<div class="flex flex-row space-x-4 sm:flex-col sm:space-y-4 sm:space-x-0">

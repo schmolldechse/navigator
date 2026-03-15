@@ -197,7 +197,11 @@
 			<StationHeatmapSettingsDialog
 				bind:isVisible={isSettingsDialogOpen}
 				initialSettings={heatmapSettings}
-				onapply={(settings: StationHeatmapSettings) => (heatmapSettings = settings)}
+				onapply={(settings: StationHeatmapSettings) =>
+					(heatmapSettings = {
+						...settings,
+						dates: { start: settings.dates.start.startOf("day"), end: settings.dates.end.endOf("day") }
+					})}
 				class="mt-14 self-start justify-self-end"
 			/>
 		</div>
