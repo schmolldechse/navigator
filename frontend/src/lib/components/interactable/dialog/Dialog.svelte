@@ -6,11 +6,20 @@
 		isVisible: boolean;
 		isModal?: boolean;
 		title: string | Snippet;
+		clickOutsideToClose?: boolean;
 		children: Snippet;
 		class?: ClassValue;
 		onclose?: () => void;
 	};
-	let { isVisible = $bindable(false), isModal = false, title, children, class: classNames, onclose }: Props = $props();
+	let {
+		isVisible = $bindable(false),
+		isModal = false,
+		title,
+		clickOutsideToClose = true,
+		children,
+		class: classNames,
+		onclose
+	}: Props = $props();
 
 	let dialog: HTMLDialogElement | undefined = $state(undefined);
 
@@ -29,6 +38,7 @@
 
 	const handleWindowClick = (event: MouseEvent) => {
 		if (!dialog || !isVisible) return;
+		if (!clickOutsideToClose) return;
 		if (!(event.target instanceof Node) || dialog.contains(event.target as Node)) return;
 		handleClose();
 	};

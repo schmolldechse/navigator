@@ -95,16 +95,16 @@
 	};
 </script>
 
-<Dialog bind:isVisible class={["max-w-[650px]", classNames]} title="Settings" onclose={handleClose}>
-	<div class="grid grid-cols-2 gap-4">
+<Dialog bind:isVisible class={["max-w-[750px]", classNames]} title="Settings" onclose={handleClose}>
+	<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
 		<!-- Timerange Section -->
-		<DialogItem title="Timerange" class="col-span-2 sm:col-span-1">
+		<DialogItem title="Timerange" class="col-span-1">
 			<TimePicker multiSelect bind:dates={localSettings.dates} />
 		</DialogItem>
 
-		<div class="flex flex-row space-x-4 sm:flex-col sm:space-y-4 sm:space-x-0">
+		<div class="col-span-1 flex flex-col space-y-4 sm:col-span-2 sm:justify-start">
 			<!-- Schedule Type -->
-			<DialogItem title="Schedule Type" class="sm:col-span-1">
+			<DialogItem title="Schedule Type">
 				{@const scheduleTypeOptions = [
 					{ id: "arrivals", value: "Arrivals" },
 					{ id: "departures", value: "Departures" }
@@ -121,7 +121,7 @@
 			</DialogItem>
 
 			<!-- Snapshot -->
-			<DialogItem title="Snapshot" class="col-span-2">
+			<DialogItem title="Snapshot">
 				{@const snapshotOptions = [
 					{ id: "count", value: "Count" },
 					{ id: "cancellations", value: "Cancellations" },
@@ -135,14 +135,14 @@
 					onselect={(option: ToggleStateOption) => (localSettings.plotType = option.id as StationHeatmapPlotType)}
 				/>
 			</DialogItem>
-		</div>
 
-		<DialogItem title="Transport Types" class="col-span-2">
-			<TransportFilter
-				options={availableTransportFilters}
-				includeTotalFilter
-				onchange={(transportTypes: TransportType[]) => (localSettings.transportTypes = transportTypes)}
-			/>
-		</DialogItem>
+			<DialogItem title="Transport Types">
+				<TransportFilter
+					options={availableTransportFilters}
+					includeTotalFilter
+					onchange={(transportTypes: TransportType[]) => (localSettings.transportTypes = transportTypes)}
+				/>
+			</DialogItem>
+		</div>
 	</div>
 </Dialog>
