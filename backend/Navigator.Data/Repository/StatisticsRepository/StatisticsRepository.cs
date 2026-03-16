@@ -39,12 +39,6 @@ public class StatisticsRepository(
         .AsNoTracking()
         .CountAsync();
 
-    public async Task RefreshHourlyTransportView() => await dataContext.Database
-        .ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW CONCURRENTLY statistics.hourly_transport_snapshots;");
-
-    public async Task RefreshHourlyStationView() => await dataContext.Database
-        .ExecuteSqlRawAsync("REFRESH MATERIALIZED VIEW CONCURRENTLY statistics.hourly_station_snapshots;");
-
     public async Task<IEnumerable<MetricSeries>> GetMetricAsync(BaseMetricRequest request) => request switch
     {
         DatabaseSizeSnapshotMetricRequest => await GetDatabaseSizeMetricsAsync((DatabaseSizeSnapshotMetricRequest) request),
@@ -216,7 +210,7 @@ public class StatisticsRepository(
             ? Enum.GetValues<TransportType>()
             : request.TransportTypes;
 
-        var query = dataContext.HourlyTransportSnapshots
+        var query = dataContext.HourlyStationSnapshots
             .AsNoTracking()
             .Where(summary => summary.BucketHour >= request.Start.UtcDateTime && summary.BucketHour <= request.End.UtcDateTime)
             .Where(summary => request.TransportTypes.Contains(summary.TransportType));

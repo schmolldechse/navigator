@@ -32,21 +32,13 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 
     // views
     public DbSet<HourlyStationSnapshot> HourlyStationSnapshots { get; set; }
-    public DbSet<HourlyTransportSnapshot> HourlyTransportSnapshots { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder
             .HasPostgresExtension("cube")
-            .HasPostgresExtension("earthdistance");
-
-        // views
-        modelBuilder.Entity<HourlyTransportSnapshot>(entity =>
-        {
-            entity.HasNoKey();
-            entity.ToView("hourly_transport_snapshots", "statistics");
-            entity.ToTable("hourly_transport_snapshots", "statistics", table => table.ExcludeFromMigrations());
-        });
+            .HasPostgresExtension("earthdistance")
+            .HasPostgresExtension("pg_cron");
 
         modelBuilder.Entity<HourlyStationSnapshot>(entity => {
             entity.HasNoKey();
