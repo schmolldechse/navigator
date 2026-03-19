@@ -16,10 +16,11 @@
 
 	type Props = {
 		stationHeatmapPoints: StationHeatmapPoint[];
+		scale?: [number, number];
 		class?: string;
 	};
 
-	let { stationHeatmapPoints, class: classes = "" }: Props = $props();
+	let { stationHeatmapPoints, scale = $bindable([0, 100]), class: classes = "" }: Props = $props();
 
 	let mapContainer: HTMLDivElement | undefined = $state(undefined);
 
@@ -42,10 +43,15 @@
 		});
 		heatLayer.addTo(map);
 
-		map.on("zoomend", () => updateDynamicHeatmapRadius());
+		map.on("zoomend", () => {
+			updateDynamicHeatmapRadius();
+			updateScale();
+		});
+		map.on("moveend", () => updateScale());
 
 		updateHeatmap();
 		updateDynamicHeatmapRadius();
+		updateScale();
 	});
 
 	const updateDynamicHeatmapRadius = () => {
@@ -74,15 +80,31 @@
 		heatLayer.setOptions({ radius: dynamicRadius, blur: dynamicBlur });
 	};
 
+	const updateScale = () => {
+		if (!map || !stationHeatmapPoints || stationHeatmapPoints.length === 0) return;
+
+		const bounds = map.getBounds();
+		const visiblePoints = stationHeatmapPoints.filter((point: StationHeatmapPoint) =>
+			bounds.contains([Number(point.station.position.latitude), Number(point.station.position.longitude)])
+		);
+
+		if (visiblePoints.length > 0) {
+			const min = Math.min(...visiblePoints.map((point: StationHeatmapPoint) => point.value));
+			const max = Math.max(...visiblePoints.map((point: StationHeatmapPoint) => point.value));
+			scale = [min, max];
+		} else scale = [0, 100];
+	};
+
 	const updateHeatmap = () => {
 		if (!map || !heatLayer || stationHeatmapPoints.length === 0) return;
 
-		const heatmapPoints = stationHeatmapPoints.map((point: StationHeatmapPoint) => [
+		heatLayer.setData(
+			stationHeatmapPoints.map((point: StationHeatmapPoint) => [
 			Number(point.station.position.latitude),
 			Number(point.station.position.longitude),
 			point.value
-		]) as HeatPoint[];
-		heatLayer.setData(heatmapPoints);
+			]) as HeatPoint[]
+		);
 	};
 
 	$effect(() => {
@@ -90,6 +112,7 @@
 		if (!stationHeatmapPoints) return;
 
 		updateHeatmap();
+		updateScale();
 	});
 </script>
 

@@ -25,6 +25,8 @@
 	import { interpolateTurbo } from "d3-scale-chromatic";
 	import { Legend } from "layerchart";
 	import { scaleSequential } from "d3-scale";
+	import { Tween } from "svelte/motion";
+	import { cubicOut } from "svelte/easing";
 	import Button from "@lib/components/interactable/button/Button.svelte";
 	import { goto } from "$app/navigation";
 	import type { PageProps } from "./$types";
@@ -33,6 +35,10 @@
 
 	let heatmapPointsLoading: boolean = $state(true);
 	let stationHeatmapPoints: StationHeatmapPoint[] = $state([]);
+	const heatmapExtent = new Tween<[number, number]>([0, 100], {
+		duration: 500,
+		easing: cubicOut
+	});
 
 	$effect(() => {
 		data.heatmapPoints
@@ -42,11 +48,6 @@
 
 	// dialog
 	let isSettingsDialogOpen: boolean = $state(false);
-
-	let heatmapExtent: [number, number] = $derived([
-		Math.min(...stationHeatmapPoints.map((point: StationHeatmapPoint) => point.value), 0),
-		Math.max(...stationHeatmapPoints.map((point: StationHeatmapPoint) => point.value), 100)
-	]);
 
 	const legendTitle = $derived(async () =>
 		data.seriesTypes.then((seriesTypes: MetricSeriesType[]) => {
@@ -108,7 +109,11 @@
 
 		<div class="flex flex-col gap-y-4">
 			<div class="relative h-[650px] w-full transition-all duration-300">
-				<StationHeatmap {stationHeatmapPoints} class="border-muted-foreground/10 z-10 h-full w-full rounded-xl border" />
+				<StationHeatmap
+					bind:scale={heatmapExtent.target}
+					{stationHeatmapPoints}
+					class="border-muted-foreground/10 z-10 h-full w-full rounded-xl border"
+				/>
 
 				{#await data.heatmapPoints}
 					<div
@@ -121,9 +126,10 @@
 			</div>
 
 			<Legend
-				scale={scaleSequential(heatmapExtent, interpolateTurbo)}
+				scale={scaleSequential(heatmapExtent.current, interpolateTurbo)}
 				title={await legendTitle()}
 				tickFormat={(value: number) => value.toLocaleString()}
+				class="transition-all duration-300"
 			/>
 		</div>
 	</section>
