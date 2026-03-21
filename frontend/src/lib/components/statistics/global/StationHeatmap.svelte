@@ -96,7 +96,7 @@
 	};
 
 	const updateHeatmap = () => {
-		if (!map || !heatLayer || stationHeatmapPoints.length === 0) return;
+		if (!map || !heatLayer) return;
 
 		heatLayer.setData(
 			stationHeatmapPoints.map((point: StationHeatmapPoint) => [
