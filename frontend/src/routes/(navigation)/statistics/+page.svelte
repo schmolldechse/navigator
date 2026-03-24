@@ -30,6 +30,7 @@
 	import Button from "@lib/components/interactable/button/Button.svelte";
 	import { goto } from "$app/navigation";
 	import type { PageProps } from "./$types";
+	import { setContext } from "svelte";
 
 	let { data }: PageProps = $props();
 
@@ -49,12 +50,15 @@
 	// dialog
 	let isSettingsDialogOpen: boolean = $state(false);
 
-	const legendTitle = $derived(async () =>
+	let seriesType: MetricSeriesType | undefined = $state(undefined);
+
+	$effect(() => {
 		data.seriesTypes.then((seriesTypes: MetricSeriesType[]) => {
-			const translation = translations.find((translation: Translations) => translation.seriesType === seriesTypes[0]);
-			return translation ? translation.title : "Heatmap";
-		})
-	);
+			if (!seriesTypes || seriesTypes.length === 0) return;
+			seriesType = seriesTypes[0];
+			setContext("METRIC_SERIES_TYPE", () => seriesType);
+		});
+	});
 </script>
 
 <svelte:head>
@@ -127,7 +131,8 @@
 
 			<Legend
 				scale={scaleSequential(heatmapExtent.current, interpolateTurbo)}
-				title={await legendTitle()}
+				title={translations.find((translation: Translations) => translation.seriesType === seriesType)?.title ||
+					"Requested metric"}
 				tickFormat={(value: number) => value.toLocaleString()}
 				class="transition-all duration-300"
 			/>

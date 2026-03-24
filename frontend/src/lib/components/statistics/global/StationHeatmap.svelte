@@ -8,16 +8,19 @@
 </script>
 
 <script lang="ts">
-	import { onMount } from "svelte";
+	import { onMount, untrack } from "svelte";
 	import "leaflet/dist/leaflet.css";
-	import { Map as LeafletMap, TileLayer } from "leaflet";
+	import { Map as LeafletMap, TileLayer, type LatLngBounds } from "leaflet";
 	import { HeatmapLayer, type HeatPoint } from "@lib/leafletImplementation/heatmapLayer";
 	import { type BaseStation } from "@lib/api";
+	import type { ClassValue } from "svelte/elements";
+	import HeatmapMarker from "./marker/HeatmapMarker.svelte";
+	import { HeatmapMarker as HeatmapMarkerImpl } from "./marker/HeatmapMarker";
 
 	type Props = {
 		stationHeatmapPoints: StationHeatmapPoint[];
-		scale?: [number, number];
-		class?: string;
+		scale: [number, number];
+		class?: ClassValue;
 	};
 
 	let { stationHeatmapPoints, scale = $bindable([0, 100]), class: classes = "" }: Props = $props();
@@ -25,7 +28,19 @@
 	let mapContainer: HTMLDivElement | undefined = $state(undefined);
 
 	let map: LeafletMap;
+	let mapBounds: LatLngBounds | undefined = $state(undefined);
+
 	let heatLayer: HeatmapLayer;
+
+	let markers = new Map<number, HeatmapMarkerImpl<typeof HeatmapMarker>>();
+
+	let visiblePoints = $derived.by(() => {
+		if (!mapBounds) return [];
+
+		return stationHeatmapPoints.filter((point: StationHeatmapPoint) =>
+			mapBounds!.contains([Number(point.station.position.latitude), Number(point.station.position.longitude)])
+		);
+	});
 
 	onMount(async () => {
 		if (!mapContainer) return;
@@ -44,14 +59,13 @@
 		heatLayer.addTo(map);
 
 		map.on("zoomend", () => {
+			mapBounds = map.getBounds();
 			updateDynamicHeatmapRadius();
-			updateScale();
 		});
-		map.on("moveend", () => updateScale());
+		map.on("moveend", () => (mapBounds = map.getBounds()));
 
-		updateHeatmap();
+		mapBounds = map.getBounds();
 		updateDynamicHeatmapRadius();
-		updateScale();
 	});
 
 	const updateDynamicHeatmapRadius = () => {
@@ -59,21 +73,20 @@
 
 		const zoom = map.getZoom();
 
-		const baseZoom = 14;
-		const baseRadius = 20;
+		const minZoom = 5; // ~5 (country layer)
+		const maxZoom = 18; // ~18 (street layer)
 
-		const scaleFactor = 1.25;
+		const zoomProgress = Math.max(0, Math.min(1, (zoom - minZoom) / (maxZoom - minZoom)));
 
-		let dynamicRadius = baseRadius * Math.pow(scaleFactor, zoom - baseZoom);
+		const minRadius = 7.5; // very small base radius. prevents painting the whole map continuously red when points cluster heavily
+		const maxRadius = 60; // large geographic radius. ensures single stations visibly cover their local surrounding area
 
-		const minRadius = 10;
-		const maxRadius = 60;
+		// exponential scale matches geographic distance zoom mechanics better than pure linear math
+		const dynamicRadius = minRadius + (maxRadius - minRadius) * Math.pow(zoomProgress, 1.5);
 
-		dynamicRadius = Math.max(minRadius, Math.min(maxRadius, dynamicRadius));
-
-		const radiusRange = maxRadius - minRadius;
-		const currentProgress = (dynamicRadius - minRadius) / (radiusRange || 1);
-		const blurRatio = 0.8 - currentProgress * 0.4;
+		// low zoom -> nearly 100% blur ratio (smooths out dense clusters into broad regional "heat" zones, preventing intense hard red dots)
+		// high zoom -> ~35% blur ratio (maintains a solid core heatmap color for an isolated station while gently fading out)
+		const blurRatio = 0.95 - zoomProgress * 0.35;
 
 		const dynamicBlur = dynamicRadius * blurRatio;
 
@@ -83,14 +96,10 @@
 	const updateScale = () => {
 		if (!map || !stationHeatmapPoints || stationHeatmapPoints.length === 0) return;
 
-		const bounds = map.getBounds();
-		const visiblePoints = stationHeatmapPoints.filter((point: StationHeatmapPoint) =>
-			bounds.contains([Number(point.station.position.latitude), Number(point.station.position.longitude)])
-		);
-
 		if (visiblePoints.length > 0) {
 			const min = Math.min(...visiblePoints.map((point: StationHeatmapPoint) => point.value));
 			const max = Math.max(...visiblePoints.map((point: StationHeatmapPoint) => point.value));
+
 			scale = [min, max];
 		} else scale = [0, 100];
 	};
@@ -98,21 +107,63 @@
 	const updateHeatmap = () => {
 		if (!map || !heatLayer) return;
 
+		heatLayer.setOptions({ maxIntensity: scale[1] });
 		heatLayer.setData(
-			stationHeatmapPoints.map((point: StationHeatmapPoint) => [
-			Number(point.station.position.latitude),
-			Number(point.station.position.longitude),
-			point.value
+			visiblePoints.map((point: StationHeatmapPoint) => [
+				Number(point.station.position.latitude),
+				Number(point.station.position.longitude),
+				point.value
 			]) as HeatPoint[]
 		);
 	};
 
+	const updateMarkers = () => {
+		if (!map) return;
+
+		const MARKER_ZOOM_THRESHOLD = 12;
+		if (map.getZoom() < MARKER_ZOOM_THRESHOLD) {
+			for (const marker of markers.values()) {
+				marker.removeFrom(map);
+			}
+			markers.clear();
+			return;
+		}
+
+		const nextVisibleEvaNumbers = new Set(visiblePoints.map((point: StationHeatmapPoint) => Number(point.station.evaNumber)));
+
+		for (const [evaNumber, marker] of markers.entries()) {
+			if (nextVisibleEvaNumbers.has(evaNumber)) continue;
+
+			marker.removeFrom(map);
+			markers.delete(evaNumber);
+		}
+
+		for (const point of visiblePoints) {
+			const evaNumber = Number(point.station.evaNumber);
+			if (markers.has(evaNumber)) continue;
+
+			const marker = new HeatmapMarkerImpl(
+				[Number(point.station.position.latitude), Number(point.station.position.longitude)],
+				HeatmapMarker,
+				{ point }
+			);
+			marker.addTo(map);
+			markers.set(evaNumber, marker);
+		}
+	};
+
 	$effect(() => {
 		if (!map || !heatLayer) return;
-		if (!stationHeatmapPoints) return;
 
-		updateHeatmap();
-		updateScale();
+		// React strictly to visible points (which are derived from stationHeatmapPoints & mapBounds)
+		const currentVisiblePoints = visiblePoints;
+		if (!currentVisiblePoints) return;
+
+		untrack(() => {
+			updateScale();
+			updateHeatmap();
+			updateMarkers();
+		});
 	});
 </script>
 
