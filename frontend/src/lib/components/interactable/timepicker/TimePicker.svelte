@@ -4,7 +4,7 @@
 	import ChevronRight from "@lucide/svelte/icons/chevron-right";
 	import type { ClassValue } from "svelte/elements";
 
-	interface Props {
+	type Props = {
 		multiSelect?: boolean;
 		min?: DateTime;
 		max?: DateTime;
@@ -14,8 +14,7 @@
 		};
 		onchange?: (params: { start: DateTime; end?: DateTime }) => void;
 		class?: ClassValue;
-	}
-
+	};
 	let {
 		multiSelect = false,
 		min,
@@ -57,22 +56,18 @@
 		if (isDayDisabled(date)) return;
 
 		if (!multiSelect) {
-			dates.start = date;
-			dates.end = undefined;
+			dates = { start: date, end: undefined };
 
 			onchange?.({ start: dates.start, end: dates.end });
 			return;
 		}
 
 		if (dates.start && dates.end) {
-			dates.start = date;
-			dates.end = undefined;
+			dates = { start: date, end: undefined };
 		} else if (dates.start && !dates.end) {
-			if (date < dates.start) {
-				dates.end = dates.start;
-				dates.start = date;
-			} else dates.end = date;
-		} else dates.start = date;
+			if (date < dates.start) dates = { start: date, end: dates.start };
+			else dates = { start: dates.start, end: date };
+		} else dates = { start: date, end: undefined };
 
 		onchange?.({ start: dates.start, end: dates.end });
 	};

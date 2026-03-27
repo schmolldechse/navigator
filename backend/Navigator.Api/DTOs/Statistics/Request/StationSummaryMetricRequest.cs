@@ -1,4 +1,4 @@
-﻿using Navigator.Data.Enums;
+using Navigator.Data.Enums;
 using Navigator.Data.Enums.Metric;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -8,12 +8,26 @@ namespace Navigator.Api.DTOs.Statistics.Request;
 
 public class StationSummaryMetricRequest : BaseMetricRequest
 {
+    private static readonly HashSet<MetricSeriesType> ValidSeriesTypes =
+    [
+        MetricSeriesType.StationArrivals,
+        MetricSeriesType.StationArrivalCancellations,
+        MetricSeriesType.StationArrivalDelayAvg,
+        MetricSeriesType.StationDepartures,
+        MetricSeriesType.StationDepartureCancellations,
+        MetricSeriesType.StationDepartureDelayAvg
+    ];
 
-    [JsonIgnore]
-    public override MetricQueryType MetricQueryType => MetricQueryType.TotalStationSnapshot;
-
-    [JsonPropertyName("snapshot")]
-    public required StationSnapshotType SnapshotType { get; set; }
+    [JsonPropertyName("seriesType")]
+    [AllowedValues(
+        MetricSeriesType.StationArrivals,
+        MetricSeriesType.StationArrivalCancellations,
+        MetricSeriesType.StationArrivalDelayAvg,
+        MetricSeriesType.StationDepartures,
+        MetricSeriesType.StationDepartureCancellations,
+        MetricSeriesType.StationDepartureDelayAvg)]
+    [Description("The specific station metric series to retrieve.")]
+    public required MetricSeriesType SeriesType { get; set; }
 
     [JsonPropertyName("start")]
     public DateTimeOffset? Start { get; set; }
@@ -29,9 +43,8 @@ public class StationSummaryMetricRequest : BaseMetricRequest
     [Description("Optional list of EVA numbers to filter the metric by stations. If not provided, all stations will be included.")]
     public int[]? EvaNumbers { get; set; }
 
-    public override Navigator.Data.Models.Statistics.BaseMetricRequest BuildRequest() => new Navigator.Data.Models.Statistics.Request.StationSummaryMetricRequest()
+    public override Navigator.Data.Models.Statistics.BaseMetricRequest BuildRequest() => new Navigator.Data.Models.Statistics.Request.StationSummaryMetricRequest(SeriesType)
     {
-        SnapshotType = SnapshotType,
         Start = Start,
         End = End,
         TransportTypes = TransportTypes,
@@ -45,6 +58,13 @@ public class StationSummaryMetricRequest : BaseMetricRequest
             yield return new ValidationResult(
                 "Start time must be earlier than or equal to end time.",
                 new[] { nameof(Start), nameof(End) });
+        }
+
+        if (!ValidSeriesTypes.Contains(SeriesType))
+        {
+            yield return new ValidationResult(
+                $"SeriesType must be one of: {string.Join(", ", ValidSeriesTypes)}.",
+                new[] { nameof(SeriesType) });
         }
     }
 }

@@ -95,7 +95,7 @@
 	};
 </script>
 
-<Dialog bind:isVisible class={["max-w-[750px]", classNames]} title="Settings" onclose={handleClose}>
+<Dialog bind:isVisible class={["max-w-[750px]", classNames]} title="Heatmap Settings" onclose={handleClose}>
 	<div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
 		<!-- Timerange Section -->
 		<DialogItem title="Timerange" class="col-span-1">

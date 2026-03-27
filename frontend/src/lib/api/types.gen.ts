@@ -16,26 +16,26 @@ export type BaseMetricDataPointBase = {
 };
 
 export type BaseMetricDataPointStationDataPoint = {
-	$type: "evaNumber";
+	$type: $typeEnum;
 	evaNumber: number | string;
 	value: number | string;
 };
 
 export type BaseMetricDataPointTimestampDataPoint = {
-	$type: "timestamp";
+	$type: $typeEnum2;
 	timestamp: string;
 	value: number | string;
 };
 
 export type BaseMetricDataPointTimestampTransportTypeDataPoint = {
-	$type: "timestampTransportType";
+	$type: $typeEnum3;
 	timestamp: string;
 	transportType: TransportType;
 	value: number | string;
 };
 
 export type BaseMetricDataPointTransportTypeDataPoint = {
-	$type: "transportType";
+	$type: $typeEnum4;
 	transportType: TransportType;
 	value: number | string;
 };
@@ -61,13 +61,17 @@ export type BaseMetricRequest =
 	  } & BaseMetricRequestStationSummaryMetricRequest);
 
 export type BaseMetricRequestDatabaseSizeSnapshotMetricRequest = {
-	queryType?: "DATABASE_SIZE_SNAPSHOT";
+	queryType?: QueryTypeEnum;
 	start: string;
 	end: string;
 };
 
 export type BaseMetricRequestHourlyTransportSnapshotMetricRequest = {
-	queryType?: "HOURLY_TRANSPORT_SNAPSHOT";
+	queryType?: QueryTypeEnum2;
+	/**
+	 * The specific hourly transport metric series to retrieve.
+	 */
+	seriesType: MetricSeriesType;
 	start: string;
 	end: string;
 	/**
@@ -81,20 +85,27 @@ export type BaseMetricRequestHourlyTransportSnapshotMetricRequest = {
 };
 
 export type BaseMetricRequestJourneySnapshotMetricRequest = {
-	queryType?: "JOURNEY_SNAPSHOT";
+	queryType?: QueryTypeEnum3;
 	start: string;
 	end: string;
 };
 
 export type BaseMetricRequestRisIdSnapshotMetricRequest = {
-	queryType?: "RIS_ID_SNAPSHOT";
+	queryType?: QueryTypeEnum4;
+	/**
+	 * The specific RIS ID metric series to retrieve. Must be one of: RisIdsActive, RisIdsInactive.
+	 */
+	seriesType: MetricSeriesType;
 	start: string;
 	end: string;
 };
 
 export type BaseMetricRequestStationSummaryMetricRequest = {
-	queryType?: "STATION_SUMMARY";
-	snapshot: StationSnapshotType;
+	queryType?: QueryTypeEnum5;
+	/**
+	 * The specific station metric series to retrieve.
+	 */
+	seriesType: MetricSeriesType;
 	start?: null | string;
 	end: string;
 	/**
@@ -108,7 +119,7 @@ export type BaseMetricRequestStationSummaryMetricRequest = {
 };
 
 export type BaseMetricRequestTransportTypeDistributionMetricRequest = {
-	queryType?: "TRANSPORT_TYPE_DISTRIBUTION";
+	queryType?: QueryTypeEnum6;
 	end: string;
 	/**
 	 * Optional list of transport types to filter the metric by. If not provided, all transport types will be included.
@@ -170,14 +181,14 @@ export type JourneyMessage =
 	  } & JourneyMessageRisQualityDeviationMessage);
 
 export type JourneyMessageAttributeMessage = {
-	type?: "ATTRIBUTE";
+	type?: TypeEnum;
 	messageId: number | string;
 	key: MessageKey;
 	text: string;
 };
 
 export type JourneyMessageDisruptionMessage = {
-	type?: "DISRUPTION";
+	type?: TypeEnum2;
 	cause?: null | string;
 	effect?: null | string;
 	disruptionId?: null | string;
@@ -189,7 +200,7 @@ export type JourneyMessageDisruptionMessage = {
 };
 
 export type JourneyMessageNoteMessage = {
-	type?: "NOTE";
+	type?: TypeEnum3;
 	category?: null | string;
 	textShort?: null | string;
 	references?: null | Array<JourneyMessageReference>;
@@ -205,14 +216,14 @@ export type JourneyMessageReference = {
 };
 
 export type JourneyMessageRisCauseMessage = {
-	type?: "RIS_CAUSE";
+	type?: TypeEnum4;
 	messageId: number | string;
 	key: MessageKey;
 	text: string;
 };
 
 export type JourneyMessageRisQualityDeviationMessage = {
-	type?: "RIS_QUALITY_DEVIATION";
+	type?: TypeEnum5;
 	messageId: number | string;
 	key: MessageKey;
 	text: string;
@@ -399,15 +410,6 @@ export type StationPosition = {
 	longitude: number | string;
 };
 
-export enum StationSnapshotType {
-	ARRIVALS = "ARRIVALS",
-	ARRIVAL_CANCELLATIONS = "ARRIVAL_CANCELLATIONS",
-	ARRIVAL_DELAY_AVG = "ARRIVAL_DELAY_AVG",
-	DEPARTURES = "DEPARTURES",
-	DEPARTURE_CANCELLATIONS = "DEPARTURE_CANCELLATIONS",
-	DEPARTURE_DELAY_AVG = "DEPARTURE_DELAY_AVG"
-}
-
 export type TimetableArrival = {
 	journeyId: string;
 	administration: TimetableEntryAdministration;
@@ -532,6 +534,66 @@ export enum TransportType {
 	BIKE = "BIKE",
 	SCOOTER = "SCOOTER",
 	WALK = "WALK"
+}
+
+export enum $typeEnum {
+	EVA_NUMBER = "evaNumber"
+}
+
+export enum $typeEnum2 {
+	TIMESTAMP = "timestamp"
+}
+
+export enum $typeEnum3 {
+	TIMESTAMP_TRANSPORT_TYPE = "timestampTransportType"
+}
+
+export enum $typeEnum4 {
+	TRANSPORT_TYPE = "transportType"
+}
+
+export enum QueryTypeEnum {
+	DATABASE_SIZE_SNAPSHOT = "DATABASE_SIZE_SNAPSHOT"
+}
+
+export enum QueryTypeEnum2 {
+	HOURLY_TRANSPORT_SNAPSHOT = "HOURLY_TRANSPORT_SNAPSHOT"
+}
+
+export enum QueryTypeEnum3 {
+	JOURNEY_SNAPSHOT = "JOURNEY_SNAPSHOT"
+}
+
+export enum QueryTypeEnum4 {
+	RIS_ID_SNAPSHOT = "RIS_ID_SNAPSHOT"
+}
+
+export enum QueryTypeEnum5 {
+	STATION_SUMMARY = "STATION_SUMMARY"
+}
+
+export enum QueryTypeEnum6 {
+	TRANSPORT_TYPE_DISTRIBUTION = "TRANSPORT_TYPE_DISTRIBUTION"
+}
+
+export enum TypeEnum {
+	ATTRIBUTE = "ATTRIBUTE"
+}
+
+export enum TypeEnum2 {
+	DISRUPTION = "DISRUPTION"
+}
+
+export enum TypeEnum3 {
+	NOTE = "NOTE"
+}
+
+export enum TypeEnum4 {
+	RIS_CAUSE = "RIS_CAUSE"
+}
+
+export enum TypeEnum5 {
+	RIS_QUALITY_DEVIATION = "RIS_QUALITY_DEVIATION"
 }
 
 export type GetApiV1JourneyData = {
@@ -750,7 +812,7 @@ export type PostApiV1StatisticsMetricsResponses = {
 	/**
 	 * OK
 	 */
-	200: Array<MetricSeries>;
+	200: MetricSeries;
 };
 
 export type PostApiV1StatisticsMetricsResponse = PostApiV1StatisticsMetricsResponses[keyof PostApiV1StatisticsMetricsResponses];

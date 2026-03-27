@@ -1,13 +1,15 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
+	import Button from "../Button.svelte";
 
 	type Props = {
 		isVisible: boolean;
 		isModal?: boolean;
-		title: string | Snippet;
+		title?: string | Snippet;
 		clickOutsideToClose?: boolean;
 		children: Snippet;
+		actions?: Snippet;
 		class?: ClassValue;
 		onclose?: () => void;
 	};
@@ -17,6 +19,7 @@
 		title,
 		clickOutsideToClose = true,
 		children,
+		actions,
 		class: classNames,
 		onclose
 	}: Props = $props();
@@ -60,18 +63,17 @@
 		{#if typeof title === "string"}
 			<h3 class="text-muted-foreground text-xl font-semibold">{title}</h3>
 		{:else}
-			{@render title()}
+			{@render title?.()}
 		{/if}
 
 		{@render children()}
 
 		<!-- Actions -->
-		<button
-			class="bg-accent text-background hover:bg-accent/90 cursor-pointer self-end rounded-lg px-4 py-1.5 font-semibold transition-colors"
-			onclick={handleClose}
-		>
-			Done
-		</button>
+		{#if typeof actions === "function"}
+			{@render actions()}
+		{:else}
+			<Button mode="primary" onclick={handleClose} class="ml-auto font-semibold">Done</Button>
+		{/if}
 	</div>
 </dialog>
 
@@ -107,13 +109,23 @@
 
 	dialog::backdrop {
 		background-color: rgba(0, 0, 0, 0);
+		backdrop-filter: blur(0px);
 		transition:
-			display var(--dialog-animation-duration, 1) allow-discrete,
-			overlay var(--dialog-animation-duration, 1) allow-discrete,
-			background-color var(--dialog-animation-duration, 1);
+			display var(--dialog-animation-duration, 1) ease-out allow-discrete,
+			overlay var(--dialog-animation-duration, 1) ease-out allow-discrete,
+			background-color var(--dialog-animation-duration, 1) ease-out,
+			backdrop-filter var(--dialog-animation-duration, 1) ease-out;
 	}
 
 	dialog[open]::backdrop {
-		background-color: rgba(0, 0, 0, 0.2);
+		background-color: rgba(0, 0, 0, 0.5);
+		backdrop-filter: blur(4px);
+	}
+
+	@starting-style {
+		dialog[open]::backdrop {
+			background-color: rgba(0, 0, 0, 0);
+			backdrop-filter: blur(0px);
+		}
 	}
 </style>

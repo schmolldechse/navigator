@@ -1,64 +1,148 @@
 <script module lang="ts">
-	type Translations = {
-		seriesType: MetricSeriesType;
-		title: string;
+	const getMetricSeriesTypeByHeatmapSettings = (
+		scheduleType: StationHeatmapScheduleType,
+		plotType: StationHeatmapPlotType
+	): MetricSeriesType => {
+		if (scheduleType === "arrivals") {
+			if (plotType === "count") return MetricSeriesType.STATION_ARRIVALS;
+			if (plotType === "cancellations") return MetricSeriesType.STATION_ARRIVAL_CANCELLATIONS;
+			if (plotType === "delay_avg") return MetricSeriesType.STATION_ARRIVAL_DELAY_AVG;
+			return MetricSeriesType.STATION_ARRIVALS;
+		}
+
+		if (scheduleType === "departures") {
+			if (plotType === "count") return MetricSeriesType.STATION_DEPARTURES;
+			if (plotType === "cancellations") return MetricSeriesType.STATION_DEPARTURE_CANCELLATIONS;
+			if (plotType === "delay_avg") return MetricSeriesType.STATION_DEPARTURE_DELAY_AVG;
+			return MetricSeriesType.STATION_DEPARTURES;
+		}
+
+		throw new Error("Invalid heatmap settings combination");
 	};
-	const translations: Translations[] = [
-		{ seriesType: MetricSeriesType.STATION_ARRIVALS, title: "Arrivals (amount)" },
-		{ seriesType: MetricSeriesType.STATION_ARRIVAL_CANCELLATIONS, title: "Arrival cancellations (amount)" },
-		{ seriesType: MetricSeriesType.STATION_ARRIVAL_DELAY_AVG, title: "Arrival avg delay (s)" },
-		{ seriesType: MetricSeriesType.STATION_DEPARTURES, title: "Departures (amount)" },
-		{ seriesType: MetricSeriesType.STATION_DEPARTURE_CANCELLATIONS, title: "Departure cancellations (amount)" },
-		{ seriesType: MetricSeriesType.STATION_DEPARTURE_DELAY_AVG, title: "Departure avg delay (s)" }
-	];
+
+	const getHeatmapSettingsByMetricSeriesType = (
+		seriesType: MetricSeriesType
+	): { scheduleType: StationHeatmapScheduleType; plotType: StationHeatmapPlotType } => {
+		switch (seriesType) {
+			case MetricSeriesType.STATION_ARRIVALS:
+				return { scheduleType: "arrivals", plotType: "count" };
+			case MetricSeriesType.STATION_ARRIVAL_CANCELLATIONS:
+				return { scheduleType: "arrivals", plotType: "cancellations" };
+			case MetricSeriesType.STATION_ARRIVAL_DELAY_AVG:
+				return { scheduleType: "arrivals", plotType: "delay_avg" };
+			case MetricSeriesType.STATION_DEPARTURES:
+				return { scheduleType: "departures", plotType: "count" };
+			case MetricSeriesType.STATION_DEPARTURE_CANCELLATIONS:
+				return { scheduleType: "departures", plotType: "cancellations" };
+			case MetricSeriesType.STATION_DEPARTURE_DELAY_AVG:
+				return { scheduleType: "departures", plotType: "delay_avg" };
+			default:
+				throw new Error("Unsupported MetricSeriesType");
+		}
+	};
 </script>
 
 <script lang="ts">
+	import { MetricSeriesType, type MetricSeries } from "@lib/api";
+	import type { PageProps } from "./$types";
+	import Button from "@lib/components/interactable/Button.svelte";
+	import type {
+		StationHeatmapPlotType,
+		StationHeatmapScheduleType,
+		StationHeatmapSettings
+	} from "@lib/components/statistics/heatmap/settings/StationHeatmapSettingsDialog.svelte";
 	import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
-	import LoaderCircle from "@lucide/svelte/icons/loader-circle";
-	import { DateTime } from "luxon";
-	import { MetricSeriesType, TransportType } from "@lib/api";
-	import StationHeatmap, { type StationHeatmapPoint } from "@lib/components/statistics/global/StationHeatmap.svelte";
-	import StationHeatmapSettingsDialog, {
-		type StationHeatmapSettings
-	} from "@lib/components/statistics/global/StationHeatmapSettingsDialog.svelte";
-	import { interpolateTurbo } from "d3-scale-chromatic";
-	import { Legend } from "layerchart";
-	import { scaleSequential } from "d3-scale";
 	import { Tween } from "svelte/motion";
 	import { cubicOut } from "svelte/easing";
-	import Button from "@lib/components/interactable/button/Button.svelte";
-	import { goto } from "$app/navigation";
-	import type { PageProps } from "./$types";
-	import { setContext } from "svelte";
+	import { DateTime } from "luxon";
+	import type { StationHeatmapPoint } from "@lib/components/statistics/heatmap/StationHeatmap.svelte";
+	import StationHeatmapSettingsDialog from "@lib/components/statistics/heatmap/settings/StationHeatmapSettingsDialog.svelte";
+	import { loadHeatmapBySeriesType, loadHourlyMetrics } from "./globalstatistics.remote";
+	import StationHeatmap from "@lib/components/statistics/heatmap/StationHeatmap.svelte";
+	import LoaderCircle from "@lucide/svelte/icons/loader-circle";
+	import { Legend } from "layerchart";
+	import { scaleSequential } from "d3-scale";
+	import { interpolateTurbo } from "d3-scale-chromatic";
+	import Separator from "@lib/components/interactable/Separator.svelte";
+	import type { HourlyTransportSettings } from "@lib/components/statistics/global/settings/HourlyTransportSettingsDialog.svelte";
+	import HourlyTransportSettingsDialog from "@lib/components/statistics/global/settings/HourlyTransportSettingsDialog.svelte";
+	import type { Component } from "svelte";
+	import HourlyStopRate from "@lib/components/statistics/global/charts/HourlyStopRate.svelte";
+	import CancellationRate from "@lib/components/statistics/global/charts/cancellationrate/CancellationRate.svelte";
+	import DelayAnalysis from "@lib/components/statistics/global/charts/delayanalysis/DelayAnalysis.svelte";
 
 	let { data }: PageProps = $props();
 
-	let heatmapPointsLoading: boolean = $state(true);
-	let stationHeatmapPoints: StationHeatmapPoint[] = $state([]);
+	// heatmap settings
+	let heatmapLoading: boolean = $state(true);
+	let heatmapPromise: Promise<StationHeatmapPoint[]> = $state(data.streamed.heatmapMetrics);
+	let heatmapPoints: StationHeatmapPoint[] = $state([]);
+	let heatmapSettings: StationHeatmapSettings = $state({
+		dates: {
+			start: data.timerange.start,
+			end: data.timerange.end
+		},
+		transportTypes: data.transportTypes,
+		plotType: getHeatmapSettingsByMetricSeriesType(data.seriesTypes.heatmap).plotType,
+		scheduleType: getHeatmapSettingsByMetricSeriesType(data.seriesTypes.heatmap).scheduleType
+	});
+	let heatmapSettingsDialogOpen: boolean = $state(false);
+
 	const heatmapExtent = new Tween<[number, number]>([0, 100], {
 		duration: 500,
 		easing: cubicOut
 	});
 
 	$effect(() => {
-		data.heatmapPoints
-			.then((points: StationHeatmapPoint[]) => (stationHeatmapPoints = points))
-			.finally(() => (heatmapPointsLoading = false));
+		if (!heatmapPromise) return;
+
+		heatmapLoading = true;
+		heatmapPromise.then((points: StationHeatmapPoint[]) => (heatmapPoints = points)).finally(() => (heatmapLoading = false));
 	});
 
-	// dialog
-	let isSettingsDialogOpen: boolean = $state(false);
-
-	let seriesType: MetricSeriesType | undefined = $state(undefined);
+	// hourly metrics
+	let hourlyTransportMetricsLoading: boolean = $state(true);
+	let hourlyTransportMetricsPromise: Promise<MetricSeries[]> = $state(data.streamed.hourlyTransportMetrics);
+	let hourlyTransportSettings: HourlyTransportSettings = $state({
+		dates: {
+			start: data.timerange.start,
+			end: data.timerange.end
+		},
+		transportTypes: data.transportTypes
+	});
+	let hourlyTransportSettingsDialogOpen: boolean = $state(false);
 
 	$effect(() => {
-		data.seriesTypes.then((seriesTypes: MetricSeriesType[]) => {
-			if (!seriesTypes || seriesTypes.length === 0) return;
-			seriesType = seriesTypes[0];
-			setContext("METRIC_SERIES_TYPE", () => seriesType);
-		});
+		if (!hourlyTransportMetricsPromise) return;
+
+		hourlyTransportMetricsLoading = true;
+		hourlyTransportMetricsPromise.finally(() => (hourlyTransportMetricsLoading = false));
 	});
+
+	type MetricCardData = {
+		metricComponent: Component<any>;
+		props: Record<string, unknown>;
+	};
+	let metricCards: MetricCardData[] = $derived([
+		{
+			metricComponent: HourlyStopRate,
+			props: {
+				promise: hourlyTransportMetricsPromise
+			}
+		},
+		{
+			metricComponent: DelayAnalysis,
+			props: {
+				promise: hourlyTransportMetricsPromise
+			}
+		},
+		{
+			metricComponent: CancellationRate,
+			props: {
+				promise: hourlyTransportMetricsPromise
+			}
+		}
+	]);
 </script>
 
 <svelte:head>
@@ -66,46 +150,43 @@
 </svelte:head>
 
 <main class="container mx-auto flex flex-col space-y-8 p-4 sm:py-8">
-	<section class="mx-auto w-full max-w-7xl space-y-4">
-		<!-- Heatmap Header -->
+	<!-- Heatmap -->
+	<section class="space-y-4">
 		<div class="relative flex flex-row items-center justify-between">
 			<h2 class="text-2xl font-medium">Station Heatmap</h2>
 
 			<Button
 				mode="secondary"
-				disabled={heatmapPointsLoading}
+				disabled={heatmapLoading}
 				onclick={(event: MouseEvent) => {
 					event.stopPropagation();
-					isSettingsDialogOpen = !isSettingsDialogOpen;
+					heatmapSettingsDialogOpen = !heatmapSettingsDialogOpen;
 				}}
 			>
 				<SlidersHorizontal size={18} />
 
 				<div class="hidden items-baseline gap-x-1 md:flex">
-					<span class="text-sm tracking-tight">{data.settings.dates.start.toLocaleString(DateTime.DATE_MED)}</span>
+					<span class="text-sm tracking-tight">{heatmapSettings.dates.start.toLocaleString(DateTime.DATE_MED)}</span>
 					<span>&nbsp;–&nbsp;</span>
-					<span class="text-sm tracking-tight">{data.settings.dates.end.toLocaleString(DateTime.DATE_MED)}</span>
+					<span class="text-sm tracking-tight">{heatmapSettings.dates.end.toLocaleString(DateTime.DATE_MED)}</span>
 				</div>
 			</Button>
 
 			<StationHeatmapSettingsDialog
-				bind:isVisible={isSettingsDialogOpen}
-				initialSettings={data.settings}
+				bind:isVisible={heatmapSettingsDialogOpen}
+				initialSettings={heatmapSettings}
 				onapply={async (settings: StationHeatmapSettings) => {
-					const url = new URL(window.location.href);
-					url.searchParams.set("start", settings.dates.start.startOf("day").toISO() as string);
-					url.searchParams.set("end", settings.dates.end.endOf("day").toISO() as string);
+					heatmapSettings = settings;
 
-					url.searchParams.delete("transportTypes");
-					settings.transportTypes.forEach((transportType: TransportType) =>
-						url.searchParams.append("transportTypes", transportType)
-					);
-
-					url.searchParams.set("scheduleType", settings.scheduleType);
-					url.searchParams.set("plotType", settings.plotType);
-
-					heatmapPointsLoading = true;
-					await goto(url, { invalidateAll: true, replaceState: true, keepFocus: true, noScroll: true });
+					const seriesType = getMetricSeriesTypeByHeatmapSettings(settings.scheduleType, settings.plotType);
+					heatmapPromise = loadHeatmapBySeriesType({
+						request: {
+							seriesType,
+							start: settings.dates.start.startOf("day").toISO()!,
+							end: settings.dates.end.endOf("day").toISO()!,
+							...(settings.transportTypes.length > 0 ? { transportTypes: settings.transportTypes } : {})
+						}
+					});
 				}}
 				class="mt-14 self-start justify-self-end"
 			/>
@@ -115,27 +196,76 @@
 			<div class="relative h-[650px] w-full transition-all duration-300">
 				<StationHeatmap
 					bind:scale={heatmapExtent.target}
-					{stationHeatmapPoints}
+					stationHeatmapPoints={heatmapPoints}
 					class="border-muted-foreground/10 z-10 h-full w-full rounded-xl border"
 				/>
 
-				{#await data.heatmapPoints}
+				{#if heatmapLoading}
 					<div
 						class="bg-background/50 absolute inset-0 z-20 flex flex-col items-center justify-center rounded-xl backdrop-blur-sm"
 					>
 						<LoaderCircle size={32} class="text-accent animate-spin" />
 						<span class="text-text mt-2 text-sm font-medium">Generating heatmap...</span>
 					</div>
-				{/await}
+				{/if}
 			</div>
 
 			<Legend
 				scale={scaleSequential(heatmapExtent.current, interpolateTurbo)}
-				title={translations.find((translation: Translations) => translation.seriesType === seriesType)?.title ||
-					"Requested metric"}
+				title="Requested metric"
 				tickFormat={(value: number) => value.toLocaleString()}
 				class="transition-all duration-300"
 			/>
+		</div>
+	</section>
+
+	<Separator />
+
+	<!-- Hourly Metrics by Transport Type -->
+	<section class="space-y-4">
+		<div class="relative flex flex-row items-center justify-between">
+			<h2 class="text-2xl font-medium">Hourly Metrics by Transport Type</h2>
+
+			<Button
+				mode="secondary"
+				disabled={heatmapLoading}
+				onclick={(event: MouseEvent) => {
+					event.stopPropagation();
+					hourlyTransportSettingsDialogOpen = !hourlyTransportSettingsDialogOpen;
+				}}
+			>
+				<SlidersHorizontal size={18} />
+
+				<div class="hidden items-baseline gap-x-1 md:flex">
+					<span class="text-sm tracking-tight">{hourlyTransportSettings.dates.start.toLocaleString(DateTime.DATE_MED)}</span>
+					<span>&nbsp;–&nbsp;</span>
+					<span class="text-sm tracking-tight">{hourlyTransportSettings.dates.end.toLocaleString(DateTime.DATE_MED)}</span>
+				</div>
+			</Button>
+
+			<HourlyTransportSettingsDialog
+				bind:isVisible={hourlyTransportSettingsDialogOpen}
+				initialSettings={hourlyTransportSettings}
+				onapply={async (settings: HourlyTransportSettings) => {
+					hourlyTransportSettings = settings;
+
+					hourlyTransportMetricsPromise = loadHourlyMetrics({
+						request: {
+							start: settings.dates.start.startOf("day").toISO()!,
+							end: settings.dates.end.endOf("day").toISO()!,
+							...(settings.transportTypes.length > 0 ? { transportTypes: settings.transportTypes } : {})
+						}
+					});
+				}}
+				class="mt-14 self-start justify-self-end"
+			/>
+		</div>
+
+		<div class="space-y-2">
+			{#each metricCards as metricCard}
+				{@const MetricComponent = metricCard.metricComponent}
+				<MetricComponent {...metricCard.props} />
+			{/each}
 		</div>
 	</section>
 </main>

@@ -25,7 +25,7 @@
 
 			<Separator />
 
-			<span class="text-right text-accent text-sm font-bold tabular-nums">{point.value.toLocaleString()}</span>
+			<span class="text-accent text-right text-sm font-bold tabular-nums">{point.value.toLocaleString()}</span>
 		</div>
 	</Tooltip.Content>
 </Tooltip.Root>

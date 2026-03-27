@@ -1,7 +1,6 @@
+using Navigator.Api.DTOs.Statistics.Request;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Navigator.Api.DTOs.Statistics.Request;
-using Navigator.Data.Enums.Metric;
 
 namespace Navigator.Api.DTOs.Statistics;
 
@@ -14,9 +13,6 @@ namespace Navigator.Api.DTOs.Statistics;
 [JsonDerivedType(typeof(StationSummaryMetricRequest), "STATION_SUMMARY")]
 public abstract class BaseMetricRequest : IValidatableObject
 {
-    [JsonIgnore]
-    public abstract MetricQueryType MetricQueryType { get; }
-
     public abstract Navigator.Data.Models.Statistics.BaseMetricRequest BuildRequest();
 
     public virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

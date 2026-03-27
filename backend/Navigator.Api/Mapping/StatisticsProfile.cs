@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 
 namespace Navigator.Api.Mapping;
 
@@ -30,41 +30,7 @@ public class StatisticsProfile : Profile
             .ForMember(dest => dest.EvaNumber, opt => opt.MapFrom(src => src.EvaNumber))
             .ForMember(dest => dest.Value, opt => opt.MapFrom(src => src.Value));
 
-        // --- Incoming Metric Request ---
-        CreateMap<Data.Models.Statistics.BaseMetricRequest, Api.DTOs.Statistics.BaseMetricRequest>()
-            .Include<Data.Models.Statistics.Request.DatabaseSizeSnapshotMetricRequest, Api.DTOs.Statistics.Request.DatabaseSizeSnapshotMetricRequest>()
-            .Include<Data.Models.Statistics.Request.HourlyTransportSnapshotMetricRequest, Api.DTOs.Statistics.Request.HourlyTransportSnapshotMetricRequest>()
-            .Include<Data.Models.Statistics.Request.JourneySnapshotMetricRequest, Api.DTOs.Statistics.Request.JourneySnapshotMetricRequest>()
-            .Include<Data.Models.Statistics.Request.RisIdSnapshotMetricRequest, Api.DTOs.Statistics.Request.RisIdSnapshotMetricRequest>()
-            .Include<Data.Models.Statistics.Request.TransportTypeDistributionMetricRequest, Api.DTOs.Statistics.Request.TransportTypeDistributionMetricRequest>();
-
-        CreateMap<Data.Models.Statistics.Request.DatabaseSizeSnapshotMetricRequest, Api.DTOs.Statistics.Request.DatabaseSizeSnapshotMetricRequest>()
-            .ForMember(dest => dest.MetricQueryType, opt => opt.MapFrom(src => src.MetricQueryType))
-            .ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
-            .ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End));
-
-        CreateMap<Data.Models.Statistics.Request.HourlyTransportSnapshotMetricRequest, Api.DTOs.Statistics.Request.HourlyTransportSnapshotMetricRequest>()
-            .ForMember(dest => dest.MetricQueryType, opt => opt.MapFrom(src => src.MetricQueryType))
-            .ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
-            .ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End))
-            .ForMember(dest => dest.TransportTypes, opt => opt.MapFrom(src => src.TransportTypes));
-
-        CreateMap<Data.Models.Statistics.Request.JourneySnapshotMetricRequest, Api.DTOs.Statistics.Request.JourneySnapshotMetricRequest>()
-            .ForMember(dest => dest.MetricQueryType, opt => opt.MapFrom(src => src.MetricQueryType))
-            .ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
-            .ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End));
-
-        CreateMap<Data.Models.Statistics.Request.RisIdSnapshotMetricRequest, Api.DTOs.Statistics.Request.RisIdSnapshotMetricRequest>()
-            .ForMember(dest => dest.MetricQueryType, opt => opt.MapFrom(src => src.MetricQueryType))
-            .ForMember(dest => dest.Start, opt => opt.MapFrom(src => src.Start))
-            .ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End));
-
-        CreateMap<Data.Models.Statistics.Request.TransportTypeDistributionMetricRequest, Api.DTOs.Statistics.Request.TransportTypeDistributionMetricRequest>()
-            .ForMember(dest => dest.MetricQueryType, opt => opt.MapFrom(src => src.MetricQueryType))
-            .ForMember(dest => dest.End, opt => opt.MapFrom(src => src.End))
-            .ForMember(dest => dest.TransportTypes, opt => opt.MapFrom(src => src.TransportTypes));
-
-        // --- General ---
+        // --- MetricSeries ---
         CreateMap<Data.Models.Statistics.MetricSeries, Api.DTOs.Statistics.MetricSeries>()
             .ForMember(dest => dest.SeriesType, opt => opt.MapFrom(src => src.SeriesType))
             .ForMember(dest => dest.Unit, opt => opt.MapFrom(src => src.Unit))

@@ -1,18 +1,17 @@
+import type { PageServerLoad } from "./$types";
 import { DateTime } from "luxon";
-import type { PageServerLoad } from "./maps/$types";
-import { TransportType, type MetricSeries } from "@lib/api";
-import { loadMetric } from "./projectdimensions.remote";
+import { loadMetric } from "@lib/remote/metrics.remote";
+import type { MetricSeries } from "@lib/api";
 
 export const load: PageServerLoad = async ({
 	url,
 	getClientAddress
 }): Promise<{
 	dimensions: {
-		databaseSize: Promise<MetricSeries[]>;
-		totalRisIds: Promise<MetricSeries[]>;
-		totalJourneys: Promise<MetricSeries[]>;
-		transportTypes: Promise<MetricSeries[]>;
-		hourlyTransports: Promise<MetricSeries[]>;
+		databaseSize: Promise<MetricSeries>;
+		risIdDistribution: Promise<MetricSeries[]>;
+		recordedJourneys: Promise<MetricSeries>;
+		transportTypeDistribution: Promise<MetricSeries>;
 	};
 	timerange: { start: DateTime; end: DateTime };
 }> => {
@@ -30,41 +29,28 @@ export const load: PageServerLoad = async ({
 		end = DateTime.now();
 	}
 
-	const transportTypesFilter = url.searchParams
-		.getAll("transportTypes")
-		.filter((transportType: string): transportType is TransportType =>
-			Object.values(TransportType).includes(transportType as TransportType)
-		);
-
 	return {
 		dimensions: {
 			databaseSize: loadMetric({
 				request: { queryType: "DATABASE_SIZE_SNAPSHOT", start: start.toISO()!, end: end.toISO()! },
 				userIp: getClientAddress()
 			}),
-			totalRisIds: loadMetric({
-				request: { queryType: "RIS_ID_SNAPSHOT", start: start.toISO()!, end: end.toISO()! },
-				userIp: getClientAddress()
-			}),
-			totalJourneys: loadMetric({
+			risIdDistribution: Promise.all([
+				loadMetric({
+					request: { queryType: "RIS_ID_SNAPSHOT", seriesType: "RIS_IDS_ACTIVE", start: start.toISO()!, end: end.toISO()! },
+					userIp: getClientAddress()
+				}),
+				loadMetric({
+					request: { queryType: "RIS_ID_SNAPSHOT", seriesType: "RIS_IDS_INACTIVE", start: start.toISO()!, end: end.toISO()! },
+					userIp: getClientAddress()
+				})
+			]),
+			recordedJourneys: loadMetric({
 				request: { queryType: "JOURNEY_SNAPSHOT", start: start.toISO()!, end: end.toISO()! },
 				userIp: getClientAddress()
 			}),
-			transportTypes: loadMetric({
-				request: {
-					queryType: "TRANSPORT_TYPE_DISTRIBUTION",
-					end: end.toISO()!,
-					...(transportTypesFilter.length > 0 ? { transportTypes: transportTypesFilter } : {})
-				},
-				userIp: getClientAddress()
-			}),
-			hourlyTransports: loadMetric({
-				request: {
-					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
-					start: start.toISO()!,
-					end: end.toISO()!,
-					...(transportTypesFilter.length > 0 ? { transportTypes: transportTypesFilter } : {})
-				},
+			transportTypeDistribution: loadMetric({
+				request: { queryType: "TRANSPORT_TYPE_DISTRIBUTION", end: end.toISO()! },
 				userIp: getClientAddress()
 			})
 		},

@@ -5,7 +5,10 @@ import { vBaseMetricRequest } from "@lib/api/valibot.gen";
 import * as v from "valibot";
 
 const loadMetric = query(
-	v.object({ request: vBaseMetricRequest, userIp: v.optional(v.pipe(v.string(), v.ip())) }),
+	v.object({
+		request: vBaseMetricRequest,
+		userIp: v.optional(v.pipe(v.string(), v.ip()))
+	}),
 	async ({ request, userIp }) => {
 		if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
 
@@ -25,7 +28,7 @@ const loadMetric = query(
 			throw new Error(`Error fetching metric ${request.queryType}: ${response.status} - ${error}`);
 		}
 
-		return (await response.json()) as MetricSeries[];
+		return (await response.json()) as MetricSeries;
 	}
 );
 

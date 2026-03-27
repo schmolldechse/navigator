@@ -100,94 +100,90 @@
 </script>
 
 <MetricCardBase class={["gap-y-4", className]}>
-	{#snippet head()}
-		<MetricCardTitle title="Hourly Stop Rate" />
-	{/snippet}
+	<MetricCardTitle title="Hourly Stop Rate" />
 
-	{#snippet body()}
-		{#await promise}
-			<div class="bg-muted h-64 w-full animate-pulse rounded-md"></div>
-		{:then metrics}
-			{@const { series, data } = hourlyStopHistogram(metrics)}
+	{#await promise}
+		<div class="bg-muted h-64 w-full animate-pulse rounded-md"></div>
+	{:then metrics}
+		{@const { series, data } = hourlyStopHistogram(metrics)}
 
-			<BarChart
-				{data}
-				{series}
-				x="date"
-				height={312}
-				seriesLayout="stack"
-				bandPadding={0.2}
-				padding={defaultChartPadding({ left: 48, bottom: 48 })}
-			>
-				{#snippet children({ visibleSeries, getBarsProps, getHighlightProps })}
-					<Svg>
-						<Axis placement="left" rule grid classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none" }} />
-						<Axis
-							placement="bottom"
-							rule
-							classes={{
-								tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
-							}}
-							tickLabelProps={{
-								rotate: 315,
-								textAnchor: "end"
-							}}
-						/>
+		<BarChart
+			{data}
+			{series}
+			x="date"
+			height={312}
+			seriesLayout="stack"
+			bandPadding={0.2}
+			padding={defaultChartPadding({ left: 48, bottom: 48 })}
+		>
+			{#snippet children({ visibleSeries, getBarsProps, getHighlightProps })}
+				<Svg>
+					<Axis placement="left" rule grid classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none" }} />
+					<Axis
+						placement="bottom"
+						rule
+						classes={{
+							tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
+						}}
+						tickLabelProps={{
+							rotate: 315,
+							textAnchor: "end"
+						}}
+					/>
 
-						<ChartClipPath>
-							{#each visibleSeries as series, i (series.key)}
-								<Bars {...getBarsProps(series, i)} />
-							{/each}
-						</ChartClipPath>
+					<ChartClipPath>
+						{#each visibleSeries as series, i (series.key)}
+							<Bars {...getBarsProps(series, i)} />
+						{/each}
+					</ChartClipPath>
 
-						<ChartClipPath full>
-							<Highlight {...getHighlightProps()} />
-						</ChartClipPath>
-					</Svg>
+					<ChartClipPath full>
+						<Highlight {...getHighlightProps()} />
+					</ChartClipPath>
+				</Svg>
 
-					<!-- Data Tooltip -->
-					<Tooltip.Root
-						anchor="bottom"
-						contained="container"
-						class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
-					>
-						{#snippet children({ data, payload })}
-							{@const total = payload.reduce((acc: number, current) => acc + current.value, 0)}
+				<!-- Data Tooltip -->
+				<Tooltip.Root
+					anchor="bottom"
+					contained="container"
+					class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
+				>
+					{#snippet children({ data, payload })}
+						{@const total = payload.reduce((acc: number, current) => acc + current.value, 0)}
 
-							<Tooltip.Header>
-								{@const startDate = DateTime.fromJSDate(data.date)}
-								{@const endDate = startDate.plus({ hour: 1 })}
+						<Tooltip.Header>
+							{@const startDate = DateTime.fromJSDate(data.date)}
+							{@const endDate = startDate.plus({ hour: 1 })}
 
-								<span class="text-text text-xs">
-									{startDate.toLocaleString(DateTime.TIME_SIMPLE)} – {endDate.toLocaleString(DateTime.TIME_SIMPLE)}
-								</span>
-							</Tooltip.Header>
+							<span class="text-text text-xs">
+								{startDate.toLocaleString(DateTime.TIME_SIMPLE)} – {endDate.toLocaleString(DateTime.TIME_SIMPLE)}
+							</span>
+						</Tooltip.Header>
 
-							<div class="flex flex-col gap-y-1">
-								{#each [...payload].reverse() as item}
-									<div class="flex justify-between gap-x-4 text-xs">
-										<div class="flex items-center gap-x-2">
-											<div class="h-1.5 w-1.5 rounded-full" style:background-color={item.color}></div>
-											<span class="text-muted-foreground text-left">{item.rawSeriesData?.label}</span>
-										</div>
-
-										<span class="text-text">{item.value.toLocaleString()}</span>
+						<div class="flex flex-col gap-y-1">
+							{#each [...payload].reverse() as item}
+								<div class="flex justify-between gap-x-4 text-xs">
+									<div class="flex items-center gap-x-2">
+										<div class="h-1.5 w-1.5 rounded-full" style:background-color={item.color}></div>
+										<span class="text-muted-foreground text-left">{item.rawSeriesData?.label}</span>
 									</div>
-								{/each}
 
-								<Tooltip.Separator class="border-muted-foreground/20 my-1 border-t" />
-
-								<div class="flex flex-row justify-between gap-x-4 text-xs">
-									<span>Total</span>
-									<span>{total.toLocaleString()}</span>
+									<span class="text-text">{item.value.toLocaleString()}</span>
 								</div>
+							{/each}
+
+							<Tooltip.Separator class="border-muted-foreground/20 my-1 border-t" />
+
+							<div class="flex flex-row justify-between gap-x-4 text-xs">
+								<span>Total</span>
+								<span>{total.toLocaleString()}</span>
 							</div>
-						{/snippet}
-					</Tooltip.Root>
-				{/snippet}
-			</BarChart>
-		{:catch}
-			<MetricLoadingFailedWarning />
-		{/await}
-	{/snippet}
+						</div>
+					{/snippet}
+				</Tooltip.Root>
+			{/snippet}
+		</BarChart>
+	{:catch}
+		<MetricLoadingFailedWarning />
+	{/await}
 </MetricCardBase>

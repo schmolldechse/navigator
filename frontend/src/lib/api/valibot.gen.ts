@@ -6,44 +6,6 @@ export const vBaseMetricDataPointBase = v.object({
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
-export const vBaseMetricDataPointStationDataPoint = v.object({
-	$type: v.picklist(["evaNumber"]),
-	evaNumber: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
-});
-
-export const vBaseMetricDataPointTimestampDataPoint = v.object({
-	$type: v.picklist(["timestamp"]),
-	timestamp: v.pipe(v.string(), v.isoTimestamp()),
-	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
-});
-
-export const vBaseMetricRequestDatabaseSizeSnapshotMetricRequest = v.object({
-	queryType: v.optional(v.picklist(["DATABASE_SIZE_SNAPSHOT"])),
-	start: v.pipe(v.string(), v.isoTimestamp()),
-	end: v.pipe(v.string(), v.isoTimestamp())
-});
-
-export const vBaseMetricRequestJourneySnapshotMetricRequest = v.object({
-	queryType: v.optional(v.picklist(["JOURNEY_SNAPSHOT"])),
-	start: v.pipe(v.string(), v.isoTimestamp()),
-	end: v.pipe(v.string(), v.isoTimestamp())
-});
-
-export const vBaseMetricRequestRisIdSnapshotMetricRequest = v.object({
-	queryType: v.optional(v.picklist(["RIS_ID_SNAPSHOT"])),
-	start: v.pipe(v.string(), v.isoTimestamp()),
-	end: v.pipe(v.string(), v.isoTimestamp())
-});
-
 export const vInformationType = v.picklist([
 	"JOURNEY_ATTRIBUTE",
 	"DISRUPTION",
@@ -108,51 +70,6 @@ export const vMessageKey = v.picklist([
 	"TICKET_INFORMATION"
 ]);
 
-export const vJourneyMessageAttributeMessage = v.object({
-	type: v.optional(v.picklist(["ATTRIBUTE"])),
-	messageId: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	key: vMessageKey,
-	text: v.string()
-});
-
-export const vJourneyMessageRisCauseMessage = v.object({
-	type: v.optional(v.picklist(["RIS_CAUSE"])),
-	messageId: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	key: vMessageKey,
-	text: v.string()
-});
-
-export const vJourneyMessageRisQualityDeviationMessage = v.object({
-	type: v.optional(v.picklist(["RIS_QUALITY_DEVIATION"])),
-	messageId: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	key: vMessageKey,
-	text: v.string()
-});
-
 export const vMessageReferenceType = v.picklist(["LINK", "IMAGE", "ATTACHMENT"]);
 
 export const vJourneyMessageReference = v.object({
@@ -160,77 +77,6 @@ export const vJourneyMessageReference = v.object({
 	url: v.optional(v.union([v.null(), v.string()])),
 	label: v.optional(v.union([v.null(), v.string()]))
 });
-
-export const vJourneyMessageDisruptionMessage = v.object({
-	type: v.optional(v.picklist(["DISRUPTION"])),
-	cause: v.optional(v.union([v.null(), v.string()])),
-	effect: v.optional(v.union([v.null(), v.string()])),
-	disruptionId: v.optional(v.union([v.null(), v.string()])),
-	textShort: v.optional(v.union([v.null(), v.string()])),
-	references: v.optional(v.union([v.null(), v.array(vJourneyMessageReference)])),
-	messageId: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	key: vMessageKey,
-	text: v.string()
-});
-
-export const vJourneyMessageNoteMessage = v.object({
-	type: v.optional(v.picklist(["NOTE"])),
-	category: v.optional(v.union([v.null(), v.string()])),
-	textShort: v.optional(v.union([v.null(), v.string()])),
-	references: v.optional(v.union([v.null(), v.array(vJourneyMessageReference)])),
-	messageId: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	key: vMessageKey,
-	text: v.string()
-});
-
-export const vJourneyMessage = v.union([
-	v.intersect([
-		v.object({
-			type: v.optional(v.literal("ATTRIBUTE"))
-		}),
-		vJourneyMessageAttributeMessage
-	]),
-	v.intersect([
-		v.object({
-			type: v.optional(v.literal("DISRUPTION"))
-		}),
-		vJourneyMessageDisruptionMessage
-	]),
-	v.intersect([
-		v.object({
-			type: v.optional(v.literal("NOTE"))
-		}),
-		vJourneyMessageNoteMessage
-	]),
-	v.intersect([
-		v.object({
-			type: v.optional(v.literal("RIS_CAUSE"))
-		}),
-		vJourneyMessageRisCauseMessage
-	]),
-	v.intersect([
-		v.object({
-			type: v.optional(v.literal("RIS_QUALITY_DEVIATION"))
-		}),
-		vJourneyMessageRisQualityDeviationMessage
-	])
-]);
 
 export const vMetricSeriesType = v.picklist([
 	"DATABASE_SIZE",
@@ -349,15 +195,6 @@ export const vBaseStation = v.object({
 	name: v.string(),
 	position: vStationPosition
 });
-
-export const vStationSnapshotType = v.picklist([
-	"ARRIVALS",
-	"ARRIVAL_CANCELLATIONS",
-	"ARRIVAL_DELAY_AVG",
-	"DEPARTURES",
-	"DEPARTURE_CANCELLATIONS",
-	"DEPARTURE_DELAY_AVG"
-]);
 
 export const vTimetableEntryAdministration = v.object({
 	administrationId: v.string(),
@@ -519,114 +356,6 @@ export const vTransportType = v.picklist([
 	"WALK"
 ]);
 
-export const vBaseMetricDataPointTimestampTransportTypeDataPoint = v.object({
-	$type: v.picklist(["timestampTransportType"]),
-	timestamp: v.pipe(v.string(), v.isoTimestamp()),
-	transportType: vTransportType,
-	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
-});
-
-export const vBaseMetricDataPointTransportTypeDataPoint = v.object({
-	$type: v.picklist(["transportType"]),
-	transportType: vTransportType,
-	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
-});
-
-export const vBaseMetricDataPoint = v.union([
-	vBaseMetricDataPointTimestampDataPoint,
-	vBaseMetricDataPointTransportTypeDataPoint,
-	vBaseMetricDataPointTimestampTransportTypeDataPoint,
-	vBaseMetricDataPointStationDataPoint,
-	vBaseMetricDataPointBase
-]);
-
-export const vBaseMetricRequestHourlyTransportSnapshotMetricRequest = v.object({
-	queryType: v.optional(v.picklist(["HOURLY_TRANSPORT_SNAPSHOT"])),
-	start: v.pipe(v.string(), v.isoTimestamp()),
-	end: v.pipe(v.string(), v.isoTimestamp()),
-	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)])),
-	stepping: v.optional(
-		v.union([
-			v.pipe(
-				v.number(),
-				v.integer(),
-				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-			),
-			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-		])
-	)
-});
-
-export const vBaseMetricRequestStationSummaryMetricRequest = v.object({
-	queryType: v.optional(v.picklist(["STATION_SUMMARY"])),
-	snapshot: vStationSnapshotType,
-	start: v.optional(v.union([v.null(), v.pipe(v.string(), v.isoTimestamp())])),
-	end: v.pipe(v.string(), v.isoTimestamp()),
-	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)])),
-	evaNumbers: v.optional(
-		v.union([
-			v.null(),
-			v.array(
-				v.union([
-					v.pipe(
-						v.number(),
-						v.integer(),
-						v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-						v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-					),
-					v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-				])
-			)
-		])
-	)
-});
-
-export const vBaseMetricRequestTransportTypeDistributionMetricRequest = v.object({
-	queryType: v.optional(v.picklist(["TRANSPORT_TYPE_DISTRIBUTION"])),
-	end: v.pipe(v.string(), v.isoTimestamp()),
-	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)]))
-});
-
-export const vBaseMetricRequest = v.union([
-	v.intersect([
-		v.object({
-			queryType: v.optional(v.literal("DATABASE_SIZE_SNAPSHOT"))
-		}),
-		vBaseMetricRequestDatabaseSizeSnapshotMetricRequest
-	]),
-	v.intersect([
-		v.object({
-			queryType: v.optional(v.literal("RIS_ID_SNAPSHOT"))
-		}),
-		vBaseMetricRequestRisIdSnapshotMetricRequest
-	]),
-	v.intersect([
-		v.object({
-			queryType: v.optional(v.literal("JOURNEY_SNAPSHOT"))
-		}),
-		vBaseMetricRequestJourneySnapshotMetricRequest
-	]),
-	v.intersect([
-		v.object({
-			queryType: v.optional(v.literal("TRANSPORT_TYPE_DISTRIBUTION"))
-		}),
-		vBaseMetricRequestTransportTypeDistributionMetricRequest
-	]),
-	v.intersect([
-		v.object({
-			queryType: v.optional(v.literal("HOURLY_TRANSPORT_SNAPSHOT"))
-		}),
-		vBaseMetricRequestHourlyTransportSnapshotMetricRequest
-	]),
-	v.intersect([
-		v.object({
-			queryType: v.optional(v.literal("STATION_SUMMARY"))
-		}),
-		vBaseMetricRequestStationSummaryMetricRequest
-	])
-]);
-
 export const vJourneyTransport = v.object({
 	type: vTransportType,
 	replacementType: v.optional(v.union([v.null(), vTransportType])),
@@ -643,31 +372,6 @@ export const vJourneyTransport = v.object({
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	]),
 	line: v.optional(v.union([v.null(), v.string()]))
-});
-
-export const vJourney = v.object({
-	journeyId: v.pipe(v.string(), v.maxLength(82)),
-	administration: vJourneyAdministration,
-	type: vJourneyType,
-	transport: vJourneyTransport,
-	continuationBy: v.optional(v.array(v.string())),
-	continuationFor: v.optional(v.array(v.string())),
-	cancelled: v.boolean(),
-	destination: vJourneyRichStopPlace,
-	differingDestination: v.optional(v.union([v.null(), vJourneyStopPlace])),
-	origin: vJourneyRichStopPlace,
-	differingOrigin: v.optional(v.union([v.null(), vJourneyStopPlace])),
-	scheduledEvents: v.array(vJourneyScheduledEvent),
-	messages: v.array(vJourneyMessage)
-});
-
-/**
- * Represents a series of measured data points for a specific metric.
- */
-export const vMetricSeries = v.object({
-	seriesType: vMetricSeriesType,
-	unit: vMetricUnit,
-	dataPoints: v.array(vBaseMetricDataPoint)
 });
 
 export const vStation = v.object({
@@ -744,89 +448,81 @@ export const vTimetableDeparture = v.object({
 	travelsWith: v.optional(v.union([v.null(), v.array(vTimetableEntryCoupledTransport)]))
 });
 
-export const vGetApiV1JourneyData = v.object({
-	body: v.optional(v.never()),
-	path: v.optional(v.never()),
-	query: v.optional(
-		v.object({
-			journeyId: v.optional(v.pipe(v.string(), v.maxLength(82)))
-		})
-	)
-});
+export const v__typeEnum = v.picklist(["evaNumber"]);
 
-/**
- * OK
- */
-export const vGetApiV1JourneyResponse = vJourney;
-
-export const vPostApiV1JourneyBatchData = v.object({
-	body: v.array(v.string()),
-	path: v.optional(v.never()),
-	query: v.optional(v.never())
-});
-
-/**
- * OK
- */
-export const vPostApiV1JourneyBatchResponse = v.array(vJourney);
-
-export const vPostApiV1StationsSearchData = v.object({
-	body: vStationBySerchtermRequest,
-	path: v.optional(v.never()),
-	query: v.optional(v.never())
-});
-
-/**
- * OK
- */
-export const vPostApiV1StationsSearchResponse = v.array(vStation);
-
-export const vPostApiV1StationsNearbyData = v.object({
-	body: vStationByGeographicCoordinatesRequest,
-	path: v.optional(v.never()),
-	query: v.optional(v.never())
-});
-
-export const vPostApiV1StationsNearbyResponse = v.union([v.array(vBaseStation), v.void()]);
-
-export const vGetApiV1StationsByEvaNumberData = v.object({
-	body: v.optional(v.never()),
-	path: v.object({
-		evaNumber: v.pipe(
+export const vBaseMetricDataPointStationDataPoint = v.object({
+	$type: v__typeEnum,
+	evaNumber: v.union([
+		v.pipe(
 			v.number(),
 			v.integer(),
 			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
 			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		)
-	}),
-	query: v.optional(v.never())
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
-/**
- * OK
- */
-export const vGetApiV1StationsByEvaNumberResponse = vStation;
+export const v__typeEnum2 = v.picklist(["timestamp"]);
 
-export const vGetApiV1StationsByEvaNumberGatheringData = v.object({
-	body: v.optional(v.never()),
-	path: v.object({
-		evaNumber: v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		)
-	}),
-	query: v.optional(v.never())
+export const vBaseMetricDataPointTimestampDataPoint = v.object({
+	$type: v__typeEnum2,
+	timestamp: v.pipe(v.string(), v.isoTimestamp()),
+	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
-/**
- * OK
- */
-export const vGetApiV1StationsByEvaNumberGatheringResponse = vStationGatheringInfo;
+export const v__typeEnum3 = v.picklist(["timestampTransportType"]);
 
-export const vPostApiV1StationsBatchData = v.object({
-	body: v.array(
+export const vBaseMetricDataPointTimestampTransportTypeDataPoint = v.object({
+	$type: v__typeEnum3,
+	timestamp: v.pipe(v.string(), v.isoTimestamp()),
+	transportType: vTransportType,
+	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
+});
+
+export const v__typeEnum4 = v.picklist(["transportType"]);
+
+export const vBaseMetricDataPointTransportTypeDataPoint = v.object({
+	$type: v__typeEnum4,
+	transportType: vTransportType,
+	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
+});
+
+export const vBaseMetricDataPoint = v.union([
+	vBaseMetricDataPointTimestampDataPoint,
+	vBaseMetricDataPointTransportTypeDataPoint,
+	vBaseMetricDataPointTimestampTransportTypeDataPoint,
+	vBaseMetricDataPointStationDataPoint,
+	vBaseMetricDataPointBase
+]);
+
+/**
+ * Represents a series of measured data points for a specific metric.
+ */
+export const vMetricSeries = v.object({
+	seriesType: vMetricSeriesType,
+	unit: vMetricUnit,
+	dataPoints: v.array(vBaseMetricDataPoint)
+});
+
+export const vQueryTypeEnum = v.picklist(["DATABASE_SIZE_SNAPSHOT"]);
+
+export const vBaseMetricRequestDatabaseSizeSnapshotMetricRequest = v.object({
+	queryType: v.optional(vQueryTypeEnum),
+	start: v.pipe(v.string(), v.isoTimestamp()),
+	end: v.pipe(v.string(), v.isoTimestamp())
+});
+
+export const vQueryTypeEnum2 = v.picklist(["HOURLY_TRANSPORT_SNAPSHOT"]);
+
+export const vBaseMetricRequestHourlyTransportSnapshotMetricRequest = v.object({
+	queryType: v.optional(vQueryTypeEnum2),
+	seriesType: vMetricSeriesType,
+	start: v.pipe(v.string(), v.isoTimestamp()),
+	end: v.pipe(v.string(), v.isoTimestamp()),
+	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)])),
+	stepping: v.optional(
 		v.union([
 			v.pipe(
 				v.number(),
@@ -836,45 +532,237 @@ export const vPostApiV1StationsBatchData = v.object({
 			),
 			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 		])
-	),
-	path: v.optional(v.never()),
-	query: v.optional(v.never())
+	)
 });
 
-/**
- * OK
- */
-export const vPostApiV1StationsBatchResponse = vBaseStation;
+export const vQueryTypeEnum3 = v.picklist(["JOURNEY_SNAPSHOT"]);
 
-export const vPostApiV1StatisticsMetricsData = v.object({
-	body: vBaseMetricRequest,
-	path: v.optional(v.never()),
-	query: v.optional(v.never())
+export const vBaseMetricRequestJourneySnapshotMetricRequest = v.object({
+	queryType: v.optional(vQueryTypeEnum3),
+	start: v.pipe(v.string(), v.isoTimestamp()),
+	end: v.pipe(v.string(), v.isoTimestamp())
 });
 
-/**
- * OK
- */
-export const vPostApiV1StatisticsMetricsResponse = v.array(vMetricSeries);
+export const vQueryTypeEnum4 = v.picklist(["RIS_ID_SNAPSHOT"]);
 
-export const vPostApiV1TimetableDeparturesData = v.object({
-	body: vTimetableRequest,
-	path: v.optional(v.never()),
-	query: v.optional(v.never())
+export const vBaseMetricRequestRisIdSnapshotMetricRequest = v.object({
+	queryType: v.optional(vQueryTypeEnum4),
+	seriesType: vMetricSeriesType,
+	start: v.pipe(v.string(), v.isoTimestamp()),
+	end: v.pipe(v.string(), v.isoTimestamp())
 });
 
-/**
- * OK
- */
-export const vPostApiV1TimetableDeparturesResponse = v.array(vTimetableDeparture);
+export const vQueryTypeEnum5 = v.picklist(["STATION_SUMMARY"]);
 
-export const vPostApiV1TimetableArrivalsData = v.object({
-	body: vTimetableRequest,
-	path: v.optional(v.never()),
-	query: v.optional(v.never())
+export const vBaseMetricRequestStationSummaryMetricRequest = v.object({
+	queryType: v.optional(vQueryTypeEnum5),
+	seriesType: vMetricSeriesType,
+	start: v.optional(v.union([v.null(), v.pipe(v.string(), v.isoTimestamp())])),
+	end: v.pipe(v.string(), v.isoTimestamp()),
+	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)])),
+	evaNumbers: v.optional(
+		v.union([
+			v.null(),
+			v.array(
+				v.union([
+					v.pipe(
+						v.number(),
+						v.integer(),
+						v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+						v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+					),
+					v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+				])
+			)
+		])
+	)
 });
 
-/**
- * OK
- */
-export const vPostApiV1TimetableArrivalsResponse = v.array(vTimetableArrival);
+export const vQueryTypeEnum6 = v.picklist(["TRANSPORT_TYPE_DISTRIBUTION"]);
+
+export const vBaseMetricRequestTransportTypeDistributionMetricRequest = v.object({
+	queryType: v.optional(vQueryTypeEnum6),
+	end: v.pipe(v.string(), v.isoTimestamp()),
+	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)]))
+});
+
+export const vBaseMetricRequest = v.union([
+	v.intersect([
+		v.object({
+			queryType: v.optional(v.literal("DATABASE_SIZE_SNAPSHOT"))
+		}),
+		vBaseMetricRequestDatabaseSizeSnapshotMetricRequest
+	]),
+	v.intersect([
+		v.object({
+			queryType: v.optional(v.literal("RIS_ID_SNAPSHOT"))
+		}),
+		vBaseMetricRequestRisIdSnapshotMetricRequest
+	]),
+	v.intersect([
+		v.object({
+			queryType: v.optional(v.literal("JOURNEY_SNAPSHOT"))
+		}),
+		vBaseMetricRequestJourneySnapshotMetricRequest
+	]),
+	v.intersect([
+		v.object({
+			queryType: v.optional(v.literal("TRANSPORT_TYPE_DISTRIBUTION"))
+		}),
+		vBaseMetricRequestTransportTypeDistributionMetricRequest
+	]),
+	v.intersect([
+		v.object({
+			queryType: v.optional(v.literal("HOURLY_TRANSPORT_SNAPSHOT"))
+		}),
+		vBaseMetricRequestHourlyTransportSnapshotMetricRequest
+	]),
+	v.intersect([
+		v.object({
+			queryType: v.optional(v.literal("STATION_SUMMARY"))
+		}),
+		vBaseMetricRequestStationSummaryMetricRequest
+	])
+]);
+
+export const vTypeEnum = v.picklist(["ATTRIBUTE"]);
+
+export const vJourneyMessageAttributeMessage = v.object({
+	type: v.optional(vTypeEnum),
+	messageId: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	key: vMessageKey,
+	text: v.string()
+});
+
+export const vTypeEnum2 = v.picklist(["DISRUPTION"]);
+
+export const vJourneyMessageDisruptionMessage = v.object({
+	type: v.optional(vTypeEnum2),
+	cause: v.optional(v.union([v.null(), v.string()])),
+	effect: v.optional(v.union([v.null(), v.string()])),
+	disruptionId: v.optional(v.union([v.null(), v.string()])),
+	textShort: v.optional(v.union([v.null(), v.string()])),
+	references: v.optional(v.union([v.null(), v.array(vJourneyMessageReference)])),
+	messageId: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	key: vMessageKey,
+	text: v.string()
+});
+
+export const vTypeEnum3 = v.picklist(["NOTE"]);
+
+export const vJourneyMessageNoteMessage = v.object({
+	type: v.optional(vTypeEnum3),
+	category: v.optional(v.union([v.null(), v.string()])),
+	textShort: v.optional(v.union([v.null(), v.string()])),
+	references: v.optional(v.union([v.null(), v.array(vJourneyMessageReference)])),
+	messageId: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	key: vMessageKey,
+	text: v.string()
+});
+
+export const vTypeEnum4 = v.picklist(["RIS_CAUSE"]);
+
+export const vJourneyMessageRisCauseMessage = v.object({
+	type: v.optional(vTypeEnum4),
+	messageId: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	key: vMessageKey,
+	text: v.string()
+});
+
+export const vTypeEnum5 = v.picklist(["RIS_QUALITY_DEVIATION"]);
+
+export const vJourneyMessageRisQualityDeviationMessage = v.object({
+	type: v.optional(vTypeEnum5),
+	messageId: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	key: vMessageKey,
+	text: v.string()
+});
+
+export const vJourneyMessage = v.union([
+	v.intersect([
+		v.object({
+			type: v.optional(v.literal("ATTRIBUTE"))
+		}),
+		vJourneyMessageAttributeMessage
+	]),
+	v.intersect([
+		v.object({
+			type: v.optional(v.literal("DISRUPTION"))
+		}),
+		vJourneyMessageDisruptionMessage
+	]),
+	v.intersect([
+		v.object({
+			type: v.optional(v.literal("NOTE"))
+		}),
+		vJourneyMessageNoteMessage
+	]),
+	v.intersect([
+		v.object({
+			type: v.optional(v.literal("RIS_CAUSE"))
+		}),
+		vJourneyMessageRisCauseMessage
+	]),
+	v.intersect([
+		v.object({
+			type: v.optional(v.literal("RIS_QUALITY_DEVIATION"))
+		}),
+		vJourneyMessageRisQualityDeviationMessage
+	])
+]);
+
+export const vJourney = v.object({
+	journeyId: v.pipe(v.string(), v.maxLength(82)),
+	administration: vJourneyAdministration,
+	type: vJourneyType,
+	transport: vJourneyTransport,
+	continuationBy: v.optional(v.array(v.string())),
+	continuationFor: v.optional(v.array(v.string())),
+	cancelled: v.boolean(),
+	destination: vJourneyRichStopPlace,
+	differingDestination: v.optional(v.union([v.null(), vJourneyStopPlace])),
+	origin: vJourneyRichStopPlace,
+	differingOrigin: v.optional(v.union([v.null(), vJourneyStopPlace])),
+	scheduledEvents: v.array(vJourneyScheduledEvent),
+	messages: v.array(vJourneyMessage)
+});

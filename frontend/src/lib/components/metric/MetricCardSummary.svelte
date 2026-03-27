@@ -2,11 +2,10 @@
 	import type { Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
 
-	interface Props {
+	type Props = {
 		children: Snippet;
 		class?: ClassValue;
-	}
-
+	};
 	let { children, class: className }: Props = $props();
 </script>
 

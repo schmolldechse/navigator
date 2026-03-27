@@ -7,13 +7,13 @@ public class LocalDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
 {
     public override DateTimeOffset Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return DateTimeOffset.Parse(reader.GetString()!);
+        if (reader.TryGetDateTimeOffset(out var dateTimeOffset)) return dateTimeOffset;
+        throw new JsonException($"Unable to parse '{reader.GetString()}' as a valid DateTimeOffset.");
     }
 
     public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
     {
-        var localOffset = TimeZoneInfo.Local.GetUtcOffset(value.DateTime);
-        var localTime = value.ToOffset(localOffset);
-        writer.WriteStringValue(localTime.ToString("yyyy-MM-ddTHH:mm:sszzz"));
+        var localOffset = value.ToLocalTime();
+        writer.WriteStringValue(localOffset);
     }
 }

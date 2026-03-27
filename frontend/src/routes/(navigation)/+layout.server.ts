@@ -1,5 +1,5 @@
-import type { NavigationItem } from "$lib/components/Header.svelte";
 import type { LayoutServerLoad } from "./$types";
+import type { NavigationItem } from "$lib/components/Header.svelte";
 
 export const load: LayoutServerLoad = async ({}) => {
 	const pages: NavigationItem[] = [

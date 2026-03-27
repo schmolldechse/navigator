@@ -185,124 +185,119 @@
 </script>
 
 <MetricCardBase class={["gap-y-4", className]}>
-	{#snippet head()}
-		<MetricCardTitle title="Stop Cancellation Rate" class="justify-between">
-			<div class="flex items-center gap-x-3">
-				<!-- Settings Button -->
-				<button
-					class={[
-						"cursor-pointer transition-colors",
-						optionsDialogVisible && "text-accent",
-						!optionsDialogVisible && "text-muted-foreground hover:text-accent"
-					]}
-					onclick={(event: MouseEvent) => {
-						event.stopPropagation();
-						optionsDialogVisible = !optionsDialogVisible;
-					}}
-				>
-					<Settings size={18} />
-				</button>
-			</div>
-		</MetricCardTitle>
-	{/snippet}
-
-	{#snippet body()}
-		{#await promise}
-			<div class="bg-muted h-64 w-full animate-pulse rounded-md"></div>
-		{:then metrics}
-			{@const series = buildCancellationRateChartSeries(metrics)}
-			{@const availableTransportTypes = getAvailableTransportTypes(metrics)}
-
-			<LineChart
-				data={series.flatMap((singleSeries: CancellationRateSeries) => singleSeries.data)}
-				{series}
-				x="date"
-				y="value"
-				yDomain={null}
-				brush
-				height={384}
-				padding={defaultChartPadding({ left: 48 })}
+	<MetricCardTitle title="Stop Cancellation Rate" class="justify-between">
+		<div class="flex items-center gap-x-3">
+			<!-- Settings Button -->
+			<button
+				class={[
+					"cursor-pointer transition-colors",
+					optionsDialogVisible && "text-accent",
+					!optionsDialogVisible && "text-muted-foreground hover:text-accent"
+				]}
+				onclick={(event: MouseEvent) => {
+					event.stopPropagation();
+					optionsDialogVisible = !optionsDialogVisible;
+				}}
 			>
-				{#snippet children({ context, visibleSeries, getSplineProps, getHighlightProps })}
-					<Svg>
-						<Axis
-							placement="left"
-							rule
-							grid
-							tickLabelProps={{
-								textAnchor: "start",
-								dx: 8
-							}}
-							classes={{
-								tickLabel: "text-xs stroke-0 text-muted-foreground select-none",
-								label: "text-xs stroke-0 text-muted-foreground select-none"
-							}}
-							label={rateMode === "relative" ? "Rate (%)" : "Cancellations"}
-						/>
-						<Axis
-							placement="bottom"
-							rule
-							grid
-							classes={{
-								tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
-							}}
-						/>
+				<Settings size={18} />
+			</button>
+		</div>
+	</MetricCardTitle>
 
-						<ChartClipPath>
-							{#each visibleSeries as series, i (series.key)}
-								<Spline {...getSplineProps(series, i)} stroke={series.color} strokeWidth={2} />
-								<Highlight
-									{...getHighlightProps(series, i)}
-									points={{ stroke: series.color }}
-									lines={{ class: "stroke-muted-foreground/30" }}
-								/>
-							{/each}
-						</ChartClipPath>
-					</Svg>
+	{#await promise}
+		<div class="bg-muted h-64 w-full animate-pulse rounded-md"></div>
+	{:then metrics}
+		{@const series = buildCancellationRateChartSeries(metrics)}
+		{@const availableTransportTypes = getAvailableTransportTypes(metrics)}
 
-					<!-- Data Tooltip -->
-					<Tooltip.Root
-						anchor="bottom"
-						contained="container"
-						class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
-					>
-						{#snippet children({ payload })}
-							<div class="flex flex-col gap-y-1">
-								{#each [...payload].reverse() as item}
-									<div class="flex items-center justify-between gap-x-4 text-xs">
-										<div class="flex items-center gap-x-2">
-											<div class="h-1.5 w-1.5 rounded-full" style:background-color={item.color}></div>
-											<span class="text-muted-foreground text-left">{item.rawSeriesData?.label}</span>
-										</div>
-
-										<span class="text-text">
-											{item.value.toLocaleString(undefined, { maximumFractionDigits: 1 })}{rateMode === "relative" ? "%" : ""}
-										</span>
-									</div>
-								{/each}
-							</div>
-						{/snippet}
-					</Tooltip.Root>
-
-					<!-- Date Tooltip on x-Axis -->
-					<DateTooltip
-						{context}
-						value={(data: { date: Date; value: number }) =>
-							DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}
+		<LineChart
+			data={series.flatMap((singleSeries: CancellationRateSeries) => singleSeries.data)}
+			{series}
+			x="date"
+			y="value"
+			yDomain={null}
+			brush
+			height={384}
+			padding={defaultChartPadding({ left: 48 })}
+		>
+			{#snippet children({ context, visibleSeries, getSplineProps, getHighlightProps })}
+				<Svg>
+					<Axis
+						placement="left"
+						rule
+						grid
+						tickLabelProps={{
+							textAnchor: "start",
+							dx: 8
+						}}
+						classes={{
+							tickLabel: "text-xs stroke-0 text-muted-foreground select-none",
+							label: "text-xs stroke-0 text-muted-foreground select-none"
+						}}
+						label={rateMode === "relative" ? "Rate (%)" : "Cancellations"}
 					/>
-				{/snippet}
-			</LineChart>
+					<Axis
+						placement="bottom"
+						rule
+						grid
+						classes={{
+							tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
+						}}
+					/>
 
-			<CancellationRateOptionsDialog
-				bind:isVisible={optionsDialogVisible}
-				{availableTransportTypes}
-				bind:selectedTransportTypes
-				bind:showTotalSeries
-				bind:scheduleType
-				bind:rateMode
-			/>
-		{:catch}
-			<MetricLoadingFailedWarning />
-		{/await}
-	{/snippet}
+					<ChartClipPath>
+						{#each visibleSeries as series, i (series.key)}
+							<Spline {...getSplineProps(series, i)} stroke={series.color} strokeWidth={2} />
+							<Highlight
+								{...getHighlightProps(series, i)}
+								points={{ stroke: series.color }}
+								lines={{ class: "stroke-muted-foreground/30" }}
+							/>
+						{/each}
+					</ChartClipPath>
+				</Svg>
+
+				<!-- Data Tooltip -->
+				<Tooltip.Root
+					anchor="bottom"
+					contained="container"
+					class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
+				>
+					{#snippet children({ payload })}
+						<div class="flex flex-col gap-y-1">
+							{#each [...payload].reverse() as item}
+								<div class="flex items-center justify-between gap-x-4 text-xs">
+									<div class="flex items-center gap-x-2">
+										<div class="h-1.5 w-1.5 rounded-full" style:background-color={item.color}></div>
+										<span class="text-muted-foreground text-left">{item.rawSeriesData?.label}</span>
+									</div>
+
+									<span class="text-text">
+										{item.value.toLocaleString(undefined, { maximumFractionDigits: 1 })}{rateMode === "relative" ? "%" : ""}
+									</span>
+								</div>
+							{/each}
+						</div>
+					{/snippet}
+				</Tooltip.Root>
+
+				<!-- Date Tooltip on x-Axis -->
+				<DateTooltip
+					{context}
+					value={(data: { date: Date; value: number }) => DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}
+				/>
+			{/snippet}
+		</LineChart>
+
+		<CancellationRateOptionsDialog
+			bind:isVisible={optionsDialogVisible}
+			{availableTransportTypes}
+			bind:selectedTransportTypes
+			bind:showTotalSeries
+			bind:scheduleType
+			bind:rateMode
+		/>
+	{:catch}
+		<MetricLoadingFailedWarning />
+	{/await}
 </MetricCardBase>

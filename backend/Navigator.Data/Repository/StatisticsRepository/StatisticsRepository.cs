@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Enums;
 using Navigator.Data.Enums.Metric;
@@ -39,21 +39,21 @@ public class StatisticsRepository(
         .AsNoTracking()
         .CountAsync();
 
-    public async Task<IEnumerable<MetricSeries>> GetMetricAsync(BaseMetricRequest request) => request switch
+    public async Task<MetricSeries> GetMetricAsync(BaseMetricRequest baseRequest) => baseRequest switch
     {
-        DatabaseSizeSnapshotMetricRequest => await GetDatabaseSizeMetricsAsync((DatabaseSizeSnapshotMetricRequest) request),
-        JourneySnapshotMetricRequest => await GetJourneyMetricsAsync((JourneySnapshotMetricRequest)request),
-        RisIdSnapshotMetricRequest => await GetRisIdMetricsAsync((RisIdSnapshotMetricRequest)request),
-        
-        TransportTypeDistributionMetricRequest => await GetTransportDistributionsAsync((TransportTypeDistributionMetricRequest)request),
+        DatabaseSizeSnapshotMetricRequest request => await GetDatabaseSizeMetricsAsync(request),
+        JourneySnapshotMetricRequest request => await GetJourneyMetricsAsync(request),
+        RisIdSnapshotMetricRequest request => await GetRisIdMetricsAsync(request),
 
-        HourlyTransportSnapshotMetricRequest => await GetHourlyTransportSnapshotAsync((HourlyTransportSnapshotMetricRequest)request),
-        StationSummaryMetricRequest => await GetStationSummaryAsync((StationSummaryMetricRequest)request),
+        TransportTypeDistributionMetricRequest request => await GetTransportDistributionsAsync(request),
 
-        _ => throw new NotSupportedException($"Metric type '{request.MetricQueryType}' is not supported.")
+        HourlyTransportSnapshotMetricRequest request => await GetHourlyTransportSnapshotAsync(request),
+        StationSummaryMetricRequest request => await GetStationSummaryAsync(request),
+
+        _ => throw new NotSupportedException($"Metric type '{baseRequest.MetricSeriesType}' is not supported.")
     };
 
-    private async Task<IEnumerable<MetricSeries>> GetDatabaseSizeMetricsAsync(DatabaseSizeSnapshotMetricRequest request)
+    private async Task<MetricSeries> GetDatabaseSizeMetricsAsync(DatabaseSizeSnapshotMetricRequest request)
     {
         var dataPoints = await dataContext.DatabaseSizes
             .AsNoTracking()
@@ -77,15 +77,15 @@ public class StatisticsRepository(
             });
         }
 
-        return [new MetricSeries()
+        return new MetricSeries()
         {
             SeriesType = MetricSeriesType.DatabaseSize,
             Unit = MetricUnit.Bytes,
             DataPoints = dataPoints,
-        }];
+        };
     }
 
-    private async Task<IEnumerable<MetricSeries>> GetRisIdMetricsAsync(RisIdSnapshotMetricRequest request)
+    private async Task<MetricSeries> GetRisIdMetricsAsync(RisIdSnapshotMetricRequest request)
     {
         var snapshots = await dataContext.RisIdSnapshots
             .AsNoTracking()
@@ -93,16 +93,20 @@ public class StatisticsRepository(
             .OrderBy(snapshot => snapshot.MeasuredAt)
             .ToListAsync();
 
-        var activePoints = snapshots.Select(snapshot => new TimestampDataPoint()
+        var dataPoints = request.MetricSeriesType switch
         {
-            Timestamp = snapshot.MeasuredAt,
-            Value = snapshot.Active
-        }).ToList();
-        var inactivePoints = snapshots.Select(snapshot => new TimestampDataPoint()
-        {
-            Timestamp = snapshot.MeasuredAt,
-            Value = snapshot.Inactive
-        }).ToList();
+            MetricSeriesType.RisIdsActive => snapshots.Select(snapshot => new TimestampDataPoint()
+            {
+                Timestamp = snapshot.MeasuredAt,
+                Value = snapshot.Active
+            }).ToList(),
+            MetricSeriesType.RisIdsInactive => snapshots.Select(snapshot => new TimestampDataPoint()
+            {
+                Timestamp = snapshot.MeasuredAt,
+                Value = snapshot.Inactive
+            }).ToList(),
+            _ => throw new NotSupportedException($"Unsupported RisId metric series type: {request.MetricSeriesType}")
+        };
 
         DateTimeOffset now = DateTime.UtcNow;
         if (request.Start <= now && now <= request.End)
@@ -110,33 +114,29 @@ public class StatisticsRepository(
             var currentEstimate = await EstimateCurrentRisIdsAsync();
             if (currentEstimate is null) currentEstimate = (0, 0);
 
-            activePoints.Add(new TimestampDataPoint()
+            var currentValue = request.MetricSeriesType switch
+            {
+                MetricSeriesType.RisIdsActive => currentEstimate.Value.Active,
+                MetricSeriesType.RisIdsInactive => currentEstimate.Value.Inactive,
+                _ => 0
+            };
+
+            dataPoints.Add(new TimestampDataPoint()
             {
                 Timestamp = now,
-                Value = currentEstimate.Value.Active
-            });
-            inactivePoints.Add(new TimestampDataPoint()
-            {
-                Timestamp = now,
-                Value = currentEstimate.Value.Inactive
+                Value = currentValue
             });
         }
 
-        return [
-            new MetricSeries() {
-                SeriesType = MetricSeriesType.RisIdsActive,
-                Unit = MetricUnit.Count,
-                DataPoints = activePoints,
-            },
-            new MetricSeries() {
-                SeriesType = MetricSeriesType.RisIdsInactive,
-                Unit = MetricUnit.Count,
-                DataPoints = inactivePoints,
-            }
-        ];
+        return new MetricSeries()
+        {
+            SeriesType = request.MetricSeriesType,
+            Unit = MetricUnit.Count,
+            DataPoints = dataPoints,
+        };
     }
 
-    private async Task<IEnumerable<MetricSeries>> GetJourneyMetricsAsync(JourneySnapshotMetricRequest request)
+    private async Task<MetricSeries> GetJourneyMetricsAsync(JourneySnapshotMetricRequest request)
     {
         var snapshots = await dataContext.JourneySnapshots
             .AsNoTracking()
@@ -160,14 +160,15 @@ public class StatisticsRepository(
             });
         }
 
-        return [new MetricSeries() {
+        return new MetricSeries()
+        {
             SeriesType = MetricSeriesType.JourneyTotal,
             Unit = MetricUnit.Count,
             DataPoints = snapshots,
-        }];
+        };
     }
 
-    private async Task<IEnumerable<MetricSeries>> GetTransportDistributionsAsync(TransportTypeDistributionMetricRequest request)
+    private async Task<MetricSeries> GetTransportDistributionsAsync(TransportTypeDistributionMetricRequest request)
     {
         request.TransportTypes = (request.TransportTypes is null || request.TransportTypes.Length == 0)
             ? Enum.GetValues<TransportType>()
@@ -197,14 +198,15 @@ public class StatisticsRepository(
             .OrderByDescending(dataPoint => dataPoint.Value)
             .ToList();
 
-        return [new MetricSeries() {
+        return new MetricSeries()
+        {
             SeriesType = MetricSeriesType.TransportTypesTotal,
             Unit = MetricUnit.Count,
             DataPoints = dataPoints,
-        }];
+        };
     }
 
-    private async Task<IEnumerable<MetricSeries>> GetHourlyTransportSnapshotAsync(HourlyTransportSnapshotMetricRequest request)
+    private async Task<MetricSeries> GetHourlyTransportSnapshotAsync(HourlyTransportSnapshotMetricRequest request)
     {
         request.TransportTypes = (request.TransportTypes is null || request.TransportTypes.Length == 0)
             ? Enum.GetValues<TransportType>()
@@ -216,10 +218,10 @@ public class StatisticsRepository(
             .Where(summary => request.TransportTypes.Contains(summary.TransportType));
 
         var results = (await query.ToListAsync())
-            .GroupBy(summary => new 
-            { 
-                BucketHour = summary.BucketHour.AddHours(-(summary.BucketHour.Hour % request.Stepping)), 
-                summary.TransportType 
+            .GroupBy(summary => new
+            {
+                BucketHour = summary.BucketHour.AddHours(-(summary.BucketHour.Hour % request.Stepping)),
+                summary.TransportType
             })
             .Select(group => new
             {
@@ -236,61 +238,44 @@ public class StatisticsRepository(
             .OrderBy(element => element.BucketHour)
             .ToList();
 
-        var arrivalsCountPoints = results
-            .Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.ArrivalsCount })
-            .ToList();
-        var arrivalCancellationsPoints = results
-            .Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.ArrivalCancellationCount })
-            .ToList();
-        var arrivalDelayPoints = results
-            .Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = (decimal)result.ArrivalDelaySum })
-            .ToList();
+        var (dataPoints, unit) = request.MetricSeriesType switch
+        {
+            MetricSeriesType.HourlyGlobalArrivals => (
+                results.Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.ArrivalsCount }).ToList(),
+                MetricUnit.Count
+            ),
+            MetricSeriesType.HourlyGlobalArrivalCancellations => (
+                results.Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.ArrivalCancellationCount }).ToList(),
+                MetricUnit.Count
+            ),
+            MetricSeriesType.HourlyGlobalArrivalDelaySum => (
+                results.Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = (decimal)result.ArrivalDelaySum }).ToList(),
+                MetricUnit.Seconds
+            ),
+            MetricSeriesType.HourlyGlobalDepartures => (
+                results.Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.DeparturesCount }).ToList(),
+                MetricUnit.Count
+            ),
+            MetricSeriesType.HourlyGlobalDepartureCancellations => (
+                results.Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.DepartureCancellationCount }).ToList(),
+                MetricUnit.Count
+            ),
+            MetricSeriesType.HourlyGlobalDepartureDelaySum => (
+                results.Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = (decimal)result.DepartureDelaySum }).ToList(),
+                MetricUnit.Seconds
+            ),
+            _ => throw new NotSupportedException($"Unsupported hourly transport metric series type: {request.MetricSeriesType}")
+        };
 
-        var departuresCountPoints = results
-            .Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.DeparturesCount })
-            .ToList();
-        var departureCancellationsPoints = results
-            .Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = result.DepartureCancellationCount })
-            .ToList();
-        var departureDelayPoints = results
-            .Select(result => new TimestampTransportTypeDataPoint { Timestamp = result.BucketHour, TransportType = result.TransportType, Value = (decimal)result.DepartureDelaySum })
-            .ToList();
-
-        return [
-            new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyGlobalArrivals,
-                Unit = MetricUnit.Count,
-                DataPoints = arrivalsCountPoints,
-            },
-            new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyGlobalArrivalCancellations,
-                Unit = MetricUnit.Count,
-                DataPoints = arrivalCancellationsPoints,
-            },
-            new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyGlobalArrivalDelaySum,
-                Unit = MetricUnit.Seconds,
-                DataPoints = arrivalDelayPoints,
-            },
-            new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyGlobalDepartures,
-                Unit = MetricUnit.Count,
-                DataPoints = departuresCountPoints,
-            },
-            new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyGlobalDepartureCancellations,
-                Unit = MetricUnit.Count,
-                DataPoints = departureCancellationsPoints,
-            },
-            new MetricSeries {
-                SeriesType = MetricSeriesType.HourlyGlobalDepartureDelaySum,
-                Unit = MetricUnit.Seconds,
-                DataPoints = departureDelayPoints,
-            }
-        ];
+        return new MetricSeries
+        {
+            SeriesType = request.MetricSeriesType,
+            Unit = unit,
+            DataPoints = dataPoints,
+        };
     }
 
-    private async Task<IEnumerable<MetricSeries>> GetStationSummaryAsync(StationSummaryMetricRequest request)
+    private async Task<MetricSeries> GetStationSummaryAsync(StationSummaryMetricRequest request)
     {
         request.TransportTypes = (request.TransportTypes is null || request.TransportTypes.Length == 0)
             ? Enum.GetValues<TransportType>()
@@ -301,21 +286,21 @@ public class StatisticsRepository(
             .Where(summary => summary.BucketHour <= request.End.UtcDateTime)
             .Where(summary => request.TransportTypes.Contains(summary.TransportType));
 
-        if (request.Start.HasValue) 
+        if (request.Start.HasValue)
             query = query.Where(summary => summary.BucketHour >= request.Start.Value.UtcDateTime);
         if (request.EvaNumbers != null && request.EvaNumbers.Length > 0)
             query = query.Where(summary => request.EvaNumbers.Contains(summary.EvaNumber));
 
         var groupedQuery = query.GroupBy(snapshot => snapshot.EvaNumber);
-        var dataPoints = request.SnapshotType switch
+        var dataPoints = request.MetricSeriesType switch
         {
-            StationSnapshotType.Arrivals => await groupedQuery
+            MetricSeriesType.StationArrivals => await groupedQuery
                 .Select(group => new StationDataPoint { EvaNumber = group.Key, Value = group.Sum(snapshot => snapshot.ArrivalCount) })
                 .ToListAsync(),
-            StationSnapshotType.ArrivalCancellations => await groupedQuery
+            MetricSeriesType.StationArrivalCancellations => await groupedQuery
                 .Select(group => new StationDataPoint { EvaNumber = group.Key, Value = group.Sum(snapshot => snapshot.ArrivalCancellationCount) })
                 .ToListAsync(),
-            StationSnapshotType.ArrivalDelayAvg => await groupedQuery
+            MetricSeriesType.StationArrivalDelayAvg => await groupedQuery
                 .Select(group => new
                 {
                     EvaNumber = group.Key,
@@ -325,16 +310,16 @@ public class StatisticsRepository(
                 .Select(element => new StationDataPoint
                 {
                     EvaNumber = element.EvaNumber,
-                    Value = element.ValidArrivals == 0 ? 0 : (decimal) element.DelaySum / element.ValidArrivals
+                    Value = element.ValidArrivals == 0 ? 0 : (decimal)element.DelaySum / element.ValidArrivals
                 })
                 .ToListAsync(),
-            StationSnapshotType.Departures => await groupedQuery
+            MetricSeriesType.StationDepartures => await groupedQuery
                 .Select(group => new StationDataPoint { EvaNumber = group.Key, Value = group.Sum(snapshot => snapshot.DepartureCount) })
                 .ToListAsync(),
-            StationSnapshotType.DepartureCancellations => await groupedQuery
+            MetricSeriesType.StationDepartureCancellations => await groupedQuery
                 .Select(group => new StationDataPoint { EvaNumber = group.Key, Value = group.Sum(snapshot => snapshot.DepartureCancellationCount) })
                 .ToListAsync(),
-            StationSnapshotType.DepartureDelayAvg => await groupedQuery
+            MetricSeriesType.StationDepartureDelayAvg => await groupedQuery
                 .Select(group => new
                 {
                     EvaNumber = group.Key,
@@ -344,17 +329,18 @@ public class StatisticsRepository(
                 .Select(element => new StationDataPoint
                 {
                     EvaNumber = element.EvaNumber,
-                    Value = element.ValidDepartures == 0 ? 0 : (decimal) element.DelaySum / element.ValidDepartures
+                    Value = element.ValidDepartures == 0 ? 0 : (decimal)element.DelaySum / element.ValidDepartures
                 })
                 .ToListAsync(),
-            _ => []
+            _ => throw new NotSupportedException($"Unsupported station metric series type: {request.MetricSeriesType}")
         };
 
-        return [new MetricSeries {
-            SeriesType = request.GetMetricMetadata().SeriesType,
-            Unit = request.GetMetricMetadata().Unit,
+        return new MetricSeries
+        {
+            SeriesType = request.MetricSeriesType,
+            Unit = request.GetMetricUnit(),
             DataPoints = dataPoints,
-        }];
+        };
     }
 
     public async Task SaveDatabaseSizeAsync(DatabaseSize databaseSize)

@@ -11,7 +11,7 @@
 	import { onMount, untrack } from "svelte";
 	import "leaflet/dist/leaflet.css";
 	import { Map as LeafletMap, TileLayer, type LatLngBounds } from "leaflet";
-	import { HeatmapLayer, type HeatPoint } from "@lib/leafletImplementation/heatmapLayer";
+	import { HeatmapLayer, type HeatPoint } from "@lib/leaflet/heatmapLayer";
 	import { type BaseStation } from "@lib/api";
 	import type { ClassValue } from "svelte/elements";
 	import HeatmapMarker from "./marker/HeatmapMarker.svelte";

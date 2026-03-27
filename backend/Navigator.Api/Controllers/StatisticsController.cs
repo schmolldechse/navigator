@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Navigator.Api.DTOs.Statistics;
 using Navigator.Data.Repository.StatisticsRepository;
@@ -14,7 +14,7 @@ public class StatisticsController(
 ) : Controller
 {
     [HttpPost("metrics")]
-    [ProducesResponseType<IEnumerable<MetricSeries>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<MetricSeries>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [EndpointSummary("Load metric series")]
     [EndpointDescription("Retrieves measured metric statistics for the specified time range.")]
@@ -22,7 +22,7 @@ public class StatisticsController(
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var metricDataSets = await statisticsRepository.GetMetricAsync(request.BuildRequest());
-        return Ok(mapper.Map<IEnumerable<MetricSeries>>(metricDataSets));
+        var metricDataSet = await statisticsRepository.GetMetricAsync(request.BuildRequest());
+        return Ok(mapper.Map<MetricSeries>(metricDataSet));
     }
 }

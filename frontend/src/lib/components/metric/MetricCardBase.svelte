@@ -2,13 +2,11 @@
 	import type { Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
 
-	interface Props {
-		head?: Snippet;
-		body?: Snippet;
+	type Props = {
+		children: Snippet;
 		class?: ClassValue;
-	}
-
-	let { head, body, class: className }: Props = $props();
+	};
+	let { children, class: className }: Props = $props();
 </script>
 
 <div
@@ -17,6 +15,5 @@
 		className
 	]}
 >
-	{@render head?.()}
-	{@render body?.()}
+	{@render children()}
 </div>

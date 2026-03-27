@@ -1,5 +1,4 @@
-﻿using Navigator.Data.Enums;
-using Navigator.Data.Enums.Metric;
+using Navigator.Data.Enums;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
 
@@ -7,9 +6,6 @@ namespace Navigator.Api.DTOs.Statistics.Request;
 
 public class TransportTypeDistributionMetricRequest : BaseMetricRequest
 {
-    [JsonIgnore]
-    public override MetricQueryType MetricQueryType => MetricQueryType.TransportTypeDistribution;
-
     [JsonPropertyName("end")]
     public required DateTimeOffset End { get; set; }
 

@@ -1,10 +1,10 @@
-﻿using Navigator.Data.Enums.Metric;
+using Navigator.Data.Enums.Metric;
 
 namespace Navigator.Data.Models.Statistics.Request;
 
 public class DatabaseSizeSnapshotMetricRequest : BaseMetricRequest
 {
-    public override MetricQueryType MetricQueryType => MetricQueryType.DatabaseSizeSnapshot;
+    public override MetricSeriesType MetricSeriesType => MetricSeriesType.DatabaseSize;
     public required DateTimeOffset Start { get; set; }
     public required DateTimeOffset End { get; set; }
 }

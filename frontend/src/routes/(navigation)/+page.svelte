@@ -4,27 +4,28 @@
 	import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
-	import ProjectDimensionsSettingsDialog from "@lib/components/projectdimensions/settings/ProjectDimensionsSettingsDialog.svelte";
-	import DatabaseSize from "@lib/components/projectdimensions/charts/DatabaseSize.svelte";
-	import RecordedJourneys from "@lib/components/projectdimensions/charts/RecordedJourneys.svelte";
-	import TransportTypeDistribution from "@lib/components/projectdimensions/charts/TransportTypeDistribution.svelte";
-	import RecordedRisIds from "@lib/components/projectdimensions/charts/risids/RecordedRisIds.svelte";
-	import HourlyStopRate from "@lib/components/projectdimensions/charts/HourlyStopRate.svelte";
-	import DelayAnalysis from "@lib/components/projectdimensions/charts/stopdelayanalysis/DelayAnalysis.svelte";
-	import CancellationRate from "@lib/components/projectdimensions/charts/cancellationrate/CancellationRate.svelte";
-	import { CardScale } from "@lib/util/card";
-	import { TransportType } from "@lib/api/types.gen";
 	import type { PageProps } from "./$types";
-	import Button from "@lib/components/interactable/button/Button.svelte";
+	import Button from "@lib/components/interactable/Button.svelte";
+	import Separator from "@lib/components/interactable/Separator.svelte";
+	import TimePickerDialog from "@lib/components/interactable/timepicker/TimePickerDialog.svelte";
+	import DatabaseSize from "@lib/components/projectdimensions/DatabaseSize.svelte";
+	import RecordedRisIds from "@lib/components/projectdimensions/risids/RecordedRisIds.svelte";
+	import RecordedJourneys from "@lib/components/projectdimensions/RecordedJourneys.svelte";
+	import TransportTypeDistribution from "@lib/components/projectdimensions/TransportTypeDistribution.svelte";
 
 	let { data }: PageProps = $props();
 
+	// settings
 	let isSettingsOpen: boolean = $state(false);
+	let selectedTimerange: { start: DateTime; end: DateTime } = $state({
+		start: data.timerange.start,
+		end: data.timerange.end
+	});
 
 	type MetricCardData = {
 		metricComponent: Component<any>;
 		props: Record<string, unknown>;
-		scale: CardScale;
+		scale: "small" | "medium" | "large";
 	};
 	let metricCards: MetricCardData[] = $derived([
 		{
@@ -32,49 +33,28 @@
 			props: {
 				promise: data.dimensions.databaseSize
 			},
-			scale: CardScale.SMALL
-		},
-		{
-			metricComponent: RecordedJourneys,
-			props: {
-				promise: data.dimensions.totalJourneys
-			},
-			scale: CardScale.MEDIUM
-		},
-		{
-			metricComponent: RecordedRisIds,
-			props: {
-				promise: data.dimensions.totalRisIds
-			},
-			scale: CardScale.MEDIUM
+			scale: "medium"
 		},
 		{
 			metricComponent: TransportTypeDistribution,
 			props: {
-				promise: data.dimensions.transportTypes
+				promise: data.dimensions.transportTypeDistribution
 			},
-			scale: CardScale.SMALL
+			scale: "small"
 		},
 		{
-			metricComponent: HourlyStopRate,
+			metricComponent: RecordedRisIds,
 			props: {
-				promise: data.dimensions.hourlyTransports
+				promise: data.dimensions.risIdDistribution
 			},
-			scale: CardScale.LARGE
+			scale: "large"
 		},
 		{
-			metricComponent: DelayAnalysis,
+			metricComponent: RecordedJourneys,
 			props: {
-				promise: data.dimensions.hourlyTransports
+				promise: data.dimensions.recordedJourneys
 			},
-			scale: CardScale.LARGE
-		},
-		{
-			metricComponent: CancellationRate,
-			props: {
-				promise: data.dimensions.hourlyTransports
-			},
-			scale: CardScale.LARGE
+			scale: "large"
 		}
 	]);
 </script>
@@ -85,7 +65,7 @@
 
 <main class="container mx-auto flex flex-col space-y-8 p-4 sm:py-8">
 	<!-- Hero Section -->
-	<section class="mx-auto w-full max-w-7xl">
+	<section>
 		<div class="relative mb-4">
 			<div class="bg-accent absolute top-0 bottom-0 w-0.5 sm:-left-4 sm:w-1"></div>
 			<h1 class="pl-4 text-3xl font-bold text-balance sm:mb-6 sm:pl-8 sm:text-4xl md:text-6xl">
@@ -99,7 +79,7 @@
 	</section>
 
 	<!-- Project Overview -->
-	<section class="mx-auto w-full max-w-7xl">
+	<section>
 		<div class="border-accent/20 flex flex-col gap-y-6 rounded-lg border-2 p-4 backdrop-blur">
 			<div class="flex items-baseline gap-x-4">
 				<Info />
@@ -130,44 +110,44 @@
 		</div>
 	</section>
 
+	<Separator orientation="horizontal" />
+
 	<!-- Project Dimensions -->
-	<section class="mx-auto w-full max-w-7xl space-y-4">
-		<div class="flex flex-row items-center justify-between gap-y-4">
+	<section class="space-y-4">
+		<div class="relative flex flex-row items-center justify-between">
 			<h2 class="text-2xl font-medium">Project Dimensions</h2>
 
-			<div class="relative">
-				<Button
-					mode="secondary"
-					onclick={(event: MouseEvent) => {
-						event.stopPropagation();
-						isSettingsOpen = !isSettingsOpen;
-					}}
-				>
-					<SlidersHorizontal size={18} />
+			<Button
+				mode="secondary"
+				onclick={(event: MouseEvent) => {
+					event.stopPropagation();
+					isSettingsOpen = !isSettingsOpen;
+				}}
+			>
+				<SlidersHorizontal size={18} />
 
-					<div class="hidden items-baseline gap-x-1 md:flex">
-						<span class="text-sm tracking-tight">{data.timerange.start?.toLocaleString(DateTime.DATE_MED)}</span>
-						<span>&nbsp;–&nbsp;</span>
-						<span class="text-sm tracking-tight">{data.timerange.end?.toLocaleString(DateTime.DATE_MED)}</span>
-					</div>
-				</Button>
+				<div class="hidden items-baseline gap-x-1 md:flex">
+					<span class="text-sm tracking-tight">{selectedTimerange.start?.toLocaleString(DateTime.DATE_MED)}</span>
+					<span>&nbsp;–&nbsp;</span>
+					<span class="text-sm tracking-tight">{selectedTimerange.end?.toLocaleString(DateTime.DATE_MED)}</span>
+				</div>
+			</Button>
 
-				<ProjectDimensionsSettingsDialog
-					bind:isVisible={isSettingsOpen}
-					dates={{ start: data.timerange.start, end: data.timerange.end }}
-					onapply={async ({ start, end, filter }) => {
-						const url = new URL(window.location.href);
-						url.searchParams.set("start", start.startOf("day").toISO() as string);
-						url.searchParams.set("end", end.endOf("day").toISO() as string);
+			<TimePickerDialog
+				bind:isVisible={isSettingsOpen}
+				multiSelect
+				dates={selectedTimerange}
+				onchange={async ({ start, end }) => {
+					selectedTimerange = { start, end: end! };
 
-						url.searchParams.delete("transportTypes");
-						filter.forEach((transportType: TransportType) => url.searchParams.append("transportTypes", transportType));
+					const url = new URL(window.location.href);
+					url.searchParams.set("start", start.startOf("day").toISO() as string);
+					url.searchParams.set("end", end!.endOf("day").toISO() as string);
 
-						await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
-					}}
-					class="mt-2"
-				/>
-			</div>
+					await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
+				}}
+				class="mt-14 self-start justify-self-end"
+			/>
 		</div>
 
 		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -176,10 +156,7 @@
 				{@const cardScale = metricCard.scale}
 				<MetricComponent
 					{...metricCard.props}
-					class={[
-						cardScale === CardScale.MEDIUM && "sm:col-span-2",
-						cardScale === CardScale.LARGE && "sm:col-span-2 lg:col-span-3"
-					]}
+					class={[cardScale === "medium" && "sm:col-span-2", cardScale === "large" && "sm:col-span-2 lg:col-span-3"]}
 				/>
 			{/each}
 		</div>
@@ -187,8 +164,9 @@
 </main>
 
 <style>
+	@reference "#app.css";
+
 	:global(p.about span) {
-		color: var(--color-accent);
-		font-weight: 600;
+		@apply text-accent font-semibold;
 	}
 </style>

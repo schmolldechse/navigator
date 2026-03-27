@@ -1,4 +1,4 @@
-﻿using Navigator.Data.Enums;
+using Navigator.Data.Enums;
 using Navigator.Data.Enums.Metric;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
@@ -10,8 +10,26 @@ public class HourlyTransportSnapshotMetricRequest : BaseMetricRequest
 {
     private static readonly HashSet<int> ValidStepping = [1, 2, 3, 4, 6, 8, 12, 24];
 
-    [JsonIgnore]
-    public override MetricQueryType MetricQueryType => MetricQueryType.HourlyTransportSnapshot;
+    private static readonly HashSet<MetricSeriesType> ValidSeriesTypes =
+    [
+        MetricSeriesType.HourlyGlobalArrivals,
+        MetricSeriesType.HourlyGlobalArrivalCancellations,
+        MetricSeriesType.HourlyGlobalArrivalDelaySum,
+        MetricSeriesType.HourlyGlobalDepartures,
+        MetricSeriesType.HourlyGlobalDepartureCancellations,
+        MetricSeriesType.HourlyGlobalDepartureDelaySum
+    ];
+
+    [JsonPropertyName("seriesType")]
+    [AllowedValues(
+        MetricSeriesType.HourlyGlobalArrivals,
+        MetricSeriesType.HourlyGlobalArrivalCancellations,
+        MetricSeriesType.HourlyGlobalArrivalDelaySum,
+        MetricSeriesType.HourlyGlobalDepartures,
+        MetricSeriesType.HourlyGlobalDepartureCancellations,
+        MetricSeriesType.HourlyGlobalDepartureDelaySum)]
+    [Description("The specific hourly transport metric series to retrieve.")]
+    public required MetricSeriesType SeriesType { get; set; }
 
     [JsonPropertyName("start")]
     public required DateTimeOffset Start { get; set; }
@@ -28,7 +46,7 @@ public class HourlyTransportSnapshotMetricRequest : BaseMetricRequest
     [AllowedValues(1, 2, 3, 4, 6, 8, 12, 24)]
     public int Stepping { get; set; } = 1;
 
-    public override Navigator.Data.Models.Statistics.BaseMetricRequest BuildRequest() => new Navigator.Data.Models.Statistics.Request.HourlyTransportSnapshotMetricRequest()
+    public override Navigator.Data.Models.Statistics.BaseMetricRequest BuildRequest() => new Navigator.Data.Models.Statistics.Request.HourlyTransportSnapshotMetricRequest(SeriesType)
     {
         Start = Start,
         End = End,
@@ -50,6 +68,13 @@ public class HourlyTransportSnapshotMetricRequest : BaseMetricRequest
             yield return new ValidationResult(
                 "Stepping must be one of: 1, 2, 3, 4, 6, 8, 12, 24.",
                 new[] { nameof(Stepping) });
+        }
+
+        if (!ValidSeriesTypes.Contains(SeriesType))
+        {
+            yield return new ValidationResult(
+                $"SeriesType must be one of: {string.Join(", ", ValidSeriesTypes)}.",
+                new[] { nameof(SeriesType) });
         }
     }
 }
