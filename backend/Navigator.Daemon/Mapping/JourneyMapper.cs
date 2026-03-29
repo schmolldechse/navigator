@@ -58,11 +58,11 @@ public partial class JourneyMapper
         }
         if (source.Messages is not null)
         {
-            MapMessages(source.Messages.Attributes, message => message.MessageID, MapMessageAttributeInternal);
+            MapMessages(source.Messages.Attributes, message => message.MessageID, MapMessageAttribute);
             MapMessages(source.Messages.Disruptions, message => message.MessageID, MapMessageDisruption);
             MapMessages(source.Messages.Notes, message => message.MessageID, MapMessageNote);
-            MapMessages(source.Messages.RisCauseCodes, message => message.MessageID, MapMessageRisCauseInternal);
-            MapMessages(source.Messages.RisQualityDeviations, message => message.MessageID, MapMessageRisQualityDeviationInternal);
+            MapMessages(source.Messages.RisCauseCodes, message => message.MessageID, MapMessageRisCause);
+            MapMessages(source.Messages.RisQualityDeviations, message => message.MessageID, MapMessageRisQualityDeviation);
         }
 
         journey.StopPlaces = new List<JourneyStopPlace>();
@@ -113,7 +113,7 @@ public partial class JourneyMapper
     [MapProperty(nameof(RisJourneys.Administration.AdministrationID), nameof(Administration.AdministrationId))]
     [MapProperty(nameof(RisJourneys.Administration.OperatorCode), nameof(Administration.OperatorCode))]
     [MapProperty(nameof(RisJourneys.Administration.OperatorName), nameof(Administration.OperatorName))]
-    public partial Administration MapAdministrationInternal(RisJourneys.Administration source);
+    public partial Administration MapAdministration(RisJourneys.Administration source);
 #pragma warning restore RMG076 // Cannot assign null to non-nullable member
     #endregion
 
@@ -255,7 +255,7 @@ public partial class JourneyMapper
     [MapValue(nameof(JourneyMessage.NoteCategory), null)]
     [MapValue(nameof(JourneyMessage.References), null)]
     [MapValue(nameof(JourneyMessage.JourneyStopPlaceMessages), null)]
-    public partial JourneyMessage MapMessageAttributeInternal(RisJourneys.MessageAttribute source);
+    public partial JourneyMessage MapMessageAttribute(RisJourneys.MessageAttribute source);
 #pragma warning restore RMG076 // Cannot assign null to non-nullable member
     #endregion
 
@@ -382,7 +382,7 @@ public partial class JourneyMapper
     [MapValue(nameof(JourneyMessage.NoteCategory), null)]
     [MapValue(nameof(JourneyMessage.References), null)]
     [MapValue(nameof(JourneyMessage.JourneyStopPlaceMessages), null)]
-    public partial JourneyMessage MapMessageRisCauseInternal(RisJourneys.MessageRisCauseCode source);
+    public partial JourneyMessage MapMessageRisCause(RisJourneys.MessageRisCauseCode source);
 #pragma warning restore RMG076 // Cannot assign null to non-nullable member
 #pragma warning restore RMG012 // Source member was not found for target member
     #endregion
@@ -402,7 +402,7 @@ public partial class JourneyMapper
     [MapValue(nameof(JourneyMessage.NoteCategory), null)]
     [MapValue(nameof(JourneyMessage.References), null)]
     [MapValue(nameof(JourneyMessage.JourneyStopPlaceMessages), null)]
-    public partial JourneyMessage MapMessageRisQualityDeviationInternal(RisJourneys.MessageRisQualityDeviation source);
+    public partial JourneyMessage MapMessageRisQualityDeviation(RisJourneys.MessageRisQualityDeviation source);
 #pragma warning restore RMG076 // Cannot assign null to non-nullable member
 #pragma warning restore RMG012 // Source member was not found for target member
     #endregion

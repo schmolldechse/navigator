@@ -8,7 +8,6 @@ using Navigator.Data.Repository.AdministrationRepository;
 using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
 using Quartz;
-using Navigator.Data.Entities.Journey;
 
 namespace Navigator.Daemon.Infrastructure;
 
@@ -111,7 +110,7 @@ public class GatheringJourneysJob(
 
             var syncAdmins = journeys.Journeys
                 .Select(journey => journey.Info.HeaderAdministration)
-                .Select(administration => mapper.MapAdministrationInternal(administration))
+                .Select(administration => mapper.MapAdministration(administration))
                 .ToList();
             var resolvedAdministrations = await administrationRepository.GetOrCreateAdministrationsAsync(syncAdmins);
 
