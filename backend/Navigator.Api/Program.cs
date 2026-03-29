@@ -19,7 +19,8 @@ builder.Services.AddOpenApi(options => options.AddSchemaTransformer<StringEnumSc
 // include Navigator.Data
 builder.Services.AddServices(builder.Configuration);
 
-builder.Services.AddSingleton<StatisticsMapper>();
+builder.Services.AddSingleton<StatisticsMapper>()
+    .AddSingleton<TimetableMapper>();
 
 var app = builder.Build();
 app.MapOpenApi();

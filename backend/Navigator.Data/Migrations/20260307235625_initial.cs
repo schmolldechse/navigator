@@ -20,7 +20,6 @@ namespace Navigator.Data.Migrations
                 name: "core");
 
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:core.information_type", "DISRUPTION,JOURNEY_ATTRIBUTE,MESSAGE,RIS_CAUSE_REASON,RIS_QUALITY_DEVIATION")
                 .Annotation("Npgsql:Enum:core.journey_type", "EXTRA,REGULAR,RELIEF,REPLACEMENT")
                 .Annotation("Npgsql:Enum:core.message_reference_type", "ATTACHMENT,IMAGE,LINK")
                 .Annotation("Npgsql:Enum:core.message_type", "ATTRIBUTE,DISRUPTION,NOTE,RIS_CAUSE,RIS_QUALITY_DEVIATION")

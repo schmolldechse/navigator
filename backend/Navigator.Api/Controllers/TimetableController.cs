@@ -1,6 +1,6 @@
-﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Navigator.Api.DTOs.Timetable;
+using Navigator.Api.Mapping;
 using Navigator.Data.Models.Timetable;
 using Navigator.Data.Repository.TimetableRepository;
 
@@ -11,7 +11,7 @@ namespace Navigator.Api.Controllers;
 [Tags("Timetable")]
 public class TimetableController(
     ITimetableRepository timetableRepository,
-    IMapper mapper
+    TimetableMapper mapper
 ) : Controller
 {
     [HttpPost("departures")]
@@ -30,7 +30,7 @@ public class TimetableController(
             Duration = request.Duration!.Value
         });
 
-        return Ok(mapper.Map<IEnumerable<TimetableDeparture>>(timetable.Departures.DistinctBy(entry => entry.JourneyID)));
+        return Ok(timetable.Departures.DistinctBy(departure => departure.JourneyID).Select(departure => mapper.MapDepartureTimetable(departure)));
     }
 
     [HttpPost("arrivals")]
@@ -49,6 +49,6 @@ public class TimetableController(
             Duration = request.Duration!.Value
         });
 
-        return Ok(mapper.Map<IEnumerable<TimetableArrival>>(timetable.Arrivals.DistinctBy(entry => entry.JourneyID)));
+        return Ok(timetable.Arrivals.DistinctBy(departure => departure.JourneyID).Select(departure => mapper.MapArrivalTimetable(departure)));
     }
 }

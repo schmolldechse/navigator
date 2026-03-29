@@ -25,7 +25,6 @@ public static class Injection
             configuration.GetConnectionString("DefaultConnection"),
             npgsqlOptions =>
             {
-                npgsqlOptions.MapEnum<InformationType>("information_type", "core");
                 npgsqlOptions.MapEnum<ScheduleType>("schedule_type", "core");
                 npgsqlOptions.MapEnum<TransportType>("transport_type", "core");
                 npgsqlOptions.MapEnum<TimeType>("time_type", "core");

@@ -11,7 +11,6 @@ namespace Navigator.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
-                .Annotation("Npgsql:Enum:core.information_type", "DISRUPTION,JOURNEY_ATTRIBUTE,MESSAGE,RIS_CAUSE_REASON,RIS_QUALITY_DEVIATION")
                 .Annotation("Npgsql:Enum:core.journey_type", "EXTRA,REGULAR,RELIEF,REPLACEMENT")
                 .Annotation("Npgsql:Enum:core.message_reference_type", "ATTACHMENT,IMAGE,LINK")
                 .Annotation("Npgsql:Enum:core.message_type", "ATTRIBUTE,DISRUPTION,NOTE,RIS_CAUSE,RIS_QUALITY_DEVIATION")
@@ -21,7 +20,6 @@ namespace Navigator.Data.Migrations
                 .Annotation("Npgsql:PostgresExtension:cube", ",,")
                 .Annotation("Npgsql:PostgresExtension:earthdistance", ",,")
                 .Annotation("Npgsql:PostgresExtension:pg_cron", ",,")
-                .OldAnnotation("Npgsql:Enum:core.information_type", "DISRUPTION,JOURNEY_ATTRIBUTE,MESSAGE,RIS_CAUSE_REASON,RIS_QUALITY_DEVIATION")
                 .OldAnnotation("Npgsql:Enum:core.journey_type", "EXTRA,REGULAR,RELIEF,REPLACEMENT")
                 .OldAnnotation("Npgsql:Enum:core.message_reference_type", "ATTACHMENT,IMAGE,LINK")
                 .OldAnnotation("Npgsql:Enum:core.message_type", "ATTRIBUTE,DISRUPTION,NOTE,RIS_CAUSE,RIS_QUALITY_DEVIATION")
