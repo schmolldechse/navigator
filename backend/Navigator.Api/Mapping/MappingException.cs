@@ -1,4 +1,4 @@
-﻿namespace Navigator.Daemon.Mapping;
+﻿namespace Navigator.Api.Mapping;
 
 public class MappingException : Exception
 {

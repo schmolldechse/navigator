@@ -1,6 +1,6 @@
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Navigator.Api.DTOs.Statistics;
+using Navigator.Api.Mapping;
 using Navigator.Data.Repository.StatisticsRepository;
 
 namespace Navigator.Api.Controllers;
@@ -10,7 +10,7 @@ namespace Navigator.Api.Controllers;
 [Tags("Statistics")]
 public class StatisticsController(
     IStatisticsRepository statisticsRepository,
-    IMapper mapper
+    StatisticsMapper mapper
 ) : Controller
 {
     [HttpPost("metrics")]
@@ -22,7 +22,7 @@ public class StatisticsController(
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var metricDataSet = await statisticsRepository.GetMetricAsync(request.BuildRequest());
-        return Ok(mapper.Map<MetricSeries>(metricDataSet));
+        var metric = await statisticsRepository.GetMetricAsync(mapper.MapBaseRequest(request));
+        return Ok(mapper.MapMetricSeries(metric));
     }
 }
