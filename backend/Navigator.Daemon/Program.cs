@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Navigator.Daemon;
 using Navigator.Daemon.Infrastructure;
@@ -8,6 +8,9 @@ using Quartz;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddServices(builder.Configuration);
+
+// mappers
+builder.Services.AddSingleton<JourneyMapper>();
 
 builder.Services.AddQuartz(options =>
 {
@@ -19,8 +22,6 @@ builder.Services.AddQuartz(options =>
     options.AddQuartzJobs<StaleRisIdDeactivationJob>(builder.Configuration);
 });
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
-
-builder.Services.AddAutoMapper(typeof(RisJourneysProfile));
 
 builder.Services.Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(2));
 
