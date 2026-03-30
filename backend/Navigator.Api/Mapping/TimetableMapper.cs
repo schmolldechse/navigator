@@ -16,7 +16,7 @@ public partial class TimetableMapper
     public partial TimetableEntryAdministration MapAdministration(RisBoards.Administration source);
     #endregion
 
-    #region TimetableEntry
+    #region Timetable Entry
 #pragma warning disable RMG076 // Cannot assign null to non-nullable member
     [MapProperty(nameof(RisBoards.StopDeparture.JourneyID), nameof(TimetableDeparture.JourneyId))]
     [MapProperty(nameof(RisBoards.StopDeparture.Administration), nameof(TimetableDeparture.Administration))]
@@ -256,8 +256,7 @@ public partial class TimetableMapper
         RisBoards.TransportType.BIKE => TransportType.Bike,
         RisBoards.TransportType.SCOOTER => TransportType.Scooter,
         RisBoards.TransportType.WALK => TransportType.Walk,
-        RisBoards.TransportType.UNKNOWN => TransportType.Unknown,
-        _ => throw new MappingException($"Value '{sourceType}' is not valid to be mapped for TransportType.")
+        _ => TransportType.Unknown
     };
     #endregion
 

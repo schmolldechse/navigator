@@ -142,7 +142,7 @@ public partial class JourneyMapper
 
         var possibleReplacements = source.Events
             .Where(journeyEvent => !string.IsNullOrEmpty(journeyEvent.Transport?.ReplacementTransport?.RealType))
-            .Select(journeyEvent => MapTransportType(journeyEvent.Transport.ReplacementTransport.RealType, throwException: false))
+            .Select(journeyEvent => MapTransportType(journeyEvent.Transport.ReplacementTransport.RealType))
             .Where(transportType => transportType != TransportType.Unknown)
             .ToList();
         if (possibleReplacements.Any()) transport.ReplacementTransportType = possibleReplacements
@@ -153,36 +153,26 @@ public partial class JourneyMapper
         return transport;
     }
 
-    private TransportType MapTransportType(string? sourceType) => MapTransportType(sourceType, throwException: true);
-
-    private TransportType MapTransportType(string? sourceType, bool throwException)
+    private TransportType MapTransportType(string? sourceType) => sourceType?.ToUpperInvariant() switch
     {
-        var transportType = sourceType?.ToUpperInvariant() switch
-        {
-            "HIGH_SPEED_TRAIN" => TransportType.HighSpeedTrain,
-            "INTERCITY_TRAIN" => TransportType.IntercityTrain,
-            "INTER_REGIONAL_TRAIN" => TransportType.InterRegionalTrain,
-            "REGIONAL_TRAIN" => TransportType.RegionalTrain,
-            "CITY_TRAIN" => TransportType.CityTrain,
-            "SUBWAY" => TransportType.Subway,
-            "TRAM" => TransportType.Tram,
-            "BUS" => TransportType.Bus,
-            "FERRY" => TransportType.Ferry,
-            "FLIGHT" => TransportType.Flight,
-            "CAR" => TransportType.Car,
-            "TAXI" => TransportType.Taxi,
-            "SHUTTLE" => TransportType.Shuttle,
-            "BIKE" => TransportType.Bike,
-            "SCOOTER" => TransportType.Scooter,
-            "WALK" => TransportType.Walk,
-            _ => TransportType.Unknown
-        };
-
-        if (throwException && transportType == TransportType.Unknown)
-            throw new MappingException($"Value '{sourceType}' is not valid to be mapped for TransportType.");
-
-        return transportType;
-    }
+        "HIGH_SPEED_TRAIN" => TransportType.HighSpeedTrain,
+        "INTERCITY_TRAIN" => TransportType.IntercityTrain,
+        "INTER_REGIONAL_TRAIN" => TransportType.InterRegionalTrain,
+        "REGIONAL_TRAIN" => TransportType.RegionalTrain,
+        "CITY_TRAIN" => TransportType.CityTrain,
+        "SUBWAY" => TransportType.Subway,
+        "TRAM" => TransportType.Tram,
+        "BUS" => TransportType.Bus,
+        "FERRY" => TransportType.Ferry,
+        "FLIGHT" => TransportType.Flight,
+        "CAR" => TransportType.Car,
+        "TAXI" => TransportType.Taxi,
+        "SHUTTLE" => TransportType.Shuttle,
+        "BIKE" => TransportType.Bike,
+        "SCOOTER" => TransportType.Scooter,
+        "WALK" => TransportType.Walk,
+        _ => TransportType.Unknown
+    };
     #endregion
 
     #region JourneyStopPlace
