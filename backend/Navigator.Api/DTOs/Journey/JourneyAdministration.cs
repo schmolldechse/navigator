@@ -6,10 +6,10 @@ public class JourneyAdministration
 {
     [JsonPropertyName("administrationId")]
     public required string AdministrationId { get; set; }
-    
+
     [JsonPropertyName("operatorCode")]
     public required string OperatorCode { get; set; }
-    
+
     [JsonPropertyName("operatorName")]
     public required string OperatorName { get; set; }
 }

@@ -8,7 +8,7 @@ public class TimetableEntryMessage
 {
     [JsonPropertyName("type")]
     public required MessageType Type { get; set; }
-    
+
     [JsonPropertyName("key")]
     public required MessageKey Key { get; set; }
 

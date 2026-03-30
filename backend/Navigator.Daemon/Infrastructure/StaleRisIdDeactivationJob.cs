@@ -9,8 +9,8 @@ using Quartz;
 namespace Navigator.Daemon.Infrastructure;
 
 public class StaleRisIdDeactivationJob(
-    IRisIdRepository risIdRepository, 
-    IJourneyRepository journeyRepository, 
+    IRisIdRepository risIdRepository,
+    IJourneyRepository journeyRepository,
     ILogger<StaleRisIdDeactivationJob> logger
 ) : IJob
 {

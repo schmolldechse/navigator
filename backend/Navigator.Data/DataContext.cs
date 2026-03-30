@@ -40,7 +40,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
             .HasPostgresExtension("earthdistance")
             .HasPostgresExtension("pg_cron");
 
-        modelBuilder.Entity<HourlyStationSnapshot>(entity => {
+        modelBuilder.Entity<HourlyStationSnapshot>(entity =>
+        {
             entity.HasNoKey();
             entity.ToView("hourly_station_snapshots", "statistics");
             entity.ToTable("hourly_station_snapshots", "statistics", table => table.ExcludeFromMigrations());
@@ -80,7 +81,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         modelBuilder.Entity<JourneyStopPlace>(entity =>
         {
             entity.Property(stopPlace => stopPlace.Delay)
-                .HasComputedColumnSql("EXTRACT(EPOCH FROM (actual_time - planned_time))::integer", 
+                .HasComputedColumnSql("EXTRACT(EPOCH FROM (actual_time - planned_time))::integer",
                 stored: true
             );
 

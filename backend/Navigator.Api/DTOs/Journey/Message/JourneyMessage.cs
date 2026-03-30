@@ -14,13 +14,13 @@ public abstract class JourneyMessage
 {
     [JsonPropertyName("messageId")]
     public required int MessageId { get; set; }
-    
+
     [JsonPropertyName("key")]
     public required MessageKey Key { get; set; }
-    
+
     [JsonPropertyName("text")]
     public required string Text { get; set; }
-    
+
     [JsonIgnore]
     internal abstract MessageType Type { get; }
 }

@@ -45,7 +45,7 @@ public partial class JourneyMapper
         {
             if (sourceList is null) return;
             foreach (var item in sourceList)
-            { 
+            {
                 var message = mapper(item);
                 message.JourneyId = journey.Id;
 

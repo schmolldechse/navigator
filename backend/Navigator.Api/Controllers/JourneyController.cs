@@ -38,10 +38,10 @@ public class JourneyController(
     public async Task<IActionResult> GetJourneyBatch([FromBody] IEnumerable<string> journeyIds)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        
-        if (journeyIds.Any(journeyId => journeyId.Length > 82)) 
+
+        if (journeyIds.Any(journeyId => journeyId.Length > 82))
             return BadRequest("One or more JourneyIds exceed the maximum length of 82 characters.");
-        
+
         var batchRequest = journeyIds.Select(journeyId => new JourneyOnDateRequest
         {
             Id = journeyId.Substring(9),

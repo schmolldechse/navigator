@@ -23,7 +23,7 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [EndpointSummary("Search stations")]
     [EndpointDescription("Searches for stations by a search term.")]
-    public async Task<IActionResult> SearchStations([Required] [FromBody] StationBySerchtermRequest request)
+    public async Task<IActionResult> SearchStations([Required][FromBody] StationBySerchtermRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -54,7 +54,7 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [EndpointSummary("Stations by geographic coordinates")]
     [EndpointDescription("Finds nearby stations based on latitude and longitude. Supports optional filters for maximum distance (in meters) and result limit.")]
-    public async Task<IActionResult> SearchStationByCoordinates([Required] [FromBody] StationByGeographicCoordinatesRequest request)
+    public async Task<IActionResult> SearchStationByCoordinates([Required][FromBody] StationByGeographicCoordinatesRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -70,7 +70,7 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [EndpointSummary("Stations by EVA number")]
     [EndpointDescription("Retrieves a single station by its EVA number.")]
-    public async Task<IActionResult> SearchStationByEvaNumber([Required] [FromRoute] int evaNumber)
+    public async Task<IActionResult> SearchStationByEvaNumber([Required][FromRoute] int evaNumber)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -86,7 +86,7 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [EndpointSummary("Gathering Information")]
     [EndpointDescription("Retrieves gathering information for a station by its EVA number, including whether querying is enabled, the last queried timestamp, and the active and disabled transport types. Returns 404 Not Found if no station matches.")]
-    public async Task<IActionResult> GetGatheringInfoByEvaNumber([Required] [FromRoute] int evaNumber)
+    public async Task<IActionResult> GetGatheringInfoByEvaNumber([Required][FromRoute] int evaNumber)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
@@ -101,7 +101,7 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [EndpointSummary("Load a station batch")]
     [EndpointDescription("Retrieves multiple stations based on the provided evaNumber batch")]
-    public async Task<IActionResult> GetStationBatch([Required] [FromBody] IEnumerable<int> evaNumbers)
+    public async Task<IActionResult> GetStationBatch([Required][FromBody] IEnumerable<int> evaNumbers)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
