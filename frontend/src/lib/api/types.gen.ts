@@ -16,26 +16,26 @@ export type BaseMetricDataPointBase = {
 };
 
 export type BaseMetricDataPointStationDataPoint = {
-	$type: $typeEnum;
+	$type: TypeEnum;
 	evaNumber: number | string;
 	value: number | string;
 };
 
 export type BaseMetricDataPointTimestampDataPoint = {
-	$type: $typeEnum2;
+	$type: TypeEnum2;
 	timestamp: string;
 	value: number | string;
 };
 
 export type BaseMetricDataPointTimestampTransportTypeDataPoint = {
-	$type: $typeEnum3;
+	$type: TypeEnum3;
 	timestamp: string;
 	transportType: TransportType;
 	value: number | string;
 };
 
 export type BaseMetricDataPointTransportTypeDataPoint = {
-	$type: $typeEnum4;
+	$type: TypeEnum4;
 	transportType: TransportType;
 	value: number | string;
 };
@@ -133,14 +133,6 @@ export type BaseStation = {
 	position: StationPosition;
 };
 
-export enum InformationType {
-	JOURNEY_ATTRIBUTE = "JOURNEY_ATTRIBUTE",
-	DISRUPTION = "DISRUPTION",
-	MESSAGE = "MESSAGE",
-	RIS_QUALITY_DEVIATION = "RIS_QUALITY_DEVIATION",
-	RIS_CAUSE_REASON = "RIS_CAUSE_REASON"
-}
-
 export type Journey = {
 	journeyId: string;
 	administration: JourneyAdministration;
@@ -181,14 +173,14 @@ export type JourneyMessage =
 	  } & JourneyMessageRisQualityDeviationMessage);
 
 export type JourneyMessageAttributeMessage = {
-	type?: TypeEnum;
+	type?: TypeEnum5;
 	messageId: number | string;
 	key: MessageKey;
 	text: string;
 };
 
 export type JourneyMessageDisruptionMessage = {
-	type?: TypeEnum2;
+	type?: TypeEnum6;
 	cause?: null | string;
 	effect?: null | string;
 	disruptionId?: null | string;
@@ -200,7 +192,7 @@ export type JourneyMessageDisruptionMessage = {
 };
 
 export type JourneyMessageNoteMessage = {
-	type?: TypeEnum3;
+	type?: TypeEnum7;
 	category?: null | string;
 	textShort?: null | string;
 	references?: null | Array<JourneyMessageReference>;
@@ -216,14 +208,14 @@ export type JourneyMessageReference = {
 };
 
 export type JourneyMessageRisCauseMessage = {
-	type?: TypeEnum4;
+	type?: TypeEnum8;
 	messageId: number | string;
 	key: MessageKey;
 	text: string;
 };
 
 export type JourneyMessageRisQualityDeviationMessage = {
-	type?: TypeEnum5;
+	type?: TypeEnum9;
 	messageId: number | string;
 	key: MessageKey;
 	text: string;
@@ -264,8 +256,9 @@ export type JourneyTransport = {
 	category?: null | string;
 	categoryInternal?: null | string;
 	journeyDescription: string;
-	number: number | string;
+	label?: null | string;
 	line?: null | string;
+	number: number | string;
 };
 
 export enum JourneyType {
@@ -300,6 +293,14 @@ export enum MessageReferenceType {
 	LINK = "LINK",
 	IMAGE = "IMAGE",
 	ATTACHMENT = "ATTACHMENT"
+}
+
+export enum MessageType {
+	ATTRIBUTE = "ATTRIBUTE",
+	DISRUPTION = "DISRUPTION",
+	NOTE = "NOTE",
+	RIS_CAUSE = "RIS_CAUSE",
+	RIS_QUALITY_DEVIATION = "RIS_QUALITY_DEVIATION"
 }
 
 /**
@@ -419,7 +420,7 @@ export type TimetableArrival = {
 	direction: Array<TimetableEntryStopPlace>;
 	viaStops: Array<TimetableEntryRichStopPlace>;
 	schedule: TimetableEntrySchedule;
-	informations: Array<TimetableEntryInformation>;
+	messages: Array<TimetableEntryMessage>;
 	cancelled: boolean;
 	additional?: null | boolean;
 	demand?: null | boolean;
@@ -435,7 +436,7 @@ export type TimetableDeparture = {
 	direction: Array<TimetableEntryStopPlace>;
 	viaStops: Array<TimetableEntryRichStopPlace>;
 	schedule: TimetableEntrySchedule;
-	informations: Array<TimetableEntryInformation>;
+	messages: Array<TimetableEntryMessage>;
 	cancelled: boolean;
 	additional?: null | boolean;
 	demand?: null | boolean;
@@ -450,11 +451,11 @@ export type TimetableEntryAdministration = {
 
 export type TimetableEntryCoupledTransport = {
 	journeyId: string;
-	separationAt: TimetableEntryStopPlace;
+	separationAt?: null | TimetableEntryStopPlace;
 };
 
-export type TimetableEntryInformation = {
-	type: InformationType;
+export type TimetableEntryMessage = {
+	type: MessageType;
 	key: MessageKey;
 	text: string;
 	textShort?: null | string;
@@ -536,19 +537,19 @@ export enum TransportType {
 	WALK = "WALK"
 }
 
-export enum $typeEnum {
+export enum TypeEnum {
 	EVA_NUMBER = "evaNumber"
 }
 
-export enum $typeEnum2 {
+export enum TypeEnum2 {
 	TIMESTAMP = "timestamp"
 }
 
-export enum $typeEnum3 {
+export enum TypeEnum3 {
 	TIMESTAMP_TRANSPORT_TYPE = "timestampTransportType"
 }
 
-export enum $typeEnum4 {
+export enum TypeEnum4 {
 	TRANSPORT_TYPE = "transportType"
 }
 
@@ -576,23 +577,23 @@ export enum QueryTypeEnum6 {
 	TRANSPORT_TYPE_DISTRIBUTION = "TRANSPORT_TYPE_DISTRIBUTION"
 }
 
-export enum TypeEnum {
+export enum TypeEnum5 {
 	ATTRIBUTE = "ATTRIBUTE"
 }
 
-export enum TypeEnum2 {
+export enum TypeEnum6 {
 	DISRUPTION = "DISRUPTION"
 }
 
-export enum TypeEnum3 {
+export enum TypeEnum7 {
 	NOTE = "NOTE"
 }
 
-export enum TypeEnum4 {
+export enum TypeEnum8 {
 	RIS_CAUSE = "RIS_CAUSE"
 }
 
-export enum TypeEnum5 {
+export enum TypeEnum9 {
 	RIS_QUALITY_DEVIATION = "RIS_QUALITY_DEVIATION"
 }
 
