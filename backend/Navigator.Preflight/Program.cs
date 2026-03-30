@@ -6,12 +6,16 @@ using Navigator.Data.Repository.StationRepository;
 using Navigator.Preflight.Infrastructure.Discovery;
 using Navigator.Preflight.Infrastructure.Merging;
 using Serilog;
+using Serilog.Exceptions;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddServices(builder.Configuration);
 
 // logging
-builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(builder.Configuration)
+builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithExceptionDetails()
     .Enrich.WithProperty("Application", "Navigator.Daemon"));
 
 builder.Services.AddTransient<IStationDiscovery, StationDiscovery>()
