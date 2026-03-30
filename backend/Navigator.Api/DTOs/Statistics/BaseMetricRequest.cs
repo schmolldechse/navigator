@@ -13,10 +13,5 @@ namespace Navigator.Api.DTOs.Statistics;
 [JsonDerivedType(typeof(StationSummaryMetricRequest), "STATION_SUMMARY")]
 public abstract class BaseMetricRequest : IValidatableObject
 {
-    public abstract Navigator.Data.Models.Statistics.BaseMetricRequest BuildRequest();
-
-    public virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
-    {
-        yield break;
-    }
+    public virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext) { yield break; }
 }

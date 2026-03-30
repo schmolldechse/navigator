@@ -6,14 +6,6 @@ export const vBaseMetricDataPointBase = v.object({
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
-export const vInformationType = v.picklist([
-	"JOURNEY_ATTRIBUTE",
-	"DISRUPTION",
-	"MESSAGE",
-	"RIS_QUALITY_DEVIATION",
-	"RIS_CAUSE_REASON"
-]);
-
 export const vJourneyAdministration = v.object({
 	administrationId: v.string(),
 	operatorCode: v.string(),
@@ -27,8 +19,8 @@ export const vJourneyRichStopPlace = v.object({
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	])
@@ -40,8 +32,8 @@ export const vJourneyStopPlace = v.object({
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	])
@@ -74,9 +66,11 @@ export const vMessageReferenceType = v.picklist(["LINK", "IMAGE", "ATTACHMENT"])
 
 export const vJourneyMessageReference = v.object({
 	referenceType: vMessageReferenceType,
-	url: v.optional(v.union([v.null(), v.string()])),
-	label: v.optional(v.union([v.null(), v.string()]))
+	url: v.nullish(v.string()),
+	label: v.nullish(v.string())
 });
+
+export const vMessageType = v.picklist(["ATTRIBUTE", "DISRUPTION", "NOTE", "RIS_CAUSE", "RIS_QUALITY_DEVIATION"]);
 
 export const vMetricSeriesType = v.picklist([
 	"DATABASE_SIZE",
@@ -101,22 +95,21 @@ export const vMetricSeriesType = v.picklist([
 export const vMetricUnit = v.picklist(["BYTES", "COUNT", "SECONDS"]);
 
 export const vProblemDetails = v.object({
-	type: v.optional(v.union([v.null(), v.string()])),
-	title: v.optional(v.union([v.null(), v.string()])),
-	status: v.optional(
+	type: v.nullish(v.string()),
+	title: v.nullish(v.string()),
+	status: v.nullish(
 		v.union([
-			v.null(),
 			v.pipe(
 				v.number(),
 				v.integer(),
-				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 			),
 			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 		])
 	),
-	detail: v.optional(v.union([v.null(), v.string()])),
-	instance: v.optional(v.union([v.null(), v.string()]))
+	detail: v.nullish(v.string()),
+	instance: v.nullish(v.string())
 });
 
 export const vScheduleType = v.picklist(["ARRIVAL", "DEPARTURE"]);
@@ -127,28 +120,20 @@ export const vScheduleType = v.picklist(["ARRIVAL", "DEPARTURE"]);
 export const vStationByGeographicCoordinatesRequest = v.object({
 	latitude: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/))]),
 	longitude: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/))]),
-	limit: v.optional(
+	limit: v.nullish(
 		v.union([
-			v.null(),
-			v.optional(
-				v.pipe(
-					v.number(),
-					v.integer(),
-					v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-					v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-				),
-				100
+			v.pipe(
+				v.number(),
+				v.integer(),
+				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 			),
-			v.optional(v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/)), 100)
+			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 		]),
 		100
 	),
-	maxDistance: v.optional(
-		v.union([
-			v.null(),
-			v.optional(v.number(), 1000),
-			v.optional(v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/)), 1000)
-		]),
+	maxDistance: v.nullish(
+		v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?$/))]),
 		1000
 	)
 });
@@ -158,23 +143,19 @@ export const vStationByGeographicCoordinatesRequest = v.object({
  */
 export const vStationBySerchtermRequest = v.object({
 	searchTerm: v.string(),
-	maxResults: v.optional(
+	maxResults: v.nullish(
 		v.union([
-			v.null(),
-			v.optional(
-				v.pipe(
-					v.number(),
-					v.integer(),
-					v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-					v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-				),
-				10
+			v.pipe(
+				v.number(),
+				v.integer(),
+				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 			),
-			v.optional(v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/)), 10)
+			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 		]),
 		10
 	),
-	locationTypes: v.optional(v.union([v.null(), v.optional(v.array(v.string()), ["ALL"])]), ["ALL"])
+	locationTypes: v.nullish(v.array(v.string()), ["ALL"])
 });
 
 export const vStationPosition = v.object({
@@ -187,8 +168,8 @@ export const vBaseStation = v.object({
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	]),
@@ -202,23 +183,23 @@ export const vTimetableEntryAdministration = v.object({
 	operatorName: v.string()
 });
 
-export const vTimetableEntryInformation = v.object({
-	type: vInformationType,
+export const vTimetableEntryMessage = v.object({
+	type: vMessageType,
 	key: vMessageKey,
 	text: v.string(),
-	textShort: v.optional(v.union([v.null(), v.string()]))
+	textShort: v.nullish(v.string())
 });
 
 export const vTimetableEntryRichStopPlace = v.object({
 	cancelled: v.boolean(),
-	additional: v.optional(v.union([v.null(), v.boolean()])),
+	additional: v.nullish(v.boolean()),
 	name: v.string(),
 	evaNumber: v.union([
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	])
@@ -230,8 +211,8 @@ export const vTimetableEntryStopPlace = v.object({
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	])
@@ -239,7 +220,7 @@ export const vTimetableEntryStopPlace = v.object({
 
 export const vTimetableEntryCoupledTransport = v.object({
 	journeyId: v.string(),
-	separationAt: vTimetableEntryStopPlace
+	separationAt: v.nullish(vTimetableEntryStopPlace)
 });
 
 /**
@@ -250,25 +231,21 @@ export const vTimetableRequest = v.object({
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	]),
-	when: v.optional(v.union([v.null(), v.pipe(v.string(), v.isoTimestamp())])),
-	duration: v.optional(
+	when: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+	duration: v.nullish(
 		v.union([
-			v.null(),
-			v.optional(
-				v.pipe(
-					v.number(),
-					v.integer(),
-					v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-					v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-				),
-				60
+			v.pipe(
+				v.number(),
+				v.integer(),
+				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 			),
-			v.optional(v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/)), 60)
+			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 		]),
 		60
 	)
@@ -290,30 +267,27 @@ export const vJourneyScheduledEvent = v.object({
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	]),
-	plannedPlatform: v.optional(v.union([v.null(), v.string()])),
-	actualPlatform: v.optional(v.union([v.null(), v.string()])),
+	plannedPlatform: v.nullish(v.string()),
+	actualPlatform: v.nullish(v.string()),
 	timeType: vTimeType,
-	travelsWith: v.optional(v.union([v.null(), v.array(v.string())])),
-	messageIds: v.optional(
-		v.union([
-			v.null(),
-			v.array(
-				v.union([
-					v.pipe(
-						v.number(),
-						v.integer(),
-						v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-						v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-					),
-					v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-				])
-			)
-		])
+	travelsWith: v.nullish(v.array(v.string())),
+	messageIds: v.nullish(
+		v.array(
+			v.union([
+				v.pipe(
+					v.number(),
+					v.integer(),
+					v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+					v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
+				),
+				v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+			])
+		)
 	)
 });
 
@@ -325,14 +299,14 @@ export const vTimetableEntrySchedule = v.object({
 			v.pipe(
 				v.number(),
 				v.integer(),
-				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 			),
 			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 		])
 	),
-	plannedPlatform: v.optional(v.union([v.null(), v.string()])),
-	actualPlatform: v.optional(v.union([v.null(), v.string()])),
+	plannedPlatform: v.nullish(v.string()),
+	actualPlatform: v.nullish(v.string()),
 	timeType: vTimeType
 });
 
@@ -358,31 +332,32 @@ export const vTransportType = v.picklist([
 
 export const vJourneyTransport = v.object({
 	type: vTransportType,
-	replacementType: v.optional(v.union([v.null(), vTransportType])),
-	category: v.optional(v.union([v.null(), v.string()])),
-	categoryInternal: v.optional(v.union([v.null(), v.string()])),
+	replacementType: v.nullish(vTransportType),
+	category: v.nullish(v.string()),
+	categoryInternal: v.nullish(v.string()),
 	journeyDescription: v.string(),
+	label: v.nullish(v.string()),
+	line: v.nullish(v.string()),
 	number: v.union([
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	line: v.optional(v.union([v.null(), v.string()]))
+	])
 });
 
 export const vStation = v.object({
 	transports: v.array(vTransportType),
-	ril100: v.optional(v.union([v.null(), v.array(v.string())])),
+	ril100: v.nullish(v.array(v.string())),
 	evaNumber: v.union([
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	]),
@@ -392,28 +367,28 @@ export const vStation = v.object({
 
 export const vStationGatheringInfo = v.object({
 	queryingEnabled: v.boolean(),
-	lastQueried: v.optional(v.union([v.null(), v.pipe(v.string(), v.isoTimestamp())])),
+	lastQueried: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
 	active: v.array(vTransportType),
 	disabled: v.array(vTransportType)
 });
 
 export const vTimetableEntryTransport = v.object({
 	type: vTransportType,
-	replacementType: v.optional(v.union([v.null(), vTransportType])),
-	category: v.optional(v.union([v.null(), v.string()])),
-	categoryInternal: v.optional(v.union([v.null(), v.string()])),
+	replacementType: v.nullish(vTransportType),
+	category: v.nullish(v.string()),
+	categoryInternal: v.nullish(v.string()),
 	journeyType: vJourneyType,
 	journeyDescription: v.string(),
 	number: v.union([
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	]),
-	line: v.optional(v.union([v.null(), v.string()]))
+	line: v.nullish(v.string())
 });
 
 export const vTimetableArrival = v.object({
@@ -421,15 +396,15 @@ export const vTimetableArrival = v.object({
 	administration: vTimetableEntryAdministration,
 	transport: vTimetableEntryTransport,
 	origin: vTimetableEntryRichStopPlace,
-	differingOrigin: v.optional(v.union([v.null(), vTimetableEntryRichStopPlace])),
+	differingOrigin: v.nullish(vTimetableEntryRichStopPlace),
 	direction: v.array(vTimetableEntryStopPlace),
 	viaStops: v.array(vTimetableEntryRichStopPlace),
 	schedule: vTimetableEntrySchedule,
-	informations: v.array(vTimetableEntryInformation),
+	messages: v.array(vTimetableEntryMessage),
 	cancelled: v.boolean(),
-	additional: v.optional(v.union([v.null(), v.boolean()])),
-	demand: v.optional(v.union([v.null(), v.boolean()])),
-	travelsWith: v.optional(v.union([v.null(), v.array(v.string())]))
+	additional: v.nullish(v.boolean()),
+	demand: v.nullish(v.boolean()),
+	travelsWith: v.nullish(v.array(v.string()))
 });
 
 export const vTimetableDeparture = v.object({
@@ -437,54 +412,54 @@ export const vTimetableDeparture = v.object({
 	administration: vTimetableEntryAdministration,
 	transport: vTimetableEntryTransport,
 	destination: vTimetableEntryRichStopPlace,
-	differingDestination: v.optional(v.union([v.null(), vTimetableEntryRichStopPlace])),
+	differingDestination: v.nullish(vTimetableEntryRichStopPlace),
 	direction: v.array(vTimetableEntryStopPlace),
 	viaStops: v.array(vTimetableEntryRichStopPlace),
 	schedule: vTimetableEntrySchedule,
-	informations: v.array(vTimetableEntryInformation),
+	messages: v.array(vTimetableEntryMessage),
 	cancelled: v.boolean(),
-	additional: v.optional(v.union([v.null(), v.boolean()])),
-	demand: v.optional(v.union([v.null(), v.boolean()])),
-	travelsWith: v.optional(v.union([v.null(), v.array(vTimetableEntryCoupledTransport)]))
+	additional: v.nullish(v.boolean()),
+	demand: v.nullish(v.boolean()),
+	travelsWith: v.nullish(v.array(vTimetableEntryCoupledTransport))
 });
 
-export const v__typeEnum = v.picklist(["evaNumber"]);
+export const vTypeEnum = v.picklist(["evaNumber"]);
 
 export const vBaseMetricDataPointStationDataPoint = v.object({
-	$type: v__typeEnum,
+	$type: vTypeEnum,
 	evaNumber: v.union([
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	]),
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
-export const v__typeEnum2 = v.picklist(["timestamp"]);
+export const vTypeEnum2 = v.picklist(["timestamp"]);
 
 export const vBaseMetricDataPointTimestampDataPoint = v.object({
-	$type: v__typeEnum2,
+	$type: vTypeEnum2,
 	timestamp: v.pipe(v.string(), v.isoTimestamp()),
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
-export const v__typeEnum3 = v.picklist(["timestampTransportType"]);
+export const vTypeEnum3 = v.picklist(["timestampTransportType"]);
 
 export const vBaseMetricDataPointTimestampTransportTypeDataPoint = v.object({
-	$type: v__typeEnum3,
+	$type: vTypeEnum3,
 	timestamp: v.pipe(v.string(), v.isoTimestamp()),
 	transportType: vTransportType,
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
 
-export const v__typeEnum4 = v.picklist(["transportType"]);
+export const vTypeEnum4 = v.picklist(["transportType"]);
 
 export const vBaseMetricDataPointTransportTypeDataPoint = v.object({
-	$type: v__typeEnum4,
+	$type: vTypeEnum4,
 	transportType: vTransportType,
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))])
 });
@@ -521,14 +496,14 @@ export const vBaseMetricRequestHourlyTransportSnapshotMetricRequest = v.object({
 	seriesType: vMetricSeriesType,
 	start: v.pipe(v.string(), v.isoTimestamp()),
 	end: v.pipe(v.string(), v.isoTimestamp()),
-	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)])),
+	transportTypes: v.nullish(v.array(vTransportType)),
 	stepping: v.optional(
 		v.union([
 			v.pipe(
 				v.number(),
 				v.integer(),
-				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+				v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+				v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 			),
 			v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 		])
@@ -557,24 +532,21 @@ export const vQueryTypeEnum5 = v.picklist(["STATION_SUMMARY"]);
 export const vBaseMetricRequestStationSummaryMetricRequest = v.object({
 	queryType: v.optional(vQueryTypeEnum5),
 	seriesType: vMetricSeriesType,
-	start: v.optional(v.union([v.null(), v.pipe(v.string(), v.isoTimestamp())])),
+	start: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
 	end: v.pipe(v.string(), v.isoTimestamp()),
-	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)])),
-	evaNumbers: v.optional(
-		v.union([
-			v.null(),
-			v.array(
-				v.union([
-					v.pipe(
-						v.number(),
-						v.integer(),
-						v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-						v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-					),
-					v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-				])
-			)
-		])
+	transportTypes: v.nullish(v.array(vTransportType)),
+	evaNumbers: v.nullish(
+		v.array(
+			v.union([
+				v.pipe(
+					v.number(),
+					v.integer(),
+					v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+					v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
+				),
+				v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+			])
+		)
 	)
 });
 
@@ -583,7 +555,7 @@ export const vQueryTypeEnum6 = v.picklist(["TRANSPORT_TYPE_DISTRIBUTION"]);
 export const vBaseMetricRequestTransportTypeDistributionMetricRequest = v.object({
 	queryType: v.optional(vQueryTypeEnum6),
 	end: v.pipe(v.string(), v.isoTimestamp()),
-	transportTypes: v.optional(v.union([v.null(), v.array(vTransportType)]))
+	transportTypes: v.nullish(v.array(vTransportType))
 });
 
 export const vBaseMetricRequest = v.union([
@@ -625,92 +597,92 @@ export const vBaseMetricRequest = v.union([
 	])
 ]);
 
-export const vTypeEnum = v.picklist(["ATTRIBUTE"]);
+export const vTypeEnum5 = v.picklist(["ATTRIBUTE"]);
 
 export const vJourneyMessageAttributeMessage = v.object({
-	type: v.optional(vTypeEnum),
-	messageId: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	key: vMessageKey,
-	text: v.string()
-});
-
-export const vTypeEnum2 = v.picklist(["DISRUPTION"]);
-
-export const vJourneyMessageDisruptionMessage = v.object({
-	type: v.optional(vTypeEnum2),
-	cause: v.optional(v.union([v.null(), v.string()])),
-	effect: v.optional(v.union([v.null(), v.string()])),
-	disruptionId: v.optional(v.union([v.null(), v.string()])),
-	textShort: v.optional(v.union([v.null(), v.string()])),
-	references: v.optional(v.union([v.null(), v.array(vJourneyMessageReference)])),
-	messageId: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	key: vMessageKey,
-	text: v.string()
-});
-
-export const vTypeEnum3 = v.picklist(["NOTE"]);
-
-export const vJourneyMessageNoteMessage = v.object({
-	type: v.optional(vTypeEnum3),
-	category: v.optional(v.union([v.null(), v.string()])),
-	textShort: v.optional(v.union([v.null(), v.string()])),
-	references: v.optional(v.union([v.null(), v.array(vJourneyMessageReference)])),
-	messageId: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	key: vMessageKey,
-	text: v.string()
-});
-
-export const vTypeEnum4 = v.picklist(["RIS_CAUSE"]);
-
-export const vJourneyMessageRisCauseMessage = v.object({
-	type: v.optional(vTypeEnum4),
-	messageId: v.union([
-		v.pipe(
-			v.number(),
-			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
-		),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	key: vMessageKey,
-	text: v.string()
-});
-
-export const vTypeEnum5 = v.picklist(["RIS_QUALITY_DEVIATION"]);
-
-export const vJourneyMessageRisQualityDeviationMessage = v.object({
 	type: v.optional(vTypeEnum5),
 	messageId: v.union([
 		v.pipe(
 			v.number(),
 			v.integer(),
-			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2^31"),
-			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2^31-1")
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	key: vMessageKey,
+	text: v.string()
+});
+
+export const vTypeEnum6 = v.picklist(["DISRUPTION"]);
+
+export const vJourneyMessageDisruptionMessage = v.object({
+	type: v.optional(vTypeEnum6),
+	cause: v.nullish(v.string()),
+	effect: v.nullish(v.string()),
+	disruptionId: v.nullish(v.string()),
+	textShort: v.nullish(v.string()),
+	references: v.nullish(v.array(vJourneyMessageReference)),
+	messageId: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	key: vMessageKey,
+	text: v.string()
+});
+
+export const vTypeEnum7 = v.picklist(["NOTE"]);
+
+export const vJourneyMessageNoteMessage = v.object({
+	type: v.optional(vTypeEnum7),
+	category: v.nullish(v.string()),
+	textShort: v.nullish(v.string()),
+	references: v.nullish(v.array(vJourneyMessageReference)),
+	messageId: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	key: vMessageKey,
+	text: v.string()
+});
+
+export const vTypeEnum8 = v.picklist(["RIS_CAUSE"]);
+
+export const vJourneyMessageRisCauseMessage = v.object({
+	type: v.optional(vTypeEnum8),
+	messageId: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
+		),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	key: vMessageKey,
+	text: v.string()
+});
+
+export const vTypeEnum9 = v.picklist(["RIS_QUALITY_DEVIATION"]);
+
+export const vJourneyMessageRisQualityDeviationMessage = v.object({
+	type: v.optional(vTypeEnum9),
+	messageId: v.union([
+		v.pipe(
+			v.number(),
+			v.integer(),
+			v.minValue(-2147483648, "Invalid value: Expected int32 to be >= -2147483648"),
+			v.maxValue(2147483647, "Invalid value: Expected int32 to be <= 2147483647")
 		),
 		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 	]),
@@ -760,9 +732,9 @@ export const vJourney = v.object({
 	continuationFor: v.optional(v.array(v.string())),
 	cancelled: v.boolean(),
 	destination: vJourneyRichStopPlace,
-	differingDestination: v.optional(v.union([v.null(), vJourneyStopPlace])),
+	differingDestination: v.nullish(vJourneyStopPlace),
 	origin: vJourneyRichStopPlace,
-	differingOrigin: v.optional(v.union([v.null(), vJourneyStopPlace])),
+	differingOrigin: v.nullish(vJourneyStopPlace),
 	scheduledEvents: v.array(vJourneyScheduledEvent),
 	messages: v.array(vJourneyMessage)
 });

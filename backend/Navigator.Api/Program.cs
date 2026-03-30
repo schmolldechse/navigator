@@ -2,7 +2,6 @@ using Navigator.Api.Converters;
 using Navigator.Api.Mapping;
 using Navigator.Api.OpenApi;
 using Navigator.Data;
-using Navigator.Data.Mapping;
 using Scalar.AspNetCore;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -20,10 +19,10 @@ builder.Services.AddOpenApi(options => options.AddSchemaTransformer<StringEnumSc
 // include Navigator.Data
 builder.Services.AddServices(builder.Configuration);
 
-builder.Services.AddAutoMapper(typeof(StationProfile))
-    .AddAutoMapper(typeof(StatisticsProfile))
-    .AddAutoMapper(typeof(TimetableProfile))
-    .AddAutoMapper(typeof(JourneyProfile));
+builder.Services.AddSingleton<JourneyMapper>()
+    .AddSingleton<StationMapper>()
+    .AddSingleton<StatisticsMapper>()
+    .AddSingleton<TimetableMapper>();
 
 var app = builder.Build();
 app.MapOpenApi();

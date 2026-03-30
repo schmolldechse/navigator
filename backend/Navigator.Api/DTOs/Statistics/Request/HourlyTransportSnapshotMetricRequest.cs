@@ -46,14 +46,6 @@ public class HourlyTransportSnapshotMetricRequest : BaseMetricRequest
     [AllowedValues(1, 2, 3, 4, 6, 8, 12, 24)]
     public int Stepping { get; set; } = 1;
 
-    public override Navigator.Data.Models.Statistics.BaseMetricRequest BuildRequest() => new Navigator.Data.Models.Statistics.Request.HourlyTransportSnapshotMetricRequest(SeriesType)
-    {
-        Start = Start,
-        End = End,
-        TransportTypes = TransportTypes ?? Array.Empty<TransportType>(),
-        Stepping = Stepping
-    };
-
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Start > End)

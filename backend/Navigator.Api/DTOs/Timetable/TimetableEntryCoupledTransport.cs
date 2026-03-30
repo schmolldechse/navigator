@@ -8,5 +8,5 @@ public class TimetableEntryCoupledTransport
     public required string JourneyId { get; set; }
 
     [JsonPropertyName("separationAt")]
-    public required TimetableEntryStopPlace SeparationAt { get; set; }
+    public TimetableEntryStopPlace? SeparationAt { get; set; }
 }

@@ -43,14 +43,6 @@ public class StationSummaryMetricRequest : BaseMetricRequest
     [Description("Optional list of EVA numbers to filter the metric by stations. If not provided, all stations will be included.")]
     public int[]? EvaNumbers { get; set; }
 
-    public override Navigator.Data.Models.Statistics.BaseMetricRequest BuildRequest() => new Navigator.Data.Models.Statistics.Request.StationSummaryMetricRequest(SeriesType)
-    {
-        Start = Start,
-        End = End,
-        TransportTypes = TransportTypes,
-        EvaNumbers = EvaNumbers
-    };
-
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Start.HasValue && Start.Value > End)

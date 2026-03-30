@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Navigator.Api.DTOs.Journey;
+using Navigator.Api.Mapping;
 using Navigator.Data.Models.Journey;
 using Navigator.Data.Repository.JourneyRepository;
 
@@ -12,7 +12,7 @@ namespace Navigator.Api.Controllers;
 [Tags("Journey")]
 public class JourneyController(
     IJourneyRepository journeyRepository,
-    IMapper mapper
+    JourneyMapper mapper
 ) : Controller
 {
     [HttpGet]
@@ -25,7 +25,9 @@ public class JourneyController(
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var journey = await journeyRepository.GetJourneyAsync(journeyId);
-        return Ok(mapper.Map<Journey>(journey));
+        if (journey is null) return BadRequest("Journey not found");
+
+        return Ok(mapper.MapJourney(journey));
     }
 
     [HttpPost("batch")]
@@ -36,16 +38,19 @@ public class JourneyController(
     public async Task<IActionResult> GetJourneyBatch([FromBody] IEnumerable<string> journeyIds)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
-        
-        if (journeyIds.Any(journeyId => journeyId.Length > 82)) 
+
+        if (journeyIds.Any(journeyId => journeyId.Length > 82))
             return BadRequest("One or more JourneyIds exceed the maximum length of 82 characters.");
-        
+
         var batchRequest = journeyIds.Select(journeyId => new JourneyOnDateRequest
         {
             Id = journeyId.Substring(9),
             FetchingDate = DateTime.ParseExact(journeyId.Substring(0, 8), "yyyyMMdd", null)
         });
+
         var journeys = await journeyRepository.GetJourneysBatchAsync(batchRequest);
-        return Ok(mapper.Map<IEnumerable<Journey>>(journeys?.Journeys));
+        if (journeys is null || !journeys.Journeys.Any()) return BadRequest("No journeys found");
+
+        return Ok(journeys.Journeys.Select(journey => mapper.MapJourney(journey)));
     }
 }

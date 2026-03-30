@@ -20,9 +20,12 @@ public class JourneyTransport
     [JsonPropertyName("journeyDescription")]
     public required string JourneyDescription { get; set; }
 
-    [JsonPropertyName("number")]
-    public required int Number { get; set; }
+    [JsonPropertyName("label")]
+    public string? Label { get; set; }
 
     [JsonPropertyName("line")]
     public string? Line { get; set; }
+
+    [JsonPropertyName("number")]
+    public required int Number { get; set; }
 }

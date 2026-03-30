@@ -10,7 +10,7 @@ public enum MetricSeriesType
     JourneyTotal,
 
     TransportTypesTotal,
-    
+
     HourlyGlobalArrivals,
     HourlyGlobalArrivalCancellations,
     HourlyGlobalArrivalDelaySum,

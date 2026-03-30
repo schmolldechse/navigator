@@ -1,7 +1,6 @@
-﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Navigator.Api.DTOs.Station;
-using Navigator.Data.Models.Station;
+using Navigator.Api.Mapping;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Data.Repository.StationRilRepository;
 using Navigator.Data.Repository.StationTransportRepository;
@@ -16,7 +15,7 @@ public class StationController(
     IStationRepository stationsRepository,
     IStationRilRepository stationRilRepository,
     IStationTransportRepository stationTransportRepository,
-    IMapper mapper
+    StationMapper mapper
 ) : ControllerBase
 {
     [HttpPost("search")]
@@ -24,11 +23,14 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [EndpointSummary("Search stations")]
     [EndpointDescription("Searches for stations by a search term.")]
-    public async Task<IActionResult> SearchStations([Required] [FromBody] StationBySerchtermRequest request)
+    public async Task<IActionResult> SearchStations([Required][FromBody] StationBySerchtermRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var stations = mapper.Map<IEnumerable<Navigator.Api.DTOs.Station.Station>>(await stationsRepository.GetVendoStationsAsync(mapper.Map<VendoStationsBySearchRequest>(request)));
+        var mappedRequest = mapper.MapStationBySearchtermRequest(request);
+
+        var stations = (await stationsRepository.GetVendoStationsAsync(mappedRequest))
+            .Select(station => mapper.MapVendoStation(station));
         var evaNumbers = stations.Select(station => station.EvaNumber).ToList();
 
         var (ril100, transports) = (
@@ -42,7 +44,7 @@ public class StationController(
             if (transports.Contains(station.EvaNumber)) station.Transports = station.Transports.Union(transports[station.EvaNumber]).ToArray();
         }
 
-        await stationsRepository.SaveStationsAsync(mapper.Map<Navigator.Data.Entities.Station.Station[]>(stations));
+        await stationsRepository.SaveStationsAsync(stations.Select(station => mapper.MapStationToDatabaseStation(station)));
         return Ok(stations);
     }
 
@@ -52,14 +54,14 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [EndpointSummary("Stations by geographic coordinates")]
     [EndpointDescription("Finds nearby stations based on latitude and longitude. Supports optional filters for maximum distance (in meters) and result limit.")]
-    public async Task<IActionResult> SearchStationByCoordinates([Required] [FromBody] StationByGeographicCoordinatesRequest request)
+    public async Task<IActionResult> SearchStationByCoordinates([Required][FromBody] StationByGeographicCoordinatesRequest request)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var stations = await stationsRepository.GetStationsByCoordinatesAsync(mapper.Map<StationsByCoordinateRequest>(request));
+        var stations = await stationsRepository.GetStationsByCoordinatesAsync(mapper.MapStationCoordinateRequest(request));
         if (!stations.Any()) return NoContent();
 
-        return Ok(mapper.Map<IEnumerable<BaseStation>>(stations));
+        return Ok(stations.Select(station => mapper.MapDatabaseStationToBaseStation(station)));
     }
 
     [HttpGet("{evaNumber:int}")]
@@ -68,14 +70,14 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [EndpointSummary("Stations by EVA number")]
     [EndpointDescription("Retrieves a single station by its EVA number.")]
-    public async Task<IActionResult> SearchStationByEvaNumber([Required] [FromRoute] int evaNumber)
+    public async Task<IActionResult> SearchStationByEvaNumber([Required][FromRoute] int evaNumber)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var station = await stationsRepository.GetByEvaNumberAsync(evaNumber);
         if (station is null) return NotFound("Station not found");
 
-        return Ok(mapper.Map<Navigator.Api.DTOs.Station.Station>(station));
+        return Ok(mapper.MapDatabaseStationToStation(station));
     }
 
     [HttpGet("{evaNumber:int}/gathering")]
@@ -84,14 +86,14 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [EndpointSummary("Gathering Information")]
     [EndpointDescription("Retrieves gathering information for a station by its EVA number, including whether querying is enabled, the last queried timestamp, and the active and disabled transport types. Returns 404 Not Found if no station matches.")]
-    public async Task<IActionResult> GetGatheringInfoByEvaNumber([Required] [FromRoute] int evaNumber)
+    public async Task<IActionResult> GetGatheringInfoByEvaNumber([Required][FromRoute] int evaNumber)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var station = await stationsRepository.GetByEvaNumberAsync(evaNumber);
         if (station is null) return NotFound("Station not found");
 
-        return Ok(mapper.Map<StationGatheringInfo>(station));
+        return Ok(mapper.MapDatabaseStationToStationGatheringInfo(station));
     }
 
     [HttpPost("batch")]
@@ -99,11 +101,11 @@ public class StationController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [EndpointSummary("Load a station batch")]
     [EndpointDescription("Retrieves multiple stations based on the provided evaNumber batch")]
-    public async Task<IActionResult> GetStationBatch([Required] [FromBody] IEnumerable<int> evaNumbers)
+    public async Task<IActionResult> GetStationBatch([Required][FromBody] IEnumerable<int> evaNumbers)
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var stations = await stationsRepository.GetStationBatch(evaNumbers);
-        return Ok(mapper.Map<IEnumerable<BaseStation>>(stations));
+        return Ok(stations.Select(station => mapper.MapDatabaseStationToBaseStation(station)));
     }
 }

@@ -23,7 +23,7 @@ public class TimetableEntrySchedule
 
     [JsonPropertyName("actualPlatform")]
     public string? ActualPlatform { get; set; }
-    
+
     [JsonPropertyName("timeType")]
     public required TimeType TimeType { get; set; }
 }

@@ -1,6 +1,5 @@
-﻿using AutoMapper;
+using Navigator.Daemon.Mapping;
 using Microsoft.Extensions.Logging;
-using Navigator.Data.Entities.Journey;
 using Navigator.Data.Entities.RisId;
 using Navigator.Data.Enums;
 using Navigator.Data.Models.Journey;
@@ -18,7 +17,7 @@ public class GatheringJourneysJob(
     IRisIdRepository risIdRepository,
     IJourneyRepository journeyRepository,
     IAdministrationRepository administrationRepository,
-    IMapper mapper
+    JourneyMapper mapper
 ) : IJob
 {
     private readonly DateTime[] _timetableChanges =
@@ -107,28 +106,29 @@ public class GatheringJourneysJob(
                 risId.LastSeen = fetchingDate;
                 risId.LastInserted = fetchingDate;
             }
-
             await risIdRepository.SaveRisIdsBatchAsync(successfulRisIds);
 
-            var mappedJourneys = mapper.Map<IEnumerable<Journey>>(journeys.Journeys);
-            foreach (var mappedJourney in mappedJourneys)
-            {
-                mappedJourney.InsertedAt = currentDate;
+            var syncAdmins = journeys.Journeys
+                .Select(journey => journey.Info.HeaderAdministration)
+                .Select(administration => mapper.MapAdministration(administration))
+                .ToList();
+            var resolvedAdministrations = await administrationRepository.GetOrCreateAdministrationsAsync(syncAdmins);
 
-                var journeyAdministration = journeys.Journeys
-                    .Where(journey => journey.JourneyID == mappedJourney.Id)
-                    .Select(journey => journey.Info.HeaderAdministration)
-                    .Select(async administration => await administrationRepository.GetOrCreateAdministrationAsync(
-                        administration.AdministrationID,
-                        administration.OperatorCode,
-                        administration.OperatorName
-                    ))
-                    .FirstOrDefault();
-                mappedJourney.Administration = journeyAdministration!.Result;
-            }
+            var administrationLookup = resolvedAdministrations.ToDictionary(administration => (administration.AdministrationId, administration.OperatorCode, administration.OperatorName));
+            var mappedJourneys = journeys.Journeys.Select(journey =>
+            {
+                var mappedJourney = mapper.MapJourney(journey);
+                mappedJourney.InsertedAt = currentDate;
+                mappedJourney.Administration = administrationLookup[(
+                    journey.Info.HeaderAdministration.AdministrationID,
+                    journey.Info.HeaderAdministration.OperatorCode,
+                    journey.Info.HeaderAdministration.OperatorName
+                )];
+                return mappedJourney;
+            }).ToList();
             await journeyRepository.SaveJourneysBatchAsync(mappedJourneys);
 
-            logger.LogInformation("Gathered {Count} journeys for {RisIdCount} RisIds.", mappedJourneys.Count(), successfulRisIds.Count);
+            logger.LogInformation("Gathered {Count} journeys for {RisIdCount} RisIds.", mappedJourneys.Count, successfulRisIds.Count);
         }
     }
 

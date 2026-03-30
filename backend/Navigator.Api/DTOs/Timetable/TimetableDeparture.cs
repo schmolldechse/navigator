@@ -30,8 +30,8 @@ public class TimetableDeparture
     [JsonPropertyName("schedule")]
     public required TimetableEntrySchedule Schedule { get; set; }
 
-    [JsonPropertyName("informations")]
-    public required IEnumerable<TimetableEntryInformation> Informations { get; set; } = [];
+    [JsonPropertyName("messages")]
+    public required IEnumerable<TimetableEntryMessage> Messages { get; set; } = [];
 
     [JsonPropertyName("cancelled")]
     public required bool Cancelled { get; set; }

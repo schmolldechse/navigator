@@ -24,12 +24,6 @@ public class RisIdSnapshotMetricRequest : BaseMetricRequest
     [JsonPropertyName("end")]
     public required DateTimeOffset End { get; set; }
 
-    public override Navigator.Data.Models.Statistics.BaseMetricRequest BuildRequest() => new Navigator.Data.Models.Statistics.Request.RisIdSnapshotMetricRequest(SeriesType)
-    {
-        Start = Start,
-        End = End
-    };
-
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Start > End)

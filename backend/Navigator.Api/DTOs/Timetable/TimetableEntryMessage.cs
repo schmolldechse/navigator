@@ -4,11 +4,11 @@ using Navigator.Api.Enums;
 
 namespace Navigator.Api.DTOs.Timetable;
 
-public class TimetableEntryInformation
+public class TimetableEntryMessage
 {
     [JsonPropertyName("type")]
-    public required InformationType Type { get; set; }
-    
+    public required MessageType Type { get; set; }
+
     [JsonPropertyName("key")]
     public required MessageKey Key { get; set; }
 

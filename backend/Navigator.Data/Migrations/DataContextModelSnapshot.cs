@@ -21,7 +21,6 @@ namespace Navigator.Data.Migrations
                 .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "information_type", new[] { "DISRUPTION", "JOURNEY_ATTRIBUTE", "MESSAGE", "RIS_CAUSE_REASON", "RIS_QUALITY_DEVIATION" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "journey_type", new[] { "EXTRA", "REGULAR", "RELIEF", "REPLACEMENT" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "message_reference_type", new[] { "ATTACHMENT", "IMAGE", "LINK" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "message_type", new[] { "ATTRIBUTE", "DISRUPTION", "NOTE", "RIS_CAUSE", "RIS_QUALITY_DEVIATION" });

@@ -32,7 +32,7 @@ public class JourneyRepository(
             logger.LogError("Failed to fetch journey by JourneyId {JourneyId}. Status Code: {StatusCode}", journeyId, response.StatusCode);
             return null;
         }
-        
+
         var journey = JsonSerializer.Deserialize<RisJourneys.JourneyEventBased>(await response.Content.ReadAsStringAsync());
         return journey ?? null;
     }
