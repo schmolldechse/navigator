@@ -256,6 +256,7 @@ public partial class TimetableMapper
         RisBoards.TransportType.BIKE => TransportType.Bike,
         RisBoards.TransportType.SCOOTER => TransportType.Scooter,
         RisBoards.TransportType.WALK => TransportType.Walk,
+        RisBoards.TransportType.UNKNOWN => TransportType.Unknown,
         _ => throw new MappingException($"Value '{sourceType}' is not valid to be mapped for TransportType.")
     };
     #endregion
