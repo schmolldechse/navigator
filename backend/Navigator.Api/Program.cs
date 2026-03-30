@@ -3,6 +3,7 @@ using Navigator.Api.Mapping;
 using Navigator.Api.OpenApi;
 using Navigator.Data;
 using Scalar.AspNetCore;
+using Serilog;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -15,6 +16,10 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.Converters.Add(new LocalDateTimeOffsetConverter());
     });
 builder.Services.AddOpenApi(options => options.AddSchemaTransformer<StringEnumSchemaTransformer>());
+
+// logging
+builder.Host.UseSerilog((context, loggerConfiguration) => loggerConfiguration.ReadFrom.Configuration(context.Configuration)
+    .Enrich.WithProperty("Application", "Navigator.Api"));
 
 // include Navigator.Data
 builder.Services.AddServices(builder.Configuration);
