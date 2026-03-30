@@ -20,6 +20,7 @@ builder.Services.AddOpenApi(options => options.AddSchemaTransformer<StringEnumSc
 builder.Services.AddServices(builder.Configuration);
 
 builder.Services.AddSingleton<JourneyMapper>()
+    .AddSingleton<StationMapper>()
     .AddSingleton<StatisticsMapper>()
     .AddSingleton<TimetableMapper>();
 

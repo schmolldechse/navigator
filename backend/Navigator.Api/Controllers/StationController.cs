@@ -1,7 +1,6 @@
-﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Navigator.Api.DTOs.Station;
-using Navigator.Data.Models.Station;
+using Navigator.Api.Mapping;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Data.Repository.StationRilRepository;
 using Navigator.Data.Repository.StationTransportRepository;
@@ -16,7 +15,7 @@ public class StationController(
     IStationRepository stationsRepository,
     IStationRilRepository stationRilRepository,
     IStationTransportRepository stationTransportRepository,
-    IMapper mapper
+    StationMapper mapper
 ) : ControllerBase
 {
     [HttpPost("search")]
@@ -28,7 +27,10 @@ public class StationController(
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var stations = mapper.Map<IEnumerable<Navigator.Api.DTOs.Station.Station>>(await stationsRepository.GetVendoStationsAsync(mapper.Map<VendoStationsBySearchRequest>(request)));
+        var mappedRequest = mapper.MapStationBySearchtermRequest(request);
+
+        var stations = (await stationsRepository.GetVendoStationsAsync(mappedRequest))
+            .Select(station => mapper.MapVendoStation(station));
         var evaNumbers = stations.Select(station => station.EvaNumber).ToList();
 
         var (ril100, transports) = (
@@ -42,7 +44,7 @@ public class StationController(
             if (transports.Contains(station.EvaNumber)) station.Transports = station.Transports.Union(transports[station.EvaNumber]).ToArray();
         }
 
-        await stationsRepository.SaveStationsAsync(mapper.Map<Navigator.Data.Entities.Station.Station[]>(stations));
+        await stationsRepository.SaveStationsAsync(stations.Select(station => mapper.MapStationToDatabaseStation(station)));
         return Ok(stations);
     }
 
@@ -56,10 +58,10 @@ public class StationController(
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var stations = await stationsRepository.GetStationsByCoordinatesAsync(mapper.Map<StationsByCoordinateRequest>(request));
+        var stations = await stationsRepository.GetStationsByCoordinatesAsync(mapper.MapStationCoordinateRequest(request));
         if (!stations.Any()) return NoContent();
 
-        return Ok(mapper.Map<IEnumerable<BaseStation>>(stations));
+        return Ok(stations.Select(station => mapper.MapDatabaseStationToBaseStation(station)));
     }
 
     [HttpGet("{evaNumber:int}")]
@@ -75,7 +77,7 @@ public class StationController(
         var station = await stationsRepository.GetByEvaNumberAsync(evaNumber);
         if (station is null) return NotFound("Station not found");
 
-        return Ok(mapper.Map<Navigator.Api.DTOs.Station.Station>(station));
+        return Ok(mapper.MapDatabaseStationToStation(station));
     }
 
     [HttpGet("{evaNumber:int}/gathering")]
@@ -91,7 +93,7 @@ public class StationController(
         var station = await stationsRepository.GetByEvaNumberAsync(evaNumber);
         if (station is null) return NotFound("Station not found");
 
-        return Ok(mapper.Map<StationGatheringInfo>(station));
+        return Ok(mapper.MapDatabaseStationToStationGatheringInfo(station));
     }
 
     [HttpPost("batch")]
@@ -104,6 +106,6 @@ public class StationController(
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var stations = await stationsRepository.GetStationBatch(evaNumbers);
-        return Ok(mapper.Map<IEnumerable<BaseStation>>(stations));
+        return Ok(stations.Select(station => mapper.MapDatabaseStationToBaseStation(station)));
     }
 }

@@ -2,6 +2,7 @@
 using Navigator.Data.Entities.RisId;
 using Navigator.Data.Entities.Station;
 using Navigator.Data.Enums;
+using Navigator.Data.Models.Ris;
 using Navigator.Data.Models.Station;
 using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
@@ -70,7 +71,7 @@ public class GatheringRisIdsJob(
         var filteredByTransports = risIds
             .Where(risId =>
             {
-                TransportType transportType = TransportTypeConverter.BoardsTransportToNavigatorTransport(risId.Type);
+                TransportType transportType = BoardsTransportToNavigatorTransport(risId.Type);
                 return enabledTransports.Contains(transportType);
             })
             .Select(risId =>
@@ -82,8 +83,8 @@ public class GatheringRisIdsJob(
                 return new RisId()
                 {
                     Id = risId.JourneyID.Substring(9),
-                    TransportType = TransportTypeConverter.BoardsTransportToNavigatorTransport(risId.Type),
-                    ReplacementTransportType = TransportTypeConverter.StringTransportToNavigatorTransport(risId.ReplacementTransport?.RealType),
+                    TransportType = BoardsTransportToNavigatorTransport(risId.Type),
+                    ReplacementTransportType = StringTransportToNavigatorTransport(risId.ReplacementTransport?.RealType),
                     DiscoveredAt = discoveryDate,
                     Active = true
                 };
@@ -138,5 +139,51 @@ public class GatheringRisIdsJob(
             TimeOnly.FromTimeSpan(DateTime.UtcNow.TimeOfDay),
             DateTimeKind.Utc);
         return null;
+    }
+
+    private TransportType BoardsTransportToNavigatorTransport(RisBoards.TransportType transportType) => transportType switch
+    {
+        RisBoards.TransportType.HIGH_SPEED_TRAIN => TransportType.HighSpeedTrain,
+        RisBoards.TransportType.INTERCITY_TRAIN => TransportType.IntercityTrain,
+        RisBoards.TransportType.INTER_REGIONAL_TRAIN => TransportType.InterRegionalTrain,
+        RisBoards.TransportType.REGIONAL_TRAIN => TransportType.RegionalTrain,
+        RisBoards.TransportType.CITY_TRAIN => TransportType.CityTrain,
+        RisBoards.TransportType.SUBWAY => TransportType.Subway,
+        RisBoards.TransportType.TRAM => TransportType.Tram,
+        RisBoards.TransportType.BUS => TransportType.Bus,
+        RisBoards.TransportType.FERRY => TransportType.Ferry,
+        RisBoards.TransportType.FLIGHT => TransportType.Flight,
+        RisBoards.TransportType.CAR => TransportType.Car,
+        RisBoards.TransportType.TAXI => TransportType.Taxi,
+        RisBoards.TransportType.SHUTTLE => TransportType.Shuttle,
+        RisBoards.TransportType.BIKE => TransportType.Bike,
+        RisBoards.TransportType.SCOOTER => TransportType.Scooter,
+        RisBoards.TransportType.WALK => TransportType.Walk,
+        _ => TransportType.Unknown,
+    };
+
+    private TransportType? StringTransportToNavigatorTransport(string? transportType)
+    {
+        if (string.IsNullOrEmpty(transportType)) return null;
+        return transportType switch
+        {
+            "HIGH_SPEED_TRAIN" => TransportType.HighSpeedTrain,
+            "INTERCITY_TRAIN" => TransportType.IntercityTrain,
+            "INTER_REGIONAL_TRAIN" => TransportType.InterRegionalTrain,
+            "REGIONAL_TRAIN" => TransportType.RegionalTrain,
+            "CITY_TRAIN" => TransportType.CityTrain,
+            "SUBWAY" => TransportType.Subway,
+            "TRAM" => TransportType.Tram,
+            "BUS" => TransportType.Bus,
+            "FERRY" => TransportType.Ferry,
+            "FLIGHT" => TransportType.Flight,
+            "CAR" => TransportType.Car,
+            "TAXI" => TransportType.Taxi,
+            "SHUTTLE" => TransportType.Shuttle,
+            "BIKE" => TransportType.Bike,
+            "SCOOTER" => TransportType.Scooter,
+            "WALK" => TransportType.Walk,
+            _ => TransportType.Unknown,
+        };
     }
 }
