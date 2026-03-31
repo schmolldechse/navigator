@@ -75,6 +75,8 @@ public class GatheringJourneysJob(
                     .FetchingDate ?? null;
             }
             await risIdRepository.SaveRisIdsBatchAsync(failedRisIds);
+
+            logger.LogInformation("No journeys found for {FailedRisIdCount} RisIds.", failedRisIds.Count);
         }
 
         if (journeys.Journeys.Any())
@@ -128,7 +130,7 @@ public class GatheringJourneysJob(
             }).ToList();
             await journeyRepository.SaveJourneysBatchAsync(mappedJourneys);
 
-            logger.LogInformation("Gathered {Count} journeys for {RisIdCount} RisIds.", mappedJourneys.Count, successfulRisIds.Count);
+            logger.LogInformation("Gathered {JourneysCount} journeys for {RisIdCount} RisIds.", mappedJourneys.Count, successfulRisIds.Count);
         }
     }
 

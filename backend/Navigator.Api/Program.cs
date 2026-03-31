@@ -23,7 +23,8 @@ builder.Host.UseSerilog((context, loggerConfiguration) => loggerConfiguration
     .ReadFrom.Configuration(context.Configuration)
     .Enrich.FromLogContext()
     .Enrich.WithExceptionDetails()
-    .Enrich.WithProperty("Application", "Navigator.Api"));
+    .Enrich.WithProperty("app", "Navigator.Preflight")
+    .Enrich.WithProperty("env", builder.Environment.EnvironmentName));
 
 // include Navigator.Data
 builder.Services.AddServices(builder.Configuration);

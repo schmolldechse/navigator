@@ -16,7 +16,8 @@ builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfigurati
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .Enrich.WithExceptionDetails()
-    .Enrich.WithProperty("Application", "Navigator.Daemon"));
+    .Enrich.WithProperty("app", "Navigator.Preflight")
+    .Enrich.WithProperty("env", builder.Environment.EnvironmentName));
 
 builder.Services.AddTransient<IStationDiscovery, StationDiscovery>()
     .AddTransient<IStationMerging, StationMerging>();
