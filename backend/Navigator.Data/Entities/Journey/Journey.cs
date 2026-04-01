@@ -27,7 +27,7 @@ public class Journey
     public required Guid AdministrationId { get; set; }
 
     [ForeignKey(nameof(AdministrationId))]
-    public Administration? Administration { get; set; }
+    public virtual Administration? Administration { get; set; }
 
     [Column("cancelled")]
     public required bool Cancelled { get; set; }

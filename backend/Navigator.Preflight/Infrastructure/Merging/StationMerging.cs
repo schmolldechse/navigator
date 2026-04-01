@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Navigator.Data.Entities.Station;
+using Navigator.Data.Enums;
 using Navigator.Data.Models.Ris;
 using Navigator.Data.Models.StaDa;
 using Navigator.Preflight.Models;
@@ -15,19 +16,19 @@ public class StationMerging(
 {
     private readonly string _tempPath = Path.Combine(Path.GetTempPath(), "navigator", "station_discovery");
 
-    private readonly Dictionary<Navigator.Data.Enums.TransportType, double> _transportWeights = new()
+    private readonly Dictionary<TransportType, double> _transportWeights = new()
     {
-        { Navigator.Data.Enums.TransportType.HighSpeedTrain, 3 },
-        { Navigator.Data.Enums.TransportType.IntercityTrain, 2 },
-        { Navigator.Data.Enums.TransportType.InterRegionalTrain, 1 },
-        { Navigator.Data.Enums.TransportType.RegionalTrain, 1 },
-        { Navigator.Data.Enums.TransportType.CityTrain, 1 },
-        { Navigator.Data.Enums.TransportType.Subway, 0.5 },
-        { Navigator.Data.Enums.TransportType.Ferry, 0.2 },
-        { Navigator.Data.Enums.TransportType.Tram, 0.2 },
-        { Navigator.Data.Enums.TransportType.Bus, 0.1 },
-        { Navigator.Data.Enums.TransportType.Taxi, 0.1 },
-        { Navigator.Data.Enums.TransportType.Shuttle, 0.1 },
+        { TransportType.HighSpeedTrain, 3 },
+        { TransportType.IntercityTrain, 2 },
+        { TransportType.InterRegionalTrain, 1 },
+        { TransportType.RegionalTrain, 1 },
+        { TransportType.CityTrain, 1 },
+        { TransportType.Subway, 0.5 },
+        { TransportType.Ferry, 0.2 },
+        { TransportType.Tram, 0.2 },
+        { TransportType.Bus, 0.1 },
+        { TransportType.Taxi, 0.1 },
+        { TransportType.Shuttle, 0.1 },
     };
     private const int _lowestPriceCategory = 8;
     private const double _priceCategoryWeight = 0.5;
@@ -46,7 +47,7 @@ public class StationMerging(
         logger.LogInformation("Loading RIS stations in cache...");
         var risStations = await LoadRisStationsAsync();
 
-        logger.LogInformation("Loaded {RisCount} RIS stations and {StaDaCount} StaDa stations. Took {Time} ms", risStations.Count, stadaStations.Count, watch.ElapsedMilliseconds);
+        logger.LogInformation("Loaded {RisCount} RIS stations and {StaDaCount} StaDa stations in {ElapsedMilliseconds}ms", risStations.Count, stadaStations.Count, watch.ElapsedMilliseconds);
 
         ConcurrentDictionary<int, Station> mappedStations = new ConcurrentDictionary<int, Station>();
         foreach (var (evaNumber, risStation) in risStations)
@@ -126,7 +127,7 @@ public class StationMerging(
                     });
             }
         }
-        logger.LogInformation("Mapped a total of {MappedCount} stations. Took {Time} ms", mappedStations.Count, watch.ElapsedMilliseconds);
+        logger.LogInformation("Mapped a total of {MappedCount} stations in {ElapsedMilliseconds}ms", mappedStations.Count, watch.ElapsedMilliseconds);
 
         logger.LogInformation("Calculating weights for mapped stations...");
         watch.Restart();
@@ -135,7 +136,7 @@ public class StationMerging(
         {
             station.Weight = CalculateWeight(station, stadaStations.GetValueOrDefault(station.EvaNumber)?.PriceCategory ?? -1);
         }
-        logger.LogInformation("Weight calculation done! Took {Time} ms", watch.ElapsedMilliseconds);
+        logger.LogInformation("Weight calculation done in {ElapsedMilliseconds}ms", watch.ElapsedMilliseconds);
 
         watch.Stop();
         return mappedStations.Values;
@@ -148,7 +149,7 @@ public class StationMerging(
             .ToList();
         if (!risFiles.Any())
         {
-            logger.LogError("No RIS station files found in path: {TempPath}", _tempPath);
+            logger.LogError("No RIS station files found in {TempPath}", _tempPath);
             throw new FileNotFoundException("No RIS station files found.", _tempPath);
         }
 
@@ -158,7 +159,7 @@ public class StationMerging(
             var risStations = JsonSerializer.Deserialize<IEnumerable<RisStations.StopPlaceSearchResult>>(await File.ReadAllTextAsync(risFile));
             if (risStations is null)
             {
-                logger.LogError("Failed to deserialize RIS stations from file: {RisFile}", risFile);
+                logger.LogError("Failed to deserialize RIS stations from file {RisFile}", risFile);
                 throw new InvalidOperationException("Failed to deserialize RIS stations.");
             }
 
@@ -179,14 +180,14 @@ public class StationMerging(
         var stadaPath = Path.Combine(_tempPath, "stada.json");
         if (!File.Exists(stadaPath))
         {
-            logger.LogError("StaDa stations file not found at path: {StadaPath}", stadaPath);
-            throw new FileNotFoundException("StaDa stations file not found.", stadaPath);
+            logger.LogError("StaDa station file not found at {StadaPath}", stadaPath);
+            throw new FileNotFoundException("StaDa station file not found.", stadaPath);
         }
 
         var stations = JsonSerializer.Deserialize<IEnumerable<StaDa.Station>>(await File.ReadAllTextAsync(stadaPath));
         if (stations is null)
         {
-            logger.LogError("Failed to deserialize StaDa stations from file: {StadaPath}", stadaPath);
+            logger.LogError("Failed to deserialize StaDa stations from file {StadaPath}", stadaPath);
             throw new InvalidOperationException("Failed to deserialize StaDa stations.");
         }
 
@@ -219,25 +220,25 @@ public class StationMerging(
         .Distinct()
         .ToArray();
 
-    private Navigator.Data.Enums.TransportType MapToNavigatorTransportType(RisStations.TransportType transportType) => transportType switch
+    private TransportType MapToNavigatorTransportType(RisStations.TransportType transportType) => transportType switch
     {
-        RisStations.TransportType.HIGH_SPEED_TRAIN => Navigator.Data.Enums.TransportType.HighSpeedTrain,
-        RisStations.TransportType.INTERCITY_TRAIN => Navigator.Data.Enums.TransportType.IntercityTrain,
-        RisStations.TransportType.INTER_REGIONAL_TRAIN => Navigator.Data.Enums.TransportType.InterRegionalTrain,
-        RisStations.TransportType.REGIONAL_TRAIN => Navigator.Data.Enums.TransportType.RegionalTrain,
-        RisStations.TransportType.CITY_TRAIN => Navigator.Data.Enums.TransportType.CityTrain,
-        RisStations.TransportType.SUBWAY => Navigator.Data.Enums.TransportType.Subway,
-        RisStations.TransportType.TRAM => Navigator.Data.Enums.TransportType.Tram,
-        RisStations.TransportType.BUS => Navigator.Data.Enums.TransportType.Bus,
-        RisStations.TransportType.FERRY => Navigator.Data.Enums.TransportType.Ferry,
-        RisStations.TransportType.FLIGHT => Navigator.Data.Enums.TransportType.Flight,
-        RisStations.TransportType.CAR => Navigator.Data.Enums.TransportType.Car,
-        RisStations.TransportType.TAXI => Navigator.Data.Enums.TransportType.Taxi,
-        RisStations.TransportType.SHUTTLE => Navigator.Data.Enums.TransportType.Shuttle,
-        RisStations.TransportType.BIKE => Navigator.Data.Enums.TransportType.Bike,
-        RisStations.TransportType.SCOOTER => Navigator.Data.Enums.TransportType.Scooter,
-        RisStations.TransportType.WALK => Navigator.Data.Enums.TransportType.Walk,
-        _ => Navigator.Data.Enums.TransportType.Unknown,
+        RisStations.TransportType.HIGH_SPEED_TRAIN => TransportType.HighSpeedTrain,
+        RisStations.TransportType.INTERCITY_TRAIN => TransportType.IntercityTrain,
+        RisStations.TransportType.INTER_REGIONAL_TRAIN => TransportType.InterRegionalTrain,
+        RisStations.TransportType.REGIONAL_TRAIN => TransportType.RegionalTrain,
+        RisStations.TransportType.CITY_TRAIN => TransportType.CityTrain,
+        RisStations.TransportType.SUBWAY => TransportType.Subway,
+        RisStations.TransportType.TRAM => TransportType.Tram,
+        RisStations.TransportType.BUS => TransportType.Bus,
+        RisStations.TransportType.FERRY => TransportType.Ferry,
+        RisStations.TransportType.FLIGHT => TransportType.Flight,
+        RisStations.TransportType.CAR => TransportType.Car,
+        RisStations.TransportType.TAXI => TransportType.Taxi,
+        RisStations.TransportType.SHUTTLE => TransportType.Shuttle,
+        RisStations.TransportType.BIKE => TransportType.Bike,
+        RisStations.TransportType.SCOOTER => TransportType.Scooter,
+        RisStations.TransportType.WALK => TransportType.Walk,
+        _ => TransportType.Unknown,
     };
 
     private double CalculateWeight(Station origin, int priceCategory = -1)

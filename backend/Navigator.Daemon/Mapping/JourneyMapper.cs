@@ -1,4 +1,4 @@
-﻿using Navigator.Data.Entities.Journey;
+using Navigator.Data.Entities.Journey;
 using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Enums;
 using Navigator.Data.Models.Ris;
@@ -17,7 +17,7 @@ public partial class JourneyMapper
     [MapValue(nameof(Journey.Date), null)]
     [MapValue(nameof(Journey.InsertedAt), null)]
     [MapValue(nameof(Journey.AdministrationId), null)]
-    [MapValue(nameof(Journey.Administration), null)]
+    [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.JourneyEventBased.Info.HeaderAdministration), nameof(Journey.Administration))]
     [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.JourneyEventBased.Info.JourneyCancelled), nameof(Journey.Cancelled))]
     [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.JourneyEventBased.Info.Type), nameof(Journey.JourneyType), Use = nameof(MapJourneyType))]
     [MapValue(nameof(Journey.Transport), null)]

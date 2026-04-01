@@ -41,7 +41,7 @@ public class StaleRisIdDeactivationJob(
                 Id = risId.Id,
                 FetchingDate = risId.LastSeen!.Value.Date.AddDays(dayOffset)
             });
-            var journeyBatch = await journeyRepository.GetJourneysBatchAsync(journeyRequest);
+            var journeyBatch = await journeyRepository.GetJourneyBatchAsync(journeyRequest);
             if (journeyBatch is null) return;
 
             foreach (var journey in journeyBatch.Journeys)

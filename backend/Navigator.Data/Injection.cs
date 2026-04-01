@@ -1,9 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Navigator.Data.Enums;
 using Navigator.Data.Infrastructure;
-using Navigator.Data.Repository.AdministrationRepository;
 using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
@@ -37,7 +36,6 @@ public static class Injection
         services.AddSingleton<ProxyHttpClientFactory>();
 
         services
-            .AddTransient<IAdministrationRepository, AdministrationRepository>()
             .AddTransient<IJourneyRepository, JourneyRepository>()
             .AddTransient<IRisIdRepository, RisIdRepository>()
             .AddTransient<IStationRepository, StationRepository>()
