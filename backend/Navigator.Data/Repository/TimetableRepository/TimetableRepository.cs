@@ -29,20 +29,18 @@ public class TimetableRepository(
         var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, url));
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to fetch stations. Status Code: {StatusCode}", response.StatusCode);
-            return new RisBoards.BoardPublicArrival
-            {
-                Arrivals = Array.Empty<RisBoards.StopArrival>(),
-                Disruptions = Array.Empty<RisBoards.DisruptionCommunicationEmbeddedLegacy>()
-            };
+            logger.LogError("Failed to fetch arrivals timetable for {EvaNumber}", request.EvaNumber);
+            throw new HttpRequestException($"Failed to fetch arrivals timetable for {request.EvaNumber}.", null, response.StatusCode);
         }
 
         var board = JsonSerializer.Deserialize<RisBoards.BoardPublicArrival>(await response.Content.ReadAsStringAsync());
-        return board ?? new RisBoards.BoardPublicArrival
+        if (board is null)
         {
-            Arrivals = Array.Empty<RisBoards.StopArrival>(),
-            Disruptions = Array.Empty<RisBoards.DisruptionCommunicationEmbeddedLegacy>()
-        };
+            logger.LogError("Failed to deserialize arrivals board.");
+            throw new JsonException("Failed to deserialize arrivals board.");
+        }
+
+        return board;
     }
 
     public async Task<RisBoards.BoardPublicDeparture> GetDeparturesAsync(RisBoardRequest request)
@@ -61,19 +59,17 @@ public class TimetableRepository(
         var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, url));
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to fetch stations. Status Code: {StatusCode}", response.StatusCode);
-            return new RisBoards.BoardPublicDeparture
-            {
-                Departures = Array.Empty<RisBoards.StopDeparture>(),
-                Disruptions = Array.Empty<RisBoards.DisruptionCommunicationEmbeddedLegacy>()
-            };
+            logger.LogError("Failed to fetch departures timetable for {EvaNumber}", request.EvaNumber);
+            throw new HttpRequestException($"Failed to fetch departures timetable for {request.EvaNumber}.", null, response.StatusCode);
         }
 
         var board = JsonSerializer.Deserialize<RisBoards.BoardPublicDeparture>(await response.Content.ReadAsStringAsync());
-        return board ?? new RisBoards.BoardPublicDeparture
+        if (board is null)
         {
-            Departures = Array.Empty<RisBoards.StopDeparture>(),
-            Disruptions = Array.Empty<RisBoards.DisruptionCommunicationEmbeddedLegacy>()
-        };
+            logger.LogError("Failed to deserialize departures board.");
+            throw new JsonException("Failed to deserialize departures board.");
+        }
+
+        return board;
     }
 }

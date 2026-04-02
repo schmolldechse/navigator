@@ -19,8 +19,10 @@ public class StationController(
 ) : ControllerBase
 {
     [HttpPost("search")]
-    [ProducesResponseType<IEnumerable<Navigator.Api.DTOs.Station.Station>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<IEnumerable<Station>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
     [EndpointSummary("Search stations")]
     [EndpointDescription("Searches for stations by a search term.")]
     public async Task<IActionResult> SearchStations([Required][FromBody] StationBySerchtermRequest request)
@@ -52,6 +54,8 @@ public class StationController(
     [ProducesResponseType<IEnumerable<BaseStation>>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
     [EndpointSummary("Stations by geographic coordinates")]
     [EndpointDescription("Finds nearby stations based on latitude and longitude. Supports optional filters for maximum distance (in meters) and result limit.")]
     public async Task<IActionResult> SearchStationByCoordinates([Required][FromBody] StationByGeographicCoordinatesRequest request)
@@ -65,7 +69,7 @@ public class StationController(
     }
 
     [HttpGet("{evaNumber:int}")]
-    [ProducesResponseType<Navigator.Api.DTOs.Station.Station>(StatusCodes.Status200OK)]
+    [ProducesResponseType<Station>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [EndpointSummary("Stations by EVA number")]

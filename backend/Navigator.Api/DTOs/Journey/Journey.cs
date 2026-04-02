@@ -21,10 +21,10 @@ public class Journey
     public required JourneyTransport Transport { get; set; }
 
     [JsonPropertyName("continuationBy")]
-    public IEnumerable<string> ContinuationBy { get; set; }
+    public IEnumerable<string>? ContinuationBy { get; set; }
 
     [JsonPropertyName("continuationFor")]
-    public IEnumerable<string> ContinuationFor { get; set; }
+    public IEnumerable<string>? ContinuationFor { get; set; }
 
     [JsonPropertyName("cancelled")]
     public required bool Cancelled { get; set; }

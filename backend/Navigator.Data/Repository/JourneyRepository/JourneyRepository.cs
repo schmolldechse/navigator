@@ -30,14 +30,14 @@ public class JourneyRepository(
         if (!response.IsSuccessStatusCode)
         {
             logger.LogError("Failed to fetch journey with ID {JourneyId}", journeyId);
-            throw new Exception($"Failed to fetch journey with ID {journeyId}");
+            throw new HttpRequestException($"Failed to fetch journey with ID {journeyId}", null, response.StatusCode);
         }
 
         var journey = JsonSerializer.Deserialize<RisJourneys.JourneyEventBased>(await response.Content.ReadAsStringAsync());
         if (journey is null)
         {
             logger.LogError("Failed to deserialize journey with ID {JourneyId}", journeyId);
-            throw new Exception($"Failed to deserialize journey with ID {journeyId}");
+            throw new JsonException($"Failed to deserialize journey with ID {journeyId}");
         }
 
         return journey;
@@ -61,14 +61,14 @@ public class JourneyRepository(
         if (!response.IsSuccessStatusCode)
         {
             logger.LogError("Failed to fetch journeys batch for {Count} entries", request.Count());
-            throw new Exception($"Failed to fetch journeys batch for {request.Count()} entries");
+            throw new HttpRequestException($"Failed to fetch journeys batch for {request.Count()} entries", null, response.StatusCode);
         }
 
         var journeyBatch = JsonSerializer.Deserialize<RisJourneys.JourneyBatchResponse>(await response.Content.ReadAsStringAsync());
         if (journeyBatch is null)
         {
             logger.LogError("Failed to deserialize journeys batch for {Count} entries", request.Count());
-            throw new Exception($"Failed to deserialize journeys batch for {request.Count()} entries");
+            throw new JsonException($"Failed to deserialize journeys batch for {request.Count()} entries");
         }
 
         return journeyBatch;

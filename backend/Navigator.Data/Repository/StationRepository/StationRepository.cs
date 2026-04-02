@@ -37,12 +37,18 @@ public class StationRepository(
         using var response = await httpClient.SendAsync(message);
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to fetch stations. Status Code: {StatusCode}", response.StatusCode);
-            return Enumerable.Empty<VendoStation>();
+            logger.LogError("Failed to fetch stations");
+            throw new HttpRequestException($"Failed to fetch stations.", null, response.StatusCode);
         }
 
         var stations = JsonSerializer.Deserialize<VendoStation[]>(await response.Content.ReadAsStringAsync());
-        return stations?.Where(station => !string.IsNullOrEmpty(station.EvaNumber)) ?? Enumerable.Empty<VendoStation>();
+        if (stations is null)
+        {
+            logger.LogError("Failed to deserialize stations.");
+            throw new JsonException("Failed to deserialize stations.");
+        }
+
+        return stations.Where(station => !string.IsNullOrEmpty(station.EvaNumber));
     }
 
     public async Task<IEnumerable<RisStations.StopPlaceSearchResult>> GetRisStationsByCoordinatesAsync(RisStationsByCoordinatesRequest request)
@@ -65,12 +71,18 @@ public class StationRepository(
         using var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, builder.Uri));
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to fetch stations. Status Code: {StatusCode}", response.StatusCode);
-            return Enumerable.Empty<RisStations.StopPlaceSearchResult>();
+            logger.LogError("Failed to fetch stations.");
+            throw new HttpRequestException($"Failed to fetch stations.", null, response.StatusCode);
         }
 
         var stations = JsonSerializer.Deserialize<RisStations.StopPlaceSearchResults>(await response.Content.ReadAsStringAsync());
-        return stations?.StopPlaces ?? Enumerable.Empty<RisStations.StopPlaceSearchResult>();
+        if (stations is null)
+        {
+            logger.LogError("Failed to deserialize stations.");
+            throw new JsonException("Failed to deserialize stations.");
+        }
+
+        return stations.StopPlaces ?? Enumerable.Empty<RisStations.StopPlaceSearchResult>();
     }
 
     public async Task<IEnumerable<StaDa.Station>> GetStaDaAsync()
@@ -82,12 +94,18 @@ public class StationRepository(
         using var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, _staDaUrl));
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to fetch StaDa stations. Status Code: {StatusCode}", response.StatusCode);
-            return Enumerable.Empty<StaDa.Station>();
+            logger.LogError("Failed to fetch StaDa stations.");
+            throw new HttpRequestException($"Failed to fetch StaDa stations.", null, response.StatusCode);
         }
 
         var stations = JsonSerializer.Deserialize<StaDa.StationQuery>(await response.Content.ReadAsStringAsync());
-        return stations?.Result ?? Enumerable.Empty<StaDa.Station>();
+        if (stations is null)
+        {
+            logger.LogError("Failed to deserialize StaDa stations.");
+            throw new JsonException("Failed to deserialize StaDa stations.");
+        }
+
+        return stations.Result ?? Enumerable.Empty<StaDa.Station>();
     }
 
     public async Task<IEnumerable<Station>> GetStationsByCoordinatesAsync(StationsByCoordinateRequest request) => await dataContext.Stations

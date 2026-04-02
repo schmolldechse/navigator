@@ -16,7 +16,7 @@ builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfigurati
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
     .Enrich.WithExceptionDetails()
-    .Enrich.WithProperty("app", "Navigator.Daemon")
+    .Enrich.WithProperty("service_name", "Navigator.Daemon")
     .Enrich.WithProperty("env", builder.Environment.EnvironmentName));
 
 // mappers

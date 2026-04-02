@@ -18,6 +18,8 @@ public class JourneyController(
     [HttpGet]
     [ProducesResponseType<Journey>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
     [EndpointSummary("Journey by ID")]
     [EndpointDescription("Retrieves a single journey by its unique journey ID. The journey ID (max 82 characters) is expected to encode a date (yyyyMMdd) in the first 8 characters followed by the journey identifier.")]
     public async Task<IActionResult> GetJourney([FromQuery][MaxLength(82)] string journeyId)
@@ -32,7 +34,9 @@ public class JourneyController(
 
     [HttpPost("batch")]
     [ProducesResponseType<IEnumerable<Journey>>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(StatusCodes.Status502BadGateway)]
     [EndpointSummary("Journey batch")]
     [EndpointDescription("Retrieves multiple journeys in a single request. Each journey ID (max 82 characters) is expected to encode a date (yyyyMMdd) in the first 8 characters followed by the journey identifier.")]
     public async Task<IActionResult> GetJourneyBatch([FromBody] IEnumerable<string> journeyIds)
@@ -48,9 +52,9 @@ public class JourneyController(
             FetchingDate = DateTime.ParseExact(journeyId.Substring(0, 8), "yyyyMMdd", null)
         });
 
-        var journeys = await journeyRepository.GetJourneysBatchAsync(batchRequest);
-        if (journeys is null || !journeys.Journeys.Any()) return BadRequest("No journeys found");
+        var journeyBatch = await journeyRepository.GetJourneyBatchAsync(batchRequest);
+        if (!journeyBatch.Journeys.Any()) return NoContent();
 
-        return Ok(journeys.Journeys.Select(journey => mapper.MapJourney(journey)));
+        return Ok(journeyBatch.Journeys.Select(journey => mapper.MapJourney(journey)));
     }
 }
