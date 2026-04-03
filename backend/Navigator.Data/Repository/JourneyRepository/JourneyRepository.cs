@@ -4,6 +4,7 @@ using Navigator.Data.Entities.Journey;
 using Navigator.Data.Infrastructure;
 using Navigator.Data.Models.Journey;
 using Navigator.Data.Models.Ris;
+using System.Net;
 using System.Text;
 using System.Text.Json;
 
@@ -18,7 +19,7 @@ public class JourneyRepository(
     private const string _risJourneysBatchMatchUrl = "https://apis.deutschebahn.com/db/apis/ris-journeys/v2/batch";
     private const string _risJourneysMatchUrl = "https://apis.deutschebahn.com/db/apis/ris-journeys/v2/{0}";
 
-    public async Task<RisJourneys.JourneyEventBased> GetJourneyAsync(string journeyId)
+    public async Task<RisJourneys.JourneyEventBased?> GetJourneyAsync(string journeyId)
     {
         using var httpClient = proxyHttpClientFactory.CreateClient();
         httpClient.DefaultRequestHeaders.Add("DB-Client-Id", Environment.GetEnvironmentVariable("JOURNEYS_CLIENT_ID"));
@@ -29,6 +30,8 @@ public class JourneyRepository(
         var response = await httpClient.SendAsync(message);
         if (!response.IsSuccessStatusCode)
         {
+            if (response.StatusCode == HttpStatusCode.NotFound) return null;
+
             logger.LogError("Failed to fetch journey with ID {JourneyId}", journeyId);
             throw new HttpRequestException($"Failed to fetch journey with ID {journeyId}", null, response.StatusCode);
         }

@@ -22,6 +22,7 @@ builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfigurati
 // mappers
 builder.Services.AddSingleton<JourneyMapper>();
 
+// quartz
 builder.Services.AddQuartz(options =>
 {
     options.AddQuartzJobs<GatheringRisIdsJob>(builder.Configuration);

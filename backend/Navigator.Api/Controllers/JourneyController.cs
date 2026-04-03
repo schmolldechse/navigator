@@ -18,6 +18,7 @@ public class JourneyController(
     [HttpGet]
     [ProducesResponseType<Journey>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     [ProducesResponseType(StatusCodes.Status502BadGateway)]
     [EndpointSummary("Journey by ID")]
@@ -27,7 +28,7 @@ public class JourneyController(
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
         var journey = await journeyRepository.GetJourneyAsync(journeyId);
-        if (journey is null) return BadRequest("Journey not found");
+        if (journey is null) return NotFound("Journey not found");
 
         return Ok(mapper.MapJourney(journey));
     }
