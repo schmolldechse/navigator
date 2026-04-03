@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Navigator.Data.Entities.Journey.Message;
+﻿using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Enums;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -7,9 +6,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Navigator.Data.Entities.Journey;
 
 [Table("journey_stop_places", Schema = "core")]
-[Index(nameof(JourneyId))]
-[Index(nameof(PlannedTime))]
-[Index(nameof(ActualTime))]
 public class JourneyStopPlace
 {
     [Key]

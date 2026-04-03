@@ -100,10 +100,6 @@ namespace Navigator.Data.Migrations
 
                     b.HasIndex("Date");
 
-                    b.HasIndex("InsertedAt");
-
-                    b.HasIndex("JourneyType");
-
                     b.ToTable("journeys", "core");
                 });
 
@@ -174,11 +170,7 @@ namespace Navigator.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ActualTime");
-
                     b.HasIndex("JourneyId");
-
-                    b.HasIndex("PlannedTime");
 
                     b.HasIndex("StationEvaNumber", "PlannedTime")
                         .HasDatabaseName("IX_journey_stop_places_station_analytics");
@@ -240,8 +232,6 @@ namespace Navigator.Data.Migrations
                     b.HasIndex("JourneyDescription");
 
                     b.HasIndex("Number");
-
-                    b.HasIndex("ReplacementTransportType");
 
                     b.HasIndex("TransportType");
 
@@ -384,15 +374,9 @@ namespace Navigator.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DiscoveredAt");
-
-                    b.HasIndex("LastInserted");
-
-                    b.HasIndex("ReplacementTransportType");
-
-                    b.HasIndex("TransportType");
-
                     b.HasIndex("Active", "LastSeen");
+
+                    b.HasIndex("Active", "DiscoveredAt", "LastInserted");
 
                     b.ToTable("ris_ids", "core");
                 });

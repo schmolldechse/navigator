@@ -7,7 +7,6 @@ namespace Navigator.Data.Entities.Journey;
 
 [Table("journey_transports", Schema = "core")]
 [Index(nameof(TransportType))]
-[Index(nameof(ReplacementTransportType))]
 [Index(nameof(JourneyDescription))]
 [Index(nameof(Number))]
 public class JourneyTransport

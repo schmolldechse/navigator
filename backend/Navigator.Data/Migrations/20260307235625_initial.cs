@@ -372,22 +372,10 @@ namespace Navigator.Data.Migrations
                 column: "journey_message_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_places_actual_time",
-                schema: "core",
-                table: "journey_stop_places",
-                column: "actual_time");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_journey_stop_places_journey_id",
                 schema: "core",
                 table: "journey_stop_places",
                 column: "journey_id");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journey_stop_places_planned_time",
-                schema: "core",
-                table: "journey_stop_places",
-                column: "planned_time");
 
             migrationBuilder.CreateIndex(
                 name: "IX_journey_stop_places_station_analytics",
@@ -409,12 +397,6 @@ namespace Navigator.Data.Migrations
                 column: "number");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journey_transports_replacement_transport_type",
-                schema: "core",
-                table: "journey_transports",
-                column: "replacement_transport_type");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_journey_transports_transport_type",
                 schema: "core",
                 table: "journey_transports",
@@ -433,46 +415,16 @@ namespace Navigator.Data.Migrations
                 column: "date");
 
             migrationBuilder.CreateIndex(
-                name: "IX_journeys_inserted_at",
-                schema: "core",
-                table: "journeys",
-                column: "inserted_at");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_journeys_journey_type",
-                schema: "core",
-                table: "journeys",
-                column: "journey_type");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ris_ids_active_last_seen",
                 schema: "core",
                 table: "ris_ids",
                 columns: new[] { "active", "last_seen" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ris_ids_discovered_at",
+                name: "IX_ris_ids_active_discovered_at_last_inserted",
                 schema: "core",
                 table: "ris_ids",
-                column: "discovered_at");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ris_ids_last_inserted",
-                schema: "core",
-                table: "ris_ids",
-                column: "last_inserted");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ris_ids_replacement_transport_type",
-                schema: "core",
-                table: "ris_ids",
-                column: "replacement_transport_type");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ris_ids_transport_type",
-                schema: "core",
-                table: "ris_ids",
-                column: "transport_type");
+                columns: new[] { "active", "discovered_at", "last_inserted" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_risid_snapshot_measured_at",

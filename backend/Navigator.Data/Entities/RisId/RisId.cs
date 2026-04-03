@@ -6,11 +6,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Navigator.Data.Entities.RisId;
 
 [Table("ris_ids", Schema = "core")]
-[Index(nameof(TransportType))]
-[Index(nameof(ReplacementTransportType))]
-[Index(nameof(DiscoveredAt))]
-[Index(nameof(LastInserted))]
 [Index(nameof(Active), nameof(LastSeen))]
+[Index(nameof(Active), nameof(DiscoveredAt), nameof(LastInserted))]
 public class RisId
 {
     /// Format: {UUID}-{UUID}
