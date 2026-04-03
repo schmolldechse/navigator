@@ -31,7 +31,7 @@ public class GatheringRisIdsJob(
         DateTime? lastQueried = EstimateLastQueried(randomStation);
         if (lastQueried == null) return;
 
-        logger.LogInformation("Querying {Station} (EvaNumber: {EvaNumber}) with last queried to {LastQueried}.",
+        logger.LogInformation("Querying {StationName} (EvaNumber: {StationEvaNumber}) with last queried to {LastQueried}.",
             randomStation.Name,
             randomStation.EvaNumber,
             lastQueried);
@@ -97,7 +97,7 @@ public class GatheringRisIdsJob(
         randomStation.LastQueried = lastQueried;
         if (!filteredByTransports.Any())
         {
-            logger.LogInformation("No RIS IDs found for {Station} (EvaNumber: {EvaNumber})",
+            logger.LogInformation("No RIS IDs found for {StationName} (EvaNumber: {StationEvaNumber})",
                 randomStation.Name,
                 randomStation.EvaNumber);
             await stationRepository.SaveStationsAsync([randomStation]);
@@ -122,7 +122,7 @@ public class GatheringRisIdsJob(
         }
 
         await stationRepository.SaveStationsAsync([randomStation]);
-        logger.LogInformation("Discovered {TotalRisIds} RIS IDs. Filtered to {Filtered} RIS IDs based on enabled transports. {NewRisIdCount} were new RIS IDs and updated {UpdatedRisIdCount} existing RIS IDs for {Station} (EvaNumber: {EvaNumber})",
+        logger.LogInformation("Discovered {TotalRisIds} RIS IDs. Filtered to {Filtered} RIS IDs based on enabled transports. {NewRisIdCount} were new RIS IDs and updated {UpdatedRisIdCount} existing RIS IDs for {StationName} (EvaNumber: {StationEvaNumber})",
             risIds.Count,
             filteredByTransports.Count(),
             newIds.Count,

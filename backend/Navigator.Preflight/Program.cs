@@ -5,9 +5,19 @@ using Navigator.Data;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Preflight.Infrastructure.Discovery;
 using Navigator.Preflight.Infrastructure.Merging;
+using Serilog;
+using Serilog.Exceptions;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddServices(builder.Configuration);
+
+// logging
+builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithExceptionDetails()
+    .Enrich.WithProperty("service_name", "Navigator.Preflight")
+    .Enrich.WithProperty("env", builder.Environment.EnvironmentName));
 
 builder.Services.AddTransient<IStationDiscovery, StationDiscovery>()
     .AddTransient<IStationMerging, StationMerging>();

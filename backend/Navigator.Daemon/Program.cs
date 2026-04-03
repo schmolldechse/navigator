@@ -5,9 +5,19 @@ using Navigator.Daemon.Infrastructure;
 using Navigator.Daemon.Mapping;
 using Navigator.Data;
 using Quartz;
+using Serilog;
+using Serilog.Exceptions;
 
 var builder = Host.CreateApplicationBuilder(args);
 builder.Services.AddServices(builder.Configuration);
+
+// logging
+builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .Enrich.WithExceptionDetails()
+    .Enrich.WithProperty("service_name", "Navigator.Daemon")
+    .Enrich.WithProperty("env", builder.Environment.EnvironmentName));
 
 // mappers
 builder.Services.AddSingleton<JourneyMapper>();

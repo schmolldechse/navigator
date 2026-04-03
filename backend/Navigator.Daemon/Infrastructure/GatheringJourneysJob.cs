@@ -4,7 +4,6 @@ using Navigator.Data.Entities.RisId;
 using Navigator.Data.Enums;
 using Navigator.Data.Models.Journey;
 using Navigator.Data.Models.RisId;
-using Navigator.Data.Repository.AdministrationRepository;
 using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
 using Quartz;
@@ -16,7 +15,6 @@ public class GatheringJourneysJob(
     ILogger<GatheringJourneysJob> logger,
     IRisIdRepository risIdRepository,
     IJourneyRepository journeyRepository,
-    IAdministrationRepository administrationRepository,
     JourneyMapper mapper
 ) : IJob
 {
@@ -31,55 +29,27 @@ public class GatheringJourneysJob(
     {
         var currentDate = DateTime.UtcNow;
 
-        var risIds = await risIdRepository.GetRisIdsBatchAsync(new RisIdBatchRequest()
+        var risIdBatch = await risIdRepository.GetRisIdsBatchAsync(new RisIdBatchRequest()
         {
             OnlyActive = true,
             IncludeNullDates = true,
             CutoffLastSeen = currentDate.Date.AddDays(-2),
             OrderBy = RisIdOrder.LastSeen
         });
-        if (!risIds.Any()) return;
+        if (!risIdBatch.Any()) return;
 
-        var journeyRequest = risIds.Select(risId => new JourneyOnDateRequest()
+        var journeyBatchRequest = risIdBatch.Select(risId => new JourneyOnDateRequest()
         {
             Id = risId.Id,
             FetchingDate = EstimateLastQueried(risId)
         });
-        var journeys = await journeyRepository.GetJourneysBatchAsync(journeyRequest);
-        if (journeys is null) return;
 
-        if (journeys.ErroneousJourneys.Any())
+        var journeyBatch = await journeyRepository.GetJourneyBatchAsync(journeyBatchRequest);
+        if (journeyBatch is null) return;
+
+        if (journeyBatch.ErroneousJourneys.Any())
         {
-            var journeyIds = journeys.ErroneousJourneys
-                .Select(erroneousJourney =>
-                {
-                    var datePart = erroneousJourney.JourneyID.Substring(0, 8);
-                    if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out _))
-                        return null;
-
-                    return erroneousJourney.JourneyID.Substring(9);
-                })
-                .Where(journeyId => journeyId != null)
-                .Select(journeyId => journeyId!)
-                .ToHashSet();
-            var failedRisIds = risIds
-                .Where(risId => journeyIds.Contains(risId.Id))
-                .ToList();
-
-            foreach (var risId in failedRisIds)
-            {
-                risId.LastSeen = journeyRequest
-                    .Where(request => request.Id == risId.Id)
-                    .Select(request => request)
-                    .FirstOrDefault()?
-                    .FetchingDate ?? null;
-            }
-            await risIdRepository.SaveRisIdsBatchAsync(failedRisIds);
-        }
-
-        if (journeys.Journeys.Any())
-        {
-            var journeyIds = journeys.Journeys
+            var journeyIds = journeyBatch.ErroneousJourneys
                 .Select(journey =>
                 {
                     var datePart = journey.JourneyID.Substring(0, 8);
@@ -91,13 +61,42 @@ public class GatheringJourneysJob(
                 .Where(journeyId => journeyId != null)
                 .Select(journeyId => journeyId!)
                 .ToHashSet();
-            var successfulRisIds = risIds
+            var failedRisIds = risIdBatch
+                .Where(risId => journeyIds.Contains(risId.Id))
+                .ToList();
+
+            foreach (var risId in failedRisIds)
+            {
+                risId.LastSeen = journeyBatchRequest
+                    .Where(request => request.Id == risId.Id)
+                    .Select(request => request)
+                    .FirstOrDefault()?
+                    .FetchingDate ?? null;
+            }
+
+            await risIdRepository.SaveRisIdsBatchAsync(failedRisIds);
+        }
+        if (journeyBatch.Journeys.Any())
+        {
+            var journeyIds = journeyBatch.Journeys
+                .Select(journey =>
+                {
+                    var datePart = journey.JourneyID.Substring(0, 8);
+                    if (!DateTime.TryParseExact(datePart, "yyyyMMdd", null, System.Globalization.DateTimeStyles.None, out _))
+                        return null;
+
+                    return journey.JourneyID.Substring(9);
+                })
+                .Where(journeyId => journeyId != null)
+                .Select(journeyId => journeyId!)
+                .ToHashSet();
+            var successfulRisIds = risIdBatch
                 .Where(risId => journeyIds.Contains(risId.Id))
                 .ToList();
 
             foreach (var risId in successfulRisIds)
             {
-                var fetchingDate = journeyRequest
+                var fetchingDate = journeyBatchRequest
                     .Where(request => request.Id == risId.Id)
                     .Select(request => request)
                     .FirstOrDefault()?
@@ -106,30 +105,19 @@ public class GatheringJourneysJob(
                 risId.LastSeen = fetchingDate;
                 risId.LastInserted = fetchingDate;
             }
-            await risIdRepository.SaveRisIdsBatchAsync(successfulRisIds);
 
-            var syncAdmins = journeys.Journeys
-                .Select(journey => journey.Info.HeaderAdministration)
-                .Select(administration => mapper.MapAdministration(administration))
-                .ToList();
-            var resolvedAdministrations = await administrationRepository.GetOrCreateAdministrationsAsync(syncAdmins);
-
-            var administrationLookup = resolvedAdministrations.ToDictionary(administration => (administration.AdministrationId, administration.OperatorCode, administration.OperatorName));
-            var mappedJourneys = journeys.Journeys.Select(journey =>
+            var mappedJourneys = journeyBatch.Journeys.Select(journey =>
             {
                 var mappedJourney = mapper.MapJourney(journey);
                 mappedJourney.InsertedAt = currentDate;
-                mappedJourney.Administration = administrationLookup[(
-                    journey.Info.HeaderAdministration.AdministrationID,
-                    journey.Info.HeaderAdministration.OperatorCode,
-                    journey.Info.HeaderAdministration.OperatorName
-                )];
                 return mappedJourney;
             }).ToList();
-            await journeyRepository.SaveJourneysBatchAsync(mappedJourneys);
 
-            logger.LogInformation("Gathered {Count} journeys for {RisIdCount} RisIds.", mappedJourneys.Count, successfulRisIds.Count);
+            await risIdRepository.SaveRisIdsBatchAsync(successfulRisIds);
+            await journeyRepository.SaveJourneyBatchAsync(mappedJourneys);
         }
+
+        logger.LogInformation("Finished gathering journeys. {RisIdsCount} RisIds of which {JourneysCount} had journeys", risIdBatch.Count(), journeyBatch.Journeys.Count());
     }
 
     private DateTime EstimateLastQueried(RisId risId)

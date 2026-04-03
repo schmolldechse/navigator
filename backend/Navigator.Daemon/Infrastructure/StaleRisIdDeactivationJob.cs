@@ -8,6 +8,7 @@ using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
 
+[DisallowConcurrentExecution]
 public class StaleRisIdDeactivationJob(
     IRisIdRepository risIdRepository,
     IJourneyRepository journeyRepository,
@@ -29,7 +30,7 @@ public class StaleRisIdDeactivationJob(
             OrderBy = RisIdOrder.Random
         })).ToList();
         if (!risIds.Any()) return;
-        logger.LogInformation($"Fetched {risIds.Count} stale RisIds for deactivation check.");
+        logger.LogInformation("Fetched {StaleRisIdCount} stale RisIds for deactivation check.", risIds.Count);
 
         // 2. check Journey occurences for each RisId
         var occuredJourneyIds = new HashSet<string>();
@@ -40,7 +41,7 @@ public class StaleRisIdDeactivationJob(
                 Id = risId.Id,
                 FetchingDate = risId.LastSeen!.Value.Date.AddDays(dayOffset)
             });
-            var journeyBatch = await journeyRepository.GetJourneysBatchAsync(journeyRequest);
+            var journeyBatch = await journeyRepository.GetJourneyBatchAsync(journeyRequest);
             if (journeyBatch is null) return;
 
             foreach (var journey in journeyBatch.Journeys)
@@ -50,12 +51,12 @@ public class StaleRisIdDeactivationJob(
                 occuredJourneyIds.Add(parsedJourneyId);
             }
 
-            logger.LogInformation($"Checked journeys for batch {dayOffset + 3}: {journeyBatch.Journeys.Count} journeys found.");
+            logger.LogInformation("Checked journeys for batch {BatchIndex}: {JourneyCount} journeys found.", dayOffset + 3, journeyBatch.Journeys.Count);
             if (dayOffset < 7) await Task.Delay(3000);
         }
 
         // 3. deacivate RisIds
-        logger.LogInformation($"Found {occuredJourneyIds.Count} unique journeys. Beginning with deactivation of stale RIS IDs.");
+        logger.LogInformation("Found {UniqueJourneyCount} unique journeys. Beginning with deactivation of stale RIS IDs.", occuredJourneyIds.Count);
 
         var risIdsToDeactivate = risIds.Where(risId => !occuredJourneyIds.Contains(risId.Id)).ToList();
         foreach (var risId in risIdsToDeactivate)
@@ -67,7 +68,7 @@ public class StaleRisIdDeactivationJob(
         else
         {
             await risIdRepository.SaveRisIdsBatchAsync(risIdsToDeactivate);
-            logger.LogInformation($"Deactivated {risIdsToDeactivate.Count} RisIds.");
+            logger.LogInformation("Deactivated {DeactivatedRisIdCount} RisIds.", risIdsToDeactivate.Count);
         }
     }
 }

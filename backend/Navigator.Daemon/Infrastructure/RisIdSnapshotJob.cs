@@ -1,10 +1,15 @@
-﻿using Navigator.Data.Entities.Statistics;
+﻿using Microsoft.Extensions.Logging;
+using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Repository.StatisticsRepository;
 using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
 
-public class RisIdSnapshotJob(IStatisticsRepository statisticsRepository) : IJob
+[DisallowConcurrentExecution]
+public class RisIdSnapshotJob(
+    ILogger<RisIdSnapshotJob> logger,
+    IStatisticsRepository statisticsRepository
+) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
@@ -17,5 +22,6 @@ public class RisIdSnapshotJob(IStatisticsRepository statisticsRepository) : IJob
             Active = result.Value.Active,
             Inactive = result.Value.Inactive
         });
+        logger.LogInformation("Estimated active RisIds: {ActiveCount}, inactive RisIds: {InactiveCount}.", result.Value.Active, result.Value.Inactive);
     }
 }

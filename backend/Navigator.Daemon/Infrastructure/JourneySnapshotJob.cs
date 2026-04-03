@@ -1,10 +1,15 @@
 ﻿using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Repository.StatisticsRepository;
+using Microsoft.Extensions.Logging;
 using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
 
-public class JourneySnapshotJob(IStatisticsRepository statisticsRepository) : IJob
+[DisallowConcurrentExecution]
+public class JourneySnapshotJob(
+    ILogger<JourneySnapshotJob> logger,
+    IStatisticsRepository statisticsRepository
+) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
@@ -16,5 +21,7 @@ public class JourneySnapshotJob(IStatisticsRepository statisticsRepository) : IJ
             MeasuredAt = DateTime.UtcNow,
             Total = result.Value
         });
+
+        logger.LogInformation("Estimated journey count: {JourneyCount}.", result.Value);
     }
 }

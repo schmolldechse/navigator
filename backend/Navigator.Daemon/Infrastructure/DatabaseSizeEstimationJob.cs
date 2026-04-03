@@ -1,20 +1,26 @@
 ﻿using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Repository.StatisticsRepository;
+using Microsoft.Extensions.Logging;
 using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
 
-public class DatabaseSizeEstimationJob(IStatisticsRepository statisticsRepository) : IJob
+[DisallowConcurrentExecution]
+public class DatabaseSizeEstimationJob(
+    ILogger<DatabaseSizeEstimationJob> logger,
+    IStatisticsRepository statisticsRepository
+) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
         var result = await statisticsRepository.EstimateCurrentDatabaseSizeAsync();
-        if (!result.HasValue) return;
 
         await statisticsRepository.SaveDatabaseSizeAsync(new DatabaseSize()
         {
             MeasuredAt = DateTime.UtcNow,
             SizeInBytes = result.Value
         });
+
+        logger.LogInformation("Estimated database size: {DatabaseSizeBytes} bytes.", result.Value);
     }
 }
