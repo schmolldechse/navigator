@@ -91,6 +91,9 @@ public class JourneyRepository(
             .ToList();
         if (!toInsert.Any()) return;
 
+        var currentTime = DateTime.UtcNow;
+        toInsert.ForEach(journey => journey.InsertedAt = currentTime);
+
         // extract unique incoming Administrations
         var administrations = toInsert
             .Select(journey => journey.Administration!)

@@ -106,12 +106,7 @@ public class GatheringJourneysJob(
                 risId.LastInserted = fetchingDate;
             }
 
-            var mappedJourneys = journeyBatch.Journeys.Select(journey =>
-            {
-                var mappedJourney = mapper.MapJourney(journey);
-                mappedJourney.InsertedAt = currentDate;
-                return mappedJourney;
-            }).ToList();
+            var mappedJourneys = journeyBatch.Journeys.Select(journey => mapper.MapJourney(journey)).ToList();
 
             await risIdRepository.SaveRisIdsBatchAsync(successfulRisIds);
             await journeyRepository.SaveJourneyBatchAsync(mappedJourneys);
