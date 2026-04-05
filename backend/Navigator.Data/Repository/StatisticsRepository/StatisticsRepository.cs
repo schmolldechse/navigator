@@ -55,7 +55,7 @@ public class StatisticsRepository(
 
     private async Task<MetricSeries> GetDatabaseSizeMetricsAsync(DatabaseSizeSnapshotMetricRequest request)
     {
-        var dataPoints = await dataContext.DatabaseSizes
+        var dataPoints = await dataContext.DatabaseSizeSnapshots
             .AsNoTracking()
             .Where(snapshot => snapshot.MeasuredAt >= request.Start.UtcDateTime && snapshot.MeasuredAt <= request.End.UtcDateTime)
             .OrderBy(snapshot => snapshot.MeasuredAt)
@@ -343,21 +343,21 @@ public class StatisticsRepository(
         };
     }
 
-    public async Task SaveDatabaseSizeAsync(DatabaseSize databaseSize)
+    public async Task SaveDatabaseSizeAsync(DatabaseSizeSnapshot snapshot)
     {
-        await dataContext.DatabaseSizes.AddAsync(databaseSize);
+        await dataContext.DatabaseSizeSnapshots.AddAsync(snapshot);
         await dataContext.SaveChangesAsync();
     }
 
-    public async Task SaveRisIdSnapshotAsync(RisIdSnapshot risIdSnapshot)
+    public async Task SaveRisIdSnapshotAsync(RisIdSnapshot snapshot)
     {
-        await dataContext.RisIdSnapshots.AddAsync(risIdSnapshot);
+        await dataContext.RisIdSnapshots.AddAsync(snapshot);
         await dataContext.SaveChangesAsync();
     }
 
-    public async Task SaveJourneySnapshotAsync(JourneySnapshot journeySnapshot)
+    public async Task SaveJourneySnapshotAsync(JourneySnapshot snapshot)
     {
-        await dataContext.JourneySnapshots.AddAsync(journeySnapshot);
+        await dataContext.JourneySnapshots.AddAsync(snapshot);
         await dataContext.SaveChangesAsync();
     }
 }

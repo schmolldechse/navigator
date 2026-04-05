@@ -28,15 +28,13 @@ public static class Injection
                 npgsqlOptions.MapEnum<TransportType>("transport_type", "core");
                 npgsqlOptions.MapEnum<TimeType>("time_type", "core");
                 npgsqlOptions.MapEnum<MessageType>("message_type", "core");
-                npgsqlOptions.MapEnum<MessageReferenceType>("message_reference_type", "core");
                 npgsqlOptions.MapEnum<JourneyType>("journey_type", "core");
             }));
 
         services.AddHttpClient();
         services.AddSingleton<ProxyHttpClientFactory>();
 
-        services
-            .AddTransient<IJourneyRepository, JourneyRepository>()
+        services.AddTransient<IJourneyRepository, JourneyRepository>()
             .AddTransient<IRisIdRepository, RisIdRepository>()
             .AddTransient<IStationRepository, StationRepository>()
             .AddTransient<IStationRilRepository, StationRilRepository>()

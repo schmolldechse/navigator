@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260307235650_addStationGeoIndex")]
-    partial class addStationGeoIndex
+    [Migration("20260405184821_AddStationGeoIndex")]
+    partial class AddStationGeoIndex
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,6 @@ namespace Navigator.Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "journey_type", new[] { "EXTRA", "REGULAR", "RELIEF", "REPLACEMENT" });
-            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "message_reference_type", new[] { "ATTACHMENT", "IMAGE", "LINK" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "message_type", new[] { "ATTRIBUTE", "DISRUPTION", "NOTE", "RIS_CAUSE", "RIS_QUALITY_DEVIATION" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "schedule_type", new[] { "ARRIVAL", "DEPARTURE" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "time_type", new[] { "PREVIEW", "REAL", "SCHEDULE" });
@@ -64,7 +63,10 @@ namespace Navigator.Data.Migrations
                     b.HasIndex("AdministrationId", "OperatorCode", "OperatorName")
                         .IsUnique();
 
-                    b.ToTable("journey_administrations", "core");
+                    b.ToTable("journey_administrations", "core", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Journey", b =>
@@ -74,6 +76,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("character varying(82)")
                         .HasColumnName("id");
 
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
+
                     b.Property<Guid>("AdministrationId")
                         .HasColumnType("uuid")
                         .HasColumnName("administration_id");
@@ -81,10 +87,6 @@ namespace Navigator.Data.Migrations
                     b.Property<bool>("Cancelled")
                         .HasColumnType("boolean")
                         .HasColumnName("cancelled");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date")
-                        .HasColumnName("date");
 
                     b.Property<DateTime>("InsertedAt")
                         .HasColumnType("timestamp with time zone")
@@ -94,21 +96,28 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("core.journey_type")
                         .HasColumnName("journey_type");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "Date");
 
                     b.HasIndex("AdministrationId");
 
                     b.HasIndex("Date");
 
-                    b.ToTable("journeys", "core");
+                    b.ToTable("journeys", "core", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.JourneyStopPlace", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+                    b.Property<string>("JourneyId")
+                        .HasMaxLength(83)
+                        .HasColumnType("character varying(83)")
+                        .HasColumnName("journey_id");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
 
                     b.Property<string>("ActualPlatform")
                         .HasMaxLength(32)
@@ -137,11 +146,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("demand");
 
-                    b.Property<string>("JourneyId")
-                        .IsRequired()
-                        .HasMaxLength(82)
-                        .HasColumnType("character varying(82)")
-                        .HasColumnName("journey_id");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<bool>("NoPassengerChange")
                         .HasColumnType("boolean")
@@ -168,24 +176,24 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("core.time_type")
                         .HasColumnName("time_type");
 
-                    b.HasKey("Id");
+                    b.HasKey("JourneyId", "Date");
 
-                    b.HasIndex("JourneyId");
-
-                    b.HasIndex("StationEvaNumber", "PlannedTime")
-                        .HasDatabaseName("IX_journey_stop_places_station_analytics");
-
-                    NpgsqlIndexBuilderExtensions.IncludeProperties(b.HasIndex("StationEvaNumber", "PlannedTime"), new[] { "JourneyId", "ScheduleType", "Delay", "Cancelled", "Additional", "Demand", "NoPassengerChange", "PlannedPlatform", "ActualPlatform" });
-
-                    b.ToTable("journey_stop_places", "core");
+                    b.ToTable("journey_stop_places", "core", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.JourneyTransport", b =>
                 {
-                    b.Property<string>("Id")
+                    b.Property<string>("JourneyId")
                         .HasMaxLength(82)
                         .HasColumnType("character varying(82)")
                         .HasColumnName("journey_id");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
 
                     b.Property<string>("Category")
                         .IsRequired()
@@ -227,23 +235,26 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("core.transport_type")
                         .HasColumnName("transport_type");
 
-                    b.HasKey("Id");
+                    b.HasKey("JourneyId", "Date");
 
-                    b.HasIndex("JourneyDescription");
+                    b.HasIndex("Date");
 
-                    b.HasIndex("Number");
-
-                    b.HasIndex("TransportType");
-
-                    b.ToTable("journey_transports", "core");
+                    b.ToTable("journey_transports", "core", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Message.JourneyMessage", b =>
                 {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+                    b.Property<string>("JourneyId")
+                        .HasMaxLength(83)
+                        .HasColumnType("character varying(83)")
+                        .HasColumnName("journey_id");
+
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
 
                     b.Property<string>("Code")
                         .HasMaxLength(64)
@@ -260,11 +271,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("disruption_effect");
 
-                    b.Property<string>("JourneyId")
-                        .IsRequired()
-                        .HasMaxLength(82)
-                        .HasColumnType("character varying(82)")
-                        .HasColumnName("journey_id");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<string>("NoteCategory")
                         .HasMaxLength(128)
@@ -285,43 +295,12 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("core.message_type")
                         .HasColumnName("message_type");
 
-                    b.HasKey("Id");
+                    b.HasKey("JourneyId", "Date");
 
-                    b.HasIndex("JourneyId");
-
-                    b.HasIndex("Type");
-
-                    b.ToTable("journey_messages", "core");
-                });
-
-            modelBuilder.Entity("Navigator.Data.Entities.Journey.Message.JourneyMessageReference", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
-
-                    b.Property<string>("Label")
-                        .HasColumnType("text")
-                        .HasColumnName("label");
-
-                    b.Property<Guid>("MessageId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("message_id");
-
-                    b.Property<MessageReferenceType>("ReferenceType")
-                        .HasColumnType("core.message_reference_type")
-                        .HasColumnName("message_reference_type");
-
-                    b.Property<string>("Url")
-                        .HasColumnType("text")
-                        .HasColumnName("url");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MessageId");
-
-                    b.ToTable("journey_message_references", "core");
+                    b.ToTable("journey_messages", "core", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Message.JourneyStopPlaceMessage", b =>
@@ -334,14 +313,23 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("journey_message_id");
 
-                    b.HasKey("StopPlaceId", "MessageId");
+                    b.Property<DateOnly>("Date")
+                        .HasColumnType("date")
+                        .HasColumnName("date");
 
-                    b.HasIndex("MessageId");
+                    b.HasKey("StopPlaceId", "MessageId", "Date");
 
-                    b.ToTable("journey_stop_place_messages", "core");
+                    b.HasIndex("MessageId", "Date");
+
+                    b.HasIndex("StopPlaceId", "Date");
+
+                    b.ToTable("journey_stop_place_messages", "core", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.RisId.RisId", b =>
+            modelBuilder.Entity("Navigator.Data.Entities.RisId", b =>
                 {
                     b.Property<string>("Id")
                         .HasMaxLength(73)
@@ -421,12 +409,10 @@ namespace Navigator.Data.Migrations
 
             modelBuilder.Entity("Navigator.Data.Entities.Station.StationRil100", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int>("EvaNumber")
                         .HasColumnType("integer")
@@ -439,19 +425,18 @@ namespace Navigator.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EvaNumber");
+                    b.HasIndex("EvaNumber", "Ril100Code")
+                        .IsUnique();
 
                     b.ToTable("station_ril100", "core");
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Station.StationTransport", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
+                        .HasColumnType("uuid")
                         .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean")
@@ -473,7 +458,7 @@ namespace Navigator.Data.Migrations
                     b.ToTable("station_transports", "core");
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.Statistics.DatabaseSize", b =>
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.DatabaseSizeSnapshot", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -492,7 +477,7 @@ namespace Navigator.Data.Migrations
 
                     b.HasIndex("MeasuredAt");
 
-                    b.ToTable("database_size", "statistics");
+                    b.ToTable("database_size_snapshots", "statistics");
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Statistics.JourneySnapshot", b =>
@@ -514,7 +499,7 @@ namespace Navigator.Data.Migrations
 
                     b.HasIndex("MeasuredAt");
 
-                    b.ToTable("journey_snapshot", "statistics");
+                    b.ToTable("journey_snapshots", "statistics");
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Statistics.RisIdSnapshot", b =>
@@ -540,7 +525,53 @@ namespace Navigator.Data.Migrations
 
                     b.HasIndex("MeasuredAt");
 
-                    b.ToTable("risid_snapshot", "statistics");
+                    b.ToTable("risid_snapshots", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.HourlyStationSnapshot", b =>
+                {
+                    b.Property<int>("ArrivalCancellationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_cancellation_count");
+
+                    b.Property<int>("ArrivalCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_count");
+
+                    b.Property<double>("ArrivalDelaySum")
+                        .HasColumnType("double precision")
+                        .HasColumnName("arrival_delay_sum");
+
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<int>("DepartureCancellationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_cancellation_count");
+
+                    b.Property<int>("DepartureCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_count");
+
+                    b.Property<double>("DepartureDelaySum")
+                        .HasColumnType("double precision")
+                        .HasColumnName("departure_delay_sum");
+
+                    b.Property<int>("EvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("eva_number");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("hourly_station_snapshots", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("hourly_station_snapshots", "statistics");
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Journey", b =>
@@ -548,7 +579,7 @@ namespace Navigator.Data.Migrations
                     b.HasOne("Navigator.Data.Entities.Journey.Administration", "Administration")
                         .WithMany()
                         .HasForeignKey("AdministrationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Administration");
@@ -558,7 +589,7 @@ namespace Navigator.Data.Migrations
                 {
                     b.HasOne("Navigator.Data.Entities.Journey.Journey", "Journey")
                         .WithMany("StopPlaces")
-                        .HasForeignKey("JourneyId")
+                        .HasForeignKey("JourneyId", "Date")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -569,7 +600,7 @@ namespace Navigator.Data.Migrations
                 {
                     b.HasOne("Navigator.Data.Entities.Journey.Journey", "Journey")
                         .WithOne("Transport")
-                        .HasForeignKey("Navigator.Data.Entities.Journey.JourneyTransport", "Id")
+                        .HasForeignKey("Navigator.Data.Entities.Journey.JourneyTransport", "JourneyId", "Date")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -580,35 +611,26 @@ namespace Navigator.Data.Migrations
                 {
                     b.HasOne("Navigator.Data.Entities.Journey.Journey", "Journey")
                         .WithMany("Messages")
-                        .HasForeignKey("JourneyId")
+                        .HasForeignKey("JourneyId", "Date")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Journey");
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.Journey.Message.JourneyMessageReference", b =>
-                {
-                    b.HasOne("Navigator.Data.Entities.Journey.Message.JourneyMessage", "Message")
-                        .WithMany("References")
-                        .HasForeignKey("MessageId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Message");
-                });
-
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Message.JourneyStopPlaceMessage", b =>
                 {
                     b.HasOne("Navigator.Data.Entities.Journey.Message.JourneyMessage", "Message")
                         .WithMany("JourneyStopPlaceMessages")
-                        .HasForeignKey("MessageId")
+                        .HasForeignKey("MessageId", "Date")
+                        .HasPrincipalKey("Id", "Date")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Navigator.Data.Entities.Journey.JourneyStopPlace", "StopPlace")
                         .WithMany("Messages")
-                        .HasForeignKey("StopPlaceId")
+                        .HasForeignKey("StopPlaceId", "Date")
+                        .HasPrincipalKey("Id", "Date")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -657,8 +679,6 @@ namespace Navigator.Data.Migrations
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Message.JourneyMessage", b =>
                 {
                     b.Navigation("JourneyStopPlaceMessages");
-
-                    b.Navigation("References");
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Station.Station", b =>

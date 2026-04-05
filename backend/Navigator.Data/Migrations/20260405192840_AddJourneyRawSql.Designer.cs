@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Navigator.Data;
 using Navigator.Data.Enums;
@@ -12,9 +13,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20260405192840_AddJourneyRawSql")]
+    partial class AddJourneyRawSql
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,8 +31,8 @@ namespace Navigator.Data.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "transport_type", new[] { "BIKE", "BUS", "CAR", "CITY_TRAIN", "FERRY", "FLIGHT", "HIGH_SPEED_TRAIN", "INTERCITY_TRAIN", "INTER_REGIONAL_TRAIN", "REGIONAL_TRAIN", "SCOOTER", "SHUTTLE", "SUBWAY", "TAXI", "TRAM", "UNKNOWN", "WALK" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "cube");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "earthdistance");
-            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "partman", "pg_partman");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_cron");
+            NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "pg_partman");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Administration", b =>
@@ -99,6 +102,8 @@ namespace Navigator.Data.Migrations
 
                     b.HasIndex("AdministrationId");
 
+                    b.HasIndex("Date");
+
                     b.ToTable("journeys", "core", t =>
                         {
                             t.ExcludeFromMigrations();
@@ -108,8 +113,8 @@ namespace Navigator.Data.Migrations
             modelBuilder.Entity("Navigator.Data.Entities.Journey.JourneyStopPlace", b =>
                 {
                     b.Property<string>("JourneyId")
-                        .HasMaxLength(82)
-                        .HasColumnType("character varying(82)")
+                        .HasMaxLength(83)
+                        .HasColumnType("character varying(83)")
                         .HasColumnName("journey_id");
 
                     b.Property<DateOnly>("Date")
@@ -234,6 +239,8 @@ namespace Navigator.Data.Migrations
 
                     b.HasKey("JourneyId", "Date");
 
+                    b.HasIndex("Date");
+
                     b.ToTable("journey_transports", "core", t =>
                         {
                             t.ExcludeFromMigrations();
@@ -243,8 +250,8 @@ namespace Navigator.Data.Migrations
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Message.JourneyMessage", b =>
                 {
                     b.Property<string>("JourneyId")
-                        .HasMaxLength(82)
-                        .HasColumnType("character varying(82)")
+                        .HasMaxLength(83)
+                        .HasColumnType("character varying(83)")
                         .HasColumnName("journey_id");
 
                     b.Property<DateOnly>("Date")

@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Navigator.Data.Entities.RisId;
+using Navigator.Data.Entities;
 using Navigator.Data.Enums;
 using Navigator.Data.Models.RisId;
 
