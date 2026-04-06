@@ -9,7 +9,7 @@ public class JourneyMessageConfiguration : IEntityTypeConfiguration<JourneyMessa
     public void Configure(EntityTypeBuilder<JourneyMessage> builder)
     {
         builder.ToTable("journey_messages", "core", table => table.ExcludeFromMigrations());
-        builder.HasKey(message => new { message.JourneyId, message.Date });
+        builder.HasKey(message => new { message.Id, message.Date });
 
         builder.Property(message => message.Id).ValueGeneratedOnAdd();
         builder.Property(message => message.JourneyId)

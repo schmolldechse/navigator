@@ -9,7 +9,7 @@ public class JourneyStopPlaceConfiguration : IEntityTypeConfiguration<JourneySto
     public void Configure(EntityTypeBuilder<JourneyStopPlace> builder)
     {
         builder.ToTable("journey_stop_places", "core", table => table.ExcludeFromMigrations());
-        builder.HasKey(stopPlace => new { stopPlace.JourneyId, stopPlace.Date });
+        builder.HasKey(stopPlace => new { stopPlace.Id, stopPlace.Date });
 
         builder.Property(stopPlace => stopPlace.Id).ValueGeneratedOnAdd();
         builder.Property(stopPlace => stopPlace.JourneyId)

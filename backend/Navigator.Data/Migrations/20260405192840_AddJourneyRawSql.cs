@@ -111,8 +111,7 @@ namespace Navigator.Data.Migrations
                             delay integer GENERATED ALWAYS AS (EXTRACT(EPOCH FROM (actual_time - planned_time))::integer) STORED,
                             planned_platform character varying(32),
                             actual_platform character varying(32),
-                            CONSTRAINT PK_journey_stop_places PRIMARY KEY (journey_id, date),
-                            CONSTRAINT UK_journey_stop_places_principal UNIQUE (id, date),
+                            CONSTRAINT PK_journey_stop_places PRIMARY KEY (id, date),
                             CONSTRAINT FK_journey_stop_places_journeys FOREIGN KEY (journey_id, date) REFERENCES core.journeys (id, date) ON DELETE CASCADE
                         ) PARTITION BY RANGE (date);");
 
@@ -132,14 +131,13 @@ namespace Navigator.Data.Migrations
                             journey_id character varying(82) NOT NULL,
                             date date NOT NULL,
                             message_type core.message_type NOT NULL,
-                            code character varying(64) NOT NULL,
-                            text character varying(2048) NOT NULL,
-                            text_short character varying(2048) NOT NULL,
+                            code character varying(64),
+                            text character varying(2048),
+                            text_short character varying(2048),
                             disruption_cause character varying(128),
                             disruption_effect character varying(128),
                             note_category character varying(128),
                             CONSTRAINT PK_journey_messages PRIMARY KEY (id, date),
-                            CONSTRAINT UK_journey_messages_principal UNIQUE (id, date),
                             CONSTRAINT FK_journey_messages_journeys FOREIGN KEY (journey_id, date) REFERENCES core.journeys (id, date) ON DELETE CASCADE
                         ) PARTITION BY RANGE (date);");
 

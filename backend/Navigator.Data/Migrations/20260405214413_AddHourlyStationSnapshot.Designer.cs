@@ -110,10 +110,10 @@ namespace Navigator.Data.Migrations
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.JourneyStopPlace", b =>
                 {
-                    b.Property<string>("JourneyId")
-                        .HasMaxLength(82)
-                        .HasColumnType("character varying(82)")
-                        .HasColumnName("journey_id");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date")
@@ -146,10 +146,11 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("demand");
 
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+                    b.Property<string>("JourneyId")
+                        .IsRequired()
+                        .HasMaxLength(82)
+                        .HasColumnType("character varying(82)")
+                        .HasColumnName("journey_id");
 
                     b.Property<bool>("NoPassengerChange")
                         .HasColumnType("boolean")
@@ -176,7 +177,9 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("core.time_type")
                         .HasColumnName("time_type");
 
-                    b.HasKey("JourneyId", "Date");
+                    b.HasKey("Id", "Date");
+
+                    b.HasIndex("JourneyId", "Date");
 
                     b.ToTable("journey_stop_places", "core", t =>
                         {
@@ -245,10 +248,10 @@ namespace Navigator.Data.Migrations
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Message.JourneyMessage", b =>
                 {
-                    b.Property<string>("JourneyId")
-                        .HasMaxLength(82)
-                        .HasColumnType("character varying(82)")
-                        .HasColumnName("journey_id");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
 
                     b.Property<DateOnly>("Date")
                         .HasColumnType("date")
@@ -269,10 +272,11 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("character varying(128)")
                         .HasColumnName("disruption_effect");
 
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id");
+                    b.Property<string>("JourneyId")
+                        .IsRequired()
+                        .HasMaxLength(82)
+                        .HasColumnType("character varying(82)")
+                        .HasColumnName("journey_id");
 
                     b.Property<string>("NoteCategory")
                         .HasMaxLength(128)
@@ -293,7 +297,9 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("core.message_type")
                         .HasColumnName("message_type");
 
-                    b.HasKey("JourneyId", "Date");
+                    b.HasKey("Id", "Date");
+
+                    b.HasIndex("JourneyId", "Date");
 
                     b.ToTable("journey_messages", "core", t =>
                         {
@@ -621,14 +627,12 @@ namespace Navigator.Data.Migrations
                     b.HasOne("Navigator.Data.Entities.Journey.Message.JourneyMessage", "Message")
                         .WithMany("JourneyStopPlaceMessages")
                         .HasForeignKey("MessageId", "Date")
-                        .HasPrincipalKey("Id", "Date")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Navigator.Data.Entities.Journey.JourneyStopPlace", "StopPlace")
                         .WithMany("Messages")
                         .HasForeignKey("StopPlaceId", "Date")
-                        .HasPrincipalKey("Id", "Date")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
