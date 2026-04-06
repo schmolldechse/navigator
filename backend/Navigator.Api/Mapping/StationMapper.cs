@@ -42,19 +42,19 @@ public partial class StationMapper
         return station;
     }
 
-    public static TransportType MapVendoProduct(string? sourceProduct) => sourceProduct.ToUpperInvariant() switch
+    public static TransportType MapVendoProduct(string? sourceProduct) => sourceProduct?.ToUpperInvariant() switch
     {
         "HOCHGESCHWINDIGKEITSZUEGE" => TransportType.HighSpeedTrain,
         "INTERCITYUNDEUROCITYZUEGE" => TransportType.IntercityTrain,
-        "INTERREGIOUNDSCHNELLZUEGE" => Navigator.Data.Enums.TransportType.InterRegionalTrain,
-        "NAHVERKEHRSONSTIGEZUEGE" => Navigator.Data.Enums.TransportType.RegionalTrain,
-        "SBAHNEN" => Navigator.Data.Enums.TransportType.CityTrain,
-        "UBAHN" => Navigator.Data.Enums.TransportType.Subway,
-        "STRASSENBAHN" => Navigator.Data.Enums.TransportType.Tram,
-        "BUSSE" => Navigator.Data.Enums.TransportType.Bus,
-        "SCHIFFE" => Navigator.Data.Enums.TransportType.Ferry,
-        "TAXI" => Navigator.Data.Enums.TransportType.Taxi,
-        "ANRUFPFLICHTIGEVERKEHRE" => Navigator.Data.Enums.TransportType.Shuttle,
+        "INTERREGIOUNDSCHNELLZUEGE" => TransportType.InterRegionalTrain,
+        "NAHVERKEHRSONSTIGEZUEGE" => TransportType.RegionalTrain,
+        "SBAHNEN" => TransportType.CityTrain,
+        "UBAHN" => TransportType.Subway,
+        "STRASSENBAHN" => TransportType.Tram,
+        "BUSSE" => TransportType.Bus,
+        "SCHIFFE" => TransportType.Ferry,
+        "TAXI" => TransportType.Taxi,
+        "ANRUFPFLICHTIGEVERKEHRE" => TransportType.Shuttle,
         _ => throw new MappingException($"Value '{sourceProduct}' is not valid to be mapped for TransportType.")
     };
     #endregion

@@ -1,20 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Navigator.Data.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using Navigator.Data.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Navigator.Data.Entities.RisId;
+namespace Navigator.Data.Entities;
 
-[Table("ris_ids", Schema = "core")]
-[Index(nameof(Active), nameof(LastSeen))]
-[Index(nameof(Active), nameof(DiscoveredAt), nameof(LastInserted))]
 public class RisId
 {
-    /// Format: {UUID}-{UUID}
-    /// Keep in mind that the second UUID is optional. In most cases it is only {UUID}.
-    [Key]
+    // The format of a RIS ID is a UUID. In some cases, two UUIDs are concatenated together, separated by a hyphen.
     [Column("id")]
-    [MaxLength(73)]
     public required string Id { get; set; }
 
     [Column("transport_type")]

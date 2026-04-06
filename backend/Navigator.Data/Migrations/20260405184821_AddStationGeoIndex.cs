@@ -5,7 +5,7 @@
 namespace Navigator.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class addStationGeoIndex : Migration
+    public partial class AddStationGeoIndex : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

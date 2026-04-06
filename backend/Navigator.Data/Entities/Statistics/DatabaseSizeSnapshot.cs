@@ -2,7 +2,7 @@
 
 namespace Navigator.Data.Entities.Statistics;
 
-public class JourneySnapshot
+public class DatabaseSizeSnapshot
 {
     [Column("id")]
     public Guid Id { get; set; }
@@ -10,6 +10,6 @@ public class JourneySnapshot
     [Column("measured_at")]
     public required DateTime MeasuredAt { get; set; }
 
-    [Column("total")]
-    public required int Total { get; set; }
+    [Column("size_in_bytes")]
+    public required long SizeInBytes { get; set; }
 }

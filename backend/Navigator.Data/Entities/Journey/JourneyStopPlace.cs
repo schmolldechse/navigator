@@ -1,24 +1,21 @@
-﻿using Navigator.Data.Entities.Journey.Message;
+using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Enums;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Navigator.Data.Entities.Journey;
 
-[Table("journey_stop_places", Schema = "core")]
 public class JourneyStopPlace
 {
-    [Key]
     [Column("id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; set; }
+    public virtual Guid Id { get; set; }
 
     [Column("journey_id")]
-    [MaxLength(82)]
     public required string JourneyId { get; set; }
 
-    [ForeignKey(nameof(JourneyId))]
     public virtual Journey? Journey { get; set; }
+
+    [Column("date")]
+    public required DateOnly Date { get; set; }
 
     [Column("schedule_type")]
     public required ScheduleType ScheduleType { get; set; }
@@ -48,14 +45,11 @@ public class JourneyStopPlace
     public required TimeType TimeType { get; set; }
 
     [Column("delay")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
     public int Delay { get; private init; }
 
-    [MaxLength(32)]
     [Column("planned_platform")]
     public string? PlannedPlatform { get; set; }
 
-    [MaxLength(32)]
     [Column("actual_platform")]
     public string? ActualPlatform { get; set; }
 

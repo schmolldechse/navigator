@@ -1,18 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Navigator.Data.Enums;
-using System.ComponentModel.DataAnnotations;
+﻿using Navigator.Data.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Navigator.Data.Entities.Station;
 
-[Table("station_transports", Schema = "core")]
-[Index(nameof(EvaNumber), nameof(TransportType), IsUnique = true)]
 public class StationTransport
 {
-    [Key]
     [Column("id")]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
+    public virtual Guid Id { get; set; }
 
     [Column("eva_number")]
     public required int EvaNumber { get; set; }

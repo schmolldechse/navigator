@@ -1,23 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
 using Navigator.Data.Enums;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Navigator.Data.Entities.Journey;
 
-[Table("journey_transports", Schema = "core")]
-[Index(nameof(TransportType))]
-[Index(nameof(JourneyDescription))]
-[Index(nameof(Number))]
 public class JourneyTransport
 {
-    [Key]
     [Column("journey_id")]
-    [MaxLength(82)]
-    public required string Id { get; set; }
+    public required string JourneyId { get; set; }
 
-    [ForeignKey(nameof(Id))]
-    public Journey? Journey { get; set; }
+    public virtual Journey? Journey { get; set; }
+
+    [Column("date")]
+    public required DateOnly Date { get; set; }
 
     [Column("transport_type")]
     public required TransportType TransportType { get; set; }
@@ -25,19 +19,15 @@ public class JourneyTransport
     [Column("replacement_transport_type")]
     public TransportType? ReplacementTransportType { get; set; }
 
-    [MaxLength(64)]
     [Column("category")]
     public required string Category { get; set; }
 
-    [MaxLength(64)]
     [Column("category_internal")]
     public required string CategoryInternal { get; set; }
 
-    [MaxLength(64)]
     [Column("journey_description")]
     public required string JourneyDescription { get; set; }
 
-    [MaxLength(64)]
     [Column("label")]
     public required string Label { get; set; }
 

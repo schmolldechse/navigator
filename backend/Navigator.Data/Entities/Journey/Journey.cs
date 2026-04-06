@@ -1,18 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Enums;
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Navigator.Data.Entities.Journey;
 
-[Table("journeys", Schema = "core")]
-[Index(nameof(Date))]
 public class Journey
 {
-    [Key]
     [Column("id")]
-    [MaxLength(82)]
     public required string Id { get; set; }
 
     [Column("date")]
@@ -24,7 +17,6 @@ public class Journey
     [Column("administration_id")]
     public required Guid AdministrationId { get; set; }
 
-    [ForeignKey(nameof(AdministrationId))]
     public virtual Administration? Administration { get; set; }
 
     [Column("cancelled")]
@@ -37,5 +29,5 @@ public class Journey
 
     public virtual ICollection<JourneyStopPlace> StopPlaces { get; set; } = [];
 
-    public virtual ICollection<JourneyMessage> Messages { get; set; } = [];
+    public virtual ICollection<Message.JourneyMessage> Messages { get; set; } = [];
 }

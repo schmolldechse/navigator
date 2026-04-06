@@ -1,4 +1,4 @@
-﻿using Navigator.Data.Entities.RisId;
+﻿using Navigator.Data.Entities;
 using Navigator.Data.Models.RisId;
 using System.ComponentModel.DataAnnotations;
 

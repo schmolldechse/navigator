@@ -11,7 +11,7 @@ public interface IStatisticsRepository
 
     Task<MetricSeries> GetMetricAsync(BaseMetricRequest request);
 
-    Task SaveDatabaseSizeAsync(DatabaseSize databaseSize);
-    Task SaveRisIdSnapshotAsync(RisIdSnapshot risIdSnapshot);
-    Task SaveJourneySnapshotAsync(JourneySnapshot journeySnapshot);
+    Task SaveDatabaseSizeAsync(DatabaseSizeSnapshot snapshot);
+    Task SaveRisIdSnapshotAsync(RisIdSnapshot snapshot);
+    Task SaveJourneySnapshotAsync(JourneySnapshot snapshot);
 }
