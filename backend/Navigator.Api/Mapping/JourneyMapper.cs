@@ -229,96 +229,26 @@ public partial class JourneyMapper
 #pragma warning disable RMG076 // Cannot assign null to non-nullable member
     [MapProperty(nameof(RisJourneys.MessageDisruptionCommunication.MessageID), nameof(DisruptionMessage.MessageId))]
     [MapValue(nameof(DisruptionMessage.Key), MessageKey.UNPLANNED_INFO)]
-    [MapValue(nameof(DisruptionMessage.Text), null)]
+    [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.MessageDisruptionCommunication.LangDe.Text), nameof(DisruptionMessage.Text))]
     [MapperIgnoreTarget(nameof(DisruptionMessage.Type))]
     [MapProperty(nameof(RisJourneys.MessageDisruptionCommunication.Cause), nameof(DisruptionMessage.Cause))]
     [MapProperty(nameof(RisJourneys.MessageDisruptionCommunication.Effect), nameof(DisruptionMessage.Effect))]
     [MapProperty(nameof(RisJourneys.MessageDisruptionCommunication.DisruptionID), nameof(DisruptionMessage.DisruptionId))]
-    [MapValue(nameof(DisruptionMessage.TextShort), null)]
-    [MapValue(nameof(DisruptionMessage.References), null)]
-    private partial DisruptionMessage MapMessageDisruptionInternal(RisJourneys.MessageDisruptionCommunication source);
+    [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.MessageDisruptionCommunication.LangDe.TextShort), nameof(DisruptionMessage.TextShort))]
+    public partial DisruptionMessage MapMessageDisruption(RisJourneys.MessageDisruptionCommunication source);
 #pragma warning restore RMG076 // Cannot assign null to non-nullable member
-
-    [UserMapping(Default = true)]
-    public DisruptionMessage MapMessageDisruption(RisJourneys.MessageDisruptionCommunication source)
-    {
-        var message = MapMessageDisruptionInternal(source);
-
-        message.Text = source.LangDe?.Text;
-        message.TextShort = source.LangDe?.TextShort ?? null;
-
-        var references = new List<JourneyMessageReference>();
-        references.AddRange((source.LangDe?.Links ?? []).Select(link => new JourneyMessageReference
-        {
-            ReferenceType = MessageReferenceType.Link,
-            Url = link.Url,
-            Label = link.Label,
-        }));
-
-        references.AddRange((source.LangDe?.Images ?? []).Select(image => new JourneyMessageReference
-        {
-            ReferenceType = MessageReferenceType.Image,
-            Url = image.Url,
-            Label = image.Label,
-        }));
-
-        references.AddRange((source.LangDe?.Attachments ?? []).Select(attachment => new JourneyMessageReference
-        {
-            ReferenceType = MessageReferenceType.Attachment,
-            Url = attachment.Url,
-            Label = attachment.Label,
-        }));
-
-        message.References = references;
-        return message;
-    }
     #endregion
 
     #region Note
 #pragma warning disable RMG076 // Cannot assign null to non-nullable member
     [MapProperty(nameof(RisJourneys.MessageNote.MessageID), nameof(NoteMessage.MessageId))]
     [MapValue(nameof(NoteMessage.Key), MessageKey.UNPLANNED_INFO)]
-    [MapValue(nameof(NoteMessage.Text), null)]
+    [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.MessageNote.LangDe.Text), nameof(NoteMessage.Text))]
     [MapperIgnoreTarget(nameof(AttributeMessage.Type))]
     [MapProperty(nameof(RisJourneys.MessageNote.Category), nameof(NoteMessage.Category))]
-    [MapValue(nameof(NoteMessage.TextShort), null)]
-    [MapValue(nameof(NoteMessage.References), null)]
-    private partial NoteMessage MapMessageNoteInternal(RisJourneys.MessageNote source);
+    [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.MessageNote.LangDe.TextShort), nameof(NoteMessage.TextShort))]
+    public partial NoteMessage MapMessageNote(RisJourneys.MessageNote source);
 #pragma warning restore RMG076 // Cannot assign null to non-nullable member
-
-    [UserMapping(Default = true)]
-    public NoteMessage MapMessageNote(RisJourneys.MessageNote source)
-    {
-        var message = MapMessageNoteInternal(source);
-
-        message.Text = source.LangDe?.Text;
-        message.TextShort = source.LangDe?.TextShort ?? null;
-
-        var references = new List<JourneyMessageReference>();
-        references.AddRange((source.LangDe?.Links ?? []).Select(link => new JourneyMessageReference
-        {
-            ReferenceType = MessageReferenceType.Link,
-            Url = link.Url,
-            Label = link.Label,
-        }));
-
-        references.AddRange((source.LangDe?.Images ?? []).Select(image => new JourneyMessageReference
-        {
-            ReferenceType = MessageReferenceType.Image,
-            Url = image.Url,
-            Label = image.Label,
-        }));
-
-        references.AddRange((source.LangDe?.Attachments ?? []).Select(attachment => new JourneyMessageReference
-        {
-            ReferenceType = MessageReferenceType.Attachment,
-            Url = attachment.Url,
-            Label = attachment.Label,
-        }));
-
-        message.References = references;
-        return message;
-    }
     #endregion
 
     #region RisCause

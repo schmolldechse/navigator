@@ -15,7 +15,7 @@ public class DatabaseSizeEstimationJob(
     {
         var result = await statisticsRepository.EstimateCurrentDatabaseSizeAsync();
 
-        await statisticsRepository.SaveDatabaseSizeAsync(new DatabaseSize()
+        await statisticsRepository.SaveDatabaseSizeAsync(new DatabaseSizeSnapshot()
         {
             MeasuredAt = DateTime.UtcNow,
             SizeInBytes = result.Value

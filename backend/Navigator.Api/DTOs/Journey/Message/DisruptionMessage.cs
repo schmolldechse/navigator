@@ -17,8 +17,5 @@ public class DisruptionMessage : JourneyMessage
     [JsonPropertyName("textShort")]
     public string? TextShort { get; set; }
 
-    [JsonPropertyName("references")]
-    public IEnumerable<JourneyMessageReference>? References { get; set; }
-
     internal override MessageType Type => MessageType.Disruption;
 }

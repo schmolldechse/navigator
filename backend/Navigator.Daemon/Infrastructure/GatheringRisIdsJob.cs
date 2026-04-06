@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Navigator.Data.Entities.RisId;
+using Navigator.Data.Entities;
 using Navigator.Data.Entities.Station;
 using Navigator.Data.Enums;
 using Navigator.Data.Models.Ris;

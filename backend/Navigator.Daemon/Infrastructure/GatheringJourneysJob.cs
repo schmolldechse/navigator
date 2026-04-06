@@ -1,12 +1,12 @@
 using Navigator.Daemon.Mapping;
 using Microsoft.Extensions.Logging;
-using Navigator.Data.Entities.RisId;
 using Navigator.Data.Enums;
 using Navigator.Data.Models.Journey;
 using Navigator.Data.Models.RisId;
 using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
 using Quartz;
+using Navigator.Data.Entities;
 
 namespace Navigator.Daemon.Infrastructure;
 
