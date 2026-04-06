@@ -1,0 +1,24 @@
+services:
+  navigator-database:
+    build: .
+    container_name: navigator-database
+    volumes:
+      - navigator-database-data:/var/lib/postgresql/18/docker
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-navigator}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-navigator}
+    restart: unless-stopped
+    healthcheck:
+      test:
+        ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: >
+      postgres
+      -c shared_preload_libraries=pg_cron
+      -c cron.database_name=${POSTGRES_DB}
+
+volumes:
+  navigator-database-data:
