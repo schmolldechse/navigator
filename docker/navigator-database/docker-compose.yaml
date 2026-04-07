@@ -11,14 +11,21 @@ services:
     restart: unless-stopped
     healthcheck:
       test:
-        ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-d", "${POSTGRES_DB}"]
+        [
+          "CMD-SHELL",
+          "pg_isready",
+          "-U",
+          "${POSTGRES_USER}",
+          "-d",
+          "${POSTGRES_DB}",
+        ]
       interval: 30s
       timeout: 10s
       retries: 3
     command: >
       postgres
       -c shared_preload_libraries=pg_cron
-      -c cron.database_name=${POSTGRES_DB}
+      -c cron.database_name=${POSTGRES_DB:-navigator}
 
 volumes:
   navigator-database-data:
