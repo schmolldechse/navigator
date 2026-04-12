@@ -4,53 +4,42 @@
 	import type { ClassValue } from "svelte/elements";
 	import Dialog from "../dialog/Dialog.svelte";
 
+	type TimePickerRange = { start: DateTime; end: DateTime };
+	type TimePickerValue = DateTime | TimePickerRange | undefined;
+
 	type Props = {
 		isVisible: boolean;
-		multiSelect?: boolean;
+		isRange?: boolean;
 		min?: DateTime;
 		max?: DateTime;
-		dates: {
-			start: DateTime;
-			end?: DateTime;
-		};
-		onchange: (params: { start: DateTime; end?: DateTime }) => void;
+		value?: TimePickerValue;
+		onchange?: (value: TimePickerValue) => void;
+		closeOnSelect?: boolean;
 		title?: string;
 		class?: ClassValue;
 	};
 	let {
 		isVisible = $bindable(false),
-		multiSelect = false,
+		isRange = false,
 		min,
 		max,
-		dates = $bindable(
-			multiSelect ? { start: DateTime.now(), end: DateTime.now().plus({ day: 1 }) } : { start: DateTime.now() }
-		),
+		value = $bindable(undefined),
 		onchange,
+		closeOnSelect = false,
 		title = "Select Date Range",
 		class: classNames
 	}: Props = $props();
 </script>
 
 <Dialog bind:isVisible {title} class={["absolute right-0 left-auto w-[400px]", classNames]}>
-	<!-- svelte-ignore block_empty -->
-	{#snippet actions()}{/snippet}
-
 	<TimePicker
-		{multiSelect}
+		{isRange}
 		{min}
 		{max}
-		bind:dates
-		onchange={({ start, end }) => {
-			if (!multiSelect) {
-				onchange({ start, end });
-				isVisible = false;
-				return;
-			}
-
-			if (start && end) {
-				onchange({ start, end });
-				isVisible = false;
-			}
+		bind:value
+		onchange={(value: TimePickerValue) => {
+			onchange?.(value);
+			if (closeOnSelect) isVisible = false;
 		}}
 	/>
 </Dialog>

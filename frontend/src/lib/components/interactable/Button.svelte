@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
-	import type { ClassValue } from "svelte/elements";
+	import type { ClassValue, MouseEventHandler } from "svelte/elements";
 
 	type Props = {
-		mode?: "primary" | "secondary" | "destructive";
+		mode?: "primary" | "secondary" | "destructive" | "tertiary";
 		disabled?: boolean;
-		onclick?: (event: MouseEvent) => void;
+		onclick?: MouseEventHandler<HTMLButtonElement> | null | undefined;
 		children: Snippet;
 		class?: ClassValue;
 	};
@@ -18,21 +18,16 @@
 	{disabled}
 	{onclick}
 	class={[
-		"flex items-center justify-center gap-x-2 rounded-lg px-4 py-2 transition-all",
-		disabled && "cursor-not-allowed opacity-50",
-		!disabled && "cursor-pointer",
+		"inline-flex items-center justify-center gap-x-2 rounded-lg px-4 py-2 font-medium transition-colors duration-200",
+		"enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
 
-		// primary
-		mode === "primary" && "bg-accent text-background hover:opacity-90",
-		mode === "primary" && disabled && "bg-accent/50 text-background/50",
-
-		// secondary
-		mode === "secondary" && "bg-muted/70 border-muted-foreground/20 hover:bg-muted-foreground/20 border",
-		mode === "secondary" && disabled && "bg-muted/50 border-muted-foreground/10",
-
-		// destructive
-		mode === "destructive" && "bg-destructive hover:opacity-90",
-		mode === "destructive" && disabled && "bg-destructive/50",
+		mode === "primary" && "bg-accent text-accent-foreground enabled:hover:bg-accent/90 enabled:active:bg-accent/80",
+		mode === "secondary" &&
+			"border-border bg-secondary text-secondary-foreground enabled:hover:bg-secondary/80 enabled:active:bg-secondary/60 border",
+		mode === "destructive" &&
+			"bg-destructive text-destructive-foreground enabled:hover:bg-destructive/90 enabled:active:bg-destructive/80",
+		mode === "tertiary" &&
+			"text-foreground enabled:hover:bg-accent/15 enabled:hover:text-accent enabled:active:bg-accent/25 enabled:active:text-accent bg-transparent",
 
 		className
 	]}

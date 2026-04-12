@@ -1,41 +1,43 @@
+@import "tailwindcss";
+
 @import "@fontsource/roboto-mono/300.css";
 @import "@fontsource/roboto-mono/400.css";
 @import "@fontsource/roboto-mono/500.css";
 @import "@fontsource/roboto-mono/600.css";
 @import "@fontsource/roboto-mono/700.css";
 
-@layer theme, base, components, utilities;
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
-@import "tailwindcss/utilities.css" layer(utilities);
+@source "../node_modules/layerchart/**/*.{svelte,js}";
 
-:root {
-	--background: oklch(0.0969 0 0);
-	--text: oklch(1 0 0);
+@theme {
+	/* Base Colors */
+	--color-background: oklch(0.12 0 0);
+	--color-foreground: oklch(0.98 0 0);
 
-	--accent: oklch(0.8928 0.1828 96.51);
-	--secondary: oklch(0.15 0 0);
+	/* Accent */
+	--color-accent: oklch(0.8928 0.1828 96.51);
+	--color-accent-foreground: oklch(0.12 0 0);
 
-	--muted: oklch(0.2 0 0);
-	--muted-foreground: oklch(0.65 0 0);
-}
+	/* Secondary */
+	--color-secondary: oklch(0.20 0 0);
+	--color-secondary-foreground: oklch(0.98 0 0);
 
-@theme inline {
-	--color-background: var(--background);
-	--color-text: var(--text);
-	--color-accent: var(--accent);
-	--color-secondary: var(--secondary);
-	--color-muted: var(--muted);
-	--color-muted-foreground: var(--muted-foreground);
+	/* Destructive */
+	--color-destructive: oklch(0.55 0.2 25);
+	--color-destructive-foreground: oklch(0.98 0 0);
+
+	/* UI-Borders */
+	--color-border: oklch(0.25 0 0);
+	
+	/* Font */
+	--font-mono: "Roboto Mono", monospace;
 }
 
 @layer base {
 	* {
-		font-family: "Roboto Mono", monospace;
-		font-weight: 400;
+		font-family: var(--font-mono);
 	}
 
 	html {
-		@apply bg-background text-text;
+		@apply bg-background text-foreground antialiased;
 	}
 }

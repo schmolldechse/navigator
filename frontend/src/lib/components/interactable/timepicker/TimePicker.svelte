@@ -1,35 +1,43 @@
 <script lang="ts">
-	import { DateTime } from "luxon";
+	import { DateTime, Info } from "luxon";
 	import ChevronLeft from "@lucide/svelte/icons/chevron-left";
 	import ChevronRight from "@lucide/svelte/icons/chevron-right";
 	import type { ClassValue } from "svelte/elements";
+	import Button from "../Button.svelte";
+
+	type TimePickerRange = { start: DateTime; end: DateTime };
+	type TimePickerValue = DateTime | TimePickerRange | undefined;
 
 	type Props = {
-		multiSelect?: boolean;
+		isRange?: boolean;
 		min?: DateTime;
 		max?: DateTime;
-		dates: {
-			start: DateTime;
-			end?: DateTime;
-		};
-		onchange?: (params: { start: DateTime; end?: DateTime }) => void;
+		value?: TimePickerValue;
+		onchange?: (value: TimePickerValue) => void;
 		class?: ClassValue;
 	};
-	let {
-		multiSelect = false,
-		min,
-		max,
-		dates = $bindable({ start: DateTime.now() }),
-		onchange,
-		class: className
-	}: Props = $props();
+	let { isRange = false, min, max, value = $bindable(undefined), onchange, class: className }: Props = $props();
 
-	let currentMonth: DateTime = $state(dates.start.startOf("month"));
+	let hoveredDate: DateTime | null = $state(null);
 
-	const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+	// tracks the first click of a range selection
+	let partialStart: DateTime | null = $state(null);
+
+	const startDate = $derived.by(() => {
+		if (!isRange) return value as DateTime | undefined;
+		if (partialStart) return partialStart;
+		return (value as TimePickerRange)?.start;
+	});
+	const endDate = $derived.by(() => {
+		if (!isRange) return undefined;
+		if (partialStart) return undefined;
+		return (value as TimePickerRange)?.end;
+	});
+
+	// svelte-ignore state_referenced_locally
+	let currentMonth: DateTime = $state((startDate || DateTime.now()).startOf("month"));
 
 	const canGoBack: boolean = $derived(!min || currentMonth > min.startOf("month"));
-
 	const canGoForward: boolean = $derived(!max || currentMonth < max.startOf("month"));
 
 	const isDayDisabled = (day: DateTime): boolean => {
@@ -52,99 +60,120 @@
 		return days;
 	});
 
+	const visualRange: { start: DateTime; end: DateTime } | null = $derived.by(() => {
+		if (!isRange || !startDate) return null;
+
+		const endTarget = endDate || hoveredDate;
+		if (!endTarget) return null;
+
+		return startDate.startOf("day") < endTarget.startOf("day")
+			? { start: startDate, end: endTarget }
+			: { start: endTarget, end: startDate };
+	});
+
 	const selectDate = (date: DateTime) => {
 		if (isDayDisabled(date)) return;
 
-		if (!multiSelect) {
-			dates = { start: date, end: undefined };
-
-			onchange?.({ start: dates.start, end: dates.end });
+		if (!isRange) {
+			value = date;
+			onchange?.(date);
 			return;
 		}
 
-		if (dates.start && dates.end) {
-			dates = { start: date, end: undefined };
-		} else if (dates.start && !dates.end) {
-			if (date < dates.start) dates = { start: date, end: dates.start };
-			else dates = { start: dates.start, end: date };
-		} else dates = { start: date, end: undefined };
+		if (!partialStart) {
+			partialStart = date;
+			return;
+		}
 
-		onchange?.({ start: dates.start, end: dates.end });
+		const start = date < partialStart ? date : partialStart;
+		const end = date >= partialStart ? date : partialStart;
+
+		const rangeValue: TimePickerRange = { start, end };
+		value = rangeValue;
+		onchange?.(rangeValue);
+
+		partialStart = null;
 	};
 </script>
 
-<div class={["flex min-w-48 flex-col space-y-2", className]}>
+<div class={["flex w-full max-w-xs flex-col gap-y-2 sm:max-w-sm", className]}>
 	<!-- Navigation -->
-	<div class="flex items-center justify-between">
-		<button
-			class={[
-				"flex items-center rounded-md p-2 transition-colors duration-300",
-				canGoBack && "group hover:bg-accent/10 cursor-pointer",
-				!canGoBack && "cursor-not-allowed opacity-30"
-			]}
+	<div class="flex items-center justify-between px-4 pb-4">
+		<Button
+			mode="tertiary"
 			disabled={!canGoBack}
 			onclick={() => canGoBack && (currentMonth = currentMonth.minus({ months: 1 }))}
+			class="group p-2!"
 		>
-			<ChevronLeft class="text-muted-foreground group-hover:text-accent h-5 w-5" />
-		</button>
+			<ChevronLeft size={24} class="text-secondary-foreground group-hover:text-accent" />
+		</Button>
 
-		<span class="text-text text-base font-semibold">{currentMonth.toFormat("MMMM yyyy")}</span>
+		<span class="text-foreground text-base font-semibold">{currentMonth.toFormat("MMMM yyyy")}</span>
 
-		<button
-			class={[
-				"flex items-center rounded-md p-2 transition-colors duration-300",
-				canGoForward && "group hover:bg-accent/10 cursor-pointer",
-				!canGoForward && "cursor-not-allowed opacity-30"
-			]}
+		<Button
+			mode="tertiary"
 			disabled={!canGoForward}
 			onclick={() => canGoForward && (currentMonth = currentMonth.plus({ months: 1 }))}
+			class="group p-2!"
 		>
-			<ChevronRight class="text-muted-foreground group-hover:text-accent h-5 w-5" />
-		</button>
+			<ChevronRight size={24} class="text-secondary-foreground group-hover:text-accent" />
+		</Button>
 	</div>
 
-	<!-- Calendar -->
-	<div class="grid grid-cols-7 gap-y-0.5 text-center">
-		{#each weekdays as day}
-			<span class="text-muted-foreground text-xs font-bold uppercase">{day}</span>
+	<!-- Weekday Headers -->
+	<div class="grid grid-cols-7 text-center">
+		{#each Info.weekdays("short") as weekday}
+			<span class="text-secondary-foreground/40 text-xs font-medium tracking-wide uppercase">{weekday}</span>
 		{/each}
+	</div>
 
-		{#each getCalendarDays as day}
-			{@const isStart = day.hasSame(dates.start, "day")}
-			{@const isEnd = !!dates.end && day.hasSame(dates.end, "day")}
-			{@const inRange = multiSelect && dates.end && day > dates.start && day < dates.end}
-			{@const isCurrentMonth = day.hasSame(currentMonth, "month")}
-			{@const disabled = isDayDisabled(day)}
+	<!-- Day grid -->
+	<div tabindex="0" role="grid" class="grid grid-cols-7 gap-y-0.5 text-center" onmouseleave={() => (hoveredDate = null)}>
+		{#each getCalendarDays as calendarDay (calendarDay)}
+			{@const isSameDay = (dateTime?: DateTime) => !!dateTime && calendarDay.hasSame(dateTime, "day")}
+			{@const disabled = isDayDisabled(calendarDay)}
 
-			<div class="relative py-0.5">
-				{#if multiSelect && dates.end}
-					<div
-						class={[
-							"absolute inset-y-0.5 z-0",
-							isStart ? "bg-accent/20 right-0 left-1/2" : "",
-							isEnd ? "bg-accent/20 right-1/2 left-0" : "",
-							inRange ? "bg-accent/20 inset-x-0" : ""
-						]}
-					></div>
-				{/if}
+			{@const isToday = isSameDay(DateTime.now())}
+			{@const isCurrentMonth = calendarDay.hasSame(currentMonth, "month")}
+			{@const isSelected = isSameDay(startDate) || isSameDay(endDate)}
+			{@const isHoverTarget = isRange && !endDate && !!hoveredDate && isSameDay(hoveredDate)}
 
-				<button
-					onclick={() => selectDate(day)}
-					{disabled}
-					class={[
-						"relative z-10 mx-auto flex h-7.5 w-7.5 items-center justify-center text-sm transition-all duration-300",
-						disabled && "cursor-not-allowed opacity-30",
-						!disabled && "cursor-pointer",
-						day.hasSame(DateTime.now(), "day") && "font-bold underline underline-offset-4",
-						{ "bg-accent text-background rounded-lg font-bold": isStart || isEnd },
-						{ "text-text": isCurrentMonth && !isStart && !isEnd },
-						{ "text-muted-foreground opacity-75": !isCurrentMonth && !isStart && !isEnd },
-						{ "hover:bg-accent/20 rounded-lg": !disabled && !isStart && !isEnd && !inRange }
-					]}
-				>
-					{day.day}
-				</button>
-			</div>
+			{@const isVisualStart = !!visualRange && isSameDay(visualRange.start)}
+			{@const isVisualEnd = !!visualRange && isSameDay(visualRange.end)}
+			{@const isVisualBetween =
+				!!visualRange && calendarDay > visualRange.start.startOf("day") && calendarDay < visualRange.end.startOf("day")}
+
+			{@const isStandalone = (!isRange && isSameDay(startDate)) || (isRange && isSameDay(startDate) && !visualRange)}
+
+			<button
+				{disabled}
+				onclick={() => selectDate(calendarDay)}
+				onmouseenter={() => (hoveredDate = calendarDay)}
+				class={[
+					"mx-auto h-6 w-full text-xs",
+					"not-disabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-30",
+
+					// base selected style
+					{ "bg-accent text-accent-foreground font-bold": isSelected },
+
+					// hovered end date preview
+					{ "bg-accent/40": isHoverTarget && !isSelected },
+
+					// range highlighting
+					{ "bg-accent/20": isVisualBetween },
+
+					// rounding
+					{ "rounded-full": isStandalone || (isVisualStart && isVisualEnd) || (isHoverTarget && !visualRange) },
+					{ "rounded-l-full": isVisualStart && !isVisualEnd },
+					{ "rounded-r-full": isVisualEnd && !isVisualStart },
+
+					{ "font-bold underline underline-offset-4": isToday },
+					{ "text-secondary-foreground/25": !isCurrentMonth && !isSelected },
+					{ "text-foreground": isCurrentMonth && !isSelected }
+				]}
+			>
+				{calendarDay.toFormat("d")}
+			</button>
 		{/each}
 	</div>
 </div>

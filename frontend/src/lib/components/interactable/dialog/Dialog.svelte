@@ -57,7 +57,7 @@
 	bind:this={dialog}
 	onclose={handleClose}
 	onclick={handleDialogClick}
-	class={["bg-background border-muted-foreground/20 z-100 rounded-lg border-2", classNames]}
+	class={["bg-background z-100 rounded-lg border-2", classNames]}
 >
 	<div class="flex flex-col space-y-3 p-2">
 		{#if typeof title === "string"}
@@ -78,14 +78,17 @@
 </dialog>
 
 <style>
-	dialog {
+	/* Scope the variables to a wildcard or explicitly duplicate them so both dialog and backdrop can read them */
+	dialog,
+	dialog::backdrop {
 		--dialog-enter-opacity: 0;
 		--dialog-enter-scale: 0.95;
 		--dialog-animation-duration: 0.15s;
+	}
 
-		opacity: var(--dialog-enter-opacity, 1);
-		transform: translate3d(0, 0, 0)
-			scale3d(var(--dialog-enter-scale, 1), var(--dialog-enter-scale, 1), var(--dialog-enter-scale, 1));
+	dialog {
+		opacity: var(--dialog-enter-opacity);
+		transform: translate3d(0, 0, 0) scale3d(var(--dialog-enter-scale), var(--dialog-enter-scale), var(--dialog-enter-scale));
 
 		transition:
 			opacity var(--dialog-animation-duration) ease-out,
@@ -101,9 +104,8 @@
 
 	@starting-style {
 		dialog[open] {
-			opacity: var(--dialog-enter-opacity, 1);
-			transform: translate3d(0, 0, 0)
-				scale3d(var(--dialog-enter-scale, 1), var(--dialog-enter-scale, 1), var(--dialog-enter-scale, 1));
+			opacity: var(--dialog-enter-opacity);
+			transform: translate3d(0, 0, 0) scale3d(var(--dialog-enter-scale), var(--dialog-enter-scale), var(--dialog-enter-scale));
 		}
 	}
 
@@ -111,10 +113,10 @@
 		background-color: rgba(0, 0, 0, 0);
 		backdrop-filter: blur(0px);
 		transition:
-			display var(--dialog-animation-duration, 1) ease-out allow-discrete,
-			overlay var(--dialog-animation-duration, 1) ease-out allow-discrete,
-			background-color var(--dialog-animation-duration, 1) ease-out,
-			backdrop-filter var(--dialog-animation-duration, 1) ease-out;
+			display var(--dialog-animation-duration) ease-out allow-discrete,
+			overlay var(--dialog-animation-duration) ease-out allow-discrete,
+			background-color var(--dialog-animation-duration) ease-out,
+			backdrop-filter var(--dialog-animation-duration) ease-out;
 	}
 
 	dialog[open]::backdrop {
