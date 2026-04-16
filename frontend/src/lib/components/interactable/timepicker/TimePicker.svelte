@@ -96,9 +96,9 @@
 	};
 </script>
 
-<div class={["flex w-full max-w-xs flex-col gap-y-2 sm:max-w-sm", className]}>
+<div class={["flex w-full min-w-fit flex-col sm:gap-y-2", className]}>
 	<!-- Navigation -->
-	<div class="flex items-center justify-between px-4 pb-4">
+	<div class="flex items-center justify-between px-4 pb-2">
 		<Button
 			mode="tertiary"
 			disabled={!canGoBack}

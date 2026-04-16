@@ -2,26 +2,31 @@
 	import type { Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
 	import Button from "../Button.svelte";
+	import X from "@lucide/svelte/icons/x";
 
 	type Props = {
 		isVisible: boolean;
-		isModal?: boolean;
 		title?: string | Snippet;
-		clickOutsideToClose?: boolean;
 		children: Snippet;
 		actions?: Snippet;
-		class?: ClassValue;
+		showHeader?: boolean;
+		showActions?: boolean;
+		isModal?: boolean;
+		clickOutsideToClose?: boolean;
 		onclose?: () => void;
+		class?: ClassValue;
 	};
 	let {
 		isVisible = $bindable(false),
-		isModal = false,
-		title,
-		clickOutsideToClose = true,
 		children,
+		title,
 		actions,
-		class: classNames,
-		onclose
+		showHeader = true,
+		showActions = true,
+		isModal = true,
+		clickOutsideToClose = true,
+		onclose,
+		class: classNames
 	}: Props = $props();
 
 	let dialog: HTMLDialogElement | undefined = $state(undefined);
@@ -57,19 +62,26 @@
 	bind:this={dialog}
 	onclose={handleClose}
 	onclick={handleDialogClick}
-	class={["bg-background z-100 rounded-lg border-2", classNames]}
+	class={["bg-background border-border z-100 rounded-xl border-2 shadow-2xl", classNames]}
 >
-	<div class="flex flex-col space-y-3 p-2">
-		{#if typeof title === "string"}
-			<h3 class="text-muted-foreground text-xl font-semibold">{title}</h3>
-		{:else}
-			{@render title?.()}
+	<div class="flex flex-col gap-y-2 p-4">
+		{#if showHeader}
+			<div class="mb-2 flex items-center justify-between gap-x-4">
+				{#if typeof title === "string"}
+					<h3 class="text-foreground text-xl font-semibold">{title}</h3>
+				{:else}
+					{@render title?.()}
+				{/if}
+
+				<Button mode="tertiary" onclick={handleClose} class="-mr-2 p-1!">
+					<X size={20} />
+				</Button>
+			</div>
 		{/if}
 
 		{@render children()}
 
-		<!-- Actions -->
-		{#if typeof actions === "function"}
+		{#if showActions && typeof actions === "function"}
 			{@render actions()}
 		{:else}
 			<Button mode="primary" onclick={handleClose} class="ml-auto font-semibold">Done</Button>

@@ -29,9 +29,14 @@
 		title = "Select Date Range",
 		class: classNames
 	}: Props = $props();
+
+	const resolvedTitle = $derived.by(() => {
+		if (title) return title;
+		return isRange ? "Select Time Range" : "Select Time";
+	});
 </script>
 
-<Dialog bind:isVisible {title} class={["absolute right-0 left-auto w-[400px]", classNames]}>
+<Dialog bind:isVisible title={resolvedTitle} class={["w-[calc(100vw-2rem)] max-w-sm sm:w-max sm:min-w-96", classNames]}>
 	<TimePicker
 		{isRange}
 		{min}
