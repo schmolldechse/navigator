@@ -15,6 +15,7 @@ const config = {
 		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
 		adapter: adapter(),
 		alias: {
+			"@style": "src/app.css",
 			"@lib": "src/lib",
 			"@components": "src/lib/components"
 		}

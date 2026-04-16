@@ -164,7 +164,7 @@
 </main>
 
 <style>
-	@reference "#app.css";
+	@reference "@style";
 
 	:global(p.about span) {
 		@apply text-accent font-semibold;
