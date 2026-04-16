@@ -4,18 +4,22 @@
 
 	type Props = {
 		mode?: "primary" | "secondary" | "destructive" | "tertiary";
+		href?: string;
 		disabled?: boolean;
 		onclick?: MouseEventHandler<HTMLButtonElement> | null | undefined;
 		children: Snippet;
 		class?: ClassValue;
 	};
 
-	let { mode = "primary", disabled = false, onclick, children, class: className }: Props = $props();
+	let { mode = "primary", href, disabled = false, onclick, children, class: className }: Props = $props();
 </script>
 
-<button
-	type="button"
-	{disabled}
+<svelte:element
+	this={href ? "a" : "button"}
+	type={href ? undefined : "button"}
+	disabled={href ? undefined : disabled}
+	href={href && !disabled ? href : undefined}
+	role={href && disabled ? "link" : undefined}
 	{onclick}
 	class={[
 		"inline-flex items-center justify-center gap-x-2 rounded-lg px-4 py-2 font-medium transition-colors duration-200",
@@ -33,4 +37,4 @@
 	]}
 >
 	{@render children()}
-</button>
+</svelte:element>
