@@ -81,10 +81,12 @@
 
 		{@render children()}
 
-		{#if showActions && typeof actions === "function"}
-			{@render actions()}
-		{:else}
-			<Button mode="primary" onclick={handleClose} class="ml-auto font-semibold">Done</Button>
+		{#if showActions}
+			{#if typeof actions === "function"}
+				{@render actions()}
+			{:else}
+				<Button mode="primary" onclick={handleClose} class="ml-auto font-semibold">Done</Button>
+			{/if}
 		{/if}
 	</div>
 </dialog>
