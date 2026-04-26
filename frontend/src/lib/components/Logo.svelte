@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Button from "./interactable/Button.svelte";
+	import Button from "./ui/Button.svelte";
 </script>
 
 <Button mode="tertiary" href="/" class="flex items-center gap-x-3">

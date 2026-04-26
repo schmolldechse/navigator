@@ -5,8 +5,8 @@
 	import type { ClassValue } from "svelte/elements";
 	import Button from "../Button.svelte";
 
-	type TimePickerRange = { start: DateTime; end: DateTime };
-	type TimePickerValue = DateTime | TimePickerRange | undefined;
+	export type TimePickerRange = { start: DateTime; end: DateTime };
+	export type TimePickerValue = DateTime | TimePickerRange | undefined;
 
 	type Props = {
 		isRange?: boolean;

@@ -1,6 +1,7 @@
-<script lang="ts" module>
-	import { TransportType } from "@lib/api";
+<script lang="ts">
+	import type { TransportType } from "@lib/api";
 	import type { Component } from "svelte";
+	import ToggleStateButton from "../togglestate/ToggleStateButton.svelte";
 
 	type TransportFilterOption = {
 		id: string;
@@ -8,12 +9,6 @@
 		label: string;
 		transportTypes: TransportType[];
 	};
-
-	export { type TransportFilterOption };
-</script>
-
-<script lang="ts">
-	import ToggleStateButton from "@lib/components/interactable/togglestate/ToggleStateButton.svelte";
 
 	type Props = {
 		options: TransportFilterOption[];

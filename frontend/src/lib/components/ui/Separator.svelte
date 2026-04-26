@@ -5,7 +5,6 @@
 		orientation?: "horizontal" | "vertical";
 		class?: ClassValue;
 	};
-
 	let { orientation = "horizontal", class: classNames }: Props = $props();
 </script>
 

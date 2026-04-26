@@ -6,8 +6,6 @@
 @import "@fontsource/roboto-mono/600.css";
 @import "@fontsource/roboto-mono/700.css";
 
-@source "../node_modules/layerchart/**/*.{svelte,js}";
-
 @theme {
 	/* Base Colors */
 	--color-background: oklch(0.12 0 0);
@@ -33,11 +31,22 @@
 }
 
 @layer base {
-	* {
+	html, body {
 		font-family: var(--font-mono);
+		@apply bg-background text-foreground antialiased;
 	}
 
-	html {
-		@apply bg-background text-foreground antialiased;
+	/* layerchart */
+	.lc-root-container {
+		/* Default marks color when not using explicit color or color scale */
+		--color-primary: var(--color-accent);
+		
+		/* Progressively shaded surfaces based on background context */
+		--color-surface-100: var(--color-background);
+		--color-surface-200: color-mix(in oklch, var(--color-background), var(--color-foreground) 5%);
+		--color-surface-300: color-mix(in oklch, var(--color-background), var(--color-foreground) 15%);
+		
+		/* Content (text) color */
+		--color-surface-content: var(--color-foreground);
 	}
 }

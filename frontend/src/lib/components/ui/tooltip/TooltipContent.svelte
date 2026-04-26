@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
-	import { getTooltipContext, TooltipContext } from "./tooltipcontext.svelte";
+	import { getTooltipContext, TooltipContext } from "./tooltip-context.svelte";
 
 	type Props = {
 		position?: "top" | "bottom" | "left" | "right";
@@ -16,7 +16,7 @@
 {#if context.contentVisible}
 	<div
 		class={[
-			"bg-background border-muted-foreground/20 absolute z-100 w-max rounded-lg border-2 p-2 shadow-2xl backdrop-blur-lg",
+			"bg-background border-border absolute z-100 w-max rounded-lg border-2 p-2 shadow-2xl",
 			{ "bottom-[calc(100%+8px)] left-1/2 origin-bottom -translate-x-1/2": position === "top" },
 			{ "top-[calc(100%+8px)] left-1/2 origin-top -translate-x-1/2": position === "bottom" },
 			{ "top-1/2 right-[calc(100%+8px)] origin-right -translate-y-1/2": position === "left" },

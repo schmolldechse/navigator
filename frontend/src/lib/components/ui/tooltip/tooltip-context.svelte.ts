@@ -1,5 +1,7 @@
 import { getContext, setContext } from "svelte";
 
+const TOOLTIP_CONTEXT_KEY = Symbol("tooltip-context");
+
 class TooltipContext {
 	contentVisible: boolean = $state(false);
 
@@ -23,10 +25,8 @@ class TooltipContext {
 	};
 }
 
-const TOOLTIP_CONTEXT_KEY = Symbol("tooltip-context");
-
 const setTooltipContext = (context: TooltipContext) => setContext(TOOLTIP_CONTEXT_KEY, context);
 
 const getTooltipContext = () => getContext<TooltipContext>(TOOLTIP_CONTEXT_KEY);
 
-export { setTooltipContext, getTooltipContext, TooltipContext };
+export { TooltipContext, setTooltipContext, getTooltipContext };

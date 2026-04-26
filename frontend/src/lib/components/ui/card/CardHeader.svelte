@@ -11,6 +11,6 @@
 </script>
 
 <div class={["flex items-center", className]}>
-	<p class="text-muted-foreground text-base font-semibold tracking-wider uppercase">{title}</p>
+	<p class="text-foreground/60 text-base font-semibold tracking-wider uppercase">{title}</p>
 	{@render children?.()}
 </div>

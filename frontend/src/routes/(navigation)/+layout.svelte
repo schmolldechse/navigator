@@ -5,12 +5,12 @@
 	import Clock_4 from "@lucide/svelte/icons/clock-4";
 	import Map from "@lucide/svelte/icons/map";
 	import Logo from "$lib/components/Logo.svelte";
-	import Dialog from "$lib/components/interactable/dialog/Dialog.svelte";
 	import type { Component } from "svelte";
-	import Button from "@lib/components/interactable/Button.svelte";
 	import X from "@lucide/svelte/icons/x";
 	import Menu from "@lucide/svelte/icons/menu";
 	import { type ClassValue } from "svelte/elements";
+	import Button from "@lib/components/ui/Button.svelte";
+	import Dialog from "@lib/components/ui/dialog/Dialog.svelte";
 
 	let { data, children }: LayoutProps = $props();
 

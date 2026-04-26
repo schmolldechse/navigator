@@ -5,13 +5,14 @@
 	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
 	import type { PageProps } from "./$types";
-	import Button from "@lib/components/interactable/Button.svelte";
-	import Separator from "@lib/components/interactable/Separator.svelte";
-	import TimePickerDialog from "@lib/components/interactable/timepicker/TimePickerDialog.svelte";
+	import Button from "@lib/components/ui/Button.svelte";
+	import Separator from "@lib/components/ui/Separator.svelte";
+	import TimePickerDialog from "@lib/components/ui/timepicker/TimePickerDialog.svelte";
 	import DatabaseSize from "@lib/components/projectdimensions/DatabaseSize.svelte";
-	import RecordedRisIds from "@lib/components/projectdimensions/risids/RecordedRisIds.svelte";
-	import RecordedJourneys from "@lib/components/projectdimensions/RecordedJourneys.svelte";
-	import TransportTypeDistribution from "@lib/components/projectdimensions/TransportTypeDistribution.svelte";
+	// import RecordedRisIds from "@lib/components/projectdimensions/risids/RecordedRisIds.svelte";
+	// import RecordedJourneys from "@lib/components/projectdimensions/RecordedJourneys.svelte";
+	// import TransportTypeDistribution from "@lib/components/projectdimensions/TransportTypeDistribution.svelte";
+	import type { TimePickerValue, TimePickerRange } from "@lib/components/ui/timepicker/TimePicker.svelte";
 
 	let { data }: PageProps = $props();
 
@@ -34,7 +35,8 @@
 				promise: data.dimensions.databaseSize
 			},
 			scale: "medium"
-		},
+		}
+		/*
 		{
 			metricComponent: TransportTypeDistribution,
 			props: {
@@ -55,7 +57,7 @@
 				promise: data.dimensions.recordedJourneys
 			},
 			scale: "large"
-		}
+		}*/
 	]);
 </script>
 
@@ -80,7 +82,7 @@
 
 	<!-- Project Overview -->
 	<section>
-		<div class="border-accent/20 flex flex-col gap-y-6 rounded-lg border-2 p-4 backdrop-blur">
+		<div class="border-accent/40 flex flex-col gap-y-6 rounded-xl border-2 p-4 backdrop-blur">
 			<div class="flex items-baseline gap-x-4">
 				<Info />
 				<h2 class="text-3xl font-bold">About the Project</h2>
@@ -135,9 +137,11 @@
 
 			<TimePickerDialog
 				bind:isVisible={isSettingsOpen}
-				multiSelect
-				dates={selectedTimerange}
-				onchange={async ({ start, end }) => {
+				isRange
+				value={selectedTimerange}
+				onchange={async (value: TimePickerValue) => {
+					const { start, end } = value as TimePickerRange;
+
 					selectedTimerange = { start, end: end! };
 
 					const url = new URL(window.location.href);
@@ -162,11 +166,3 @@
 		</div>
 	</section>
 </main>
-
-<style>
-	@reference "@style";
-
-	:global(p.about span) {
-		@apply text-accent font-semibold;
-	}
-</style>

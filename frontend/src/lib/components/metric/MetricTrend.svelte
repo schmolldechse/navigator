@@ -3,12 +3,11 @@
 	import TrendingUp from "@lucide/svelte/icons/trending-up";
 	import TrendingDown from "@lucide/svelte/icons/trending-down";
 
-	interface Props {
+	type Props = {
 		metrics: MetricSeries[];
 		togglingEnabled?: boolean;
 		defaultDisplayMode?: "percentage" | "absolute";
-	}
-
+	};
 	let { metrics, togglingEnabled = true, defaultDisplayMode = "percentage" }: Props = $props();
 
 	const calculateChange = (metrics: MetricSeries[]): { percentage: number; isUp: boolean } => {

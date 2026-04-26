@@ -1,11 +1,8 @@
 <script lang="ts">
 	import { DateTime } from "luxon";
-	import TimePicker from "./TimePicker.svelte";
+	import TimePicker, { type TimePickerValue } from "./TimePicker.svelte";
 	import type { ClassValue } from "svelte/elements";
 	import Dialog from "../dialog/Dialog.svelte";
-
-	type TimePickerRange = { start: DateTime; end: DateTime };
-	type TimePickerValue = DateTime | TimePickerRange | undefined;
 
 	type Props = {
 		isVisible: boolean;

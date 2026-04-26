@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
-	import { setTooltipContext, TooltipContext } from "./tooltipcontext.svelte";
+	import { setTooltipContext, TooltipContext } from "./tooltip-context.svelte";
 
 	type Props = {
 		delay?: number;

@@ -22,7 +22,7 @@
 	role={href && disabled ? "link" : undefined}
 	{onclick}
 	class={[
-		"inline-flex items-center justify-center gap-x-2 rounded-lg px-4 py-2 font-medium transition-colors duration-200",
+		"rounded-lg px-3 py-1.5 font-medium transition-colors duration-200",
 		"enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
 
 		mode === "primary" && "bg-accent text-accent-foreground enabled:hover:bg-accent/90 enabled:active:bg-accent/80",
