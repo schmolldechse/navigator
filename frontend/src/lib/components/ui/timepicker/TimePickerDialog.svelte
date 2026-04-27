@@ -12,7 +12,6 @@
 		value?: TimePickerValue;
 		onchange?: (value: TimePickerValue) => void;
 		closeOnSelect?: boolean;
-		title?: string;
 		class?: ClassValue;
 	};
 	let {
@@ -23,17 +22,16 @@
 		value = $bindable(undefined),
 		onchange,
 		closeOnSelect = false,
-		title = "Select Date Range",
 		class: classNames
 	}: Props = $props();
-
-	const resolvedTitle = $derived.by(() => {
-		if (title) return title;
-		return isRange ? "Select Time Range" : "Select Time";
-	});
 </script>
 
-<Dialog bind:isVisible title={resolvedTitle} class={["w-[calc(100vw-2rem)] max-w-sm sm:w-max sm:min-w-96", classNames]}>
+<Dialog
+	bind:isVisible
+	showHeader={false}
+	showActions={false}
+	class={["w-[calc(100vw-2rem)] max-w-sm sm:w-max sm:min-w-96", classNames]}
+>
 	<TimePicker
 		{isRange}
 		{min}
