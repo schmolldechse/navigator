@@ -85,8 +85,8 @@
 	{size}
 	oninput={handleInput}
 	class={[
-		"rounded-lg border px-3 py-1.5 text-sm font-semibold transition-all outline-none",
-		disabled && "border-muted-foreground/10 bg-muted/10 text-muted-foreground/40 cursor-not-allowed opacity-75",
+		"border-border rounded-lg border-2 px-3 py-1.5 text-sm font-semibold transition-all outline-none",
+		"disabled:cursor-not-allowed disabled:opacity-50",
 		classNames
 	]}
 />
