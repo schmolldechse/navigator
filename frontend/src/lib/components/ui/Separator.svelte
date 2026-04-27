@@ -12,9 +12,9 @@
 	role="separator"
 	aria-orientation={orientation}
 	class={[
-		"bg-muted-foreground/20 shrink-0",
-		{ "h-px w-full": orientation === "horizontal" },
-		{ "h-full w-px": orientation === "vertical" },
+		"bg-border shrink-0",
+		{ "h-0.5 w-full": orientation === "horizontal" },
+		{ "h-full w-0.5": orientation === "vertical" },
 		classNames
 	]}
 ></div>
