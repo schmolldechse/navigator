@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
 		MetricSeriesType,
-		MetricUnit,
 		type BaseMetricDataPoint,
 		type BaseMetricDataPointTimestampDataPoint,
 		type MetricSeries
@@ -9,13 +8,13 @@
 	import { scaleOrdinal } from "d3-scale";
 	import { schemeTableau10 } from "d3-scale-chromatic";
 	import type { ClassValue } from "svelte/elements";
-	import Card from "../ui/card/Card.svelte";
-	import CardHeader from "../ui/card/CardHeader.svelte";
-	import MetricTrend from "../metric/MetricTrend.svelte";
-	import { Axis, Chart, ChartClipPath, defaultChartPadding, Highlight, Spline, Tooltip } from "layerchart";
-	import DateTooltip from "../layerchart/tooltips/DateTooltip.svelte";
+	import { Axis, Chart, ChartClipPath, defaultChartPadding, Highlight, LineChart, Spline, Svg, Tooltip } from "layerchart";
 	import { DateTime } from "luxon";
-	import MetricLoadingFailedWarning from "../metric/MetricLoadingFailedWarning.svelte";
+	import DateTooltip from "../../layerchart/tooltips/DateTooltip.svelte";
+	import Card from "@lib/components/ui/card/Card.svelte";
+	import CardHeader from "@lib/components/ui/card/CardHeader.svelte";
+	import MetricTrend from "@lib/components/metric/MetricTrend.svelte";
+	import MetricLoadingFailedWarning from "@lib/components/metric/MetricLoadingFailedWarning.svelte";
 
 	type Props = {
 		promise: Promise<MetricSeries>;
@@ -25,35 +24,34 @@
 
 	let validatedPromise = $derived(
 		promise.then((metric: MetricSeries) => {
-			if (metric.seriesType !== MetricSeriesType.DATABASE_SIZE)
-				throw new Error("DatabaseSizeMetricCard received invalid metric series type.");
-			if (metric.unit !== MetricUnit.BYTES) throw new Error("DatabaseSizeMetricCard received invalid metric unit.");
+			if (metric.seriesType !== MetricSeriesType.JOURNEY_TOTAL)
+				throw new Error("RecordedJourneyMetricCard received invalid metric series type.");
 			return metric;
 		})
 	);
 
-	type DatabaseSizeSeries = {
-		key: MetricSeriesType.DATABASE_SIZE;
-		data: DatabaseSizeDataPoint[];
+	type RecordedJourneyChartSeries = {
+		key: MetricSeriesType.JOURNEY_TOTAL;
+		data: RecordedJourneysDataPoint[];
 		color: string;
 		label: string;
 	};
 
-	type DatabaseSizeDataPoint = {
+	type RecordedJourneysDataPoint = {
 		date: Date;
 		value: number;
 	};
 
 	const colorScale = scaleOrdinal(schemeTableau10);
 
-	const buildDatabaseSizeSeries = (metric: MetricSeries): DatabaseSizeSeries[] => {
+	const buildChartSeries = (metric: MetricSeries): RecordedJourneyChartSeries[] => {
 		if (!metric.dataPoints.length) return [];
 
 		const dataPoints = metric.dataPoints
 			.map((baseDataPoint: BaseMetricDataPoint) => {
 				const dataPoint = baseDataPoint as BaseMetricDataPointTimestampDataPoint;
 				if (!dataPoint.timestamp || typeof dataPoint.value !== "number") {
-					console.warn("Invalid data point in DatabaseSize metric series:", baseDataPoint);
+					console.warn("Invalid data point in RecordedJourneys metric series:", baseDataPoint);
 					return null;
 				}
 
@@ -62,43 +60,22 @@
 					value: dataPoint.value
 				};
 			})
-			.filter((dataPoint: DatabaseSizeDataPoint | null): dataPoint is DatabaseSizeDataPoint => !!dataPoint)
-			.sort((dataPoint: DatabaseSizeDataPoint, b: DatabaseSizeDataPoint) => dataPoint.date.getTime() - b.date.getTime());
+			.filter((dataPoint: RecordedJourneysDataPoint | null): dataPoint is RecordedJourneysDataPoint => !!dataPoint)
+			.sort((a, b) => a.date.getTime() - b.date.getTime());
 
 		return [
 			{
-				key: metric.seriesType as MetricSeriesType.DATABASE_SIZE,
+				key: metric.seriesType as MetricSeriesType.JOURNEY_TOTAL,
 				data: dataPoints,
 				color: colorScale(metric.seriesType),
-				label: "Database Size"
+				label: "Recorded Journeys"
 			}
 		];
-	};
-
-	const getUnit = (bytes: number, useDecimal: boolean = false): string => {
-		if (bytes === 0) return "Bytes";
-
-		const k = useDecimal ? 1000 : 1024;
-		const sizes = useDecimal
-			? ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"]
-			: ["Bytes", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB"];
-
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return sizes[i];
-	};
-
-	const formatBytes = (bytes: number, useDecimal: boolean = false, decimals = 2): number => {
-		if (bytes === 0) return 0;
-
-		const k = useDecimal ? 1000 : 1024;
-		const dm = decimals < 0 ? 0 : decimals;
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
 	};
 </script>
 
 <Card class={["gap-y-2", className]}>
-	<CardHeader title="Database Size" class="justify-between">
+	<CardHeader title="Recorded Journeys" class="justify-between">
 		{#await validatedPromise then metric}
 			<MetricTrend metrics={[metric]} />
 		{/await}
@@ -107,27 +84,21 @@
 	{#await validatedPromise}
 		<div class="bg-muted h-64 w-full animate-pulse rounded-md"></div>
 	{:then metric}
-		{@const series = buildDatabaseSizeSeries(metric)}
+		{@const series = buildChartSeries(metric)}
 
 		<Chart
 			{series}
-			data={series.flatMap((databaseSeries: DatabaseSizeSeries) => databaseSeries.data)}
+			data={series.flatMap((recordedJourneySeries: RecordedJourneyChartSeries) => recordedJourneySeries.data)}
 			x="date"
 			y="value"
-			padding={defaultChartPadding({ left: 48 })}
+			padding={defaultChartPadding({ left: 64 })}
 			yDomain={null}
 			brush
 			height={250}
 			tooltipContext={{ mode: "quadtree-x" }}
 		>
 			{#snippet axis()}
-				<Axis
-					placement="left"
-					rule
-					grid
-					tickLength={8}
-					format={(value: number) => formatBytes(value, true) + " " + getUnit(value, true)}
-				/>
+				<Axis placement="left" rule grid tickLength={8} format={(value: number) => value.toLocaleString()} />
 				<Axis placement="bottom" rule tickLength={8} />
 			{/snippet}
 
@@ -153,10 +124,7 @@
 										<div class="h-1.5 w-1.5 rounded-full" style:background-color={visibleSeries.color}></div>
 										<span class="text-foreground">{visibleSeries.label}:</span>
 									</div>
-									<span class="text-foreground">
-										{formatBytes(data.value, true)}
-										{getUnit(data.value, true)}
-									</span>
+									<span class="text-foreground">{data.value.toLocaleString()}</span>
 								</div>
 							{/each}
 						</div>
@@ -166,7 +134,7 @@
 				<!-- Date Tooltip on x-Axis -->
 				<DateTooltip
 					{context}
-					value={(dataPoint: DatabaseSizeDataPoint) =>
+					value={(dataPoint: RecordedJourneysDataPoint) =>
 						DateTime.fromJSDate(dataPoint.date).toLocaleString(DateTime.DATETIME_MED)}
 				/>
 			{/snippet}

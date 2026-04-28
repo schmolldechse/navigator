@@ -8,10 +8,10 @@
 	import Button from "@lib/components/ui/Button.svelte";
 	import Separator from "@lib/components/ui/Separator.svelte";
 	import TimePickerDialog from "@lib/components/ui/timepicker/TimePickerDialog.svelte";
-	import DatabaseSize from "@lib/components/projectdimensions/DatabaseSize.svelte";
+	import DatabaseSize from "@lib/components/statistics/projectdimensions/DatabaseSize.svelte";
 	// import RecordedRisIds from "@lib/components/projectdimensions/risids/RecordedRisIds.svelte";
-	// import RecordedJourneys from "@lib/components/projectdimensions/RecordedJourneys.svelte";
 	// import TransportTypeDistribution from "@lib/components/projectdimensions/TransportTypeDistribution.svelte";
+	import RecordedJourneys from "@lib/components/statistics/projectdimensions/RecordedJourneys.svelte";
 	import type { TimePickerValue, TimePickerRange } from "@lib/components/ui/timepicker/TimePicker.svelte";
 
 	let { data }: PageProps = $props();
@@ -35,7 +35,7 @@
 				promise: data.dimensions.databaseSize
 			},
 			scale: "medium"
-		}
+		},
 		/*
 		{
 			metricComponent: TransportTypeDistribution,
@@ -51,13 +51,14 @@
 			},
 			scale: "large"
 		},
+		*/
 		{
 			metricComponent: RecordedJourneys,
 			props: {
 				promise: data.dimensions.recordedJourneys
 			},
 			scale: "large"
-		}*/
+		}
 	]);
 </script>
 
