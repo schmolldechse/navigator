@@ -168,3 +168,11 @@
 		</div>
 	</section>
 </main>
+
+<style>
+	@reference "../app.css";
+
+	:global(p.about span) {
+		@apply text-accent font-semibold;
+	}
+</style>
