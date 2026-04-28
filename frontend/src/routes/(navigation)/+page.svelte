@@ -125,6 +125,7 @@
 					event.stopPropagation();
 					isSettingsOpen = !isSettingsOpen;
 				}}
+				class="flex items-center gap-x-2"
 			>
 				<SlidersHorizontal size={18} />
 
@@ -137,6 +138,7 @@
 
 			<TimePickerDialog
 				bind:isVisible={isSettingsOpen}
+				isModal={false}
 				isRange
 				value={selectedTimerange}
 				onchange={async (value: TimePickerValue) => {
@@ -150,7 +152,7 @@
 
 					await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
 				}}
-				class="mt-14 self-start justify-self-end"
+				class="absolute top-full z-50 mt-2 justify-self-end"
 			/>
 		</div>
 

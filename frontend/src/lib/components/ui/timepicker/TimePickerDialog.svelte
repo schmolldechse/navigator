@@ -1,33 +1,32 @@
 <script lang="ts">
-	import { DateTime } from "luxon";
 	import TimePicker, { type TimePickerValue } from "./TimePicker.svelte";
 	import type { ClassValue } from "svelte/elements";
 	import Dialog from "../dialog/Dialog.svelte";
+	import type { ComponentProps } from "svelte";
 
 	type Props = {
-		isVisible: boolean;
-		isRange?: boolean;
-		min?: DateTime;
-		max?: DateTime;
-		value?: TimePickerValue;
-		onchange?: (value: TimePickerValue) => void;
 		closeOnSelect?: boolean;
 		class?: ClassValue;
-	};
+	} & Pick<ComponentProps<typeof Dialog>, "isVisible" | "isModal" | "clickOutsideToClose"> &
+		Pick<ComponentProps<typeof TimePicker>, "isRange" | "min" | "max" | "value" | "onchange">;
 	let {
+		closeOnSelect = true,
+		class: classNames,
 		isVisible = $bindable(false),
+		isModal = true,
+		clickOutsideToClose = true,
 		isRange = false,
 		min,
 		max,
 		value = $bindable(undefined),
-		onchange,
-		closeOnSelect = false,
-		class: classNames
+		onchange
 	}: Props = $props();
 </script>
 
 <Dialog
 	bind:isVisible
+	{isModal}
+	{clickOutsideToClose}
 	showHeader={false}
 	showActions={false}
 	class={["w-[calc(100vw-2rem)] max-w-sm sm:w-max sm:min-w-96", classNames]}
