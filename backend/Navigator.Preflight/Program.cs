@@ -23,11 +23,21 @@ builder.Services.AddTransient<IStationDiscovery, StationDiscovery>()
     .AddTransient<IStationMerging, StationMerging>();
 
 var host = builder.Build();
+var skipStationBootstrap = string.Equals(
+    builder.Configuration["Preflight:SkipStationBootstrap"],
+    "true",
+    StringComparison.OrdinalIgnoreCase);
 
 using (var scope = host.Services.CreateScope())
 {
     var dataContext = scope.ServiceProvider.GetRequiredService<DataContext>();
     await dataContext.Database.MigrateAsync();
+
+    if (skipStationBootstrap)
+    {
+        Log.Information("Skipping station bootstrap process.");
+        return;
+    }
 
     var stationDiscovery = scope.ServiceProvider.GetRequiredService<IStationDiscovery>();
     await stationDiscovery.StartDiscoveringAsync();

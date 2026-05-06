@@ -529,8 +529,146 @@ namespace Navigator.Data.Migrations
                     b.ToTable("risid_snapshots", "statistics");
                 });
 
+            modelBuilder.Entity("Navigator.Data.Entities.Views.DailyJourneyServiceSnapshot", b =>
+                {
+                    b.Property<int>("ArrivalStopCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_stop_count");
+
+                    b.Property<DateTime>("BucketDay")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_day");
+
+                    b.Property<int>("CancelledStopCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("cancelled_stop_count");
+
+                    b.Property<int>("DelaySampleCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("delay_sample_count");
+
+                    b.Property<double>("DelaySum")
+                        .HasColumnType("double precision")
+                        .HasColumnName("delay_sum");
+
+                    b.Property<int>("DepartureStopCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_stop_count");
+
+                    b.Property<int>("DisruptionMessageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("disruption_message_count");
+
+                    b.Property<int>("JourneyCancellationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("journey_cancellation_count");
+
+                    b.Property<int>("JourneyCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("journey_count");
+
+                    b.Property<JourneyType>("JourneyType")
+                        .HasColumnType("core.journey_type")
+                        .HasColumnName("journey_type");
+
+                    b.Property<int>("MessageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("message_count");
+
+                    b.Property<string>("OperatorCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("operator_code");
+
+                    b.Property<string>("OperatorName")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("operator_name");
+
+                    b.Property<int>("ReplacementTransportCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("replacement_transport_count");
+
+                    b.Property<int>("StopCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("stop_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("daily_journey_service_snapshots", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("daily_journey_service_snapshots", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.DailyStationMessageSnapshot", b =>
+                {
+                    b.Property<int>("AffectedJourneyCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("affected_journey_count");
+
+                    b.Property<int>("AffectedStopPlaceCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("affected_stop_place_count");
+
+                    b.Property<DateTime>("BucketDay")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_day");
+
+                    b.Property<string>("DisruptionCause")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("disruption_cause");
+
+                    b.Property<string>("DisruptionEffect")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("disruption_effect");
+
+                    b.Property<int>("EvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("eva_number");
+
+                    b.Property<string>("MessageCode")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("message_code");
+
+                    b.Property<int>("MessageCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("message_count");
+
+                    b.Property<MessageType>("MessageType")
+                        .HasColumnType("core.message_type")
+                        .HasColumnName("message_type");
+
+                    b.Property<string>("NoteCategory")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("note_category");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("daily_station_message_snapshots", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("daily_station_message_snapshots", "statistics");
+                });
+
             modelBuilder.Entity("Navigator.Data.Entities.Views.HourlyStationSnapshot", b =>
                 {
+                    b.Property<int>("ArrivalAdditionalCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_additional_count");
+
                     b.Property<int>("ArrivalCancellationCount")
                         .HasColumnType("integer")
                         .HasColumnName("arrival_cancellation_count");
@@ -539,13 +677,49 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("arrival_count");
 
+                    b.Property<int>("ArrivalDelayMajorCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_delay_major_count");
+
+                    b.Property<int>("ArrivalDelayMinorCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_delay_minor_count");
+
+                    b.Property<int>("ArrivalDelaySampleCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_delay_sample_count");
+
+                    b.Property<int>("ArrivalDelaySevereCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_delay_severe_count");
+
                     b.Property<double>("ArrivalDelaySum")
                         .HasColumnType("double precision")
                         .HasColumnName("arrival_delay_sum");
 
+                    b.Property<int>("ArrivalDemandCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_demand_count");
+
+                    b.Property<int>("ArrivalNoPassengerChangeCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_no_passenger_change_count");
+
+                    b.Property<int>("ArrivalPlatformChangeCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_platform_change_count");
+
+                    b.Property<int>("ArrivalPunctualCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("arrival_punctual_count");
+
                     b.Property<DateTime>("BucketHour")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
+
+                    b.Property<int>("DepartureAdditionalCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_additional_count");
 
                     b.Property<int>("DepartureCancellationCount")
                         .HasColumnType("integer")
@@ -555,9 +729,41 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("departure_count");
 
+                    b.Property<int>("DepartureDelayMajorCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_delay_major_count");
+
+                    b.Property<int>("DepartureDelayMinorCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_delay_minor_count");
+
+                    b.Property<int>("DepartureDelaySampleCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_delay_sample_count");
+
+                    b.Property<int>("DepartureDelaySevereCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_delay_severe_count");
+
                     b.Property<double>("DepartureDelaySum")
                         .HasColumnType("double precision")
                         .HasColumnName("departure_delay_sum");
+
+                    b.Property<int>("DepartureDemandCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_demand_count");
+
+                    b.Property<int>("DepartureNoPassengerChangeCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_no_passenger_change_count");
+
+                    b.Property<int>("DeparturePlatformChangeCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_platform_change_count");
+
+                    b.Property<int>("DeparturePunctualCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("departure_punctual_count");
 
                     b.Property<int>("EvaNumber")
                         .HasColumnType("integer")

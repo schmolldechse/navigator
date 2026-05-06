@@ -9,8 +9,8 @@
 	import Separator from "@lib/components/ui/Separator.svelte";
 	import TimePickerDialog from "@lib/components/ui/timepicker/TimePickerDialog.svelte";
 	import DatabaseSize from "@lib/components/statistics/projectdimensions/DatabaseSize.svelte";
+	import TransportTypeDistribution from "@lib/components/statistics/projectdimensions/TransportTypeDistribution.svelte";
 	// import RecordedRisIds from "@lib/components/projectdimensions/risids/RecordedRisIds.svelte";
-	// import TransportTypeDistribution from "@lib/components/projectdimensions/TransportTypeDistribution.svelte";
 	import RecordedJourneys from "@lib/components/statistics/projectdimensions/RecordedJourneys.svelte";
 	import type { TimePickerValue, TimePickerRange } from "@lib/components/ui/timepicker/TimePicker.svelte";
 
@@ -36,7 +36,6 @@
 			},
 			scale: "medium"
 		},
-		/*
 		{
 			metricComponent: TransportTypeDistribution,
 			props: {
@@ -44,6 +43,7 @@
 			},
 			scale: "small"
 		},
+		/*
 		{
 			metricComponent: RecordedRisIds,
 			props: {

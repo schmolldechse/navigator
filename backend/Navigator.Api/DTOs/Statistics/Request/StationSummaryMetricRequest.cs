@@ -13,9 +13,19 @@ public class StationSummaryMetricRequest : BaseMetricRequest
         MetricSeriesType.StationArrivals,
         MetricSeriesType.StationArrivalCancellations,
         MetricSeriesType.StationArrivalDelayAvg,
+        MetricSeriesType.StationArrivalPunctualityRate,
+        MetricSeriesType.StationArrivalDelayMinor,
+        MetricSeriesType.StationArrivalDelayMajor,
+        MetricSeriesType.StationArrivalDelaySevere,
+        MetricSeriesType.StationArrivalPlatformChanges,
         MetricSeriesType.StationDepartures,
         MetricSeriesType.StationDepartureCancellations,
-        MetricSeriesType.StationDepartureDelayAvg
+        MetricSeriesType.StationDepartureDelayAvg,
+        MetricSeriesType.StationDeparturePunctualityRate,
+        MetricSeriesType.StationDepartureDelayMinor,
+        MetricSeriesType.StationDepartureDelayMajor,
+        MetricSeriesType.StationDepartureDelaySevere,
+        MetricSeriesType.StationDeparturePlatformChanges
     ];
 
     [JsonPropertyName("seriesType")]
@@ -23,9 +33,19 @@ public class StationSummaryMetricRequest : BaseMetricRequest
         MetricSeriesType.StationArrivals,
         MetricSeriesType.StationArrivalCancellations,
         MetricSeriesType.StationArrivalDelayAvg,
+        MetricSeriesType.StationArrivalPunctualityRate,
+        MetricSeriesType.StationArrivalDelayMinor,
+        MetricSeriesType.StationArrivalDelayMajor,
+        MetricSeriesType.StationArrivalDelaySevere,
+        MetricSeriesType.StationArrivalPlatformChanges,
         MetricSeriesType.StationDepartures,
         MetricSeriesType.StationDepartureCancellations,
-        MetricSeriesType.StationDepartureDelayAvg)]
+        MetricSeriesType.StationDepartureDelayAvg,
+        MetricSeriesType.StationDeparturePunctualityRate,
+        MetricSeriesType.StationDepartureDelayMinor,
+        MetricSeriesType.StationDepartureDelayMajor,
+        MetricSeriesType.StationDepartureDelaySevere,
+        MetricSeriesType.StationDeparturePlatformChanges)]
     [Description("The specific station metric series to retrieve.")]
     public required MetricSeriesType SeriesType { get; set; }
 

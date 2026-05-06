@@ -57,7 +57,12 @@
 	import { DateTime } from "luxon";
 	import type { StationHeatmapPoint } from "@lib/components/statistics/heatmap/StationHeatmap.svelte";
 	import StationHeatmapSettingsDialog from "@lib/components/statistics/heatmap/settings/StationHeatmapSettingsDialog.svelte";
-	import { loadHeatmapBySeriesType, loadHourlyMetrics } from "./globalstatistics.remote";
+	import {
+		loadHeatmapBySeriesType,
+		loadHourlyMetrics,
+		loadJourneyServiceMetrics,
+		loadMessageSummaryMetrics
+	} from "./globalstatistics.remote";
 	import StationHeatmap from "@lib/components/statistics/heatmap/StationHeatmap.svelte";
 	import LoaderCircle from "@lucide/svelte/icons/loader-circle";
 	import { Legend } from "layerchart";
@@ -70,6 +75,12 @@
 	import HourlyStopRate from "@lib/components/statistics/global/charts/HourlyStopRate.svelte";
 	import CancellationRate from "@lib/components/statistics/global/charts/cancellationrate/CancellationRate.svelte";
 	import DelayAnalysis from "@lib/components/statistics/global/charts/delayanalysis/DelayAnalysis.svelte";
+	import PunctualityRate from "@lib/components/statistics/global/charts/PunctualityRate.svelte";
+	import DelaySeverityBuckets from "@lib/components/statistics/global/charts/DelaySeverityBuckets.svelte";
+	import PlatformChangeRate from "@lib/components/statistics/global/charts/PlatformChangeRate.svelte";
+	import OperatorReliability from "@lib/components/statistics/global/charts/OperatorReliability.svelte";
+	import JourneyTypeShare from "@lib/components/statistics/global/charts/JourneyTypeShare.svelte";
+	import DisruptionCauses from "@lib/components/statistics/global/charts/DisruptionCauses.svelte";
 
 	let { data }: PageProps = $props();
 
@@ -103,6 +114,8 @@
 	// hourly metrics
 	let hourlyTransportMetricsLoading: boolean = $state(true);
 	let hourlyTransportMetricsPromise: Promise<MetricSeries[]> = $state(data.streamed.hourlyTransportMetrics);
+	let journeyServiceMetricsPromise: Promise<MetricSeries[]> = $state(data.streamed.journeyServiceMetrics);
+	let messageSummaryMetricsPromise: Promise<MetricSeries[]> = $state(data.streamed.messageSummaryMetrics);
 	let hourlyTransportSettings: HourlyTransportSettings = $state({
 		dates: {
 			start: data.timerange.start,
@@ -123,7 +136,7 @@
 		metricComponent: Component<any>;
 		props: Record<string, unknown>;
 	};
-	let metricCards: MetricCardData[] = $derived([
+	let hourlyMetricCards: MetricCardData[] = $derived([
 		{
 			metricComponent: HourlyStopRate,
 			props: {
@@ -131,15 +144,56 @@
 			}
 		},
 		{
-			metricComponent: DelayAnalysis,
+			metricComponent: PunctualityRate,
 			props: {
 				promise: hourlyTransportMetricsPromise
 			}
 		},
 		{
-			metricComponent: CancellationRate,
+			metricComponent: DelaySeverityBuckets,
 			props: {
 				promise: hourlyTransportMetricsPromise
+			}
+		},
+		{
+			metricComponent: PlatformChangeRate,
+			props: {
+				promise: hourlyTransportMetricsPromise
+			}
+		},
+		{
+			metricComponent: DelayAnalysis,
+			props: {
+				promise: hourlyTransportMetricsPromise,
+				class: "xl:col-span-2"
+			}
+		},
+		{
+			metricComponent: CancellationRate,
+			props: {
+				promise: hourlyTransportMetricsPromise,
+				class: "xl:col-span-2"
+			}
+		}
+	]);
+	let serviceMetricCards: MetricCardData[] = $derived([
+		{
+			metricComponent: OperatorReliability,
+			props: {
+				promise: journeyServiceMetricsPromise
+			}
+		},
+		{
+			metricComponent: JourneyTypeShare,
+			props: {
+				promise: journeyServiceMetricsPromise
+			}
+		},
+		{
+			metricComponent: DisruptionCauses,
+			props: {
+				promise: messageSummaryMetricsPromise,
+				class: "xl:col-span-2"
 			}
 		}
 	]);
@@ -256,13 +310,43 @@
 							...(settings.transportTypes.length > 0 ? { transportTypes: settings.transportTypes } : {})
 						}
 					});
+					journeyServiceMetricsPromise = loadJourneyServiceMetrics({
+						request: {
+							start: settings.dates.start.startOf("day").toISO()!,
+							end: settings.dates.end.endOf("day").toISO()!,
+							...(settings.transportTypes.length > 0 ? { transportTypes: settings.transportTypes } : {})
+						}
+					});
+					messageSummaryMetricsPromise = loadMessageSummaryMetrics({
+						request: {
+							start: settings.dates.start.startOf("day").toISO()!,
+							end: settings.dates.end.endOf("day").toISO()!,
+							...(settings.transportTypes.length > 0 ? { transportTypes: settings.transportTypes } : {}),
+							limit: 12
+						}
+					});
 				}}
 				class="mt-14 self-start justify-self-end"
 			/>
 		</div>
 
-		<div class="space-y-2">
-			{#each metricCards as metricCard}
+		<div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+			{#each hourlyMetricCards as metricCard}
+				{@const MetricComponent = metricCard.metricComponent}
+				<MetricComponent {...metricCard.props} />
+			{/each}
+		</div>
+	</section>
+
+	<Separator />
+
+	<section class="space-y-4">
+		<div class="relative flex flex-row items-center justify-between">
+			<h2 class="text-2xl font-medium">Service Transparency</h2>
+		</div>
+
+		<div class="grid grid-cols-1 gap-4 xl:grid-cols-2">
+			{#each serviceMetricCards as metricCard}
 				{@const MetricComponent = metricCard.metricComponent}
 				<MetricComponent {...metricCard.props} />
 			{/each}

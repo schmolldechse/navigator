@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { TransportType } from "@lib/api";
 	import type { Component } from "svelte";
-	import ToggleStateButton from "../togglestate/ToggleStateButton.svelte";
+	import ToggleStateButton from "@lib/components/interactable/togglestate/ToggleStateButton.svelte";
 
 	type TransportFilterOption = {
 		id: string;

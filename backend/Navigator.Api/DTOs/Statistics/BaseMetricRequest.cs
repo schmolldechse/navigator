@@ -11,6 +11,9 @@ namespace Navigator.Api.DTOs.Statistics;
 [JsonDerivedType(typeof(TransportTypeDistributionMetricRequest), "TRANSPORT_TYPE_DISTRIBUTION")]
 [JsonDerivedType(typeof(HourlyTransportSnapshotMetricRequest), "HOURLY_TRANSPORT_SNAPSHOT")]
 [JsonDerivedType(typeof(StationSummaryMetricRequest), "STATION_SUMMARY")]
+[JsonDerivedType(typeof(StationTimeSeriesMetricRequest), "STATION_TIME_SERIES")]
+[JsonDerivedType(typeof(JourneyServiceMetricRequest), "JOURNEY_SERVICE")]
+[JsonDerivedType(typeof(MessageSummaryMetricRequest), "MESSAGE_SUMMARY")]
 public abstract class BaseMetricRequest : IValidatableObject
 {
     public virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext) { yield break; }

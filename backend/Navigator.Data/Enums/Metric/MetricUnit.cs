@@ -4,5 +4,6 @@ public enum MetricUnit
 {
     Bytes,
     Count,
-    Seconds
+    Seconds,
+    Percent
 }

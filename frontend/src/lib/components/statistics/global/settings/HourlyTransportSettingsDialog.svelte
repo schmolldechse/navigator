@@ -4,9 +4,23 @@
 	import Regional from "@lib/components/icons/transport-types/Regional.svelte";
 	import Suburban from "@lib/components/icons/transport-types/Suburban.svelte";
 	import Bus from "@lib/components/icons/transport-types/Bus.svelte";
+	import Ferry from "@lib/components/icons/transport-types/Ferry.svelte";
 	import { TransportType } from "@lib/api";
 
 	const availableTransportFilters: TransportFilterOption[] = [
+		{
+			id: "local_public_transport",
+			label: "Local Transit",
+			icon: Regional,
+			transportTypes: [
+				TransportType.REGIONAL_TRAIN,
+				TransportType.CITY_TRAIN,
+				TransportType.SUBWAY,
+				TransportType.TRAM,
+				TransportType.BUS,
+				TransportType.FERRY
+			]
+		},
 		{
 			id: "long_distance",
 			label: "Long Distance",
@@ -32,8 +46,10 @@
 			transportTypes: [TransportType.INTER_REGIONAL_TRAIN]
 		},
 		{ id: "suburban", label: "Suburban", icon: Suburban, transportTypes: [TransportType.CITY_TRAIN] },
+		{ id: "subway", label: "Subway", icon: Suburban, transportTypes: [TransportType.SUBWAY] },
 		{ id: "tram", label: "Tram", icon: Tram, transportTypes: [TransportType.TRAM] },
-		{ id: "bus", label: "Bus", icon: Bus, transportTypes: [TransportType.BUS] }
+		{ id: "bus", label: "Bus", icon: Bus, transportTypes: [TransportType.BUS] },
+		{ id: "ferry", label: "Ferry", icon: Ferry, transportTypes: [TransportType.FERRY] }
 	];
 
 	type HourlyTransportSettings = {

@@ -9,6 +9,8 @@ import { getStationBatch } from "@lib/remote/station.remote";
 import * as v from "valibot";
 import {
 	vBaseMetricRequestHourlyTransportSnapshotMetricRequest,
+	vBaseMetricRequestJourneyServiceMetricRequest,
+	vBaseMetricRequestMessageSummaryMetricRequest,
 	vBaseMetricRequestStationSummaryMetricRequest
 } from "@lib/api/valibot.gen";
 import { loadMetric } from "@lib/remote/metrics.remote";
@@ -54,6 +56,66 @@ const loadHourlyMetrics = query(
 			loadMetric({
 				request: {
 					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_ARRIVAL_DELAY_SAMPLE_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_ARRIVAL_PUNCTUAL_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_ARRIVAL_DELAY_MINOR_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_ARRIVAL_DELAY_MAJOR_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_ARRIVAL_DELAY_SEVERE_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_ARRIVAL_PLATFORM_CHANGES",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
 					seriesType: "HOURLY_GLOBAL_DEPARTURES",
 					start: request.start,
 					end: request.end,
@@ -65,6 +127,66 @@ const loadHourlyMetrics = query(
 				request: {
 					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
 					seriesType: "HOURLY_GLOBAL_DEPARTURE_CANCELLATIONS",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_DEPARTURE_DELAY_SAMPLE_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_DEPARTURE_PUNCTUAL_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_DEPARTURE_DELAY_MINOR_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_DEPARTURE_DELAY_MAJOR_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_DEPARTURE_DELAY_SEVERE_COUNT",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "HOURLY_TRANSPORT_SNAPSHOT",
+					seriesType: "HOURLY_GLOBAL_DEPARTURE_PLATFORM_CHANGES",
 					start: request.start,
 					end: request.end,
 					transportTypes: request.transportTypes
@@ -148,4 +270,99 @@ const loadHeatmapBySeriesType = query(
 	}
 );
 
-export { loadHourlyMetrics, loadHeatmapBySeriesType };
+const loadJourneyServiceMetrics = query(
+	v.object({
+		request: v.pick(vBaseMetricRequestJourneyServiceMetricRequest, [
+			"start",
+			"end",
+			"transportTypes",
+			"journeyTypes",
+			"operatorCodes"
+		]),
+		userIp: v.optional(v.pipe(v.string(), v.ip()))
+	}),
+	async ({ request, userIp }): Promise<MetricSeries[]> =>
+		Promise.all([
+			loadMetric({
+				request: {
+					queryType: "JOURNEY_SERVICE",
+					seriesType: "JOURNEY_SERVICE_OPERATOR_JOURNEYS",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes,
+					journeyTypes: request.journeyTypes,
+					operatorCodes: request.operatorCodes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "JOURNEY_SERVICE",
+					seriesType: "JOURNEY_SERVICE_OPERATOR_CANCELLATIONS",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes,
+					journeyTypes: request.journeyTypes,
+					operatorCodes: request.operatorCodes
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "JOURNEY_SERVICE",
+					seriesType: "JOURNEY_SERVICE_JOURNEY_TYPE_JOURNEYS",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes,
+					journeyTypes: request.journeyTypes,
+					operatorCodes: request.operatorCodes
+				},
+				userIp
+			})
+		])
+);
+
+const loadMessageSummaryMetrics = query(
+	v.object({
+		request: v.pick(vBaseMetricRequestMessageSummaryMetricRequest, [
+			"start",
+			"end",
+			"transportTypes",
+			"messageTypes",
+			"evaNumbers",
+			"limit"
+		]),
+		userIp: v.optional(v.pipe(v.string(), v.ip()))
+	}),
+	async ({ request, userIp }): Promise<MetricSeries[]> =>
+		Promise.all([
+			loadMetric({
+				request: {
+					queryType: "MESSAGE_SUMMARY",
+					seriesType: "MESSAGE_DISRUPTION_CAUSES",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes,
+					messageTypes: request.messageTypes,
+					evaNumbers: request.evaNumbers,
+					limit: request.limit
+				},
+				userIp
+			}),
+			loadMetric({
+				request: {
+					queryType: "MESSAGE_SUMMARY",
+					seriesType: "MESSAGE_DAILY_TYPES",
+					start: request.start,
+					end: request.end,
+					transportTypes: request.transportTypes,
+					messageTypes: request.messageTypes,
+					evaNumbers: request.evaNumbers,
+					limit: request.limit
+				},
+				userIp
+			})
+		])
+);
+
+export { loadHourlyMetrics, loadHeatmapBySeriesType, loadJourneyServiceMetrics, loadMessageSummaryMetrics };

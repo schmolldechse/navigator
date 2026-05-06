@@ -21,6 +21,8 @@ public class StationSummaryMetricRequest : BaseMetricRequest
     {
         MetricSeriesType.StationArrivalDelayAvg => MetricUnit.Seconds,
         MetricSeriesType.StationDepartureDelayAvg => MetricUnit.Seconds,
+        MetricSeriesType.StationArrivalPunctualityRate => MetricUnit.Percent,
+        MetricSeriesType.StationDeparturePunctualityRate => MetricUnit.Percent,
         _ => MetricUnit.Count,
     };
 }
