@@ -16,6 +16,7 @@
 	import DateTooltip from "../../layerchart/tooltips/DateTooltip.svelte";
 	import { DateTime } from "luxon";
 	import MetricLoadingFailedWarning from "../../metric/MetricLoadingFailedWarning.svelte";
+	import Skeleton from "@lib/components/ui/Skeleton.svelte";
 
 	type Props = {
 		promise: Promise<MetricSeries>;
@@ -105,7 +106,7 @@
 	</CardHeader>
 
 	{#await validatedPromise}
-		<div class="bg-muted h-64 w-full animate-pulse rounded-md"></div>
+		<Skeleton class="h-64 w-full" />
 	{:then metric}
 		{@const series = buildDatabaseSizeSeries(metric)}
 

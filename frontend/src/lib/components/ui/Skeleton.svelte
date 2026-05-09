@@ -5,4 +5,4 @@
 	let { class: className }: Props = $props();
 </script>
 
-<div class={["animate-pulse rounded-md", className]}></div>
+<div class={["bg-foreground/5 animate-pulse rounded-md", className]}></div>

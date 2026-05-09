@@ -13,6 +13,7 @@
 	import Card from "@lib/components/ui/card/Card.svelte";
 	import MetricLoadingFailedWarning from "@lib/components/metric/MetricLoadingFailedWarning.svelte";
 	import CardHeader from "@lib/components/ui/card/CardHeader.svelte";
+	import Skeleton from "@lib/components/ui/Skeleton.svelte";
 
 	type Props = {
 		promise: Promise<MetricSeries>;
@@ -74,7 +75,7 @@
 	<CardHeader title="Transport Type Distribution" />
 
 	{#await validatedPromise}
-		<div class="bg-foreground/10 h-64 w-full animate-pulse rounded-md"></div>
+		<Skeleton class="h-64 w-full" />
 	{:then metrics}
 		<PieChart
 			data={buildChartSeries(metrics)}
