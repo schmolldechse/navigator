@@ -2,21 +2,37 @@
 	import type { Snippet } from "svelte";
 	import type { ClassValue, MouseEventHandler } from "svelte/elements";
 
+	type AttributeValue = string | number | boolean | null | undefined;
 	type Props = {
 		mode?: "primary" | "secondary" | "destructive" | "tertiary";
 		href?: string;
+		id?: string;
+		type?: HTMLButtonElement["type"];
 		disabled?: boolean;
 		onclick?: MouseEventHandler<HTMLButtonElement> | null | undefined;
 		children: Snippet;
 		class?: ClassValue;
+		[key: `aria-${string}`]: AttributeValue;
+		[key: `data-${string}`]: AttributeValue;
 	};
-
-	let { mode = "primary", href, disabled = false, onclick, children, class: className }: Props = $props();
+	let {
+		mode = "primary",
+		href,
+		id,
+		type = "button",
+		disabled = false,
+		onclick,
+		children,
+		class: className,
+		...rest
+	}: Props = $props();
 </script>
 
 <svelte:element
 	this={href ? "a" : "button"}
-	type={href ? undefined : "button"}
+	{...rest}
+	{id}
+	type={href ? undefined : type}
 	disabled={href ? undefined : disabled}
 	href={href && !disabled ? href : undefined}
 	role={href && disabled ? "link" : undefined}
