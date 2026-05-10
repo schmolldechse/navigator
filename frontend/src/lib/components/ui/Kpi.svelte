@@ -52,7 +52,7 @@
 
 <Card class={["gap-y-3", className]}>
 	<!-- Header -->
-	<div class="flex items-start justify-between gap-x-3">
+	<div class="flex items-center justify-between gap-x-3">
 		<div class="flex items-center justify-center gap-x-2">
 			{#if Icon}
 				<Icon class="text-foreground/60 shrink-0" size={18} />
