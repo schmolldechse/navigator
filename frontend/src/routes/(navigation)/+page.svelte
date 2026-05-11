@@ -1,63 +1,31 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
 	import Info from "@lucide/svelte/icons/info";
-	import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
-	import { DateTime } from "luxon";
 	import type { Component } from "svelte";
 	import type { PageProps } from "./$types";
-	import Button from "@lib/components/ui/Button.svelte";
-	import Separator from "@lib/components/ui/Separator.svelte";
-	import TimePickerDialog from "@lib/components/ui/timepicker/TimePickerDialog.svelte";
-	import DatabaseSize from "@lib/components/statistics/projectdimensions/DatabaseSize.svelte";
-	import TransportTypeDistribution from "@lib/components/statistics/projectdimensions/TransportTypeDistribution.svelte";
-	// import RecordedRisIds from "@lib/components/projectdimensions/risids/RecordedRisIds.svelte";
+	import DatabaseSizeKpi from "@lib/components/statistics/projectdimensions/DatabaseSizeKpi.svelte";
+	import RecordedRisIds from "@lib/components/statistics/projectdimensions/RecordedRisIds.svelte";
 	import RecordedJourneys from "@lib/components/statistics/projectdimensions/RecordedJourneys.svelte";
-	import type { TimePickerValue, TimePickerRange } from "@lib/components/ui/timepicker/TimePicker.svelte";
+	import * as Accordion from "@lib/components/ui/accordion";
 
 	let { data }: PageProps = $props();
-
-	// settings
-	let isSettingsOpen: boolean = $state(false);
-	let selectedTimerange: { start: DateTime; end: DateTime } = $state({
-		start: data.timerange.start,
-		end: data.timerange.end
-	});
+	let faqValues: string[] = $state([]);
 
 	type MetricCardData = {
 		metricComponent: Component<any>;
-		props: Record<string, unknown>;
-		scale: "small" | "medium" | "large";
+		promise: Promise<unknown>;
 	};
 	let metricCards: MetricCardData[] = $derived([
 		{
-			metricComponent: DatabaseSize,
-			props: {
-				promise: data.dimensions.databaseSize
-			},
-			scale: "medium"
+			metricComponent: DatabaseSizeKpi,
+			promise: data.databaseSize
 		},
-		{
-			metricComponent: TransportTypeDistribution,
-			props: {
-				promise: data.dimensions.transportTypeDistribution
-			},
-			scale: "small"
-		},
-		/*
 		{
 			metricComponent: RecordedRisIds,
-			props: {
-				promise: data.dimensions.risIdDistribution
-			},
-			scale: "large"
+			promise: data.risIdDistribution
 		},
-		*/
 		{
 			metricComponent: RecordedJourneys,
-			props: {
-				promise: data.dimensions.recordedJourneys
-			},
-			scale: "large"
+			promise: data.recordedJourneys
 		}
 	]);
 </script>
@@ -66,7 +34,7 @@
 	<title>Navigator</title>
 </svelte:head>
 
-<main class="container mx-auto flex flex-col space-y-8 p-4 sm:py-8">
+<main class="container mx-auto flex flex-col gap-y-8 p-4 sm:py-8">
 	<!-- Hero Section -->
 	<section>
 		<div class="relative mb-4">
@@ -113,60 +81,51 @@
 		</div>
 	</section>
 
-	<Separator orientation="horizontal" />
-
 	<!-- Project Dimensions -->
 	<section class="space-y-4">
-		<div class="relative flex flex-row items-center justify-between">
-			<h2 class="text-2xl font-medium">Project Dimensions</h2>
+		<h2 class="text-2xl font-medium">Project Dimensions</h2>
 
-			<Button
-				mode="secondary"
-				onclick={(event: MouseEvent) => {
-					event.stopPropagation();
-					isSettingsOpen = !isSettingsOpen;
-				}}
-				class="flex items-center gap-x-2"
-			>
-				<SlidersHorizontal size={18} />
-
-				<div class="hidden items-baseline gap-x-1 md:flex">
-					<span class="text-sm tracking-tight">{selectedTimerange.start?.toLocaleString(DateTime.DATE_MED)}</span>
-					<span>&nbsp;–&nbsp;</span>
-					<span class="text-sm tracking-tight">{selectedTimerange.end?.toLocaleString(DateTime.DATE_MED)}</span>
-				</div>
-			</Button>
-
-			<TimePickerDialog
-				bind:isVisible={isSettingsOpen}
-				isModal={false}
-				isRange
-				value={selectedTimerange}
-				onchange={async (value: TimePickerValue) => {
-					const { start, end } = value as TimePickerRange;
-
-					selectedTimerange = { start, end: end! };
-
-					const url = new URL(window.location.href);
-					url.searchParams.set("start", start.startOf("day").toISO() as string);
-					url.searchParams.set("end", end!.endOf("day").toISO() as string);
-
-					await goto(url, { replaceState: true, keepFocus: true, noScroll: true });
-				}}
-				class="absolute top-full z-50 mt-2 justify-self-end"
-			/>
-		</div>
-
-		<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+		<div class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
 			{#each metricCards as metricCard}
 				{@const MetricComponent = metricCard.metricComponent}
-				{@const cardScale = metricCard.scale}
-				<MetricComponent
-					{...metricCard.props}
-					class={[cardScale === "medium" && "sm:col-span-2", cardScale === "large" && "sm:col-span-2 lg:col-span-3"]}
-				/>
+				<MetricComponent promise={metricCard.promise} class="mb-4 break-inside-avoid" />
 			{/each}
 		</div>
+	</section>
+
+	<!-- FAQ -->
+	<section class="space-y-4">
+		<div class="flex flex-col gap-y-1">
+			<h2 class="text-2xl font-medium">FAQ</h2>
+			<p class="text-muted-foreground max-w-3xl text-sm sm:text-base">
+				Answers to the most important questions about Navigator's data collection.
+			</p>
+		</div>
+
+		<Accordion.Root type="multiple" bind:value={faqValues}>
+			<Accordion.Item value="data-source">
+				<Accordion.Trigger>Where do the data come from?</Accordion.Trigger>
+				<Accordion.Content>
+					<p class="leading-relaxed text-pretty">
+						Navigator pulls real-time transit data directly from the Deutsche Bahn API Marketplace. The system continuously
+						monitors station boards to discover active services and then performs deep-dive queries to capture full journey
+						details. This allows tracking everything from precise stop times and platform changes to real-time delays and
+						cancellations across the entire network.
+					</p>
+				</Accordion.Content>
+			</Accordion.Item>
+
+			<Accordion.Item value="ris-id-matching">
+				<Accordion.Trigger>How are journeys identified?</Accordion.Trigger>
+				<Accordion.Content>
+					<p class="leading-relaxed text-pretty">
+						Official Journey IDs change every day because they include a date prefix. Navigator strips this prefix to isolate a
+						stable RIS ID. By focusing on this permanent identifier, recurring services can be tracked across multiple days.
+						This makes it possible to analyze the performance of specific lines over time.
+					</p>
+				</Accordion.Content>
+			</Accordion.Item>
+		</Accordion.Root>
 	</section>
 </main>
 

@@ -120,11 +120,11 @@ class AccordionItemContext {
 
 const setAccordionRootContext = (context: AccordionRootContext) => setContext(ACCORDION_ROOT_CONTEXT_KEY, context);
 
-const getAccordionRootContext = () => getContext<AccordionRootContext | undefined>(ACCORDION_ROOT_CONTEXT_KEY);
+const getAccordionRootContext = () => getContext<AccordionRootContext>(ACCORDION_ROOT_CONTEXT_KEY);
 
 const setAccordionItemContext = (context: AccordionItemContext) => setContext(ACCORDION_ITEM_CONTEXT_KEY, context);
 
-const getAccordionItemContext = () => getContext<AccordionItemContext | undefined>(ACCORDION_ITEM_CONTEXT_KEY);
+const getAccordionItemContext = () => getContext<AccordionItemContext>(ACCORDION_ITEM_CONTEXT_KEY);
 
 export {
 	type AccordionType,

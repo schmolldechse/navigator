@@ -1,21 +1,9 @@
 <script lang="ts">
-	import {
-		MetricSeriesType,
-		type BaseMetricDataPoint,
-		type BaseMetricDataPointTimestampDataPoint,
-		type MetricSeries
-	} from "@lib/api";
-	import { scaleOrdinal } from "d3-scale";
-	import { schemeTableau10 } from "d3-scale-chromatic";
-	import type { ClassValue } from "svelte/elements";
-	import { Axis, Chart, ChartClipPath, defaultChartPadding, Highlight, LineChart, Spline, Svg, Tooltip } from "layerchart";
-	import { DateTime } from "luxon";
-	import DateTooltip from "../../layerchart/tooltips/DateTooltip.svelte";
-	import Card from "@lib/components/ui/card/Card.svelte";
-	import CardHeader from "@lib/components/ui/card/CardHeader.svelte";
-	import MetricTrend from "@lib/components/metric/MetricTrend.svelte";
+	import { MetricSeriesType, type MetricSeries } from "@lib/api";
 	import MetricLoadingFailedWarning from "@lib/components/metric/MetricLoadingFailedWarning.svelte";
-	import Skeleton from "@lib/components/ui/Skeleton.svelte";
+	import Kpi, { type KpiTrend } from "@lib/components/ui/Kpi.svelte";
+	import TrainFront from "@lucide/svelte/icons/train-front";
+	import type { ClassValue } from "svelte/elements";
 
 	type Props = {
 		promise: Promise<MetricSeries>;
@@ -25,122 +13,32 @@
 
 	let validatedPromise = $derived(
 		promise.then((metric: MetricSeries) => {
-			if (metric.seriesType !== MetricSeriesType.JOURNEY_TOTAL)
-				throw new Error("RecordedJourneyMetricCard received invalid metric series type.");
+			if (metric.seriesType !== MetricSeriesType.JOURNEY_TOTAL) throw new Error("Expected `JOURNEY_TOTAL` metric series");
+			if (!metric.dataPoints.length) throw new Error("Expected at least one data point");
 			return metric;
 		})
 	);
-
-	type RecordedJourneyChartSeries = {
-		key: MetricSeriesType.JOURNEY_TOTAL;
-		data: RecordedJourneysDataPoint[];
-		color: string;
-		label: string;
-	};
-
-	type RecordedJourneysDataPoint = {
-		date: Date;
-		value: number;
-	};
-
-	const colorScale = scaleOrdinal(schemeTableau10);
-
-	const buildChartSeries = (metric: MetricSeries): RecordedJourneyChartSeries[] => {
-		if (!metric.dataPoints.length) return [];
-
-		const dataPoints = metric.dataPoints
-			.map((baseDataPoint: BaseMetricDataPoint) => {
-				const dataPoint = baseDataPoint as BaseMetricDataPointTimestampDataPoint;
-				if (!dataPoint.timestamp || typeof dataPoint.value !== "number") {
-					console.warn("Invalid data point in RecordedJourneys metric series:", baseDataPoint);
-					return null;
-				}
-
-				return {
-					date: new Date(dataPoint.timestamp),
-					value: dataPoint.value
-				};
-			})
-			.filter((dataPoint: RecordedJourneysDataPoint | null): dataPoint is RecordedJourneysDataPoint => !!dataPoint)
-			.sort((a, b) => a.date.getTime() - b.date.getTime());
-
-		return [
-			{
-				key: metric.seriesType as MetricSeriesType.JOURNEY_TOTAL,
-				data: dataPoints,
-				color: colorScale(metric.seriesType),
-				label: "Recorded Journeys"
-			}
-		];
-	};
 </script>
 
-<Card class={["gap-y-2", className]}>
-	<CardHeader title="Recorded Journeys" class="justify-between">
-		{#await validatedPromise then metric}
-			<MetricTrend metrics={[metric]} />
-		{/await}
-	</CardHeader>
+{#await validatedPromise}
+	<Kpi title="Recorded Journeys" loading icon={TrainFront} class={className} />
+{:then metric}
+	{@const firstValue = Number(metric.dataPoints.at(0)?.value)}
+	{@const lastValue = Number(metric.dataPoints.at(-1)?.value)}
+	{@const changedBy = metric.dataPoints.length > 1 ? lastValue - firstValue : 0}
 
-	{#await validatedPromise}
-		<Skeleton class="h-64 w-full" />
-	{:then metric}
-		{@const series = buildChartSeries(metric)}
+	{@const trend: KpiTrend = {
+		value: changedBy.toLocaleString(),
+		label: "last 24h",
+		direction: lastValue > firstValue ? "up" : lastValue < firstValue ? "down" : "neutral",
+		tone: lastValue > firstValue ? "positive" : lastValue < firstValue ? "negative" : "neutral"
+	}}
 
-		<Chart
-			{series}
-			data={series.flatMap((recordedJourneySeries: RecordedJourneyChartSeries) => recordedJourneySeries.data)}
-			x="date"
-			y="value"
-			padding={defaultChartPadding({ left: 64 })}
-			yDomain={null}
-			brush
-			height={250}
-			tooltipContext={{ mode: "quadtree-x" }}
-		>
-			{#snippet axis()}
-				<Axis placement="left" rule grid tickLength={8} format={(value: number) => value.toLocaleString()} />
-				<Axis placement="bottom" rule tickLength={8} />
-			{/snippet}
-
-			{#snippet marks({ context })}
-				<ChartClipPath>
-					{#each context.series.visibleSeries as visibleSeries (visibleSeries.key)}
-						<Spline seriesKey={visibleSeries.key} stroke={visibleSeries.color} strokeWidth={2} />
-					{/each}
-				</ChartClipPath>
-			{/snippet}
-
-			{#snippet highlight()}
-				<Highlight points lines />
-			{/snippet}
-
-			{#snippet tooltip({ context })}
-				<Tooltip.Root anchor="top" variant="none" class="bg-background border-border rounded-lg border-2 px-2 py-0.5">
-					{#snippet children({ data })}
-						<div class="flex flex-col gap-y-1">
-							{#each context.series.visibleSeries as visibleSeries (visibleSeries.key)}
-								<div class="flex items-center justify-between gap-x-4 text-xs">
-									<div class="flex items-center gap-x-2">
-										<div class="h-1.5 w-1.5 rounded-full" style:background-color={visibleSeries.color}></div>
-										<span class="text-foreground">{visibleSeries.label}:</span>
-									</div>
-									<span class="text-foreground">{data.value.toLocaleString()}</span>
-								</div>
-							{/each}
-						</div>
-					{/snippet}
-				</Tooltip.Root>
-
-				<!-- Date Tooltip on x-Axis -->
-				<DateTooltip
-					{context}
-					value={(dataPoint: RecordedJourneysDataPoint) =>
-						DateTime.fromJSDate(dataPoint.date).toLocaleString(DateTime.DATETIME_MED)}
-				/>
-			{/snippet}
-		</Chart>
-	{:catch}
-		<MetricLoadingFailedWarning />
-	{/await}
-</Card>
+	<Kpi title="Recorded Journeys" metric={{ value: lastValue.toLocaleString() }} {trend} icon={TrainFront} class={className} />
+{:catch}
+	<Kpi title="Recorded Journeys" icon={TrainFront} class={className}>
+		{#snippet footer()}
+			<MetricLoadingFailedWarning />
+		{/snippet}
+	</Kpi>
+{/await}
