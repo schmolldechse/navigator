@@ -1,5 +1,5 @@
 <script lang="ts">
-	import StationMap from "@lib/components/maps/StationMap.svelte";
+	import StationMap from "@lib/components/map/StationMap.svelte";
 	import type { PageProps } from "./$types";
 	import type { BaseStation } from "@lib/api/types.gen";
 	import { findNearbyStations } from "@lib/remote/station.remote";
