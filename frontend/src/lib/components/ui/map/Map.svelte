@@ -71,10 +71,9 @@
 </script>
 
 <script lang="ts" generics="TData = unknown">
-	import { interpolateTurbo } from "d3-scale-chromatic";
 	import { mount, onMount, unmount, type Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
-	import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type MapLayerMouseEvent } from "maplibre-gl";
+	import maplibregl, { type GeoJSONSource, type Map as MapLibreMap } from "maplibre-gl";
 	import "maplibre-gl/dist/maplibre-gl.css";
 	import MapMarkerRenderer from "./MapMarkerRenderer.svelte";
 
@@ -86,7 +85,7 @@
 		marker?: Snippet<[MapMarkerRenderContext<TMarkerData>]>;
 		markerAnchor?: MapMarkerAnchor;
 		markerOffset?: MapMarkerOffset;
-		clusterMarkers?: boolean;
+		markerRenderPadding?: number;
 		heatmap?: boolean;
 		heatmapPoints?: MapHeatmapPoint[];
 		heatmapGradient?: MapHeatmapGradient;
@@ -107,21 +106,17 @@
 
 	const BASE_SOURCE_ID = "navigator-map-osm-tiles";
 	const BASE_LAYER_ID = "navigator-map-osm-tiles";
-	const MARKER_SOURCE_ID = "navigator-map-markers";
-	const MARKER_CLUSTER_LAYER_ID = "navigator-map-marker-clusters";
-	const MARKER_POINT_LAYER_ID = "navigator-map-marker-points";
 	const HEATMAP_SOURCE_ID = "navigator-map-heatmap";
 	const HEATMAP_LAYER_ID = "navigator-map-heatmap-layer";
 	const DEFAULT_HEATMAP_GRADIENT: MapHeatmapGradientStop[] = [
 		{ density: 0, color: "rgba(0, 0, 0, 0)" },
-		...Array.from({ length: 8 }, (_, index) => {
-			const density = 0.1 + (index / 7) * 0.9;
-
-			return {
-				density,
-				color: interpolateTurbo(density)
-			};
-		})
+		{ density: 0.08, color: "rgba(0, 42, 255, 0.08)" },
+		{ density: 0.18, color: "rgba(0, 42, 255, 0.36)" },
+		{ density: 0.34, color: "rgba(0, 26, 255, 0.72)" },
+		{ density: 0.5, color: "rgba(38, 0, 255, 0.88)" },
+		{ density: 0.68, color: "rgba(190, 0, 120, 0.94)" },
+		{ density: 0.82, color: "rgba(255, 0, 35, 0.98)" },
+		{ density: 1, color: "#ff1700" }
 	];
 
 	let {
@@ -132,7 +127,7 @@
 		marker: markerContent,
 		markerAnchor = "center",
 		markerOffset,
-		clusterMarkers = true,
+		markerRenderPadding = 128,
 		heatmap = false,
 		heatmapPoints = [],
 		heatmapGradient = DEFAULT_HEATMAP_GRADIENT,
@@ -148,9 +143,6 @@
 	let mapContainer: HTMLDivElement | undefined = $state(undefined);
 	let map: MapLibreMap | undefined = $state(undefined);
 	let styleLoaded = $state(false);
-	let markerById = new globalThis.Map<string, MapMarker<TData>>();
-	let markerPointInteractionsAttached = false;
-	let markerClusterInteractionsAttached = false;
 	let customMarkerById = new globalThis.Map<
 		string,
 		{
@@ -160,6 +152,14 @@
 			content: Snippet<[MapMarkerRenderContext<TData>]>;
 		}
 	>();
+	let customMarkerSyncFrame: number | undefined;
+	let pendingCustomMarkerSync:
+		| {
+				items: MapMarker<TData>[];
+				content: Snippet<[MapMarkerRenderContext<TData>]>;
+				renderPadding: number;
+		  }
+		| undefined;
 	let resizeObserver: ResizeObserver | undefined;
 
 	const isFiniteCoordinate = ({ latitude, longitude }: MapCoordinates) =>
@@ -169,30 +169,6 @@
 		latitude <= 90 &&
 		longitude >= -180 &&
 		longitude <= 180;
-
-	const createEmptyFeatureCollection = () =>
-		({
-			type: "FeatureCollection",
-			features: []
-		}) as unknown as Parameters<GeoJSONSource["setData"]>[0];
-
-	const createMarkerFeatureCollection = (items: MapMarker<TData>[]) =>
-		({
-			type: "FeatureCollection",
-			features: items.filter(isFiniteCoordinate).map((marker: MapMarker<TData>) => ({
-				type: "Feature",
-				id: String(marker.id),
-				properties: {
-					id: String(marker.id),
-					label: marker.label ?? "",
-					color: marker.color ?? "#ffda0a"
-				},
-				geometry: {
-					type: "Point",
-					coordinates: [marker.longitude, marker.latitude]
-				}
-			}))
-		}) as unknown as Parameters<GeoJSONSource["setData"]>[0];
 
 	const createHeatmapFeatureCollection = (items: MapHeatmapPoint[]) =>
 		({
@@ -267,6 +243,36 @@
 
 	const getGeoJsonSource = (sourceId: string) => map?.getSource(sourceId) as GeoJSONSource | undefined;
 
+	const getMarkerRenderPadding = () => (Number.isFinite(markerRenderPadding) ? Math.max(0, markerRenderPadding) : 128);
+
+	const isCustomMarkerInRenderViewport = (marker: MapMarker<TData>, renderPadding: number) => {
+		if (!map || !isFiniteCoordinate(marker)) return false;
+
+		const canvas = map.getCanvas();
+		const width = canvas.clientWidth;
+		const height = canvas.clientHeight;
+
+		if (width <= 0 || height <= 0) return false;
+
+		const point = map.project([marker.longitude, marker.latitude]);
+
+		return (
+			point.x >= -renderPadding &&
+			point.x <= width + renderPadding &&
+			point.y >= -renderPadding &&
+			point.y <= height + renderPadding
+		);
+	};
+
+	const cancelCustomMarkerSync = () => {
+		if (customMarkerSyncFrame !== undefined) {
+			cancelAnimationFrame(customMarkerSyncFrame);
+			customMarkerSyncFrame = undefined;
+		}
+
+		pendingCustomMarkerSync = undefined;
+	};
+
 	const clearCustomMarkers = () => {
 		for (const mountedMarker of customMarkerById.values()) {
 			unmount(mountedMarker.component);
@@ -274,40 +280,6 @@
 		}
 
 		customMarkerById.clear();
-	};
-
-	const setMarkerLayerVisibility = (visibility: "visible" | "none") => {
-		if (!map) return;
-
-		for (const layerId of [MARKER_CLUSTER_LAYER_ID, MARKER_POINT_LAYER_ID]) {
-			if (map.getLayer(layerId)) map.setLayoutProperty(layerId, "visibility", visibility);
-		}
-	};
-
-	const setCursor = (cursor: string) => {
-		if (!map) return;
-		map.getCanvas().style.cursor = cursor;
-	};
-
-	const handleMarkerLayerMouseEnter = () => setCursor("pointer");
-	const handleMarkerLayerMouseLeave = () => setCursor("");
-
-	const attachMarkerLayerInteractions = () => {
-		if (!map) return;
-
-		if (map.getLayer(MARKER_POINT_LAYER_ID) && !markerPointInteractionsAttached) {
-			map.on("click", MARKER_POINT_LAYER_ID, handleMarkerClick);
-			map.on("mouseenter", MARKER_POINT_LAYER_ID, handleMarkerLayerMouseEnter);
-			map.on("mouseleave", MARKER_POINT_LAYER_ID, handleMarkerLayerMouseLeave);
-			markerPointInteractionsAttached = true;
-		}
-
-		if (clusterMarkers && map.getLayer(MARKER_CLUSTER_LAYER_ID) && !markerClusterInteractionsAttached) {
-			map.on("click", MARKER_CLUSTER_LAYER_ID, handleClusterClick);
-			map.on("mouseenter", MARKER_CLUSTER_LAYER_ID, handleMarkerLayerMouseEnter);
-			map.on("mouseleave", MARKER_CLUSTER_LAYER_ID, handleMarkerLayerMouseLeave);
-			markerClusterInteractionsAttached = true;
-		}
 	};
 
 	const getDistanceInMeters = (start: MapCoordinates, end: MapCoordinates) => {
@@ -387,9 +359,9 @@
 			["linear"],
 			["get", "value"],
 			lower,
-			0.25,
+			0.28,
 			normalizedUpper,
-			1
+			0.9
 		]);
 	};
 
@@ -430,52 +402,11 @@
 			type: "heatmap",
 			source: HEATMAP_SOURCE_ID,
 			paint: {
-				"heatmap-weight": ["interpolate", ["linear"], ["get", "value"], 0, 0.25, 100, 1],
-				"heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 4, 1.1, 12, 3.2],
+				"heatmap-weight": ["interpolate", ["linear"], ["get", "value"], 0, 0.28, 100, 0.9],
+				"heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 4, 1.45, 8, 2.25, 12, 3.6, 15, 5],
 				"heatmap-color": createHeatmapColorExpression(heatmapGradient),
-				"heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 14, 8, 28, 13, 54],
+				"heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 30, 8, 54, 12, 82, 15, 116],
 				"heatmap-opacity": 1
-			}
-		});
-	};
-
-	const addMarkerLayers = () => {
-		if (!map || map.getSource(MARKER_SOURCE_ID)) return;
-
-		map.addSource(MARKER_SOURCE_ID, {
-			type: "geojson",
-			data: createMarkerFeatureCollection(markers),
-			cluster: clusterMarkers,
-			clusterMaxZoom: 14,
-			clusterRadius: 48
-		});
-
-		if (clusterMarkers) {
-			map.addLayer({
-				id: MARKER_CLUSTER_LAYER_ID,
-				type: "circle",
-				source: MARKER_SOURCE_ID,
-				filter: ["has", "point_count"],
-				paint: {
-					"circle-color": "#ffda0a",
-					"circle-opacity": 0.95,
-					"circle-radius": ["step", ["get", "point_count"], 17, 10, 21, 100, 27],
-					"circle-stroke-color": "rgba(255, 218, 10, 0.35)",
-					"circle-stroke-width": ["step", ["get", "point_count"], 7, 10, 8, 100, 9]
-				}
-			});
-		}
-
-		map.addLayer({
-			id: MARKER_POINT_LAYER_ID,
-			type: "circle",
-			source: MARKER_SOURCE_ID,
-			filter: ["!", ["has", "point_count"]],
-			paint: {
-				"circle-color": ["case", ["has", "color"], ["get", "color"], "#ffda0a"],
-				"circle-radius": ["interpolate", ["linear"], ["zoom"], 5, 4, 12, 7, 16, 10],
-				"circle-stroke-color": "#0a0a0a",
-				"circle-stroke-width": 2
 			}
 		});
 	};
@@ -524,10 +455,14 @@
 		});
 	};
 
-	const syncCustomMarkers = (items: MapMarker<TData>[], content: Snippet<[MapMarkerRenderContext<TData>]>) => {
+	const syncCustomMarkers = (
+		items: MapMarker<TData>[],
+		content: Snippet<[MapMarkerRenderContext<TData>]>,
+		renderPadding = getMarkerRenderPadding()
+	) => {
 		if (!map) return;
 
-		const visibleItems = items.filter(isFiniteCoordinate);
+		const visibleItems = items.filter((item: MapMarker<TData>) => isCustomMarkerInRenderViewport(item, renderPadding));
 		const nextIds = new Set(visibleItems.map((item: MapMarker<TData>) => String(item.id)));
 
 		for (const [id, mountedMarker] of customMarkerById.entries()) {
@@ -557,28 +492,31 @@
 		}
 	};
 
-	const handleClusterClick = async (event: MapLayerMouseEvent) => {
-		if (!map) return;
+	const scheduleCustomMarkerSync = (
+		items: MapMarker<TData>[],
+		content: Snippet<[MapMarkerRenderContext<TData>]>,
+		renderPadding = getMarkerRenderPadding()
+	) => {
+		if (!map || !styleLoaded) return;
 
-		const feature = event.features?.[0];
-		const clusterId = feature?.properties?.cluster_id;
-		const coordinates = (feature?.geometry.type === "Point" ? feature.geometry.coordinates : undefined) as
-			| [number, number]
-			| undefined;
-		const source = getGeoJsonSource(MARKER_SOURCE_ID);
+		pendingCustomMarkerSync = { items, content, renderPadding };
+		if (customMarkerSyncFrame !== undefined) return;
 
-		if (!source || clusterId === undefined || !coordinates) return;
+		customMarkerSyncFrame = requestAnimationFrame(() => {
+			customMarkerSyncFrame = undefined;
 
-		const expansionZoom = await source.getClusterExpansionZoom(Number(clusterId));
-		map.easeTo({ center: coordinates, zoom: expansionZoom });
+			const nextSync = pendingCustomMarkerSync;
+			pendingCustomMarkerSync = undefined;
+			if (!nextSync) return;
+
+			syncCustomMarkers(nextSync.items, nextSync.content, nextSync.renderPadding);
+		});
 	};
 
-	const handleMarkerClick = (event: MapLayerMouseEvent) => {
-		const feature = event.features?.[0];
-		const id = feature?.properties?.id;
-		const marker = id === undefined ? undefined : markerById.get(String(id));
+	const handleCustomMarkerViewportChange = () => {
+		if (!markerContent) return;
 
-		if (marker) onmarkerselect?.(marker);
+		scheduleCustomMarkerSync(markers, markerContent, getMarkerRenderPadding());
 	};
 
 	onMount(() => {
@@ -626,19 +564,14 @@
 		const initializeMapLayers = () => {
 			if (styleLoaded) return;
 
-			markerById = new globalThis.Map<string, MapMarker<TData>>(
-				markers.map((marker: MapMarker<TData>) => [String(marker.id), marker])
-			);
 			addHeatmapLayer();
-			if (markerContent) {
-				syncCustomMarkers(markers, markerContent);
-			} else {
-				addMarkerLayers();
-				attachMarkerLayerInteractions();
-			}
+			if (markerContent) syncCustomMarkers(markers, markerContent);
 			tryAddDefaultBaseLayer();
 
 			nextMap.on("moveend", emitViewportChange);
+			nextMap.on("move", handleCustomMarkerViewportChange);
+			nextMap.on("zoom", handleCustomMarkerViewportChange);
+			nextMap.on("resize", handleCustomMarkerViewportChange);
 
 			styleLoaded = true;
 			if (mapContainer) {
@@ -673,21 +606,27 @@
 		nextMap.once("load", tryInitializeMapLayers);
 		tryInitializeMapLayers();
 
-		resizeObserver = new ResizeObserver(() => nextMap.resize());
+		resizeObserver = new ResizeObserver(() => {
+			nextMap.resize();
+			handleCustomMarkerViewportChange();
+		});
 		resizeObserver.observe(mapContainer);
 
 		return () => {
 			cancelAnimationFrame(resizeFrame);
 			if (initializeTimeout !== undefined) clearTimeout(initializeTimeout);
 			if (baseLayerTimeout !== undefined) clearTimeout(baseLayerTimeout);
+			cancelCustomMarkerSync();
 			nextMap.off("styledata", tryInitializeMapLayers);
 			nextMap.off("load", tryInitializeMapLayers);
+			nextMap.off("moveend", emitViewportChange);
+			nextMap.off("move", handleCustomMarkerViewportChange);
+			nextMap.off("zoom", handleCustomMarkerViewportChange);
+			nextMap.off("resize", handleCustomMarkerViewportChange);
 			resizeObserver?.disconnect();
 			resizeObserver = undefined;
 			clearCustomMarkers();
 			styleLoaded = false;
-			markerPointInteractionsAttached = false;
-			markerClusterInteractionsAttached = false;
 			nextMap.remove();
 			map = undefined;
 		};
@@ -698,21 +637,15 @@
 
 		const nextMarkers = markers;
 		const nextMarkerContent = markerContent;
-		markerById = new globalThis.Map<string, MapMarker<TData>>(
-			nextMarkers.map((marker: MapMarker<TData>) => [String(marker.id), marker])
-		);
+		const nextMarkerRenderPadding = getMarkerRenderPadding();
 
 		if (nextMarkerContent) {
-			setMarkerLayerVisibility("none");
-			syncCustomMarkers(nextMarkers, nextMarkerContent);
+			scheduleCustomMarkerSync(nextMarkers, nextMarkerContent, nextMarkerRenderPadding);
 			return;
 		}
 
+		cancelCustomMarkerSync();
 		clearCustomMarkers();
-		addMarkerLayers();
-		attachMarkerLayerInteractions();
-		setMarkerLayerVisibility("visible");
-		getGeoJsonSource(MARKER_SOURCE_ID)?.setData(createMarkerFeatureCollection(nextMarkers));
 	});
 
 	$effect(() => {
@@ -757,9 +690,7 @@
 	});
 </script>
 
-<div class={["bg-secondary relative flex min-h-64 overflow-hidden rounded-lg", className]}>
-	<div bind:this={mapContainer} role="region" aria-label={ariaLabel} class="min-h-64 w-full flex-1"></div>
-</div>
+<div bind:this={mapContainer} role="region" aria-label={ariaLabel} class={["min-h-64 w-full rounded-lg", className]}></div>
 
 <style>
 	:global(.navigator-map-custom-marker) {

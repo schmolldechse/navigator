@@ -2,6 +2,7 @@
 	import type { BaseStation } from "@lib/api/types.gen";
 	import type { ClassValue } from "svelte/elements";
 	import Map, { type MapMarker, type MapViewportChange } from "../ui/map/Map.svelte";
+	import MapPin from "@lucide/svelte/icons/map-pin";
 
 	type Props = {
 		stations?: BaseStation[];
@@ -48,9 +49,16 @@
 	center={{ latitude: 50.1066819, longitude: 8.66282825 }}
 	zoom={14}
 	{markers}
-	clusterMarkers={true}
 	onmoveend={handleMoveEnd}
 	onmarkerselect={handleMarkerSelect}
 	ariaLabel="Station map"
 	class={["h-full w-full rounded-xl", className]}
-/>
+>
+	{#snippet marker({ marker })}
+		<div
+			class="border-border bg-background/85 flex h-9 w-9 items-center justify-center rounded-full border shadow-sm backdrop-blur-md"
+		>
+			<MapPin size={18} color={marker.color ?? "#ffda0a"} />
+		</div>
+	{/snippet}
+</Map>

@@ -6,7 +6,6 @@
 		marker: MapMarker<TMarkerData>;
 		markerContent: Snippet<[MapMarkerRenderContext<TMarkerData>]>;
 	};
-
 	let { marker, markerContent }: Props<TData> = $props();
 </script>
 
