@@ -9,7 +9,6 @@
 	type MapMarker<TData = unknown> = MapCoordinates & {
 		id: number | string;
 		label?: string;
-		color?: string;
 		data?: TData;
 	};
 
@@ -86,6 +85,7 @@
 		markerAnchor?: MapMarkerAnchor;
 		markerOffset?: MapMarkerOffset;
 		markerRenderPadding?: number;
+		markerMinZoom?: number;
 		heatmap?: boolean;
 		heatmapPoints?: MapHeatmapPoint[];
 		heatmapGradient?: MapHeatmapGradient;
@@ -128,6 +128,7 @@
 		markerAnchor = "center",
 		markerOffset,
 		markerRenderPadding = 128,
+		markerMinZoom = 0,
 		heatmap = false,
 		heatmapPoints = [],
 		heatmapGradient = DEFAULT_HEATMAP_GRADIENT,
@@ -158,6 +159,7 @@
 				items: MapMarker<TData>[];
 				content: Snippet<[MapMarkerRenderContext<TData>]>;
 				renderPadding: number;
+				minZoom: number;
 		  }
 		| undefined;
 	let resizeObserver: ResizeObserver | undefined;
@@ -244,6 +246,7 @@
 	const getGeoJsonSource = (sourceId: string) => map?.getSource(sourceId) as GeoJSONSource | undefined;
 
 	const getMarkerRenderPadding = () => (Number.isFinite(markerRenderPadding) ? Math.max(0, markerRenderPadding) : 128);
+	const getMarkerMinZoom = () => (Number.isFinite(markerMinZoom) ? Math.max(0, markerMinZoom) : 0);
 
 	const isCustomMarkerInRenderViewport = (marker: MapMarker<TData>, renderPadding: number) => {
 		if (!map || !isFiniteCoordinate(marker)) return false;
@@ -458,11 +461,15 @@
 	const syncCustomMarkers = (
 		items: MapMarker<TData>[],
 		content: Snippet<[MapMarkerRenderContext<TData>]>,
-		renderPadding = getMarkerRenderPadding()
+		renderPadding = getMarkerRenderPadding(),
+		minZoom = getMarkerMinZoom()
 	) => {
 		if (!map) return;
 
-		const visibleItems = items.filter((item: MapMarker<TData>) => isCustomMarkerInRenderViewport(item, renderPadding));
+		const visibleItems =
+			map.getZoom() >= minZoom
+				? items.filter((item: MapMarker<TData>) => isCustomMarkerInRenderViewport(item, renderPadding))
+				: [];
 		const nextIds = new Set(visibleItems.map((item: MapMarker<TData>) => String(item.id)));
 
 		for (const [id, mountedMarker] of customMarkerById.entries()) {
@@ -495,11 +502,12 @@
 	const scheduleCustomMarkerSync = (
 		items: MapMarker<TData>[],
 		content: Snippet<[MapMarkerRenderContext<TData>]>,
-		renderPadding = getMarkerRenderPadding()
+		renderPadding = getMarkerRenderPadding(),
+		minZoom = getMarkerMinZoom()
 	) => {
 		if (!map || !styleLoaded) return;
 
-		pendingCustomMarkerSync = { items, content, renderPadding };
+		pendingCustomMarkerSync = { items, content, renderPadding, minZoom };
 		if (customMarkerSyncFrame !== undefined) return;
 
 		customMarkerSyncFrame = requestAnimationFrame(() => {
@@ -509,14 +517,14 @@
 			pendingCustomMarkerSync = undefined;
 			if (!nextSync) return;
 
-			syncCustomMarkers(nextSync.items, nextSync.content, nextSync.renderPadding);
+			syncCustomMarkers(nextSync.items, nextSync.content, nextSync.renderPadding, nextSync.minZoom);
 		});
 	};
 
 	const handleCustomMarkerViewportChange = () => {
 		if (!markerContent) return;
 
-		scheduleCustomMarkerSync(markers, markerContent, getMarkerRenderPadding());
+		scheduleCustomMarkerSync(markers, markerContent, getMarkerRenderPadding(), getMarkerMinZoom());
 	};
 
 	onMount(() => {
@@ -638,9 +646,10 @@
 		const nextMarkers = markers;
 		const nextMarkerContent = markerContent;
 		const nextMarkerRenderPadding = getMarkerRenderPadding();
+		const nextMarkerMinZoom = getMarkerMinZoom();
 
 		if (nextMarkerContent) {
-			scheduleCustomMarkerSync(nextMarkers, nextMarkerContent, nextMarkerRenderPadding);
+			scheduleCustomMarkerSync(nextMarkers, nextMarkerContent, nextMarkerRenderPadding, nextMarkerMinZoom);
 			return;
 		}
 

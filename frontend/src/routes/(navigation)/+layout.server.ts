@@ -8,7 +8,6 @@ export type NavigationItem = {
 
 export const load: LayoutServerLoad = async () => ({
 	pages: [
-		{ href: "/maps", pageName: "Station Map", icon: "Map" },
 		{ href: "/statistics", pageName: "Statistics", icon: "ChartLine" },
 		{ href: "/timetable", pageName: "Timetable", icon: "Clock_4" }
 	]

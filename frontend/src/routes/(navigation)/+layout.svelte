@@ -3,7 +3,6 @@
 	import { page } from "$app/state";
 	import ChartLine from "@lucide/svelte/icons/chart-line";
 	import Clock_4 from "@lucide/svelte/icons/clock-4";
-	import Map from "@lucide/svelte/icons/map";
 	import Logo from "$lib/components/Logo.svelte";
 	import type { Component } from "svelte";
 	import X from "@lucide/svelte/icons/x";
@@ -17,7 +16,6 @@
 	let isMenuOpen: boolean = $state(false);
 
 	const icons: Record<string, Component> = {
-		Map: Map as Component,
 		ChartLine: ChartLine as Component,
 		Clock_4: Clock_4 as Component
 	};
