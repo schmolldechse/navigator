@@ -15,9 +15,21 @@ public class HourlyTransportSnapshotMetricRequest : BaseMetricRequest
         MetricSeriesType.HourlyGlobalArrivals,
         MetricSeriesType.HourlyGlobalArrivalCancellations,
         MetricSeriesType.HourlyGlobalArrivalDelaySum,
+        MetricSeriesType.HourlyGlobalArrivalDelaySampleCount,
+        MetricSeriesType.HourlyGlobalArrivalPunctualCount,
+        MetricSeriesType.HourlyGlobalArrivalDelayMinorCount,
+        MetricSeriesType.HourlyGlobalArrivalDelayMajorCount,
+        MetricSeriesType.HourlyGlobalArrivalDelaySevereCount,
+        MetricSeriesType.HourlyGlobalArrivalPlatformChanges,
         MetricSeriesType.HourlyGlobalDepartures,
         MetricSeriesType.HourlyGlobalDepartureCancellations,
-        MetricSeriesType.HourlyGlobalDepartureDelaySum
+        MetricSeriesType.HourlyGlobalDepartureDelaySum,
+        MetricSeriesType.HourlyGlobalDepartureDelaySampleCount,
+        MetricSeriesType.HourlyGlobalDeparturePunctualCount,
+        MetricSeriesType.HourlyGlobalDepartureDelayMinorCount,
+        MetricSeriesType.HourlyGlobalDepartureDelayMajorCount,
+        MetricSeriesType.HourlyGlobalDepartureDelaySevereCount,
+        MetricSeriesType.HourlyGlobalDeparturePlatformChanges
     ];
 
     [JsonPropertyName("seriesType")]
@@ -25,9 +37,21 @@ public class HourlyTransportSnapshotMetricRequest : BaseMetricRequest
         MetricSeriesType.HourlyGlobalArrivals,
         MetricSeriesType.HourlyGlobalArrivalCancellations,
         MetricSeriesType.HourlyGlobalArrivalDelaySum,
+        MetricSeriesType.HourlyGlobalArrivalDelaySampleCount,
+        MetricSeriesType.HourlyGlobalArrivalPunctualCount,
+        MetricSeriesType.HourlyGlobalArrivalDelayMinorCount,
+        MetricSeriesType.HourlyGlobalArrivalDelayMajorCount,
+        MetricSeriesType.HourlyGlobalArrivalDelaySevereCount,
+        MetricSeriesType.HourlyGlobalArrivalPlatformChanges,
         MetricSeriesType.HourlyGlobalDepartures,
         MetricSeriesType.HourlyGlobalDepartureCancellations,
-        MetricSeriesType.HourlyGlobalDepartureDelaySum)]
+        MetricSeriesType.HourlyGlobalDepartureDelaySum,
+        MetricSeriesType.HourlyGlobalDepartureDelaySampleCount,
+        MetricSeriesType.HourlyGlobalDeparturePunctualCount,
+        MetricSeriesType.HourlyGlobalDepartureDelayMinorCount,
+        MetricSeriesType.HourlyGlobalDepartureDelayMajorCount,
+        MetricSeriesType.HourlyGlobalDepartureDelaySevereCount,
+        MetricSeriesType.HourlyGlobalDeparturePlatformChanges)]
     [Description("The specific hourly transport metric series to retrieve.")]
     public required MetricSeriesType SeriesType { get; set; }
 

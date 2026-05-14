@@ -21,6 +21,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<RisIdSnapshot> RisIdSnapshots { get; set; }
     public DbSet<JourneySnapshot> JourneySnapshots { get; set; }
     public DbSet<HourlyStationSnapshot> HourlyStationSnapshots { get; set; }
+    public DbSet<DailyJourneyServiceSnapshot> DailyJourneyServiceSnapshots { get; set; }
+    public DbSet<DailyStationMessageSnapshot> DailyStationMessageSnapshots { get; set; }
     // journey
     public DbSet<Administration> Administrations { get; set; }
     public DbSet<Journey> Journeys { get; set; }

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Navigator Journey Metrics"
+  short_description: "Journey dashboard metric design"
+  default_prompt: "Use $navigator-journey-metrics to design Navigator journey dashboard metrics."

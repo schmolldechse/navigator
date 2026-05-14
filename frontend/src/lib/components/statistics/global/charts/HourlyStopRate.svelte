@@ -33,7 +33,7 @@
 	import { scaleOrdinal } from "d3-scale";
 	import { schemeTableau10 } from "d3-scale-chromatic";
 	import type { ClassValue } from "svelte/elements";
-	import { Axis, BarChart, Bars, ChartClipPath, defaultChartPadding, Highlight, Svg, Tooltip } from "layerchart";
+	import { Axis, Bars, Chart, ChartClipPath, defaultChartPadding, Highlight, Tooltip } from "layerchart";
 	import MetricCardBase from "@lib/components/metric/MetricCardBase.svelte";
 	import MetricCardTitle from "@lib/components/metric/MetricCardTitle.svelte";
 	import MetricLoadingFailedWarning from "@lib/components/metric/MetricLoadingFailedWarning.svelte";
@@ -107,7 +107,7 @@
 	{:then metrics}
 		{@const { series, data } = hourlyStopHistogram(metrics)}
 
-		<BarChart
+		<Chart
 			{data}
 			{series}
 			x="date"
@@ -115,41 +115,47 @@
 			seriesLayout="stack"
 			bandPadding={0.2}
 			padding={defaultChartPadding({ left: 48, bottom: 48 })}
+			tooltipContext={{ mode: "band" }}
 		>
-			{#snippet children({ visibleSeries, getBarsProps, getHighlightProps })}
-				<Svg>
-					<Axis placement="left" rule grid classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none" }} />
-					<Axis
-						placement="bottom"
-						rule
-						classes={{
-							tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
-						}}
-						tickLabelProps={{
-							rotate: 315,
-							textAnchor: "end"
-						}}
-					/>
+			{#snippet axis()}
+				<Axis placement="left" rule grid classes={{ tickLabel: "text-xs stroke-0 text-muted-foreground select-none" }} />
+				<Axis
+					placement="bottom"
+					rule
+					classes={{
+						tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
+					}}
+					tickLabelProps={{
+						rotate: 315,
+						textAnchor: "end"
+					}}
+				/>
+			{/snippet}
 
-					<ChartClipPath>
-						{#each visibleSeries as series, i (series.key)}
-							<Bars {...getBarsProps(series, i)} />
-						{/each}
-					</ChartClipPath>
+			{#snippet marks({ context })}
+				<ChartClipPath>
+					{#each context.series.visibleSeries as visibleSeries (visibleSeries.key)}
+						<Bars seriesKey={visibleSeries.key} fill={visibleSeries.color} />
+					{/each}
+				</ChartClipPath>
+			{/snippet}
 
-					<ChartClipPath full>
-						<Highlight {...getHighlightProps()} />
-					</ChartClipPath>
-				</Svg>
+			{#snippet highlight()}
+				<Highlight area />
+			{/snippet}
 
-				<!-- Data Tooltip -->
+			{#snippet tooltip({ context })}
 				<Tooltip.Root
 					anchor="bottom"
 					contained="container"
 					class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
 				>
-					{#snippet children({ data, payload })}
-						{@const total = payload.reduce((acc: number, current) => acc + current.value, 0)}
+					{#snippet children({ data })}
+						{@const total = context.series.visibleSeries.reduce(
+							(acc: number, visibleSeries) =>
+								acc + Number(data[visibleSeries.key as keyof HourlyStopDataPoint] ?? 0),
+							0
+						)}
 
 						<Tooltip.Header>
 							{@const startDate = DateTime.fromJSDate(data.date)}
@@ -161,14 +167,16 @@
 						</Tooltip.Header>
 
 						<div class="flex flex-col gap-y-1">
-							{#each [...payload].reverse() as item}
+							{#each [...context.series.visibleSeries].reverse() as visibleSeries (visibleSeries.key)}
 								<div class="flex justify-between gap-x-4 text-xs">
 									<div class="flex items-center gap-x-2">
-										<div class="h-1.5 w-1.5 rounded-full" style:background-color={item.color}></div>
-										<span class="text-muted-foreground text-left">{item.rawSeriesData?.label}</span>
+										<div class="h-1.5 w-1.5 rounded-full" style:background-color={visibleSeries.color}></div>
+										<span class="text-muted-foreground text-left">{visibleSeries.label}</span>
 									</div>
 
-									<span class="text-text">{item.value.toLocaleString()}</span>
+									<span class="text-text">
+										{Number(data[visibleSeries.key as keyof HourlyStopDataPoint] ?? 0).toLocaleString()}
+									</span>
 								</div>
 							{/each}
 
@@ -182,7 +190,7 @@
 					{/snippet}
 				</Tooltip.Root>
 			{/snippet}
-		</BarChart>
+		</Chart>
 	{:catch}
 		<MetricLoadingFailedWarning />
 	{/await}

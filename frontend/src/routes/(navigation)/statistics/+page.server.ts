@@ -1,6 +1,11 @@
 import { DateTime } from "luxon";
 import type { PageServerLoad } from "./$types";
-import { loadHeatmapBySeriesType, loadHourlyMetrics } from "./globalstatistics.remote";
+import {
+	loadHeatmapBySeriesType,
+	loadHourlyMetrics,
+	loadJourneyServiceMetrics,
+	loadMessageSummaryMetrics
+} from "./globalstatistics.remote";
 import { MetricSeriesType, TransportType } from "@lib/api";
 
 export const load: PageServerLoad = async ({
@@ -9,6 +14,8 @@ export const load: PageServerLoad = async ({
 	streamed: {
 		hourlyTransportMetrics: Promise<Awaited<ReturnType<typeof loadHourlyMetrics>>>;
 		heatmapMetrics: Promise<Awaited<ReturnType<typeof loadHeatmapBySeriesType>>>;
+		journeyServiceMetrics: Promise<Awaited<ReturnType<typeof loadJourneyServiceMetrics>>>;
+		messageSummaryMetrics: Promise<Awaited<ReturnType<typeof loadMessageSummaryMetrics>>>;
 	};
 	seriesTypes: {
 		heatmap: MetricSeriesType;
@@ -33,6 +40,21 @@ export const load: PageServerLoad = async ({
 					seriesType: "STATION_ARRIVALS",
 					start: start.toISO(),
 					end: end.toISO()
+				},
+				userIp: getClientAddress()
+			}),
+			journeyServiceMetrics: loadJourneyServiceMetrics({
+				request: {
+					start: start.toISO(),
+					end: end.toISO()
+				},
+				userIp: getClientAddress()
+			}),
+			messageSummaryMetrics: loadMessageSummaryMetrics({
+				request: {
+					start: start.toISO(),
+					end: end.toISO(),
+					limit: 12
 				},
 				userIp: getClientAddress()
 			})

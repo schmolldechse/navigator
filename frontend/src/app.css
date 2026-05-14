@@ -1,41 +1,52 @@
+@import "tailwindcss";
+
 @import "@fontsource/roboto-mono/300.css";
 @import "@fontsource/roboto-mono/400.css";
 @import "@fontsource/roboto-mono/500.css";
 @import "@fontsource/roboto-mono/600.css";
 @import "@fontsource/roboto-mono/700.css";
 
-@layer theme, base, components, utilities;
-@import "tailwindcss/theme.css" layer(theme);
-@import "tailwindcss/preflight.css" layer(base);
-@import "tailwindcss/utilities.css" layer(utilities);
+@theme {
+	/* Base Colors */
+	--color-background: oklch(0.12 0 0);
+	--color-foreground: oklch(0.98 0 0);
 
-:root {
-	--background: oklch(0.0969 0 0);
-	--text: oklch(1 0 0);
+	/* Accent */
+	--color-accent: oklch(0.8928 0.1828 96.51);
+	--color-accent-foreground: oklch(0.12 0 0);
 
-	--accent: oklch(0.8928 0.1828 96.51);
-	--secondary: oklch(0.15 0 0);
+	/* Secondary */
+	--color-secondary: oklch(0.20 0 0);
+	--color-secondary-foreground: oklch(0.98 0 0);
 
-	--muted: oklch(0.2 0 0);
-	--muted-foreground: oklch(0.65 0 0);
-}
+	/* Destructive */
+	--color-destructive: oklch(0.55 0.2 25);
+	--color-destructive-foreground: oklch(0.98 0 0);
 
-@theme inline {
-	--color-background: var(--background);
-	--color-text: var(--text);
-	--color-accent: var(--accent);
-	--color-secondary: var(--secondary);
-	--color-muted: var(--muted);
-	--color-muted-foreground: var(--muted-foreground);
+	/* UI-Borders */
+	--color-border: oklch(0.25 0 0);
+	
+	/* Font */
+	--font-mono: "Roboto Mono", monospace;
 }
 
 @layer base {
-	* {
-		font-family: "Roboto Mono", monospace;
-		font-weight: 400;
+	html, body {
+		font-family: var(--font-mono);
+		@apply bg-background text-foreground antialiased;
 	}
 
-	html {
-		@apply bg-background text-text;
+	/* layerchart */
+	.lc-root-container {
+		/* Default marks color when not using explicit color or color scale */
+		--color-primary: var(--color-accent);
+		
+		/* Progressively shaded surfaces based on background context */
+		--color-surface-100: var(--color-background);
+		--color-surface-200: color-mix(in oklch, var(--color-background), var(--color-foreground) 5%);
+		--color-surface-300: color-mix(in oklch, var(--color-background), var(--color-foreground) 15%);
+		
+		/* Content (text) color */
+		--color-surface-content: var(--color-foreground);
 	}
 }

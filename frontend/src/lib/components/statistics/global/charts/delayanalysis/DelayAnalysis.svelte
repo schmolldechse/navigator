@@ -9,6 +9,7 @@
 	type DelayAnalysisDataPoint = {
 		date: Date;
 		value: number;
+		label: string;
 	};
 </script>
 
@@ -33,7 +34,7 @@
 	import Info from "@lucide/svelte/icons/info";
 	import Settings from "@lucide/svelte/icons/settings";
 	import DelayAnalysisInformationDialog from "./DelayAnalysisInformationDialog.svelte";
-	import { Axis, ChartClipPath, defaultChartPadding, Highlight, LineChart, Spline, Svg, Tooltip } from "layerchart";
+	import { Axis, Chart, ChartClipPath, defaultChartPadding, Highlight, Spline, Tooltip } from "layerchart";
 	import MetricCardBase from "@lib/components/metric/MetricCardBase.svelte";
 	import MetricCardTitle from "@lib/components/metric/MetricCardTitle.svelte";
 	import DateTooltip from "@lib/components/layerchart/tooltips/DateTooltip.svelte";
@@ -115,7 +116,9 @@
 			MetricSeriesType.HOURLY_GLOBAL_ARRIVAL_CANCELLATIONS,
 			MetricSeriesType.HOURLY_GLOBAL_DEPARTURE_CANCELLATIONS,
 			MetricSeriesType.HOURLY_GLOBAL_ARRIVAL_DELAY_SUM,
-			MetricSeriesType.HOURLY_GLOBAL_DEPARTURE_DELAY_SUM
+			MetricSeriesType.HOURLY_GLOBAL_DEPARTURE_DELAY_SUM,
+			MetricSeriesType.HOURLY_GLOBAL_ARRIVAL_DELAY_SAMPLE_COUNT,
+			MetricSeriesType.HOURLY_GLOBAL_DEPARTURE_DELAY_SAMPLE_COUNT
 		];
 
 		metrics.forEach((metric: MetricSeries) => {
@@ -151,35 +154,42 @@
 				? {
 						delayType: MetricSeriesType.HOURLY_GLOBAL_ARRIVAL_DELAY_SUM,
 						countType: MetricSeriesType.HOURLY_GLOBAL_ARRIVALS,
-						cancelType: MetricSeriesType.HOURLY_GLOBAL_ARRIVAL_CANCELLATIONS
+						cancelType: MetricSeriesType.HOURLY_GLOBAL_ARRIVAL_CANCELLATIONS,
+						sampleType: MetricSeriesType.HOURLY_GLOBAL_ARRIVAL_DELAY_SAMPLE_COUNT
 					}
 				: {
 						delayType: MetricSeriesType.HOURLY_GLOBAL_DEPARTURE_DELAY_SUM,
 						countType: MetricSeriesType.HOURLY_GLOBAL_DEPARTURES,
-						cancelType: MetricSeriesType.HOURLY_GLOBAL_DEPARTURE_CANCELLATIONS
+						cancelType: MetricSeriesType.HOURLY_GLOBAL_DEPARTURE_CANCELLATIONS,
+						sampleType: MetricSeriesType.HOURLY_GLOBAL_DEPARTURE_DELAY_SAMPLE_COUNT
 					};
 
 			const dataPoints: DelayAnalysisDataPoint[] = sortedTimestamps.map((timestamp: string) => {
 				let delaySum: number = 0;
 				let stopCount: number = 0;
 				let cancellationCount: number = 0;
+				let sampleCount: number = 0;
 
 				if (isTotal)
 					availableTransportTypes.forEach((transportType: TransportType) => {
 						delaySum += lookup[metricSeriesPerDirection.delayType]?.[timestamp]?.[transportType] ?? 0;
 						stopCount += lookup[metricSeriesPerDirection.countType]?.[timestamp]?.[transportType] ?? 0;
 						cancellationCount += lookup[metricSeriesPerDirection.cancelType]?.[timestamp]?.[transportType] ?? 0;
+						sampleCount += lookup[metricSeriesPerDirection.sampleType]?.[timestamp]?.[transportType] ?? 0;
 					});
 				else {
 					delaySum = lookup[metricSeriesPerDirection.delayType]?.[timestamp]?.[seriesType!] ?? 0;
 					stopCount = lookup[metricSeriesPerDirection.countType]?.[timestamp]?.[seriesType!] ?? 0;
 					cancellationCount = lookup[metricSeriesPerDirection.cancelType]?.[timestamp]?.[seriesType!] ?? 0;
+					sampleCount = lookup[metricSeriesPerDirection.sampleType]?.[timestamp]?.[seriesType!] ?? 0;
 				}
 
+				if (sampleCount === 0) sampleCount = Math.max(0, stopCount - cancellationCount);
 				const adjustedDelaySum = handleCancelledAsDelayed ? delaySum + cancellationCount * delayThreshold : delaySum;
-				const delayValue = delayMode === "avg" ? (stopCount > 0 ? adjustedDelaySum / stopCount : 0) : adjustedDelaySum;
+				const denominator = handleCancelledAsDelayed ? sampleCount + cancellationCount : sampleCount;
+				const delayValue = delayMode === "avg" ? (denominator > 0 ? adjustedDelaySum / denominator : 0) : adjustedDelaySum;
 
-				return { date: DateTime.fromISO(timestamp).toJSDate(), value: delayValue };
+				return { date: DateTime.fromISO(timestamp).toJSDate(), value: delayValue, label };
 			});
 
 			return { key, label, data: dataPoints, color: colorScale(key) };
@@ -230,7 +240,7 @@
 		{@const series = buildDelayChartSeries(metrics)}
 		{@const availableTransportTypes = getAvailableTransportTypes(metrics)}
 
-		<LineChart
+		<Chart
 			data={series.flatMap((singleSeries: DelayAnalysisSeries) => singleSeries.data)}
 			{series}
 			x="date"
@@ -239,64 +249,59 @@
 			brush
 			height={384}
 			padding={defaultChartPadding({ left: 48 })}
+			tooltipContext={{ mode: "quadtree-x" }}
 		>
-			{#snippet children({ context, visibleSeries, getSplineProps, getHighlightProps })}
-				<Svg>
-					<Axis
-						placement="left"
-						rule
-						grid
-						tickLabelProps={{
-							textAnchor: "start",
-							dx: 8
-						}}
-						classes={{
-							tickLabel: "text-xs stroke-0 text-muted-foreground select-none",
-							label: "text-xs stroke-0 text-muted-foreground select-none"
-						}}
-						label="Delay (s)"
-					/>
-					<Axis
-						placement="bottom"
-						rule
-						grid
-						classes={{
-							tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
-						}}
-					/>
+			{#snippet axis()}
+				<Axis
+					placement="left"
+					rule
+					grid
+					tickLabelProps={{
+						textAnchor: "start",
+						dx: 8
+					}}
+					classes={{
+						tickLabel: "text-xs stroke-0 text-muted-foreground select-none",
+						label: "text-xs stroke-0 text-muted-foreground select-none"
+					}}
+					label="Delay (s)"
+				/>
+				<Axis
+					placement="bottom"
+					rule
+					grid
+					classes={{
+						tickLabel: "text-xs stroke-0 text-muted-foreground select-none max-sm:hidden"
+					}}
+				/>
+			{/snippet}
 
-					<ChartClipPath>
-						{#each visibleSeries as series, i (series.key)}
-							<Spline {...getSplineProps(series, i)} stroke={series.color} strokeWidth={2} />
-							<Highlight
-								{...getHighlightProps(series, i)}
-								points={{ stroke: series.color }}
-								lines={{ class: "stroke-muted-foreground/30" }}
-							/>
-						{/each}
-					</ChartClipPath>
-				</Svg>
+			{#snippet marks({ context })}
+				<ChartClipPath>
+					{#each context.series.visibleSeries as visibleSeries (visibleSeries.key)}
+						<Spline seriesKey={visibleSeries.key} stroke={visibleSeries.color} strokeWidth={2} />
+					{/each}
+				</ChartClipPath>
+			{/snippet}
 
-				<!-- Data Tooltip -->
+			{#snippet highlight()}
+				<Highlight points lines />
+			{/snippet}
+
+			{#snippet tooltip({ context })}
 				<Tooltip.Root
 					anchor="bottom"
 					contained="container"
 					class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
 				>
-					{#snippet children({ payload })}
+					{#snippet children({ data })}
 						<div class="flex flex-col gap-y-1">
-							{#each [...payload].reverse() as item}
-								<div class="flex items-center justify-between gap-x-4 text-xs">
-									<div class="flex items-center gap-x-2">
-										<div class="h-1.5 w-1.5 rounded-full" style:background-color={item.color}></div>
-										<span class="text-muted-foreground text-left">{item.rawSeriesData?.label}</span>
-									</div>
-
-									<span class="text-text">
-										{item.value.toLocaleString(undefined, { maximumFractionDigits: 1 })}
-									</span>
-								</div>
-							{/each}
+							<div class="flex items-center justify-between gap-x-4 text-xs">
+								<span class="text-muted-foreground text-left">{data.label}</span>
+								<span class="text-text">
+									{data.value.toLocaleString(undefined, { maximumFractionDigits: 1 })}
+								</span>
+							</div>
 						</div>
 					{/snippet}
 				</Tooltip.Root>
@@ -307,7 +312,7 @@
 					value={(data: { date: Date; value: number }) => DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATETIME_MED)}
 				/>
 			{/snippet}
-		</LineChart>
+		</Chart>
 
 		<DelayAnalysisOptionsDialog
 			bind:isVisible={optionsDialogVisible}

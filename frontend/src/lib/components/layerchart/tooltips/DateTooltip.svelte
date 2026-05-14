@@ -1,10 +1,10 @@
 <script lang="ts" generics="T">
-	import { Tooltip, type ChartContextValue } from "layerchart";
+	import { type ChartState, Tooltip } from "layerchart";
 	import { DateTime } from "luxon";
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
 
 	type Props = {
-		context: ChartContextValue;
+		context: ChartState;
 		value?: (data: T) => string;
 	};
 	let { context, value }: Props = $props();
@@ -12,10 +12,10 @@
 
 <Tooltip.Root
 	x="pointer"
-	y={context.height + context.padding.bottom - 12}
+	y={context.height + context.padding.top + 2}
 	anchor="top"
 	variant="none"
-	class="bg-background/90! rounded-lg border border-white/10! px-2 shadow-xl backdrop-blur-md select-none"
+	class="bg-background border-border rounded-lg border-2 px-2"
 >
 	{#snippet children({ data }: { data: T })}
 		<span class="text-text text-xs">

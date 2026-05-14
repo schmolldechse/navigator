@@ -1,12 +1,14 @@
 import type { LayoutServerLoad } from "./$types";
-import type { NavigationItem } from "$lib/components/Header.svelte";
 
-export const load: LayoutServerLoad = async ({}) => {
-	const pages: NavigationItem[] = [
-		{ href: "/maps", pageName: "Station Map", icon: "Map" },
+export type NavigationItem = {
+	href: string;
+	pageName: string;
+	icon?: string;
+};
+
+export const load: LayoutServerLoad = async () => ({
+	pages: [
 		{ href: "/statistics", pageName: "Statistics", icon: "ChartLine" },
 		{ href: "/timetable", pageName: "Timetable", icon: "Clock_4" }
-	];
-
-	return { pages };
-};
+	]
+});
