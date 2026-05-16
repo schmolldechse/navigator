@@ -5,7 +5,7 @@ namespace Navigator.Data.Models.Statistics.Request;
 
 public class TransportTypeDistributionMetricRequest : BaseMetricRequest
 {
-    public override MetricSeriesType MetricSeriesType => MetricSeriesType.TransportTypesTotal;
+    public override MetricSeriesType MetricSeriesType => MetricSeriesType.JourneyTransportTypeDistribution;
     public required DateTimeOffset End { get; set; }
     public TransportType[]? TransportTypes { get; set; }
 }

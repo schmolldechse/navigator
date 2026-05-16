@@ -3,4 +3,5 @@
 public abstract class BaseMetricDataPoint
 {
     public required decimal Value { get; set; }
+    public MetricSample? Sample { get; set; }
 }

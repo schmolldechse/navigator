@@ -534,52 +534,6 @@ namespace Navigator.Data.Migrations
                     b.ToTable("risid_snapshots", "statistics");
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.Views.HourlyStationSnapshot", b =>
-                {
-                    b.Property<int>("ArrivalCancellationCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("arrival_cancellation_count");
-
-                    b.Property<int>("ArrivalCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("arrival_count");
-
-                    b.Property<double>("ArrivalDelaySum")
-                        .HasColumnType("double precision")
-                        .HasColumnName("arrival_delay_sum");
-
-                    b.Property<DateTime>("BucketHour")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("bucket_hour");
-
-                    b.Property<int>("DepartureCancellationCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("departure_cancellation_count");
-
-                    b.Property<int>("DepartureCount")
-                        .HasColumnType("integer")
-                        .HasColumnName("departure_count");
-
-                    b.Property<double>("DepartureDelaySum")
-                        .HasColumnType("double precision")
-                        .HasColumnName("departure_delay_sum");
-
-                    b.Property<int>("EvaNumber")
-                        .HasColumnType("integer")
-                        .HasColumnName("eva_number");
-
-                    b.Property<TransportType>("TransportType")
-                        .HasColumnType("core.transport_type")
-                        .HasColumnName("transport_type");
-
-                    b.ToTable("hourly_station_snapshots", "statistics", t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-
-                    b.ToView("hourly_station_snapshots", "statistics");
-                });
-
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Journey", b =>
                 {
                     b.HasOne("Navigator.Data.Entities.Journey.Administration", "Administration")

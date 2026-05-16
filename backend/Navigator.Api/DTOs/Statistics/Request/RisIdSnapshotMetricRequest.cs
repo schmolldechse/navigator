@@ -9,13 +9,13 @@ public class RisIdSnapshotMetricRequest : BaseMetricRequest
 {
     private static readonly HashSet<MetricSeriesType> ValidSeriesTypes =
     [
-        MetricSeriesType.RisIdsActive,
-        MetricSeriesType.RisIdsInactive
+        MetricSeriesType.RisIdActiveCount,
+        MetricSeriesType.RisIdInactiveCount
     ];
 
     [JsonPropertyName("seriesType")]
-    [AllowedValues(MetricSeriesType.RisIdsActive, MetricSeriesType.RisIdsInactive)]
-    [Description("The specific RIS ID metric series to retrieve. Must be one of: RisIdsActive, RisIdsInactive.")]
+    [AllowedValues(MetricSeriesType.RisIdActiveCount, MetricSeriesType.RisIdInactiveCount)]
+    [Description("The specific RIS ID metric series to retrieve.")]
     public required MetricSeriesType SeriesType { get; set; }
 
     [JsonPropertyName("start")]

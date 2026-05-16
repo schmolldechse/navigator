@@ -1,6 +1,8 @@
-﻿namespace Navigator.Data.Models.Statistics.DataPoint;
+﻿using Navigator.Data.Models.Statistics.Subject;
+
+namespace Navigator.Data.Models.Statistics.DataPoint;
 
 public class StationDataPoint : BaseMetricDataPoint
 {
-    public required int EvaNumber { get; set; }
+    public required StationMetricSubject Station { get; set; }
 }

@@ -6,5 +6,6 @@ public class MetricSeries
 {
     public required MetricSeriesType SeriesType { get; set; }
     public required MetricUnit Unit { get; set; }
+    public MetricPage? Page { get; set; }
     public required IEnumerable<BaseMetricDataPoint> DataPoints { get; set; }
 }

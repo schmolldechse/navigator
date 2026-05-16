@@ -3,12 +3,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Navigator.Data.Enums;
 using Navigator.Data.Infrastructure;
+using Navigator.Data.Repository;
 using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Data.Repository.StationRilRepository;
 using Navigator.Data.Repository.StationTransportRepository;
 using Navigator.Data.Repository.StatisticsRepository;
+using Navigator.Data.Repository.StatisticsRepository.MetricSeriesBuilders;
 using Navigator.Data.Repository.TimetableRepository;
 
 namespace Navigator.Data;
@@ -33,6 +35,17 @@ public static class Injection
 
         services.AddHttpClient();
         services.AddSingleton<ProxyHttpClientFactory>();
+
+        services.AddScoped<Estimator>();
+
+        services.AddTransient<IMetricSeriesBuilder, DatabaseSizeMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, RisIdMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, JourneyMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, TransportTypeDistributionMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, GlobalTransportQualityMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, StationQualityMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, AdministrationRankingMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, LineRankingMetricSeriesBuilder>();
 
         services.AddTransient<IJourneyRepository, JourneyRepository>()
             .AddTransient<IRisIdRepository, RisIdRepository>()

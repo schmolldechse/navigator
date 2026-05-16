@@ -13,6 +13,9 @@ public class MetricSeries
     [JsonPropertyName("unit")]
     public required MetricUnit Unit { get; set; }
 
+    [JsonPropertyName("page")]
+    public MetricPage? Page { get; set; }
+
     [JsonPropertyName("dataPoints")]
     public required IEnumerable<BaseMetricDataPoint> DataPoints { get; set; }
 }
