@@ -50,7 +50,7 @@ public sealed class LineRankingMetricSeriesBuilder(
 
     protected override async Task<MetricSeries> BuildAsync(LineRankingMetricRequest request)
     {
-        var definition = GetDefinition(request.MetricSeriesType);
+        var definition = GetDefinition(request.SeriesType);
         var limit = Math.Clamp(request.Limit, 1, 500);
         var offset = Math.Max(request.Offset, 0);
 
@@ -87,7 +87,7 @@ public sealed class LineRankingMetricSeriesBuilder(
 
         return new()
         {
-            SeriesType = request.MetricSeriesType,
+            SeriesType = request.SeriesType,
             Unit = definition.Unit,
             DataPoints = dataPoints,
             Page = MetricPage.Create(offset, limit, totalItems)
@@ -103,10 +103,10 @@ public sealed class LineRankingMetricSeriesBuilder(
             .AsNoTracking()
             .Where(summary => summary.BucketHour >= start && summary.BucketHour < end);
 
-        if (!string.IsNullOrWhiteSpace(request.LineRegex))
-            query = query.Where(summary => summary.Line != null && Regex.IsMatch(summary.Line, request.LineRegex));
-        if (!string.IsNullOrWhiteSpace(request.NumberRegex))
-            query = query.Where(summary => Regex.IsMatch(summary.Number.ToString(), request.NumberRegex));
+        if (!string.IsNullOrWhiteSpace(request.Line))
+            query = query.Where(summary => summary.Line != null && Regex.IsMatch(summary.Line, request.Line));
+        if (!string.IsNullOrWhiteSpace(request.Number))
+            query = query.Where(summary => Regex.IsMatch(summary.Number.ToString(), request.Number));
 
         return query
             .GroupBy(summary => new
@@ -148,7 +148,6 @@ public sealed class LineRankingMetricSeriesBuilder(
                     transport.number,
                     transport.journey_description,
                     transport.transport_type,
-                    stop_place.schedule_type,
                     journey.administration_id,
                     stop_place.cancelled,
                     stop_place.delay
@@ -227,7 +226,6 @@ public sealed class LineRankingMetricSeriesBuilder(
                 station_events.number AS "Number",
                 station_events.journey_description AS "JourneyDescription",
                 station_events.transport_type AS "TransportType",
-                station_events.schedule_type AS "ScheduleType",
                 station_events.administration_id AS "AdministrationId",
                 routes.origin_eva_number AS "OriginEvaNumber",
                 routes.destination_eva_number AS "DestinationEvaNumber",
@@ -261,17 +259,9 @@ public sealed class LineRankingMetricSeriesBuilder(
                 station_events.number,
                 station_events.journey_description,
                 station_events.transport_type,
-                station_events.schedule_type,
                 station_events.administration_id,
                 routes.origin_eva_number,
                 routes.destination_eva_number
-            ORDER BY
-                station_events.line,
-                station_events.number,
-                routes.origin_eva_number,
-                routes.destination_eva_number
-            LIMIT @limit
-            OFFSET @offset
             """;
 
         var parameters = new List<object>
@@ -281,10 +271,8 @@ public sealed class LineRankingMetricSeriesBuilder(
             new NpgsqlParameter("end_date", NpgsqlDbType.Date) { Value = DateOnly.FromDateTime(request.End.UtcDateTime.Date) },
             new NpgsqlParameter("start", NpgsqlDbType.TimestampTz) { Value = request.Start.UtcDateTime },
             new NpgsqlParameter("end", NpgsqlDbType.TimestampTz) { Value = request.End.UtcDateTime },
-            new NpgsqlParameter("line_regex", NpgsqlDbType.Text) { Value = string.IsNullOrWhiteSpace(request.LineRegex) ? DBNull.Value : request.LineRegex },
-            new NpgsqlParameter("number_regex", NpgsqlDbType.Text) { Value = string.IsNullOrWhiteSpace(request.NumberRegex) ? DBNull.Value : request.NumberRegex },
-            new NpgsqlParameter("limit", NpgsqlDbType.Integer) { Value = request.Limit },
-            new NpgsqlParameter("offset", NpgsqlDbType.Integer) { Value = request.Offset }
+            new NpgsqlParameter("line_regex", NpgsqlDbType.Text) { Value = string.IsNullOrWhiteSpace(request.Line) ? DBNull.Value : request.Line },
+            new NpgsqlParameter("number_regex", NpgsqlDbType.Text) { Value = string.IsNullOrWhiteSpace(request.Number) ? DBNull.Value : request.Number },
         };
 
         return dataContext.Database.SqlQueryRaw<LineRankingRow>(sql.ToString(), parameters.ToArray());

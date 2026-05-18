@@ -37,7 +37,7 @@ public sealed class DatabaseSizeMetricSeriesBuilder(
 
         return new()
         {
-            SeriesType = request.MetricSeriesType,
+            SeriesType = request.SeriesType,
             Unit = MetricUnit.Bytes,
             DataPoints = dataPoints
         };

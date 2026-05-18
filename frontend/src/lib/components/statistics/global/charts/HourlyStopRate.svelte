@@ -152,8 +152,7 @@
 				>
 					{#snippet children({ data })}
 						{@const total = context.series.visibleSeries.reduce(
-							(acc: number, visibleSeries) =>
-								acc + Number(data[visibleSeries.key as keyof HourlyStopDataPoint] ?? 0),
+							(acc: number, visibleSeries) => acc + Number(data[visibleSeries.key as keyof HourlyStopDataPoint] ?? 0),
 							0
 						)}
 

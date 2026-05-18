@@ -120,7 +120,11 @@
 			{/snippet}
 
 			{#snippet tooltip({ context })}
-				<Tooltip.Root anchor="bottom" variant="none" class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none">
+				<Tooltip.Root
+					anchor="bottom"
+					variant="none"
+					class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
+				>
 					{#snippet children({ data })}
 						<Tooltip.Header>
 							<span class="text-text text-xs">{DateTime.fromJSDate(data.date).toLocaleString(DateTime.DATE_MED)}</span>

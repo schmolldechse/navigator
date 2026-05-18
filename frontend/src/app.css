@@ -16,7 +16,7 @@
 	--color-accent-foreground: oklch(0.12 0 0);
 
 	/* Secondary */
-	--color-secondary: oklch(0.20 0 0);
+	--color-secondary: oklch(0.2 0 0);
 	--color-secondary-foreground: oklch(0.98 0 0);
 
 	/* Destructive */
@@ -25,13 +25,14 @@
 
 	/* UI-Borders */
 	--color-border: oklch(0.25 0 0);
-	
+
 	/* Font */
 	--font-mono: "Roboto Mono", monospace;
 }
 
 @layer base {
-	html, body {
+	html,
+	body {
 		font-family: var(--font-mono);
 		@apply bg-background text-foreground antialiased;
 	}
@@ -40,12 +41,12 @@
 	.lc-root-container {
 		/* Default marks color when not using explicit color or color scale */
 		--color-primary: var(--color-accent);
-		
+
 		/* Progressively shaded surfaces based on background context */
 		--color-surface-100: var(--color-background);
 		--color-surface-200: color-mix(in oklch, var(--color-background), var(--color-foreground) 5%);
 		--color-surface-300: color-mix(in oklch, var(--color-background), var(--color-foreground) 15%);
-		
+
 		/* Content (text) color */
 		--color-surface-content: var(--color-foreground);
 	}

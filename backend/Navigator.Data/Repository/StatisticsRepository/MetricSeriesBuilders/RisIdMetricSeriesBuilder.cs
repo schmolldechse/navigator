@@ -19,7 +19,7 @@ public sealed class RisIdMetricSeriesBuilder(
             .OrderBy(snapshot => snapshot.MeasuredAt)
             .ToListAsync();
 
-        var dataPoints = request.MetricSeriesType switch
+        var dataPoints = request.SeriesType switch
         {
             MetricSeriesType.RisIdActiveCount => snapshots.Select(snapshot => new TimestampDataPoint
             {
@@ -31,7 +31,7 @@ public sealed class RisIdMetricSeriesBuilder(
                 Timestamp = snapshot.MeasuredAt,
                 Value = snapshot.Inactive
             }).ToList(),
-            _ => throw new NotSupportedException($"Unsupported RisId metric series type: {request.MetricSeriesType}")
+            _ => throw new NotSupportedException($"Unsupported RisId metric series type: {request.SeriesType}")
         };
 
         DateTimeOffset now = DateTime.UtcNow;
@@ -40,7 +40,7 @@ public sealed class RisIdMetricSeriesBuilder(
             var currentEstimate = await estimator.EstimateCurrentRisIdsAsync();
             if (currentEstimate is null) currentEstimate = (0, 0);
 
-            var currentValue = request.MetricSeriesType switch
+            var currentValue = request.SeriesType switch
             {
                 MetricSeriesType.RisIdActiveCount => currentEstimate.Value.Active,
                 MetricSeriesType.RisIdInactiveCount => currentEstimate.Value.Inactive,
@@ -56,7 +56,7 @@ public sealed class RisIdMetricSeriesBuilder(
 
         return new()
         {
-            SeriesType = request.MetricSeriesType,
+            SeriesType = request.SeriesType,
             Unit = MetricUnit.Count,
             DataPoints = dataPoints
         };

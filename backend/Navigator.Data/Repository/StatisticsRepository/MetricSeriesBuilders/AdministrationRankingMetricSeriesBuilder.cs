@@ -46,7 +46,7 @@ public sealed class AdministrationRankingMetricSeriesBuilder(
 
     protected override async Task<MetricSeries> BuildAsync(AdministrationRankingMetricRequest request)
     {
-        var definition = GetDefinition(request.MetricSeriesType);
+        var definition = GetDefinition(request.SeriesType);
         var limit = Math.Clamp(request.Limit, 1, 500);
         var offset = Math.Max(request.Offset, 0);
         var start = request.Start.UtcDateTime;
@@ -105,7 +105,7 @@ public sealed class AdministrationRankingMetricSeriesBuilder(
 
         return new MetricSeries()
         {
-            SeriesType = request.MetricSeriesType,
+            SeriesType = request.SeriesType,
             Unit = definition.Unit,
             DataPoints = dataPoints,
             Page = MetricPage.Create(offset, limit, totalItems)

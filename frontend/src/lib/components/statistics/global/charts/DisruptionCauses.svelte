@@ -88,7 +88,11 @@
 			{/snippet}
 
 			{#snippet tooltip()}
-				<Tooltip.Root anchor="bottom" variant="none" class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none">
+				<Tooltip.Root
+					anchor="bottom"
+					variant="none"
+					class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
+				>
 					{#snippet children({ data })}
 						<p class="text-text max-w-72 truncate text-xs font-semibold">{data.category}</p>
 						<div class="mt-1 flex justify-between gap-x-4 text-xs">

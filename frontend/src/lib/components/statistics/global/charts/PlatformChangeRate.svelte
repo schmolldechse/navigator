@@ -115,7 +115,12 @@
 			tooltipContext={{ mode: "quadtree-x" }}
 		>
 			{#snippet axis()}
-				<Axis placement="left" rule grid format={(value: number) => `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`} />
+				<Axis
+					placement="left"
+					rule
+					grid
+					format={(value: number) => `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`}
+				/>
 				<Axis placement="bottom" rule grid />
 			{/snippet}
 
@@ -132,7 +137,11 @@
 			{/snippet}
 
 			{#snippet tooltip({ context })}
-				<Tooltip.Root anchor="bottom" variant="none" class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none">
+				<Tooltip.Root
+					anchor="bottom"
+					variant="none"
+					class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
+				>
 					{#snippet children({ data })}
 						<div class="flex flex-col gap-y-1">
 							{#each context.series.visibleSeries as visibleSeries (visibleSeries.key)}
@@ -142,7 +151,9 @@
 										<span class="text-muted-foreground text-left">{visibleSeries.label}</span>
 									</div>
 									<span class="text-text">
-										{Number(data[visibleSeries.key as keyof PlatformChangePoint]).toLocaleString(undefined, { maximumFractionDigits: 2 })}%
+										{Number(data[visibleSeries.key as keyof PlatformChangePoint]).toLocaleString(undefined, {
+											maximumFractionDigits: 2
+										})}%
 									</span>
 								</div>
 							{/each}

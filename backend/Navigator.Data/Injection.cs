@@ -41,9 +41,9 @@ public static class Injection
         services.AddTransient<IMetricSeriesBuilder, DatabaseSizeMetricSeriesBuilder>()
             .AddTransient<IMetricSeriesBuilder, RisIdMetricSeriesBuilder>()
             .AddTransient<IMetricSeriesBuilder, JourneyMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, TransportTypeDistributionMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, GlobalTransportQualityMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, StationQualityMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, NetworkStationEventQualityTimeSeriesMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, StationEventQualityTimeSeriesMetricSeriesBuilder>()
+            .AddTransient<IMetricSeriesBuilder, StationEventQualitySummaryMetricSeriesBuilder>()
             .AddTransient<IMetricSeriesBuilder, AdministrationRankingMetricSeriesBuilder>()
             .AddTransient<IMetricSeriesBuilder, LineRankingMetricSeriesBuilder>();
 

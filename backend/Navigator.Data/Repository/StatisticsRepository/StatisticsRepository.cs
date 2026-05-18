@@ -24,7 +24,7 @@ public class StatisticsRepository(
         if (buildersByRequestType.TryGetValue(baseRequest.GetType(), out var builder))
             return builder.BuildAsync(baseRequest);
 
-        throw new NotSupportedException($"Metric type '{baseRequest.MetricSeriesType}' is not supported.");
+        throw new NotSupportedException($"Metric type '{baseRequest.SeriesType}' is not supported.");
     }
 
     public async Task SaveDatabaseSizeAsync(DatabaseSizeSnapshot snapshot)

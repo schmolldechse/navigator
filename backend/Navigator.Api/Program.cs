@@ -41,7 +41,6 @@ try
     // mapping
     builder.Services.AddSingleton<JourneyMapper>()
         .AddSingleton<StationMapper>()
-        .AddSingleton<StatisticsMapper>()
         .AddSingleton<TimetableMapper>();
 
     // global exception handling

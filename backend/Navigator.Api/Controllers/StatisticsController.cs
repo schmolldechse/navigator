@@ -1,6 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
-using Navigator.Api.DTOs.Statistics;
-using Navigator.Api.Mapping;
+using Navigator.Data.Models.Statistics;
 using Navigator.Data.Repository.StatisticsRepository;
 
 namespace Navigator.Api.Controllers;
@@ -9,8 +8,7 @@ namespace Navigator.Api.Controllers;
 [Route("api/v1/statistics")]
 [Tags("Statistics")]
 public class StatisticsController(
-    IStatisticsRepository statisticsRepository,
-    StatisticsMapper mapper
+    IStatisticsRepository statisticsRepository
 ) : Controller
 {
     [HttpPost("metrics")]
@@ -22,7 +20,7 @@ public class StatisticsController(
     {
         if (!ModelState.IsValid) return BadRequest(ModelState);
 
-        var metric = await statisticsRepository.GetMetricAsync(mapper.MapBaseRequest(request));
-        return Ok(mapper.MapMetricSeries(metric));
+        var metric = await statisticsRepository.GetMetricAsync(request);
+        return Ok(metric);
     }
 }

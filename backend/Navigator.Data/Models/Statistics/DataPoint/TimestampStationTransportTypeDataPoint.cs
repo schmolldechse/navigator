@@ -1,12 +1,15 @@
-using Navigator.Data.Enums;
 using System.Text.Json.Serialization;
+using Navigator.Data.Enums;
 
-namespace Navigator.Api.DTOs.Statistics.DataPoint;
+namespace Navigator.Data.Models.Statistics.DataPoint;
 
-public class TimestampTransportTypeDataPoint : BaseMetricDataPoint
+public class TimestampStationTransportTypeDataPoint : BaseMetricDataPoint
 {
     [JsonPropertyName("timestamp")]
     public required DateTimeOffset Timestamp { get; set; }
+
+    [JsonPropertyName("evaNumber")]
+    public required int EvaNumber { get; set; }
 
     [JsonPropertyName("transportType")]
     public required TransportType TransportType { get; set; }

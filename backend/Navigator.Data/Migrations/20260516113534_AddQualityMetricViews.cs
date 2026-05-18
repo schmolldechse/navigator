@@ -129,7 +129,8 @@ namespace Navigator.Data.Migrations
                     line,
                     number,
                     origin_eva_number,
-                    destination_eva_number;
+                    destination_eva_number
+                WITH NO DATA;
             ");
 
             migrationBuilder.Sql(@"
@@ -190,7 +191,8 @@ namespace Navigator.Data.Migrations
                     stop_place.station_eva_number,
                     stop_place.schedule_type,
                     journey.administration_id,
-                    transport.transport_type;
+                    transport.transport_type
+                WITH NO DATA;
             ");
 
             migrationBuilder.Sql(@"
@@ -215,8 +217,8 @@ namespace Navigator.Data.Migrations
             ");
             #endregion
 
-            migrationBuilder.Sql(@"SELECT cron.schedule('refresh_journey_route_quality_hourly', '0 */6 * * *', 'REFRESH MATERIALIZED VIEW CONCURRENTLY statistics.journey_route_quality_hourly');");
-            migrationBuilder.Sql(@"SELECT cron.schedule('refresh_station_event_quality_hourly', '0 */6 * * *', 'REFRESH MATERIALIZED VIEW CONCURRENTLY statistics.station_event_quality_hourly');");
+            migrationBuilder.Sql(@"SELECT cron.schedule('refresh_journey_route_quality_hourly', '0 */12 * * *', 'REFRESH MATERIALIZED VIEW CONCURRENTLY statistics.journey_route_quality_hourly');");
+            migrationBuilder.Sql(@"SELECT cron.schedule('refresh_station_event_quality_hourly', '0 */12 * * *', 'REFRESH MATERIALIZED VIEW CONCURRENTLY statistics.station_event_quality_hourly');");
         }
 
         /// <inheritdoc />

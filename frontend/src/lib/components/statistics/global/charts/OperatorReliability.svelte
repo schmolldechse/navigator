@@ -49,7 +49,9 @@
 
 	const buildOperatorReliabilityData = (metrics: MetricSeries[]): OperatorReliabilityPoint[] => {
 		const journeyCounts = categoryValues(getCategoryMetric(metrics, MetricSeriesType.JOURNEY_SERVICE_OPERATOR_JOURNEYS));
-		const cancellationCounts = categoryValues(getCategoryMetric(metrics, MetricSeriesType.JOURNEY_SERVICE_OPERATOR_CANCELLATIONS));
+		const cancellationCounts = categoryValues(
+			getCategoryMetric(metrics, MetricSeriesType.JOURNEY_SERVICE_OPERATOR_CANCELLATIONS)
+		);
 
 		return [...journeyCounts.entries()]
 			.map(([category, journeyCount]) => {
@@ -84,7 +86,12 @@
 			tooltipContext={{ mode: "band" }}
 		>
 			{#snippet axis()}
-				<Axis placement="left" rule grid format={(value: number) => `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`} />
+				<Axis
+					placement="left"
+					rule
+					grid
+					format={(value: number) => `${value.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`}
+				/>
 				<Axis placement="bottom" rule tickLabelProps={{ rotate: 315, textAnchor: "end" }} />
 			{/snippet}
 
@@ -101,7 +108,11 @@
 			{/snippet}
 
 			{#snippet tooltip()}
-				<Tooltip.Root anchor="bottom" variant="none" class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none">
+				<Tooltip.Root
+					anchor="bottom"
+					variant="none"
+					class="bg-background/90! rounded-lg border border-white/10! px-2 py-0.5 shadow-xl backdrop-blur-md select-none"
+				>
 					{#snippet children({ data })}
 						<p class="text-text max-w-72 truncate text-xs font-semibold">{data.category}</p>
 						<div class="mt-1 grid grid-cols-2 gap-x-4 gap-y-1 text-xs">

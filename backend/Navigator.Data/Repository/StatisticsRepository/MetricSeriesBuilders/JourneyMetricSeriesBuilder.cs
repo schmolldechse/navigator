@@ -37,7 +37,7 @@ public sealed class JourneyMetricSeriesBuilder(
 
         return new()
         {
-            SeriesType = request.MetricSeriesType,
+            SeriesType = request.SeriesType,
             Unit = MetricUnit.Count,
             DataPoints = dataPoints
         };
