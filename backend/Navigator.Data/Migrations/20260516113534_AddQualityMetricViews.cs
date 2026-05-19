@@ -14,7 +14,7 @@ namespace Navigator.Data.Migrations
             migrationBuilder.Sql(@"
                 CREATE INDEX IF NOT EXISTS IX_journey_stop_places_station_date_planned_time
                 ON core.journey_stop_places (station_eva_number, date, planned_time)
-                INCLUDE (journey_id, schedule_type, cancelled, delay);
+                INCLUDE (id, journey_id, schedule_type, cancelled, delay);
             ");
 
             migrationBuilder.Sql(@"

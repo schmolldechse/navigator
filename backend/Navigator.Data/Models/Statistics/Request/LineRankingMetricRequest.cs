@@ -38,7 +38,7 @@ public class LineRankingMetricRequest : BaseMetricRequest
     public required DateTimeOffset End { get; set; }
 
     [JsonPropertyName("evaNumber")]
-    [Description("Optional array of station EVA numbers. If provided, station event quality is ranked instead of global journey route quality.")]
+    [Description("Optional array of station EVA numbers. If provided, line quality is ranked for station visits instead of global journey route quality.")]
     public int[] EvaNumber { get; set; } = [];
 
     [JsonPropertyName("line")]

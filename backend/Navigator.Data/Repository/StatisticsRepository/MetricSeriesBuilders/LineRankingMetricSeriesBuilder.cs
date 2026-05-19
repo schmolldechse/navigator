@@ -140,10 +140,14 @@ public sealed class LineRankingMetricSeriesBuilder(
     private IQueryable<LineRankingRow> BuildStationLineRankingQuery(LineRankingMetricRequest request)
     {
         const string sql = """
-            WITH station_events AS (
+            WITH station_event_candidates AS (
                 SELECT
+                    stop_place.id,
                     stop_place.journey_id,
                     stop_place.date,
+                    stop_place.station_eva_number,
+                    stop_place.schedule_type,
+                    stop_place.planned_time,
                     coalesce(nullif(transport.line, ''), transport.number::text, 'UNKNOWN') AS line,
                     transport.number,
                     transport.journey_description,
@@ -174,6 +178,31 @@ public sealed class LineRankingMetricSeriesBuilder(
                         @number_regex IS NULL
                         OR transport.number::text ~ @number_regex
                     )
+            ),
+            station_events AS (
+                SELECT
+                    journey_id,
+                    date,
+                    line,
+                    number,
+                    journey_description,
+                    transport_type,
+                    administration_id,
+                    cancelled,
+                    delay
+                FROM (
+                    SELECT
+                        station_event_candidates.*,
+                        row_number() OVER (
+                            PARTITION BY journey_id, date, station_eva_number
+                            ORDER BY
+                                CASE WHEN schedule_type = 'DEPARTURE' THEN 0 ELSE 1 END,
+                                planned_time DESC,
+                                id
+                        ) AS event_rank
+                    FROM station_event_candidates
+                ) AS ranked_station_events
+                WHERE event_rank = 1
             ),
             selected_journeys AS (
                 SELECT DISTINCT journey_id, date
