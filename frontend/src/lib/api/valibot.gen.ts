@@ -659,7 +659,7 @@ export const vBaseMetricRequestAdministrationRankingMetricRequest = v.object({
 	seriesType: vMetricSeriesType,
 	start: v.pipe(v.string(), v.isoTimestamp()),
 	end: v.pipe(v.string(), v.isoTimestamp()),
-	evaNumber: v.optional(
+	evaNumbers: v.optional(
 		v.array(
 			v.union([
 				v.pipe(
@@ -709,7 +709,7 @@ export const vBaseMetricRequestLineRankingMetricRequest = v.object({
 	seriesType: vMetricSeriesType,
 	start: v.pipe(v.string(), v.isoTimestamp()),
 	end: v.pipe(v.string(), v.isoTimestamp()),
-	evaNumber: v.optional(
+	evaNumbers: v.optional(
 		v.array(
 			v.union([
 				v.pipe(

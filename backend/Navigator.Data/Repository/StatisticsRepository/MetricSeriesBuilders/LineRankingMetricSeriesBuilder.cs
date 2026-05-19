@@ -54,7 +54,7 @@ public sealed class LineRankingMetricSeriesBuilder(
         var limit = Math.Clamp(request.Limit, 1, 500);
         var offset = Math.Max(request.Offset, 0);
 
-        var ranking = request.EvaNumber.Any()
+        var ranking = request.EvaNumbers.Any()
             ? BuildStationLineRankingQuery(request)
             : BuildGlobalLineRankingQuery(request);
 
@@ -295,7 +295,7 @@ public sealed class LineRankingMetricSeriesBuilder(
 
         var parameters = new List<object>
         {
-            new NpgsqlParameter("eva_numbers", NpgsqlDbType.Array | NpgsqlDbType.Integer) { Value = request.EvaNumber },
+            new NpgsqlParameter("eva_numbers", NpgsqlDbType.Array | NpgsqlDbType.Integer) { Value = request.EvaNumbers },
             new NpgsqlParameter("start_date", NpgsqlDbType.Date) { Value = DateOnly.FromDateTime(request.Start.UtcDateTime.Date) },
             new NpgsqlParameter("end_date", NpgsqlDbType.Date) { Value = DateOnly.FromDateTime(request.End.UtcDateTime.Date) },
             new NpgsqlParameter("start", NpgsqlDbType.TimestampTz) { Value = request.Start.UtcDateTime },

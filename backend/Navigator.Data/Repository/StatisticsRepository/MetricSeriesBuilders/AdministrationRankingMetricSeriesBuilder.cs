@@ -52,11 +52,11 @@ public sealed class AdministrationRankingMetricSeriesBuilder(
         var start = request.Start.UtcDateTime;
         var end = request.End.UtcDateTime;
 
-        IQueryable<AdministrationRankingRow> ranking = request.EvaNumber.Any()
+        IQueryable<AdministrationRankingRow> ranking = request.EvaNumbers.Any()
             ? dataContext.StationEventQualities
                 .AsNoTracking()
                 .Where(summary => summary.BucketHour >= start && summary.BucketHour < end)
-                .Where(summary => request.EvaNumber.Contains(summary.StationEvaNumber))
+                .Where(summary => request.EvaNumbers.Contains(summary.StationEvaNumber))
                 .GroupBy(summary => new { summary.AdministrationId })
                 .Select(group => new AdministrationRankingRow
                 {

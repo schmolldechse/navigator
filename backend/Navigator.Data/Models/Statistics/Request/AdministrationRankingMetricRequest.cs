@@ -35,9 +35,9 @@ public class AdministrationRankingMetricRequest : BaseMetricRequest
     [JsonPropertyName("end")]
     public required DateTimeOffset End { get; set; }
 
-    [JsonPropertyName("evaNumber")]
+    [JsonPropertyName("evaNumbers")]
     [Description("Optional array of EVA numbers. If provided, station event quality is ranked instead of global journey route quality.")]
-    public int[] EvaNumber { get; set; } = [];
+    public int[] EvaNumbers { get; set; } = [];
 
     [JsonPropertyName("limit")]
     [Range(1, 500)]

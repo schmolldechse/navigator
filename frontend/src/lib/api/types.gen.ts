@@ -125,7 +125,7 @@ export type BaseMetricRequestAdministrationRankingMetricRequest = {
 	/**
 	 * Optional array of EVA numbers. If provided, station event quality is ranked instead of global journey route quality.
 	 */
-	evaNumber?: Array<number | string>;
+	evaNumbers?: Array<number | string>;
 	limit?: number | string;
 	offset?: number | string;
 };
@@ -151,9 +151,9 @@ export type BaseMetricRequestLineRankingMetricRequest = {
 	start: string;
 	end: string;
 	/**
-	 * Optional array of station EVA numbers. If provided, station event quality is ranked instead of global journey route quality.
+	 * Optional array of station EVA numbers. If provided, line quality is ranked for station visits instead of global journey route quality.
 	 */
-	evaNumber?: Array<number | string>;
+	evaNumbers?: Array<number | string>;
 	/**
 	 * Optional regex filter for the line key.
 	 */
