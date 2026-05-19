@@ -18,10 +18,10 @@
 		promise.then((metrics: MetricSeries[]) => {
 			if (
 				!metrics.every((metric: MetricSeries) =>
-					[MetricSeriesType.RIS_IDS_ACTIVE, MetricSeriesType.RIS_IDS_INACTIVE].includes(metric.seriesType)
+					[MetricSeriesType.RIS_ID_ACTIVE_COUNT, MetricSeriesType.RIS_ID_INACTIVE_COUNT].includes(metric.seriesType)
 				)
 			)
-				throw new Error("Expected `RIS_IDS_ACTIVE` or `RIS_IDS_INACTIVE` metric series");
+				throw new Error("Expected `RIS_ID_ACTIVE_COUNT` or `RIS_ID_INACTIVE_COUNT` metric series");
 			if (!metrics.every((metric) => metric.dataPoints.length > 0)) throw new Error("Expected at least one data point");
 
 			return metrics;
@@ -35,7 +35,7 @@
 
 		return metrics.map((metric: MetricSeries) => {
 			const value = Number(metric.dataPoints.at(-1)?.value);
-			const label = metric.seriesType === MetricSeriesType.RIS_IDS_ACTIVE ? "Active" : "Inactive";
+			const label = metric.seriesType === MetricSeriesType.RIS_ID_ACTIVE_COUNT ? "Active" : "Inactive";
 
 			return {
 				key: metric.seriesType,

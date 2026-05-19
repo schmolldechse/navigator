@@ -130,7 +130,7 @@
 </main>
 
 <style>
-	@reference "../app.css";
+	@reference "../../app.css";
 
 	:global(p.about span) {
 		@apply text-accent font-semibold;

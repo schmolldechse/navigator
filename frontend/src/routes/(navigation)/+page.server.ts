@@ -22,7 +22,7 @@ export const load: PageServerLoad = async ({
 		loadMetric({
 			request: {
 				queryType: "RIS_ID_SNAPSHOT",
-				seriesType: "RIS_IDS_ACTIVE",
+				seriesType: "RIS_ID_ACTIVE_COUNT",
 				start: DateTime.now().minus({ days: 1 }).toISO(),
 				end: DateTime.now().toISO()
 			},
@@ -31,7 +31,7 @@ export const load: PageServerLoad = async ({
 		loadMetric({
 			request: {
 				queryType: "RIS_ID_SNAPSHOT",
-				seriesType: "RIS_IDS_INACTIVE",
+				seriesType: "RIS_ID_INACTIVE_COUNT",
 				start: DateTime.now().minus({ days: 1 }).toISO(),
 				end: DateTime.now().toISO()
 			},

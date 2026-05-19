@@ -13,7 +13,8 @@
 
 	let validatedPromise = $derived(
 		promise.then((metric: MetricSeries) => {
-			if (metric.seriesType !== MetricSeriesType.JOURNEY_TOTAL) throw new Error("Expected `JOURNEY_TOTAL` metric series");
+			if (metric.seriesType !== MetricSeriesType.JOURNEY_TOTAL_COUNT)
+				throw new Error("Expected `JOURNEY_TOTAL_COUNT` metric series");
 			if (!metric.dataPoints.length) throw new Error("Expected at least one data point");
 			return metric;
 		})

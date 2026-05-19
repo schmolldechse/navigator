@@ -13,7 +13,8 @@
 
 	const validatedPromise = $derived(
 		promise.then((metric) => {
-			if (metric.seriesType !== MetricSeriesType.DATABASE_SIZE) throw new Error("Expected `DATABASE_SIZE` metric series");
+			if (metric.seriesType !== MetricSeriesType.DATABASE_SIZE_BYTES)
+				throw new Error("Expected `DATABASE_SIZE_BYTES` metric series");
 			if (metric.unit !== MetricUnit.BYTES) throw new Error("Expected metric unit to be bytes");
 			if (!metric.dataPoints.length) throw new Error("Expected at least one data point");
 
