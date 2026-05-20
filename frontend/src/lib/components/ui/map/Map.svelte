@@ -39,7 +39,12 @@
 		color: string;
 	};
 
-	type MapHeatmapGradient = readonly string[] | readonly MapHeatmapGradientStop[];
+	type MapHeatmapGradientInterpolator = (density: number) => string;
+
+	type MapHeatmapGradient =
+		| MapHeatmapGradientInterpolator
+		| readonly string[]
+		| readonly MapHeatmapGradientStop[];
 
 	type MapViewportChange = {
 		center: MapCoordinates;
@@ -63,6 +68,7 @@
 		MapMarkerRenderContext,
 		MapHeatmapPoint,
 		MapHeatmapGradient,
+		MapHeatmapGradientInterpolator,
 		MapHeatmapGradientStop,
 		MapViewportChange,
 		MapStyle
@@ -108,6 +114,8 @@
 	const BASE_LAYER_ID = "navigator-map-osm-tiles";
 	const HEATMAP_SOURCE_ID = "navigator-map-heatmap";
 	const HEATMAP_LAYER_ID = "navigator-map-heatmap-layer";
+	const HEATMAP_SCALE_PADDING = 128;
+	const HEATMAP_INTERPOLATOR_STOP_COUNT = 12;
 	const DEFAULT_HEATMAP_GRADIENT: MapHeatmapGradientStop[] = [
 		{ density: 0, color: "rgba(0, 0, 0, 0)" },
 		{ density: 0.08, color: "rgba(0, 42, 255, 0.08)" },
@@ -162,6 +170,7 @@
 				minZoom: number;
 		  }
 		| undefined;
+	let heatmapScaleFrame: number | undefined;
 	let resizeObserver: ResizeObserver | undefined;
 
 	const isFiniteCoordinate = ({ latitude, longitude }: MapCoordinates) =>
@@ -172,10 +181,12 @@
 		longitude >= -180 &&
 		longitude <= 180;
 
+	const isValidHeatmapPoint = (point: MapHeatmapPoint) => isFiniteCoordinate(point) && Number.isFinite(point.value);
+
 	const createHeatmapFeatureCollection = (items: MapHeatmapPoint[]) =>
 		({
 			type: "FeatureCollection",
-			features: items.filter(isFiniteCoordinate).map((point: MapHeatmapPoint) => ({
+			features: items.filter(isValidHeatmapPoint).map((point: MapHeatmapPoint) => ({
 				type: "Feature",
 				id: String(point.id),
 				properties: {
@@ -191,7 +202,47 @@
 
 	const clampDensity = (density: number) => Math.min(1, Math.max(0, density));
 
+	const normalizeHeatmapGradientStops = (stops: readonly MapHeatmapGradientStop[]) => {
+		const normalizedStops = stops
+			.filter(
+				(stop): stop is MapHeatmapGradientStop =>
+					typeof stop === "object" &&
+					stop !== null &&
+					Number.isFinite(stop.density) &&
+					typeof stop.color === "string" &&
+					stop.color.length > 0
+			)
+			.map((stop: MapHeatmapGradientStop) => ({
+				density: clampDensity(stop.density),
+				color: stop.color
+			}))
+			.sort((left, right) => left.density - right.density);
+
+		if (normalizedStops.length === 0) return DEFAULT_HEATMAP_GRADIENT;
+		if (normalizedStops[0].density > 0) {
+			return [{ density: 0, color: "rgba(0, 0, 0, 0)" }, ...normalizedStops];
+		}
+
+		return normalizedStops;
+	};
+
 	const normalizeHeatmapGradient = (gradient: MapHeatmapGradient) => {
+		if (typeof gradient === "function") {
+			const stops: MapHeatmapGradientStop[] = [
+				{ density: 0, color: "rgba(0, 0, 0, 0)" },
+				...Array.from({ length: HEATMAP_INTERPOLATOR_STOP_COUNT }, (_, index) => {
+					const value = index / (HEATMAP_INTERPOLATOR_STOP_COUNT - 1);
+
+					return {
+						density: 0.1 + value * 0.9,
+						color: gradient(value)
+					};
+				})
+			];
+
+			return normalizeHeatmapGradientStops(stops);
+		}
+
 		if (gradient.length === 0) return DEFAULT_HEATMAP_GRADIENT;
 
 		if (typeof gradient[0] === "string") {
@@ -214,25 +265,7 @@
 			];
 		}
 
-		const stops = gradient
-			.filter(
-				(stop): stop is MapHeatmapGradientStop =>
-					typeof stop === "object" &&
-					stop !== null &&
-					Number.isFinite(stop.density) &&
-					typeof stop.color === "string" &&
-					stop.color.length > 0
-			)
-			.map((stop: MapHeatmapGradientStop) => ({
-				density: clampDensity(stop.density),
-				color: stop.color
-			}))
-			.sort((left, right) => left.density - right.density);
-
-		if (stops.length === 0) return DEFAULT_HEATMAP_GRADIENT;
-		if (stops[0].density > 0) return [{ density: 0, color: "rgba(0, 0, 0, 0)" }, ...stops];
-
-		return stops;
+		return normalizeHeatmapGradientStops(gradient as readonly MapHeatmapGradientStop[]);
 	};
 
 	const createHeatmapColorExpression = (gradient: MapHeatmapGradient) =>
@@ -274,6 +307,13 @@
 		}
 
 		pendingCustomMarkerSync = undefined;
+	};
+
+	const cancelHeatmapScaleSync = () => {
+		if (heatmapScaleFrame !== undefined) {
+			cancelAnimationFrame(heatmapScaleFrame);
+			heatmapScaleFrame = undefined;
+		}
 	};
 
 	const clearCustomMarkers = () => {
@@ -324,14 +364,32 @@
 		};
 	};
 
+	const isHeatmapPointInScaleViewport = (point: MapHeatmapPoint) => {
+		if (!map || !isValidHeatmapPoint(point)) return false;
+
+		const canvas = map.getCanvas();
+		const width = canvas.clientWidth;
+		const height = canvas.clientHeight;
+
+		if (width <= 0 || height <= 0) return false;
+
+		const projectedPoint = map.project([point.longitude, point.latitude]);
+
+		return (
+			projectedPoint.x >= -HEATMAP_SCALE_PADDING &&
+			projectedPoint.x <= width + HEATMAP_SCALE_PADDING &&
+			projectedPoint.y >= -HEATMAP_SCALE_PADDING &&
+			projectedPoint.y <= height + HEATMAP_SCALE_PADDING
+		);
+	};
+
 	const updateVisibleHeatmapScale = () => {
 		if (!map || heatmapPoints.length === 0) {
 			scale = [0, 100];
 			return;
 		}
 
-		const bounds = map.getBounds();
-		const visiblePoints = heatmapPoints.filter((point: MapHeatmapPoint) => bounds.contains([point.longitude, point.latitude]));
+		const visiblePoints = heatmapPoints.filter(isHeatmapPointInScaleViewport);
 
 		if (visiblePoints.length === 0) {
 			scale = [0, 100];
@@ -342,7 +400,18 @@
 		scale = [Math.min(...values), Math.max(...values)];
 	};
 
+	const scheduleVisibleHeatmapScaleUpdate = () => {
+		if (!map || !styleLoaded) return;
+		if (heatmapScaleFrame !== undefined) return;
+
+		heatmapScaleFrame = requestAnimationFrame(() => {
+			heatmapScaleFrame = undefined;
+			updateVisibleHeatmapScale();
+		});
+	};
+
 	const emitViewportChange = () => {
+		cancelHeatmapScaleSync();
 		updateVisibleHeatmapScale();
 
 		const viewport = getViewportChange();
@@ -353,18 +422,27 @@
 		if (!map || !map.getLayer(HEATMAP_LAYER_ID)) return;
 
 		const [min, max] = scale;
+		if (!Number.isFinite(min) || !Number.isFinite(max)) {
+			map.setPaintProperty(HEATMAP_LAYER_ID, "heatmap-weight", 0.8);
+			return;
+		}
+
 		const lower = Math.min(min, max);
 		const upper = Math.max(min, max);
-		const normalizedUpper = lower === upper ? lower + 1 : upper;
+
+		if (lower === upper) {
+			map.setPaintProperty(HEATMAP_LAYER_ID, "heatmap-weight", ["case", ["==", ["get", "value"], lower], 0.72, 0.24]);
+			return;
+		}
 
 		map.setPaintProperty(HEATMAP_LAYER_ID, "heatmap-weight", [
 			"interpolate",
 			["linear"],
 			["get", "value"],
 			lower,
-			0.28,
-			normalizedUpper,
-			0.9
+			0.04,
+			upper,
+			0.82
 		]);
 	};
 
@@ -405,11 +483,11 @@
 			type: "heatmap",
 			source: HEATMAP_SOURCE_ID,
 			paint: {
-				"heatmap-weight": ["interpolate", ["linear"], ["get", "value"], 0, 0.28, 100, 0.9],
-				"heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 4, 1.45, 8, 2.25, 12, 3.6, 15, 5],
+				"heatmap-weight": ["interpolate", ["linear"], ["get", "value"], 0, 0.04, 100, 0.82],
+				"heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 4, 0.34, 7, 0.58, 10, 1, 13, 1.48, 15, 1.85],
 				"heatmap-color": createHeatmapColorExpression(heatmapGradient),
-				"heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 30, 8, 54, 12, 82, 15, 116],
-				"heatmap-opacity": 1
+				"heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 9, 7, 16, 10, 27, 13, 46, 15, 64],
+				"heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0.64, 8, 0.72, 12, 0.78, 15, 0.84]
 			}
 		});
 	};
@@ -527,6 +605,10 @@
 		scheduleCustomMarkerSync(markers, markerContent, getMarkerRenderPadding(), getMarkerMinZoom());
 	};
 
+	const handleHeatmapViewportChange = () => {
+		scheduleVisibleHeatmapScaleUpdate();
+	};
+
 	onMount(() => {
 		if (!mapContainer) return;
 
@@ -578,8 +660,11 @@
 
 			nextMap.on("moveend", emitViewportChange);
 			nextMap.on("move", handleCustomMarkerViewportChange);
+			nextMap.on("move", handleHeatmapViewportChange);
 			nextMap.on("zoom", handleCustomMarkerViewportChange);
+			nextMap.on("zoom", handleHeatmapViewportChange);
 			nextMap.on("resize", handleCustomMarkerViewportChange);
+			nextMap.on("resize", handleHeatmapViewportChange);
 
 			styleLoaded = true;
 			if (mapContainer) {
@@ -616,6 +701,7 @@
 
 		resizeObserver = new ResizeObserver(() => {
 			nextMap.resize();
+			updateVisibleHeatmapScale();
 			handleCustomMarkerViewportChange();
 		});
 		resizeObserver.observe(mapContainer);
@@ -625,12 +711,16 @@
 			if (initializeTimeout !== undefined) clearTimeout(initializeTimeout);
 			if (baseLayerTimeout !== undefined) clearTimeout(baseLayerTimeout);
 			cancelCustomMarkerSync();
+			cancelHeatmapScaleSync();
 			nextMap.off("styledata", tryInitializeMapLayers);
 			nextMap.off("load", tryInitializeMapLayers);
 			nextMap.off("moveend", emitViewportChange);
 			nextMap.off("move", handleCustomMarkerViewportChange);
+			nextMap.off("move", handleHeatmapViewportChange);
 			nextMap.off("zoom", handleCustomMarkerViewportChange);
+			nextMap.off("zoom", handleHeatmapViewportChange);
 			nextMap.off("resize", handleCustomMarkerViewportChange);
+			nextMap.off("resize", handleHeatmapViewportChange);
 			resizeObserver?.disconnect();
 			resizeObserver = undefined;
 			clearCustomMarkers();
@@ -661,7 +751,7 @@
 		if (!map || !styleLoaded) return;
 
 		getGeoJsonSource(HEATMAP_SOURCE_ID)?.setData(createHeatmapFeatureCollection(heatmapPoints));
-		updateVisibleHeatmapScale();
+		scheduleVisibleHeatmapScaleUpdate();
 	});
 
 	$effect(() => {

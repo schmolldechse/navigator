@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Map, {
-		type MapHeatmapGradient,
+		type MapHeatmapGradientInterpolator,
 		type MapHeatmapPoint,
 		type MapMarker,
 		type MapMarkerRenderContext,
@@ -30,6 +30,7 @@
 
 	type SampleMarkerData = {
 		category: SampleMarkerCategory;
+		color: string;
 		score: number;
 	};
 
@@ -59,56 +60,49 @@
 			label: "Frankfurt Hbf",
 			latitude: 50.107145,
 			longitude: 8.663789,
-			color: "#ffda0a",
-			data: { category: "hub", score: 92 }
+			data: { category: "hub", color: "#ffda0a", score: 92 }
 		},
 		{
 			id: "hauptwache",
 			label: "Hauptwache",
 			latitude: 50.11357,
 			longitude: 8.67905,
-			color: categoryColors.city,
-			data: { category: "city", score: 74 }
+			data: { category: "city", color: categoryColors.city, score: 74 }
 		},
 		{
 			id: "konstablerwache",
 			label: "Konstablerwache",
 			latitude: 50.11455,
 			longitude: 8.68774,
-			color: categoryColors.city,
-			data: { category: "city", score: 68 }
+			data: { category: "city", color: categoryColors.city, score: 68 }
 		},
 		{
 			id: "ffm-sued",
 			label: "Frankfurt Sud",
 			latitude: 50.09927,
 			longitude: 8.68609,
-			color: categoryColors.hub,
-			data: { category: "hub", score: 46 }
+			data: { category: "hub", color: categoryColors.hub, score: 46 }
 		},
 		{
 			id: "airport",
 			label: "Frankfurt Flughafen",
 			latitude: 50.05218,
 			longitude: 8.57082,
-			color: categoryColors.airport,
-			data: { category: "airport", score: 57 }
+			data: { category: "airport", color: categoryColors.airport, score: 57 }
 		},
 		{
 			id: "mainz-hbf",
 			label: "Mainz Hbf",
 			latitude: 50.00102,
 			longitude: 8.25856,
-			color: "#e15759",
-			data: { category: "hub", score: 31 }
+			data: { category: "hub", color: "#e15759", score: 31 }
 		},
 		{
 			id: "darmstadt-hbf",
 			label: "Darmstadt Hbf",
 			latitude: 49.87284,
 			longitude: 8.63272,
-			color: "#b07aa1",
-			data: { category: "hub", score: 26 }
+			data: { category: "hub", color: "#b07aa1", score: 26 }
 		}
 	];
 
@@ -136,10 +130,10 @@
 		}))
 	);
 	let markerIconSize = $derived(Math.max(14, Math.min(28, markerSize - 14)));
+	let heatmapGradient: MapHeatmapGradientInterpolator = $derived(getHeatmapGradientInterpolator(selectedHeatmapGradientId));
 	let heatmapGradientColors = $derived(
-		gradientSampleDensities.map((density) => getHeatmapGradientInterpolator(selectedHeatmapGradientId)(density))
+		gradientSampleDensities.map((density) => heatmapGradient(density))
 	);
-	let heatmapGradient: MapHeatmapGradient = $derived(heatmapGradientColors);
 	let heatmapGradientPreview = $derived(`linear-gradient(to right, ${heatmapGradientColors.join(", ")})`);
 
 	const formatNumber = (value: number, maximumFractionDigits = 2) => value.toLocaleString(undefined, { maximumFractionDigits });
@@ -170,8 +164,7 @@
 			label: `Generated marker ${markerNumber}`,
 			latitude,
 			longitude,
-			color: categoryColors[category],
-			data: { category, score }
+			data: { category, color: categoryColors[category], score }
 		};
 
 		nextGeneratedMarker += 1;
@@ -199,7 +192,7 @@
 		style={`height: ${markerSize}px; width: ${markerSize}px;`}
 		title={context.marker.label}
 	>
-		<MapPin size={markerIconSize} color={context.marker.color ?? "#ffda0a"} />
+		<MapPin size={markerIconSize} color={context.marker.data?.color ?? "#ffda0a"} />
 	</div>
 {/snippet}
 

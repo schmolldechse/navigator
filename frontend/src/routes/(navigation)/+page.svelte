@@ -44,7 +44,7 @@
 			</h1>
 		</div>
 
-		<p class="text-muted-foreground max-w-3xl pl-4 text-base sm:pl-8 sm:text-lg lg:text-xl">
+		<p class="text-foreground/60 max-w-3xl pl-4 text-base sm:pl-8 sm:text-lg lg:text-xl">
 			Clear insights. <span class="text-accent font-semibold">Transparency</span> for Germany's Public Transport.
 		</p>
 	</section>
@@ -59,23 +59,28 @@
 
 			<div class="flex flex-col space-y-2 px-10 text-pretty">
 				<p class="about text-sm leading-relaxed sm:text-base lg:text-lg">
-					Detailed and freely accessible statistics on the <span>punctuality</span> of German rail transport are not available from
-					Deutsche Bahn. There is no way to view the performance of specific stations for a user-definable period, as only an annual
-					summary report exists.
+					Detailed and freely accessible statistics on the
+					<span class="text-accent font-semibold">punctuality</span>
+					of German rail transport are not available from Deutsche Bahn. There is no way to view the performance of specific stations
+					for a user-definable period, as only an annual summary report exists.
 				</p>
 
 				<p class="about text-sm leading-relaxed sm:text-base lg:text-lg">
-					<span>Navigator</span> addresses this lack of <span>transparency</span> by specifically collecting journey data. Since
-					<span>March 2025</span>, all relevant information on train services, including
-					<span>delays</span>
-					and <span>cancellations</span>, has been systematically recorded, starting in the Stuttgart area.
+					<span class="text-accent font-semibold">Navigator</span>
+					addresses this lack of
+					<span class="text-accent font-semibold">transparency</span>
+					by specifically collecting journey data. Since
+					<span class="text-accent font-semibold">March 2025</span>, all relevant information on train services, including
+					<span class="text-accent font-semibold">delays</span>
+					and <span class="text-accent font-semibold">cancellations</span>, has been systematically recorded, starting in the Stuttgart
+					area.
 				</p>
 
 				<p class="about text-sm leading-relaxed sm:text-base lg:text-lg">
-					The dataset is continuously expanding to gradually cover more stations. The long-term goal is to achieve <span
-						>nationwide coverage</span
-					>. In this way, Navigator creates <span>data-based transparency</span> that allows users to get a clear picture of the reliability
-					of rail transport.
+					The dataset is continuously expanding to gradually cover more stations. The long-term goal is to achieve
+					<span class="text-accent font-semibold">nationwide coverage</span>. In this way, Navigator creates
+					<span class="text-accent font-semibold">data-based transparency</span>
+					that allows users to get a clear picture of the reliability of rail transport.
 				</p>
 			</div>
 		</div>
@@ -97,7 +102,7 @@
 	<section class="space-y-4">
 		<div class="flex flex-col gap-y-1">
 			<h2 class="text-2xl font-medium">FAQ</h2>
-			<p class="text-muted-foreground max-w-3xl text-sm sm:text-base">
+			<p class="text-foreground/60 max-w-3xl text-sm sm:text-base">
 				Answers to the most important questions about Navigator's data collection.
 			</p>
 		</div>
@@ -128,11 +133,3 @@
 		</Accordion.Root>
 	</section>
 </main>
-
-<style>
-	@reference "../../app.css";
-
-	:global(p.about span) {
-		@apply text-accent font-semibold;
-	}
-</style>

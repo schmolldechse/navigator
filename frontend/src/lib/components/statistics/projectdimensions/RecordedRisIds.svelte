@@ -7,9 +7,10 @@
 	import Kpi, { type KpiTrend } from "@lib/components/ui/Kpi.svelte";
 	import Wrench from "@lucide/svelte/icons/wrench";
 	import DistributionBar, { type DistributionBarItem } from "@lib/components/ui/DistributionBar.svelte";
+	import type { loadMetric } from "@lib/remote/metrics.remote";
 
 	type Props = {
-		promise: Promise<MetricSeries[]>;
+		promise: Promise<Awaited<ReturnType<typeof loadMetric>>[]>;
 		class?: ClassValue;
 	};
 	let { promise, class: className }: Props = $props();

@@ -1,68 +1,27 @@
-import { DateTime } from "luxon";
 import type { PageServerLoad } from "./$types";
-import {
-	loadHeatmapBySeriesType,
-	loadHourlyMetrics,
-	loadJourneyServiceMetrics,
-	loadMessageSummaryMetrics
-} from "./globalstatistics.remote";
-import { MetricSeriesType, TransportType } from "@lib/api";
+import { loadHeatmap } from "@lib/components/statistics/heatmap/heatmap.remote";
+import { createDefaultHeatmapSettings, type HeatmapSettings } from "@lib/components/statistics/heatmap/heatmap";
 
 export const load: PageServerLoad = async ({
 	getClientAddress
 }): Promise<{
-	streamed: {
-		hourlyTransportMetrics: Promise<Awaited<ReturnType<typeof loadHourlyMetrics>>>;
-		heatmapMetrics: Promise<Awaited<ReturnType<typeof loadHeatmapBySeriesType>>>;
-		journeyServiceMetrics: Promise<Awaited<ReturnType<typeof loadJourneyServiceMetrics>>>;
-		messageSummaryMetrics: Promise<Awaited<ReturnType<typeof loadMessageSummaryMetrics>>>;
-	};
-	seriesTypes: {
-		heatmap: MetricSeriesType;
-	};
-	timerange: { start: DateTime; end: DateTime };
-	transportTypes: TransportType[];
+	heatmap: { promise: Promise<Awaited<ReturnType<typeof loadHeatmap>>>; settings: HeatmapSettings };
 }> => {
-	const start = DateTime.now().minus({ days: 7 });
-	const end = DateTime.now();
+	const heatmapSettings: HeatmapSettings = createDefaultHeatmapSettings();
 
 	return {
-		streamed: {
-			hourlyTransportMetrics: loadHourlyMetrics({
+		heatmap: {
+			promise: loadHeatmap({
 				request: {
-					start: start.toISO(),
-					end: end.toISO()
+					seriesType: heatmapSettings.seriesType,
+					scheduleType: heatmapSettings.scheduleType,
+					start: heatmapSettings.dates.start.toISO()!,
+					end: heatmapSettings.dates.end.toISO()!,
+					transportTypes: heatmapSettings.transportTypes
 				},
 				userIp: getClientAddress()
 			}),
-			heatmapMetrics: loadHeatmapBySeriesType({
-				request: {
-					seriesType: "STATION_ARRIVALS",
-					start: start.toISO(),
-					end: end.toISO()
-				},
-				userIp: getClientAddress()
-			}),
-			journeyServiceMetrics: loadJourneyServiceMetrics({
-				request: {
-					start: start.toISO(),
-					end: end.toISO()
-				},
-				userIp: getClientAddress()
-			}),
-			messageSummaryMetrics: loadMessageSummaryMetrics({
-				request: {
-					start: start.toISO(),
-					end: end.toISO(),
-					limit: 12
-				},
-				userIp: getClientAddress()
-			})
-		},
-		seriesTypes: {
-			heatmap: MetricSeriesType.STATION_ARRIVALS
-		},
-		timerange: { start, end },
-		transportTypes: []
+			settings: heatmapSettings
+		}
 	};
 };

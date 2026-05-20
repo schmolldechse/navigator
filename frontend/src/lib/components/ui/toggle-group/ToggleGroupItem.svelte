@@ -1,16 +1,16 @@
 <script lang="ts" generics="T extends ToggleItem">
 	import { untrack, type Snippet } from "svelte";
 	import { getToggleGroupContext, type ToggleItem } from "./toggle-group-context.svelte";
-	import type { ClassValue } from "svelte/elements";
+	import type { ClassValue, HTMLButtonAttributes } from "svelte/elements";
 
-	type Props = {
+	type Props = Omit<HTMLButtonAttributes, "class" | "disabled" | "type" | "onselect"> & {
 		item: T;
 		disabled?: boolean;
 		onselect?: (option: T, isActive: boolean) => void;
 		children: Snippet<[{ isActive: boolean; isDisabled: boolean }?]>;
 		class?: ClassValue;
 	};
-	let { item, disabled, onselect, children, class: className }: Props = $props();
+	let { item, disabled, onselect, children, class: className, ...rest }: Props = $props();
 
 	const context = getToggleGroupContext<T>();
 	if (!context) throw new Error("ToggleGroupItem must be used within a ToggleGroup.");
@@ -24,6 +24,7 @@
 </script>
 
 <button
+	{...rest}
 	type="button"
 	data-active={isActive ? true : undefined}
 	{disabled}

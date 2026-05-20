@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
-	import type { ClassValue } from "svelte/elements";
-	import Button from "../Button.svelte";
+	import type { ClassValue, HTMLDialogAttributes } from "svelte/elements";
 	import X from "@lucide/svelte/icons/x";
+	import Button from "../Button.svelte";
 
 	type Props = {
 		isVisible: boolean;
@@ -11,88 +11,159 @@
 		actions?: Snippet;
 		showHeader?: boolean;
 		showActions?: boolean;
+		showCloseButton?: boolean;
 		isModal?: boolean;
 		clickOutsideToClose?: boolean;
 		onclose?: () => void;
 		class?: ClassValue;
-	};
+	} & Omit<HTMLDialogAttributes, "open" | "class" | "onclose" | "title">;
 	let {
 		isVisible = $bindable(false),
-		children,
 		title,
+		children,
 		actions,
 		showHeader = true,
 		showActions = true,
+		showCloseButton = true,
 		isModal = true,
 		clickOutsideToClose = true,
 		onclose,
-		class: classNames
+		class: className,
+		...rest
 	}: Props = $props();
 
+	const id = $props.id();
+	const titleId = `${id}-title`;
+
 	let dialog: HTMLDialogElement | undefined = $state(undefined);
+
+	let hasEmittedClose = $state(false);
+	let suppressNextNativeClose = $state(false);
+
+	const hasVisibleTitle = $derived(showHeader && Boolean(title));
+	const ariaLabel = $derived(hasVisibleTitle ? undefined : (rest["aria-label"] ?? "Dialog"));
 
 	$effect(() => {
 		if (!dialog) return;
 
-		if (isVisible) isModal ? dialog.showModal() : dialog.show();
-		else dialog.close();
+		if (isVisible) {
+			hasEmittedClose = false;
+			suppressNextNativeClose = false;
+
+			if (!dialog.open) {
+				if (isModal) dialog.showModal();
+				else dialog.show();
+			}
+
+			return;
+		}
+
+		if (dialog.open) {
+			suppressNextNativeClose = true;
+			dialog.close();
+		}
 	});
 
-	const handleClose = () => {
-		if (!isVisible) return;
-		isVisible = false;
+	const emitClose = () => {
+		if (hasEmittedClose) return;
+
+		hasEmittedClose = true;
 		onclose?.();
 	};
 
-	const handleWindowClick = (event: MouseEvent) => {
-		if (!dialog || !isVisible) return;
-		if (!clickOutsideToClose) return;
-		if (!(event.target instanceof Node) || dialog.contains(event.target as Node)) return;
-		handleClose();
+	const requestClose = () => {
+		if (!isVisible && !dialog?.open) return;
+
+		emitClose();
+		isVisible = false;
+
+		if (dialog?.open) {
+			suppressNextNativeClose = true;
+			dialog.close();
+		}
 	};
 
-	const handleDialogClick = (event: MouseEvent) => {
-		if (event.target === dialog) handleClose();
+	const handleNativeClose = () => {
+		if (suppressNextNativeClose) {
+			suppressNextNativeClose = false;
+			return;
+		}
+
+		if (!isVisible) return;
+
+		emitClose();
+		isVisible = false;
+	};
+
+	const handleCancel = (event: Event) => {
+		event.preventDefault();
+		requestClose();
+	};
+
+	const pointerIsInsideDialog = (event: PointerEvent) => {
+		if (!dialog) return false;
+
+		const rect = dialog.getBoundingClientRect();
+		return (
+			event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom
+		);
+	};
+
+	const handleDialogPointerDown = (event: PointerEvent) => {
+		if (!dialog || !isVisible || !isModal || !clickOutsideToClose) return;
+		if (event.target === dialog && !pointerIsInsideDialog(event)) requestClose();
+	};
+
+	const handleWindowPointerDown = (event: PointerEvent) => {
+		if (!dialog || !isVisible || isModal || !clickOutsideToClose) return;
+		if (!(event.target instanceof Node)) return;
+		if (dialog.contains(event.target)) return;
+
+		requestClose();
 	};
 </script>
 
-<svelte:window onclick={handleWindowClick} />
+<svelte:window onpointerdown={handleWindowPointerDown} />
 
 <dialog
+	{...rest}
 	bind:this={dialog}
-	onclose={handleClose}
-	onclick={handleDialogClick}
-	class={["bg-background border-border z-100 rounded-xl border-2 shadow-2xl", classNames]}
+	onclose={handleNativeClose}
+	oncancel={handleCancel}
+	onpointerdown={handleDialogPointerDown}
+	aria-labelledby={hasVisibleTitle ? titleId : undefined}
+	aria-label={ariaLabel}
+	class={[
+		"bg-background text-foreground border-border z-100 max-h-[calc(100dvh-2rem)] rounded-xl border-2 p-4 shadow-2xl",
+		className
+	]}
 >
-	<div class="flex flex-col gap-y-2 p-4">
+	<div class="flex flex-col gap-y-3">
 		{#if showHeader}
-			<div class="mb-2 flex items-center justify-between gap-x-4">
+			<div class="flex items-start justify-between gap-x-4">
 				{#if typeof title === "string"}
-					<h3 class="text-foreground text-xl font-semibold">{title}</h3>
-				{:else}
-					{@render title?.()}
+					<h3 id={titleId} class="text-foreground text-xl font-semibold">{title}</h3>
+				{:else if title}
+					<div id={titleId}>
+						{@render title()}
+					</div>
 				{/if}
 
-				<Button mode="tertiary" onclick={handleClose} class="-mr-2 p-1!">
-					<X size={20} />
-				</Button>
+				{#if showCloseButton}
+					<Button mode="tertiary" onclick={requestClose} aria-label="Close dialog" class="-mt-1 -mr-2 p-1!">
+						<X size={20} />
+					</Button>
+				{/if}
 			</div>
 		{/if}
 
 		{@render children()}
 
-		{#if showActions}
-			{#if typeof actions === "function"}
-				{@render actions()}
-			{:else}
-				<Button mode="primary" onclick={handleClose} class="ml-auto font-semibold">Done</Button>
-			{/if}
-		{/if}
+		{@render actions?.()}
 	</div>
 </dialog>
 
 <style>
-	/* Scope the variables to a wildcard or explicitly duplicate them so both dialog and backdrop can read them */
 	dialog,
 	dialog::backdrop {
 		--dialog-enter-opacity: 0;

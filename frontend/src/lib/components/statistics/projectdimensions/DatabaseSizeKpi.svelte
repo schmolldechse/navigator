@@ -4,9 +4,10 @@
 	import Database from "@lucide/svelte/icons/database";
 	import MetricLoadingFailedWarning from "@lib/components/metric/MetricLoadingFailedWarning.svelte";
 	import type { ClassValue } from "svelte/elements";
+	import type { loadMetric } from "@lib/remote/metrics.remote";
 
 	type Props = {
-		promise: Promise<MetricSeries>;
+		promise: Promise<Awaited<ReturnType<typeof loadMetric>>>;
 		class?: ClassValue;
 	};
 	let { promise, class: className }: Props = $props();

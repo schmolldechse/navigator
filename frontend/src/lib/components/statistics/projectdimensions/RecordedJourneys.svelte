@@ -2,11 +2,12 @@
 	import { MetricSeriesType, type MetricSeries } from "@lib/api";
 	import MetricLoadingFailedWarning from "@lib/components/metric/MetricLoadingFailedWarning.svelte";
 	import Kpi, { type KpiTrend } from "@lib/components/ui/Kpi.svelte";
+	import type { loadMetric } from "@lib/remote/metrics.remote";
 	import TrainFront from "@lucide/svelte/icons/train-front";
 	import type { ClassValue } from "svelte/elements";
 
 	type Props = {
-		promise: Promise<MetricSeries>;
+		promise: Promise<Awaited<ReturnType<typeof loadMetric>>>;
 		class?: ClassValue;
 	};
 	let { promise, class: className }: Props = $props();
