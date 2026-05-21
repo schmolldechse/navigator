@@ -41,10 +41,7 @@
 
 	type MapHeatmapGradientInterpolator = (density: number) => string;
 
-	type MapHeatmapGradient =
-		| MapHeatmapGradientInterpolator
-		| readonly string[]
-		| readonly MapHeatmapGradientStop[];
+	type MapHeatmapGradient = MapHeatmapGradientInterpolator | readonly string[] | readonly MapHeatmapGradientStop[];
 
 	type MapViewportChange = {
 		center: MapCoordinates;

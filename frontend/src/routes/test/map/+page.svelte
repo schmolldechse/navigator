@@ -131,9 +131,7 @@
 	);
 	let markerIconSize = $derived(Math.max(14, Math.min(28, markerSize - 14)));
 	let heatmapGradient: MapHeatmapGradientInterpolator = $derived(getHeatmapGradientInterpolator(selectedHeatmapGradientId));
-	let heatmapGradientColors = $derived(
-		gradientSampleDensities.map((density) => heatmapGradient(density))
-	);
+	let heatmapGradientColors = $derived(gradientSampleDensities.map((density) => heatmapGradient(density)));
 	let heatmapGradientPreview = $derived(`linear-gradient(to right, ${heatmapGradientColors.join(", ")})`);
 
 	const formatNumber = (value: number, maximumFractionDigits = 2) => value.toLocaleString(undefined, { maximumFractionDigits });

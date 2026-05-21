@@ -72,8 +72,8 @@
 					by specifically collecting journey data. Since
 					<span class="text-accent font-semibold">March 2025</span>, all relevant information on train services, including
 					<span class="text-accent font-semibold">delays</span>
-					and <span class="text-accent font-semibold">cancellations</span>, has been systematically recorded, starting in the Stuttgart
-					area.
+					and <span class="text-accent font-semibold">cancellations</span>, has been systematically recorded, starting in the
+					Stuttgart area.
 				</p>
 
 				<p class="about text-sm leading-relaxed sm:text-base lg:text-lg">
