@@ -43,7 +43,7 @@
 
 		mode === "primary" && "bg-accent text-accent-foreground enabled:hover:bg-accent/90 enabled:active:bg-accent/80",
 		mode === "secondary" &&
-			"border-border bg-secondary text-secondary-foreground enabled:hover:bg-secondary/80 enabled:active:bg-secondary/60 border",
+			"border-border bg-secondary text-secondary-foreground enabled:hover:border-accent/40 enabled:hover:bg-accent/15 enabled:hover:text-accent enabled:active:border-accent/50 enabled:active:bg-accent/25 enabled:active:text-accent border",
 		mode === "destructive" &&
 			"bg-destructive text-destructive-foreground enabled:hover:bg-destructive/90 enabled:active:bg-destructive/80",
 		mode === "tertiary" &&
