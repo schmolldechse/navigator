@@ -131,12 +131,17 @@
 	onclose={cancel}
 	isModal={false}
 	class={[
-		"z-50",
-		"max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:max-h-[70vh] max-md:w-screen max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0", // mobile view
+		"z-50 max-md:overflow-hidden",
+		"max-md:fixed max-md:inset-x-0 max-md:bottom-0 max-md:max-h-[min(88dvh,42rem)] max-md:w-screen max-md:rounded-b-none max-md:border-x-0 max-md:border-b-0", // mobile view
 		"md:absolute md:top-full md:left-auto md:mt-2 md:max-h-[50vh] md:max-w-[50rem]" // desktop view
 	]}
 >
-	<div class="grid grid-cols-1 gap-3 md:grid-cols-[minmax(14rem,20rem)_1fr]">
+	<div
+		class={[
+			"grid grid-cols-1 gap-3 md:grid-cols-[minmax(14rem,20rem)_1fr]",
+			"max-md:max-h-[calc(min(88dvh,42rem)-8.75rem)] max-md:overflow-y-auto max-md:overscroll-contain max-md:pb-2 max-md:[-webkit-overflow-scrolling:touch]"
+		]}
+	>
 		<section class="border-border bg-secondary/30 grid gap-2 rounded-lg border p-2.5">
 			<div class="flex items-center gap-x-2 px-1">
 				<CalendarDays size={16} class="text-accent" />
@@ -259,7 +264,12 @@
 	</div>
 
 	{#snippet actions()}
-		<div class="mt-2 flex justify-end gap-2">
+		<div
+			class={[
+				"mt-2 flex justify-end gap-2",
+				"max-md:border-border max-md:bg-background/95 max-md:sticky max-md:bottom-0 max-md:-mx-4 max-md:-mb-4 max-md:border-t max-md:px-4 max-md:py-3 max-md:backdrop-blur-md"
+			]}
+		>
 			<Button mode="tertiary" onclick={cancel}>Cancel</Button>
 			<Button mode="primary" onclick={save}>Save</Button>
 		</div>
