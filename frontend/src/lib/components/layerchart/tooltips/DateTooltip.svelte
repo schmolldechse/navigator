@@ -1,4 +1,4 @@
-<script lang="ts" generics="T">
+<script lang="ts" generics="T extends { date: Date }">
 	import { type ChartState, Tooltip } from "layerchart";
 	import { DateTime } from "luxon";
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";

@@ -59,18 +59,19 @@
 	import CalendarDays from "@lucide/svelte/icons/calendar-days";
 	import Route from "@lucide/svelte/icons/route";
 	import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
-	import { HEATMAP_METRIC_OPTIONS, type HeatmapMetricOption, type HeatmapSettings } from "./heatmap";
+	import { STATION_METRIC_MAP_OPTIONS, type StationMetricMapOption, type StationMetricMapSettings } from "./station-metric-map";
 	import ToggleGroup from "@lib/components/ui/toggle-group/ToggleGroup.svelte";
 	import ToggleGroupItem from "@lib/components/ui/toggle-group/ToggleGroupItem.svelte";
 
 	type Props = {
 		isVisible: boolean;
-		settings: HeatmapSettings;
-		onsave: (settings: HeatmapSettings) => void;
+		settings: StationMetricMapSettings;
+		title?: string;
+		onsave: (settings: StationMetricMapSettings) => void;
 	};
-	let { isVisible = $bindable(true), settings, onsave }: Props = $props();
+	let { isVisible = $bindable(true), settings, title = "Station Metric Settings", onsave }: Props = $props();
 
-	const cloneSettings = (source: HeatmapSettings): HeatmapSettings => ({
+	const cloneSettings = (source: StationMetricMapSettings): StationMetricMapSettings => ({
 		dates: {
 			start: source.dates.start,
 			end: source.dates.end
@@ -81,9 +82,9 @@
 	});
 
 	// svelte-ignore state_referenced_locally
-	let localSettings: HeatmapSettings = $state(cloneSettings(settings));
-	let selectedMetricOptions: HeatmapMetricOption[] = $derived(
-		HEATMAP_METRIC_OPTIONS.filter((option: HeatmapMetricOption) => option.seriesType === localSettings.seriesType)
+	let localSettings: StationMetricMapSettings = $state(cloneSettings(settings));
+	let selectedMetricOptions: StationMetricMapOption[] = $derived(
+		STATION_METRIC_MAP_OPTIONS.filter((option: StationMetricMapOption) => option.seriesType === localSettings.seriesType)
 	);
 	let selectedScheduleOptions: ScheduleOption[] = $derived(
 		SCHEDULE_OPTIONS.filter((option: ScheduleOption) => option.id === localSettings.scheduleType)
@@ -124,7 +125,7 @@
 
 <Dialog
 	bind:isVisible
-	title="Heatmap Settings"
+	{title}
 	showActions
 	onclose={cancel}
 	isModal={false}
@@ -166,8 +167,8 @@
 				<ToggleGroup
 					mode="single"
 					selected={selectedMetricOptions}
-					keyFn={(option: HeatmapMetricOption) => option.seriesType}
-					onselect={(selected: HeatmapMetricOption[]) => {
+					keyFn={(option: StationMetricMapOption) => option.seriesType}
+					onselect={(selected: StationMetricMapOption[]) => {
 						const [option] = selected;
 						if (!option) return;
 
@@ -175,7 +176,7 @@
 					}}
 					class="grid! grid-cols-2 gap-1.5 sm:grid-cols-3"
 				>
-					{#each HEATMAP_METRIC_OPTIONS as option}
+					{#each STATION_METRIC_MAP_OPTIONS as option}
 						<ToggleGroupItem
 							item={option}
 							title={option.description}

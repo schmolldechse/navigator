@@ -1,56 +1,96 @@
 import { MetricSeriesType, ScheduleType, TransportType } from "@lib/api";
-import { formatMetricValue } from "@lib/components/statistics/metric-format";
 import type { vBaseMetricRequestStationEventQualitySummaryMetricRequest } from "@lib/api/valibot.gen";
 import { DateTime } from "luxon";
 import * as v from "valibot";
 
-type HeatmapMetricOption = {
+type StationMetricMapOption = {
 	seriesType: MetricSeriesType;
 	label: string;
 	description: string;
 	valueLabel: string;
+	polarity: "positive" | "negative" | "neutral";
+	visualization: "density" | "points";
+	domain: [number, number] | "data";
+	sampleLabels?: {
+		numerator: string;
+		denominator: string;
+	};
 };
 
-const HEATMAP_METRIC_OPTIONS: HeatmapMetricOption[] = [
+const STATION_METRIC_MAP_OPTIONS: StationMetricMapOption[] = [
 	{
 		seriesType: MetricSeriesType.STATION_EVENT_COUNT,
-		label: "Journey count",
+		label: "Station events",
 		description: "Number of recorded station events in the selected range.",
-		valueLabel: "Events"
+		valueLabel: "Events",
+		polarity: "neutral",
+		visualization: "density",
+		domain: "data"
 	},
 	{
 		seriesType: MetricSeriesType.STATION_EVENT_CANCELLATION_COUNT,
 		label: "Cancellations",
 		description: "Cancelled station events.",
-		valueLabel: "Cancelled"
+		valueLabel: "Cancelled",
+		polarity: "negative",
+		visualization: "density",
+		domain: "data"
 	},
 	{
 		seriesType: MetricSeriesType.STATION_EVENT_CANCELLATION_RATE,
 		label: "Cancellation Rate",
 		description: "Share of station events that were cancelled.",
-		valueLabel: "Rate"
+		valueLabel: "Rate",
+		polarity: "negative",
+		visualization: "points",
+		domain: [0, 100],
+		sampleLabels: {
+			numerator: "Cancelled events",
+			denominator: "Station events"
+		}
 	},
 	{
 		seriesType: MetricSeriesType.STATION_EVENT_DELAY_AVERAGE,
 		label: "Average Delay",
 		description: "Average delay in seconds for measured events.",
-		valueLabel: "Delay"
+		valueLabel: "Delay",
+		polarity: "negative",
+		visualization: "points",
+		domain: "data",
+		sampleLabels: {
+			numerator: "Total delay seconds",
+			denominator: "Measured events"
+		}
 	},
 	{
 		seriesType: MetricSeriesType.STATION_EVENT_PUNCTUALITY5_RATE,
 		label: "Punctuality 5",
 		description: "Share of measured events below five minutes delay.",
-		valueLabel: "Rate"
+		valueLabel: "Rate",
+		polarity: "positive",
+		visualization: "points",
+		domain: [0, 100],
+		sampleLabels: {
+			numerator: "Punctual events",
+			denominator: "Measured events"
+		}
 	},
 	{
 		seriesType: MetricSeriesType.STATION_EVENT_PUNCTUALITY15_RATE,
 		label: "Punctuality 15",
 		description: "Share of measured events below fifteen minutes delay.",
-		valueLabel: "Rate"
+		valueLabel: "Rate",
+		polarity: "positive",
+		visualization: "points",
+		domain: [0, 100],
+		sampleLabels: {
+			numerator: "Punctual events",
+			denominator: "Measured events"
+		}
 	}
 ];
 
-type HeatmapSettings = {
+type StationMetricMapSettings = {
 	dates: {
 		start: DateTime;
 		end: DateTime;
@@ -60,8 +100,8 @@ type HeatmapSettings = {
 	transportTypes: TransportType[];
 };
 
-const createHeatmapRequest = (
-	settings: HeatmapSettings
+const createStationMetricMapRequest = (
+	settings: StationMetricMapSettings
 ): v.InferOutput<typeof vBaseMetricRequestStationEventQualitySummaryMetricRequest> => ({
 	queryType: "STATION_EVENT_QUALITY_SUMMARY",
 	seriesType: settings.seriesType,
@@ -71,7 +111,7 @@ const createHeatmapRequest = (
 	transportTypes: settings.transportTypes
 });
 
-const createDefaultHeatmapSettings = (): HeatmapSettings => ({
+const createDefaultStationMetricMapSettings = (): StationMetricMapSettings => ({
 	dates: {
 		start: DateTime.now().minus({ days: 7 }).startOf("day"),
 		end: DateTime.now().endOf("day")
@@ -81,15 +121,14 @@ const createDefaultHeatmapSettings = (): HeatmapSettings => ({
 	transportTypes: []
 });
 
-const getHeatmapMetricOption = (seriesType: MetricSeriesType): HeatmapMetricOption | undefined =>
-	HEATMAP_METRIC_OPTIONS.find((option: HeatmapMetricOption) => option.seriesType === seriesType);
+const getStationMetricMapOption = (seriesType: MetricSeriesType): StationMetricMapOption | undefined =>
+	STATION_METRIC_MAP_OPTIONS.find((option: StationMetricMapOption) => option.seriesType === seriesType);
 
 export {
-	type HeatmapMetricOption,
-	HEATMAP_METRIC_OPTIONS,
-	type HeatmapSettings,
-	createHeatmapRequest,
-	createDefaultHeatmapSettings,
-	getHeatmapMetricOption,
-	formatMetricValue as formatHeatmapMetricValue
+	type StationMetricMapOption,
+	STATION_METRIC_MAP_OPTIONS,
+	type StationMetricMapSettings,
+	createStationMetricMapRequest,
+	createDefaultStationMetricMapSettings,
+	getStationMetricMapOption
 };

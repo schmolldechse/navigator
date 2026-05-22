@@ -1,36 +1,65 @@
 import type { PageServerLoad } from "./$types";
-import { loadHeatmap } from "@lib/components/statistics/global/heatmap/heatmap.remote";
+import { loadStationMetricMap } from "@lib/components/statistics/global/station-metric-map/station-metric-map.remote";
 import {
-	createDefaultHeatmapSettings,
-	createHeatmapRequest,
-	type HeatmapSettings
-} from "@lib/components/statistics/global/heatmap/heatmap";
+	createDefaultStationMetricMapSettings,
+	createStationMetricMapRequest,
+	type StationMetricMapSettings
+} from "@lib/components/statistics/global/station-metric-map/station-metric-map";
 import { loadMetric } from "@lib/remote/metrics.remote";
 import {
 	createAdministrationRankingRequest,
 	createDefaultAdministrationRankingSettings,
 	type AdministrationRankingSettings
 } from "@lib/components/statistics/global/administration-ranking/administration-ranking";
+import {
+	createDefaultLineRankingSettings,
+	createLineRankingRequest,
+	type LineRankingSettings
+} from "@lib/components/statistics/global/line-ranking/line-ranking";
+import {
+	createDefaultNetworkTimeSeriesSettings,
+	createNetworkTimeSeriesRequest
+} from "@lib/components/statistics/global/network-time-series/network-time-series";
 
 export const load: PageServerLoad = async ({
 	getClientAddress
 }): Promise<{
-	heatmap: { promise: Promise<Awaited<ReturnType<typeof loadHeatmap>>>; settings: HeatmapSettings };
+	stationMetricMap: {
+		promise: Promise<Awaited<ReturnType<typeof loadStationMetricMap>>>;
+		settings: StationMetricMapSettings;
+	};
+	networkTimeSeries: {
+		promise: Promise<Awaited<ReturnType<typeof loadMetric>>>;
+		settings: StationMetricMapSettings;
+	};
 	administrationRanking: {
 		promise: Promise<Awaited<ReturnType<typeof loadMetric>>>;
 		settings: AdministrationRankingSettings;
 	};
+	lineRanking: {
+		promise: Promise<Awaited<ReturnType<typeof loadMetric>>>;
+		settings: LineRankingSettings;
+	};
 }> => {
-	const heatmapSettings: HeatmapSettings = createDefaultHeatmapSettings();
+	const stationMetricMapSettings: StationMetricMapSettings = createDefaultStationMetricMapSettings();
+	const networkTimeSeriesSettings: StationMetricMapSettings = createDefaultNetworkTimeSeriesSettings();
 	const administrationRankingSettings: AdministrationRankingSettings = createDefaultAdministrationRankingSettings();
+	const lineRankingSettings: LineRankingSettings = createDefaultLineRankingSettings();
 
 	return {
-		heatmap: {
-			promise: loadHeatmap({
-				request: createHeatmapRequest(heatmapSettings),
+		stationMetricMap: {
+			promise: loadStationMetricMap({
+				request: createStationMetricMapRequest(stationMetricMapSettings),
 				userIp: getClientAddress()
 			}),
-			settings: heatmapSettings
+			settings: stationMetricMapSettings
+		},
+		networkTimeSeries: {
+			promise: loadMetric({
+				request: createNetworkTimeSeriesRequest(networkTimeSeriesSettings),
+				userIp: getClientAddress()
+			}),
+			settings: networkTimeSeriesSettings
 		},
 		administrationRanking: {
 			promise: loadMetric({
@@ -38,6 +67,13 @@ export const load: PageServerLoad = async ({
 				userIp: getClientAddress()
 			}),
 			settings: administrationRankingSettings
+		},
+		lineRanking: {
+			promise: loadMetric({
+				request: createLineRankingRequest(lineRankingSettings),
+				userIp: getClientAddress()
+			}),
+			settings: lineRankingSettings
 		}
 	};
 };

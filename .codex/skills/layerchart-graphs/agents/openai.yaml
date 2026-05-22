@@ -1,0 +1,4 @@
+interface:
+  display_name: "Layerchart Graphs"
+  short_description: "Build Navigator charts with Layerchart Next"
+  default_prompt: "Use $layerchart-graphs to create or update a Navigator chart with Layerchart Next v2."

@@ -4,9 +4,9 @@ This plan describes the metric surfaces available from `POST /api/v1/statistics/
 
 ## Global `/statistics`
 
-The first implemented global metric is the station heatmap. It uses `STATION_EVENT_QUALITY_SUMMARY` and intentionally leaves `evaNumbers` unset, so the backend returns one value per station for the selected network slice.
+The first implemented global metric is the station metric map. It uses `STATION_EVENT_QUALITY_SUMMARY` and intentionally leaves `evaNumbers` unset, so the backend returns one value per station for the selected network slice.
 
-Supported heatmap series:
+Supported station metric map series:
 
 - `STATION_EVENT_COUNT`
 - `STATION_EVENT_CANCELLATION_COUNT`
@@ -22,7 +22,7 @@ Ranking metrics that fit the global page:
 - `ADMINISTRATION_RANKING_*` for operator/administration ranking across the whole network.
 - `LINE_RANKING_*` for line ranking across the whole network.
 
-System/project metrics that can stay outside the heatmap experience:
+System/project metrics that can stay outside the station metric map experience:
 
 - `DATABASE_SIZE_SNAPSHOT`
 - `RIS_ID_SNAPSHOT`
@@ -30,7 +30,7 @@ System/project metrics that can stay outside the heatmap experience:
 
 ## Station-Specific `/statistics/:evaNumber`
 
-Station-specific pages should not render a heatmap. They should use the selected station EVA number as the scope for station quality metrics and rankings.
+Station-specific pages should not render a global station metric map. They should use the selected station EVA number as the scope for station quality metrics and rankings.
 
 Recommended station quality metrics:
 
@@ -57,4 +57,4 @@ Ranking metrics that fit a station page:
 - Default schedule type: `DEPARTURE`.
 - Default metric: `STATION_EVENT_COUNT`.
 - Default transport filter: all transport types, represented by omitting `transportTypes`.
-- Heatmap is global only; station-specific pages use charts, KPI summaries, and rankings instead.
+- The station metric map is global only; station-specific pages use charts, KPI summaries, and rankings instead.

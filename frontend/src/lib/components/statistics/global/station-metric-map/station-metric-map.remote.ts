@@ -1,15 +1,15 @@
 import { query } from "$app/server";
-import type { BaseMetricDataPointStationDataPoint, BaseStation } from "@lib/api";
+import type { BaseMetricDataPointStationDataPoint, BaseStation, MetricSample } from "@lib/api";
 import { vBaseMetricRequestStationEventQualitySummaryMetricRequest } from "@lib/api/valibot.gen";
 import type {
-	HeatmapMetricSeries,
-	StationHeatmapPoint
-} from "@lib/components/statistics/global/heatmap/StationMetricHeatmap.svelte";
+	StationMetricMapPoint,
+	StationMetricMapSeries
+} from "@lib/components/statistics/global/station-metric-map/StationMetricMap.svelte";
 import { loadMetric } from "@lib/remote/metrics.remote";
 import { getStationBatch } from "@lib/remote/station.remote";
 import * as v from "valibot";
 
-const loadHeatmap = query(
+const loadStationMetricMap = query(
 	v.object({
 		request: v.pick(vBaseMetricRequestStationEventQualitySummaryMetricRequest, [
 			"seriesType",
@@ -20,7 +20,7 @@ const loadHeatmap = query(
 		]),
 		userIp: v.optional(v.pipe(v.string(), v.ip()))
 	}),
-	async ({ request, userIp }): Promise<HeatmapMetricSeries> => {
+	async ({ request, userIp }): Promise<StationMetricMapSeries> => {
 		const metric = await loadMetric({
 			request: {
 				queryType: "STATION_EVENT_QUALITY_SUMMARY",
@@ -33,7 +33,7 @@ const loadHeatmap = query(
 			userIp
 		});
 
-		const valueByStation = new Map<number, number>();
+		const valueByStation = new Map<number, { value: number; sample?: MetricSample | null }>();
 		for (const baseDataPoint of metric.dataPoints) {
 			if (!("station" in baseDataPoint) || !baseDataPoint.station) continue;
 
@@ -41,7 +41,10 @@ const loadHeatmap = query(
 			const evaNumber = Number(dataPoint.station.evaNumber);
 			if (!Number.isFinite(evaNumber) || valueByStation.has(evaNumber)) continue;
 
-			valueByStation.set(evaNumber, Number(dataPoint.value));
+			valueByStation.set(evaNumber, {
+				value: Number(dataPoint.value),
+				sample: dataPoint.sample
+			});
 		}
 
 		const evaNumbers = [...valueByStation.keys()];
@@ -53,16 +56,16 @@ const loadHeatmap = query(
 			stationByEva.set(Number(station.evaNumber), station);
 		}
 
-		const points: StationHeatmapPoint[] = [];
-		for (const [evaNumber, value] of valueByStation) {
+		const points: StationMetricMapPoint[] = [];
+		for (const [evaNumber, dataPoint] of valueByStation) {
 			const station = stationByEva.get(evaNumber);
 			if (!station) continue;
 
-			points.push({ station, value });
+			points.push({ station, value: dataPoint.value, sample: dataPoint.sample });
 		}
 
 		return { ...metric, points };
 	}
 );
 
-export { loadHeatmap };
+export { loadStationMetricMap };

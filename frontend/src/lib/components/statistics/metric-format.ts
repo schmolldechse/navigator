@@ -6,25 +6,27 @@ type FormattedMetricValue = {
 	unit: string;
 };
 
-const formatNumber = (value: number, maximumFractionDigits: number): string =>
-	value.toLocaleString(undefined, {
-		maximumFractionDigits
-	});
-
 const formatMetricValue = (value: number, unit: MetricUnit): FormattedMetricValue => {
 	if (!Number.isFinite(value)) return { value: "N/A", unit: "" };
 
-	if (unit === MetricUnit.SECONDS) {
-		const duration = Duration.fromObject({ seconds: value });
-		if (Math.abs(value) >= 60) return { value: formatNumber(duration.as("minutes"), 1), unit: "min" };
-		return { value: formatNumber(duration.as("seconds"), 0), unit: "s" };
+	switch (unit) {
+		case MetricUnit.SECONDS: {
+			const duration = Duration.fromObject({ seconds: value });
+
+			if (Math.abs(value) >= 60)
+				return { value: duration.as("minutes").toLocaleString(undefined, { maximumFractionDigits: 1 }), unit: "min" };
+
+			return { value: duration.as("seconds").toLocaleString(undefined, { maximumFractionDigits: 0 }), unit: "s" };
+		}
+		case MetricUnit.PERCENT:
+			return { value: value.toLocaleString(undefined, { maximumFractionDigits: 2 }), unit: "%" };
+		case MetricUnit.COUNT:
+			return { value: value.toLocaleString(), unit: "" };
+		case MetricUnit.BYTES:
+			return { value: value.toLocaleString(), unit: "B" };
+		default:
+			return { value: value.toLocaleString(undefined, { maximumFractionDigits: 2 }), unit };
 	}
-
-	if (unit === MetricUnit.PERCENT) return { value: formatNumber(value, 2), unit: "%" };
-	if (unit === MetricUnit.COUNT) return { value: value.toLocaleString(), unit: "" };
-	if (unit === MetricUnit.BYTES) return { value: value.toLocaleString(), unit: "B" };
-
-	return { value: formatNumber(value, 2), unit };
 };
 
 export { type FormattedMetricValue, formatMetricValue };

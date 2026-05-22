@@ -1,10 +1,19 @@
 <script module lang="ts">
-	import type { AdministrationMetricSubject, MetricSample, MetricSeries } from "@lib/api";
+	import type {
+		AdministrationMetricSubject,
+		LineMetricSubject,
+		MetricSample,
+		MetricSeries,
+		StationMetricSubject
+	} from "@lib/api";
 
-	type AdministrationRankingRow = {
+	type LineRankingRow = {
 		key: string;
 		rank: number;
+		line: LineMetricSubject;
 		administration: AdministrationMetricSubject;
+		startStation: StationMetricSubject;
+		endStation: StationMetricSubject;
 		value: number;
 		unit: MetricSeries["unit"];
 		sample?: MetricSample | null;
@@ -18,7 +27,7 @@
 		hasMore: boolean;
 	};
 
-	export type { AdministrationRankingRow, NormalizedPage };
+	export type { LineRankingRow, NormalizedPage };
 </script>
 
 <script lang="ts">
@@ -27,12 +36,13 @@
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
 	import Info from "@lucide/svelte/icons/info";
 	import Trophy from "@lucide/svelte/icons/trophy";
+	import Route from "@lucide/svelte/icons/route";
 	import Card from "@lib/components/ui/card/Card.svelte";
 	import Pagination from "@lib/components/ui/Pagination.svelte";
 	import Skeleton from "@lib/components/ui/Skeleton.svelte";
 	import * as Tooltip from "@lib/components/ui/tooltip/index";
 	import { loadMetric } from "@lib/remote/metrics.remote";
-	import { getAdministrationRankingMetricOption } from "./administration-ranking";
+	import { getLineRankingMetricOption } from "./line-ranking";
 	import { formatMetricValue } from "../../metric-format";
 
 	type Props = {
@@ -57,19 +67,34 @@
 		};
 	};
 
-	const createRows = (metric: MetricSeries, page: NormalizedPage): AdministrationRankingRow[] => {
-		const rows: AdministrationRankingRow[] = [];
+	const getStationLabel = (station: StationMetricSubject) => station.name ?? `Station ${station.evaNumber}`;
+
+	const formatTransportType = (value: string) =>
+		value
+			.toLowerCase()
+			.split("_")
+			.map((part: string) => part.charAt(0).toUpperCase() + part.slice(1))
+			.join(" ");
+
+	const createRows = (metric: MetricSeries, page: NormalizedPage): LineRankingRow[] => {
+		const rows: LineRankingRow[] = [];
 
 		for (const dataPoint of metric.dataPoints) {
-			if (!("administration" in dataPoint) || !dataPoint.administration) continue;
+			if (!("line" in dataPoint) || !dataPoint.line) continue;
 
 			const index = rows.length;
+			const line = dataPoint.line;
 			const administration = dataPoint.administration;
+			const startStation = dataPoint.startStation;
+			const endStation = dataPoint.endStation;
 
 			rows.push({
-				key: `${administration.operatorCode}-${administration.administrationId}`,
+				key: `${line.number}-${line.journeyDescription}-${administration.operatorCode}-${startStation.evaNumber}-${endStation.evaNumber}`,
 				rank: page.offset + index + 1,
+				line,
 				administration,
+				startStation,
+				endStation,
 				value: Number(dataPoint.value),
 				unit: metric.unit,
 				sample: dataPoint.sample
@@ -87,7 +112,7 @@
 			<Skeleton class="h-6 w-32" />
 		{:then data}
 			<h2 class="text-foreground text-sm font-semibold sm:text-base">
-				{getAdministrationRankingMetricOption(data.seriesType)?.label ?? "???"}
+				{getLineRankingMetricOption(data.seriesType)?.label ?? "???"}
 			</h2>
 		{/await}
 	</Card>
@@ -107,22 +132,22 @@
 				<div
 					class="bg-secondary/30 border-border flex min-h-96 flex-col items-center justify-center rounded-lg border text-center"
 				>
-					<p class="text-foreground font-semibold">No ranking data available</p>
+					<p class="text-foreground font-semibold">No line ranking data available</p>
 					<p class="text-foreground/60 max-w-sm text-sm">Try a wider time range or another ranking metric.</p>
 				</div>
 			{:else}
 				{@const maxValue = Math.max(0, ...rows.map((row) => row.value))}
-				{@const metricOption = getAdministrationRankingMetricOption(metric.seriesType)}
+				{@const metricOption = getLineRankingMetricOption(metric.seriesType)}
 
 				<div class="flex flex-col gap-y-2">
 					<div
 						class={[
 							"text-foreground/45 gap-3 px-3 text-xs font-semibold tracking-wide uppercase",
-							"hidden grid-cols-[4rem_minmax(0,1fr)_minmax(6rem,8rem)] sm:grid"
+							"hidden grid-cols-[4rem_minmax(0,1fr)_minmax(6rem,8rem)] md:grid"
 						]}
 					>
 						<span class="text-right">Place</span>
-						<span>Administration / Operator</span>
+						<span>Line Information</span>
 						<span class="text-right">{metricOption?.valueLabel ?? "Value"}</span>
 					</div>
 
@@ -132,12 +157,12 @@
 
 						<article
 							class={[
-								"border-border bg-secondary/20 hover:bg-secondary/35 gap-x-4 gap-y-3 rounded-lg border p-4 transition-colors sm:gap-x-3 sm:gap-y-2 sm:p-3",
-								"grid grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[4rem_minmax(0,1fr)_minmax(6rem,8rem)] sm:grid-rows-[auto_auto]"
+								"border-border bg-secondary/20 hover:bg-secondary/35 gap-x-4 gap-y-3 rounded-lg border p-4 transition-colors md:gap-x-3 md:gap-y-2 md:p-3",
+								"grid grid-cols-[minmax(0,1fr)_auto] md:grid-cols-[4rem_minmax(0,1fr)_minmax(6rem,8rem)] md:grid-rows-[auto_auto_auto]"
 							]}
 						>
 							<!-- Place -->
-							<div class={["flex items-center gap-x-2 sm:justify-end sm:self-center", "sm:row-span-2"]}>
+							<div class={["flex items-center gap-x-2 md:justify-end md:self-center", "md:row-span-3"]}>
 								{#if row.rank <= 3 && metricOption?.polarity === "positive"}
 									<Trophy size={16} class="text-accent" />
 								{:else if row.rank <= 3 && metricOption?.polarity === "negative"}
@@ -151,28 +176,50 @@
 								</span>
 							</div>
 
-							<!-- Administration -->
+							<!-- Line Information -->
+							<div class={["flex flex-col gap-y-1", "col-span-2 md:col-span-1 md:col-start-2 md:row-start-1 md:self-center"]}>
+								<div class="flex flex-wrap items-center gap-x-2 gap-y-1">
+									<Route size={15} class="text-accent shrink-0" />
+
+									<span class="text-foreground min-w-0 font-semibold break-words">{row.line.journeyDescription}</span>
+									<span class="bg-background text-foreground/60 rounded-md px-1.5 py-0.5 text-xs font-medium">
+										{row.line.number}
+									</span>
+									<span class="bg-background text-foreground/60 rounded-md px-1.5 py-0.5 text-xs font-medium">
+										{formatTransportType(row.line.transportType)}
+									</span>
+								</div>
+
+								<div class="text-foreground/55 flex flex-wrap items-baseline gap-x-2 gap-y-1 text-xs">
+									<span class="truncate">{row.administration.operatorName}</span>
+									<span class="bg-background text-foreground/60 rounded-md px-1.5 py-0.5 text-xs font-medium">
+										{row.administration.operatorCode}
+									</span>
+								</div>
+							</div>
+
+							<!-- Route -->
 							<div
 								class={[
-									"flex flex-row flex-wrap items-baseline gap-x-2 gap-y-1",
-									"col-span-2 sm:col-span-1 sm:col-start-2 sm:row-start-1"
+									"text-foreground/65 gap-x-2 gap-y-1 text-sm",
+									"col-span-2 grid grid-cols-[0.75rem_minmax(0,1fr)] md:col-span-1 md:col-start-2 md:row-start-2"
 								]}
 							>
-								<span class="text-foreground max-w-full min-w-0 font-semibold break-words">
-									{row.administration.operatorName}
-								</span>
-								<span
-									class="bg-background text-foreground/60 max-w-full rounded-md px-1.5 py-0.5 text-xs font-medium break-all"
-								>
-									{row.administration.operatorCode}
-								</span>
+								<div class="relative row-span-2 flex justify-center" aria-hidden="true">
+									<span class="bg-accent absolute top-1.5 size-1.5 rounded-full"></span>
+									<span class="bg-foreground/20 absolute top-3 bottom-3 w-px"></span>
+									<span class="bg-foreground/35 absolute bottom-1.5 size-1.5 rounded-full"></span>
+								</div>
+
+								<span class="min-w-0 truncate">{getStationLabel(row.startStation)}</span>
+								<span class="text-foreground/55 min-w-0 truncate">{getStationLabel(row.endStation)}</span>
 							</div>
 
 							<!-- Value -->
 							<div
 								class={[
-									"flex items-center justify-end gap-x-2 sm:self-center",
-									"col-start-2 row-start-1 sm:col-start-3 sm:row-span-2 sm:row-start-1"
+									"flex items-center justify-end gap-x-2 md:self-center",
+									"col-start-2 row-start-1 md:col-start-3 md:row-span-3 md:row-start-1"
 								]}
 							>
 								<div class="text-foreground text-right font-bold whitespace-nowrap tabular-nums">
@@ -211,10 +258,10 @@
 							<div
 								class={[
 									"bg-background h-2 overflow-hidden rounded-full",
-									"col-span-2 sm:col-span-1 sm:col-start-2 sm:row-start-2"
+									"col-span-2 md:col-span-1 md:col-start-2 md:row-start-3"
 								]}
 								role="img"
-								aria-label={`${row.administration.operatorName} relative value ${percentage.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`}
+								aria-label={`${row.line.journeyDescription} from ${getStationLabel(row.startStation)} to ${getStationLabel(row.endStation)} relative value ${percentage.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`}
 							>
 								<div class="bg-accent h-full rounded-full transition-[width] duration-300" style:width={`${percentage}%`}></div>
 							</div>
@@ -236,7 +283,7 @@
 				class="bg-secondary/30 border-border flex min-h-96 flex-col items-center justify-center gap-2 rounded-lg border text-center"
 			>
 				<CircleAlert size={32} class="text-destructive" />
-				<p class="text-foreground font-semibold">An error occurred while loading the administration ranking.</p>
+				<p class="text-foreground font-semibold">An error occurred while loading the line ranking.</p>
 				<p class="text-foreground/60 max-w-xl text-sm">{error.message}</p>
 			</div>
 		{/await}

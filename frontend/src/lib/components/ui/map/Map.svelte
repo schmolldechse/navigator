@@ -34,6 +34,12 @@
 		value: number;
 	};
 
+	type MapValuePoint = MapCoordinates & {
+		id: number | string;
+		value: number;
+		color: string;
+	};
+
 	type MapHeatmapGradientStop = {
 		density: number;
 		color: string;
@@ -64,6 +70,7 @@
 		MapMarkerOffset,
 		MapMarkerRenderContext,
 		MapHeatmapPoint,
+		MapValuePoint,
 		MapHeatmapGradient,
 		MapHeatmapGradientInterpolator,
 		MapHeatmapGradientStop,
@@ -92,6 +99,8 @@
 		heatmap?: boolean;
 		heatmapPoints?: MapHeatmapPoint[];
 		heatmapGradient?: MapHeatmapGradient;
+		valuePoints?: MapValuePoint[];
+		valuePointLayer?: boolean;
 		scale?: [number, number];
 		navigationControl?: boolean;
 		attributionControl?: boolean;
@@ -111,6 +120,8 @@
 	const BASE_LAYER_ID = "navigator-map-osm-tiles";
 	const HEATMAP_SOURCE_ID = "navigator-map-heatmap";
 	const HEATMAP_LAYER_ID = "navigator-map-heatmap-layer";
+	const VALUE_POINTS_SOURCE_ID = "navigator-map-value-points";
+	const VALUE_POINTS_LAYER_ID = "navigator-map-value-points-layer";
 	const HEATMAP_SCALE_PADDING = 128;
 	const HEATMAP_INTERPOLATOR_STOP_COUNT = 12;
 	const DEFAULT_HEATMAP_GRADIENT: MapHeatmapGradientStop[] = [
@@ -137,6 +148,8 @@
 		heatmap = false,
 		heatmapPoints = [],
 		heatmapGradient = DEFAULT_HEATMAP_GRADIENT,
+		valuePoints = [],
+		valuePointLayer = false,
 		scale = $bindable([0, 100] as [number, number]),
 		navigationControl = true,
 		attributionControl = true,
@@ -179,6 +192,8 @@
 		longitude <= 180;
 
 	const isValidHeatmapPoint = (point: MapHeatmapPoint) => isFiniteCoordinate(point) && Number.isFinite(point.value);
+	const isValidValuePoint = (point: MapValuePoint) =>
+		isFiniteCoordinate(point) && Number.isFinite(point.value) && typeof point.color === "string" && point.color.length > 0;
 
 	const createHeatmapFeatureCollection = (items: MapHeatmapPoint[]) =>
 		({
@@ -189,6 +204,24 @@
 				properties: {
 					id: String(point.id),
 					value: point.value
+				},
+				geometry: {
+					type: "Point",
+					coordinates: [point.longitude, point.latitude]
+				}
+			}))
+		}) as unknown as Parameters<GeoJSONSource["setData"]>[0];
+
+	const createValuePointFeatureCollection = (items: MapValuePoint[]) =>
+		({
+			type: "FeatureCollection",
+			features: items.filter(isValidValuePoint).map((point: MapValuePoint) => ({
+				type: "Feature",
+				id: String(point.id),
+				properties: {
+					id: String(point.id),
+					value: point.value,
+					color: point.color
 				},
 				geometry: {
 					type: "Point",
@@ -479,12 +512,40 @@
 			id: HEATMAP_LAYER_ID,
 			type: "heatmap",
 			source: HEATMAP_SOURCE_ID,
+			layout: {
+				visibility: heatmap ? "visible" : "none"
+			},
 			paint: {
 				"heatmap-weight": ["interpolate", ["linear"], ["get", "value"], 0, 0.04, 100, 0.82],
 				"heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 4, 0.34, 7, 0.58, 10, 1, 13, 1.48, 15, 1.85],
 				"heatmap-color": createHeatmapColorExpression(heatmapGradient),
 				"heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 9, 7, 16, 10, 27, 13, 46, 15, 64],
 				"heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0.64, 8, 0.72, 12, 0.78, 15, 0.84]
+			}
+		});
+	};
+
+	const addValuePointLayer = () => {
+		if (!map || map.getSource(VALUE_POINTS_SOURCE_ID)) return;
+
+		map.addSource(VALUE_POINTS_SOURCE_ID, {
+			type: "geojson",
+			data: createValuePointFeatureCollection(valuePoints)
+		});
+
+		map.addLayer({
+			id: VALUE_POINTS_LAYER_ID,
+			type: "circle",
+			source: VALUE_POINTS_SOURCE_ID,
+			layout: {
+				visibility: valuePointLayer ? "visible" : "none"
+			},
+			paint: {
+				"circle-radius": ["interpolate", ["linear"], ["zoom"], 4, 3.5, 7, 5.5, 10, 8, 13, 11, 15, 14],
+				"circle-color": ["coalesce", ["get", "color"], "#f5c542"],
+				"circle-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0.58, 8, 0.72, 12, 0.84, 15, 0.92],
+				"circle-stroke-color": "rgba(18, 18, 18, 0.88)",
+				"circle-stroke-width": ["interpolate", ["linear"], ["zoom"], 4, 0.75, 10, 1.25, 14, 1.75]
 			}
 		});
 	};
@@ -652,6 +713,7 @@
 			if (styleLoaded) return;
 
 			addHeatmapLayer();
+			addValuePointLayer();
 			if (markerContent) syncCustomMarkers(markers, markerContent);
 			tryAddDefaultBaseLayer();
 
@@ -752,9 +814,21 @@
 	});
 
 	$effect(() => {
+		if (!map || !styleLoaded) return;
+
+		getGeoJsonSource(VALUE_POINTS_SOURCE_ID)?.setData(createValuePointFeatureCollection(valuePoints));
+	});
+
+	$effect(() => {
 		if (!map || !styleLoaded || !map.getLayer(HEATMAP_LAYER_ID)) return;
 
 		map.setLayoutProperty(HEATMAP_LAYER_ID, "visibility", heatmap ? "visible" : "none");
+	});
+
+	$effect(() => {
+		if (!map || !styleLoaded || !map.getLayer(VALUE_POINTS_LAYER_ID)) return;
+
+		map.setLayoutProperty(VALUE_POINTS_LAYER_ID, "visibility", valuePointLayer ? "visible" : "none");
 	});
 
 	$effect(() => {
