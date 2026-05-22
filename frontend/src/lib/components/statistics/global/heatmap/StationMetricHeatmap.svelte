@@ -41,7 +41,7 @@
 		promise: Promise<HeatmapData>;
 		class?: ClassValue;
 	};
-	let { promise, class: classes = "" }: Props = $props();
+	let { promise, class: className }: Props = $props();
 
 	let heatmapPoints: MapHeatmapPoint[] = $state([]);
 	let markers: MapMarker<StationHeatmapMarkerData>[] = $state([]);
@@ -120,9 +120,9 @@
 	});
 </script>
 
-<div class={["relative overflow-hidden rounded-xl", classes]}>
+<div class={["relative overflow-hidden rounded-xl", className]}>
 	<Card class="bg-background/85! pointer-events-none absolute top-4 left-4 z-10 px-3! py-2! shadow-sm backdrop-blur-md">
-		<p class="text-muted-foreground text-xs font-medium">Heatmap metric</p>
+		<p class="text-foreground/60 text-xs font-medium">Heatmap metric</p>
 		{#await promise}
 			<Skeleton class="h-6 w-32" />
 		{:then data}

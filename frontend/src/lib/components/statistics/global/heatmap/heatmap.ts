@@ -1,5 +1,8 @@
-import { MetricSeriesType, MetricUnit, ScheduleType, TransportType } from "@lib/api";
+import { MetricSeriesType, ScheduleType, TransportType } from "@lib/api";
+import { formatMetricValue } from "@lib/components/statistics/metric-format";
+import type { vBaseMetricRequestStationEventQualitySummaryMetricRequest } from "@lib/api/valibot.gen";
 import { DateTime } from "luxon";
+import * as v from "valibot";
 
 type HeatmapMetricOption = {
 	seriesType: MetricSeriesType;
@@ -57,6 +60,17 @@ type HeatmapSettings = {
 	transportTypes: TransportType[];
 };
 
+const createHeatmapRequest = (
+	settings: HeatmapSettings
+): v.InferOutput<typeof vBaseMetricRequestStationEventQualitySummaryMetricRequest> => ({
+	queryType: "STATION_EVENT_QUALITY_SUMMARY",
+	seriesType: settings.seriesType,
+	scheduleType: settings.scheduleType,
+	start: settings.dates.start.startOf("day").toISO()!,
+	end: settings.dates.end.endOf("day").toISO()!,
+	transportTypes: settings.transportTypes
+});
+
 const createDefaultHeatmapSettings = (): HeatmapSettings => ({
 	dates: {
 		start: DateTime.now().minus({ days: 7 }).startOf("day"),
@@ -70,31 +84,12 @@ const createDefaultHeatmapSettings = (): HeatmapSettings => ({
 const getHeatmapMetricOption = (seriesType: MetricSeriesType): HeatmapMetricOption | undefined =>
 	HEATMAP_METRIC_OPTIONS.find((option: HeatmapMetricOption) => option.seriesType === seriesType);
 
-const formatCompactNumber = (value: number, maximumFractionDigits: number) =>
-	value.toLocaleString(undefined, {
-		maximumFractionDigits
-	});
-
-const formatHeatmapMetricValue = (value: number, unit: MetricUnit) => {
-	if (!Number.isFinite(value)) return { value: "N/A", unit: "" };
-
-	if (unit === MetricUnit.SECONDS) {
-		if (Math.abs(value) >= 60) return { value: formatCompactNumber(value / 60, 1), unit: "min" };
-		return { value: formatCompactNumber(value, 0), unit: "s" };
-	}
-
-	if (unit === MetricUnit.PERCENT) return { value: formatCompactNumber(value, Math.abs(value) < 10 ? 1 : 0), unit: "%" };
-	if (unit === MetricUnit.COUNT) return { value: value.toLocaleString(), unit: "" };
-	if (unit === MetricUnit.BYTES) return { value: value.toLocaleString(), unit: "B" };
-
-	return { value: formatCompactNumber(value, Math.abs(value) < 10 ? 2 : 0), unit };
-};
-
 export {
 	type HeatmapMetricOption,
 	HEATMAP_METRIC_OPTIONS,
 	type HeatmapSettings,
+	createHeatmapRequest,
 	createDefaultHeatmapSettings,
 	getHeatmapMetricOption,
-	formatHeatmapMetricValue
+	formatMetricValue as formatHeatmapMetricValue
 };

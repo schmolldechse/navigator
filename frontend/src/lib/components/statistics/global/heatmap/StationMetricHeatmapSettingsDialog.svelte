@@ -67,9 +67,8 @@
 		isVisible: boolean;
 		settings: HeatmapSettings;
 		onsave: (settings: HeatmapSettings) => void;
-		oncancel?: () => void;
 	};
-	let { isVisible = $bindable(true), settings, onsave, oncancel }: Props = $props();
+	let { isVisible = $bindable(true), settings, onsave }: Props = $props();
 
 	const cloneSettings = (source: HeatmapSettings): HeatmapSettings => ({
 		dates: {
@@ -115,7 +114,6 @@
 
 	const cancel = () => {
 		localSettings = cloneSettings(settings);
-		oncancel?.();
 		isVisible = false;
 	};
 

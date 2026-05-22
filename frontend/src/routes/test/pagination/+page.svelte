@@ -90,7 +90,7 @@
 				offset={currentOffset}
 				limit={normalizedLimit}
 				totalItems={normalizedTotalItems}
-				totalPages={totalPages}
+				{totalPages}
 				{hasMore}
 				{disabled}
 				onpagechange={setOffset}

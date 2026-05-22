@@ -1,7 +1,10 @@
 import { query } from "$app/server";
-import type { BaseMetricDataPointStationDataPoint, BaseStation, MetricSeries } from "@lib/api";
+import type { BaseMetricDataPointStationDataPoint, BaseStation } from "@lib/api";
 import { vBaseMetricRequestStationEventQualitySummaryMetricRequest } from "@lib/api/valibot.gen";
-import type { HeatmapMetricSeries, StationHeatmapPoint } from "@lib/components/statistics/heatmap/StationMetricHeatmap.svelte";
+import type {
+	HeatmapMetricSeries,
+	StationHeatmapPoint
+} from "@lib/components/statistics/global/heatmap/StationMetricHeatmap.svelte";
 import { loadMetric } from "@lib/remote/metrics.remote";
 import { getStationBatch } from "@lib/remote/station.remote";
 import * as v from "valibot";
