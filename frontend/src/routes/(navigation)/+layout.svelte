@@ -9,19 +9,28 @@
 	import Menu from "@lucide/svelte/icons/menu";
 	import { type ClassValue } from "svelte/elements";
 	import Button from "@lib/components/ui/Button.svelte";
-	import Dialog from "@lib/components/ui/dialog/Dialog.svelte";
 
 	let { data, children }: LayoutProps = $props();
 
 	let isMenuOpen: boolean = $state(false);
+	let currentPath: string = $state(page.url.pathname);
+	const mobileNavigationId = "mobile-navigation-menu";
 
 	const icons: Record<string, Component> = {
 		ChartLine: ChartLine as Component,
 		Clock_4: Clock_4 as Component
 	};
+
+	$effect(() => {
+		const nextPath = page.url.pathname;
+		if (nextPath !== currentPath) {
+			currentPath = nextPath;
+			isMenuOpen = false;
+		}
+	});
 </script>
 
-{#snippet pageEntries({ class: className }: { class: ClassValue })}
+{#snippet pageEntries({ class: className, onNavigate }: { class: ClassValue; onNavigate?: () => void })}
 	<nav class={className}>
 		{#each data.pages as pageEntry}
 			{@const isVisited = page.url.pathname === pageEntry.href}
@@ -30,6 +39,7 @@
 			<Button
 				mode="tertiary"
 				href={pageEntry.href}
+				onclick={onNavigate}
 				class={[
 					"group hover:text-accent! flex items-center gap-2 text-sm font-medium transition-colors",
 					isVisited && "text-accent!",
@@ -54,6 +64,9 @@
 		<Button
 			mode="secondary"
 			class="flex md:hidden"
+			aria-controls={mobileNavigationId}
+			aria-expanded={isMenuOpen}
+			aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
 			onclick={(event: MouseEvent) => {
 				event.stopPropagation();
 				isMenuOpen = !isMenuOpen;
@@ -66,14 +79,15 @@
 	</div>
 </header>
 
-<Dialog
-	bind:isVisible={isMenuOpen}
-	title="Menu"
-	showActions={false}
-	clickOutsideToClose
-	class="mt-auto max-h-[50vh] w-full max-w-full rounded-b-none border-b-0 md:hidden"
->
-	{@render pageEntries({ class: "md:hidden flex flex-col items-start gap-y-2" })}
-</Dialog>
+{#if isMenuOpen}
+	<div id={mobileNavigationId} class="fixed top-18 right-4 left-4 z-90 md:hidden">
+		<div class="border-border bg-background/95 rounded-xl border-2 p-2 shadow-2xl backdrop-blur-md sm:ml-auto sm:max-w-xs">
+			{@render pageEntries({
+				class: "flex flex-col items-stretch gap-y-1",
+				onNavigate: () => (isMenuOpen = false)
+			})}
+		</div>
+	</div>
+{/if}
 
 {@render children?.()}
