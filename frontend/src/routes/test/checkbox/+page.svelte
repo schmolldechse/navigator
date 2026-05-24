@@ -58,22 +58,25 @@
 			<div class="grid gap-3">
 				<label
 					class="border-border hover:bg-secondary/50 flex items-center gap-3 rounded-lg border p-3 text-sm font-medium transition-colors"
+					for="unchecked"
 				>
-					<Checkbox bind:checked={unchecked} aria-label="Unchecked example" />
+					<Checkbox bind:checked={unchecked} aria-label="Unchecked example" id="unchecked" />
 					<span>Unchecked</span>
 				</label>
 
 				<label
 					class="border-border hover:bg-secondary/50 flex items-center gap-3 rounded-lg border p-3 text-sm font-medium transition-colors"
+					for="checked"
 				>
-					<Checkbox bind:checked={checkedExample} aria-label="Checked example" />
+					<Checkbox bind:checked={checkedExample} aria-label="Checked example" id="checked" />
 					<span>Checked</span>
 				</label>
 
 				<label
 					class="border-border hover:bg-secondary/50 flex items-center gap-3 rounded-lg border p-3 text-sm font-medium transition-colors"
+					for="mixed"
 				>
-					<Checkbox bind:checked={mixedChecked} bind:indeterminate={mixedIndeterminate} aria-label="Mixed example" />
+					<Checkbox bind:checked={mixedChecked} bind:indeterminate={mixedIndeterminate} aria-label="Mixed example" id="mixed" />
 					<span>Mixed</span>
 				</label>
 
@@ -106,22 +109,23 @@
 			</div>
 
 			<div class="grid gap-3">
-				<label class="border-border flex items-center gap-3 rounded-lg border p-3 text-sm font-medium">
-					<Checkbox bind:checked={disabledUnchecked} disabled aria-label="Disabled unchecked example" />
+				<label class="border-border flex items-center gap-3 rounded-lg border p-3 text-sm font-medium" for="disabled-unchecked">
+					<Checkbox bind:checked={disabledUnchecked} disabled aria-label="Disabled unchecked example" id="disabled-unchecked" />
 					<span class="text-foreground/60">Disabled unchecked</span>
 				</label>
 
-				<label class="border-border flex items-center gap-3 rounded-lg border p-3 text-sm font-medium">
-					<Checkbox bind:checked={disabledChecked} disabled aria-label="Disabled checked example" />
+				<label class="border-border flex items-center gap-3 rounded-lg border p-3 text-sm font-medium" for="disabled-checked">
+					<Checkbox bind:checked={disabledChecked} disabled aria-label="Disabled checked example" id="disabled-checked" />
 					<span class="text-foreground/60">Disabled checked</span>
 				</label>
 
-				<label class="border-border flex items-center gap-3 rounded-lg border p-3 text-sm font-medium">
+				<label class="border-border flex items-center gap-3 rounded-lg border p-3 text-sm font-medium" for="disabled-mixed">
 					<Checkbox
 						bind:checked={disabledMixedChecked}
 						bind:indeterminate={disabledMixedIndeterminate}
 						disabled
 						aria-label="Disabled mixed example"
+						id="disabled-mixed"
 					/>
 					<span class="text-foreground/60">Disabled mixed</span>
 				</label>
@@ -135,17 +139,17 @@
 			</div>
 
 			<div class="grid gap-3">
-				<label class="flex items-center gap-3 text-sm font-medium">
+				<label class="flex items-center gap-3 text-sm font-medium" for="notifications">
 					<Checkbox id="notifications" name="notifications" bind:checked={notifications} />
 					<span>Notifications</span>
 				</label>
 
-				<label class="flex items-center gap-3 text-sm font-medium">
+				<label class="flex items-center gap-3 text-sm font-medium" for="route-warnings">
 					<Checkbox id="route-warnings" name="routeWarnings" bind:checked={routeWarnings} required />
 					<span>Route warnings</span>
 				</label>
 
-				<label class="flex items-center gap-3 text-sm font-medium">
+				<label class="flex items-center gap-3 text-sm font-medium" for="maintenance">
 					<Checkbox
 						id="maintenance"
 						name="maintenance"
@@ -164,11 +168,12 @@
 			</div>
 
 			<div class="flex flex-col gap-4">
-				<label class="flex items-center gap-3 text-sm font-medium">
+				<label class="flex items-center gap-3 text-sm font-medium" for="callback-checkbox">
 					<Checkbox
 						bind:checked={callbackChecked}
 						onchecked={(value) => (lastChange = value ? "checked" : "unchecked")}
 						aria-label="Callback example"
+						id="callback-checkbox"
 					/>
 					<span>Callback state</span>
 				</label>

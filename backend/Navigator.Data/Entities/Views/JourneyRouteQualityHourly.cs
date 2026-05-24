@@ -17,11 +17,11 @@ public class JourneyRouteQualityHourly
     [Column("journey_description")]
     public required string JourneyDescription { get; set; }
 
-    [Column("line")]
-    public required string Line { get; set; }
-
     [Column("number")]
     public required int Number { get; set; }
+
+    [Column("is_replacement_transport")]
+    public required bool IsReplacementTransport { get; set; }
 
     [Column("origin_eva_number")]
     public required int OriginEvaNumber { get; set; }

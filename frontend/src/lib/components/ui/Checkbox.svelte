@@ -1,9 +1,7 @@
 <script lang="ts">
 	import Check from "@lucide/svelte/icons/check";
 	import Minus from "@lucide/svelte/icons/minus";
-	import type { ClassValue } from "svelte/elements";
-
-	type AttributeValue = string | number | boolean | null | undefined;
+	import type { ClassValue, HTMLAttributes } from "svelte/elements";
 
 	type Props = {
 		id?: string;
@@ -16,9 +14,7 @@
 		disabled?: boolean;
 		required?: boolean;
 		class?: ClassValue;
-		[key: `aria-${string}`]: AttributeValue;
-		[key: `data-${string}`]: AttributeValue;
-	};
+	} & HTMLAttributes<HTMLInputElement>;
 	let {
 		id,
 		name,

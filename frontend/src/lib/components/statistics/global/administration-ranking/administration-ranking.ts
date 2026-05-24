@@ -1,6 +1,6 @@
 import { MetricSeriesType } from "@lib/api";
 import type { vBaseMetricRequestAdministrationRankingMetricRequest } from "@lib/api/valibot.gen";
-import { DateTime } from "luxon";
+import { toJourneyRankingMetricScopeRequest, type StatisticsScopeSettings } from "../statistics-scope";
 import * as v from "valibot";
 
 type AdministrationRankingMetricOption = {
@@ -17,10 +17,6 @@ type AdministrationRankingMetricOption = {
 };
 
 type AdministrationRankingSettings = {
-	dates: {
-		start: DateTime;
-		end: DateTime;
-	};
 	seriesType: MetricSeriesType;
 	limit: number;
 	offset: number;
@@ -94,21 +90,17 @@ const ADMINISTRATION_RANKING_METRIC_OPTIONS: AdministrationRankingMetricOption[]
 ];
 
 const createAdministrationRankingRequest = (
-	settings: AdministrationRankingSettings
+	settings: AdministrationRankingSettings,
+	scope: StatisticsScopeSettings
 ): v.InferOutput<typeof vBaseMetricRequestAdministrationRankingMetricRequest> => ({
 	queryType: "ADMINISTRATION_RANKING",
 	seriesType: settings.seriesType,
-	start: settings.dates.start.startOf("day").toISO()!,
-	end: settings.dates.end.endOf("day").toISO()!,
+	...toJourneyRankingMetricScopeRequest(scope),
 	limit: settings.limit,
 	offset: settings.offset
 });
 
 const createDefaultAdministrationRankingSettings = (): AdministrationRankingSettings => ({
-	dates: {
-		start: DateTime.now().minus({ days: 7 }).startOf("day"),
-		end: DateTime.now().endOf("day")
-	},
 	seriesType: MetricSeriesType.ADMINISTRATION_RANKING_COUNT,
 	limit: 10,
 	offset: 0

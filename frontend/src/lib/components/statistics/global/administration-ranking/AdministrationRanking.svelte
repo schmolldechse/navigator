@@ -1,50 +1,59 @@
-<script module lang="ts">
-	import type { AdministrationMetricSubject, MetricSample, MetricSeries } from "@lib/api";
-
-	type AdministrationRankingRow = {
-		key: string;
-		rank: number;
-		administration: AdministrationMetricSubject;
-		value: number;
-		unit: MetricSeries["unit"];
-		sample?: MetricSample | null;
-	};
-
-	type NormalizedPage = {
-		offset: number;
-		limit: number;
-		totalItems: number;
-		totalPages: number;
-		hasMore: boolean;
-	};
-
-	export type { AdministrationRankingRow, NormalizedPage };
-</script>
-
 <script lang="ts">
-	import type { ClassValue } from "svelte/elements";
+	import { loadMetric } from "@lib/remote/metrics.remote";
+	import {
+		ADMINISTRATION_RANKING_METRIC_OPTIONS,
+		createAdministrationRankingRequest,
+		getAdministrationRankingMetricOption,
+		type AdministrationRankingMetricOption,
+		type AdministrationRankingSettings
+	} from "./administration-ranking";
 	import type { MetricPage } from "@lib/api";
+	import ChartBar from "@lucide/svelte/icons/chart-bar";
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
-	import Info from "@lucide/svelte/icons/info";
-	import Trophy from "@lucide/svelte/icons/trophy";
+	import AdministrationRankingList, { type NormalizedPage } from "./AdministrationRankingList.svelte";
 	import Card from "@lib/components/ui/card/Card.svelte";
 	import Pagination from "@lib/components/ui/Pagination.svelte";
 	import Skeleton from "@lib/components/ui/Skeleton.svelte";
-	import * as Tooltip from "@lib/components/ui/tooltip/index";
-	import { loadMetric } from "@lib/remote/metrics.remote";
-	import { getAdministrationRankingMetricOption } from "./administration-ranking";
-	import { formatMetricValue } from "../../metric-format";
+	import { getStatisticsScopeContext } from "../statistics-scope-context.svelte";
+	import ToggleGroup from "@lib/components/ui/toggle-group/ToggleGroup.svelte";
+	import ToggleGroupItem from "@lib/components/ui/toggle-group/ToggleGroupItem.svelte";
 
 	type Props = {
+		isLoading: boolean;
+		settings: AdministrationRankingSettings;
 		promise: Promise<Awaited<ReturnType<typeof loadMetric>>>;
-		onpagechange: (offset: number) => void;
-		class?: ClassValue;
 	};
-	let { promise, onpagechange, class: className }: Props = $props();
+	let { isLoading = $bindable(true), settings: initialSettings, promise: initialPromise }: Props = $props();
+
+	const scopeContext = getStatisticsScopeContext();
+
+	// svelte-ignore state_referenced_locally
+	let settings: AdministrationRankingSettings = $state({ ...initialSettings });
+
+	let metricOption = $derived(getAdministrationRankingMetricOption(settings.seriesType));
+	let selectedMetricOption: AdministrationRankingMetricOption | undefined = $derived(
+		ADMINISTRATION_RANKING_METRIC_OPTIONS.find(
+			(option: AdministrationRankingMetricOption) => option.seriesType === settings.seriesType
+		)
+	);
+
+	let request = $derived(createAdministrationRankingRequest(settings, scopeContext.current));
+	// svelte-ignore state_referenced_locally
+	let promise: Promise<Awaited<ReturnType<typeof loadMetric>>> = $state(initialPromise);
+
+	const selectMetric = (option: AdministrationRankingMetricOption) => {
+		if (option.seriesType === settings.seriesType) return;
+
+		settings = { ...settings, seriesType: option.seriesType, limit: 10, offset: 0 };
+	};
+
+	const changePage = (offset: number) => {
+		settings = { ...settings, limit: 10, offset };
+	};
 
 	const normalizePage = (page: MetricPage | null | undefined): NormalizedPage => {
-		const limit = Math.max(1, Number(page?.limit ?? 10));
-		const offset = Math.max(0, Number(page?.offset ?? 0));
+		const limit = Math.max(1, Number(page?.limit ?? settings.limit));
+		const offset = Math.max(0, Number(page?.offset ?? settings.offset));
 		const totalItems = Math.max(0, Number(page?.totalItems ?? 0));
 		const totalPages = Math.max(0, Number(page?.totalPages ?? Math.ceil(totalItems / limit)));
 
@@ -57,188 +66,90 @@
 		};
 	};
 
-	const createRows = (metric: MetricSeries, page: NormalizedPage): AdministrationRankingRow[] => {
-		const rows: AdministrationRankingRow[] = [];
-
-		for (const dataPoint of metric.dataPoints) {
-			if (!("administration" in dataPoint) || !dataPoint.administration) continue;
-
-			const index = rows.length;
-			const administration = dataPoint.administration;
-
-			rows.push({
-				key: `${administration.operatorCode}-${administration.administrationId}`,
-				rank: page.offset + index + 1,
-				administration,
-				value: Number(dataPoint.value),
-				unit: metric.unit,
-				sample: dataPoint.sample
-			});
+	let initialized = false;
+	$effect(() => {
+		const currentRequest = request;
+		if (!currentRequest) return;
+		if (!initialized) {
+			initialized = true;
+			return;
 		}
 
-		return rows;
-	};
+		promise = loadMetric({ request: currentRequest });
+	});
+
+	$effect(() => {
+		const currentPromise = promise;
+		if (!currentPromise) return;
+
+		isLoading = "loading" in currentPromise && Boolean(currentPromise.loading);
+	});
 </script>
 
-<Card class={["gap-y-4", className]}>
-	<Card class="bg-background/85! pointer-events-none z-10 w-fit px-3! py-2! shadow-sm backdrop-blur-md">
-		<p class="text-foreground/60 text-xs font-medium">Ranking metric</p>
-		{#await promise}
-			<Skeleton class="h-6 w-32" />
-		{:then data}
-			<h2 class="text-foreground text-sm font-semibold sm:text-base">
-				{getAdministrationRankingMetricOption(data.seriesType)?.label ?? "???"}
-			</h2>
-		{/await}
-	</Card>
+<section class="space-y-4">
+	<div class="flex items-center gap-2">
+		<ChartBar size={22} class="text-accent" />
+		<h2 class="text-2xl font-semibold">Administration Ranking</h2>
+	</div>
 
-	<div class="flex flex-col gap-y-4">
-		{#await promise}
-			<div class="flex flex-col gap-y-2">
-				{#each Array.from({ length: 5 }) as _}
-					<Skeleton class="h-16 w-full" />
-				{/each}
-			</div>
-		{:then metric}
-			{@const page = normalizePage(metric.page)}
-			{@const rows = createRows(metric, page)}
+	<p class="text-foreground/60 text-sm leading-relaxed sm:text-base">
+		Compare operators across the global journey dataset for a dedicated time range.
+		{metricOption?.rankingDescription ?? "Values are ranked by the selected metric."}
+	</p>
 
-			{#if rows.length === 0}
-				<div
-					class="bg-secondary/30 border-border flex min-h-96 flex-col items-center justify-center rounded-lg border text-center"
+	<Card class="gap-y-4">
+		<ToggleGroup
+			mode="single"
+			allowEmpty={false}
+			selected={selectedMetricOption}
+			keyFn={(option: AdministrationRankingMetricOption) => option.seriesType}
+			onselect={(option: AdministrationRankingMetricOption | undefined) => {
+				if (option) selectMetric(option);
+			}}
+			class="gap-1.5 xl:justify-end"
+		>
+			{#each ADMINISTRATION_RANKING_METRIC_OPTIONS as option (option.seriesType)}
+				<ToggleGroupItem
+					item={option}
+					disabled={isLoading}
+					title={option.description}
+					aria-label={`${option.label}: ${option.description}`}
+					class="enabled:hover:bg-accent/15 enabled:hover:text-accent data-active:border-accent data-active:bg-accent data-active:text-accent-foreground data-active:hover:bg-accent data-active:hover:text-accent-foreground px-2.5 py-1.5 text-xs font-semibold transition-colors"
 				>
-					<p class="text-foreground font-semibold">No ranking data available</p>
-					<p class="text-foreground/60 max-w-sm text-sm">Try a wider time range or another ranking metric.</p>
-				</div>
-			{:else}
-				{@const maxValue = Math.max(0, ...rows.map((row) => row.value))}
-				{@const metricOption = getAdministrationRankingMetricOption(metric.seriesType)}
+					{option.label}
+				</ToggleGroupItem>
+			{/each}
+		</ToggleGroup>
 
+		<div class="flex flex-col gap-y-4">
+			{#await promise}
 				<div class="flex flex-col gap-y-2">
-					<div
-						class={[
-							"text-foreground/45 gap-3 px-3 text-xs font-semibold tracking-wide uppercase",
-							"hidden grid-cols-[4rem_minmax(0,1fr)_minmax(6rem,8rem)] sm:grid"
-						]}
-					>
-						<span class="text-right">Place</span>
-						<span>Administration / Operator</span>
-						<span class="text-right">{metricOption?.valueLabel ?? "Value"}</span>
-					</div>
-
-					{#each rows as row (row.key)}
-						{@const percentage = maxValue === 0 ? 0 : (Math.max(0, row.value) / maxValue) * 100}
-						{@const { value, unit } = formatMetricValue(row.value, row.unit)}
-
-						<article
-							class={[
-								"border-border bg-secondary/20 hover:bg-secondary/35 gap-x-4 gap-y-3 rounded-lg border p-4 transition-colors sm:gap-x-3 sm:gap-y-2 sm:p-3",
-								"grid grid-cols-[minmax(0,1fr)_auto] sm:grid-cols-[4rem_minmax(0,1fr)_minmax(6rem,8rem)] sm:grid-rows-[auto_auto]"
-							]}
-						>
-							<!-- Place -->
-							<div class={["flex items-center gap-x-2 sm:justify-end sm:self-center", "sm:row-span-2"]}>
-								{#if row.rank <= 3 && metricOption?.polarity === "positive"}
-									<Trophy size={16} class="text-accent" />
-								{:else if row.rank <= 3 && metricOption?.polarity === "negative"}
-									<CircleAlert size={16} class="text-destructive" />
-								{/if}
-
-								<span
-									class="bg-background border-border text-foreground rounded-md border px-2 py-1 text-sm font-bold tabular-nums"
-								>
-									#{row.rank}
-								</span>
-							</div>
-
-							<!-- Administration -->
-							<div
-								class={[
-									"flex flex-row flex-wrap items-baseline gap-x-2 gap-y-1",
-									"col-span-2 sm:col-span-1 sm:col-start-2 sm:row-start-1"
-								]}
-							>
-								<span class="text-foreground max-w-full min-w-0 font-semibold break-words">
-									{row.administration.operatorName}
-								</span>
-								<span
-									class="bg-background text-foreground/60 max-w-full rounded-md px-1.5 py-0.5 text-xs font-medium break-all"
-								>
-									{row.administration.operatorCode}
-								</span>
-							</div>
-
-							<!-- Value -->
-							<div
-								class={[
-									"flex items-center justify-end gap-x-2 sm:self-center",
-									"col-start-2 row-start-1 sm:col-start-3 sm:row-span-2 sm:row-start-1"
-								]}
-							>
-								<div class="text-foreground text-right font-bold whitespace-nowrap tabular-nums">
-									{value}
-									{#if unit}
-										<span class="text-foreground/60 ml-1 text-xs font-semibold">{unit}</span>
-									{/if}
-								</div>
-
-								{#if row.sample && metricOption?.sampleLabels}
-									<Tooltip.Root delay={100}>
-										<Tooltip.Trigger>
-											<button
-												type="button"
-												class="text-foreground/45 hover:bg-accent/15 hover:text-accent focus-visible:outline-accent flex size-7 shrink-0 items-center justify-center rounded-lg transition-colors focus-visible:outline-2 focus-visible:outline-offset-2"
-												aria-label={`Show sample for ${row.administration.operatorName}`}
-											>
-												<Info size={15} />
-											</button>
-										</Tooltip.Trigger>
-
-										<Tooltip.Content position="left" class="w-64">
-											<div class="grid gap-y-1">
-												<p class="text-foreground text-sm font-semibold">Sample basis</p>
-												<p class="text-foreground/60 text-xs leading-relaxed">
-													{metricOption.sampleLabels.numerator}: {Number(row.sample.numerator).toLocaleString()}.
-													{metricOption.sampleLabels.denominator}: {Number(row.sample.denominator).toLocaleString()}.
-												</p>
-											</div>
-										</Tooltip.Content>
-									</Tooltip.Root>
-								{/if}
-							</div>
-
-							<!-- Value Bar -->
-							<div
-								class={[
-									"bg-background h-2 overflow-hidden rounded-full",
-									"col-span-2 sm:col-span-1 sm:col-start-2 sm:row-start-2"
-								]}
-								role="img"
-								aria-label={`${row.administration.operatorName} relative value ${percentage.toLocaleString(undefined, { maximumFractionDigits: 0 })}%`}
-							>
-								<div class="bg-accent h-full rounded-full transition-[width] duration-300" style:width={`${percentage}%`}></div>
-							</div>
-						</article>
+					{#each Array.from({ length: 5 }) as _, index (index)}
+						<Skeleton class="h-16 w-full" />
 					{/each}
 				</div>
-			{/if}
+			{:then metric}
+				{@const page = normalizePage(metric.page)}
 
-			<Pagination
-				offset={page.offset}
-				limit={page.limit}
-				totalItems={page.totalItems}
-				totalPages={page.totalPages}
-				hasMore={page.hasMore}
-				{onpagechange}
-			/>
-		{:catch error}
-			<div
-				class="bg-secondary/30 border-border flex min-h-96 flex-col items-center justify-center gap-2 rounded-lg border text-center"
-			>
-				<CircleAlert size={32} class="text-destructive" />
-				<p class="text-foreground font-semibold">An error occurred while loading the administration ranking.</p>
-				<p class="text-foreground/60 max-w-xl text-sm">{error.message}</p>
-			</div>
-		{/await}
-	</div>
-</Card>
+				<AdministrationRankingList {metric} {page} />
+
+				<Pagination
+					offset={page.offset}
+					limit={page.limit}
+					totalItems={page.totalItems}
+					totalPages={page.totalPages}
+					hasMore={page.hasMore}
+					onpagechange={changePage}
+				/>
+			{:catch error}
+				<div
+					class="bg-secondary/30 border-border flex min-h-96 flex-col items-center justify-center gap-2 rounded-lg border text-center"
+				>
+					<CircleAlert size={32} class="text-destructive" />
+					<p class="text-foreground font-semibold">An error occurred while loading the administration ranking.</p>
+					<p class="text-foreground/60 max-w-xl text-sm">{error.message}</p>
+				</div>
+			{/await}
+		</div>
+	</Card>
+</section>

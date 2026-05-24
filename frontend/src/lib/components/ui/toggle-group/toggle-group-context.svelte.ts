@@ -4,12 +4,14 @@ const TOGGLE_GROUP_CONTEXT_KEY = Symbol("toggle-group");
 
 type ToggleItem = { [key: string]: any };
 type ToggleGroupMode = "single" | "multiple";
+type ToggleGroupValue<T extends ToggleItem> = T | T[] | undefined;
 
 interface ToggleGroupProps<T extends ToggleItem> {
-	get selected(): T[];
-	set selected(item: T[]);
+	get selected(): ToggleGroupValue<T>;
+	set selected(item: ToggleGroupValue<T>);
 	get mode(): ToggleGroupMode;
 	get keyFn(): (item: T) => unknown;
+	get allowEmpty(): boolean;
 }
 
 class ToggleGroupContext<T extends ToggleItem> {
@@ -17,12 +19,17 @@ class ToggleGroupContext<T extends ToggleItem> {
 
 	constructor(private props: ToggleGroupProps<T>) {}
 
-	get selected(): T[] {
+	get selected(): ToggleGroupValue<T> {
 		return this.props.selected;
 	}
 
-	set selected(option: T[]) {
+	set selected(option: ToggleGroupValue<T>) {
 		this.props.selected = option;
+	}
+
+	get selectedItems(): T[] {
+		if (!this.selected) return [];
+		return Array.isArray(this.selected) ? this.selected : [this.selected];
 	}
 
 	register = (option: T) => {
@@ -37,20 +44,26 @@ class ToggleGroupContext<T extends ToggleItem> {
 		this.items = this.items.filter((availableOption: T) => this.props.keyFn(availableOption) !== key);
 	};
 
-	toggle = (option: T) => {
+	toggle = (option: T): boolean => {
 		const key = this.props.keyFn(option);
-		const isAlreadySelected = this.selected.some((selectedOption: T) => this.props.keyFn(selectedOption) === key);
+		const isAlreadySelected = this.selectedItems.some((selectedOption: T) => this.props.keyFn(selectedOption) === key);
 
-		if (this.props.mode === "single") this.selected = isAlreadySelected ? [] : [option];
-		else
+		if (this.props.mode === "single") {
+			if (isAlreadySelected && !this.props.allowEmpty) return false;
+
+			this.selected = isAlreadySelected ? undefined : option;
+		} else {
 			this.selected = isAlreadySelected
-				? this.selected.filter((selectedOption: T) => this.props.keyFn(selectedOption) !== key)
-				: [...this.selected, option];
+				? this.selectedItems.filter((selectedOption: T) => this.props.keyFn(selectedOption) !== key)
+				: [...this.selectedItems, option];
+		}
+
+		return true;
 	};
 
 	isSelected = (option: T): boolean => {
 		const key = this.props.keyFn(option);
-		return this.selected.some((selectedOption: T) => this.props.keyFn(selectedOption) === key);
+		return this.selectedItems.some((selectedOption: T) => this.props.keyFn(selectedOption) === key);
 	};
 }
 
@@ -59,4 +72,11 @@ const setToggleGroupContext = <T extends ToggleItem>(context: ToggleGroupContext
 
 const getToggleGroupContext = <T extends ToggleItem>() => getContext<ToggleGroupContext<T>>(TOGGLE_GROUP_CONTEXT_KEY);
 
-export { type ToggleItem, type ToggleGroupMode, ToggleGroupContext, setToggleGroupContext, getToggleGroupContext };
+export {
+	type ToggleItem,
+	type ToggleGroupMode,
+	type ToggleGroupValue,
+	ToggleGroupContext,
+	setToggleGroupContext,
+	getToggleGroupContext
+};

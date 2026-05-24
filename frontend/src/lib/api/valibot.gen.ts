@@ -672,6 +672,8 @@ export const vBaseMetricRequestAdministrationRankingMetricRequest = v.object({
 			])
 		)
 	),
+	transportTypes: v.nullish(v.array(vTransportType)),
+	includeReplacementTransport: v.optional(v.boolean()),
 	limit: v.optional(
 		v.union([
 			v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(500)),
@@ -722,7 +724,9 @@ export const vBaseMetricRequestLineRankingMetricRequest = v.object({
 			])
 		)
 	),
-	line: v.nullish(v.string()),
+	transportTypes: v.nullish(v.array(vTransportType)),
+	includeReplacementTransport: v.optional(v.boolean()),
+	journeyDescription: v.nullish(v.string()),
 	number: v.nullish(v.string()),
 	limit: v.optional(
 		v.union([
@@ -746,7 +750,8 @@ export const vBaseMetricRequestNetworkStationEventQualityTimeSeriesMetricRequest
 	scheduleType: vScheduleType,
 	start: v.pipe(v.string(), v.isoTimestamp()),
 	end: v.pipe(v.string(), v.isoTimestamp()),
-	transportTypes: v.nullish(v.array(vTransportType))
+	transportTypes: v.nullish(v.array(vTransportType)),
+	includeReplacementTransport: v.optional(v.boolean())
 });
 
 export const vQueryTypeEnum6 = v.picklist(["RIS_ID_SNAPSHOT"]);
@@ -779,7 +784,8 @@ export const vBaseMetricRequestStationEventQualitySummaryMetricRequest = v.objec
 				v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 			])
 		)
-	)
+	),
+	includeReplacementTransport: v.optional(v.boolean())
 });
 
 export const vQueryTypeEnum8 = v.picklist(["STATION_EVENT_QUALITY_TIME_SERIES"]);
@@ -803,7 +809,8 @@ export const vBaseMetricRequestStationEventQualityTimeSeriesMetricRequest = v.ob
 				v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
 			])
 		)
-	)
+	),
+	includeReplacementTransport: v.optional(v.boolean())
 });
 
 export const vBaseMetricRequest = v.union([

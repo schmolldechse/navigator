@@ -44,6 +44,10 @@ public class NetworkStationEventQualityTimeSeriesMetricRequest : BaseMetricReque
     [Description("Optional list of transport types to filter the metric by. If omitted or empty, all transport types will be included.")]
     public TransportType[]? TransportTypes { get; set; } = [];
 
+    [JsonPropertyName("includeReplacementTransport")]
+    [Description("Whether replacement transport should be included in the metric.")]
+    public bool IncludeReplacementTransport { get; set; } = true;
+
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Start > End)

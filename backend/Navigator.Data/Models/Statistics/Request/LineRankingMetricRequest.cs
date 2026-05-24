@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
+using Navigator.Data.Enums;
 using Navigator.Data.Enums.Metric;
 using Navigator.Data.Infrastructure;
 
@@ -41,20 +41,28 @@ public class LineRankingMetricRequest : BaseMetricRequest
     [Description("Optional array of station EVA numbers. If provided, line quality is ranked for station visits instead of global journey route quality.")]
     public int[] EvaNumbers { get; set; } = [];
 
-    [JsonPropertyName("line")]
+    [JsonPropertyName("transportTypes")]
+    [Description("Optional list of transport types to filter the ranking by. If omitted or empty, all transport types will be included.")]
+    public TransportType[]? TransportTypes { get; set; } = [];
+
+    [JsonPropertyName("includeReplacementTransport")]
+    [Description("Whether replacement transport should be included in the metric.")]
+    public bool IncludeReplacementTransport { get; set; } = true;
+
+    [JsonPropertyName("journeyDescription")]
     [Regex(
         @"^[\p{L}\p{N}\s_\-/\^\$\.\|\(\)\[\]\+\*\?\{\},]+$",
-        Exception = "Line may only contain letters, digits, spaces and basic regex operators.",
+        Exception = "Journey description may only contain letters, digits, spaces and basic regex operators.",
         MaxLength = 64)]
-    [Description("Optional regex filter for the line key.")]
-    public string? Line { get; set; }
+    [Description("Optional regex filter for the journey description.")]
+    public string? JourneyDescription { get; set; }
 
     [JsonPropertyName("number")]
     [Regex(
         @"^[0-9\s\^\$\.\|\(\)\[\]\+\*\?\{\},]+$",
         Exception = "Number may only contain digits and basic regex operators.",
         MaxLength = 64)]
-    [Description("Optional regex filter for the journey or line number.")]
+    [Description("Optional regex filter for the journey number.")]
     public string? Number { get; set; }
 
     [JsonPropertyName("limit")]

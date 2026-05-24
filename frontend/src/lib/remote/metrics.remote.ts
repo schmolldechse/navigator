@@ -1,15 +1,15 @@
-import { query } from "$app/server";
-import { env } from "$env/dynamic/public";
+import { getRequestEvent, query } from "$app/server";
 import type { MetricSeries } from "@lib/api";
 import { vBaseMetricRequest } from "@lib/api/valibot.gen";
 import * as v from "valibot";
+import { env } from "$env/dynamic/public";
 
 const loadMetric = query(
 	v.object({
 		request: vBaseMetricRequest,
-		userIp: v.optional(v.pipe(v.string(), v.ip()))
+		userIp: v.optional(v.string())
 	}),
-	async ({ request, userIp }) => {
+	async ({ request, userIp }): Promise<MetricSeries> => {
 		if (!env.PUBLIC_API_URL) throw new Error("API URL is not defined");
 
 		const headers: HeadersInit = {

@@ -3,27 +3,48 @@
 	import {
 		setToggleGroupContext,
 		ToggleGroupContext,
-		type ToggleGroupMode,
+		type ToggleGroupValue,
 		type ToggleItem
 	} from "./toggle-group-context.svelte";
 	import type { ClassValue } from "svelte/elements";
 
 	type Props = {
-		mode?: ToggleGroupMode;
-		selected?: T[];
 		keyFn?: (option: T) => unknown;
-		onselect?: (selected: T[]) => void;
+		allowEmpty?: boolean;
 		children?: Snippet;
 		class?: ClassValue;
-	};
+	} & (
+		| {
+				mode?: "single";
+				selected?: T;
+				onselect?: (selected: T | undefined) => void;
+		  }
+		| {
+				mode: "multiple";
+				selected?: T[];
+				onselect?: (selected: T[]) => void;
+		  }
+	);
 	let {
 		mode = "single",
-		selected = $bindable([]),
+		selected = $bindable(undefined),
 		keyFn = (option: T) => option.id ?? option,
+		allowEmpty = true,
 		onselect,
 		children,
 		class: className
 	}: Props = $props();
+
+	const notifySelection = (nextSelected: ToggleGroupValue<T>) => {
+		if (mode === "multiple") {
+			(onselect as ((selected: T[]) => void) | undefined)?.(Array.isArray(nextSelected) ? nextSelected : []);
+			return;
+		}
+
+		(onselect as ((selected: T | undefined) => void) | undefined)?.(
+			Array.isArray(nextSelected) ? nextSelected[0] : nextSelected
+		);
+	};
 
 	const selection = new ToggleGroupContext<T>({
 		get selected() {
@@ -31,10 +52,17 @@
 		},
 		set selected(newSelected) {
 			selected = newSelected;
-			onselect?.(newSelected);
+			notifySelection(newSelected);
 		},
-		keyFn,
-		mode
+		get keyFn() {
+			return keyFn;
+		},
+		get mode() {
+			return mode;
+		},
+		get allowEmpty() {
+			return allowEmpty;
+		}
 	});
 	setToggleGroupContext(selection);
 </script>

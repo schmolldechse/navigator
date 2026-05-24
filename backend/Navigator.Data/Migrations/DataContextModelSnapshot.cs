@@ -564,10 +564,9 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("text")
                         .HasColumnName("journey_description");
 
-                    b.Property<string>("Line")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("line");
+                    b.Property<bool>("IsReplacementTransport")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement_transport");
 
                     b.Property<int>("Number")
                         .HasColumnType("integer")
@@ -622,6 +621,10 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("EventCount")
                         .HasColumnType("bigint")
                         .HasColumnName("event_count");
+
+                    b.Property<bool>("IsReplacementTransport")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement_transport");
 
                     b.Property<long>("Punctual15Count")
                         .HasColumnType("bigint")

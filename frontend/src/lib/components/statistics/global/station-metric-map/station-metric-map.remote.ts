@@ -1,13 +1,10 @@
 import { query } from "$app/server";
-import type { BaseMetricDataPointStationDataPoint, BaseStation, MetricSample } from "@lib/api";
 import { vBaseMetricRequestStationEventQualitySummaryMetricRequest } from "@lib/api/valibot.gen";
-import type {
-	StationMetricMapPoint,
-	StationMetricMapSeries
-} from "@lib/components/statistics/global/station-metric-map/StationMetricMap.svelte";
+import type { StationMetricMapSeries } from "./station-metric-map-types";
+import * as v from "valibot";
+import type { BaseMetricDataPointStationDataPoint, BaseStation, MetricSample } from "@lib/api";
 import { loadMetric } from "@lib/remote/metrics.remote";
 import { getStationBatch } from "@lib/remote/station.remote";
-import * as v from "valibot";
 
 const loadStationMetricMap = query(
 	v.object({
@@ -16,9 +13,10 @@ const loadStationMetricMap = query(
 			"scheduleType",
 			"start",
 			"end",
-			"transportTypes"
+			"transportTypes",
+			"includeReplacementTransport"
 		]),
-		userIp: v.optional(v.pipe(v.string(), v.ip()))
+		userIp: v.optional(v.string())
 	}),
 	async ({ request, userIp }): Promise<StationMetricMapSeries> => {
 		const metric = await loadMetric({
@@ -28,7 +26,8 @@ const loadStationMetricMap = query(
 				scheduleType: request.scheduleType,
 				start: request.start,
 				end: request.end,
-				transportTypes: request.transportTypes
+				transportTypes: request.transportTypes,
+				includeReplacementTransport: request.includeReplacementTransport
 			},
 			userIp
 		});
@@ -50,19 +49,16 @@ const loadStationMetricMap = query(
 		const evaNumbers = [...valueByStation.keys()];
 		if (evaNumbers.length === 0) return { ...metric, points: [] };
 
-		const fetchedStations = await getStationBatch({ evaNumbers });
+		const fetchedStations = await getStationBatch({ evaNumbers, userIp });
 		const stationByEva = new Map<number, BaseStation>();
 		for (const station of fetchedStations) {
 			stationByEva.set(Number(station.evaNumber), station);
 		}
 
-		const points: StationMetricMapPoint[] = [];
-		for (const [evaNumber, dataPoint] of valueByStation) {
+		const points = [...valueByStation.entries()].flatMap(([evaNumber, dataPoint]) => {
 			const station = stationByEva.get(evaNumber);
-			if (!station) continue;
-
-			points.push({ station, value: dataPoint.value, sample: dataPoint.sample });
-		}
+			return station ? [{ station, value: dataPoint.value, sample: dataPoint.sample }] : [];
+		});
 
 		return { ...metric, points };
 	}

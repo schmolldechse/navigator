@@ -126,6 +126,14 @@ export type BaseMetricRequestAdministrationRankingMetricRequest = {
 	 * Optional array of EVA numbers. If provided, station event quality is ranked instead of global journey route quality.
 	 */
 	evaNumbers?: Array<number | string>;
+	/**
+	 * Optional list of transport types to filter the ranking by. If omitted or empty, all transport types will be included.
+	 */
+	transportTypes?: null | Array<TransportType>;
+	/**
+	 * Whether replacement transport should be included in the metric.
+	 */
+	includeReplacementTransport?: boolean;
 	limit?: number | string;
 	offset?: number | string;
 };
@@ -155,11 +163,19 @@ export type BaseMetricRequestLineRankingMetricRequest = {
 	 */
 	evaNumbers?: Array<number | string>;
 	/**
-	 * Optional regex filter for the line key.
+	 * Optional list of transport types to filter the ranking by. If omitted or empty, all transport types will be included.
 	 */
-	line?: null | string;
+	transportTypes?: null | Array<TransportType>;
 	/**
-	 * Optional regex filter for the journey or line number.
+	 * Whether replacement transport should be included in the metric.
+	 */
+	includeReplacementTransport?: boolean;
+	/**
+	 * Optional regex filter for the journey description.
+	 */
+	journeyDescription?: null | string;
+	/**
+	 * Optional regex filter for the journey number.
 	 */
 	number?: null | string;
 	limit?: number | string;
@@ -182,6 +198,10 @@ export type BaseMetricRequestNetworkStationEventQualityTimeSeriesMetricRequest =
 	 * Optional list of transport types to filter the metric by. If omitted or empty, all transport types will be included.
 	 */
 	transportTypes?: null | Array<TransportType>;
+	/**
+	 * Whether replacement transport should be included in the metric.
+	 */
+	includeReplacementTransport?: boolean;
 };
 
 export type BaseMetricRequestRisIdSnapshotMetricRequest = {
@@ -214,6 +234,10 @@ export type BaseMetricRequestStationEventQualitySummaryMetricRequest = {
 	 * Optional list of EVA numbers to filter the metric by stations. If omitted or empty, all stations will be included.
 	 */
 	evaNumbers?: null | Array<number | string>;
+	/**
+	 * Whether replacement transport should be included in the metric.
+	 */
+	includeReplacementTransport?: boolean;
 };
 
 export type BaseMetricRequestStationEventQualityTimeSeriesMetricRequest = {
@@ -236,6 +260,10 @@ export type BaseMetricRequestStationEventQualityTimeSeriesMetricRequest = {
 	 * Optional list of EVA numbers to filter the metric by stations. If omitted or empty, all stations will be included.
 	 */
 	evaNumbers?: null | Array<number | string>;
+	/**
+	 * Whether replacement transport should be included in the metric.
+	 */
+	includeReplacementTransport?: boolean;
 };
 
 export type BaseStation = {

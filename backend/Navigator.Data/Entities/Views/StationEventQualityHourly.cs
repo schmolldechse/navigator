@@ -20,6 +20,9 @@ public class StationEventQualityHourly
     [Column("transport_type")]
     public required TransportType TransportType { get; set; }
 
+    [Column("is_replacement_transport")]
+    public required bool IsReplacementTransport { get; set; }
+
     [Column("event_count")]
     public required long EventCount { get; set; }
 

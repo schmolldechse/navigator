@@ -1,6 +1,13 @@
-import { MetricSeriesType, ScheduleType } from "@lib/api";
-import type { StationMetricMapSettings } from "../station-metric-map/station-metric-map";
-import { DateTime } from "luxon";
+import { MetricSeriesType, type MetricSeries } from "@lib/api";
+import { toMetricScopeRequest, type StatisticsScopeSettings } from "../statistics-scope";
+
+type NetworkTimeSeriesPromises = {
+	eventCount: Promise<MetricSeries>;
+	punctuality5: Promise<MetricSeries>;
+	punctuality15: Promise<MetricSeries>;
+	cancellationRate: Promise<MetricSeries>;
+	averageDelay: Promise<MetricSeries>;
+};
 
 type NetworkTimeSeriesOption = {
 	seriesType: MetricSeriesType;
@@ -41,32 +48,28 @@ const NETWORK_TIME_SERIES_OPTIONS: NetworkTimeSeriesOption[] = [
 	}
 ];
 
-const createNetworkTimeSeriesRequest = (settings: StationMetricMapSettings) => ({
+const createNetworkTimeSeriesRequest = (scope: StatisticsScopeSettings, seriesType: MetricSeriesType) => ({
 	queryType: "NETWORK_STATION_EVENT_QUALITY_TIME_SERIES" as const,
-	seriesType: settings.seriesType,
-	scheduleType: settings.scheduleType,
-	start: settings.dates.start.startOf("day").toISO()!,
-	end: settings.dates.end.endOf("day").toISO()!,
-	transportTypes: settings.transportTypes
+	seriesType,
+	...toMetricScopeRequest(scope)
 });
 
-const createDefaultNetworkTimeSeriesSettings = (): StationMetricMapSettings => ({
-	dates: {
-		start: DateTime.now().minus({ days: 7 }).startOf("day"),
-		end: DateTime.now().endOf("day")
-	},
-	seriesType: MetricSeriesType.STATION_EVENT_COUNT,
-	scheduleType: ScheduleType.DEPARTURE,
-	transportTypes: []
+const createNetworkTimeSeriesRequests = (scope: StatisticsScopeSettings) => ({
+	eventCount: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_COUNT),
+	punctuality5: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_PUNCTUALITY5_RATE),
+	punctuality15: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_PUNCTUALITY15_RATE),
+	cancellationRate: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_CANCELLATION_RATE),
+	averageDelay: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_DELAY_AVERAGE)
 });
 
 const getNetworkTimeSeriesOption = (seriesType: MetricSeriesType): NetworkTimeSeriesOption | undefined =>
 	NETWORK_TIME_SERIES_OPTIONS.find((option: NetworkTimeSeriesOption) => option.seriesType === seriesType);
 
 export {
+	type NetworkTimeSeriesPromises,
 	type NetworkTimeSeriesOption,
 	NETWORK_TIME_SERIES_OPTIONS,
 	createNetworkTimeSeriesRequest,
-	createDefaultNetworkTimeSeriesSettings,
+	createNetworkTimeSeriesRequests,
 	getNetworkTimeSeriesOption
 };

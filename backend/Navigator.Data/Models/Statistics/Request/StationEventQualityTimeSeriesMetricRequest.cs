@@ -48,6 +48,10 @@ public class StationEventQualityTimeSeriesMetricRequest : BaseMetricRequest
     [Description("Optional list of EVA numbers to filter the metric by stations. If omitted or empty, all stations will be included.")]
     public int[]? EvaNumbers { get; set; } = [];
 
+    [JsonPropertyName("includeReplacementTransport")]
+    [Description("Whether replacement transport should be included in the metric.")]
+    public bool IncludeReplacementTransport { get; set; } = true;
+
     public override IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (Start > End)

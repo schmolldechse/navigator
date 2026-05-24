@@ -1,6 +1,6 @@
-import { MetricSeriesType, ScheduleType, TransportType } from "@lib/api";
+import { MetricSeriesType } from "@lib/api";
 import type { vBaseMetricRequestStationEventQualitySummaryMetricRequest } from "@lib/api/valibot.gen";
-import { DateTime } from "luxon";
+import { toMetricScopeRequest, type StatisticsScopeSettings } from "../statistics-scope";
 import * as v from "valibot";
 
 type StationMetricMapOption = {
@@ -91,34 +91,20 @@ const STATION_METRIC_MAP_OPTIONS: StationMetricMapOption[] = [
 ];
 
 type StationMetricMapSettings = {
-	dates: {
-		start: DateTime;
-		end: DateTime;
-	};
 	seriesType: MetricSeriesType;
-	scheduleType: ScheduleType;
-	transportTypes: TransportType[];
 };
 
 const createStationMetricMapRequest = (
-	settings: StationMetricMapSettings
+	settings: StationMetricMapSettings,
+	scope: StatisticsScopeSettings
 ): v.InferOutput<typeof vBaseMetricRequestStationEventQualitySummaryMetricRequest> => ({
 	queryType: "STATION_EVENT_QUALITY_SUMMARY",
 	seriesType: settings.seriesType,
-	scheduleType: settings.scheduleType,
-	start: settings.dates.start.startOf("day").toISO()!,
-	end: settings.dates.end.endOf("day").toISO()!,
-	transportTypes: settings.transportTypes
+	...toMetricScopeRequest(scope)
 });
 
 const createDefaultStationMetricMapSettings = (): StationMetricMapSettings => ({
-	dates: {
-		start: DateTime.now().minus({ days: 7 }).startOf("day"),
-		end: DateTime.now().endOf("day")
-	},
-	seriesType: MetricSeriesType.STATION_EVENT_COUNT,
-	scheduleType: ScheduleType.DEPARTURE,
-	transportTypes: []
+	seriesType: MetricSeriesType.STATION_EVENT_COUNT
 });
 
 const getStationMetricMapOption = (seriesType: MetricSeriesType): StationMetricMapOption | undefined =>

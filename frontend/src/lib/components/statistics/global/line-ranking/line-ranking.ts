@@ -1,6 +1,6 @@
 import { MetricSeriesType } from "@lib/api";
 import type { vBaseMetricRequestLineRankingMetricRequest } from "@lib/api/valibot.gen";
-import { DateTime } from "luxon";
+import { toJourneyRankingMetricScopeRequest, type StatisticsScopeSettings } from "../statistics-scope";
 import * as v from "valibot";
 
 type LineRankingMetricOption = {
@@ -17,12 +17,8 @@ type LineRankingMetricOption = {
 };
 
 type LineRankingSettings = {
-	dates: {
-		start: DateTime;
-		end: DateTime;
-	};
 	seriesType: MetricSeriesType;
-	line: string;
+	journeyDescription: string;
 	number: string;
 	limit: number;
 	offset: number;
@@ -96,25 +92,21 @@ const LINE_RANKING_METRIC_OPTIONS: LineRankingMetricOption[] = [
 ];
 
 const createLineRankingRequest = (
-	settings: LineRankingSettings
+	settings: LineRankingSettings,
+	scope: StatisticsScopeSettings
 ): v.InferOutput<typeof vBaseMetricRequestLineRankingMetricRequest> => ({
 	queryType: "LINE_RANKING",
 	seriesType: settings.seriesType,
-	start: settings.dates.start.startOf("day").toISO()!,
-	end: settings.dates.end.endOf("day").toISO()!,
-	line: settings.line.trim() || undefined,
+	...toJourneyRankingMetricScopeRequest(scope),
+	journeyDescription: settings.journeyDescription.trim() || undefined,
 	number: settings.number.trim() || undefined,
 	limit: settings.limit,
 	offset: settings.offset
 });
 
 const createDefaultLineRankingSettings = (): LineRankingSettings => ({
-	dates: {
-		start: DateTime.now().minus({ days: 7 }).startOf("day"),
-		end: DateTime.now().endOf("day")
-	},
 	seriesType: MetricSeriesType.LINE_RANKING_COUNT,
-	line: "",
+	journeyDescription: "",
 	number: "",
 	limit: 10,
 	offset: 0

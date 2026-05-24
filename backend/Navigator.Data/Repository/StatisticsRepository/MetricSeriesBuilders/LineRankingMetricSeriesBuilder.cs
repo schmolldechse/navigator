@@ -60,6 +60,13 @@ public sealed class LineRankingMetricSeriesBuilder(
 
         var totalItems = await ranking.CountAsync();
         var rows = await definition.Order(ranking)
+            .ThenByDescending(row => row.Count)
+            .ThenBy(row => row.JourneyDescription)
+            .ThenBy(row => row.Number)
+            .ThenBy(row => row.TransportType)
+            .ThenBy(row => row.AdministrationId)
+            .ThenBy(row => row.OriginEvaNumber)
+            .ThenBy(row => row.DestinationEvaNumber)
             .Skip(offset)
             .Take(limit)
             .ToListAsync();
@@ -98,20 +105,23 @@ public sealed class LineRankingMetricSeriesBuilder(
     {
         var start = request.Start.UtcDateTime;
         var end = request.End.UtcDateTime;
+        var transportTypes = StationEventQualityMetricDefinitions.NormalizeTransportTypes(request.TransportTypes);
 
         var query = dataContext.JourneyRouteQualities
             .AsNoTracking()
-            .Where(summary => summary.BucketHour >= start && summary.BucketHour < end);
+            .Where(summary => summary.BucketHour >= start && summary.BucketHour < end)
+            .Where(summary => transportTypes.Contains(summary.TransportType))
+            .Where(summary => request.IncludeReplacementTransport || !summary.IsReplacementTransport);
 
-        if (!string.IsNullOrWhiteSpace(request.Line))
-            query = query.Where(summary => summary.Line != null && Regex.IsMatch(summary.Line, request.Line));
+        var journeyDescriptionRegex = request.JourneyDescription;
+        if (!string.IsNullOrWhiteSpace(journeyDescriptionRegex))
+            query = query.Where(summary => Regex.IsMatch(summary.JourneyDescription, journeyDescriptionRegex));
         if (!string.IsNullOrWhiteSpace(request.Number))
             query = query.Where(summary => Regex.IsMatch(summary.Number.ToString(), request.Number));
 
         return query
             .GroupBy(summary => new
             {
-                summary.Line,
                 summary.Number,
                 summary.JourneyDescription,
                 summary.TransportType,
@@ -121,7 +131,6 @@ public sealed class LineRankingMetricSeriesBuilder(
             })
             .Select(group => new LineRankingRow
             {
-                Line = group.Key.Line,
                 Number = group.Key.Number,
                 JourneyDescription = group.Key.JourneyDescription,
                 TransportType = group.Key.TransportType,
@@ -148,7 +157,6 @@ public sealed class LineRankingMetricSeriesBuilder(
                     stop_place.station_eva_number,
                     stop_place.schedule_type,
                     stop_place.planned_time,
-                    coalesce(nullif(transport.line, ''), transport.number::text, 'UNKNOWN') AS line,
                     transport.number,
                     transport.journey_description,
                     transport.transport_type,
@@ -171,19 +179,26 @@ public sealed class LineRankingMetricSeriesBuilder(
                     AND stop_place.planned_time >= @start
                     AND stop_place.planned_time < @end
                     AND (
-                        @line_regex IS NULL
-                        OR coalesce(nullif(transport.line, ''), transport.number::text, 'UNKNOWN') ~ @line_regex
+                        @journey_description_regex IS NULL
+                        OR transport.journey_description ~ @journey_description_regex
                     )
                     AND (
                         @number_regex IS NULL
                         OR transport.number::text ~ @number_regex
+                    )
+                    AND transport.transport_type = ANY(@transport_types)
+                    AND (
+                        @include_replacement_transport
+                        OR (
+                            journey.journey_type <> 'REPLACEMENT'::core.journey_type
+                            AND transport.replacement_transport_type IS NULL
+                        )
                     )
             ),
             station_events AS (
                 SELECT
                     journey_id,
                     date,
-                    line,
                     number,
                     journey_description,
                     transport_type,
@@ -251,7 +266,6 @@ public sealed class LineRankingMetricSeriesBuilder(
                     stop_place.date
             )
             SELECT
-                station_events.line AS "Line",
                 station_events.number AS "Number",
                 station_events.journey_description AS "JourneyDescription",
                 station_events.transport_type AS "TransportType",
@@ -284,7 +298,6 @@ public sealed class LineRankingMetricSeriesBuilder(
                     ON routes.journey_id = station_events.journey_id
                         AND routes.date = station_events.date
             GROUP BY
-                station_events.line,
                 station_events.number,
                 station_events.journey_description,
                 station_events.transport_type,
@@ -300,8 +313,10 @@ public sealed class LineRankingMetricSeriesBuilder(
             new NpgsqlParameter("end_date", NpgsqlDbType.Date) { Value = DateOnly.FromDateTime(request.End.UtcDateTime.Date) },
             new NpgsqlParameter("start", NpgsqlDbType.TimestampTz) { Value = request.Start.UtcDateTime },
             new NpgsqlParameter("end", NpgsqlDbType.TimestampTz) { Value = request.End.UtcDateTime },
-            new NpgsqlParameter("line_regex", NpgsqlDbType.Text) { Value = string.IsNullOrWhiteSpace(request.Line) ? DBNull.Value : request.Line },
+            new NpgsqlParameter<TransportType[]>("transport_types", StationEventQualityMetricDefinitions.NormalizeTransportTypes(request.TransportTypes)) { DataTypeName = "core.transport_type[]" },
+            new NpgsqlParameter("journey_description_regex", NpgsqlDbType.Text) { Value = string.IsNullOrWhiteSpace(request.JourneyDescription) ? DBNull.Value : request.JourneyDescription },
             new NpgsqlParameter("number_regex", NpgsqlDbType.Text) { Value = string.IsNullOrWhiteSpace(request.Number) ? DBNull.Value : request.Number },
+            new NpgsqlParameter("include_replacement_transport", NpgsqlDbType.Boolean) { Value = request.IncludeReplacementTransport },
         };
 
         return dataContext.Database.SqlQueryRaw<LineRankingRow>(sql.ToString(), parameters.ToArray());
@@ -361,7 +376,6 @@ public sealed class LineRankingMetricSeriesBuilder(
 
     private sealed class LineRankingRow
     {
-        public string Line { get; set; } = string.Empty;
         public int Number { get; set; }
         public string JourneyDescription { get; set; } = string.Empty;
         public TransportType TransportType { get; set; }

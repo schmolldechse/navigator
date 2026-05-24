@@ -18,7 +18,8 @@ public sealed class NetworkStationEventQualityTimeSeriesMetricSeriesBuilder(
             .AsNoTracking()
             .Where(summary => summary.BucketHour >= request.Start.UtcDateTime && summary.BucketHour <= request.End.UtcDateTime)
             .Where(summary => summary.ScheduleType == request.ScheduleType)
-            .Where(summary => transportTypes.Contains(summary.TransportType));
+            .Where(summary => transportTypes.Contains(summary.TransportType))
+            .Where(summary => request.IncludeReplacementTransport || !summary.IsReplacementTransport);
 
         var dataPoints = (await query.ToListAsync())
             .GroupBy(summary => new { summary.BucketHour, summary.TransportType })

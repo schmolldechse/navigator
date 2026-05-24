@@ -10,6 +10,7 @@
 	};
 	let { delay = 150, class: className, children }: Props = $props();
 
+	// svelte-ignore state_referenced_locally
 	const context: TooltipContext = new TooltipContext(delay);
 	setTooltipContext(context);
 </script>

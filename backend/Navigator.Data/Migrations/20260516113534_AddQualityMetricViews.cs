@@ -24,9 +24,9 @@ namespace Navigator.Data.Migrations
             ");
 
             migrationBuilder.Sql(@"
-                CREATE INDEX IF NOT EXISTS IX_journey_transports_line_number_date
-                ON core.journey_transports (line, number, date)
-                INCLUDE (journey_id, journey_description, transport_type);
+                CREATE INDEX IF NOT EXISTS IX_journey_transports_journey_description_number_date
+                ON core.journey_transports (journey_description, number, date)
+                INCLUDE (journey_id, transport_type, replacement_transport_type);
             ");
             #endregion
 
@@ -39,9 +39,10 @@ namespace Navigator.Data.Migrations
                         journey.date,
                         journey.administration_id,
                         journey.cancelled AS journey_cancelled,
+                        journey.journey_type,
                         transport.transport_type,
+                        transport.replacement_transport_type AS transport_replacement_transport_type,
                         transport.journey_description,
-                        coalesce(nullif(transport.line, ''), transport.number::text, 'UNKNOWN') AS line,
                         transport.number,
                         stop_place.station_eva_number,
                         stop_place.schedule_type,
@@ -64,8 +65,11 @@ namespace Navigator.Data.Migrations
                         journey_cancelled,
                         transport_type,
                         journey_description,
-                        line,
                         number,
+                        bool_or(
+                            journey_type = 'REPLACEMENT'::core.journey_type
+                                OR transport_replacement_transport_type IS NOT NULL
+                        ) AS is_replacement_transport,
                         coalesce(
                             (array_agg(station_eva_number ORDER BY planned_time, station_eva_number) FILTER (WHERE schedule_type = 'DEPARTURE'))[1],
                             (array_agg(station_eva_number ORDER BY planned_time, station_eva_number))[1],
@@ -89,7 +93,6 @@ namespace Navigator.Data.Migrations
                         journey_cancelled,
                         transport_type,
                         journey_description,
-                        line,
                         number
                 )
                 SELECT
@@ -97,8 +100,8 @@ namespace Navigator.Data.Migrations
                     administration_id,
                     transport_type,
                     journey_description,
-                    line,
                     number,
+                    is_replacement_transport,
                     origin_eva_number,
                     destination_eva_number,
                     count(*)::bigint AS journey_count,
@@ -126,8 +129,8 @@ namespace Navigator.Data.Migrations
                     administration_id,
                     transport_type,
                     journey_description,
-                    line,
                     number,
+                    is_replacement_transport,
                     origin_eva_number,
                     destination_eva_number
                 WITH NO DATA;
@@ -140,8 +143,8 @@ namespace Navigator.Data.Migrations
                     administration_id,
                     transport_type,
                     journey_description,
-                    line,
                     number,
+                    is_replacement_transport,
                     origin_eva_number,
                     destination_eva_number
                 );
@@ -153,8 +156,8 @@ namespace Navigator.Data.Migrations
             ");
 
             migrationBuilder.Sql(@"
-                CREATE INDEX IF NOT EXISTS IX_journey_route_quality_hourly_line_route
-                ON statistics.journey_route_quality_hourly (line, number, bucket_hour);
+                CREATE INDEX IF NOT EXISTS IX_journey_route_quality_hourly_journey_description_route
+                ON statistics.journey_route_quality_hourly (journey_description, number, bucket_hour, is_replacement_transport);
             ");
             #endregion
 
@@ -167,6 +170,10 @@ namespace Navigator.Data.Migrations
                     stop_place.schedule_type,
                     journey.administration_id,
                     transport.transport_type,
+                    (
+                        journey.journey_type = 'REPLACEMENT'::core.journey_type
+                            OR transport.replacement_transport_type IS NOT NULL
+                    ) AS is_replacement_transport,
                     count(*)::bigint AS event_count,
                     count(*) FILTER (WHERE stop_place.cancelled IS TRUE)::bigint AS cancelled_count,
                     count(*) FILTER (WHERE stop_place.cancelled IS NOT TRUE)::bigint AS delay_sample_count,
@@ -191,7 +198,11 @@ namespace Navigator.Data.Migrations
                     stop_place.station_eva_number,
                     stop_place.schedule_type,
                     journey.administration_id,
-                    transport.transport_type
+                    transport.transport_type,
+                    (
+                        journey.journey_type = 'REPLACEMENT'::core.journey_type
+                            OR transport.replacement_transport_type IS NOT NULL
+                    )
                 WITH NO DATA;
             ");
 
@@ -202,7 +213,8 @@ namespace Navigator.Data.Migrations
                     station_eva_number,
                     schedule_type,
                     administration_id,
-                    transport_type
+                    transport_type,
+                    is_replacement_transport
                 );
             ");
 
@@ -213,7 +225,7 @@ namespace Navigator.Data.Migrations
 
             migrationBuilder.Sql(@"
                 CREATE INDEX IF NOT EXISTS IX_station_event_quality_hourly_bucket_administration
-                ON statistics.station_event_quality_hourly (bucket_hour, administration_id);
+                ON statistics.station_event_quality_hourly (bucket_hour, administration_id, is_replacement_transport);
             ");
             #endregion
 
@@ -232,7 +244,7 @@ namespace Navigator.Data.Migrations
             migrationBuilder.Sql(@"DROP MATERIALIZED VIEW IF EXISTS statistics.station_event_quality_hourly;");
             migrationBuilder.Sql(@"DROP MATERIALIZED VIEW IF EXISTS statistics.journey_route_quality_hourly;");
 
-            migrationBuilder.Sql(@"DROP INDEX IF EXISTS core.IX_journey_transports_line_number_date;");
+            migrationBuilder.Sql(@"DROP INDEX IF EXISTS core.IX_journey_transports_journey_description_number_date;");
             migrationBuilder.Sql(@"DROP INDEX IF EXISTS core.IX_journey_stop_places_journey_date_planned_time;");
             migrationBuilder.Sql(@"DROP INDEX IF EXISTS core.IX_journey_stop_places_station_date_planned_time;");
 

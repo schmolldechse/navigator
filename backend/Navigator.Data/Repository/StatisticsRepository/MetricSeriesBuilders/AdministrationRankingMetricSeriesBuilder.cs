@@ -51,11 +51,14 @@ public sealed class AdministrationRankingMetricSeriesBuilder(
         var offset = Math.Max(request.Offset, 0);
         var start = request.Start.UtcDateTime;
         var end = request.End.UtcDateTime;
+        var transportTypes = StationEventQualityMetricDefinitions.NormalizeTransportTypes(request.TransportTypes);
 
         IQueryable<AdministrationRankingRow> ranking = request.EvaNumbers.Any()
             ? dataContext.StationEventQualities
                 .AsNoTracking()
                 .Where(summary => summary.BucketHour >= start && summary.BucketHour < end)
+                .Where(summary => transportTypes.Contains(summary.TransportType))
+                .Where(summary => request.IncludeReplacementTransport || !summary.IsReplacementTransport)
                 .Where(summary => request.EvaNumbers.Contains(summary.StationEvaNumber))
                 .GroupBy(summary => new { summary.AdministrationId })
                 .Select(group => new AdministrationRankingRow
@@ -71,6 +74,8 @@ public sealed class AdministrationRankingMetricSeriesBuilder(
             : dataContext.JourneyRouteQualities
                 .AsNoTracking()
                 .Where(summary => summary.BucketHour >= start && summary.BucketHour < end)
+                .Where(summary => transportTypes.Contains(summary.TransportType))
+                .Where(summary => request.IncludeReplacementTransport || !summary.IsReplacementTransport)
                 .GroupBy(summary => new { summary.AdministrationId })
                 .Select(group => new AdministrationRankingRow
                 {

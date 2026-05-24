@@ -18,7 +18,8 @@ public sealed class StationEventQualityTimeSeriesMetricSeriesBuilder(
             .AsNoTracking()
             .Where(summary => summary.BucketHour >= request.Start.UtcDateTime && summary.BucketHour <= request.End.UtcDateTime)
             .Where(summary => summary.ScheduleType == request.ScheduleType)
-            .Where(summary => transportTypes.Contains(summary.TransportType));
+            .Where(summary => transportTypes.Contains(summary.TransportType))
+            .Where(summary => request.IncludeReplacementTransport || !summary.IsReplacementTransport);
 
         if (request.EvaNumbers is { Length: > 0 })
             query = query.Where(summary => request.EvaNumbers.Contains(summary.StationEvaNumber));

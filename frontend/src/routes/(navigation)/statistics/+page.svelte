@@ -1,13 +1,31 @@
 <script lang="ts">
 	import type { PageProps } from "./$types";
-	import StationMetricMapSection from "@lib/components/statistics/global/StationMetricMapSection.svelte";
-	import AdministrationRankingSection from "@lib/components/statistics/global/AdministrationRankingSection.svelte";
-	import NetworkQualityTimeSeriesSection from "@lib/components/statistics/global/NetworkQualityTimeSeriesSection.svelte";
-	import LineRankingSection from "@lib/components/statistics/global/LineRankingSection.svelte";
+	import StationMetricMap from "@lib/components/statistics/global/station-metric-map/StationMetricMap.svelte";
+	import AdministrationRanking from "@lib/components/statistics/global/administration-ranking/AdministrationRanking.svelte";
+	import NetworkQualityTimeSeries from "@lib/components/statistics/global/network-time-series/NetworkQualityTimeSeries.svelte";
+	import LineRanking from "@lib/components/statistics/global/line-ranking/LineRanking.svelte";
 	import * as Accordion from "@lib/components/ui/accordion";
+	import StatisticsScopeControls from "@lib/components/statistics/global/StatisticsScopeControls.svelte";
+	import {
+		setStatisticsScopeContext,
+		StatisticsScopeContext
+	} from "@lib/components/statistics/global/statistics-scope-context.svelte";
 
 	let { data }: PageProps = $props();
+
 	let faqValues: string[] = $state([]);
+
+	// svelte-ignore state_referenced_locally
+	const scopeContext = new StatisticsScopeContext(data.scope);
+	setStatisticsScopeContext(scopeContext);
+
+	let stationMetricMapLoading: boolean = $state(true);
+	let networkQualityLoading: boolean = $state(true);
+	let administrationRankingLoading: boolean = $state(true);
+	let lineRankingLoading: boolean = $state(true);
+	const metricLoading = $derived(
+		stationMetricMapLoading || networkQualityLoading || administrationRankingLoading || lineRankingLoading
+	);
 </script>
 
 <svelte:head>
@@ -15,101 +33,80 @@
 </svelte:head>
 
 <main class="container mx-auto flex flex-col gap-y-8 p-4 sm:py-8">
-	<StationMetricMapSection promise={data.stationMetricMap.promise} settings={data.stationMetricMap.settings} />
+	<section class="relative flex flex-col gap-4">
+		<div class="grid gap-1">
+			<h1 class="text-3xl font-bold">Statistics</h1>
+			<p class="text-foreground/60 max-w-3xl text-sm sm:text-base">
+				Compare activity and quality across the selected network slice.
+			</p>
+		</div>
+	</section>
 
-	<NetworkQualityTimeSeriesSection promise={data.networkTimeSeries.promise} settings={data.networkTimeSeries.settings} />
+	<StatisticsScopeControls isUpdating={metricLoading} />
 
-	<AdministrationRankingSection promise={data.administrationRanking.promise} settings={data.administrationRanking.settings} />
+	<StationMetricMap
+		bind:isLoading={stationMetricMapLoading}
+		settings={data.stationMetricMap.settings}
+		promise={data.stationMetricMap.promise}
+	/>
 
-	<LineRankingSection promise={data.lineRanking.promise} settings={data.lineRanking.settings} />
+	<NetworkQualityTimeSeries bind:isLoading={networkQualityLoading} promises={data.networkQuality.promises} />
+
+	<AdministrationRanking
+		bind:isLoading={administrationRankingLoading}
+		settings={data.administrationRanking.settings}
+		promise={data.administrationRanking.promise}
+	/>
+
+	<LineRanking bind:isLoading={lineRankingLoading} settings={data.lineRanking.settings} promise={data.lineRanking.promise} />
 
 	<section class="space-y-4">
 		<div class="flex flex-col gap-y-1">
 			<h2 class="text-2xl font-medium">Statistics FAQ</h2>
-			<p class="text-foreground/60 max-w-3xl text-sm sm:text-base">
-				Answers to the most important questions about the map, rankings, time series, and metric interpretation.
-			</p>
+			<p class="text-foreground/60 max-w-3xl text-sm sm:text-base">Short answers to the terms and choices that matter most.</p>
 		</div>
 
 		<Accordion.Root type="multiple" bind:value={faqValues}>
-			<Accordion.Item value="map-modes">
-				<Accordion.Trigger>Why are some metrics shown as density and others as points?</Accordion.Trigger>
+			<Accordion.Item value="misleading-100">
+				<Accordion.Trigger>Why can 100% be misleading?</Accordion.Trigger>
 				<Accordion.Content>
 					<p class="leading-relaxed text-pretty">
-						Station event counts are volume metrics, so a density layer is useful for showing where many events cluster. Quality
-						metrics such as cancellation rate, average delay, and punctuality are station values. They are shown as colored
-						points so the color represents the metric value instead of a mixture of value and nearby station density.
+						Percent values are only as strong as their denominator. A line with one punctual measured journey can show 100
+						percent punctuality, while another line with thousands of journeys and 99 percent punctuality is usually the more
+						reliable signal. Tooltips and ranking samples expose numerator and denominator so small samples stay visible.
 					</p>
 				</Accordion.Content>
 			</Accordion.Item>
 
-			<Accordion.Item value="polarity">
-				<Accordion.Trigger>What does metric polarity mean?</Accordion.Trigger>
+			<Accordion.Item value="journey-description">
+				<Accordion.Trigger>What is a journey description?</Accordion.Trigger>
 				<Accordion.Content>
 					<p class="leading-relaxed text-pretty">
-						Polarity describes whether a higher value is better, worse, or mostly neutral. Punctuality has positive polarity,
-						cancellation rate and delay have negative polarity, and raw event counts are neutral. The statistics page uses this
-						metadata for color scales, ranking icons, and descriptions, so a high bad value is not accidentally framed as a top
-						performer.
+						A journey description is the public-facing service description recorded for a journey, for example a category or
+						route label such as RE, S, or ICE. In line rankings it helps group and filter services together with the numeric
+						journey or line number.
 					</p>
 				</Accordion.Content>
 			</Accordion.Item>
 
-			<Accordion.Item value="samples">
-				<Accordion.Trigger>Why do tooltips show sample sizes?</Accordion.Trigger>
+			<Accordion.Item value="arrivals-departures">
+				<Accordion.Trigger>Why are arrivals and departures evaluated separately?</Accordion.Trigger>
 				<Accordion.Content>
 					<p class="leading-relaxed text-pretty">
-						Rates and averages need context. A 100 percent cancellation rate from one recorded event means something very
-						different than the same rate from hundreds of events. The sample details show the numerator and denominator behind a
-						value and flag small samples so comparisons stay cautious.
+						Arrivals and departures answer different questions. Arrival quality is closer to whether passengers reach a station
+						on time, while departure quality shows how reliably services leave a station. Keeping them separate avoids mixing
+						two operational moments that can have different delays, cancellations, and passenger impact.
 					</p>
 				</Accordion.Content>
 			</Accordion.Item>
 
-			<Accordion.Item value="station-events-vs-journeys">
-				<Accordion.Trigger>What is the difference between station events and journeys?</Accordion.Trigger>
+			<Accordion.Item value="replacement-services">
+				<Accordion.Trigger>How are replacement services handled?</Accordion.Trigger>
 				<Accordion.Content>
 					<p class="leading-relaxed text-pretty">
-						The station metric map is built from stop-place events: one planned arrival or departure at one station. Line and
-						operator rankings are built from journey-route summaries: one row per journey, line, operator, route, and hour. This
-						is why a station can show a cancelled stop event while a line ranking still does not count the whole journey as
-						cancelled.
-					</p>
-				</Accordion.Content>
-			</Accordion.Item>
-
-			<Accordion.Item value="cancellations">
-				<Accordion.Trigger>What counts as a cancellation?</Accordion.Trigger>
-				<Accordion.Content>
-					<p class="leading-relaxed text-pretty">
-						For line and operator rankings, cancellation rate means fully cancelled journeys based on the journey-level
-						<code class="bg-secondary rounded px-1 py-0.5 text-xs">cancelled</code>
-						flag. If a planned terminal station is skipped and the route ends earlier, that is not counted as a fully cancelled journey
-						there. On the station metric map, cancellation count and rate refer to cancelled station events at the selected arrival
-						or departure stop.
-					</p>
-				</Accordion.Content>
-			</Accordion.Item>
-
-			<Accordion.Item value="delay-reference">
-				<Accordion.Trigger>What does delay refer to?</Accordion.Trigger>
-				<Accordion.Content>
-					<p class="leading-relaxed text-pretty">
-						Station delay is calculated from the recorded delay of the planned station event, so arrivals are measured against
-						the planned arrival time and departures against the planned departure time. Route delay uses the terminal delay from
-						the last non-cancelled arrival event of the journey where possible. Cancelled events are excluded from delay
-						averages and punctuality rates.
-					</p>
-				</Accordion.Content>
-			</Accordion.Item>
-
-			<Accordion.Item value="rankings">
-				<Accordion.Trigger>How should the rankings be read?</Accordion.Trigger>
-				<Accordion.Content>
-					<p class="leading-relaxed text-pretty">
-						Rankings are sorted by the selected metric, but the interpretation depends on polarity. For punctuality, high ranks
-						highlight stronger performance. For cancellation rate or delay, high ranks identify the highest problem values
-						rather than winners.
+						Replacement services are included by default so the dashboard reflects the full recorded service offer. The Scope
+						settings can exclude them when you want to focus on regular services only. A service is treated as replacement
+						transport when the recorded journey or its transport information marks it that way.
 					</p>
 				</Accordion.Content>
 			</Accordion.Item>
