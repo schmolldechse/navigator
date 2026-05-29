@@ -3,6 +3,7 @@ import { toMetricScopeRequest, type StatisticsScopeSettings } from "../statistic
 
 type NetworkTimeSeriesPromises = {
 	eventCount: Promise<MetricSeries>;
+	cancellationCount: Promise<MetricSeries>;
 	punctuality5: Promise<MetricSeries>;
 	punctuality15: Promise<MetricSeries>;
 	cancellationRate: Promise<MetricSeries>;
@@ -56,6 +57,7 @@ const createNetworkTimeSeriesRequest = (scope: StatisticsScopeSettings, seriesTy
 
 const createNetworkTimeSeriesRequests = (scope: StatisticsScopeSettings) => ({
 	eventCount: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_COUNT),
+	cancellationCount: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_CANCELLATION_COUNT),
 	punctuality5: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_PUNCTUALITY5_RATE),
 	punctuality15: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_PUNCTUALITY15_RATE),
 	cancellationRate: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_CANCELLATION_RATE),

@@ -3,6 +3,8 @@
 	import StationMetricMap from "@lib/components/statistics/global/station-metric-map/StationMetricMap.svelte";
 	import AdministrationRanking from "@lib/components/statistics/global/administration-ranking/AdministrationRanking.svelte";
 	import NetworkQualityTimeSeries from "@lib/components/statistics/global/network-time-series/NetworkQualityTimeSeries.svelte";
+	import NetworkKpiStrip from "@lib/components/statistics/global/network-kpis/NetworkKpiStrip.svelte";
+	import NetworkTransportBreakdown from "@lib/components/statistics/global/transport-breakdown/NetworkTransportBreakdown.svelte";
 	import LineRanking from "@lib/components/statistics/global/line-ranking/LineRanking.svelte";
 	import * as Accordion from "@lib/components/ui/accordion";
 	import StatisticsScopeControls from "@lib/components/statistics/global/StatisticsScopeControls.svelte";
@@ -20,11 +22,16 @@
 	setStatisticsScopeContext(scopeContext);
 
 	let stationMetricMapLoading: boolean = $state(true);
+	let networkKpiStripLoading: boolean = $state(true);
 	let networkQualityLoading: boolean = $state(true);
 	let administrationRankingLoading: boolean = $state(true);
 	let lineRankingLoading: boolean = $state(true);
 	const metricLoading = $derived(
-		stationMetricMapLoading || networkQualityLoading || administrationRankingLoading || lineRankingLoading
+		stationMetricMapLoading ||
+			networkKpiStripLoading ||
+			networkQualityLoading ||
+			administrationRankingLoading ||
+			lineRankingLoading
 	);
 </script>
 
@@ -44,6 +51,8 @@
 
 	<StatisticsScopeControls isUpdating={metricLoading} />
 
+	<NetworkKpiStrip bind:isLoading={networkKpiStripLoading} promises={data.networkQuality.promises} />
+
 	<StationMetricMap
 		bind:isLoading={stationMetricMapLoading}
 		settings={data.stationMetricMap.settings}
@@ -51,6 +60,8 @@
 	/>
 
 	<NetworkQualityTimeSeries bind:isLoading={networkQualityLoading} promises={data.networkQuality.promises} />
+
+	<NetworkTransportBreakdown promises={data.networkQuality.promises} />
 
 	<AdministrationRanking
 		bind:isLoading={administrationRankingLoading}

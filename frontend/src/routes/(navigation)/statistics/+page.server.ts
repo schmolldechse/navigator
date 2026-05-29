@@ -26,8 +26,6 @@ import {
 } from "@lib/components/statistics/global/network-time-series/network-time-series";
 import type { StationMetricMapSeries } from "@lib/components/statistics/global/station-metric-map/station-metric-map-types";
 
-type MetricPromise = ReturnType<typeof loadMetric>;
-
 export const load: PageServerLoad = async ({
 	getClientAddress
 }): Promise<{
@@ -39,11 +37,11 @@ export const load: PageServerLoad = async ({
 		promises: NetworkTimeSeriesPromises;
 	};
 	administrationRanking: {
-		promise: MetricPromise;
+		promise: ReturnType<typeof loadMetric>;
 		settings: AdministrationRankingSettings;
 	};
 	lineRanking: {
-		promise: MetricPromise;
+		promise: ReturnType<typeof loadMetric>;
 		settings: LineRankingSettings;
 	};
 	scope: StatisticsScopeSettings;
@@ -70,6 +68,7 @@ export const load: PageServerLoad = async ({
 		networkQuality: {
 			promises: {
 				eventCount: loadMetric({ request: networkQualityRequests.eventCount, userIp }),
+				cancellationCount: loadMetric({ request: networkQualityRequests.cancellationCount, userIp }),
 				punctuality5: loadMetric({ request: networkQualityRequests.punctuality5, userIp }),
 				punctuality15: loadMetric({ request: networkQualityRequests.punctuality15, userIp }),
 				cancellationRate: loadMetric({ request: networkQualityRequests.cancellationRate, userIp }),

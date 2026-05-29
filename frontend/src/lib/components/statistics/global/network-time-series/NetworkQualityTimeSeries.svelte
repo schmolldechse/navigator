@@ -4,7 +4,7 @@
 	import Activity from "@lucide/svelte/icons/activity";
 	import { createNetworkTimeSeriesRequests, type NetworkTimeSeriesPromises } from "./network-time-series";
 	import NetworkAverageDelayTrendChart from "./NetworkAverageDelayTrendChart.svelte";
-	import NetworkCancellationRateTrendChart from "./NetworkCancellationRateTrendChart.svelte";
+	import NetworkCancellationTrendChart from "./NetworkCancellationTrendChart.svelte";
 	import NetworkEventHourDistributionChart from "./NetworkEventHourDistributionChart.svelte";
 	import NetworkPunctualityThresholdTrendChart from "./NetworkPunctualityThresholdTrendChart.svelte";
 	import { getStatisticsScopeContext } from "../statistics-scope-context.svelte";
@@ -19,6 +19,7 @@
 
 	const createPromises = (requests: ReturnType<typeof createNetworkTimeSeriesRequests>): NetworkTimeSeriesPromises => ({
 		eventCount: loadMetric({ request: requests.eventCount }),
+		cancellationCount: loadMetric({ request: requests.cancellationCount }),
 		punctuality5: loadMetric({ request: requests.punctuality5 }),
 		punctuality15: loadMetric({ request: requests.punctuality15 }),
 		cancellationRate: loadMetric({ request: requests.cancellationRate }),
@@ -28,11 +29,12 @@
 	let requests = $derived(createNetworkTimeSeriesRequests(scopeContext.current));
 	// svelte-ignore state_referenced_locally
 	let promises: NetworkTimeSeriesPromises = $state(initialPromises);
-	let initialized = false;
 
+	let initialized = false;
 	$effect(() => {
 		const currentRequests = requests;
 		if (!currentRequests) return;
+
 		if (!initialized) {
 			initialized = true;
 			return;
@@ -69,7 +71,10 @@
 			punctuality15Promise={promises.punctuality15}
 		/>
 
-		<NetworkCancellationRateTrendChart promise={promises.cancellationRate} />
+		<NetworkCancellationTrendChart
+			cancellationRatePromise={promises.cancellationRate}
+			cancellationCountPromise={promises.cancellationCount}
+		/>
 
 		<NetworkAverageDelayTrendChart promise={promises.averageDelay} />
 	</div>
