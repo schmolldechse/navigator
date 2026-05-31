@@ -1,5 +1,6 @@
 using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Models.Statistics;
+using Navigator.Data.Repository.StationRil100Repository;
 using Navigator.Data.Repository.StatisticsRepository.MetricSeriesBuilders;
 
 namespace Navigator.Data.Repository.StatisticsRepository;
@@ -7,6 +8,7 @@ namespace Navigator.Data.Repository.StatisticsRepository;
 public class StatisticsRepository(
     DataContext dataContext,
     Estimator estimator,
+    IStationRil100Repository stationRil100Repository,
     IEnumerable<IMetricSeriesBuilder> metricSeriesBuilders
 ) : IStatisticsRepository
 {
@@ -19,12 +21,22 @@ public class StatisticsRepository(
 
     public Task<int?> EstimateCurrentJourneysAsync() => estimator.EstimateCurrentJourneysAsync();
 
-    public Task<MetricSeries> GetMetricAsync(BaseMetricRequest baseRequest)
+    public async Task<MetricSeries> GetMetricAsync(BaseMetricRequest baseRequest)
     {
+        await ExpandEvaNumbersByRil100Async(baseRequest);
+
         if (buildersByRequestType.TryGetValue(baseRequest.GetType(), out var builder))
-            return builder.BuildAsync(baseRequest);
+            return await builder.BuildAsync(baseRequest);
 
         throw new NotSupportedException($"Metric type '{baseRequest.SeriesType}' is not supported.");
+    }
+
+    private async Task ExpandEvaNumbersByRil100Async(BaseMetricRequest request)
+    {
+        if (request is not IEvaNumberMetricRequest { IncludeRil100: true, EvaNumbers.Length: > 0 } evaNumberRequest)
+            return;
+
+        evaNumberRequest.EvaNumbers = await stationRil100Repository.ExpandEvaNumbersByRil100Async(evaNumberRequest.EvaNumbers);
     }
 
     public async Task SaveDatabaseSizeAsync(DatabaseSizeSnapshot snapshot)

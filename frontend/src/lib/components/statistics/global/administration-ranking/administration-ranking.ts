@@ -91,11 +91,14 @@ const ADMINISTRATION_RANKING_METRIC_OPTIONS: AdministrationRankingMetricOption[]
 
 const createAdministrationRankingRequest = (
 	settings: AdministrationRankingSettings,
-	scope: StatisticsScopeSettings
+	scope: StatisticsScopeSettings,
+	evaNumbers?: number[]
 ): v.InferOutput<typeof vBaseMetricRequestAdministrationRankingMetricRequest> => ({
 	queryType: "ADMINISTRATION_RANKING",
 	seriesType: settings.seriesType,
 	...toJourneyRankingMetricScopeRequest(scope),
+	evaNumbers,
+	includeRil100: Boolean(evaNumbers?.length),
 	limit: settings.limit,
 	offset: settings.offset
 });

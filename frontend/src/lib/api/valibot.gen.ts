@@ -672,6 +672,7 @@ export const vBaseMetricRequestAdministrationRankingMetricRequest = v.object({
 			])
 		)
 	),
+	includeRil100: v.optional(v.boolean()),
 	transportTypes: v.nullish(v.array(vTransportType)),
 	includeReplacementTransport: v.optional(v.boolean()),
 	limit: v.optional(
@@ -724,6 +725,7 @@ export const vBaseMetricRequestLineRankingMetricRequest = v.object({
 			])
 		)
 	),
+	includeRil100: v.optional(v.boolean()),
 	transportTypes: v.nullish(v.array(vTransportType)),
 	includeReplacementTransport: v.optional(v.boolean()),
 	journeyDescription: v.nullish(v.string()),
@@ -772,7 +774,7 @@ export const vBaseMetricRequestStationEventQualitySummaryMetricRequest = v.objec
 	start: v.pipe(v.string(), v.isoTimestamp()),
 	end: v.pipe(v.string(), v.isoTimestamp()),
 	transportTypes: v.nullish(v.array(vTransportType)),
-	evaNumbers: v.nullish(
+	evaNumbers: v.optional(
 		v.array(
 			v.union([
 				v.pipe(
@@ -785,6 +787,7 @@ export const vBaseMetricRequestStationEventQualitySummaryMetricRequest = v.objec
 			])
 		)
 	),
+	includeRil100: v.optional(v.boolean()),
 	includeReplacementTransport: v.optional(v.boolean())
 });
 
@@ -797,7 +800,7 @@ export const vBaseMetricRequestStationEventQualityTimeSeriesMetricRequest = v.ob
 	start: v.pipe(v.string(), v.isoTimestamp()),
 	end: v.pipe(v.string(), v.isoTimestamp()),
 	transportTypes: v.nullish(v.array(vTransportType)),
-	evaNumbers: v.nullish(
+	evaNumbers: v.optional(
 		v.array(
 			v.union([
 				v.pipe(
@@ -810,6 +813,7 @@ export const vBaseMetricRequestStationEventQualityTimeSeriesMetricRequest = v.ob
 			])
 		)
 	),
+	includeRil100: v.optional(v.boolean()),
 	includeReplacementTransport: v.optional(v.boolean())
 });
 

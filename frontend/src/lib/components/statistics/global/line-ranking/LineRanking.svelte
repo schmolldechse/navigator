@@ -24,8 +24,9 @@
 		isLoading: boolean;
 		settings: LineRankingSettings;
 		promise: Promise<Awaited<ReturnType<typeof loadMetric>>>;
+		evaNumber?: number;
 	};
-	let { isLoading = $bindable(true), settings: initialSettings, promise: initialPromise }: Props = $props();
+	let { isLoading = $bindable(true), settings: initialSettings, promise: initialPromise, evaNumber }: Props = $props();
 
 	const scopeContext = getStatisticsScopeContext();
 
@@ -42,7 +43,7 @@
 	// svelte-ignore state_referenced_locally
 	let number = $state(settings.number);
 
-	let request = $derived(createLineRankingRequest(settings, scopeContext.current));
+	let request = $derived(createLineRankingRequest(settings, scopeContext.current, evaNumber ? [evaNumber] : undefined));
 	// svelte-ignore state_referenced_locally
 	let promise: Promise<Awaited<ReturnType<typeof loadMetric>>> = $state(initialPromise);
 
@@ -108,7 +109,11 @@
 	</div>
 
 	<p class="text-foreground/60 text-sm leading-relaxed sm:text-base">
-		Compare individual lines and routes across the global journey dataset.
+		{#if evaNumber}
+			Compare individual lines and routes that visited this station. Arrival/departure only affects station-event charts.
+		{:else}
+			Compare individual lines and routes across the global journey dataset.
+		{/if}
 		{metricOption?.rankingDescription ?? "Values are ranked by the selected metric."}
 	</p>
 

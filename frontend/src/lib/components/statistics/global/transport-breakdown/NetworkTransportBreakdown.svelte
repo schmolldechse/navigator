@@ -10,6 +10,7 @@
 	import type { NetworkTimeSeriesPromises } from "../network-time-series/network-time-series";
 	import { createTransportBreakdownRows, type TransportBreakdownRow } from "../network-quality-utils";
 	import { formatMetricValue } from "../../metric-format";
+	import { getNetworkQualityContext } from "../network-quality-context.svelte";
 
 	type BreakdownOption = {
 		key: keyof NetworkTimeSeriesPromises;
@@ -18,9 +19,18 @@
 	};
 
 	type Props = {
-		promises: NetworkTimeSeriesPromises;
+		isLoading: boolean;
+		title?: string;
+		description?: string;
 	};
-	let { promises }: Props = $props();
+	let {
+		isLoading = $bindable(true),
+		title = "Transport Mix & Quality",
+		description = "Compare how much each transport family contributes and how quality differs inside the selected scope."
+	}: Props = $props();
+
+	const networkQualityContext = getNetworkQualityContext();
+	let promises: NetworkTimeSeriesPromises = $derived(networkQualityContext.promises);
 
 	const options: BreakdownOption[] = [
 		{ key: "eventCount", label: "Activity", description: "Recorded station events by transport family." },
@@ -59,6 +69,10 @@
 				};
 			})
 			.sort((left, right) => right.eventCount - left.eventCount);
+
+	$effect(() => {
+		isLoading = networkQualityContext.isLoading();
+	});
 </script>
 
 <section class="space-y-4">
@@ -66,10 +80,10 @@
 		<div class="flex min-w-0 flex-col gap-y-1">
 			<div class="flex items-center gap-2">
 				<TrainFront size={22} class="text-accent" />
-				<h2 class="text-2xl font-semibold">Transport Mix & Quality</h2>
+				<h2 class="text-2xl font-semibold">{title}</h2>
 			</div>
 			<p class="text-foreground/60 max-w-3xl text-sm leading-relaxed sm:text-base">
-				Compare how much each transport family contributes and how quality differs inside the selected scope.
+				{description}
 			</p>
 		</div>
 

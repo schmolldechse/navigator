@@ -1,68 +1,64 @@
+<script module lang="ts">
+	type InputValue = string | number;
+
+	export { type InputValue };
+</script>
+
 <script lang="ts">
 	import { onDestroy } from "svelte";
-	import type { ClassValue } from "svelte/elements";
+	import type { ClassValue, HTMLInputAttributes } from "svelte/elements";
 
 	type Props = {
 		type: "text" | "number";
-		value: string | number;
-		placeholder?: string;
-		disabled?: boolean;
-		readonly?: boolean;
-		min?: number;
-		max?: number;
-		step?: number;
-		pattern?: string;
-		minlength?: number;
-		maxlength?: number;
-		size?: number;
+		value: InputValue;
 		debounceTime?: number;
-		onchange?: (value: string | number) => void;
+		onchange?: (value: InputValue) => void;
 		class?: ClassValue;
-	};
+	} & Omit<HTMLInputAttributes, "type" | "value" | "oninput" | "onchange">;
 
-	let {
-		type,
-		value = $bindable(),
-		placeholder,
-		disabled,
-		readonly,
-		min,
-		max,
-		step,
-		pattern,
-		minlength,
-		maxlength,
-		size,
-		debounceTime,
-		onchange,
-		class: classNames
-	}: Props = $props();
+	let { type = "text", value = $bindable(), debounceTime = 0, onchange, class: classNames, ...rest }: Props = $props();
 
 	let input: HTMLInputElement | undefined = $state(undefined);
-
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined = $state(undefined);
 
+	const toNumber = (value: unknown): number | undefined => {
+		if (value == null || value === "") return undefined;
+
+		const numberValue = Number(value);
+		return Number.isFinite(numberValue) ? numberValue : undefined;
+	};
+
 	const clamp = (val: number): number => {
+		const min = toNumber(rest.min);
+		const max = toNumber(rest.max);
+
 		if (min != null && val < min) return min;
 		if (max != null && val > max) return max;
+
 		return val;
 	};
 
-	const applyValue = (newValue: string | number) => {
-		if (type === "number" && typeof newValue === "number" && !Number.isNaN(newValue)) {
-			newValue = clamp(newValue);
-		}
-		value = newValue;
+	const getInputValue = (target: HTMLInputElement): InputValue => {
+		if (type === "text") return target.value;
+		if (target.value === "") return "";
+
+		const numberValue = target.valueAsNumber;
+		if (Number.isNaN(numberValue)) return target.value;
+
+		return clamp(numberValue);
+	};
+
+	const applyValue = (newValue: InputValue) => {
 		onchange?.(newValue);
 	};
 
 	const handleInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
-		const newValue = type === "number" ? target.valueAsNumber : target.value;
+		const newValue = getInputValue(target);
 
 		if (debounceTimer) clearTimeout(debounceTimer);
 
-		if (debounceTime) debounceTimer = setTimeout(() => applyValue(newValue), debounceTime);
+		if (debounceTime > 0) debounceTimer = setTimeout(() => applyValue(newValue), debounceTime);
 		else applyValue(newValue);
 	};
 
@@ -71,18 +67,9 @@
 
 <input
 	bind:this={input}
+	{...rest}
 	{type}
 	{value}
-	{placeholder}
-	{disabled}
-	{readonly}
-	{min}
-	{max}
-	{step}
-	{pattern}
-	{minlength}
-	{maxlength}
-	{size}
 	oninput={handleInput}
 	class={[
 		"border-border rounded-lg border-2 px-3 py-1.5 text-sm font-semibold transition-all outline-none",

@@ -1,17 +1,25 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
+	import { page } from "$app/state";
 	import type { PageProps } from "./$types";
+	import type { Station } from "@lib/api";
 	import StationMetricMap from "@lib/components/statistics/global/station-metric-map/StationMetricMap.svelte";
 	import AdministrationRanking from "@lib/components/statistics/global/administration-ranking/AdministrationRanking.svelte";
 	import NetworkQualityTimeSeries from "@lib/components/statistics/global/network-time-series/NetworkQualityTimeSeries.svelte";
 	import NetworkKpiStrip from "@lib/components/statistics/global/network-kpis/NetworkKpiStrip.svelte";
 	import NetworkTransportBreakdown from "@lib/components/statistics/global/transport-breakdown/NetworkTransportBreakdown.svelte";
 	import LineRanking from "@lib/components/statistics/global/line-ranking/LineRanking.svelte";
+	import StationSearch from "@lib/components/station/StationSearch.svelte";
 	import * as Accordion from "@lib/components/ui/accordion";
 	import StatisticsScopeControls from "@lib/components/statistics/global/StatisticsScopeControls.svelte";
 	import {
 		setStatisticsScopeContext,
 		StatisticsScopeContext
 	} from "@lib/components/statistics/global/statistics-scope-context.svelte";
+	import {
+		NetworkQualityContext,
+		setNetworkQualityContext
+	} from "@lib/components/statistics/global/network-quality-context.svelte";
 
 	let { data }: PageProps = $props();
 
@@ -20,56 +28,104 @@
 	// svelte-ignore state_referenced_locally
 	const scopeContext = new StatisticsScopeContext(data.scope);
 	setStatisticsScopeContext(scopeContext);
+	// svelte-ignore state_referenced_locally
+	const networkQualityContext = new NetworkQualityContext(data.networkQuality.promises);
+	setNetworkQualityContext(networkQualityContext);
 
 	let stationMetricMapLoading: boolean = $state(true);
 	let networkKpiStripLoading: boolean = $state(true);
 	let networkQualityLoading: boolean = $state(true);
+	let networkTransportBreakdownLoading: boolean = $state(true);
 	let administrationRankingLoading: boolean = $state(true);
 	let lineRankingLoading: boolean = $state(true);
 	const metricLoading = $derived(
 		stationMetricMapLoading ||
 			networkKpiStripLoading ||
 			networkQualityLoading ||
+			networkTransportBreakdownLoading ||
 			administrationRankingLoading ||
 			lineRankingLoading
 	);
+
+	let networkInitialized = false;
+	$effect(() => {
+		const scope = scopeContext.current;
+		if (!scope) return;
+
+		if (!networkInitialized) {
+			networkInitialized = true;
+			return;
+		}
+
+		networkQualityContext.update(scope);
+	});
+
+	const selectStation = async (station: Station) => {
+		const evaNumber = Number(station.evaNumber);
+		const search = page.url.searchParams.toString();
+		await goto(`/statistics/${evaNumber}${search ? `?${search}` : ""}`);
+	};
 </script>
 
 <svelte:head>
 	<title>Statistics - Navigator</title>
 </svelte:head>
 
-<main class="container mx-auto flex flex-col gap-y-8 p-4 sm:py-8">
-	<section class="relative flex flex-col gap-4">
-		<div class="grid gap-1">
-			<h1 class="text-3xl font-bold">Statistics</h1>
-			<p class="text-foreground/60 max-w-3xl text-sm sm:text-base">
+<main class="container mx-auto flex flex-col gap-y-12 p-4 sm:py-8">
+	<section class="relative">
+		<div class="bg-accent absolute top-1 bottom-1 w-0.5 sm:-left-4 sm:w-1"></div>
+
+		<div class="flex flex-col gap-y-2 pl-4 sm:pl-8">
+			<h1 class="text-3xl font-bold text-balance sm:text-4xl">Statistics</h1>
+			<p class="text-foreground/60 max-w-3xl text-sm leading-relaxed sm:text-base">
 				Compare activity and quality across the selected network slice.
 			</p>
 		</div>
 	</section>
 
-	<StatisticsScopeControls isUpdating={metricLoading} />
+	<section class="border-border bg-secondary/10 -mx-4 border-y px-4 py-8 sm:-mx-6 sm:px-6">
+		<div class="flex flex-col gap-y-5">
+			<div class="flex max-w-3xl flex-col gap-y-2">
+				<h2 class="text-2xl font-medium">Station metrics</h2>
+				<p class="text-foreground/60 max-w-3xl text-sm leading-relaxed sm:text-base">
+					Search a station to open station-specific punctuality, delay, cancellation, operator, and line statistics.
+				</p>
+			</div>
 
-	<NetworkKpiStrip bind:isLoading={networkKpiStripLoading} promises={data.networkQuality.promises} />
+			<StationSearch class="w-full max-w-3xl" onselect={selectStation} />
+		</div>
+	</section>
 
-	<StationMetricMap
-		bind:isLoading={stationMetricMapLoading}
-		settings={data.stationMetricMap.settings}
-		promise={data.stationMetricMap.promise}
-	/>
+	<section class="flex flex-col gap-y-8">
+		<div class="flex flex-col gap-y-2">
+			<h2 class="text-2xl font-medium">Global metrics</h2>
+			<p class="text-foreground/60 max-w-3xl text-sm leading-relaxed sm:text-base">
+				Filter the collected network data and compare quality signals across stations, transport families, operators, and lines.
+			</p>
+		</div>
 
-	<NetworkQualityTimeSeries bind:isLoading={networkQualityLoading} promises={data.networkQuality.promises} />
+		<StatisticsScopeControls isUpdating={metricLoading} />
 
-	<NetworkTransportBreakdown promises={data.networkQuality.promises} />
+		<NetworkKpiStrip bind:isLoading={networkKpiStripLoading} />
 
-	<AdministrationRanking
-		bind:isLoading={administrationRankingLoading}
-		settings={data.administrationRanking.settings}
-		promise={data.administrationRanking.promise}
-	/>
+		<StationMetricMap
+			bind:isLoading={stationMetricMapLoading}
+			settings={data.stationMetricMap.settings}
+			promise={data.stationMetricMap.promise}
+		/>
 
-	<LineRanking bind:isLoading={lineRankingLoading} settings={data.lineRanking.settings} promise={data.lineRanking.promise} />
+		<NetworkQualityTimeSeries bind:isLoading={networkQualityLoading} />
+
+		<NetworkTransportBreakdown bind:isLoading={networkTransportBreakdownLoading} />
+
+		<AdministrationRanking
+			bind:isLoading={administrationRankingLoading}
+			settings={data.administrationRanking.settings}
+			promise={data.administrationRanking.promise}
+		/>
+
+		<LineRanking bind:isLoading={lineRankingLoading} settings={data.lineRanking.settings} promise={data.lineRanking.promise} />
+	</section>
 
 	<section class="space-y-4">
 		<div class="flex flex-col gap-y-1">

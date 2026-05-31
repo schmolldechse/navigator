@@ -22,8 +22,9 @@
 		isLoading: boolean;
 		settings: AdministrationRankingSettings;
 		promise: Promise<Awaited<ReturnType<typeof loadMetric>>>;
+		evaNumber?: number;
 	};
-	let { isLoading = $bindable(true), settings: initialSettings, promise: initialPromise }: Props = $props();
+	let { isLoading = $bindable(true), settings: initialSettings, promise: initialPromise, evaNumber }: Props = $props();
 
 	const scopeContext = getStatisticsScopeContext();
 
@@ -37,7 +38,9 @@
 		)
 	);
 
-	let request = $derived(createAdministrationRankingRequest(settings, scopeContext.current));
+	let request = $derived(
+		createAdministrationRankingRequest(settings, scopeContext.current, evaNumber ? [evaNumber] : undefined)
+	);
 	// svelte-ignore state_referenced_locally
 	let promise: Promise<Awaited<ReturnType<typeof loadMetric>>> = $state(initialPromise);
 
@@ -93,7 +96,11 @@
 	</div>
 
 	<p class="text-foreground/60 text-sm leading-relaxed sm:text-base">
-		Compare operators across the global journey dataset for a dedicated time range.
+		{#if evaNumber}
+			Compare operators by recorded station visits for this station. Arrival/departure only affects station-event charts.
+		{:else}
+			Compare operators across the global journey dataset for a dedicated time range.
+		{/if}
 		{metricOption?.rankingDescription ?? "Values are ranked by the selected metric."}
 	</p>
 

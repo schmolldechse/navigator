@@ -1,4 +1,5 @@
 import { MetricSeriesType, type MetricSeries } from "@lib/api";
+import { loadMetric } from "@lib/remote/metrics.remote";
 import { toMetricScopeRequest, type StatisticsScopeSettings } from "../statistics-scope";
 
 type NetworkTimeSeriesPromises = {
@@ -49,20 +50,46 @@ const NETWORK_TIME_SERIES_OPTIONS: NetworkTimeSeriesOption[] = [
 	}
 ];
 
-const createNetworkTimeSeriesRequest = (scope: StatisticsScopeSettings, seriesType: MetricSeriesType) => ({
-	queryType: "NETWORK_STATION_EVENT_QUALITY_TIME_SERIES" as const,
-	seriesType,
-	...toMetricScopeRequest(scope)
+const createNetworkTimeSeriesRequest = (scope: StatisticsScopeSettings, seriesType: MetricSeriesType, evaNumber?: number) =>
+	evaNumber
+		? {
+				queryType: "STATION_EVENT_QUALITY_TIME_SERIES" as const,
+				seriesType,
+				...toMetricScopeRequest(scope),
+				evaNumbers: [evaNumber],
+				includeRil100: true
+			}
+		: {
+				queryType: "NETWORK_STATION_EVENT_QUALITY_TIME_SERIES" as const,
+				seriesType,
+				...toMetricScopeRequest(scope)
+			};
+
+const createNetworkTimeSeriesRequests = (scope: StatisticsScopeSettings, evaNumber?: number) => ({
+	eventCount: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_COUNT, evaNumber),
+	cancellationCount: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_CANCELLATION_COUNT, evaNumber),
+	punctuality5: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_PUNCTUALITY5_RATE, evaNumber),
+	punctuality15: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_PUNCTUALITY15_RATE, evaNumber),
+	cancellationRate: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_CANCELLATION_RATE, evaNumber),
+	averageDelay: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_DELAY_AVERAGE, evaNumber)
 });
 
-const createNetworkTimeSeriesRequests = (scope: StatisticsScopeSettings) => ({
-	eventCount: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_COUNT),
-	cancellationCount: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_CANCELLATION_COUNT),
-	punctuality5: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_PUNCTUALITY5_RATE),
-	punctuality15: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_PUNCTUALITY15_RATE),
-	cancellationRate: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_CANCELLATION_RATE),
-	averageDelay: createNetworkTimeSeriesRequest(scope, MetricSeriesType.STATION_EVENT_DELAY_AVERAGE)
-});
+const createNetworkTimeSeriesPromises = (
+	scope: StatisticsScopeSettings,
+	userIp?: string,
+	evaNumber?: number
+): NetworkTimeSeriesPromises => {
+	const requests = createNetworkTimeSeriesRequests(scope, evaNumber);
+
+	return {
+		eventCount: loadMetric({ request: requests.eventCount, userIp }),
+		cancellationCount: loadMetric({ request: requests.cancellationCount, userIp }),
+		punctuality5: loadMetric({ request: requests.punctuality5, userIp }),
+		punctuality15: loadMetric({ request: requests.punctuality15, userIp }),
+		cancellationRate: loadMetric({ request: requests.cancellationRate, userIp }),
+		averageDelay: loadMetric({ request: requests.averageDelay, userIp })
+	};
+};
 
 const getNetworkTimeSeriesOption = (seriesType: MetricSeriesType): NetworkTimeSeriesOption | undefined =>
 	NETWORK_TIME_SERIES_OPTIONS.find((option: NetworkTimeSeriesOption) => option.seriesType === seriesType);
@@ -73,5 +100,6 @@ export {
 	NETWORK_TIME_SERIES_OPTIONS,
 	createNetworkTimeSeriesRequest,
 	createNetworkTimeSeriesRequests,
+	createNetworkTimeSeriesPromises,
 	getNetworkTimeSeriesOption
 };

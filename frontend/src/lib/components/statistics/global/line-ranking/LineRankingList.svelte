@@ -61,20 +61,20 @@
 		const rows: LineRankingRow[] = [];
 
 		for (const baseDataPoint of metric.dataPoints) {
-			console.log(baseDataPoint);
 			if (!("line" in baseDataPoint) || !baseDataPoint.line) continue;
 
 			const dataPoint = baseDataPoint as BaseMetricDataPointLineRankingDataPoint;
 
 			const index = rows.length;
+			const rank = page.offset + index + 1;
 			const line = dataPoint.line;
 			const administration = dataPoint.administration;
 			const startStation = dataPoint.startStation;
 			const endStation = dataPoint.endStation;
 
 			rows.push({
-				key: `${line.number}-${line.journeyDescription}-${administration.operatorCode}-${startStation.evaNumber}-${endStation.evaNumber}`,
-				rank: page.offset + index + 1,
+				key: `${rank}-${line.number}-${line.journeyDescription}-${line.transportType}-${administration.operatorCode}-${administration.administrationId}-${startStation.evaNumber}-${endStation.evaNumber}`,
+				rank,
 				line,
 				administration,
 				startStation,

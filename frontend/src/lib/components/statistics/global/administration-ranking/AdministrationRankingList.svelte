@@ -45,10 +45,11 @@
 
 			const index = rows.length;
 			const administration = dataPoint.administration;
+			const rank = page.offset + index + 1;
 
 			rows.push({
-				key: `${administration.operatorCode}-${administration.administrationId}`,
-				rank: page.offset + index + 1,
+				key: `${rank}-${administration.operatorCode}-${administration.administrationId}-${administration.operatorName}`,
+				rank,
 				administration,
 				value: Number(dataPoint.value),
 				unit: metric.unit,

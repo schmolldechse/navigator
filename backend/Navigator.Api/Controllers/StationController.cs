@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Navigator.Api.DTOs.Station;
 using Navigator.Api.Mapping;
 using Navigator.Data.Repository.StationRepository;
-using Navigator.Data.Repository.StationRilRepository;
+using Navigator.Data.Repository.StationRil100Repository;
 using Navigator.Data.Repository.StationTransportRepository;
 using System.ComponentModel.DataAnnotations;
 
@@ -13,7 +13,7 @@ namespace Navigator.Api.Controllers;
 [Tags("Stations")]
 public class StationController(
     IStationRepository stationsRepository,
-    IStationRilRepository stationRilRepository,
+    IStationRil100Repository stationRil100Repository,
     IStationTransportRepository stationTransportRepository,
     StationMapper mapper
 ) : ControllerBase
@@ -36,7 +36,7 @@ public class StationController(
         var evaNumbers = stations.Select(station => station.EvaNumber).ToList();
 
         var (ril100, transports) = (
-            await stationRilRepository.GetRilByEvaNumbersAsync(evaNumbers.ToArray()),
+            await stationRil100Repository.GetRilByEvaNumbersAsync(evaNumbers.ToArray()),
             await stationTransportRepository.GetTransportByEvaNumbersAsync(evaNumbers.ToArray())
         );
 

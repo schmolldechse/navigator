@@ -8,11 +8,10 @@
 	import Gauge from "@lucide/svelte/icons/gauge";
 	import ShieldCheck from "@lucide/svelte/icons/shield-check";
 	import type { LucideIcon } from "@lucide/svelte";
-	import { createNetworkTimeSeriesRequests, type NetworkTimeSeriesPromises } from "../network-time-series/network-time-series";
+	import type { NetworkTimeSeriesPromises } from "../network-time-series/network-time-series";
 	import { aggregateMetricSeries } from "../network-quality-utils";
-	import { getStatisticsScopeContext } from "../statistics-scope-context.svelte";
-	import { loadMetric } from "@lib/remote/metrics.remote";
 	import { formatMetricValue } from "../../metric-format";
+	import { getNetworkQualityContext } from "../network-quality-context.svelte";
 
 	type KpiDefinition = {
 		key: keyof NetworkTimeSeriesPromises;
@@ -23,45 +22,14 @@
 
 	type Props = {
 		isLoading: boolean;
-		promises: NetworkTimeSeriesPromises;
 	};
-	let { isLoading = $bindable(true), promises: initialPromises }: Props = $props();
+	let { isLoading = $bindable(true) }: Props = $props();
 
-	const scopeContext = getStatisticsScopeContext();
-
-	const createPromises = (requests: ReturnType<typeof createNetworkTimeSeriesRequests>): NetworkTimeSeriesPromises => ({
-		eventCount: loadMetric({ request: requests.eventCount }),
-		cancellationCount: loadMetric({ request: requests.cancellationCount }),
-		punctuality5: loadMetric({ request: requests.punctuality5 }),
-		punctuality15: loadMetric({ request: requests.punctuality15 }),
-		cancellationRate: loadMetric({ request: requests.cancellationRate }),
-		averageDelay: loadMetric({ request: requests.averageDelay })
-	});
-
-	let requests = $derived(createNetworkTimeSeriesRequests(scopeContext.current));
-	// svelte-ignore state_referenced_locally
-	let promises: NetworkTimeSeriesPromises = $state(initialPromises);
-
-	let initialized = false;
-	$effect(() => {
-		const currentRequests = requests;
-		if (!currentRequests) return;
-
-		if (!initialized) {
-			initialized = true;
-			return;
-		}
-
-		promises = createPromises(currentRequests);
-	});
+	const networkQualityContext = getNetworkQualityContext();
+	let promises: NetworkTimeSeriesPromises = $derived(networkQualityContext.promises);
 
 	$effect(() => {
-		const currentPromises = promises;
-		if (!currentPromises) return;
-
-		isLoading = Object.values(currentPromises).some(
-			(promise: Promise<MetricSeries>) => "loading" in promise && Boolean(promise.loading)
-		);
+		isLoading = networkQualityContext.isLoading();
 	});
 
 	const definitions: KpiDefinition[] = [

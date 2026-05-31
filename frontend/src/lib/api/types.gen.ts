@@ -127,6 +127,10 @@ export type BaseMetricRequestAdministrationRankingMetricRequest = {
 	 */
 	evaNumbers?: Array<number | string>;
 	/**
+	 * Whether EVA number filters should include all station EVA numbers that share a RIL100 code.
+	 */
+	includeRil100?: boolean;
+	/**
 	 * Optional list of transport types to filter the ranking by. If omitted or empty, all transport types will be included.
 	 */
 	transportTypes?: null | Array<TransportType>;
@@ -162,6 +166,10 @@ export type BaseMetricRequestLineRankingMetricRequest = {
 	 * Optional array of station EVA numbers. If provided, line quality is ranked for station visits instead of global journey route quality.
 	 */
 	evaNumbers?: Array<number | string>;
+	/**
+	 * Whether EVA number filters should include all station EVA numbers that share a RIL100 code.
+	 */
+	includeRil100?: boolean;
 	/**
 	 * Optional list of transport types to filter the ranking by. If omitted or empty, all transport types will be included.
 	 */
@@ -233,7 +241,11 @@ export type BaseMetricRequestStationEventQualitySummaryMetricRequest = {
 	/**
 	 * Optional list of EVA numbers to filter the metric by stations. If omitted or empty, all stations will be included.
 	 */
-	evaNumbers?: null | Array<number | string>;
+	evaNumbers?: Array<number | string>;
+	/**
+	 * Whether EVA number filters should include all station EVA numbers that share a RIL100 code.
+	 */
+	includeRil100?: boolean;
 	/**
 	 * Whether replacement transport should be included in the metric.
 	 */
@@ -259,7 +271,11 @@ export type BaseMetricRequestStationEventQualityTimeSeriesMetricRequest = {
 	/**
 	 * Optional list of EVA numbers to filter the metric by stations. If omitted or empty, all stations will be included.
 	 */
-	evaNumbers?: null | Array<number | string>;
+	evaNumbers?: Array<number | string>;
+	/**
+	 * Whether EVA number filters should include all station EVA numbers that share a RIL100 code.
+	 */
+	includeRil100?: boolean;
 	/**
 	 * Whether replacement transport should be included in the metric.
 	 */

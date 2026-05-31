@@ -32,7 +32,7 @@
 
 {#snippet pageEntries({ class: className, onNavigate }: { class: ClassValue; onNavigate?: () => void })}
 	<nav class={className}>
-		{#each data.pages as pageEntry}
+		{#each data.pages as pageEntry (pageEntry.href)}
 			{@const isVisited = page.url.pathname === pageEntry.href}
 			{@const IconItem = pageEntry.icon ? icons[pageEntry.icon] : null}
 
@@ -55,39 +55,41 @@
 	</nav>
 {/snippet}
 
-<header class="bg-background/95 border-border sticky top-0 z-100 w-full border-b-2">
-	<div class="flex h-16 items-center justify-between px-4">
-		<Logo />
+<div class="grid h-screen grid-rows-[auto_minmax(0,1fr)]">
+	<header class="bg-background/95 border-border sticky top-0 z-100 w-full border-b-2">
+		<div class="flex h-16 items-center justify-between px-4">
+			<Logo />
 
-		{@render pageEntries({ class: "hidden md:flex items-center gap-x-6" })}
+			{@render pageEntries({ class: "hidden md:flex items-center gap-x-6" })}
 
-		<Button
-			mode="secondary"
-			class="flex md:hidden"
-			aria-controls={mobileNavigationId}
-			aria-expanded={isMenuOpen}
-			aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
-			onclick={(event: MouseEvent) => {
-				event.stopPropagation();
-				isMenuOpen = !isMenuOpen;
-			}}
-		>
-			{#if isMenuOpen}<X />
-			{:else}<Menu />
-			{/if}
-		</Button>
-	</div>
-</header>
-
-{#if isMenuOpen}
-	<div id={mobileNavigationId} class="fixed top-18 right-4 left-4 z-90 md:hidden">
-		<div class="border-border bg-background/95 rounded-xl border-2 p-2 shadow-2xl backdrop-blur-md sm:ml-auto sm:max-w-xs">
-			{@render pageEntries({
-				class: "flex flex-col items-stretch gap-y-1",
-				onNavigate: () => (isMenuOpen = false)
-			})}
+			<Button
+				mode="secondary"
+				class="flex md:hidden"
+				aria-controls={mobileNavigationId}
+				aria-expanded={isMenuOpen}
+				aria-label={isMenuOpen ? "Close navigation" : "Open navigation"}
+				onclick={(event: MouseEvent) => {
+					event.stopPropagation();
+					isMenuOpen = !isMenuOpen;
+				}}
+			>
+				{#if isMenuOpen}<X />
+				{:else}<Menu />
+				{/if}
+			</Button>
 		</div>
-	</div>
-{/if}
+	</header>
 
-{@render children?.()}
+	{#if isMenuOpen}
+		<div id={mobileNavigationId} class="fixed top-18 right-4 left-4 z-90 md:hidden">
+			<div class="border-border bg-background/95 rounded-xl border-2 p-2 shadow-2xl backdrop-blur-md sm:ml-auto sm:max-w-xs">
+				{@render pageEntries({
+					class: "flex flex-col items-stretch gap-y-1",
+					onNavigate: () => (isMenuOpen = false)
+				})}
+			</div>
+		</div>
+	{/if}
+
+	{@render children?.()}
+</div>

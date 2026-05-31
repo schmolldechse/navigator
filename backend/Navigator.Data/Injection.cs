@@ -7,7 +7,7 @@ using Navigator.Data.Repository;
 using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
-using Navigator.Data.Repository.StationRilRepository;
+using Navigator.Data.Repository.StationRil100Repository;
 using Navigator.Data.Repository.StationTransportRepository;
 using Navigator.Data.Repository.StatisticsRepository;
 using Navigator.Data.Repository.StatisticsRepository.MetricSeriesBuilders;
@@ -50,7 +50,7 @@ public static class Injection
         services.AddTransient<IJourneyRepository, JourneyRepository>()
             .AddTransient<IRisIdRepository, RisIdRepository>()
             .AddTransient<IStationRepository, StationRepository>()
-            .AddTransient<IStationRilRepository, StationRilRepository>()
+            .AddTransient<IStationRil100Repository, StationRil100Repository>()
             .AddTransient<IStationTransportRepository, StationTransportRepository>()
             .AddTransient<IStatisticsRepository, StatisticsRepository>()
             .AddTransient<ITimetableRepository, TimetableRepository>();

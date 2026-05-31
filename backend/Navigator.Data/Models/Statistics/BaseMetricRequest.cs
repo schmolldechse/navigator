@@ -20,3 +20,9 @@ public abstract class BaseMetricRequest : IValidatableObject
 
     public virtual IEnumerable<ValidationResult> Validate(ValidationContext validationContext) { yield break; }
 }
+
+public interface IEvaNumberMetricRequest
+{
+    int[] EvaNumbers { get; set; }
+    bool IncludeRil100 { get; set; }
+}

@@ -93,11 +93,14 @@ const LINE_RANKING_METRIC_OPTIONS: LineRankingMetricOption[] = [
 
 const createLineRankingRequest = (
 	settings: LineRankingSettings,
-	scope: StatisticsScopeSettings
+	scope: StatisticsScopeSettings,
+	evaNumbers?: number[]
 ): v.InferOutput<typeof vBaseMetricRequestLineRankingMetricRequest> => ({
 	queryType: "LINE_RANKING",
 	seriesType: settings.seriesType,
 	...toJourneyRankingMetricScopeRequest(scope),
+	evaNumbers,
+	includeRil100: Boolean(evaNumbers?.length),
 	journeyDescription: settings.journeyDescription.trim() || undefined,
 	number: settings.number.trim() || undefined,
 	limit: settings.limit,

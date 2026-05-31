@@ -6,7 +6,7 @@ using Navigator.Data.Enums.Metric;
 
 namespace Navigator.Data.Models.Statistics.Request;
 
-public class AdministrationRankingMetricRequest : BaseMetricRequest
+public class AdministrationRankingMetricRequest : BaseMetricRequest, IEvaNumberMetricRequest
 {
     private static readonly HashSet<MetricSeriesType> ValidSeriesTypes =
     [
@@ -39,6 +39,10 @@ public class AdministrationRankingMetricRequest : BaseMetricRequest
     [JsonPropertyName("evaNumbers")]
     [Description("Optional array of EVA numbers. If provided, station event quality is ranked instead of global journey route quality.")]
     public int[] EvaNumbers { get; set; } = [];
+
+    [JsonPropertyName("includeRil100")]
+    [Description("Whether EVA number filters should include all station EVA numbers that share a RIL100 code.")]
+    public bool IncludeRil100 { get; set; } = false;
 
     [JsonPropertyName("transportTypes")]
     [Description("Optional list of transport types to filter the ranking by. If omitted or empty, all transport types will be included.")]

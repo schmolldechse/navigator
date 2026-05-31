@@ -69,6 +69,63 @@ const createDefaultStatisticsScopeSettings = (): StatisticsScopeSettings => ({
 	includeReplacementTransport: true
 });
 
+const parseDate = (value: string | null, fallback: DateTime): DateTime => {
+	if (!value) return fallback;
+
+	const parsed = DateTime.fromISO(value);
+	return parsed.isValid ? parsed : fallback;
+};
+
+const parseTransportTypes = (value: string | null): TransportType[] => {
+	if (!value) return [];
+
+	const validTransportTypes = new Set(Object.values(TransportType));
+	return value
+		.split(",")
+		.map((part: string) => part.trim())
+		.filter((part: string): part is TransportType => validTransportTypes.has(part as TransportType));
+};
+
+const parseBoolean = (value: string | null, fallback: boolean): boolean => {
+	if (value === "true") return true;
+	if (value === "false") return false;
+	return fallback;
+};
+
+const createStatisticsScopeSettingsFromSearchParams = (searchParams: URLSearchParams): StatisticsScopeSettings => {
+	const fallback = createDefaultStatisticsScopeSettings();
+	const scheduleTypeValue = searchParams.get("scheduleType");
+	const validScheduleTypes = new Set(Object.values(ScheduleType));
+	const start = parseDate(searchParams.get("start"), fallback.dates.start).startOf("day");
+	const end = parseDate(searchParams.get("end"), fallback.dates.end).endOf("day");
+
+	return {
+		dates: start <= end ? { start, end } : fallback.dates,
+		scheduleType: validScheduleTypes.has(scheduleTypeValue as ScheduleType)
+			? (scheduleTypeValue as ScheduleType)
+			: fallback.scheduleType,
+		transportTypes: parseTransportTypes(searchParams.get("transportTypes")),
+		includeReplacementTransport: parseBoolean(
+			searchParams.get("includeReplacementTransport"),
+			fallback.includeReplacementTransport
+		)
+	};
+};
+
+const updateStatisticsScopeSearchParams = (searchParams: URLSearchParams, scope: StatisticsScopeSettings): URLSearchParams => {
+	const next = new URLSearchParams(searchParams);
+
+	next.set("start", scope.dates.start.toISODate()!);
+	next.set("end", scope.dates.end.toISODate()!);
+	next.set("scheduleType", scope.scheduleType);
+	next.set("includeReplacementTransport", String(scope.includeReplacementTransport));
+
+	if (scope.transportTypes.length > 0) next.set("transportTypes", [...scope.transportTypes].sort().join(","));
+	else next.delete("transportTypes");
+
+	return next;
+};
+
 const cloneScopeSettings = (source: StatisticsScopeSettings): StatisticsScopeSettings => ({
 	dates: {
 		start: source.dates.start,
@@ -108,8 +165,10 @@ export {
 	TRANSPORT_OPTIONS,
 	SCHEDULE_OPTIONS,
 	createDefaultStatisticsScopeSettings,
+	createStatisticsScopeSettingsFromSearchParams,
 	cloneScopeSettings,
 	areScopeSettingsEqual,
+	updateStatisticsScopeSearchParams,
 	toMetricScopeRequest,
 	toJourneyRankingMetricScopeRequest
 };

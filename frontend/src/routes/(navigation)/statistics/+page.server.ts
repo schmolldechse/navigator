@@ -15,19 +15,20 @@ import {
 	type LineRankingSettings
 } from "@lib/components/statistics/global/line-ranking/line-ranking";
 import {
-	createDefaultStatisticsScopeSettings,
+	createStatisticsScopeSettingsFromSearchParams,
 	type StatisticsScopeSettings
 } from "@lib/components/statistics/global/statistics-scope";
 import { loadStationMetricMap } from "@lib/components/statistics/global/station-metric-map/station-metric-map.remote";
 import { loadMetric } from "@lib/remote/metrics.remote";
 import {
-	createNetworkTimeSeriesRequests,
+	createNetworkTimeSeriesPromises,
 	type NetworkTimeSeriesPromises
 } from "@lib/components/statistics/global/network-time-series/network-time-series";
 import type { StationMetricMapSeries } from "@lib/components/statistics/global/station-metric-map/station-metric-map-types";
 
 export const load: PageServerLoad = async ({
-	getClientAddress
+	getClientAddress,
+	url
 }): Promise<{
 	stationMetricMap: {
 		promise: Promise<StationMetricMapSeries>;
@@ -46,13 +47,11 @@ export const load: PageServerLoad = async ({
 	};
 	scope: StatisticsScopeSettings;
 }> => {
-	const scopeSettings: StatisticsScopeSettings = createDefaultStatisticsScopeSettings();
+	const scopeSettings: StatisticsScopeSettings = createStatisticsScopeSettingsFromSearchParams(url.searchParams);
 	const userIp = getClientAddress();
 
 	const stationMetricMapSettings = createDefaultStationMetricMapSettings();
 	const stationMetricMapRequest = createStationMetricMapRequest(stationMetricMapSettings, scopeSettings);
-
-	const networkQualityRequests = createNetworkTimeSeriesRequests(scopeSettings);
 
 	const administrationRankingSettings: AdministrationRankingSettings = createDefaultAdministrationRankingSettings();
 	const administrationRankingRequest = createAdministrationRankingRequest(administrationRankingSettings, scopeSettings);
@@ -66,14 +65,7 @@ export const load: PageServerLoad = async ({
 			settings: stationMetricMapSettings
 		},
 		networkQuality: {
-			promises: {
-				eventCount: loadMetric({ request: networkQualityRequests.eventCount, userIp }),
-				cancellationCount: loadMetric({ request: networkQualityRequests.cancellationCount, userIp }),
-				punctuality5: loadMetric({ request: networkQualityRequests.punctuality5, userIp }),
-				punctuality15: loadMetric({ request: networkQualityRequests.punctuality15, userIp }),
-				cancellationRate: loadMetric({ request: networkQualityRequests.cancellationRate, userIp }),
-				averageDelay: loadMetric({ request: networkQualityRequests.averageDelay, userIp })
-			}
+			promises: createNetworkTimeSeriesPromises(scopeSettings, userIp)
 		},
 		administrationRanking: {
 			promise: loadMetric({ request: administrationRankingRequest, userIp }),

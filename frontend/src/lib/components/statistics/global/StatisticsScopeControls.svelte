@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from "$app/navigation";
+	import { page } from "$app/state";
 	import { DateTime } from "luxon";
 	import Button from "@lib/components/ui/Button.svelte";
 	import Checkbox from "@lib/components/ui/Checkbox.svelte";
@@ -19,6 +21,7 @@
 		TRANSPORT_OPTIONS,
 		areScopeSettingsEqual,
 		cloneScopeSettings,
+		updateStatisticsScopeSearchParams,
 		type ScheduleOption,
 		type StatisticsScopeSettings,
 		type TransportOption
@@ -72,11 +75,18 @@
 		draft.transportTypes = [...new Set(options.flatMap((option: TransportOption) => option.transportTypes))];
 	};
 
-	const apply = () => {
+	const apply = async () => {
 		if (!draft.dates.start.isValid || !draft.dates.end.isValid || !hasChanges) return;
 
 		scopeContext.update(draft);
 		draft = cloneScopeSettings(scopeContext.current);
+
+		const searchParams = updateStatisticsScopeSearchParams(page.url.searchParams, scopeContext.current);
+		await goto(`${page.url.pathname}?${searchParams.toString()}`, {
+			keepFocus: true,
+			noScroll: true,
+			replaceState: true
+		});
 	};
 
 	const reset = () => {
