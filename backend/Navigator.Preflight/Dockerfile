@@ -13,6 +13,7 @@ WORKDIR /src
 # Copy Navigator dependencies
 COPY ["Navigator.Preflight/Navigator.Preflight.csproj", "Navigator.Preflight/"]
 COPY ["Navigator.Data/Navigator.Data.csproj", "Navigator.Data/"]
+COPY ["Navigator.Observability/Navigator.Observability.csproj", "Navigator.Observability/"]
 
 RUN dotnet restore "./Navigator.Preflight/Navigator.Preflight.csproj"
 COPY . .

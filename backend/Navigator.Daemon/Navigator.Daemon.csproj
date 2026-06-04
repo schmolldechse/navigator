@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Navigator.Data\Navigator.Data.csproj" />
+    <ProjectReference Include="..\Navigator.Observability\Navigator.Observability.csproj" />
   </ItemGroup>
 
   <ItemGroup>

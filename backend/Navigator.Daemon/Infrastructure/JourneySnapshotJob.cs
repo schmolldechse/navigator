@@ -1,6 +1,7 @@
 ﻿using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Repository.StatisticsRepository;
 using Microsoft.Extensions.Logging;
+using Navigator.Observability;
 using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
@@ -11,7 +12,9 @@ public class JourneySnapshotJob(
     IStatisticsRepository statisticsRepository
 ) : IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context) => await logger.RunJobAsync(nameof(JourneySnapshotJob), context.FireInstanceId, ExecuteCoreAsync);
+
+    private async Task ExecuteCoreAsync()
     {
         var result = await statisticsRepository.EstimateCurrentJourneysAsync();
         if (!result.HasValue) return;

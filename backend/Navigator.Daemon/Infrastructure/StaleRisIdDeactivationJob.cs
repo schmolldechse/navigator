@@ -4,6 +4,7 @@ using Navigator.Data.Models.Journey;
 using Navigator.Data.Models.RisId;
 using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
+using Navigator.Observability;
 using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
@@ -15,7 +16,9 @@ public class StaleRisIdDeactivationJob(
     ILogger<StaleRisIdDeactivationJob> logger
 ) : IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context) => await logger.RunJobAsync(nameof(StaleRisIdDeactivationJob), context.FireInstanceId, ExecuteCoreAsync);
+
+    private async Task ExecuteCoreAsync()
     {
         var cutoffDiscoverd = DateTime.UtcNow.Date.AddDays(-21);
         var cutoffInserted = DateTime.UtcNow.Date.AddDays(-45);

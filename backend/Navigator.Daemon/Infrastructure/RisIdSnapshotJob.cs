@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Repository.StatisticsRepository;
+using Navigator.Observability;
 using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
@@ -11,7 +12,9 @@ public class RisIdSnapshotJob(
     IStatisticsRepository statisticsRepository
 ) : IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context) => await logger.RunJobAsync(nameof(RisIdSnapshotJob), context.FireInstanceId, ExecuteCoreAsync);
+
+    private async Task ExecuteCoreAsync()
     {
         var result = await statisticsRepository.EstimateCurrentRisIdsAsync();
         if (!result.HasValue) return;

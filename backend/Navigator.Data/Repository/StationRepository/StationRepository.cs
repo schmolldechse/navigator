@@ -37,15 +37,26 @@ public class StationRepository(
         using var response = await httpClient.SendAsync(message);
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to fetch stations");
-            throw new HttpRequestException($"Failed to fetch stations.", null, response.StatusCode);
+            var exception = new HttpRequestException("Failed to fetch stations.", null, response.StatusCode);
+            logger.LogError(
+                exception,
+                "Failed to fetch stations from {UpstreamService} at {UpstreamEndpoint}. StatusCode: {StatusCode}",
+                "Vendo",
+                "SearchStations",
+                (int)response.StatusCode);
+            throw exception;
         }
 
         var stations = JsonSerializer.Deserialize<VendoStation[]>(await response.Content.ReadAsStringAsync());
         if (stations is null)
         {
-            logger.LogError("Failed to deserialize stations.");
-            throw new JsonException("Failed to deserialize stations.");
+            var exception = new JsonException("Failed to deserialize stations.");
+            logger.LogError(
+                exception,
+                "Failed to deserialize stations from {UpstreamService} at {UpstreamEndpoint}",
+                "Vendo",
+                "SearchStations");
+            throw exception;
         }
 
         return stations.Where(station => !string.IsNullOrEmpty(station.EvaNumber));
@@ -71,15 +82,32 @@ public class StationRepository(
         using var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, builder.Uri));
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to fetch stations.");
-            throw new HttpRequestException($"Failed to fetch stations.", null, response.StatusCode);
+            var exception = new HttpRequestException("Failed to fetch stations.", null, response.StatusCode);
+            logger.LogError(
+                exception,
+                "Failed to fetch stations from {UpstreamService} at {UpstreamEndpoint}. StatusCode: {StatusCode}. Latitude: {Latitude}. Longitude: {Longitude}. Radius: {Radius}",
+                "RIS::Stations",
+                "GetStationsByCoordinates",
+                (int)response.StatusCode,
+                request.Latitude,
+                request.Longitude,
+                request.Radius);
+            throw exception;
         }
 
         var stations = JsonSerializer.Deserialize<RisStations.StopPlaceSearchResults>(await response.Content.ReadAsStringAsync());
         if (stations is null)
         {
-            logger.LogError("Failed to deserialize stations.");
-            throw new JsonException("Failed to deserialize stations.");
+            var exception = new JsonException("Failed to deserialize stations.");
+            logger.LogError(
+                exception,
+                "Failed to deserialize stations from {UpstreamService} at {UpstreamEndpoint}. Latitude: {Latitude}. Longitude: {Longitude}. Radius: {Radius}",
+                "RIS::Stations",
+                "GetStationsByCoordinates",
+                request.Latitude,
+                request.Longitude,
+                request.Radius);
+            throw exception;
         }
 
         return stations.StopPlaces ?? Enumerable.Empty<RisStations.StopPlaceSearchResult>();
@@ -94,15 +122,26 @@ public class StationRepository(
         using var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Get, _staDaUrl));
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to fetch StaDa stations.");
-            throw new HttpRequestException($"Failed to fetch StaDa stations.", null, response.StatusCode);
+            var exception = new HttpRequestException("Failed to fetch StaDa stations.", null, response.StatusCode);
+            logger.LogError(
+                exception,
+                "Failed to fetch stations from {UpstreamService} at {UpstreamEndpoint}. StatusCode: {StatusCode}",
+                "StaDa",
+                "GetStations",
+                (int)response.StatusCode);
+            throw exception;
         }
 
         var stations = JsonSerializer.Deserialize<StaDa.StationQuery>(await response.Content.ReadAsStringAsync());
         if (stations is null)
         {
-            logger.LogError("Failed to deserialize StaDa stations.");
-            throw new JsonException("Failed to deserialize StaDa stations.");
+            var exception = new JsonException("Failed to deserialize StaDa stations.");
+            logger.LogError(
+                exception,
+                "Failed to deserialize stations from {UpstreamService} at {UpstreamEndpoint}",
+                "StaDa",
+                "GetStations");
+            throw exception;
         }
 
         return stations.Result ?? Enumerable.Empty<StaDa.Station>();

@@ -1,6 +1,7 @@
 ﻿using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Repository.StatisticsRepository;
 using Microsoft.Extensions.Logging;
+using Navigator.Observability;
 using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
@@ -11,9 +12,12 @@ public class DatabaseSizeEstimationJob(
     IStatisticsRepository statisticsRepository
 ) : IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context) => await logger.RunJobAsync(nameof(DatabaseSizeEstimationJob), context.FireInstanceId, ExecuteCoreAsync);
+
+    private async Task ExecuteCoreAsync()
     {
         var result = await statisticsRepository.EstimateCurrentDatabaseSizeAsync();
+        if (!result.HasValue) return;
 
         await statisticsRepository.SaveDatabaseSizeAsync(new DatabaseSizeSnapshot()
         {

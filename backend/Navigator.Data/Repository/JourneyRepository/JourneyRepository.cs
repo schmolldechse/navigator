@@ -34,15 +34,28 @@ public class JourneyRepository(
         {
             if (response.StatusCode == HttpStatusCode.NotFound) return null;
 
-            logger.LogError("Failed to fetch journey with ID {JourneyId}", journeyId);
-            throw new HttpRequestException($"Failed to fetch journey with ID {journeyId}", null, response.StatusCode);
+            var exception = new HttpRequestException($"Failed to fetch journey with ID {journeyId}", null, response.StatusCode);
+            logger.LogError(
+                exception,
+                "Failed to fetch journey from {UpstreamService} at {UpstreamEndpoint}. StatusCode: {StatusCode}. JourneyId: {JourneyId}",
+                "RIS::Journeys",
+                "GetJourney",
+                (int)response.StatusCode,
+                journeyId);
+            throw exception;
         }
 
         var journey = JsonSerializer.Deserialize<RisJourneys.JourneyEventBased>(await response.Content.ReadAsStringAsync());
         if (journey is null)
         {
-            logger.LogError("Failed to deserialize journey with ID {JourneyId}", journeyId);
-            throw new JsonException($"Failed to deserialize journey with ID {journeyId}");
+            var exception = new JsonException($"Failed to deserialize journey with ID {journeyId}");
+            logger.LogError(
+                exception,
+                "Failed to deserialize journey from {UpstreamService} at {UpstreamEndpoint}. JourneyId: {JourneyId}",
+                "RIS::Journeys",
+                "GetJourney",
+                journeyId);
+            throw exception;
         }
 
         return journey;
@@ -50,6 +63,7 @@ public class JourneyRepository(
 
     public async Task<RisJourneys.JourneyBatchResponse> GetJourneyBatchAsync(IEnumerable<JourneyOnDateRequest> request)
     {
+        var requestList = request.ToList();
         using var httpClient = proxyHttpClientFactory.CreateClient();
         httpClient.DefaultRequestHeaders.Add("DB-Client-Id", Environment.GetEnvironmentVariable("JOURNEYS_CLIENT_ID"));
         httpClient.DefaultRequestHeaders.Add("DB-Api-Key", Environment.GetEnvironmentVariable("JOURNEYS_API_KEY"));
@@ -59,21 +73,34 @@ public class JourneyRepository(
         {
             IncludeReferences = true,
             SeparateCancelled = false,
-            JourneyIDs = request.Select(entry => entry.FetchingDate.ToString("yyyyMMdd") + "-" + entry.Id).ToArray()
+            JourneyIDs = requestList.Select(entry => entry.FetchingDate.ToString("yyyyMMdd") + "-" + entry.Id).ToArray()
         }), Encoding.UTF8, "application/json");
 
         var response = await httpClient.SendAsync(message);
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Failed to fetch journeys batch for {Count} entries", request.Count());
-            throw new HttpRequestException($"Failed to fetch journeys batch for {request.Count()} entries", null, response.StatusCode);
+            var exception = new HttpRequestException($"Failed to fetch journeys batch for {requestList.Count} entries", null, response.StatusCode);
+            logger.LogError(
+                exception,
+                "Failed to fetch journey batch from {UpstreamService} at {UpstreamEndpoint}. StatusCode: {StatusCode}. RequestCount: {RequestCount}",
+                "RIS::Journeys",
+                "GetJourneyBatch",
+                (int)response.StatusCode,
+                requestList.Count);
+            throw exception;
         }
 
         var journeyBatch = JsonSerializer.Deserialize<RisJourneys.JourneyBatchResponse>(await response.Content.ReadAsStringAsync());
         if (journeyBatch is null)
         {
-            logger.LogError("Failed to deserialize journeys batch for {Count} entries", request.Count());
-            throw new JsonException($"Failed to deserialize journeys batch for {request.Count()} entries");
+            var exception = new JsonException($"Failed to deserialize journeys batch for {requestList.Count} entries");
+            logger.LogError(
+                exception,
+                "Failed to deserialize journey batch from {UpstreamService} at {UpstreamEndpoint}. RequestCount: {RequestCount}",
+                "RIS::Journeys",
+                "GetJourneyBatch",
+                requestList.Count);
+            throw exception;
         }
 
         return journeyBatch;
