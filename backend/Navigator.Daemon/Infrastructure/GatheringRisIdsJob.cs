@@ -7,6 +7,7 @@ using Navigator.Data.Models.Station;
 using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Data.Repository.TimetableRepository;
+using Navigator.Observability;
 using Quartz;
 
 namespace Navigator.Daemon.Infrastructure;
@@ -19,7 +20,9 @@ public class GatheringRisIdsJob(
     IRisIdRepository risIdRepository
 ) : IJob
 {
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context) => await logger.RunJobAsync(nameof(GatheringRisIdsJob), context.FireInstanceId, ExecuteCoreAsync);
+
+    private async Task ExecuteCoreAsync()
     {
         var randomStation = await stationRepository.GetRandomStationAsync(new ShuffledStationRequest()
         {

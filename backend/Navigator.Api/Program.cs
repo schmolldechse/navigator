@@ -3,9 +3,9 @@ using Navigator.Api.Exceptions;
 using Navigator.Api.Mapping;
 using Navigator.Api.OpenApi;
 using Navigator.Data;
+using Navigator.Observability;
 using Scalar.AspNetCore;
 using Serilog;
-using Serilog.Exceptions;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -17,13 +17,7 @@ try
 {
     var builder = WebApplication.CreateBuilder(args);
     // logging
-    builder.Services.AddSerilog((services, loggerConfiguration) => loggerConfiguration
-        .ReadFrom.Configuration(builder.Configuration)
-        .ReadFrom.Services(services)
-        .Enrich.FromLogContext()
-        .Enrich.WithExceptionDetails()
-        .Enrich.WithProperty("service_name", "Navigator.Api")
-        .Enrich.WithProperty("env", builder.Environment.EnvironmentName));
+    builder.AddNavigatorObservability("Navigator.Api");
 
     // controllers
     builder.Services.AddControllers()
@@ -77,9 +71,9 @@ try
     app.UseExceptionHandler();
     app.UseStatusCodePages();
 
-    app.UseMiddleware<CorrelationIdMiddleware>();
+    app.UseMiddleware<NavigatorCorrelation>();
 
-    app.UseSerilogRequestLogging();
+    app.UseNavigatorRequestLogging();
 
     app.UseHttpsRedirection();
     app.UseAuthorization();

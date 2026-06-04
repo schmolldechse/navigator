@@ -7,6 +7,7 @@ using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
 using Quartz;
 using Navigator.Data.Entities;
+using Navigator.Observability;
 
 namespace Navigator.Daemon.Infrastructure;
 
@@ -21,7 +22,9 @@ public class GatheringJourneysJob(
     private const int TimetableChangesPerDirection = 6;
     private const int CompletedJourneyDelayDays = 2;
 
-    public async Task Execute(IJobExecutionContext context)
+    public async Task Execute(IJobExecutionContext context) => await logger.RunJobAsync(nameof(GatheringJourneysJob), context.FireInstanceId, ExecuteCoreAsync);
+
+    private async Task ExecuteCoreAsync()
     {
         var currentDate = DateTime.UtcNow;
         var latestCompletedDate = currentDate.Date.AddDays(-CompletedJourneyDelayDays);

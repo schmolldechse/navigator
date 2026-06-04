@@ -3,10 +3,12 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Navigator.Api.Mapping;
+using Navigator.Observability;
+using System.Diagnostics;
 
 namespace Navigator.Api.Exceptions;
 
-public class GlobalExceptionHandler : IExceptionHandler
+public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
@@ -21,6 +23,15 @@ public class GlobalExceptionHandler : IExceptionHandler
             _ => StatusCodes.Status500InternalServerError
         };
         httpContext.Response.StatusCode = statusCode;
+        var correlationId = httpContext.Items[NavigatorCorrelation.CorrelationIdItemName]?.ToString();
+        var traceId = Activity.Current?.TraceId.ToString();
+
+        logger.LogError(
+            exception,
+            "Unhandled request exception returned {StatusCode}. CorrelationId: {CorrelationId}. TraceId: {TraceId}",
+            statusCode,
+            correlationId,
+            traceId);
 
         var problemDetails = new ProblemDetails()
         {
@@ -28,6 +39,9 @@ public class GlobalExceptionHandler : IExceptionHandler
             Title = "An error occurred while proccessing your request.",
             Detail = exception.Message,
         };
+        problemDetails.Extensions["correlationId"] = correlationId;
+        problemDetails.Extensions["traceId"] = traceId;
+
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
         return true;
     }
