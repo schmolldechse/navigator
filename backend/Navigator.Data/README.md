@@ -55,6 +55,15 @@ RIS Journey API
 
 The API continues to read from the hourly statistics views. The raw journey tables remain available for audits, reprocessing, and future analytics.
 
+### TimescaleDB Refresh and Compression Windows
+
+Journey imports can write data several months in the past because RIS IDs may be discovered late in a timetable period or continued across operating dates. TimescaleDB policies therefore keep the active refresh window wider than a half-year timetable period:
+
+- continuous aggregate refresh window: `210 days`
+- compression policy for raw journey and fact hypertables: `240 days`
+
+This keeps the current timetable period plus buffer uncompressed and refreshable. Compression starts only after the data is expected to be historically stable.
+
 ## Model Generation Guide
 
 When adding or updating models for the Deutsche Bahn third-party APIs (RIS), strictly follow the guide below.
