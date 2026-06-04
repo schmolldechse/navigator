@@ -4,13 +4,10 @@ namespace Navigator.Data.Repository;
 
 public class Estimator(DataContext dataContext)
 {
+    // TimescaleDB stores hypertable chunks in internal schemas, so measure the database footprint directly.
     public async Task<long?> EstimateCurrentDatabaseSizeAsync() => await dataContext.Database
         .SqlQuery<long>($@"
-            SELECT COALESCE(SUM(pg_total_relation_size(c.oid))::bigint, 0) AS ""Value""
-            FROM pg_class c
-                JOIN pg_namespace n ON n.oid = c.relnamespace
-            WHERE n.nspname = 'core'
-            AND c.relkind = 'r'")
+            SELECT pg_database_size(current_database())::bigint AS ""Value""")
         .SingleOrDefaultAsync();
 
     public async Task<(int Active, int Inactive)?> EstimateCurrentRisIdsAsync()
