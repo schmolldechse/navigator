@@ -81,85 +81,149 @@ public class JourneyRepository(
 
     public async Task SaveJourneyBatchAsync(IEnumerable<Journey> journeys)
     {
-        var journeyIds = journeys.Select(journey => journey.Id).ToList();
-        var existingIds = await dataContext.Journeys
-            .Where(journey => journeyIds.Contains(journey.Id))
-            .Select(journey => journey.Id)
-            .ToHashSetAsync();
-
-        var toInsert = journeys
-            .Where(journey => !existingIds.Contains(journey.Id))
-            .Where(journey => journey.Administration != null)
-            .ToList();
-        if (!toInsert.Any()) return;
-
-        var currentTime = DateTime.UtcNow;
-        toInsert.ForEach(journey => journey.InsertedAt = currentTime);
-
-        // extract unique incoming Administrations
-        var administrations = toInsert
-            .Select(journey => journey.Administration!)
-            .GroupBy(administration => new { administration.AdministrationId, administration.OperatorCode, administration.OperatorName })
+        var incomingJourneys = journeys
+            .GroupBy(journey => new { journey.Id, journey.Date })
             .Select(group => group.First())
             .ToList();
-        if (!administrations.Any()) return;
+        if (!incomingJourneys.Any()) return;
 
-        var administrationIds = administrations.Select(administration => administration.AdministrationId).ToList();
-        var operatorCodes = administrations.Select(administration => administration.OperatorCode).ToList();
-        var operatorNames = administrations.Select(administration => administration.OperatorName).ToList();
+        var incomingKeys = incomingJourneys
+            .Select(journey => (journey.Id, journey.Date))
+            .ToHashSet();
+        var journeyIds = incomingKeys.Select(key => key.Id).ToList();
+        var journeyDates = incomingKeys.Select(key => key.Date).ToList();
 
-        // query database
-        var existingAdministrations = await dataContext.Administrations
-            .Where(administration => administrationIds.Contains(administration.AdministrationId)
-                && operatorCodes.Contains(administration.OperatorCode)
-                && operatorNames.Contains(administration.OperatorName))
+        var existingIds = await dataContext.Journeys
+            .Where(journey => journeyIds.Contains(journey.Id))
+            .Where(journey => journeyDates.Contains(journey.Date))
+            .Select(journey => new { journey.Id, journey.Date })
             .ToListAsync();
-        var existingAdministrationsDictionary = existingAdministrations.ToDictionary(
-            administration => (administration.AdministrationId, administration.OperatorCode, administration.OperatorName)
-        );
+        var existingKeys = existingIds
+            .Select(journey => (journey.Id, journey.Date))
+            .Where(incomingKeys.Contains)
+            .ToHashSet();
 
-        // re-link Journey Administrations
-        var newAdministrationsDictionary = new Dictionary<(string AdministrationId, string OperatorCode, string OperatorName), Administration>();
-        foreach (var journey in toInsert)
-        {
-            var administration = journey.Administration;
-            if (administration is null) continue;
-
-            var key = (administration.AdministrationId, administration.OperatorCode, administration.OperatorName);
-            if (existingAdministrationsDictionary.TryGetValue(key, out var existingAdministration))
-            {
-                journey.Administration = existingAdministration;
-                journey.AdministrationId = existingAdministration.Id;
-            }
-            else
-            {
-                if (!newAdministrationsDictionary.TryGetValue(key, out var newAdministration))
-                {
-                    newAdministration = new Administration()
-                    {
-                        AdministrationId = administration.AdministrationId,
-                        OperatorCode = administration.OperatorCode,
-                        OperatorName = administration.OperatorName
-                    };
-                    newAdministrationsDictionary[key] = newAdministration;
-                }
-
-                journey.Administration = newAdministration;
-                journey.AdministrationId = newAdministration.Id;
-            }
-        }
+        var toInsert = incomingJourneys
+            .Where(journey => !existingKeys.Contains((journey.Id, journey.Date)))
+            .Where(journey => journey.Administration != null)
+            .ToList();
 
         await using var transaction = await dataContext.Database.BeginTransactionAsync();
 
-        dataContext.AddRange(toInsert);
-        await dataContext.SaveChangesAsync();
+        if (toInsert.Any())
+        {
+            var currentTime = DateTime.UtcNow;
+            toInsert.ForEach(journey => journey.InsertedAt = currentTime);
 
-        var (eventFacts, routeFacts) = BuildQualityFacts(toInsert);
-        dataContext.JourneyEventQualityFacts.AddRange(eventFacts);
-        dataContext.JourneyRouteQualityFacts.AddRange(routeFacts);
-        await dataContext.SaveChangesAsync();
+            // extract unique incoming Administrations
+            var administrations = toInsert
+                .Select(journey => journey.Administration!)
+                .GroupBy(administration => new { administration.AdministrationId, administration.OperatorCode, administration.OperatorName })
+                .Select(group => group.First())
+                .ToList();
+
+            var administrationIds = administrations.Select(administration => administration.AdministrationId).ToList();
+            var operatorCodes = administrations.Select(administration => administration.OperatorCode).ToList();
+            var operatorNames = administrations.Select(administration => administration.OperatorName).ToList();
+
+            // query database
+            var existingAdministrations = await dataContext.Administrations
+                .Where(administration => administrationIds.Contains(administration.AdministrationId)
+                    && operatorCodes.Contains(administration.OperatorCode)
+                    && operatorNames.Contains(administration.OperatorName))
+                .ToListAsync();
+            var existingAdministrationsDictionary = existingAdministrations.ToDictionary(
+                administration => (administration.AdministrationId, administration.OperatorCode, administration.OperatorName)
+            );
+
+            // re-link Journey Administrations
+            var newAdministrationsDictionary = new Dictionary<(string AdministrationId, string OperatorCode, string OperatorName), Administration>();
+            foreach (var journey in toInsert)
+            {
+                var administration = journey.Administration;
+                if (administration is null) continue;
+
+                var key = (administration.AdministrationId, administration.OperatorCode, administration.OperatorName);
+                if (existingAdministrationsDictionary.TryGetValue(key, out var existingAdministration))
+                {
+                    journey.Administration = existingAdministration;
+                    journey.AdministrationId = existingAdministration.Id;
+                }
+                else
+                {
+                    if (!newAdministrationsDictionary.TryGetValue(key, out var newAdministration))
+                    {
+                        newAdministration = new Administration()
+                        {
+                            AdministrationId = administration.AdministrationId,
+                            OperatorCode = administration.OperatorCode,
+                            OperatorName = administration.OperatorName
+                        };
+                        newAdministrationsDictionary[key] = newAdministration;
+                    }
+
+                    journey.Administration = newAdministration;
+                    journey.AdministrationId = newAdministration.Id;
+                }
+            }
+
+            dataContext.AddRange(toInsert);
+            await dataContext.SaveChangesAsync();
+        }
+
+        await EnsureQualityFactsAsync(incomingKeys);
 
         await transaction.CommitAsync();
+    }
+
+    private async Task EnsureQualityFactsAsync(IReadOnlySet<(string Id, DateOnly Date)> journeyKeys)
+    {
+        if (!journeyKeys.Any()) return;
+
+        var journeyIds = journeyKeys.Select(key => key.Id).ToList();
+        var journeyDates = journeyKeys.Select(key => key.Date).ToList();
+        var persistedJourneys = (await dataContext.Journeys
+                .Include(journey => journey.Transport)
+                .Include(journey => journey.StopPlaces)
+                .Where(journey => journeyIds.Contains(journey.Id))
+                .Where(journey => journeyDates.Contains(journey.Date))
+                .ToListAsync())
+            .Where(journey => journeyKeys.Contains((journey.Id, journey.Date)))
+            .ToList();
+        if (!persistedJourneys.Any()) return;
+
+        var (eventFacts, routeFacts) = BuildQualityFacts(persistedJourneys);
+        if (!eventFacts.Any() && !routeFacts.Any()) return;
+
+        var stopPlaceIds = eventFacts.Select(fact => fact.StopPlaceId).ToList();
+        var existingEventFacts = await dataContext.JourneyEventQualityFacts
+            .Where(fact => stopPlaceIds.Contains(fact.StopPlaceId))
+            .Select(fact => new { fact.StopPlaceId, fact.PlannedTime })
+            .ToListAsync();
+        var existingEventFactKeys = existingEventFacts
+            .Select(fact => (fact.StopPlaceId, fact.PlannedTime))
+            .ToHashSet();
+        var eventFactsToInsert = eventFacts
+            .Where(fact => !existingEventFactKeys.Contains((fact.StopPlaceId, fact.PlannedTime)))
+            .ToList();
+
+        var routeJourneyIds = routeFacts.Select(fact => fact.JourneyId).ToList();
+        var routeDates = routeFacts.Select(fact => fact.Date).ToList();
+        var existingRouteFacts = await dataContext.JourneyRouteQualityFacts
+            .Where(fact => routeJourneyIds.Contains(fact.JourneyId))
+            .Where(fact => routeDates.Contains(fact.Date))
+            .Select(fact => new { fact.JourneyId, fact.Date, fact.JourneyStartTime })
+            .ToListAsync();
+        var existingRouteFactKeys = existingRouteFacts
+            .Select(fact => (fact.JourneyId, fact.Date, fact.JourneyStartTime))
+            .ToHashSet();
+        var routeFactsToInsert = routeFacts
+            .Where(fact => !existingRouteFactKeys.Contains((fact.JourneyId, fact.Date, fact.JourneyStartTime)))
+            .ToList();
+
+        dataContext.JourneyEventQualityFacts.AddRange(eventFactsToInsert);
+        dataContext.JourneyRouteQualityFacts.AddRange(routeFactsToInsert);
+        await dataContext.SaveChangesAsync();
     }
 
     private static (List<JourneyEventQualityFact> EventFacts, List<JourneyRouteQualityFact> RouteFacts) BuildQualityFacts(
