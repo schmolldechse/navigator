@@ -120,11 +120,11 @@ public static class NavigatorLogging
         this Microsoft.Extensions.Logging.ILogger logger,
         string jobName,
         string? fireInstanceId = null) => logger.BeginScope(new Dictionary<string, object?>
-    {
-        ["JobName"] = jobName,
-        ["FireInstanceId"] = fireInstanceId,
-        ["EventType"] = "quartz_job"
-    });
+        {
+            ["JobName"] = jobName,
+            ["FireInstanceId"] = fireInstanceId,
+            ["EventType"] = "quartz_job"
+        });
 
     public static async Task RunJobAsync(
         this Microsoft.Extensions.Logging.ILogger logger,
