@@ -1,31 +1,34 @@
 services:
   navigator-database:
-    build: .
+    image: timescale/timescaledb:2.27.1-pg18
+    shm_size: ${POSTGRES_SHM_SIZE:-2gb}
     container_name: navigator-database
     volumes:
-      - navigator-database-data:/var/lib/postgresql/18/docker
+      - navigator-database-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-navigator}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
       POSTGRES_DB: ${POSTGRES_DB:-navigator}
     restart: unless-stopped
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready",
-          "-U",
-          "${POSTGRES_USER}",
-          "-d",
-          "${POSTGRES_DB}",
-        ]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER:-navigator} -d $${POSTGRES_DB:-navigator}"]
       interval: 30s
       timeout: 10s
       retries: 3
     command: >
       postgres
-      -c shared_preload_libraries=pg_cron
-      -c cron.database_name=${POSTGRES_DB:-navigator}
-
+      -c shared_buffers=${POSTGRES_SHARED_BUFFERS:-4GB}
+      -c effective_cache_size=${POSTGRES_EFFECTIVE_CACHE_SIZE:-11GB}
+      -c maintenance_work_mem=${POSTGRES_MAINTENANCE_WORK_MEM:-1GB}
+      -c work_mem=${POSTGRES_WORK_MEM:-64MB}
+      -c max_wal_size=${POSTGRES_MAX_WAL_SIZE:-4GB}
+      -c min_wal_size=${POSTGRES_MIN_WAL_SIZE:-1GB}
+      -c checkpoint_timeout=${POSTGRES_CHECKPOINT_TIMEOUT:-15min}
+      -c checkpoint_completion_target=${POSTGRES_CHECKPOINT_COMPLETION_TARGET:-0.9}
+      -c random_page_cost=${POSTGRES_RANDOM_PAGE_COST:-1.1}
+      -c effective_io_concurrency=${POSTGRES_EFFECTIVE_IO_CONCURRENCY:-300}
+      -c max_worker_processes=${POSTGRES_MAX_WORKER_PROCESSES:-16}
+      -c max_parallel_workers_per_gather=${POSTGRES_MAX_PARALLEL_WORKERS_PER_GATHER:-4}
+      -c max_parallel_maintenance_workers=${POSTGRES_MAX_PARALLEL_MAINTENANCE_WORKERS:-4}
 volumes:
   navigator-database-data:
