@@ -20,8 +20,11 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<DatabaseSizeSnapshot> DatabaseSizeSnapshots { get; set; }
     public DbSet<RisIdSnapshot> RisIdSnapshots { get; set; }
     public DbSet<JourneySnapshot> JourneySnapshots { get; set; }
+    public DbSet<JourneyEventQualityFact> JourneyEventQualityFacts { get; set; }
+    public DbSet<JourneyRouteQualityFact> JourneyRouteQualityFacts { get; set; }
     public DbSet<JourneyRouteQualityHourly> JourneyRouteQualities { get; set; }
     public DbSet<StationEventQualityHourly> StationEventQualities { get; set; }
+    public DbSet<StationLineRouteQualityHourly> StationLineRouteQualities { get; set; }
     // journey
     public DbSet<Administration> Administrations { get; set; }
     public DbSet<Journey> Journeys { get; set; }
@@ -34,8 +37,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     {
         modelBuilder.HasPostgresExtension("cube")
             .HasPostgresExtension("earthdistance")
-            .HasPostgresExtension("partman", "pg_partman")
-            .HasPostgresExtension("pg_cron");
+            .HasPostgresExtension("timescaledb");
 
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DataContext).Assembly);
 

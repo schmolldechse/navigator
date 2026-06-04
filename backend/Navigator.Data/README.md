@@ -2,6 +2,59 @@
 
 This repository contains the core data layer for the **Navigator Backend**. It serves as the central library for all Database Entities and HTTP API Repositories, facilitating communication with internal databases and external third-party services.
 
+## Journey Analytics Storage
+
+Journey data is stored in two layers:
+
+1. **Raw journey tables** in the `core` schema keep the complete normalized source data:
+   - `core.journeys`
+   - `core.journey_transports`
+   - `core.journey_stop_places`
+   - `core.journey_messages`
+   - `core.journey_stop_place_messages`
+
+2. **Analytics fact tables** in the `statistics` schema keep pre-shaped rows for TimescaleDB continuous aggregates:
+   - `statistics.journey_event_quality_facts`
+   - `statistics.journey_route_quality_facts`
+
+The fact tables are intentionally derived data. They do not replace the raw journey tables and must not be treated as the source of truth.
+
+### Why Fact Tables Exist
+
+The previous PostgreSQL materialized views could run complex SQL directly over the normalized journey tables because a refresh recomputed the whole view. TimescaleDB continuous aggregates work differently: they are designed to incrementally refresh time buckets from a hypertable. They work best when the aggregate query is a straightforward `time_bucket(...)` plus `GROUP BY` over a single fact source.
+
+The historical quality views need more than simple aggregation:
+
+- joins between journeys, transports, and stop places
+- origin and destination station resolution
+- terminal delay selection per journey
+- replacement transport detection
+- station-line-route de-duplication per journey/station
+
+That shaping is therefore done once when journeys are imported, and again during historical backfill. Continuous aggregates then only count and sum already-prepared facts.
+
+### Current Data Flow
+
+```text
+RIS Journey API
+  -> EF Journey graph
+  -> core raw journey hypertables
+  -> statistics fact hypertables
+  -> TimescaleDB continuous aggregates
+  -> API metric builders
+```
+
+`statistics.journey_event_quality_facts` contains one row per stop-place event and powers:
+
+- `statistics.station_event_quality_hourly`
+- `statistics.station_line_route_quality_hourly`
+
+`statistics.journey_route_quality_facts` contains one row per journey and powers:
+
+- `statistics.journey_route_quality_hourly`
+
+The API continues to read from the hourly statistics views. The raw journey tables remain available for audits, reprocessing, and future analytics.
+
 ## Model Generation Guide
 
 When adding or updating models for the Deutsche Bahn third-party APIs (RIS), strictly follow the guide below.
