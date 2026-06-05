@@ -21,6 +21,12 @@ public class JourneyEventQualityFact
     [Column("planned_time")]
     public required DateTime PlannedTime { get; set; }
 
+    [Column("journey_start_time")]
+    public required DateTime JourneyStartTime { get; set; }
+
+    [Column("journey_end_time")]
+    public required DateTime JourneyEndTime { get; set; }
+
     [Column("station_eva_number")]
     public required int StationEvaNumber { get; set; }
 
@@ -47,9 +53,6 @@ public class JourneyEventQualityFact
 
     [Column("destination_eva_number")]
     public required int DestinationEvaNumber { get; set; }
-
-    [Column("is_station_line_event")]
-    public required bool IsStationLineEvent { get; set; }
 
     [Column("cancelled")]
     public required bool Cancelled { get; set; }

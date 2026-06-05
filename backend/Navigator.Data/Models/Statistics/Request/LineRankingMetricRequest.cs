@@ -37,6 +37,10 @@ public class LineRankingMetricRequest : BaseMetricRequest, IEvaNumberMetricReque
     [JsonPropertyName("end")]
     public required DateTimeOffset End { get; set; }
 
+    [JsonPropertyName("scheduleType")]
+    [Description("Whether to retrieve arrival or departure station-event ranking metrics. Only applies when evaNumbers are provided.")]
+    public ScheduleType? ScheduleType { get; set; }
+
     [JsonPropertyName("evaNumbers")]
     [Description("Optional array of station EVA numbers. If provided, line quality is ranked for station visits instead of global journey route quality.")]
     public int[] EvaNumbers { get; set; } = [];

@@ -40,13 +40,13 @@ const NETWORK_TIME_SERIES_OPTIONS: NetworkTimeSeriesOption[] = [
 	},
 	{
 		seriesType: MetricSeriesType.STATION_EVENT_PUNCTUALITY5_RATE,
-		label: "Punctuality 5",
-		description: "Share of measured events below five minutes delay."
+		label: "Punctual <= 5:59 min",
+		description: "Share of measured events with less than six minutes delay."
 	},
 	{
 		seriesType: MetricSeriesType.STATION_EVENT_PUNCTUALITY15_RATE,
-		label: "Punctuality 15",
-		description: "Share of measured events below fifteen minutes delay."
+		label: "Punctual <= 14:59 min",
+		description: "Share of measured events with less than fifteen minutes delay."
 	}
 ];
 

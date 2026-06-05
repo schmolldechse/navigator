@@ -16,4 +16,10 @@ public class LineRankingDataPoint : BaseMetricDataPoint
 
     [JsonPropertyName("endStation")]
     public required StationMetricSubject EndStation { get; set; }
+
+    [JsonPropertyName("routeStartTime")]
+    public DateTimeOffset? RouteStartTime { get; set; }
+
+    [JsonPropertyName("routeEndTime")]
+    public DateTimeOffset? RouteEndTime { get; set; }
 }

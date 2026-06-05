@@ -44,7 +44,7 @@ internal static class StationEventQualityMetricDefinitions
             ? Enum.GetValues<TransportType>()
             : transportTypes;
 
-    public static StationEventQualityMetricAggregate Aggregate(IEnumerable<StationEventQualityHourly> summaries) =>
+    public static StationEventQualityMetricAggregate Aggregate(IEnumerable<StationLineRouteQualityHourly> summaries) =>
         new()
         {
             EventCount = summaries.Sum(summary => summary.EventCount),

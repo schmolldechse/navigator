@@ -15,6 +15,8 @@
 		administration: AdministrationMetricSubject;
 		startStation: StationMetricSubject;
 		endStation: StationMetricSubject;
+		routeStartTime?: string | null;
+		routeEndTime?: string | null;
 		value: number;
 		unit: MetricSeries["unit"];
 		sample?: MetricSample | null;
@@ -40,15 +42,22 @@
 	import * as Tooltip from "@lib/components/ui/tooltip/index";
 	import { getLineRankingMetricOption } from "./line-ranking";
 	import { formatMetricValue } from "../../metric-format";
+	import { DateTime } from "luxon";
 
 	type Props = {
 		metric: MetricSeries;
 		page: NormalizedPage;
+		stationScoped?: boolean;
 		class?: ClassValue;
 	};
-	let { metric, page, class: className }: Props = $props();
+	let { metric, page, stationScoped = false, class: className }: Props = $props();
 
 	const getStationLabel = (station: StationMetricSubject) => station.name ?? `Station ${station.evaNumber}`;
+	const formatRouteTime = (value?: string | null) => {
+		if (!value) return undefined;
+		const date = DateTime.fromISO(value);
+		return date.isValid ? date.toLocaleString(DateTime.TIME_SIMPLE) : undefined;
+	};
 
 	const formatTransportType = (value: string) =>
 		value
@@ -79,6 +88,8 @@
 				administration,
 				startStation,
 				endStation,
+				routeStartTime: dataPoint.routeStartTime,
+				routeEndTime: dataPoint.routeEndTime,
 				value: Number(dataPoint.value),
 				unit: metric.unit,
 				sample: dataPoint.sample
@@ -91,6 +102,9 @@
 	let rows = $derived(createRows(metric, page));
 	let maxValue = $derived(Math.max(0, ...rows.map((row: LineRankingRow) => row.value)));
 	let metricOption = $derived(getLineRankingMetricOption(metric.seriesType));
+	let valueLabel = $derived(
+		stationScoped && metricOption?.valueLabel === "Journeys" ? "Station events" : (metricOption?.valueLabel ?? "Value")
+	);
 </script>
 
 <div class={["flex flex-col gap-y-2", className]}>
@@ -109,12 +123,14 @@
 			>
 				<span class="text-right">Place</span>
 				<span>Line Information</span>
-				<span class="text-right">{metricOption?.valueLabel ?? "Value"}</span>
+				<span class="text-right">{valueLabel}</span>
 			</div>
 
 			{#each rows as row (row.key)}
 				{@const percentage = maxValue === 0 ? 0 : (Math.max(0, row.value) / maxValue) * 100}
 				{@const { value, unit } = formatMetricValue(row.value, row.unit)}
+				{@const routeStartTime = formatRouteTime(row.routeStartTime)}
+				{@const routeEndTime = formatRouteTime(row.routeEndTime)}
 
 				<article
 					class={[
@@ -172,8 +188,18 @@
 							<span class="bg-foreground/35 absolute bottom-1.5 size-1.5 rounded-full"></span>
 						</div>
 
-						<span class="min-w-0 truncate">{getStationLabel(row.startStation)}</span>
-						<span class="text-foreground/55 min-w-0 truncate">{getStationLabel(row.endStation)}</span>
+						<span class="min-w-0 truncate">
+							{getStationLabel(row.startStation)}
+							{#if routeStartTime}
+								<span class="text-foreground/45 ml-1 tabular-nums">{routeStartTime}</span>
+							{/if}
+						</span>
+						<span class="text-foreground/55 min-w-0 truncate">
+							{getStationLabel(row.endStation)}
+							{#if routeEndTime}
+								<span class="text-foreground/40 ml-1 tabular-nums">{routeEndTime}</span>
+							{/if}
+						</span>
 					</div>
 
 					<!-- Value -->

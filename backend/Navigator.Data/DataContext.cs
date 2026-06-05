@@ -20,10 +20,10 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<DatabaseSizeSnapshot> DatabaseSizeSnapshots { get; set; }
     public DbSet<RisIdSnapshot> RisIdSnapshots { get; set; }
     public DbSet<JourneySnapshot> JourneySnapshots { get; set; }
+    public DbSet<JourneyFactProjectionBacklog> JourneyFactProjectionBacklog { get; set; }
     public DbSet<JourneyEventQualityFact> JourneyEventQualityFacts { get; set; }
     public DbSet<JourneyRouteQualityFact> JourneyRouteQualityFacts { get; set; }
     public DbSet<JourneyRouteQualityHourly> JourneyRouteQualities { get; set; }
-    public DbSet<StationEventQualityHourly> StationEventQualities { get; set; }
     public DbSet<StationLineRouteQualityHourly> StationLineRouteQualities { get; set; }
     // journey
     public DbSet<Administration> Administrations { get; set; }
@@ -42,5 +42,44 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(DataContext).Assembly);
 
         base.OnModelCreating(modelBuilder);
+    }
+
+    public override int SaveChanges()
+    {
+        AddJourneyFactProjectionBacklogEntries();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        AddJourneyFactProjectionBacklogEntries();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void AddJourneyFactProjectionBacklogEntries()
+    {
+        var currentTime = DateTime.UtcNow;
+        var existingBacklogKeys = ChangeTracker.Entries<JourneyFactProjectionBacklog>()
+            .Select(entry => (entry.Entity.JourneyId, entry.Entity.Date))
+            .ToHashSet();
+
+        var newJourneyKeys = ChangeTracker.Entries<Journey>()
+            .Where(entry => entry.State == EntityState.Added)
+            .Select(entry => (entry.Entity.Id, entry.Entity.Date))
+            .Distinct()
+            .Where(key => !existingBacklogKeys.Contains(key))
+            .ToList();
+
+        foreach (var (journeyId, date) in newJourneyKeys)
+        {
+            JourneyFactProjectionBacklog.Add(new JourneyFactProjectionBacklog
+            {
+                JourneyId = journeyId,
+                Date = date,
+                CreatedAt = currentTime,
+                AvailableAt = currentTime,
+                Attempts = 0
+            });
+        }
     }
 }

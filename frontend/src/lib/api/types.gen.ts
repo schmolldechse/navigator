@@ -46,6 +46,8 @@ export type BaseMetricDataPointLineRankingDataPoint = {
 	administration: AdministrationMetricSubject;
 	startStation: StationMetricSubject;
 	endStation: StationMetricSubject;
+	routeStartTime?: null | string;
+	routeEndTime?: null | string;
 	value: number | string;
 	sample?: null | MetricSample;
 };
@@ -122,6 +124,7 @@ export type BaseMetricRequestAdministrationRankingMetricRequest = {
 	seriesType: MetricSeriesType;
 	start: string;
 	end: string;
+	scheduleType?: null | ScheduleType;
 	/**
 	 * Optional array of EVA numbers. If provided, station event quality is ranked instead of global journey route quality.
 	 */
@@ -162,6 +165,7 @@ export type BaseMetricRequestLineRankingMetricRequest = {
 	seriesType: MetricSeriesType;
 	start: string;
 	end: string;
+	scheduleType?: null | ScheduleType;
 	/**
 	 * Optional array of station EVA numbers. If provided, line quality is ranked for station visits instead of global journey route quality.
 	 */

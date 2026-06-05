@@ -562,10 +562,6 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("boolean")
                         .HasColumnName("is_replacement_transport");
 
-                    b.Property<bool>("IsStationLineEvent")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_station_line_event");
-
                     b.Property<string>("JourneyDescription")
                         .IsRequired()
                         .HasMaxLength(64)
@@ -577,6 +573,14 @@ namespace Navigator.Data.Migrations
                         .HasMaxLength(82)
                         .HasColumnType("character varying(82)")
                         .HasColumnName("journey_id");
+
+                    b.Property<DateTime>("JourneyStartTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("journey_start_time");
+
+                    b.Property<DateTime>("JourneyEndTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("journey_end_time");
 
                     b.Property<int>("Number")
                         .HasColumnType("integer")
@@ -620,6 +624,10 @@ namespace Navigator.Data.Migrations
                     b.Property<DateTime>("JourneyStartTime")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("journey_start_time");
+
+                    b.Property<DateTime>("JourneyEndTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("journey_end_time");
 
                     b.Property<Guid>("AdministrationId")
                         .HasColumnType("uuid")
@@ -677,6 +685,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
+                    b.Property<DateTime>("FirstPlannedTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_planned_time");
+
                     b.Property<long>("DelaySampleCount")
                         .HasColumnType("bigint")
                         .HasColumnName("delay_sample_count");
@@ -692,6 +704,10 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("JourneyCancelledCount")
                         .HasColumnType("bigint")
                         .HasColumnName("journey_cancelled_count");
+
+                    b.Property<DateTime>("LastPlannedTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_planned_time");
 
                     b.Property<long>("JourneyCount")
                         .HasColumnType("bigint")
@@ -734,64 +750,6 @@ namespace Navigator.Data.Migrations
                     b.ToView("journey_route_quality_hourly", "statistics");
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.Views.StationEventQualityHourly", b =>
-                {
-                    b.Property<Guid>("AdministrationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("administration_id");
-
-                    b.Property<DateTime>("BucketHour")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("bucket_hour");
-
-                    b.Property<long>("CancelledCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("cancelled_count");
-
-                    b.Property<long>("DelaySampleCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("delay_sample_count");
-
-                    b.Property<long>("DelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("delay_sum_seconds");
-
-                    b.Property<long>("EventCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("event_count");
-
-                    b.Property<bool>("IsReplacementTransport")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_replacement_transport");
-
-                    b.Property<long>("Punctual15Count")
-                        .HasColumnType("bigint")
-                        .HasColumnName("punctual_15_count");
-
-                    b.Property<long>("Punctual5Count")
-                        .HasColumnType("bigint")
-                        .HasColumnName("punctual_5_count");
-
-                    b.Property<ScheduleType>("ScheduleType")
-                        .HasColumnType("core.schedule_type")
-                        .HasColumnName("schedule_type");
-
-                    b.Property<int>("StationEvaNumber")
-                        .HasColumnType("integer")
-                        .HasColumnName("station_eva_number");
-
-                    b.Property<TransportType>("TransportType")
-                        .HasColumnType("core.transport_type")
-                        .HasColumnName("transport_type");
-
-                    b.ToTable("station_event_quality_hourly", "statistics", t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
-
-                    b.ToView("station_event_quality_hourly", "statistics");
-                });
-
             modelBuilder.Entity("Navigator.Data.Entities.Views.StationLineRouteQualityHourly", b =>
                 {
                     b.Property<Guid>("AdministrationId")
@@ -822,6 +780,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("event_count");
 
+                    b.Property<DateTime>("FirstPlannedTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_planned_time");
+
                     b.Property<bool>("IsReplacementTransport")
                         .HasColumnType("boolean")
                         .HasColumnName("is_replacement_transport");
@@ -830,6 +792,10 @@ namespace Navigator.Data.Migrations
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("journey_description");
+
+                    b.Property<DateTime>("LastPlannedTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_planned_time");
 
                     b.Property<int>("Number")
                         .HasColumnType("integer")
@@ -850,6 +816,10 @@ namespace Navigator.Data.Migrations
                     b.Property<int>("StationEvaNumber")
                         .HasColumnType("integer")
                         .HasColumnName("station_eva_number");
+
+                    b.Property<ScheduleType>("ScheduleType")
+                        .HasColumnType("core.schedule_type")
+                        .HasColumnName("schedule_type");
 
                     b.Property<TransportType>("TransportType")
                         .HasColumnType("core.transport_type")

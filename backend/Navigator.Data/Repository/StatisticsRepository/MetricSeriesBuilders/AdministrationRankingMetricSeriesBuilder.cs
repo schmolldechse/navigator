@@ -54,9 +54,10 @@ public sealed class AdministrationRankingMetricSeriesBuilder(
         var transportTypes = StationEventQualityMetricDefinitions.NormalizeTransportTypes(request.TransportTypes);
 
         IQueryable<AdministrationRankingRow> ranking = request.EvaNumbers.Any()
-            ? dataContext.StationEventQualities
+            ? dataContext.StationLineRouteQualities
                 .AsNoTracking()
                 .Where(summary => summary.BucketHour >= start && summary.BucketHour < end)
+                .Where(summary => request.ScheduleType == null || summary.ScheduleType == request.ScheduleType)
                 .Where(summary => transportTypes.Contains(summary.TransportType))
                 .Where(summary => request.IncludeReplacementTransport || !summary.IsReplacementTransport)
                 .Where(summary => request.EvaNumbers.Contains(summary.StationEvaNumber))

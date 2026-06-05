@@ -67,23 +67,23 @@ const LINE_RANKING_METRIC_OPTIONS: LineRankingMetricOption[] = [
 	},
 	{
 		seriesType: MetricSeriesType.LINE_RANKING_PUNCTUALITY5_RATE,
-		label: "Punctuality 5",
-		description: "Share of non-cancelled measured journeys with terminal delay below five minutes.",
+		label: "Punctual <= 5:59 min",
+		description: "Share of non-cancelled measured events with delay below six minutes.",
 		valueLabel: "Rate",
 		polarity: "positive",
-		rankingDescription: "Lines with the best five-minute punctuality appear first.",
+		rankingDescription: "Lines with the best <= 5:59 min punctuality appear first.",
 		sampleLabels: {
-			numerator: "Punctual journeys",
-			denominator: "Measured journeys"
+			numerator: "Punctual events",
+			denominator: "Measured events"
 		}
 	},
 	{
 		seriesType: MetricSeriesType.LINE_RANKING_PUNCTUALITY15_RATE,
-		label: "Punctuality 15",
+		label: "Punctual <= 14:59 min",
 		description: "Share of non-cancelled measured journeys with terminal delay below fifteen minutes.",
 		valueLabel: "Rate",
 		polarity: "positive",
-		rankingDescription: "Lines with the best fifteen-minute punctuality appear first.",
+		rankingDescription: "Lines with the best <= 14:59 min punctuality appear first.",
 		sampleLabels: {
 			numerator: "Punctual journeys",
 			denominator: "Measured journeys"
@@ -99,6 +99,7 @@ const createLineRankingRequest = (
 	queryType: "LINE_RANKING",
 	seriesType: settings.seriesType,
 	...toJourneyRankingMetricScopeRequest(scope),
+	scheduleType: evaNumbers?.length ? scope.scheduleType : undefined,
 	evaNumbers,
 	includeRil100: Boolean(evaNumbers?.length),
 	journeyDescription: settings.journeyDescription.trim() || undefined,

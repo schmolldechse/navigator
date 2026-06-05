@@ -537,6 +537,8 @@ export const vBaseMetricDataPointLineRankingDataPoint = v.object({
 	administration: vAdministrationMetricSubject,
 	startStation: vStationMetricSubject,
 	endStation: vStationMetricSubject,
+	routeStartTime: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
+	routeEndTime: v.nullish(v.pipe(v.string(), v.isoTimestamp())),
 	value: v.union([v.number(), v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)(?:\.\d+)?$/))]),
 	sample: v.nullish(vMetricSample)
 });
@@ -659,6 +661,7 @@ export const vBaseMetricRequestAdministrationRankingMetricRequest = v.object({
 	seriesType: vMetricSeriesType,
 	start: v.pipe(v.string(), v.isoTimestamp()),
 	end: v.pipe(v.string(), v.isoTimestamp()),
+	scheduleType: v.nullish(vScheduleType),
 	evaNumbers: v.optional(
 		v.array(
 			v.union([
@@ -712,6 +715,7 @@ export const vBaseMetricRequestLineRankingMetricRequest = v.object({
 	seriesType: vMetricSeriesType,
 	start: v.pipe(v.string(), v.isoTimestamp()),
 	end: v.pipe(v.string(), v.isoTimestamp()),
+	scheduleType: v.nullish(vScheduleType),
 	evaNumbers: v.optional(
 		v.array(
 			v.union([

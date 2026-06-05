@@ -110,7 +110,7 @@
 
 	<p class="text-foreground/60 text-sm leading-relaxed sm:text-base">
 		{#if evaNumber}
-			Compare individual lines and routes that visited this station. Arrival/departure only affects station-event charts.
+			Compare individual lines and routes by recorded station events for this station and schedule scope.
 		{:else}
 			Compare individual lines and routes across the global journey dataset.
 		{/if}
@@ -167,7 +167,7 @@
 			{:then metric}
 				{@const page = normalizePage(metric.page)}
 
-				<LineRankingList {metric} {page} />
+				<LineRankingList {metric} {page} stationScoped={Boolean(evaNumber)} />
 
 				<Pagination
 					offset={page.offset}

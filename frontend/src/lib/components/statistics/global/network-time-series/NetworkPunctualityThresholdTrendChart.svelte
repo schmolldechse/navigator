@@ -48,13 +48,13 @@
 	const series = [
 		{
 			key: "punctuality5",
-			label: "Below 5 min",
+			label: "<= 5:59 min",
 			value: (datum: ThresholdRow) => datum.punctuality5,
 			color: "var(--color-accent)"
 		},
 		{
 			key: "punctuality15",
-			label: "Below 15 min",
+			label: "<= 14:59 min",
 			value: (datum: ThresholdRow) => datum.punctuality15,
 			color: "var(--color-foreground)"
 		}
@@ -64,7 +64,7 @@
 <Card class="gap-y-4">
 	<div>
 		<p class="text-foreground/60 text-xs font-medium">Punctuality thresholds</p>
-		<h3 class="text-foreground text-base font-semibold">Five and fifteen minute rule</h3>
+		<h3 class="text-foreground text-base font-semibold">Punctuality by delay threshold</h3>
 	</div>
 
 	{#await Promise.all([punctuality5Promise, punctuality15Promise])}
@@ -131,21 +131,19 @@
 						contained="container"
 						class="bg-background/95! border-border! w-72 rounded-lg border px-3 py-2 shadow-xl backdrop-blur-md select-none"
 					>
-						{#snippet children()}
-							<Tooltip.List class="grid-cols-[minmax(0,1fr)_max-content] gap-x-8 gap-y-1">
-								{#each context.tooltip.series as seriesItem (seriesItem.key)}
-									{@const { value, unit } = formatMetricValue(Number(seriesItem.value), MetricUnit.PERCENT)}
-									<Tooltip.Item label={seriesItem.label} color={seriesItem.color} valueAlign="right">
-										<span class="text-foreground font-bold tabular-nums">
-											{value}
-											{#if unit}
-												<span class="text-foreground/60 ml-1 text-xs">{unit}</span>
-											{/if}
-										</span>
-									</Tooltip.Item>
-								{/each}
-							</Tooltip.List>
-						{/snippet}
+						<Tooltip.List class="grid-cols-[minmax(0,1fr)_max-content] gap-x-8 gap-y-1">
+							{#each context.tooltip.series as seriesItem (seriesItem.key)}
+								{@const { value, unit } = formatMetricValue(Number(seriesItem.value), MetricUnit.PERCENT)}
+								<Tooltip.Item label={seriesItem.label} color={seriesItem.color} valueAlign="right">
+									<span class="text-foreground font-bold tabular-nums">
+										{value}
+										{#if unit}
+											<span class="text-foreground/60 ml-1 text-xs">{unit}</span>
+										{/if}
+									</span>
+								</Tooltip.Item>
+							{/each}
+						</Tooltip.List>
 					</Tooltip.Root>
 
 					<DateTooltip

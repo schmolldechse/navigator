@@ -97,7 +97,7 @@
 
 	<p class="text-foreground/60 text-sm leading-relaxed sm:text-base">
 		{#if evaNumber}
-			Compare operators by recorded station visits for this station. Arrival/departure only affects station-event charts.
+			Compare operators by recorded station events for this station and schedule scope.
 		{:else}
 			Compare operators across the global journey dataset for a dedicated time range.
 		{/if}
@@ -138,7 +138,7 @@
 			{:then metric}
 				{@const page = normalizePage(metric.page)}
 
-				<AdministrationRankingList {metric} {page} />
+				<AdministrationRankingList {metric} {page} stationScoped={Boolean(evaNumber)} />
 
 				<Pagination
 					offset={page.offset}

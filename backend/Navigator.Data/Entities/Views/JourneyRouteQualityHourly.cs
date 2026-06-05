@@ -29,6 +29,12 @@ public class JourneyRouteQualityHourly
     [Column("destination_eva_number")]
     public required int DestinationEvaNumber { get; set; }
 
+    [Column("first_planned_time")]
+    public required DateTime FirstPlannedTime { get; set; }
+
+    [Column("last_planned_time")]
+    public required DateTime LastPlannedTime { get; set; }
+
     [Column("journey_count")]
     public required long JourneyCount { get; set; }
 

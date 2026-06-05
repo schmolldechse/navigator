@@ -71,22 +71,32 @@ public sealed class LineRankingMetricSeriesBuilder(
 
         var administrations = await LoadAdministrationsAsync(rows.Select(row => row.AdministrationId));
         var stations = await LoadStationsAsync(rows.SelectMany(row => new[] { row.OriginEvaNumber, row.DestinationEvaNumber }));
+        var routeTimes = request.EvaNumbers.Any()
+            ? await LoadStationScopedRouteTimesAsync(request, rows)
+            : await LoadGlobalRouteTimesAsync(request, rows);
 
         var dataPoints = rows
             .Where(row => administrations.ContainsKey(row.AdministrationId))
-            .Select(row => new LineRankingDataPoint
+            .Select(row =>
             {
-                Line = new LineMetricSubject
+                routeTimes.TryGetValue(CreateKey(row), out var routeTime);
+
+                return new LineRankingDataPoint
                 {
-                    Number = row.Number,
-                    JourneyDescription = row.JourneyDescription,
-                    TransportType = row.TransportType
-                },
-                Administration = administrations[row.AdministrationId],
-                StartStation = GetStationSubject(stations, row.OriginEvaNumber),
-                EndStation = GetStationSubject(stations, row.DestinationEvaNumber),
-                Value = definition.GetValue(row),
-                Sample = definition.CreateSample?.Invoke(row)
+                    Line = new LineMetricSubject
+                    {
+                        Number = row.Number,
+                        JourneyDescription = row.JourneyDescription,
+                        TransportType = row.TransportType
+                    },
+                    Administration = administrations[row.AdministrationId],
+                    StartStation = GetStationSubject(stations, row.OriginEvaNumber),
+                    EndStation = GetStationSubject(stations, row.DestinationEvaNumber),
+                    RouteStartTime = ToDateTimeOffset(routeTime?.RouteStartTime),
+                    RouteEndTime = ToDateTimeOffset(routeTime?.RouteEndTime),
+                    Value = definition.GetValue(row),
+                    Sample = definition.CreateSample?.Invoke(row)
+                };
             })
             .ToList();
 
@@ -144,6 +154,138 @@ public sealed class LineRankingMetricSeriesBuilder(
             });
     }
 
+    private async Task<Dictionary<LineRankingKey, RouteTimeWindow>> LoadStationScopedRouteTimesAsync(
+        LineRankingMetricRequest request,
+        IReadOnlyCollection<LineRankingRow> rows
+    )
+    {
+        if (!rows.Any()) return new();
+
+        var start = request.Start.UtcDateTime;
+        var end = request.End.UtcDateTime;
+        var transportTypes = StationEventQualityMetricDefinitions.NormalizeTransportTypes(request.TransportTypes);
+        var keys = rows.Select(CreateKey).ToHashSet();
+        var numbers = rows.Select(row => row.Number).Distinct().ToArray();
+        var journeyDescriptions = rows.Select(row => row.JourneyDescription).Distinct().ToArray();
+        var administrationIds = rows.Select(row => row.AdministrationId).Distinct().ToArray();
+        var originEvaNumbers = rows.Select(row => row.OriginEvaNumber).Distinct().ToArray();
+        var destinationEvaNumbers = rows.Select(row => row.DestinationEvaNumber).Distinct().ToArray();
+
+        var query = dataContext.JourneyEventQualityFacts
+            .AsNoTracking()
+            .Where(fact => fact.PlannedTime >= start && fact.PlannedTime < end)
+            .Where(fact => request.EvaNumbers.Contains(fact.StationEvaNumber))
+            .Where(fact => request.ScheduleType == null || fact.ScheduleType == request.ScheduleType)
+            .Where(fact => transportTypes.Contains(fact.TransportType))
+            .Where(fact => request.IncludeReplacementTransport || !fact.IsReplacementTransport)
+            .Where(fact => numbers.Contains(fact.Number))
+            .Where(fact => journeyDescriptions.Contains(fact.JourneyDescription))
+            .Where(fact => administrationIds.Contains(fact.AdministrationId))
+            .Where(fact => originEvaNumbers.Contains(fact.OriginEvaNumber))
+            .Where(fact => destinationEvaNumbers.Contains(fact.DestinationEvaNumber));
+
+        var journeyDescriptionRegex = request.JourneyDescription;
+        if (!string.IsNullOrWhiteSpace(journeyDescriptionRegex))
+            query = query.Where(fact => Regex.IsMatch(fact.JourneyDescription, journeyDescriptionRegex));
+        if (!string.IsNullOrWhiteSpace(request.Number))
+            query = query.Where(fact => Regex.IsMatch(fact.Number.ToString(), request.Number));
+
+        var candidates = await query
+            .Select(fact => new RouteTimeCandidate
+            {
+                Key = new(
+                    fact.Number,
+                    fact.JourneyDescription,
+                    fact.TransportType,
+                    fact.AdministrationId,
+                    fact.OriginEvaNumber,
+                    fact.DestinationEvaNumber),
+                MatchingTime = fact.PlannedTime,
+                JourneyId = fact.JourneyId,
+                Date = fact.Date,
+                RouteStartTime = fact.JourneyStartTime,
+                RouteEndTime = fact.JourneyEndTime
+            })
+            .ToListAsync();
+
+        return candidates
+            .Where(candidate => keys.Contains(candidate.Key))
+            .GroupBy(candidate => candidate.Key)
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .OrderBy(candidate => candidate.MatchingTime)
+                    .ThenBy(candidate => candidate.JourneyId)
+                    .ThenBy(candidate => candidate.Date)
+                    .Select(candidate => new RouteTimeWindow(candidate.RouteStartTime, candidate.RouteEndTime))
+                    .First());
+    }
+
+    private async Task<Dictionary<LineRankingKey, RouteTimeWindow>> LoadGlobalRouteTimesAsync(
+        LineRankingMetricRequest request,
+        IReadOnlyCollection<LineRankingRow> rows
+    )
+    {
+        if (!rows.Any()) return new();
+
+        var start = request.Start.UtcDateTime;
+        var end = request.End.UtcDateTime;
+        var transportTypes = StationEventQualityMetricDefinitions.NormalizeTransportTypes(request.TransportTypes);
+        var keys = rows.Select(CreateKey).ToHashSet();
+        var numbers = rows.Select(row => row.Number).Distinct().ToArray();
+        var journeyDescriptions = rows.Select(row => row.JourneyDescription).Distinct().ToArray();
+        var administrationIds = rows.Select(row => row.AdministrationId).Distinct().ToArray();
+        var originEvaNumbers = rows.Select(row => row.OriginEvaNumber).Distinct().ToArray();
+        var destinationEvaNumbers = rows.Select(row => row.DestinationEvaNumber).Distinct().ToArray();
+
+        var query = dataContext.JourneyRouteQualityFacts
+            .AsNoTracking()
+            .Where(fact => fact.JourneyStartTime >= start && fact.JourneyStartTime < end)
+            .Where(fact => transportTypes.Contains(fact.TransportType))
+            .Where(fact => request.IncludeReplacementTransport || !fact.IsReplacementTransport)
+            .Where(fact => numbers.Contains(fact.Number))
+            .Where(fact => journeyDescriptions.Contains(fact.JourneyDescription))
+            .Where(fact => administrationIds.Contains(fact.AdministrationId))
+            .Where(fact => originEvaNumbers.Contains(fact.OriginEvaNumber))
+            .Where(fact => destinationEvaNumbers.Contains(fact.DestinationEvaNumber));
+
+        var journeyDescriptionRegex = request.JourneyDescription;
+        if (!string.IsNullOrWhiteSpace(journeyDescriptionRegex))
+            query = query.Where(fact => Regex.IsMatch(fact.JourneyDescription, journeyDescriptionRegex));
+        if (!string.IsNullOrWhiteSpace(request.Number))
+            query = query.Where(fact => Regex.IsMatch(fact.Number.ToString(), request.Number));
+
+        var candidates = await query
+            .Select(fact => new RouteTimeCandidate
+            {
+                Key = new(
+                    fact.Number,
+                    fact.JourneyDescription,
+                    fact.TransportType,
+                    fact.AdministrationId,
+                    fact.OriginEvaNumber,
+                    fact.DestinationEvaNumber),
+                MatchingTime = fact.JourneyStartTime,
+                JourneyId = fact.JourneyId,
+                Date = fact.Date,
+                RouteStartTime = fact.JourneyStartTime,
+                RouteEndTime = fact.JourneyEndTime
+            })
+            .ToListAsync();
+
+        return candidates
+            .Where(candidate => keys.Contains(candidate.Key))
+            .GroupBy(candidate => candidate.Key)
+            .ToDictionary(
+                group => group.Key,
+                group => group
+                    .OrderBy(candidate => candidate.MatchingTime)
+                    .ThenBy(candidate => candidate.JourneyId)
+                    .ThenBy(candidate => candidate.Date)
+                    .Select(candidate => new RouteTimeWindow(candidate.RouteStartTime, candidate.RouteEndTime))
+                    .First());
+    }
+
     private IQueryable<LineRankingRow> BuildStationLineRankingQuery(LineRankingMetricRequest request)
     {
         var start = request.Start.UtcDateTime;
@@ -154,6 +296,7 @@ public sealed class LineRankingMetricSeriesBuilder(
             .AsNoTracking()
             .Where(summary => summary.BucketHour >= start && summary.BucketHour < end)
             .Where(summary => request.EvaNumbers.Contains(summary.StationEvaNumber))
+            .Where(summary => request.ScheduleType == null || summary.ScheduleType == request.ScheduleType)
             .Where(summary => transportTypes.Contains(summary.TransportType))
             .Where(summary => request.IncludeReplacementTransport || !summary.IsReplacementTransport);
 
@@ -231,6 +374,19 @@ public sealed class LineRankingMetricSeriesBuilder(
             EvaNumber = evaNumber
         };
 
+    private static DateTimeOffset? ToDateTimeOffset(DateTime? dateTime) =>
+        dateTime is null
+            ? null
+            : new DateTimeOffset(DateTime.SpecifyKind(dateTime.Value, DateTimeKind.Utc));
+
+    private static LineRankingKey CreateKey(LineRankingRow row) => new(
+        row.Number,
+        row.JourneyDescription,
+        row.TransportType,
+        row.AdministrationId,
+        row.OriginEvaNumber,
+        row.DestinationEvaNumber);
+
     private static MetricDefinition GetDefinition(MetricSeriesType seriesType) =>
         Definitions.TryGetValue(seriesType, out var definition)
             ? definition
@@ -256,5 +412,25 @@ public sealed class LineRankingMetricSeriesBuilder(
         public long DelaySumSeconds { get; set; }
         public long Punctual5Count { get; set; }
         public long Punctual15Count { get; set; }
+    }
+
+    private sealed record LineRankingKey(
+        int Number,
+        string JourneyDescription,
+        TransportType TransportType,
+        Guid AdministrationId,
+        int OriginEvaNumber,
+        int DestinationEvaNumber);
+
+    private sealed record RouteTimeWindow(DateTime RouteStartTime, DateTime RouteEndTime);
+
+    private sealed class RouteTimeCandidate
+    {
+        public required LineRankingKey Key { get; init; }
+        public required DateTime MatchingTime { get; init; }
+        public required string JourneyId { get; init; }
+        public required DateOnly Date { get; init; }
+        public required DateTime RouteStartTime { get; init; }
+        public required DateTime RouteEndTime { get; init; }
     }
 }

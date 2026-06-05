@@ -125,6 +125,8 @@ namespace Navigator.Data.Migrations
                             journey_id character varying(82) NOT NULL,
                             date date NOT NULL,
                             planned_time timestamp with time zone NOT NULL,
+                            journey_start_time timestamp with time zone NOT NULL,
+                            journey_end_time timestamp with time zone NOT NULL,
                             station_eva_number integer NOT NULL,
                             schedule_type core.schedule_type NOT NULL,
                             administration_id uuid NOT NULL,
@@ -134,7 +136,6 @@ namespace Navigator.Data.Migrations
                             is_replacement_transport boolean NOT NULL,
                             origin_eva_number integer NOT NULL,
                             destination_eva_number integer NOT NULL,
-                            is_station_line_event boolean NOT NULL,
                             cancelled boolean NOT NULL,
                             delay integer NOT NULL,
                             CONSTRAINT PK_journey_event_quality_facts PRIMARY KEY (stop_place_id, planned_time)
@@ -149,13 +150,21 @@ namespace Navigator.Data.Migrations
                         ON statistics.journey_event_quality_facts (planned_time, administration_id, transport_type, is_replacement_transport);");
 
             migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_journey_event_quality_facts_line_route
-                        ON statistics.journey_event_quality_facts (station_eva_number, planned_time, journey_description, number, transport_type)
-                        WHERE is_station_line_event;");
+                        ON statistics.journey_event_quality_facts (
+                            station_eva_number,
+                            planned_time,
+                            schedule_type,
+                            journey_description,
+                            number,
+                            transport_type,
+                            is_replacement_transport
+                        );");
 
             migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS statistics.journey_route_quality_facts (
                             journey_id character varying(82) NOT NULL,
                             date date NOT NULL,
                             journey_start_time timestamp with time zone NOT NULL,
+                            journey_end_time timestamp with time zone NOT NULL,
                             administration_id uuid NOT NULL,
                             transport_type core.transport_type NOT NULL,
                             journey_description character varying(64) NOT NULL,
@@ -177,57 +186,166 @@ namespace Navigator.Data.Migrations
                         ON statistics.journey_route_quality_facts (journey_description, number, journey_start_time, transport_type, is_replacement_transport);");
             #endregion
 
-            #region Continuous Aggregates
+            #region Statistics Projection Backlog
+            migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS statistics.journey_fact_projection_backlog (
+                            journey_id character varying(82) NOT NULL,
+                            date date NOT NULL,
+                            created_at timestamp with time zone NOT NULL DEFAULT now(),
+                            available_at timestamp with time zone NOT NULL DEFAULT now(),
+                            attempts integer NOT NULL DEFAULT 0,
+                            last_attempt_at timestamp with time zone,
+                            locked_until timestamp with time zone,
+                            locked_by character varying(128),
+                            last_error character varying(2048),
+                            dead_lettered_at timestamp with time zone,
+                            CONSTRAINT PK_journey_fact_projection_backlog PRIMARY KEY (journey_id, date)
+                        );");
+
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_journey_fact_projection_backlog_available
+                        ON statistics.journey_fact_projection_backlog (available_at, created_at)
+                        WHERE dead_lettered_at IS NULL;");
+
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_journey_fact_projection_backlog_dead_lettered
+                        ON statistics.journey_fact_projection_backlog (dead_lettered_at)
+                        WHERE dead_lettered_at IS NOT NULL;");
+
             migrationBuilder.Sql(@"
-                CREATE MATERIALIZED VIEW IF NOT EXISTS statistics.station_event_quality_hourly
-                WITH (timescaledb.continuous) AS
-                SELECT
-                    time_bucket(INTERVAL '1 hour', planned_time) AS bucket_hour,
-                    station_eva_number,
-                    schedule_type,
-                    administration_id,
-                    transport_type,
-                    is_replacement_transport,
-                    count(*)::bigint AS event_count,
-                    count(*) FILTER (WHERE cancelled IS TRUE)::bigint AS cancelled_count,
-                    count(*) FILTER (WHERE cancelled IS NOT TRUE)::bigint AS delay_sample_count,
-                    coalesce(sum(delay) FILTER (WHERE cancelled IS NOT TRUE), 0)::bigint AS delay_sum_seconds,
-                    count(*) FILTER (WHERE cancelled IS NOT TRUE AND delay < 300)::bigint AS punctual_5_count,
-                    count(*) FILTER (WHERE cancelled IS NOT TRUE AND delay < 900)::bigint AS punctual_15_count
-                FROM statistics.journey_event_quality_facts
-                GROUP BY
-                    bucket_hour,
-                    station_eva_number,
-                    schedule_type,
-                    administration_id,
-                    transport_type,
-                    is_replacement_transport
-                WITH NO DATA;
+                CREATE OR REPLACE FUNCTION statistics.notify_journey_fact_projection_backlog()
+                RETURNS trigger
+                LANGUAGE plpgsql
+                AS $$
+                BEGIN
+                    PERFORM pg_notify('journey_fact_projection_backlog', '');
+                    RETURN NULL;
+                END;
+                $$;
             ");
 
-            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_station_event_quality_hourly_network
-                        ON statistics.station_event_quality_hourly (
-                            schedule_type,
-                            transport_type,
-                            is_replacement_transport,
-                            bucket_hour
-                        );");
+            migrationBuilder.Sql(@"DROP TRIGGER IF EXISTS TRG_journey_fact_projection_backlog_notify ON statistics.journey_fact_projection_backlog;");
 
-            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_station_event_quality_hourly_station
-                        ON statistics.station_event_quality_hourly (
-                            station_eva_number,
-                            schedule_type,
-                            transport_type,
-                            is_replacement_transport,
-                            bucket_hour
-                        );");
+            migrationBuilder.Sql(@"
+                CREATE TRIGGER TRG_journey_fact_projection_backlog_notify
+                AFTER INSERT OR UPDATE OF available_at
+                ON statistics.journey_fact_projection_backlog
+                FOR EACH STATEMENT
+                EXECUTE FUNCTION statistics.notify_journey_fact_projection_backlog();
+            ");
 
+            migrationBuilder.Sql(@"
+                CREATE OR REPLACE FUNCTION statistics.enqueue_missing_journey_fact_projections(
+                    p_from_date date DEFAULT NULL,
+                    p_to_date date DEFAULT NULL,
+                    p_reset_failed boolean DEFAULT FALSE
+                )
+                RETURNS integer
+                LANGUAGE plpgsql
+                AS $$
+                DECLARE
+                    enqueued_count integer;
+                BEGIN
+                    WITH candidates AS (
+                        SELECT journeys.id, journeys.date
+                        FROM core.journeys AS journeys
+                        WHERE (p_from_date IS NULL OR journeys.date >= p_from_date)
+                          AND (p_to_date IS NULL OR journeys.date < p_to_date)
+                          AND EXISTS (
+                              SELECT 1
+                              FROM core.journey_stop_places AS stop_places
+                              WHERE stop_places.journey_id = journeys.id
+                                AND stop_places.date = journeys.date
+                          )
+                          AND (
+                              NOT EXISTS (
+                                  SELECT 1
+                                  FROM statistics.journey_route_quality_facts AS route_facts
+                                  WHERE route_facts.journey_id = journeys.id
+                                    AND route_facts.date = journeys.date
+                              )
+                              OR EXISTS (
+                                  SELECT 1
+                                  FROM core.journey_stop_places AS stop_places
+                                  WHERE stop_places.journey_id = journeys.id
+                                    AND stop_places.date = journeys.date
+                                    AND NOT EXISTS (
+                                        SELECT 1
+                                        FROM statistics.journey_event_quality_facts AS event_facts
+                                        WHERE event_facts.stop_place_id = stop_places.id
+                                          AND event_facts.planned_time = stop_places.planned_time
+                                    )
+                              )
+                          )
+                    ),
+                    upserted AS (
+                        INSERT INTO statistics.journey_fact_projection_backlog (
+                            journey_id,
+                            date,
+                            created_at,
+                            available_at,
+                            attempts,
+                            last_attempt_at,
+                            locked_until,
+                            locked_by,
+                            last_error,
+                            dead_lettered_at
+                        )
+                        SELECT
+                            candidates.id,
+                            candidates.date,
+                            now(),
+                            now(),
+                            0,
+                            NULL,
+                            NULL,
+                            NULL,
+                            NULL,
+                            NULL
+                        FROM candidates
+                        ON CONFLICT (journey_id, date) DO UPDATE
+                        SET
+                            available_at = now(),
+                            attempts = CASE
+                                WHEN p_reset_failed THEN 0
+                                ELSE statistics.journey_fact_projection_backlog.attempts
+                            END,
+                            last_attempt_at = CASE
+                                WHEN p_reset_failed THEN NULL
+                                ELSE statistics.journey_fact_projection_backlog.last_attempt_at
+                            END,
+                            locked_until = NULL,
+                            locked_by = NULL,
+                            last_error = CASE
+                                WHEN p_reset_failed THEN NULL
+                                ELSE statistics.journey_fact_projection_backlog.last_error
+                            END,
+                            dead_lettered_at = CASE
+                                WHEN p_reset_failed THEN NULL
+                                ELSE statistics.journey_fact_projection_backlog.dead_lettered_at
+                            END
+                        WHERE p_reset_failed
+                           OR statistics.journey_fact_projection_backlog.dead_lettered_at IS NULL
+                        RETURNING 1
+                    )
+                    SELECT count(*)::integer INTO enqueued_count
+                    FROM upserted;
+
+                    IF enqueued_count > 0 THEN
+                        PERFORM pg_notify('journey_fact_projection_backlog', enqueued_count::text);
+                    END IF;
+
+                    RETURN enqueued_count;
+                END;
+                $$;
+            ");
+            #endregion
+
+            #region Continuous Aggregates
             migrationBuilder.Sql(@"
                 CREATE MATERIALIZED VIEW IF NOT EXISTS statistics.station_line_route_quality_hourly
                 WITH (timescaledb.continuous) AS
                 SELECT
                     time_bucket(INTERVAL '1 hour', planned_time) AS bucket_hour,
                     station_eva_number,
+                    schedule_type,
                     administration_id,
                     transport_type,
                     journey_description,
@@ -235,17 +353,19 @@ namespace Navigator.Data.Migrations
                     is_replacement_transport,
                     origin_eva_number,
                     destination_eva_number,
+                    min(journey_start_time) AS first_planned_time,
+                    max(journey_end_time) AS last_planned_time,
                     count(*)::bigint AS event_count,
                     count(*) FILTER (WHERE cancelled IS TRUE)::bigint AS cancelled_count,
                     count(*) FILTER (WHERE cancelled IS NOT TRUE)::bigint AS delay_sample_count,
                     coalesce(sum(delay) FILTER (WHERE cancelled IS NOT TRUE), 0)::bigint AS delay_sum_seconds,
-                    count(*) FILTER (WHERE cancelled IS NOT TRUE AND delay < 300)::bigint AS punctual_5_count,
+                    count(*) FILTER (WHERE cancelled IS NOT TRUE AND delay < 360)::bigint AS punctual_5_count,
                     count(*) FILTER (WHERE cancelled IS NOT TRUE AND delay < 900)::bigint AS punctual_15_count
                 FROM statistics.journey_event_quality_facts
-                WHERE is_station_line_event IS TRUE
                 GROUP BY
                     bucket_hour,
                     station_eva_number,
+                    schedule_type,
                     administration_id,
                     transport_type,
                     journey_description,
@@ -259,6 +379,15 @@ namespace Navigator.Data.Migrations
             migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_station_line_route_quality_hourly_station
                         ON statistics.station_line_route_quality_hourly (
                             station_eva_number,
+                            schedule_type,
+                            transport_type,
+                            is_replacement_transport,
+                            bucket_hour
+                        );");
+
+            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_station_line_route_quality_hourly_network
+                        ON statistics.station_line_route_quality_hourly (
+                            schedule_type,
                             transport_type,
                             is_replacement_transport,
                             bucket_hour
@@ -276,13 +405,15 @@ namespace Navigator.Data.Migrations
                     is_replacement_transport,
                     origin_eva_number,
                     destination_eva_number,
+                    min(journey_start_time) AS first_planned_time,
+                    max(journey_end_time) AS last_planned_time,
                     count(*)::bigint AS journey_count,
                     count(*) FILTER (WHERE journey_cancelled IS TRUE)::bigint AS journey_cancelled_count,
                     count(*) FILTER (WHERE journey_cancelled IS NOT TRUE AND terminal_delay_seconds IS NOT NULL)::bigint AS delay_sample_count,
                     coalesce(sum(terminal_delay_seconds) FILTER (
                         WHERE journey_cancelled IS NOT TRUE AND terminal_delay_seconds IS NOT NULL
                     ), 0)::bigint AS delay_sum_seconds,
-                    count(*) FILTER (WHERE journey_cancelled IS NOT TRUE AND terminal_delay_seconds < 300)::bigint AS punctual_5_count,
+                    count(*) FILTER (WHERE journey_cancelled IS NOT TRUE AND terminal_delay_seconds < 360)::bigint AS punctual_5_count,
                     count(*) FILTER (WHERE journey_cancelled IS NOT TRUE AND terminal_delay_seconds < 900)::bigint AS punctual_15_count
                 FROM statistics.journey_route_quality_facts
                 GROUP BY
@@ -303,12 +434,6 @@ namespace Navigator.Data.Migrations
                             is_replacement_transport,
                             bucket_hour
                         );");
-
-            migrationBuilder.Sql(@"SELECT add_continuous_aggregate_policy('statistics.station_event_quality_hourly',
-                        start_offset => INTERVAL '210 days',
-                        end_offset => INTERVAL '1 hour',
-                        schedule_interval => INTERVAL '1 hour',
-                        if_not_exists => TRUE);");
 
             migrationBuilder.Sql(@"SELECT add_continuous_aggregate_policy('statistics.station_line_route_quality_hourly',
                         start_offset => INTERVAL '210 days',
@@ -357,24 +482,25 @@ namespace Navigator.Data.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"SELECT remove_continuous_aggregate_policy('statistics.station_event_quality_hourly', if_exists => TRUE);");
             migrationBuilder.Sql(@"SELECT remove_continuous_aggregate_policy('statistics.station_line_route_quality_hourly', if_exists => TRUE);");
             migrationBuilder.Sql(@"SELECT remove_continuous_aggregate_policy('statistics.journey_route_quality_hourly', if_exists => TRUE);");
 
             migrationBuilder.Sql(@"DROP INDEX IF EXISTS _timescaledb_internal.IX_journey_route_quality_hourly_window;");
+            migrationBuilder.Sql(@"DROP INDEX IF EXISTS _timescaledb_internal.IX_station_line_route_quality_hourly_network;");
             migrationBuilder.Sql(@"DROP INDEX IF EXISTS _timescaledb_internal.IX_station_line_route_quality_hourly_station;");
-            migrationBuilder.Sql(@"DROP INDEX IF EXISTS _timescaledb_internal.IX_station_event_quality_hourly_station;");
-            migrationBuilder.Sql(@"DROP INDEX IF EXISTS _timescaledb_internal.IX_station_event_quality_hourly_network;");
 
             migrationBuilder.Sql(@"DROP MATERIALIZED VIEW IF EXISTS statistics.journey_route_quality_hourly;");
             migrationBuilder.Sql(@"DROP MATERIALIZED VIEW IF EXISTS statistics.station_line_route_quality_hourly;");
-            migrationBuilder.Sql(@"DROP MATERIALIZED VIEW IF EXISTS statistics.station_event_quality_hourly;");
 
             migrationBuilder.Sql(@"SELECT remove_compression_policy('statistics.journey_route_quality_facts', if_exists => TRUE);");
             migrationBuilder.Sql(@"SELECT remove_compression_policy('statistics.journey_event_quality_facts', if_exists => TRUE);");
             migrationBuilder.Sql(@"SELECT remove_compression_policy('core.journey_stop_place_messages', if_exists => TRUE);");
             migrationBuilder.Sql(@"SELECT remove_compression_policy('core.journey_stop_places', if_exists => TRUE);");
 
+            migrationBuilder.Sql(@"DROP TRIGGER IF EXISTS TRG_journey_fact_projection_backlog_notify ON statistics.journey_fact_projection_backlog;");
+            migrationBuilder.Sql(@"DROP FUNCTION IF EXISTS statistics.enqueue_missing_journey_fact_projections(date, date, boolean);");
+            migrationBuilder.Sql(@"DROP FUNCTION IF EXISTS statistics.notify_journey_fact_projection_backlog();");
+            migrationBuilder.Sql(@"DROP TABLE IF EXISTS statistics.journey_fact_projection_backlog CASCADE;");
             migrationBuilder.Sql(@"DROP TABLE IF EXISTS statistics.journey_route_quality_facts CASCADE;");
             migrationBuilder.Sql(@"DROP TABLE IF EXISTS statistics.journey_event_quality_facts CASCADE;");
             migrationBuilder.Sql(@"DROP TABLE IF EXISTS core.journey_stop_place_messages CASCADE;");

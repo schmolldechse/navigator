@@ -59,13 +59,13 @@
 		},
 		{
 			key: "punctuality5",
-			title: "Punctuality 5",
+			title: "Punctual <= 5:59 min",
 			icon: ShieldCheck,
 			seriesType: MetricSeriesType.STATION_EVENT_PUNCTUALITY5_RATE
 		},
 		{
 			key: "punctuality15",
-			title: "Punctuality 15",
+			title: "Punctual <= 14:59 min",
 			icon: ShieldCheck,
 			seriesType: MetricSeriesType.STATION_EVENT_PUNCTUALITY15_RATE
 		}

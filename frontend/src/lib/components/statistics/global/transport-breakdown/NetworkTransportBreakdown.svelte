@@ -36,8 +36,16 @@
 		{ key: "eventCount", label: "Activity", description: "Recorded station events by transport family." },
 		{ key: "cancellationRate", label: "Cancellation Rate", description: "Cancelled station-event share by transport family." },
 		{ key: "averageDelay", label: "Average Delay", description: "Weighted delay by transport family." },
-		{ key: "punctuality5", label: "Punctuality 5", description: "Five-minute punctuality by transport family." },
-		{ key: "punctuality15", label: "Punctuality 15", description: "Fifteen-minute punctuality by transport family." }
+		{
+			key: "punctuality5",
+			label: "Punctual <= 5:59 min",
+			description: "Events with less than six minutes delay by transport family."
+		},
+		{
+			key: "punctuality15",
+			label: "Punctual <= 14:59 min",
+			description: "Events with less than fifteen minutes delay by transport family."
+		}
 	];
 
 	let selectedOption: BreakdownOption = $state(options[0]);

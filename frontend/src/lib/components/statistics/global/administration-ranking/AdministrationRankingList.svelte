@@ -33,9 +33,10 @@
 	type Props = {
 		metric: MetricSeries;
 		page: NormalizedPage;
+		stationScoped?: boolean;
 		class?: ClassValue;
 	};
-	let { metric, page, class: className }: Props = $props();
+	let { metric, page, stationScoped = false, class: className }: Props = $props();
 
 	const createRows = (metric: MetricSeries, page: NormalizedPage): AdministrationRankingRow[] => {
 		const rows: AdministrationRankingRow[] = [];
@@ -63,6 +64,9 @@
 	let rows = $derived(createRows(metric, page));
 	let maxValue = $derived(Math.max(0, ...rows.map((row: AdministrationRankingRow) => row.value)));
 	let metricOption = $derived(getAdministrationRankingMetricOption(metric.seriesType));
+	let valueLabel = $derived(
+		stationScoped && metricOption?.valueLabel === "Journeys" ? "Station events" : (metricOption?.valueLabel ?? "Value")
+	);
 </script>
 
 <div class={["flex flex-col gap-y-2", className]}>
@@ -80,7 +84,7 @@
 		>
 			<span class="text-right">Place</span>
 			<span>Administration / Operator</span>
-			<span class="text-right">{metricOption?.valueLabel ?? "Value"}</span>
+			<span class="text-right">{valueLabel}</span>
 		</div>
 
 		{#each rows as row (row.key)}

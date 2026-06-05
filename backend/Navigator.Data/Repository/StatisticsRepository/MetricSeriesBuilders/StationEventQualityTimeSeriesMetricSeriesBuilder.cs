@@ -14,7 +14,7 @@ public sealed class StationEventQualityTimeSeriesMetricSeriesBuilder(
         var definition = StationEventQualityMetricDefinitions.GetDefinition(request.SeriesType);
         var transportTypes = StationEventQualityMetricDefinitions.NormalizeTransportTypes(request.TransportTypes);
 
-        var query = dataContext.StationEventQualities
+        var query = dataContext.StationLineRouteQualities
             .AsNoTracking()
             .Where(summary => summary.BucketHour >= request.Start.UtcDateTime && summary.BucketHour <= request.End.UtcDateTime)
             .Where(summary => summary.ScheduleType == request.ScheduleType)
@@ -46,7 +46,7 @@ public sealed class StationEventQualityTimeSeriesMetricSeriesBuilder(
             })
             .ToList();
 
-        return new()
+        return new MetricSeries()
         {
             SeriesType = request.SeriesType,
             Unit = definition.Unit,

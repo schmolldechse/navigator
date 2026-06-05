@@ -29,7 +29,6 @@ The historical quality views need more than simple aggregation:
 - origin and destination station resolution
 - terminal delay selection per journey
 - replacement transport detection
-- station-line-route de-duplication per journey/station
 
 That shaping is therefore done once when journeys are imported, and again during historical backfill. Continuous aggregates then only count and sum already-prepared facts.
 
@@ -46,7 +45,6 @@ RIS Journey API
 
 `statistics.journey_event_quality_facts` contains one row per stop-place event and powers:
 
-- `statistics.station_event_quality_hourly`
 - `statistics.station_line_route_quality_hourly`
 
 `statistics.journey_route_quality_facts` contains one row per journey and powers:

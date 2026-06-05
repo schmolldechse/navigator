@@ -18,6 +18,9 @@ public class JourneyRouteQualityFact
     [Column("journey_start_time")]
     public required DateTime JourneyStartTime { get; set; }
 
+    [Column("journey_end_time")]
+    public required DateTime JourneyEndTime { get; set; }
+
     [Column("administration_id")]
     public required Guid AdministrationId { get; set; }
 

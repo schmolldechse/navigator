@@ -11,6 +11,9 @@ public class StationLineRouteQualityHourly
     [Column("station_eva_number")]
     public required int StationEvaNumber { get; set; }
 
+    [Column("schedule_type")]
+    public required ScheduleType ScheduleType { get; set; }
+
     [Column("administration_id")]
     public required Guid AdministrationId { get; set; }
 
@@ -31,6 +34,12 @@ public class StationLineRouteQualityHourly
 
     [Column("destination_eva_number")]
     public required int DestinationEvaNumber { get; set; }
+
+    [Column("first_planned_time")]
+    public required DateTime FirstPlannedTime { get; set; }
+
+    [Column("last_planned_time")]
+    public required DateTime LastPlannedTime { get; set; }
 
     [Column("event_count")]
     public required long EventCount { get; set; }
