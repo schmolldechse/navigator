@@ -1,35 +1,77 @@
 # Navigator.Preflight
 
-**Navigator.Preflight** is the database seeding utility designed to bootstrap the ecosystem. Its primary purpose is to append migrations and populate the newly created database with stations gathered from the Deutsche Bahn **RIS::Stations** API and acts as a initialization script to ensure the core application has the necessary stations.
+`Navigator.Preflight` is the database bootstrap utility for Navigator. It applies EF Core migrations and can seed the station catalog from Deutsche Bahn station sources before the API and daemon start using the database.
 
-## Setup
+The station discovery and merge approach is based on the ideas used by [derhuerst/db-hafas-stations](https://github.com/derhuerst/db-hafas-stations), which builds a broad station/stop dataset from `RIS::Stations` and StaDa. Navigator reimplements this flow for its own .NET/TimescaleDB bootstrap process instead of consuming the npm package directly.
 
-Before executing, you must obtain valid credentials from the [DB API Marketplace](https://developers.deutschebahn.com/db-api-marketplace/apis/product). Please follow these steps:
+## Responsibilities
 
-### 1. Create a application
+- Apply pending EF Core migrations.
+- Discover stop places through `RIS::Stations`.
+- Load station metadata from StaDa.
+- Merge RIS and StaDa station records into Navigator's internal station model.
+- Store EVA numbers, names, coordinates, RIL100 identifiers, transport types, query flags, and station weights.
 
-1. Log in to the Marketplace
-2. Navigate to **"Anwendungen"**
-3. Create a new application by filling in the required form fields.
-   ![Applications](../docs/preflight-setup-1.png)
-   ![Creation](../docs/preflight-setup-2.png)
+## Data Sources
 
-### 2. Obtain Credentials
+Preflight uses:
 
-Once the application is created, locate and copy your:
+- [RIS::Stations](https://developer-docs.deutschebahn.com/doku/apis/ris-stations-10686906) for stop-place discovery by geographic position.
+- [StaDa](https://developers.deutschebahn.com/db-api-marketplace/apis/product) for station metadata such as RIL100 identifiers and price categories.
+- [DB API Marketplace](https://developers.deutschebahn.com/db-api-marketplace/apis/product) for API product access and credentials.
 
-- **Client ID**
-- **Client Secret (API Key)**
-  ![Credentials](../docs/preflight-setup-3.png)
+## Implementation Reference
 
-### 3. Subscribe an API
+The discovery shape follows the public `db-hafas-stations` approach:
 
-1. Go to the **"Katalog"** again and select **`RIS::Stations`**.
-2. Select a plan (e.g., **"Testzugang"**) and add it to your application you created in Step 1.
-   ![Plan selection](../docs/preflight-setup-4.png)
+- fetch a broad set of stop places from `RIS::Stations`
+- fetch station metadata from StaDa
+- merge records by EVA number and related identifiers
+- preserve station names, coordinates, transport coverage, and railway identifiers for local lookup
 
-> **Note**: While many APIs on the DB API Marketplace require enterprise agreements or are restricted for end users, `RIS::Stations` offers a free plan for 2 months.
+`db-hafas-stations` publishes its package code under the ISC license and documents separate data-license terms for the generated station data. Navigator's repository is licensed under Apache-2.0, while any data retrieved from Deutsche Bahn APIs remains subject to the respective upstream terms.
 
-### 4. Local Environment Configuration
+The repository-level attribution is recorded in [`THIRD-PARTY-NOTICES.md`](../../THIRD-PARTY-NOTICES.md).
 
-Open the `Properties/launchsettings.json` file and paste your credentials you obtained earlier.
+## Configuration
+
+Required configuration:
+
+```text
+ConnectionStrings:DefaultConnection
+STATIONS_CLIENT_ID
+STATIONS_API_KEY
+```
+
+Station bootstrapping can be skipped while still applying migrations:
+
+```text
+Preflight:SkipStationBootstrap=true
+```
+
+## Discovery Process
+
+The discovery process recursively scans a broad bounding box, writes temporary RIS and StaDa response files, and then merges them into station records. Temporary discovery files are stored below the system temp directory:
+
+```text
+navigator/station_discovery
+```
+
+A `manifest.json` file marks a completed discovery run. Remove the temporary discovery directory if a full re-discovery is required.
+
+## Development
+
+Run from the repository root:
+
+```sh
+dotnet run --project backend/Navigator.Preflight
+```
+
+## References
+
+- [Navigator.Data README](../Navigator.Data/README.md)
+- [DB API Marketplace](https://developers.deutschebahn.com/db-api-marketplace/apis/product)
+- [DB API Marketplace Terms of Use](https://developers.deutschebahn.com/db-api-marketplace/apis/nutzungsbedingungen)
+- [RIS::Stations documentation](https://developer-docs.deutschebahn.com/doku/apis/ris-stations-10686906)
+- [derhuerst/db-hafas-stations](https://github.com/derhuerst/db-hafas-stations)
+- [Navigator third-party notices](../../THIRD-PARTY-NOTICES.md)

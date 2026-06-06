@@ -1,38 +1,80 @@
-# sv
+# Navigator Frontend
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+The frontend is the SvelteKit dashboard for Navigator. It presents project-level counters, global network statistics, station-specific statistics, rankings, and map-based quality views from the Navigator API.
 
-## Creating a project
+## Responsibilities
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Render the main Navigator dashboard and statistics experience.
+- Query the backend API through SvelteKit server-side remote functions.
+- Use generated OpenAPI types and Valibot schemas from `src/lib/api`.
+- Provide station search and station-detail navigation.
+- Visualize time series, rankings, transport breakdowns, and station map metrics.
 
-```sh
-# create a new project in the current directory
-npx sv create
+The `/timetable` route currently exists as a preview placeholder. The active product focus is the statistics dashboard.
 
-# create a new project in my-app
-npx sv create my-app
-```
+## Stack
 
-## Developing
+- [SvelteKit](https://svelte.dev/docs/kit) with Svelte 5
+- [Bun](https://bun.sh/) for package management and scripts
+- [Tailwind CSS](https://tailwindcss.com/) through the Vite plugin
+- [LayerChart](https://www.layerchart.com/) for chart components
+- [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) for map rendering
+- [@hey-api/openapi-ts](https://heyapi.dev/openapi-ts/) for generated API types
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Configuration
 
-```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
+Create `frontend/.env` from `frontend/.env.example`:
 
 ```sh
-npm run build
+cp .env.example .env
 ```
 
-You can preview the production build with `npm run preview`.
+The required public API URL is:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+```text
+PUBLIC_API_URL=http://localhost:5019/
+```
+
+This value is read by the server-side remote modules in `src/lib/remote`.
+
+## Development
+
+Install dependencies:
+
+```sh
+bun install
+```
+
+Start the Vite development server:
+
+```sh
+bun run dev
+```
+
+Run checks:
+
+```sh
+bun run lint
+bun run check
+bun run build
+```
+
+Regenerate API types while `Navigator.Api` is running:
+
+```sh
+bun run generate:api
+```
+
+`openapi-ts.config.ts` reads the backend OpenAPI document from:
+
+```text
+http://localhost:5019/swagger.json
+```
+
+## References
+
+- [Navigator API README](../backend/Navigator.Api/README.md)
+- [SvelteKit documentation](https://svelte.dev/docs/kit)
+- [LayerChart documentation](https://www.layerchart.com/)
+- [MapLibre GL JS documentation](https://maplibre.org/maplibre-gl-js/docs/)
+- [@hey-api/openapi-ts documentation](https://heyapi.dev/openapi-ts/)

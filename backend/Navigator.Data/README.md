@@ -1,42 +1,64 @@
 # Navigator.Data
 
-This repository contains the core data layer for the **Navigator Backend**. It serves as the central library for all Database Entities and HTTP API Repositories, facilitating communication with internal databases and external third-party services.
+`Navigator.Data` is the shared data layer for the Navigator backend. It owns Entity Framework Core mappings, database entities, repository implementations, generated Deutsche Bahn API models, and the metric builders used by `Navigator.Api` and `Navigator.Daemon`.
 
-## Journey Analytics Storage
+## Responsibilities
+
+- Configure PostgreSQL, TimescaleDB, enum mappings, and spatial extensions through `DataContext`.
+- Store stations, RIL100 identifiers, transport coverage, RIS IDs, journeys, journey messages, and statistics snapshots.
+- Provide repositories for stations, timetables, journeys, RIS IDs, and statistics.
+- Call upstream Deutsche Bahn APIs through repository implementations.
+- Build metric series for the frontend dashboard.
+
+## Upstream Interfaces
+
+The data layer calls these external interfaces:
+
+- [RIS::Boards](https://developer-docs.deutschebahn.com/doku/apis/ris-boards-10686900) for arrivals and departures by station and time window.
+- [RIS::Journeys](https://developer-docs.deutschebahn.com/doku/apis/ris-journeys-10582266) for single and batch journey records.
+- [RIS::Stations](https://developer-docs.deutschebahn.com/doku/apis/ris-stations-10686906) for stop-place discovery by position.
+- [StaDa](https://developers.deutschebahn.com/db-api-marketplace/apis/product) for station metadata.
+- Deutsche Bahn's Vendo location search endpoint for station search.
+
+External API credentials are read from environment variables by the repositories that need them. Do not commit real credentials.
+
+## Database Layout
+
+Navigator uses two main schemas:
+
+- `core`: source-of-truth entities such as stations, RIS IDs, journeys, journey transports, stop places, and messages.
+- `statistics`: snapshots, derived journey fact tables, projection backlog, and TimescaleDB continuous aggregates.
 
 Journey data is stored in two layers:
 
-1. **Raw journey tables** in the `core` schema keep the complete normalized source data:
+1. Raw journey tables in the `core` schema keep the normalized source data:
    - `core.journeys`
    - `core.journey_transports`
    - `core.journey_stop_places`
    - `core.journey_messages`
    - `core.journey_stop_place_messages`
-
-2. **Analytics fact tables** in the `statistics` schema keep pre-shaped rows for TimescaleDB continuous aggregates:
+2. Analytics fact tables in the `statistics` schema keep pre-shaped rows for TimescaleDB continuous aggregates:
    - `statistics.journey_event_quality_facts`
    - `statistics.journey_route_quality_facts`
 
 The fact tables are intentionally derived data. They do not replace the raw journey tables and must not be treated as the source of truth.
 
-### Why Fact Tables Exist
+## Journey Analytics Storage
 
-The previous PostgreSQL materialized views could run complex SQL directly over the normalized journey tables because a refresh recomputed the whole view. TimescaleDB continuous aggregates work differently: they are designed to incrementally refresh time buckets from a hypertable. They work best when the aggregate query is a straightforward `time_bucket(...)` plus `GROUP BY` over a single fact source.
-
-The historical quality views need more than simple aggregation:
+TimescaleDB continuous aggregates work best when the aggregate query is a straightforward `time_bucket(...)` plus `GROUP BY` over a single fact source. Historical journey quality needs more shaping than that:
 
 - joins between journeys, transports, and stop places
 - origin and destination station resolution
 - terminal delay selection per journey
 - replacement transport detection
 
-That shaping is therefore done once when journeys are imported, and again during historical backfill. Continuous aggregates then only count and sum already-prepared facts.
+That shaping is done once when journeys are imported or backfilled. Continuous aggregates then count and sum already-prepared facts.
 
-### Current Data Flow
+Current flow:
 
 ```text
-RIS Journey API
-  -> EF Journey graph
+RIS::Journeys
+  -> EF journey graph
   -> core raw journey hypertables
   -> statistics fact hypertables
   -> TimescaleDB continuous aggregates
@@ -51,9 +73,9 @@ RIS Journey API
 
 - `statistics.journey_route_quality_hourly`
 
-The API continues to read from the hourly statistics views. The raw journey tables remain available for audits, reprocessing, and future analytics.
+The API reads from the hourly statistics views. Raw journey tables remain available for audits, reprocessing, and future analytics.
 
-### TimescaleDB Refresh and Compression Windows
+## Refresh And Compression Windows
 
 Journey imports can write data several months in the past because RIS IDs may be discovered late in a timetable period or continued across operating dates. TimescaleDB policies therefore keep the active refresh window wider than a half-year timetable period:
 
@@ -62,27 +84,21 @@ Journey imports can write data several months in the past because RIS IDs may be
 
 This keeps the current timetable period plus buffer uncompressed and refreshable. Compression starts only after the data is expected to be historically stable.
 
-## Model Generation Guide
+## Model Generation
 
-When adding or updating models for the Deutsche Bahn third-party APIs (RIS), strictly follow the guide below.
+When adding or updating C# models for Deutsche Bahn APIs, download the relevant OpenAPI specification from the [DB API Marketplace](https://developers.deutschebahn.com/db-api-marketplace/apis/product), then generate models with NSwag:
 
-1. **Obtain NSwag Tool**: Download and install the NSwag.ConsoleCore package from [NuGet](https://www.nuget.org/packages/NSwag.ConsoleCore).
+```sh
+nswag openapi2csclient /input:<path-of-spec> /output:<output-file>.cs /namespace:Navigator.Data /JsonLibrary:SystemTextJson
+```
 
-2. **Go to the DB API Marketplace**: Navigate to the **"RIS-API"** category in the dropdown menu.
-   ![DB API Marketplace](../docs/model-generation-1.png)
+Place generated RIS models in `Models/Ris`. Keep generated files reviewable and avoid mixing generated model changes with unrelated hand-written repository changes.
 
-3. **Choose specific API**: Select the relevant API product (e.g. `RIS::Boards`, `RIS::Journeys`, `RIS::Stations`, etc.). Scroll down to the **Zugehörige APIs** (Associated APIs) section and click on the specific API you need.
-   ![API Selection](../docs/model-generation-2.png)
+## References
 
-4. **Download OpenAPI Specification**: Scroll down to the bottom of the page and use one of the download option to download the specification file (usually `.json` or `.yaml`).
-   ![Download API Specification](../docs/model-generation-3.png)
-
-5. **Generate Models using NSwag**: Use the NSwag.ConsoleCore CLI downloaded before to generate the C# client models from the downloaded specification. Run the following command, replacing `<path of the spec>` and `<output file>` with your specific paths:
-
-   ```bash
-   nswag openapi2csclient /input:<path of spec> /output:<output file>.cs /namespace:Navigator.Data /JsonLibrary:SystemTextJson
-   ```
-
-6. **Integration**: Take the generated model file and place it in the `Models/Ris` directory.
-
----
+- [Navigator.Api README](../Navigator.Api/README.md)
+- [Navigator.Daemon README](../Navigator.Daemon/README.md)
+- [TimescaleDB continuous aggregates](https://docs.timescale.com/use-timescale/latest/continuous-aggregates/)
+- [Entity Framework Core documentation](https://learn.microsoft.com/ef/core/)
+- [DB API Marketplace](https://developers.deutschebahn.com/db-api-marketplace/apis/product)
+- [NSwag](https://github.com/RicoSuter/NSwag)
