@@ -1,4 +1,3 @@
-using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Enums;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -53,5 +52,4 @@ public class JourneyStopPlace
     [Column("actual_platform")]
     public string? ActualPlatform { get; set; }
 
-    public required virtual ICollection<JourneyStopPlaceMessage> Messages { get; set; } = [];
 }

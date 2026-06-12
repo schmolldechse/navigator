@@ -26,10 +26,5 @@ public class JourneyStopPlaceConfiguration : IEntityTypeConfiguration<JourneySto
             .WithMany(journey => journey.StopPlaces)
             .HasForeignKey(stopPlace => new { stopPlace.JourneyId, stopPlace.Date })
             .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(stopPlace => stopPlace.Messages)
-            .WithOne(message => message.StopPlace)
-            .HasForeignKey(message => new { message.StopPlaceId, message.Date })
-            .OnDelete(DeleteBehavior.Cascade);
     }
 }

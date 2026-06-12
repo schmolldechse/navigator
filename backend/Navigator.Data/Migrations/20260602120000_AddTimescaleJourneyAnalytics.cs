@@ -75,31 +75,6 @@ namespace Navigator.Data.Migrations
                         );");
 
             migrationBuilder.Sql(@"SELECT create_hypertable('core.journey_stop_places', 'date', chunk_time_interval => INTERVAL '14 days', if_not_exists => TRUE);");
-
-            migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS core.journey_messages (
-                            id uuid NOT NULL DEFAULT gen_random_uuid(),
-                            journey_id character varying(82) NOT NULL,
-                            date date NOT NULL,
-                            message_type core.message_type NOT NULL,
-                            code character varying(64),
-                            text character varying(2048),
-                            text_short character varying(2048),
-                            disruption_cause character varying(128),
-                            disruption_effect character varying(128),
-                            note_category character varying(128),
-                            CONSTRAINT PK_journey_messages PRIMARY KEY (id, date)
-                        );");
-
-            migrationBuilder.Sql(@"SELECT create_hypertable('core.journey_messages', 'date', chunk_time_interval => INTERVAL '1 month', if_not_exists => TRUE);");
-
-            migrationBuilder.Sql(@"CREATE TABLE IF NOT EXISTS core.journey_stop_place_messages (
-                            journey_stop_place_id uuid NOT NULL,
-                            journey_message_id uuid NOT NULL,
-                            date date NOT NULL,
-                            CONSTRAINT PK_journey_stop_place_messages PRIMARY KEY (journey_stop_place_id, journey_message_id, date)
-                        );");
-
-            migrationBuilder.Sql(@"SELECT create_hypertable('core.journey_stop_place_messages', 'date', chunk_time_interval => INTERVAL '14 days', if_not_exists => TRUE);");
             #endregion
 
             #region Journey Raw Indexes
@@ -110,9 +85,6 @@ namespace Navigator.Data.Migrations
             migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_journey_stop_places_journey_date_planned_time
                         ON core.journey_stop_places (journey_id, date, planned_time)
                         INCLUDE (station_eva_number, schedule_type, cancelled, delay);");
-
-            migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_journey_messages_journey_date
-                        ON core.journey_messages (journey_id, date);");
 
             migrationBuilder.Sql(@"CREATE INDEX IF NOT EXISTS IX_journey_transports_journey_description_number_date
                         ON core.journey_transports (journey_description, number, date)
@@ -455,11 +427,6 @@ namespace Navigator.Data.Migrations
                         timescaledb.compress_orderby = 'date, planned_time'
                     );");
 
-            migrationBuilder.Sql(@"ALTER TABLE core.journey_stop_place_messages SET (
-                        timescaledb.compress,
-                        timescaledb.compress_orderby = 'date'
-                    );");
-
             migrationBuilder.Sql(@"ALTER TABLE statistics.journey_event_quality_facts SET (
                         timescaledb.compress,
                         timescaledb.compress_segmentby = 'station_eva_number, transport_type',
@@ -473,7 +440,6 @@ namespace Navigator.Data.Migrations
                     );");
 
             migrationBuilder.Sql(@"SELECT add_compression_policy('core.journey_stop_places', INTERVAL '240 days', if_not_exists => TRUE);");
-            migrationBuilder.Sql(@"SELECT add_compression_policy('core.journey_stop_place_messages', INTERVAL '240 days', if_not_exists => TRUE);");
             migrationBuilder.Sql(@"SELECT add_compression_policy('statistics.journey_event_quality_facts', INTERVAL '240 days', if_not_exists => TRUE);");
             migrationBuilder.Sql(@"SELECT add_compression_policy('statistics.journey_route_quality_facts', INTERVAL '240 days', if_not_exists => TRUE);");
             #endregion
@@ -494,7 +460,6 @@ namespace Navigator.Data.Migrations
 
             migrationBuilder.Sql(@"SELECT remove_compression_policy('statistics.journey_route_quality_facts', if_exists => TRUE);");
             migrationBuilder.Sql(@"SELECT remove_compression_policy('statistics.journey_event_quality_facts', if_exists => TRUE);");
-            migrationBuilder.Sql(@"SELECT remove_compression_policy('core.journey_stop_place_messages', if_exists => TRUE);");
             migrationBuilder.Sql(@"SELECT remove_compression_policy('core.journey_stop_places', if_exists => TRUE);");
 
             migrationBuilder.Sql(@"DROP TRIGGER IF EXISTS TRG_journey_fact_projection_backlog_notify ON statistics.journey_fact_projection_backlog;");
@@ -503,8 +468,6 @@ namespace Navigator.Data.Migrations
             migrationBuilder.Sql(@"DROP TABLE IF EXISTS statistics.journey_fact_projection_backlog CASCADE;");
             migrationBuilder.Sql(@"DROP TABLE IF EXISTS statistics.journey_route_quality_facts CASCADE;");
             migrationBuilder.Sql(@"DROP TABLE IF EXISTS statistics.journey_event_quality_facts CASCADE;");
-            migrationBuilder.Sql(@"DROP TABLE IF EXISTS core.journey_stop_place_messages CASCADE;");
-            migrationBuilder.Sql(@"DROP TABLE IF EXISTS core.journey_messages CASCADE;");
             migrationBuilder.Sql(@"DROP TABLE IF EXISTS core.journey_stop_places CASCADE;");
             migrationBuilder.Sql(@"DROP TABLE IF EXISTS core.journey_transports CASCADE;");
             migrationBuilder.Sql(@"DROP TABLE IF EXISTS core.journeys CASCADE;");

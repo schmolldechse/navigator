@@ -1,5 +1,4 @@
 using Navigator.Data.Entities.Journey;
-using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Enums;
 using Navigator.Data.Models.Ris;
 using Riok.Mapperly.Abstractions;
@@ -29,7 +28,6 @@ public partial class JourneyMapper
     [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.JourneyEventBased.Info.Type), nameof(Journey.JourneyType), Use = nameof(MapJourneyType))]
     [MapValue(nameof(Journey.Transport), null)]
     [MapperIgnoreTarget(nameof(Journey.StopPlaces))]
-    [MapperIgnoreTarget(nameof(Journey.Messages))]
     private partial Journey MapJourneyInternal(RisJourneys.JourneyEventBased source);
 #pragma warning restore RMG076 // Cannot assign null to non-nullable member
 
@@ -45,34 +43,6 @@ public partial class JourneyMapper
         journey.Transport = MapJourneyTransport(source);
         journey.Transport.Date = date;
 
-        var messageLookup = new Dictionary<int, JourneyMessage>();
-        journey.Messages = new List<JourneyMessage>();
-
-        void MapMessages<T>(IEnumerable<T>? sourceList, Func<T, int> idSelector, Func<T, JourneyMessage> mapper)
-        {
-            if (sourceList is null) return;
-            foreach (var item in sourceList)
-            {
-                var message = mapper(item);
-                message.JourneyId = journey.Id;
-                message.Date = date;
-
-                journey.Messages.Add(message);
-
-                var messageId = idSelector(item);
-                if (!messageLookup.ContainsKey(messageId))
-                    messageLookup[messageId] = message;
-            }
-        }
-        if (source.Messages is not null)
-        {
-            MapMessages(source.Messages.Attributes, message => message.MessageID, MapMessageAttribute);
-            MapMessages(source.Messages.Disruptions, message => message.MessageID, MapMessageDisruption);
-            MapMessages(source.Messages.Notes, message => message.MessageID, MapMessageNote);
-            MapMessages(source.Messages.RisCauseCodes, message => message.MessageID, MapMessageRisCause);
-            MapMessages(source.Messages.RisQualityDeviations, message => message.MessageID, MapMessageRisQualityDeviation);
-        }
-
         journey.StopPlaces = new List<JourneyStopPlace>();
         if (source.Events is not null)
         {
@@ -81,24 +51,6 @@ public partial class JourneyMapper
                 var stopPlace = MapJourneyStopPlace(sourceEvent);
                 stopPlace.JourneyId = journey.Id;
                 stopPlace.Date = date;
-
-                if (sourceEvent.Messages is null || !sourceEvent.Messages.Any())
-                {
-                    journey.StopPlaces.Add(stopPlace);
-                    continue;
-                }
-
-                stopPlace.Messages = [];
-                foreach (var messageId in sourceEvent.Messages)
-                {
-                    if (!messageLookup.TryGetValue(messageId, out var linkedMessage)) continue;
-                    stopPlace.Messages.Add(new JourneyStopPlaceMessage()
-                    {
-                        StopPlace = stopPlace,
-                        Message = linkedMessage,
-                        Date = date
-                    });
-                }
 
                 journey.StopPlaces.Add(stopPlace);
             }
@@ -196,7 +148,6 @@ public partial class JourneyMapper
     [MapProperty(nameof(RisJourneys.JourneyEvent.TimeType), nameof(JourneyStopPlace.TimeType), Use = nameof(MapTimeType))]
     [MapProperty(nameof(RisJourneys.JourneyEvent.PlatformSchedule), nameof(JourneyStopPlace.PlannedPlatform))]
     [MapProperty(nameof(RisJourneys.JourneyEvent.Platform), nameof(JourneyStopPlace.ActualPlatform))]
-    [MapValue(nameof(JourneyStopPlace.Messages), null)]
     public partial JourneyStopPlace MapJourneyStopPlace(RisJourneys.JourneyEvent source);
 #pragma warning restore RMG076 // Cannot assign null to non-nullable member
 
@@ -223,97 +174,4 @@ public partial class JourneyMapper
     };
     #endregion
 
-    #region JourneyMessage
-
-    #region Attribute
-#pragma warning disable RMG076 // Cannot assign null to non-nullable member
-    [MapperIgnoreTarget(nameof(JourneyMessage.Id))]
-    [MapValue(nameof(JourneyMessage.JourneyId), null)]
-    [MapperIgnoreTarget(nameof(JourneyMessage.Journey))]
-    [MapValue(nameof(JourneyMessage.Date), null)]
-    [MapValue(nameof(JourneyMessage.Type), MessageType.Attribute)]
-    [MapProperty(nameof(RisJourneys.MessageAttribute.Code), nameof(JourneyMessage.Code))]
-    [MapProperty(nameof(RisJourneys.MessageAttribute.Text), nameof(JourneyMessage.Text))]
-    [MapValue(nameof(JourneyMessage.TextShort), null)]
-    [MapValue(nameof(JourneyMessage.DisruptionCause), null)]
-    [MapValue(nameof(JourneyMessage.DisruptionEffect), null)]
-    [MapValue(nameof(JourneyMessage.NoteCategory), null)]
-    [MapValue(nameof(JourneyMessage.JourneyStopPlaceMessages), null)]
-    public partial JourneyMessage MapMessageAttribute(RisJourneys.MessageAttribute source);
-#pragma warning restore RMG076 // Cannot assign null to non-nullable member
-    #endregion
-
-    #region Disruption
-#pragma warning disable RMG076 // Cannot assign null to non-nullable member
-    [MapperIgnoreTarget(nameof(JourneyMessage.Id))]
-    [MapValue(nameof(JourneyMessage.JourneyId), null)]
-    [MapperIgnoreTarget(nameof(JourneyMessage.Journey))]
-    [MapValue(nameof(JourneyMessage.Date), null)]
-    [MapValue(nameof(JourneyMessage.Type), MessageType.Disruption)]
-    [MapValue(nameof(JourneyMessage.Code), null)]
-    [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.MessageDisruptionCommunication.LangDe.Text), nameof(JourneyMessage.Text))]
-    [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.MessageDisruptionCommunication.LangDe.TextShort), nameof(JourneyMessage.TextShort))]
-    [MapProperty(nameof(RisJourneys.MessageDisruptionCommunication.Cause), nameof(JourneyMessage.DisruptionCause))]
-    [MapProperty(nameof(RisJourneys.MessageDisruptionCommunication.Effect), nameof(JourneyMessage.DisruptionEffect))]
-    [MapValue(nameof(JourneyMessage.NoteCategory), null)]
-    [MapValue(nameof(JourneyMessage.JourneyStopPlaceMessages), null)]
-    public partial JourneyMessage MapMessageDisruption(RisJourneys.MessageDisruptionCommunication source);
-#pragma warning restore RMG076 // Cannot assign null to non-nullable member
-    #endregion
-
-    #region Note
-#pragma warning disable RMG076 // Cannot assign null to non-nullable member
-    [MapperIgnoreTarget(nameof(JourneyMessage.Id))]
-    [MapValue(nameof(JourneyMessage.JourneyId), null)]
-    [MapperIgnoreTarget(nameof(JourneyMessage.Journey))]
-    [MapValue(nameof(JourneyMessage.Date), null)]
-    [MapValue(nameof(JourneyMessage.Type), MessageType.Note)]
-    [MapProperty(nameof(RisJourneys.MessageNote.Code), nameof(JourneyMessage.Code))]
-    [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.MessageNote.LangDe.Text), nameof(JourneyMessage.Text))]
-    [MapProperty(nameof(@Navigator.Data.Models.Ris.RisJourneys.MessageNote.LangDe.TextShort), nameof(JourneyMessage.TextShort))]
-    [MapValue(nameof(JourneyMessage.DisruptionCause), null)]
-    [MapValue(nameof(JourneyMessage.DisruptionEffect), null)]
-    [MapProperty(nameof(RisJourneys.MessageNote.Category), nameof(JourneyMessage.NoteCategory))]
-    [MapValue(nameof(JourneyMessage.JourneyStopPlaceMessages), null)]
-    public partial JourneyMessage MapMessageNote(RisJourneys.MessageNote source);
-#pragma warning restore RMG076 // Cannot assign null to non-nullable member
-    #endregion
-
-    #region RisCause
-#pragma warning disable RMG076 // Cannot assign null to non-nullable member
-    [MapperIgnoreTarget(nameof(JourneyMessage.Id))]
-    [MapValue(nameof(JourneyMessage.JourneyId), null)]
-    [MapperIgnoreTarget(nameof(JourneyMessage.Journey))]
-    [MapValue(nameof(JourneyMessage.Date), null)]
-    [MapValue(nameof(JourneyMessage.Type), MessageType.RisCause)]
-    [MapProperty(nameof(RisJourneys.MessageRisCauseCode.Code), nameof(JourneyMessage.Code))]
-    [MapProperty(nameof(RisJourneys.MessageRisCauseCode.Text), nameof(JourneyMessage.Text))]
-    [MapValue(nameof(JourneyMessage.TextShort), null)]
-    [MapValue(nameof(JourneyMessage.DisruptionCause), null)]
-    [MapValue(nameof(JourneyMessage.DisruptionEffect), null)]
-    [MapValue(nameof(JourneyMessage.NoteCategory), null)]
-    [MapValue(nameof(JourneyMessage.JourneyStopPlaceMessages), null)]
-    public partial JourneyMessage MapMessageRisCause(RisJourneys.MessageRisCauseCode source);
-#pragma warning restore RMG076 // Cannot assign null to non-nullable member
-    #endregion
-
-    #region RisQualityDeviation
-#pragma warning disable RMG076 // Cannot assign null to non-nullable member
-    [MapperIgnoreTarget(nameof(JourneyMessage.Id))]
-    [MapValue(nameof(JourneyMessage.JourneyId), null)]
-    [MapperIgnoreTarget(nameof(JourneyMessage.Journey))]
-    [MapValue(nameof(JourneyMessage.Date), null)]
-    [MapValue(nameof(JourneyMessage.Type), MessageType.RisQualityDeviation)]
-    [MapProperty(nameof(RisJourneys.MessageRisQualityDeviation.Code), nameof(JourneyMessage.Code))]
-    [MapProperty(nameof(RisJourneys.MessageRisQualityDeviation.Text), nameof(JourneyMessage.Text))]
-    [MapValue(nameof(JourneyMessage.TextShort), null)]
-    [MapValue(nameof(JourneyMessage.DisruptionCause), null)]
-    [MapValue(nameof(JourneyMessage.DisruptionEffect), null)]
-    [MapValue(nameof(JourneyMessage.NoteCategory), null)]
-    [MapValue(nameof(JourneyMessage.JourneyStopPlaceMessages), null)]
-    public partial JourneyMessage MapMessageRisQualityDeviation(RisJourneys.MessageRisQualityDeviation source);
-#pragma warning restore RMG076 // Cannot assign null to non-nullable member
-    #endregion
-
-    #endregion
 }

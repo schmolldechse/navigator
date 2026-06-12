@@ -29,7 +29,6 @@ public static class Injection
                 npgsqlOptions.MapEnum<ScheduleType>("schedule_type", "core");
                 npgsqlOptions.MapEnum<TransportType>("transport_type", "core");
                 npgsqlOptions.MapEnum<TimeType>("time_type", "core");
-                npgsqlOptions.MapEnum<MessageType>("message_type", "core");
                 npgsqlOptions.MapEnum<JourneyType>("journey_type", "core");
             }));
 

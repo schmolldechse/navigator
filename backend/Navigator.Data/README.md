@@ -5,7 +5,7 @@
 ## Responsibilities
 
 - Configure PostgreSQL, TimescaleDB, enum mappings, and spatial extensions through `DataContext`.
-- Store stations, RIL100 identifiers, transport coverage, RIS IDs, journeys, journey messages, and statistics snapshots.
+- Store stations, RIL100 identifiers, transport coverage, RIS IDs, journeys, and statistics snapshots.
 - Provide repositories for stations, timetables, journeys, RIS IDs, and statistics.
 - Call upstream Deutsche Bahn APIs through repository implementations.
 - Build metric series for the frontend dashboard.
@@ -35,8 +35,6 @@ Journey data is stored in two layers:
    - `core.journeys`
    - `core.journey_transports`
    - `core.journey_stop_places`
-   - `core.journey_messages`
-   - `core.journey_stop_place_messages`
 2. Analytics fact tables in the `statistics` schema keep pre-shaped rows for TimescaleDB continuous aggregates:
    - `statistics.journey_event_quality_facts`
    - `statistics.journey_route_quality_facts`

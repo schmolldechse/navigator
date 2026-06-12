@@ -1,4 +1,4 @@
-using Navigator.Data.Enums;
+using Navigator.Api.Enums;
 
 namespace Navigator.Api.DTOs.Journey.Message;
 

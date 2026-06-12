@@ -29,5 +29,4 @@ public class Journey
 
     public virtual ICollection<JourneyStopPlace> StopPlaces { get; set; } = [];
 
-    public virtual ICollection<Message.JourneyMessage> Messages { get; set; } = [];
 }

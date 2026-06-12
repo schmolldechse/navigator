@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Navigator.Data.Entities;
 using Navigator.Data.Entities.Journey;
-using Navigator.Data.Entities.Journey.Message;
 using Navigator.Data.Entities.Station;
 using Navigator.Data.Entities.Statistics;
 using Navigator.Data.Entities.Views;
@@ -30,8 +29,6 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<Journey> Journeys { get; set; }
     public DbSet<JourneyTransport> JourneyTransports { get; set; }
     public DbSet<JourneyStopPlace> JourneyStopPlaces { get; set; }
-    public DbSet<JourneyMessage> JourneyMessages { get; set; }
-    public DbSet<JourneyStopPlaceMessage> JourneyStopPlaceMessages { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
