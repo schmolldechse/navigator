@@ -21,9 +21,18 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<JourneySnapshot> JourneySnapshots { get; set; }
     public DbSet<JourneyFactProjectionBacklog> JourneyFactProjectionBacklog { get; set; }
     public DbSet<JourneyEventQualityFact> JourneyEventQualityFacts { get; set; }
-    public DbSet<JourneyRouteQualityFact> JourneyRouteQualityFacts { get; set; }
-    public DbSet<JourneyRouteQualityHourly> JourneyRouteQualities { get; set; }
-    public DbSet<StationLineRouteQualityHourly> StationLineRouteQualities { get; set; }
+    public DbSet<JourneyQualityFact> JourneyQualityFacts { get; set; }
+    public DbSet<StationJourneyEventDetail> StationJourneyEventDetails { get; set; }
+    public DbSet<JourneyQualityDetail> JourneyQualityDetails { get; set; }
+    public DbSet<NetworkEventQualityHourly> NetworkEventQualities { get; set; }
+    public DbSet<NetworkJourneyQualityHourly> NetworkJourneyQualities { get; set; }
+    public DbSet<StationEventQualityHourly> StationEventQualities { get; set; }
+    public DbSet<StationAdministrationQualityHourly> StationAdministrationQualities { get; set; }
+    public DbSet<LineEventQualityHourly> LineEventQualities { get; set; }
+    public DbSet<StationLineQualityHourly> StationLineQualities { get; set; }
+    public DbSet<JourneyAdministrationQualityHourly> JourneyAdministrationQualities { get; set; }
+    public DbSet<LineJourneyQualityHourly> LineJourneyQualities { get; set; }
+    public DbSet<JourneyNumberQualityHourly> JourneyNumberQualities { get; set; }
     // journey
     public DbSet<Administration> Administrations { get; set; }
     public DbSet<Journey> Journeys { get; set; }

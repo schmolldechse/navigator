@@ -37,14 +37,10 @@ public static class Injection
 
         services.AddScoped<Estimator>();
 
-        services.AddTransient<IMetricSeriesBuilder, DatabaseSizeMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, RisIdMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, JourneyMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, NetworkStationEventQualityTimeSeriesMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, StationEventQualityTimeSeriesMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, StationEventQualitySummaryMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, AdministrationRankingMetricSeriesBuilder>()
-            .AddTransient<IMetricSeriesBuilder, LineRankingMetricSeriesBuilder>();
+        services.AddTransient<IStatisticsMetricBuilder, NetworkStatisticsMetricSeriesBuilder>()
+            .AddTransient<IStatisticsMetricBuilder, StationStatisticsMetricSeriesBuilder>()
+            .AddTransient<IStatisticsMetricBuilder, LineStatisticsMetricSeriesBuilder>()
+            .AddTransient<IStatisticsMetricBuilder, JourneyStatisticsMetricSeriesBuilder>();
 
         services.AddTransient<IJourneyRepository, JourneyRepository>()
             .AddTransient<IRisIdRepository, RisIdRepository>()

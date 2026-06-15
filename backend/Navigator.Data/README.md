@@ -37,7 +37,7 @@ Journey data is stored in two layers:
    - `core.journey_stop_places`
 2. Analytics fact tables in the `statistics` schema keep pre-shaped rows for TimescaleDB continuous aggregates:
    - `statistics.journey_event_quality_facts`
-   - `statistics.journey_route_quality_facts`
+   - `statistics.journey_quality_facts`
 
 The fact tables are intentionally derived data. They do not replace the raw journey tables and must not be treated as the source of truth.
 
@@ -47,7 +47,8 @@ TimescaleDB continuous aggregates work best when the aggregate query is a straig
 
 - joins between journeys, transports, and stop places
 - origin and destination station resolution
-- terminal delay selection per journey
+- exact stop-event time and delay selection
+- destination delay and journey outcome selection
 - replacement transport detection
 
 That shaping is done once when journeys are imported or backfilled. Continuous aggregates then count and sum already-prepared facts.
@@ -59,17 +60,31 @@ RIS::Journeys
   -> EF journey graph
   -> core raw journey hypertables
   -> statistics fact hypertables
+  -> statistics detail views
   -> TimescaleDB continuous aggregates
   -> API metric builders
 ```
 
-`statistics.journey_event_quality_facts` contains one row per stop-place event and powers:
+`statistics.journey_event_quality_facts` contains one row per stop-place event. It stores exact `planned_time`, origin/destination context, `stop_cancelled`, and `event_delay_seconds`. It powers station, network, administration, and station-line event aggregates.
 
-- `statistics.station_line_route_quality_hourly`
+`statistics.journey_quality_facts` contains one row per journey. It stores journey-level outcomes such as `fully_cancelled`, `partially_cancelled`, `destination_not_reached`, and `destination_delay_seconds`. It powers network, administration, and line journey aggregates.
 
-`statistics.journey_route_quality_facts` contains one row per journey and powers:
+Detail queries read slim views over the fact tables:
 
-- `statistics.journey_route_quality_hourly`
+- `statistics.station_journey_event_details`
+- `statistics.journey_quality_details`
+
+Metric queries read API-specific continuous aggregates:
+
+- `statistics.network_event_quality_hourly`
+- `statistics.network_journey_quality_hourly`
+- `statistics.station_event_quality_hourly`
+- `statistics.station_administration_quality_hourly`
+- `statistics.line_event_quality_hourly`
+- `statistics.station_line_quality_hourly`
+- `statistics.journey_administration_quality_hourly`
+- `statistics.line_journey_quality_hourly`
+- `statistics.journey_number_quality_hourly`
 
 The API reads from the hourly statistics views. Raw journey tables remain available for audits, reprocessing, and future analytics.
 

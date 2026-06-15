@@ -25,13 +25,13 @@ public sealed class JourneyFactProjectionService(
         var result = await ProjectClaimedAsync(claimed, cancellationToken);
 
         logger.LogInformation(
-            "Projected journey quality facts. Claimed: {ClaimedCount}, Projected: {ProjectedCount}, Skipped: {SkippedCount}, Failed: {FailedCount}, EventFacts: {EventFactCount}, RouteFacts: {RouteFactCount}",
+            "Projected journey quality facts. Claimed: {ClaimedCount}, Projected: {ProjectedCount}, Skipped: {SkippedCount}, Failed: {FailedCount}, EventFacts: {EventFactCount}, JourneyFacts: {JourneyFactCount}",
             result.ClaimedCount,
             result.ProjectedCount,
             result.SkippedCount,
             result.FailedCount,
             result.EventFactCount,
-            result.RouteFactCount);
+            result.JourneyFactCount);
 
         return result;
     }
@@ -73,7 +73,7 @@ public sealed class JourneyFactProjectionService(
                 SkippedCount: 0,
                 FailedCount: 1,
                 EventFactCount: 0,
-                RouteFactCount: 0);
+                JourneyFactCount: 0);
         }
         finally
         {
@@ -98,7 +98,7 @@ public sealed class JourneyFactProjectionService(
             SkippedCount: entries.Count - result.ProjectedCount,
             FailedCount: 0,
             EventFactCount: result.EventFactCount,
-            RouteFactCount: result.RouteFactCount);
+            JourneyFactCount: result.JourneyFactCount);
     }
 
     private async Task<ProjectFactsResult> ProjectFactsInDatabaseAsync(
@@ -130,8 +130,12 @@ public sealed class JourneyFactProjectionService(
                     journeys.journey_type,
                     transports.transport_type,
                     transports.replacement_transport_type,
-                    transports.journey_description,
-                    transports.number
+                    coalesce(
+                        nullif(btrim(transports.journey_description), ''),
+                        nullif(btrim(concat_ws(' ', nullif(btrim(transports.category), ''), nullif(btrim(transports.line), ''))), ''),
+                        transports.number::text
+                    ) AS journey_description,
+                    transports.number AS journey_number
                 FROM claimed
                 INNER JOIN core.journeys AS journeys
                     ON journeys.id = claimed.journey_id
@@ -141,7 +145,13 @@ public sealed class JourneyFactProjectionService(
                    AND transports.date = journeys.date
             ),
             stop_places AS (
-                SELECT
+                SELECT DISTINCT ON (
+                    journey.journey_id,
+                    journey.date,
+                    stop_place.station_eva_number,
+                    stop_place.schedule_type,
+                    stop_place.planned_time
+                )
                     journey.journey_id,
                     journey.date,
                     journey.administration_id,
@@ -150,28 +160,41 @@ public sealed class JourneyFactProjectionService(
                     journey.transport_type,
                     journey.replacement_transport_type,
                     journey.journey_description,
-                    journey.number,
+                    journey.journey_number,
                     stop_place.id AS stop_place_id,
+                    time_bucket(INTERVAL '1 hour', stop_place.planned_time) AS bucket_hour,
                     stop_place.planned_time,
                     stop_place.station_eva_number,
                     stop_place.schedule_type,
-                    stop_place.cancelled,
+                    stop_place.cancelled AS stop_cancelled,
                     stop_place.delay
                 FROM journeys_with_transport AS journey
                 INNER JOIN core.journey_stop_places AS stop_place
                     ON stop_place.journey_id = journey.journey_id
                    AND stop_place.date = journey.date
+                ORDER BY
+                    journey.journey_id,
+                    journey.date,
+                    stop_place.station_eva_number,
+                    stop_place.schedule_type,
+                    stop_place.planned_time,
+                    CASE stop_place.time_type
+                        WHEN 'REAL'::core.time_type THEN 0
+                        WHEN 'PREVIEW'::core.time_type THEN 1
+                        ELSE 2
+                    END,
+                    stop_place.actual_time DESC,
+                    stop_place.id
             ),
             journey_bounds AS (
                 SELECT
                     journey_id,
                     date,
                     (array_agg(administration_id))[1] AS administration_id,
-                    bool_or(journey_cancelled) AS journey_cancelled,
-                    bool_or(journey_type = 'REPLACEMENT'::core.journey_type OR replacement_transport_type IS NOT NULL) AS is_replacement_transport,
+                    bool_or(journey_type = 'REPLACEMENT'::core.journey_type OR replacement_transport_type IS NOT NULL) AS is_replacement,
                     (array_agg(transport_type))[1] AS transport_type,
                     (array_agg(journey_description))[1] AS journey_description,
-                    (array_agg(number))[1] AS number,
+                    (array_agg(journey_number))[1] AS journey_number,
                     coalesce(
                         (array_agg(station_eva_number ORDER BY planned_time, station_eva_number)
                             FILTER (WHERE schedule_type = 'DEPARTURE'::core.schedule_type))[1],
@@ -190,16 +213,50 @@ public sealed class JourneyFactProjectionService(
                         max(planned_time) FILTER (WHERE schedule_type = 'ARRIVAL'::core.schedule_type),
                         max(planned_time)
                     ) AS journey_end_time,
-                    (array_agg(delay ORDER BY CASE WHEN schedule_type = 'ARRIVAL'::core.schedule_type THEN 0 ELSE 1 END, planned_time DESC)
-                        FILTER (WHERE cancelled IS NOT TRUE))[1] AS terminal_delay_seconds
+                    (array_agg(delay ORDER BY CASE WHEN schedule_type = 'ARRIVAL'::core.schedule_type THEN 0 ELSE 1 END, planned_time DESC, station_eva_number DESC))[1] AS destination_delay_raw,
+                    (array_agg(stop_cancelled ORDER BY CASE WHEN schedule_type = 'ARRIVAL'::core.schedule_type THEN 0 ELSE 1 END, planned_time DESC, station_eva_number DESC))[1] AS destination_stop_cancelled,
+                    bool_or(journey_cancelled) OR bool_and(stop_cancelled) AS fully_cancelled,
+                    bool_or(stop_cancelled) AS has_cancelled_stop
                 FROM stop_places
                 GROUP BY journey_id, date
             ),
+            journey_facts AS (
+                SELECT
+                    *,
+                    time_bucket(INTERVAL '1 hour', journey_start_time) AS bucket_hour,
+                    has_cancelled_stop AND NOT fully_cancelled AS partially_cancelled,
+                    fully_cancelled OR destination_stop_cancelled AS destination_not_reached,
+                    CASE
+                        WHEN fully_cancelled OR destination_stop_cancelled THEN NULL
+                        ELSE destination_delay_raw
+                    END AS destination_delay_seconds
+                FROM journey_bounds
+            ),
+            deleted_event_facts AS (
+                DELETE FROM statistics.journey_event_quality_facts AS facts
+                USING claimed
+                WHERE facts.journey_id = claimed.journey_id
+                  AND facts.journey_date = claimed.date
+                RETURNING 1
+            ),
+            deleted_journey_facts AS (
+                DELETE FROM statistics.journey_quality_facts AS facts
+                USING claimed
+                WHERE facts.journey_id = claimed.journey_id
+                  AND facts.journey_date = claimed.date
+                RETURNING 1
+            ),
+            delete_barrier AS (
+                SELECT
+                    (SELECT count(*) FROM deleted_event_facts)
+                    + (SELECT count(*) FROM deleted_journey_facts) AS deleted_count
+            ),
             inserted_event_facts AS (
                 INSERT INTO statistics.journey_event_quality_facts (
+                    bucket_hour,
                     stop_place_id,
                     journey_id,
-                    date,
+                    journey_date,
                     planned_time,
                     journey_start_time,
                     journey_end_time,
@@ -208,14 +265,15 @@ public sealed class JourneyFactProjectionService(
                     administration_id,
                     transport_type,
                     journey_description,
-                    number,
-                    is_replacement_transport,
+                    journey_number,
+                    is_replacement,
                     origin_eva_number,
                     destination_eva_number,
-                    cancelled,
-                    delay
+                    stop_cancelled,
+                    event_delay_seconds
                 )
                 SELECT
+                    stop_place.bucket_hour,
                     stop_place.stop_place_id,
                     stop_place.journey_id,
                     stop_place.date,
@@ -227,51 +285,57 @@ public sealed class JourneyFactProjectionService(
                     bounds.administration_id,
                     bounds.transport_type,
                     bounds.journey_description,
-                    bounds.number,
-                    bounds.is_replacement_transport,
+                    bounds.journey_number,
+                    bounds.is_replacement,
                     bounds.origin_eva_number,
                     bounds.destination_eva_number,
-                    stop_place.cancelled,
+                    stop_place.stop_cancelled,
                     stop_place.delay
                 FROM stop_places AS stop_place
                 INNER JOIN journey_bounds AS bounds
                     ON bounds.journey_id = stop_place.journey_id
                    AND bounds.date = stop_place.date
-                ON CONFLICT DO NOTHING
+                CROSS JOIN delete_barrier
                 RETURNING 1
             ),
-            inserted_route_facts AS (
-                INSERT INTO statistics.journey_route_quality_facts (
+            inserted_journey_facts AS (
+                INSERT INTO statistics.journey_quality_facts (
+                    bucket_hour,
                     journey_id,
-                    date,
-                    journey_start_time,
-                    journey_end_time,
+                    journey_date,
                     administration_id,
                     transport_type,
                     journey_description,
-                    number,
-                    is_replacement_transport,
+                    journey_number,
+                    is_replacement,
                     origin_eva_number,
                     destination_eva_number,
-                    journey_cancelled,
-                    terminal_delay_seconds
+                    journey_start_time,
+                    journey_end_time,
+                    destination_delay_seconds,
+                    fully_cancelled,
+                    partially_cancelled,
+                    destination_not_reached
                 )
                 SELECT
+                    bucket_hour,
                     journey_id,
                     date,
-                    journey_start_time,
-                    journey_end_time,
                     administration_id,
                     transport_type,
                     journey_description,
-                    number,
-                    is_replacement_transport,
+                    journey_number,
+                    is_replacement,
                     origin_eva_number,
                     destination_eva_number,
-                    journey_cancelled,
-                    terminal_delay_seconds
-                FROM journey_bounds
-                ON CONFLICT DO NOTHING
+                    journey_start_time,
+                    journey_end_time,
+                    destination_delay_seconds,
+                    fully_cancelled,
+                    partially_cancelled,
+                    destination_not_reached
+                FROM journey_facts
+                CROSS JOIN delete_barrier
                 RETURNING 1
             ),
             deleted_backlog_entries AS (
@@ -282,11 +346,11 @@ public sealed class JourneyFactProjectionService(
                 RETURNING 1
             )
             SELECT
-                (SELECT count(*)::integer FROM journey_bounds) AS projected_count,
+                (SELECT count(*)::integer FROM journey_facts) AS projected_count,
                 (SELECT count(*)::integer FROM stop_places) AS event_fact_count,
-                (SELECT count(*)::integer FROM journey_bounds) AS route_fact_count,
+                (SELECT count(*)::integer FROM journey_facts) AS journey_fact_count,
                 (SELECT count(*)::integer FROM inserted_event_facts) AS inserted_event_fact_count,
-                (SELECT count(*)::integer FROM inserted_route_facts) AS inserted_route_fact_count,
+                (SELECT count(*)::integer FROM inserted_journey_facts) AS inserted_journey_fact_count,
                 (SELECT count(*)::integer FROM deleted_backlog_entries) AS deleted_backlog_entry_count;
             """;
 
@@ -299,7 +363,7 @@ public sealed class JourneyFactProjectionService(
         return new ProjectFactsResult(
             ProjectedCount: reader.GetInt32(0),
             EventFactCount: reader.GetInt32(1),
-            RouteFactCount: reader.GetInt32(2));
+            JourneyFactCount: reader.GetInt32(2));
     }
 
     private async Task<List<ClaimedJourneyFactProjection>> ClaimBacklogEntriesAsync(
@@ -430,7 +494,7 @@ public sealed class JourneyFactProjectionService(
     private sealed record ProjectFactsResult(
         int ProjectedCount,
         int EventFactCount,
-        int RouteFactCount
+        int JourneyFactCount
     );
 }
 
@@ -440,7 +504,7 @@ public sealed record JourneyFactProjectionRunResult(
     int SkippedCount,
     int FailedCount,
     int EventFactCount,
-    int RouteFactCount
+    int JourneyFactCount
 )
 {
     public static JourneyFactProjectionRunResult Empty { get; } = new(0, 0, 0, 0, 0, 0);
@@ -451,5 +515,5 @@ public sealed record JourneyFactProjectionRunResult(
         SkippedCount + other.SkippedCount,
         FailedCount + other.FailedCount,
         EventFactCount + other.EventFactCount,
-        RouteFactCount + other.RouteFactCount);
+        JourneyFactCount + other.JourneyFactCount);
 }

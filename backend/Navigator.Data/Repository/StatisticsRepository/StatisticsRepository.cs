@@ -1,6 +1,5 @@
 using Navigator.Data.Entities.Statistics;
-using Navigator.Data.Models.Statistics;
-using Navigator.Data.Repository.StationRil100Repository;
+using Navigator.Data.Models.Statistics.Api;
 using Navigator.Data.Repository.StatisticsRepository.MetricSeriesBuilders;
 
 namespace Navigator.Data.Repository.StatisticsRepository;
@@ -8,12 +7,10 @@ namespace Navigator.Data.Repository.StatisticsRepository;
 public class StatisticsRepository(
     DataContext dataContext,
     Estimator estimator,
-    IStationRil100Repository stationRil100Repository,
-    IEnumerable<IMetricSeriesBuilder> metricSeriesBuilders
+    IEnumerable<IStatisticsMetricBuilder> metricBuilders
 ) : IStatisticsRepository
 {
-    private readonly IReadOnlyDictionary<Type, IMetricSeriesBuilder> buildersByRequestType =
-        metricSeriesBuilders.ToDictionary(builder => builder.RequestType);
+    private readonly IReadOnlyList<IStatisticsMetricBuilder> metricBuilders = metricBuilders.ToList();
 
     public Task<long?> EstimateCurrentDatabaseSizeAsync() => estimator.EstimateCurrentDatabaseSizeAsync();
 
@@ -21,22 +18,36 @@ public class StatisticsRepository(
 
     public Task<int?> EstimateCurrentJourneysAsync() => estimator.EstimateCurrentJourneysAsync();
 
-    public async Task<MetricSeries> GetMetricAsync(BaseMetricRequest baseRequest)
+    public Task<StatisticsMetricResponse> GetNetworkMetricAsync(
+        NetworkStatisticsMetricRequest request,
+        CancellationToken cancellationToken = default
+    ) => BuildMetricAsync(request, cancellationToken);
+
+    public Task<StatisticsMetricResponse> GetStationMetricAsync(
+        StationStatisticsMetricRequest request,
+        CancellationToken cancellationToken = default
+    ) => BuildMetricAsync(request, cancellationToken);
+
+    public Task<StatisticsMetricResponse> GetLineMetricAsync(
+        LineStatisticsMetricRequest request,
+        CancellationToken cancellationToken = default
+    ) => BuildMetricAsync(request, cancellationToken);
+
+    public Task<StatisticsMetricResponse> GetJourneyMetricAsync(
+        JourneyStatisticsMetricRequest request,
+        CancellationToken cancellationToken = default
+    ) => BuildMetricAsync(request, cancellationToken);
+
+    private async Task<StatisticsMetricResponse> BuildMetricAsync(
+        StatisticsMetricRequest request,
+        CancellationToken cancellationToken
+    )
     {
-        await ExpandEvaNumbersByRil100Async(baseRequest);
+        var builder = metricBuilders.FirstOrDefault(builder => builder.CanBuild(request));
+        if (builder is null)
+            throw new NotSupportedException($"No statistics metric builder supports request type '{request.GetType().Name}'.");
 
-        if (buildersByRequestType.TryGetValue(baseRequest.GetType(), out var builder))
-            return await builder.BuildAsync(baseRequest);
-
-        throw new NotSupportedException($"Metric type '{baseRequest.SeriesType}' is not supported.");
-    }
-
-    private async Task ExpandEvaNumbersByRil100Async(BaseMetricRequest request)
-    {
-        if (request is not IEvaNumberMetricRequest { IncludeRil100: true, EvaNumbers.Length: > 0 } evaNumberRequest)
-            return;
-
-        evaNumberRequest.EvaNumbers = await stationRil100Repository.ExpandEvaNumbersByRil100Async(evaNumberRequest.EvaNumbers);
+        return await builder.BuildAsync(request, cancellationToken);
     }
 
     public async Task SaveDatabaseSizeAsync(DatabaseSizeSnapshot snapshot)

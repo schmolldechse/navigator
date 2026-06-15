@@ -9,14 +9,17 @@ namespace Navigator.Data.Entities.Statistics;
 /// </summary>
 public class JourneyEventQualityFact
 {
+    [Column("bucket_hour")]
+    public required DateTime BucketHour { get; set; }
+
     [Column("stop_place_id")]
     public Guid StopPlaceId { get; set; }
 
     [Column("journey_id")]
     public required string JourneyId { get; set; }
 
-    [Column("date")]
-    public required DateOnly Date { get; set; }
+    [Column("journey_date")]
+    public required DateOnly JourneyDate { get; set; }
 
     [Column("planned_time")]
     public required DateTime PlannedTime { get; set; }
@@ -42,11 +45,11 @@ public class JourneyEventQualityFact
     [Column("journey_description")]
     public required string JourneyDescription { get; set; }
 
-    [Column("number")]
-    public required int Number { get; set; }
+    [Column("journey_number")]
+    public required int JourneyNumber { get; set; }
 
-    [Column("is_replacement_transport")]
-    public required bool IsReplacementTransport { get; set; }
+    [Column("is_replacement")]
+    public required bool IsReplacement { get; set; }
 
     [Column("origin_eva_number")]
     public required int OriginEvaNumber { get; set; }
@@ -54,9 +57,10 @@ public class JourneyEventQualityFact
     [Column("destination_eva_number")]
     public required int DestinationEvaNumber { get; set; }
 
-    [Column("cancelled")]
-    public required bool Cancelled { get; set; }
+    [Column("stop_cancelled")]
+    public required bool StopCancelled { get; set; }
 
-    [Column("delay")]
-    public required int Delay { get; set; }
+    [Column("event_delay_seconds")]
+    public required int EventDelaySeconds { get; set; }
+
 }
