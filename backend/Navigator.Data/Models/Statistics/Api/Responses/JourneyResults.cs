@@ -18,11 +18,11 @@ public sealed record JourneyPatternResult(
     TransportType? TransportType,
 
     [property: JsonPropertyName("scheduledStartTime")]
-    [property: Description("Typical scheduled start time in Europe/Berlin local time.")]
+    [property: Description("Typical scheduled start time using the request offset.")]
     TimeSpan ScheduledStartTime,
 
     [property: JsonPropertyName("scheduledEndTime")]
-    [property: Description("Typical scheduled end time in Europe/Berlin local time.")]
+    [property: Description("Typical scheduled end time using the request offset.")]
     TimeSpan ScheduledEndTime,
 
     [property: JsonPropertyName("mainOrigin")]
@@ -90,7 +90,7 @@ public sealed record JourneyStopProfileItem(
     StationReference Station,
 
     [property: JsonPropertyName("plannedTime")]
-    [property: Description("Typical planned stop time in Europe/Berlin local time.")]
+    [property: Description("Typical planned stop time using the request offset.")]
     TimeSpan PlannedTime,
 
     [property: JsonPropertyName("scheduleType")]

@@ -1,25 +1,105 @@
 <script lang="ts">
 	import type { EventTimeSeriesPoint } from "@lib/api";
-	import LineHourMatrix from "@lib/components/statistics/dashboard/LineHourMatrix.svelte";
-	import MetricComparisonList from "@lib/components/statistics/dashboard/MetricComparisonList.svelte";
-	import MetricHeatmap from "@lib/components/statistics/dashboard/MetricHeatmap.svelte";
-	import MetricKpiGrid from "@lib/components/statistics/dashboard/MetricKpiGrid.svelte";
-	import MetricRankingList from "@lib/components/statistics/dashboard/MetricRankingList.svelte";
-	import MetricTrendChart, { type TrendMetricDefinition } from "@lib/components/statistics/dashboard/MetricTrendChart.svelte";
-	import StationEventDetailsTable from "@lib/components/statistics/dashboard/StationEventDetailsTable.svelte";
-	import StatisticsFilterBar from "@lib/components/statistics/dashboard/StatisticsFilterBar.svelte";
+	import { getStatisticsDashboardContext } from "@lib/components/statistics/shared/statistics-context.svelte";
+	import MetricBucketControl from "@lib/components/statistics/shared/MetricBucketControl.svelte";
+	import StatisticsFilterPanel from "@lib/components/statistics/shared/StatisticsFilterPanel.svelte";
 	import {
-		createSearchParamsFromStatisticsFilters,
+		createRangeLabel,
+		createStationArrivalDepartureComparisonRequest,
+		createStationBenchmarkRequest,
+		createStationDirectionsRequest,
+		createStationEventDetailsRequest,
+		createStationEventSummaryRequest,
+		createStationLineHourMatrixRequest,
+		createStationLineRankingRequest,
+		createStationTimeSeriesRequest,
+		createStationTransportTypeMixRequest,
+		createStationWeekdayHourHeatmapRequest,
 		rateToPercent,
 		transportTypeShortLabel
-	} from "@lib/components/statistics/dashboard/statistics-dashboard";
+	} from "@lib/components/statistics/shared/statistics-dashboard";
+	import StationComparisonChart from "@lib/components/statistics/station/StationComparisonChart.svelte";
+	import StationEventDetailsTable from "@lib/components/statistics/station/StationEventDetailsTable.svelte";
+	import StationHeatmap from "@lib/components/statistics/station/StationHeatmap.svelte";
+	import StationKpiGrid from "@lib/components/statistics/station/StationKpiGrid.svelte";
+	import StationLineHourMatrix from "@lib/components/statistics/station/StationLineHourMatrix.svelte";
+	import StationRankingList from "@lib/components/statistics/station/StationRankingList.svelte";
+	import StationTrendChart, { type TrendMetricDefinition } from "@lib/components/statistics/station/StationTrendChart.svelte";
 	import Button from "@lib/components/ui/Button.svelte";
+	import { loadStationMetric } from "@lib/remote/statistics.remote";
 	import ArrowLeft from "@lucide/svelte/icons/arrow-left";
 	import RadioTower from "@lucide/svelte/icons/radio-tower";
 	import type { PageProps } from "./$types";
 
 	let { data }: PageProps = $props();
-	const networkHref = $derived(`/statistics?${createSearchParamsFromStatisticsFilters(data.filters).toString()}`);
+	const statistics = getStatisticsDashboardContext();
+	const rangeLabel = $derived(createRangeLabel(statistics.global));
+
+	const eventSummary = $derived(
+		loadStationMetric({
+			request: createStationEventSummaryRequest(statistics.global, statistics.event, data.evaNumber)
+		})
+	);
+	const benchmark = $derived(
+		loadStationMetric({
+			request: createStationBenchmarkRequest(statistics.global, statistics.event, data.evaNumber)
+		})
+	);
+	const timeSeries = $derived(
+		loadStationMetric({
+			request: createStationTimeSeriesRequest(
+				statistics.global,
+				statistics.event,
+				data.evaNumber,
+				statistics.station.timeSeries
+			)
+		})
+	);
+	const arrivalDepartureComparison = $derived(
+		loadStationMetric({
+			request: createStationArrivalDepartureComparisonRequest(statistics.global, statistics.event, data.evaNumber)
+		})
+	);
+	const weekdayHourHeatmap = $derived(
+		loadStationMetric({
+			request: createStationWeekdayHourHeatmapRequest(statistics.global, statistics.event, data.evaNumber)
+		})
+	);
+	const lineRanking = $derived(
+		loadStationMetric({
+			request: createStationLineRankingRequest(
+				statistics.global,
+				statistics.event,
+				data.evaNumber,
+				statistics.station.lineRanking
+			)
+		})
+	);
+	const directions = $derived(
+		loadStationMetric({
+			request: createStationDirectionsRequest(statistics.global, statistics.event, data.evaNumber)
+		})
+	);
+	const transportTypeMix = $derived(
+		loadStationMetric({
+			request: createStationTransportTypeMixRequest(statistics.global, statistics.event, data.evaNumber)
+		})
+	);
+	const lineHourMatrix = $derived(
+		loadStationMetric({
+			request: createStationLineHourMatrixRequest(statistics.global, statistics.event, data.evaNumber)
+		})
+	);
+	const eventDetails = $derived(
+		loadStationMetric({
+			request: createStationEventDetailsRequest(
+				statistics.global,
+				statistics.event,
+				data.evaNumber,
+				statistics.station.eventDetails
+			)
+		})
+	);
 
 	const eventTrendMetrics: TrendMetricDefinition[] = [
 		{
@@ -56,9 +136,8 @@
 
 		<div class="flex flex-col gap-4 pl-4 sm:pl-8 lg:flex-row lg:items-start lg:justify-between">
 			<div class="min-w-0">
-				<p class="text-foreground/55 text-sm font-semibold">EVA {data.evaNumber}</p>
 				<h1 class="text-3xl font-bold text-balance sm:text-4xl">{data.station.name}</h1>
-				<p class="text-foreground/60 mt-2 text-sm font-semibold">{data.rangeLabel}</p>
+				<p class="text-foreground/60 mt-2 text-sm font-semibold">{rangeLabel}</p>
 
 				<div class="mt-3 flex flex-wrap gap-2">
 					{#each data.station.transports as transportType (transportType)}
@@ -85,64 +164,65 @@
 				</div>
 			</div>
 
-			<Button href={networkHref} mode="secondary" class="inline-flex items-center gap-2">
+			<Button href="/statistics" mode="secondary" class="inline-flex items-center gap-2">
 				<ArrowLeft size={16} />
 				Network
 			</Button>
 		</div>
 	</section>
 
-	<StatisticsFilterBar filters={data.filters} />
+	<StatisticsFilterPanel />
 
-	<MetricKpiGrid eventPromise={data.metrics.eventKpis} benchmarkPromise={data.metrics.benchmark} />
+	<StationKpiGrid eventPromise={eventSummary} benchmarkPromise={benchmark} />
 
 	<section class="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(22rem,0.75fr)]">
-		<MetricTrendChart
+		<StationTrendChart
 			title="Station stop-event reliability"
 			description="Reliability, broader punctuality and cancellations over time."
-			promise={data.metrics.timeSeries}
+			promise={timeSeries}
 			metrics={eventTrendMetrics}
 			yDomain={[0, 100]}
-		/>
+		>
+			{#snippet actions()}
+				<MetricBucketControl value={statistics.station.timeSeries.bucket} onchange={statistics.setStationTimeSeriesBucket} />
+			{/snippet}
+		</StationTrendChart>
 
-		<MetricComparisonList
+		<StationComparisonChart
 			title="Arrival and departure"
 			description="Stop-event quality split by schedule type."
-			promise={data.metrics.arrivalDepartureComparison}
+			promise={arrivalDepartureComparison}
 			mode="arrivalDeparture"
 		/>
 	</section>
 
 	<section class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,0.8fr)]">
-		<MetricHeatmap
-			title="Weekday and hour"
-			description="Station reliability by local weekday and hour."
-			promise={data.metrics.weekdayHourHeatmap}
-		/>
-		<MetricComparisonList
+		<StationHeatmap promise={weekdayHourHeatmap} />
+		<StationComparisonChart
 			title="Transport mix"
 			description="Station activity share and reliability by transport type."
-			promise={data.metrics.transportTypeMix}
+			promise={transportTypeMix}
 			mode="transportMix"
 		/>
 	</section>
 
 	<section class="grid gap-4 xl:grid-cols-2">
-		<MetricRankingList
+		<StationRankingList
 			title="Line delay pressure"
 			description="Lines at this station ranked by accumulated delay minutes."
-			promise={data.metrics.lineRanking}
-			mode="stationLines"
+			promise={lineRanking}
+			mode="lines"
+			onpagechange={statistics.setStationLineRankingOffset}
 		/>
-		<MetricRankingList
+		<StationRankingList
 			title="Directions"
 			description="Connected origins and destinations ranked by delay pressure."
-			promise={data.metrics.directions}
-			mode="stationDirections"
+			promise={directions}
+			mode="directions"
 		/>
 	</section>
 
-	<LineHourMatrix promise={data.metrics.lineHourMatrix} />
+	<StationLineHourMatrix promise={lineHourMatrix} />
 
-	<StationEventDetailsTable promise={data.metrics.eventDetails} />
+	<StationEventDetailsTable promise={eventDetails} onpagechange={statistics.setStationEventDetailsOffset} />
 </main>

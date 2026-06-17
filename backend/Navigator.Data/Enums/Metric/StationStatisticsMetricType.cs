@@ -2,7 +2,7 @@ namespace Navigator.Data.Enums.Metric;
 
 public enum StationStatisticsMetricType
 {
-    EventKpis,
+    EventSummary,
     Benchmark,
     TimeSeries,
     ArrivalDepartureComparison,

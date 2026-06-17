@@ -1,13 +1,13 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { page } from "$app/state";
 	import type { GeoJsonFeature, GeoJsonFeatureCollection } from "@lib/api";
 	import Map, { type MapHeatmapPoint, type MapMarker, type MapValuePoint } from "@lib/components/ui/map/Map.svelte";
 	import Skeleton from "@lib/components/ui/Skeleton.svelte";
+	import type { RemoteQuery } from "@sveltejs/kit";
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
 	import MapPinned from "@lucide/svelte/icons/map-pinned";
-	import DashboardPanel from "./DashboardPanel.svelte";
-	import { formatCount, formatMetric, toNumber } from "./statistics-dashboard";
+	import DashboardPanel from "../shared/DashboardPanel.svelte";
+	import { formatCount, toNumber } from "../shared/statistics-dashboard";
 
 	type HotspotData = {
 		stationEvaNumber: number;
@@ -19,7 +19,7 @@
 	};
 
 	type Props = {
-		promise: Promise<GeoJsonFeatureCollection>;
+		promise: RemoteQuery<GeoJsonFeatureCollection>;
 	};
 
 	let { promise }: Props = $props();
@@ -33,7 +33,7 @@
 
 		return {
 			stationEvaNumber,
-			stationName: String(getProperty(feature, "stationName") ?? `EVA ${stationEvaNumber}`),
+			stationName: String(getProperty(feature, "stationName") ?? "Unnamed station"),
 			plannedEvents: toNumber(getProperty(feature, "plannedEvents") as number | string | null | undefined),
 			customerReliability5Rate: toNumber(
 				getProperty(feature, "customerReliability5Rate") as number | string | null | undefined
@@ -89,8 +89,7 @@
 		}));
 
 	const openStation = async (marker: MapMarker<HotspotData>) => {
-		const search = page.url.searchParams.toString();
-		await goto(`/statistics/${marker.id}${search ? `?${search}` : ""}`);
+		await goto(`/statistics/${marker.id}`);
 	};
 </script>
 
@@ -100,13 +99,20 @@
 	icon={MapPinned}
 	class="overflow-hidden"
 >
-	{#await promise}
+	{#if promise.loading}
 		<div class="flex min-h-[32rem] flex-col gap-y-3">
 			<Skeleton class="h-[30rem] w-full" />
 			<Skeleton class="h-5 w-2/3" />
 		</div>
-	{:then featureCollection}
-		{@const markers = createMarkers(featureCollection.features)}
+	{:else if promise.error}
+		<div
+			class="border-destructive/30 bg-destructive/10 flex min-h-[32rem] flex-col items-center justify-center gap-2 rounded-lg border text-center"
+		>
+			<CircleAlert size={32} class="text-destructive" />
+			<p class="text-destructive text-sm font-semibold">{promise.error.message}</p>
+		</div>
+	{:else if promise.current}
+		{@const markers = createMarkers(promise.current.features)}
 		{@const heatmapPoints = createHeatmapPoints(markers)}
 		{@const valuePoints = createValuePoints(markers)}
 		{#if markers.length === 0}
@@ -121,7 +127,10 @@
 				{valuePoints}
 				valuePointLayer
 				heatmap
-				markerMinZoom={6}
+				center={{ latitude: 51.1657, longitude: 10.4515 }}
+				zoom={5.4}
+				markerMinZoom={8.5}
+				markerRenderPadding={48}
 				onmarkerselect={openStation}
 				class="min-h-[32rem] overflow-hidden rounded-lg"
 				ariaLabel="Station quality hotspot map"
@@ -135,31 +144,6 @@
 					</div>
 				{/snippet}
 			</Map>
-
-			<div class="grid gap-2 sm:grid-cols-3">
-				{#each markers.slice(0, 3) as marker (marker.id)}
-					<a
-						href={`/statistics/${marker.id}${page.url.search ? page.url.search : ""}`}
-						class="border-border bg-secondary/10 hover:bg-accent/10 rounded-lg border p-3 transition-colors"
-					>
-						<p class="text-foreground truncate text-sm font-semibold">{marker.data?.stationName}</p>
-						<p class="text-foreground/55 text-xs">
-							{formatMetric(marker.data?.customerReliability5Rate, "rate")} reliable | {formatMetric(
-								marker.data?.delayDebtMinutes,
-								"minutes",
-								true
-							)}
-						</p>
-					</a>
-				{/each}
-			</div>
 		{/if}
-	{:catch error}
-		<div
-			class="border-destructive/30 bg-destructive/10 flex min-h-[32rem] flex-col items-center justify-center gap-2 rounded-lg border text-center"
-		>
-			<CircleAlert size={32} class="text-destructive" />
-			<p class="text-destructive text-sm font-semibold">{error.message}</p>
-		</div>
-	{/await}
+	{/if}
 </DashboardPanel>

@@ -73,3 +73,45 @@ public sealed record NetworkMapHotspotsResult(
     [property: Description("GeoJSON feature collection for station hotspots.")]
     GeoJsonFeatureCollection FeatureCollection
 ) : StatisticsMetricResult;
+
+public sealed record EventDelayDistributionResult(
+    [property: JsonPropertyName("summary")]
+    [property: Description("Summary quantiles for served stop-event delay samples.")]
+    EventDelayDistributionSummary Summary,
+
+    [property: JsonPropertyName("bins")]
+    [property: Description("Histogram bins for served stop-event delay samples.")]
+    IReadOnlyList<EventDelayDistributionBin> Bins
+) : StatisticsMetricResult;
+
+public sealed record EventDelayDistributionSummary(
+    [property: JsonPropertyName("sampleCount")]
+    [property: Description("Number of served stop-event delay samples.")]
+    long SampleCount,
+
+    [property: JsonPropertyName("medianDelaySeconds")]
+    [property: Description("Median served stop-event delay in seconds.")]
+    decimal? MedianDelaySeconds,
+
+    [property: JsonPropertyName("p95DelaySeconds")]
+    [property: Description("95th percentile served stop-event delay in seconds.")]
+    decimal? P95DelaySeconds
+);
+
+public sealed record EventDelayDistributionBin(
+    [property: JsonPropertyName("lowerBoundSeconds")]
+    [property: Description("Inclusive lower delay bound in seconds.")]
+    int LowerBoundSeconds,
+
+    [property: JsonPropertyName("upperBoundSeconds")]
+    [property: Description("Exclusive upper delay bound in seconds.")]
+    int UpperBoundSeconds,
+
+    [property: JsonPropertyName("count")]
+    [property: Description("Number of delay samples inside the bin.")]
+    long Count,
+
+    [property: JsonPropertyName("cumulativeShare")]
+    [property: Description("Cumulative share up to and including this bin.")]
+    decimal CumulativeShare
+);

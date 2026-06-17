@@ -6,27 +6,27 @@ using Navigator.Data.Enums.Metric;
 
 namespace Navigator.Data.Models.Statistics.Api;
 
-#pragma warning disable CS0108
-
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(NetworkEventKpisRequest), "EVENT_KPIS")]
-[JsonDerivedType(typeof(NetworkJourneyKpisRequest), "JOURNEY_KPIS")]
+[JsonDerivedType(typeof(NetworkEventSummaryRequest), "EVENT_SUMMARY")]
+[JsonDerivedType(typeof(NetworkJourneySummaryRequest), "JOURNEY_SUMMARY")]
 [JsonDerivedType(typeof(NetworkEventTimeSeriesRequest), "EVENT_TIME_SERIES")]
 [JsonDerivedType(typeof(NetworkJourneyTimeSeriesRequest), "JOURNEY_TIME_SERIES")]
 [JsonDerivedType(typeof(NetworkWeekdayHourHeatmapRequest), "WEEKDAY_HOUR_HEATMAP")]
 [JsonDerivedType(typeof(NetworkTransportTypeComparisonRequest), "TRANSPORT_TYPE_COMPARISON")]
 [JsonDerivedType(typeof(NetworkStationRankingRequest), "STATION_RANKING")]
 [JsonDerivedType(typeof(NetworkLineRankingRequest), "LINE_RANKING")]
+[JsonDerivedType(typeof(NetworkEventDelayDistributionRequest), "EVENT_DELAY_DISTRIBUTION")]
 public abstract class NetworkStatisticsMetricRequest : StatisticsMetricRequest
 {
     [JsonIgnore]
     public abstract NetworkStatisticsMetricType MetricType { get; }
-
-    [JsonIgnore]
-    public override string MetricName => MetricType.ToString();
 }
 
-public abstract class NetworkEventFilterRequest : NetworkStatisticsMetricRequest
+public abstract class NetworkEventFilterRequest : NetworkStatisticsMetricRequest,
+    IHasScheduleType,
+    IHasTransportTypes,
+    IHasAdministrationIds,
+    IHasReplacementFilter
 {
     [JsonPropertyName("scheduleType")]
     [Description("Optional filter for arrival or departure stop events.")]
@@ -43,17 +43,12 @@ public abstract class NetworkEventFilterRequest : NetworkStatisticsMetricRequest
     [JsonPropertyName("includeReplacement")]
     [Description("Whether replacement transport should be included.")]
     public bool IncludeReplacement { get; init; } = true;
-
-    public override ScheduleType? GetScheduleType() => ScheduleType;
-
-    public override TransportType[] GetTransportTypes() => TransportTypes;
-
-    public override string[] GetAdministrationIds() => AdministrationIds;
-
-    public override bool GetIncludeReplacement() => IncludeReplacement;
 }
 
-public abstract class NetworkJourneyFilterRequest : NetworkStatisticsMetricRequest
+public abstract class NetworkJourneyFilterRequest : NetworkStatisticsMetricRequest,
+    IHasTransportTypes,
+    IHasAdministrationIds,
+    IHasReplacementFilter
 {
     [JsonPropertyName("transportTypes")]
     [Description("Optional transport types to include. Empty means all transport types.")]
@@ -66,48 +61,38 @@ public abstract class NetworkJourneyFilterRequest : NetworkStatisticsMetricReque
     [JsonPropertyName("includeReplacement")]
     [Description("Whether replacement transport should be included.")]
     public bool IncludeReplacement { get; init; } = true;
-
-    public override TransportType[] GetTransportTypes() => TransportTypes;
-
-    public override string[] GetAdministrationIds() => AdministrationIds;
-
-    public override bool GetIncludeReplacement() => IncludeReplacement;
 }
 
-public sealed class NetworkEventKpisRequest : NetworkEventFilterRequest
+public sealed class NetworkEventSummaryRequest : NetworkEventFilterRequest
 {
     [JsonIgnore]
-    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.EventKpis;
+    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.EventSummary;
 }
 
-public sealed class NetworkJourneyKpisRequest : NetworkJourneyFilterRequest
+public sealed class NetworkJourneySummaryRequest : NetworkJourneyFilterRequest
 {
     [JsonIgnore]
-    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.JourneyKpis;
+    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.JourneySummary;
 }
 
-public sealed class NetworkEventTimeSeriesRequest : NetworkEventFilterRequest
+public sealed class NetworkEventTimeSeriesRequest : NetworkEventFilterRequest, IHasBucket
 {
-    [JsonPropertyName("bucket")]
-    [Description("Aggregation bucket used for returned time series.")]
-    public StatisticsBucket Bucket { get; init; } = StatisticsBucket.Day;
-
     [JsonIgnore]
     public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.EventTimeSeries;
 
-    public override StatisticsBucket GetBucket() => Bucket;
-}
-
-public sealed class NetworkJourneyTimeSeriesRequest : NetworkJourneyFilterRequest
-{
     [JsonPropertyName("bucket")]
     [Description("Aggregation bucket used for returned time series.")]
     public StatisticsBucket Bucket { get; init; } = StatisticsBucket.Day;
+}
 
+public sealed class NetworkJourneyTimeSeriesRequest : NetworkJourneyFilterRequest, IHasBucket
+{
     [JsonIgnore]
     public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.JourneyTimeSeries;
 
-    public override StatisticsBucket GetBucket() => Bucket;
+    [JsonPropertyName("bucket")]
+    [Description("Aggregation bucket used for returned time series.")]
+    public StatisticsBucket Bucket { get; init; } = StatisticsBucket.Day;
 }
 
 public sealed class NetworkWeekdayHourHeatmapRequest : NetworkEventFilterRequest
@@ -116,20 +101,26 @@ public sealed class NetworkWeekdayHourHeatmapRequest : NetworkEventFilterRequest
     public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.WeekdayHourHeatmap;
 }
 
-public sealed class NetworkTransportTypeComparisonRequest : NetworkJourneyFilterRequest
+public sealed class NetworkTransportTypeComparisonRequest : NetworkJourneyFilterRequest, IHasScheduleType
 {
-    [JsonPropertyName("scheduleType")]
-    [Description("Optional filter for arrival or departure stop events in event-based comparison values.")]
-    public ScheduleType? ScheduleType { get; init; }
-
     [JsonIgnore]
     public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.TransportTypeComparison;
 
-    public override ScheduleType? GetScheduleType() => ScheduleType;
+    [JsonPropertyName("scheduleType")]
+    [Description("Optional filter for arrival or departure stop events in event-based comparison values.")]
+    public ScheduleType? ScheduleType { get; init; }
 }
 
-public sealed class NetworkStationRankingRequest : NetworkStatisticsMetricRequest
+public sealed class NetworkStationRankingRequest : NetworkStatisticsMetricRequest,
+    IHasScheduleType,
+    IHasTransportTypes,
+    IHasReplacementFilter,
+    IHasMinimumVolume,
+    IHasPagination
 {
+    [JsonIgnore]
+    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.StationRanking;
+
     [JsonPropertyName("scheduleType")]
     [Description("Optional filter for arrival or departure stop events.")]
     public ScheduleType? ScheduleType { get; init; }
@@ -156,25 +147,20 @@ public sealed class NetworkStationRankingRequest : NetworkStatisticsMetricReques
     [Range(0, int.MaxValue)]
     [Description("Number of stations to skip.")]
     public int Offset { get; init; } = 0;
-
-    [JsonIgnore]
-    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.StationRanking;
-
-    public override ScheduleType? GetScheduleType() => ScheduleType;
-
-    public override TransportType[] GetTransportTypes() => TransportTypes;
-
-    public override bool GetIncludeReplacement() => IncludeReplacement;
-
-    public override int GetMinVolume() => MinVolume;
-
-    public override int GetLimit() => Limit;
-
-    public override int GetOffset() => Offset;
 }
 
-public sealed class NetworkLineRankingRequest : NetworkStatisticsMetricRequest
+public sealed class NetworkLineRankingRequest : NetworkStatisticsMetricRequest,
+    IHasTransportTypes,
+    IHasAdministrationIds,
+    IHasOriginEvaNumber,
+    IHasDestinationEvaNumber,
+    IHasReplacementFilter,
+    IHasMinimumVolume,
+    IHasPagination
 {
+    [JsonIgnore]
+    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.LineRanking;
+
     [JsonPropertyName("transportTypes")]
     [Description("Optional transport types to include. Empty means all transport types.")]
     public TransportType[] TransportTypes { get; init; } = [];
@@ -209,29 +195,17 @@ public sealed class NetworkLineRankingRequest : NetworkStatisticsMetricRequest
     [Range(0, int.MaxValue)]
     [Description("Number of lines to skip.")]
     public int Offset { get; init; } = 0;
-
-    [JsonIgnore]
-    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.LineRanking;
-
-    public override TransportType[] GetTransportTypes() => TransportTypes;
-
-    public override string[] GetAdministrationIds() => AdministrationIds;
-
-    public override int? GetOriginEvaNumber() => OriginEvaNumber;
-
-    public override int? GetDestinationEvaNumber() => DestinationEvaNumber;
-
-    public override bool GetIncludeReplacement() => IncludeReplacement;
-
-    public override int GetMinVolume() => MinVolume;
-
-    public override int GetLimit() => Limit;
-
-    public override int GetOffset() => Offset;
 }
 
-public sealed class NetworkMapHotspotsRequest : NetworkStatisticsMetricRequest
+public sealed class NetworkMapHotspotsRequest : NetworkStatisticsMetricRequest,
+    IHasScheduleType,
+    IHasTransportTypes,
+    IHasReplacementFilter,
+    IHasMinimumVolume
 {
+    [JsonIgnore]
+    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.MapHotspots;
+
     [JsonPropertyName("scheduleType")]
     [Description("Optional filter for arrival or departure stop events.")]
     public ScheduleType? ScheduleType { get; init; }
@@ -248,19 +222,10 @@ public sealed class NetworkMapHotspotsRequest : NetworkStatisticsMetricRequest
     [Range(0, int.MaxValue)]
     [Description("Minimum planned event count required for a station to be included.")]
     public int MinVolume { get; init; } = 0;
-
-    [JsonIgnore]
-    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.MapHotspots;
-
-    public override ScheduleType? GetScheduleType() => ScheduleType;
-
-    public override TransportType[] GetTransportTypes() => TransportTypes;
-
-    public override bool GetIncludeReplacement() => IncludeReplacement;
-
-    public override int GetMinVolume() => MinVolume;
-
-    public override int GetLimit() => int.MaxValue;
 }
 
-#pragma warning restore CS0108
+public sealed class NetworkEventDelayDistributionRequest : NetworkEventFilterRequest
+{
+    [JsonIgnore]
+    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.EventDelayDistribution;
+}

@@ -6,10 +6,8 @@ using Navigator.Data.Enums.Metric;
 
 namespace Navigator.Data.Models.Statistics.Api;
 
-#pragma warning disable CS0108
-
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(StationEventKpisRequest), "EVENT_KPIS")]
+[JsonDerivedType(typeof(StationEventSummaryRequest), "EVENT_SUMMARY")]
 [JsonDerivedType(typeof(StationBenchmarkRequest), "BENCHMARK")]
 [JsonDerivedType(typeof(StationTimeSeriesRequest), "TIME_SERIES")]
 [JsonDerivedType(typeof(StationArrivalDepartureComparisonRequest), "ARRIVAL_DEPARTURE_COMPARISON")]
@@ -21,20 +19,21 @@ namespace Navigator.Data.Models.Statistics.Api;
 [JsonDerivedType(typeof(StationEventDetailsRequest), "EVENT_DETAILS")]
 public abstract class StationStatisticsMetricRequest : StatisticsMetricRequest
 {
+    [JsonIgnore]
+    public abstract StationStatisticsMetricType MetricType { get; }
+
     [JsonPropertyName("stationEvaNumber")]
     [Required]
     [Range(1, int.MaxValue)]
     [Description("Station EVA number to evaluate.")]
     public int StationEvaNumber { get; init; }
-
-    [JsonIgnore]
-    public abstract StationStatisticsMetricType MetricType { get; }
-
-    [JsonIgnore]
-    public override string MetricName => MetricType.ToString();
 }
 
-public abstract class StationEventFilterRequest : StationStatisticsMetricRequest
+public abstract class StationEventFilterRequest : StationStatisticsMetricRequest,
+    IHasScheduleType,
+    IHasTransportTypes,
+    IHasAdministrationIds,
+    IHasReplacementFilter
 {
     [JsonPropertyName("scheduleType")]
     [Description("Optional filter for arrival or departure stop events.")]
@@ -51,20 +50,12 @@ public abstract class StationEventFilterRequest : StationStatisticsMetricRequest
     [JsonPropertyName("includeReplacement")]
     [Description("Whether replacement transport should be included.")]
     public bool IncludeReplacement { get; init; } = true;
-
-    public override ScheduleType? GetScheduleType() => ScheduleType;
-
-    public override TransportType[] GetTransportTypes() => TransportTypes;
-
-    public override string[] GetAdministrationIds() => AdministrationIds;
-
-    public override bool GetIncludeReplacement() => IncludeReplacement;
 }
 
-public sealed class StationEventKpisRequest : StationEventFilterRequest
+public sealed class StationEventSummaryRequest : StationEventFilterRequest
 {
     [JsonIgnore]
-    public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.EventKpis;
+    public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.EventSummary;
 }
 
 public sealed class StationBenchmarkRequest : StationEventFilterRequest
@@ -73,16 +64,14 @@ public sealed class StationBenchmarkRequest : StationEventFilterRequest
     public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.Benchmark;
 }
 
-public sealed class StationTimeSeriesRequest : StationEventFilterRequest
+public sealed class StationTimeSeriesRequest : StationEventFilterRequest, IHasBucket
 {
-    [JsonPropertyName("bucket")]
-    [Description("Aggregation bucket used for returned time series.")]
-    public StatisticsBucket Bucket { get; init; } = StatisticsBucket.Day;
-
     [JsonIgnore]
     public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.TimeSeries;
 
-    public override StatisticsBucket GetBucket() => Bucket;
+    [JsonPropertyName("bucket")]
+    [Description("Aggregation bucket used for returned time series.")]
+    public StatisticsBucket Bucket { get; init; } = StatisticsBucket.Day;
 }
 
 public sealed class StationArrivalDepartureComparisonRequest : StationEventFilterRequest
@@ -97,8 +86,16 @@ public sealed class StationWeekdayHourHeatmapRequest : StationEventFilterRequest
     public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.WeekdayHourHeatmap;
 }
 
-public sealed class StationLineRankingRequest : StationEventFilterRequest
+public sealed class StationLineRankingRequest : StationEventFilterRequest,
+    IHasOriginEvaNumber,
+    IHasDestinationEvaNumber,
+    IHasDirectionEvaNumber,
+    IHasMinimumVolume,
+    IHasPagination
 {
+    [JsonIgnore]
+    public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.LineRanking;
+
     [JsonPropertyName("originEvaNumber")]
     [Description("Optional origin station EVA number filter.")]
     public int? OriginEvaNumber { get; init; }
@@ -125,33 +122,16 @@ public sealed class StationLineRankingRequest : StationEventFilterRequest
     [Range(0, int.MaxValue)]
     [Description("Number of ranked lines to skip.")]
     public int Offset { get; init; } = 0;
-
-    [JsonIgnore]
-    public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.LineRanking;
-
-    public override int? GetOriginEvaNumber() => OriginEvaNumber;
-
-    public override int? GetDestinationEvaNumber() => DestinationEvaNumber;
-
-    public override int? GetDirectionEvaNumber() => DirectionEvaNumber;
-
-    public override int GetMinVolume() => MinVolume;
-
-    public override int GetLimit() => Limit;
-
-    public override int GetOffset() => Offset;
 }
 
-public sealed class StationDirectionsRequest : StationEventFilterRequest
+public sealed class StationDirectionsRequest : StationEventFilterRequest, IHasDirectionEvaNumber
 {
-    [JsonPropertyName("directionEvaNumber")]
-    [Description("Optional connected station EVA number filter.")]
-    public int? DirectionEvaNumber { get; init; }
-
     [JsonIgnore]
     public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.Directions;
 
-    public override int? GetDirectionEvaNumber() => DirectionEvaNumber;
+    [JsonPropertyName("directionEvaNumber")]
+    [Description("Optional connected station EVA number filter.")]
+    public int? DirectionEvaNumber { get; init; }
 }
 
 public sealed class StationTransportTypeMixRequest : StationEventFilterRequest
@@ -160,8 +140,14 @@ public sealed class StationTransportTypeMixRequest : StationEventFilterRequest
     public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.TransportTypeMix;
 }
 
-public sealed class StationLineHourMatrixRequest : StationEventFilterRequest
+public sealed class StationLineHourMatrixRequest : StationEventFilterRequest,
+    IHasOriginEvaNumber,
+    IHasDestinationEvaNumber,
+    IHasDirectionEvaNumber
 {
+    [JsonIgnore]
+    public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.LineHourMatrix;
+
     [JsonPropertyName("originEvaNumber")]
     [Description("Optional origin station EVA number filter.")]
     public int? OriginEvaNumber { get; init; }
@@ -173,19 +159,20 @@ public sealed class StationLineHourMatrixRequest : StationEventFilterRequest
     [JsonPropertyName("directionEvaNumber")]
     [Description("Optional connected station EVA number filter.")]
     public int? DirectionEvaNumber { get; init; }
-
-    [JsonIgnore]
-    public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.LineHourMatrix;
-
-    public override int? GetOriginEvaNumber() => OriginEvaNumber;
-
-    public override int? GetDestinationEvaNumber() => DestinationEvaNumber;
-
-    public override int? GetDirectionEvaNumber() => DirectionEvaNumber;
 }
 
-public sealed class StationEventDetailsRequest : StationStatisticsMetricRequest
+public sealed class StationEventDetailsRequest : StationStatisticsMetricRequest,
+    IHasScheduleType,
+    IHasTransportTypes,
+    IHasOptionalJourneyNumber,
+    IHasOriginEvaNumber,
+    IHasDestinationEvaNumber,
+    IHasReplacementFilter,
+    IHasPagination
 {
+    [JsonIgnore]
+    public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.EventDetails;
+
     [JsonPropertyName("scheduleType")]
     [Description("Optional filter for arrival or departure stop events.")]
     public ScheduleType? ScheduleType { get; init; }
@@ -219,25 +206,4 @@ public sealed class StationEventDetailsRequest : StationStatisticsMetricRequest
     [Range(0, int.MaxValue)]
     [Description("Number of detail rows to skip.")]
     public int Offset { get; init; } = 0;
-
-    [JsonIgnore]
-    public override StationStatisticsMetricType MetricType => StationStatisticsMetricType.EventDetails;
-
-    public override ScheduleType? GetScheduleType() => ScheduleType;
-
-    public override TransportType[] GetTransportTypes() => TransportTypes;
-
-    public override int? GetJourneyNumberFilter() => JourneyNumber;
-
-    public override int? GetOriginEvaNumber() => OriginEvaNumber;
-
-    public override int? GetDestinationEvaNumber() => DestinationEvaNumber;
-
-    public override bool GetIncludeReplacement() => IncludeReplacement;
-
-    public override int GetLimit() => Limit;
-
-    public override int GetOffset() => Offset;
 }
-
-#pragma warning restore CS0108

@@ -13,16 +13,16 @@ public sealed class JourneyStatisticsMetricSeriesBuilder(
         CancellationToken cancellationToken
     )
     {
-        StatisticsMetricResult result = request.MetricType switch
+        StatisticsMetricResult result = request switch
         {
-            Navigator.Data.Enums.Metric.JourneyStatisticsMetricType.Pattern => await BuildPatternAsync(request, cancellationToken),
-            Navigator.Data.Enums.Metric.JourneyStatisticsMetricType.JourneyKpis => new JourneyKpisResult(StatisticsMetricBuilderHelpers.ToJourneyMetrics(
+            JourneyPatternRequest => await BuildPatternAsync(request, cancellationToken),
+            JourneySummaryRequest => new JourneySummaryResult(StatisticsMetricBuilderHelpers.ToJourneyMetrics(
                 StatisticsMetricBuilderHelpers.AggregateJourneyRows(await LoadJourneyNumberRowsAsync(request, cancellationToken)))),
-            Navigator.Data.Enums.Metric.JourneyStatisticsMetricType.DailyOutcomes => await BuildDailyOutcomesAsync(request, cancellationToken),
-            Navigator.Data.Enums.Metric.JourneyStatisticsMetricType.StopProfile => await BuildStopProfileAsync(request, cancellationToken),
-            Navigator.Data.Enums.Metric.JourneyStatisticsMetricType.DelayBuildUp => await BuildDelayBuildUpAsync(request, cancellationToken),
-            Navigator.Data.Enums.Metric.JourneyStatisticsMetricType.Calendar => await BuildCalendarAsync(request, cancellationToken),
-            _ => throw new NotSupportedException($"Unsupported journey statistics metric: {request.MetricType}")
+            JourneyDailyOutcomesRequest => await BuildDailyOutcomesAsync(request, cancellationToken),
+            JourneyStopProfileRequest => await BuildStopProfileAsync(request, cancellationToken),
+            JourneyDelayBuildUpRequest => await BuildDelayBuildUpAsync(request, cancellationToken),
+            JourneyCalendarRequest => await BuildCalendarAsync(request, cancellationToken),
+            _ => throw new NotSupportedException($"Unsupported journey statistics metric: {request.GetType().Name}")
         };
 
         return new StatisticsMetricResponse(CreateMeta(request), result);
@@ -34,17 +34,22 @@ public sealed class JourneyStatisticsMetricSeriesBuilder(
     )
     {
         var administrationIds = await StatisticsMetricBuilderHelpers.ResolveAdministrationIdsAsync(dataContext, request, cancellationToken);
-        var transportTypes = request.TransportTypes;
+        var transportTypes = StatisticsMetricBuilderHelpers.TransportTypes(request);
+        var originEvaNumber = StatisticsMetricBuilderHelpers.OriginEvaNumber(request);
+        var destinationEvaNumber = StatisticsMetricBuilderHelpers.DestinationEvaNumber(request);
+        var fromUtc = StatisticsMetricBuilderHelpers.UtcFrom(request);
+        var toUtc = StatisticsMetricBuilderHelpers.UtcTo(request);
+        var includeReplacement = StatisticsMetricBuilderHelpers.IncludeReplacement(request);
 
         return await dataContext.JourneyNumberQualities
             .AsNoTracking()
             .Where(row => row.JourneyNumber == request.JourneyNumber)
             .Where(row => request.LineName == null || row.JourneyDescription == request.LineName)
-            .Where(row => row.BucketHour >= request.FromUtc && row.BucketHour < request.ToUtc)
+            .Where(row => row.BucketHour >= fromUtc && row.BucketHour < toUtc)
             .Where(row => transportTypes.Length == 0 || transportTypes.Contains(row.TransportType))
-            .Where(row => request.IncludeReplacement || !row.IsReplacement)
-            .Where(row => request.OriginEvaNumber == null || row.OriginEvaNumber == request.OriginEvaNumber)
-            .Where(row => request.DestinationEvaNumber == null || row.DestinationEvaNumber == request.DestinationEvaNumber)
+            .Where(row => includeReplacement || !row.IsReplacement)
+            .Where(row => originEvaNumber == null || row.OriginEvaNumber == originEvaNumber)
+            .Where(row => destinationEvaNumber == null || row.DestinationEvaNumber == destinationEvaNumber)
             .Where(row => administrationIds.Length == 0 || administrationIds.Contains(row.AdministrationId))
             .ToListAsync(cancellationToken);
     }
@@ -55,17 +60,22 @@ public sealed class JourneyStatisticsMetricSeriesBuilder(
     )
     {
         var administrationIds = await StatisticsMetricBuilderHelpers.ResolveAdministrationIdsAsync(dataContext, request, cancellationToken);
-        var transportTypes = request.TransportTypes;
+        var transportTypes = StatisticsMetricBuilderHelpers.TransportTypes(request);
+        var originEvaNumber = StatisticsMetricBuilderHelpers.OriginEvaNumber(request);
+        var destinationEvaNumber = StatisticsMetricBuilderHelpers.DestinationEvaNumber(request);
+        var fromUtc = StatisticsMetricBuilderHelpers.UtcFrom(request);
+        var toUtc = StatisticsMetricBuilderHelpers.UtcTo(request);
+        var includeReplacement = StatisticsMetricBuilderHelpers.IncludeReplacement(request);
 
         return await dataContext.JourneyQualityDetails
             .AsNoTracking()
             .Where(row => row.JourneyNumber == request.JourneyNumber)
             .Where(row => request.LineName == null || row.JourneyDescription == request.LineName)
-            .Where(row => row.JourneyStartTime >= request.FromUtc && row.JourneyStartTime < request.ToUtc)
+            .Where(row => row.JourneyStartTime >= fromUtc && row.JourneyStartTime < toUtc)
             .Where(row => transportTypes.Length == 0 || transportTypes.Contains(row.TransportType))
-            .Where(row => request.IncludeReplacement || !row.IsReplacement)
-            .Where(row => request.OriginEvaNumber == null || row.OriginEvaNumber == request.OriginEvaNumber)
-            .Where(row => request.DestinationEvaNumber == null || row.DestinationEvaNumber == request.DestinationEvaNumber)
+            .Where(row => includeReplacement || !row.IsReplacement)
+            .Where(row => originEvaNumber == null || row.OriginEvaNumber == originEvaNumber)
+            .Where(row => destinationEvaNumber == null || row.DestinationEvaNumber == destinationEvaNumber)
             .Where(row => administrationIds.Length == 0 || administrationIds.Contains(row.AdministrationId))
             .OrderBy(row => row.JourneyDate)
             .ThenBy(row => row.JourneyStartTime)
@@ -77,18 +87,24 @@ public sealed class JourneyStatisticsMetricSeriesBuilder(
         CancellationToken cancellationToken
     )
     {
-        var transportTypes = request.TransportTypes;
+        var transportTypes = StatisticsMetricBuilderHelpers.TransportTypes(request);
+        var scheduleType = StatisticsMetricBuilderHelpers.ScheduleType(request);
+        var originEvaNumber = StatisticsMetricBuilderHelpers.OriginEvaNumber(request);
+        var destinationEvaNumber = StatisticsMetricBuilderHelpers.DestinationEvaNumber(request);
+        var fromUtc = StatisticsMetricBuilderHelpers.UtcFrom(request);
+        var toUtc = StatisticsMetricBuilderHelpers.UtcTo(request);
+        var includeReplacement = StatisticsMetricBuilderHelpers.IncludeReplacement(request);
 
         return await dataContext.StationJourneyEventDetails
             .AsNoTracking()
             .Where(row => row.JourneyNumber == request.JourneyNumber)
             .Where(row => request.LineName == null || row.JourneyDescription == request.LineName)
-            .Where(row => row.PlannedTime >= request.FromUtc && row.PlannedTime < request.ToUtc)
-            .Where(row => request.ScheduleType == null || row.ScheduleType == request.ScheduleType)
+            .Where(row => row.PlannedTime >= fromUtc && row.PlannedTime < toUtc)
+            .Where(row => scheduleType == null || row.ScheduleType == scheduleType)
             .Where(row => transportTypes.Length == 0 || transportTypes.Contains(row.TransportType))
-            .Where(row => request.IncludeReplacement || !row.IsReplacement)
-            .Where(row => request.OriginEvaNumber == null || row.OriginEvaNumber == request.OriginEvaNumber)
-            .Where(row => request.DestinationEvaNumber == null || row.DestinationEvaNumber == request.DestinationEvaNumber)
+            .Where(row => includeReplacement || !row.IsReplacement)
+            .Where(row => originEvaNumber == null || row.OriginEvaNumber == originEvaNumber)
+            .Where(row => destinationEvaNumber == null || row.DestinationEvaNumber == destinationEvaNumber)
             .OrderBy(row => row.PlannedTime)
             .ThenBy(row => row.StationEvaNumber)
             .ToListAsync(cancellationToken);
@@ -121,11 +137,11 @@ public sealed class JourneyStatisticsMetricSeriesBuilder(
             main?.Key.JourneyDescription ?? request.LineName,
             main?.Key.TransportType,
             rows
-                .Select(row => StatisticsMetricBuilderHelpers.ToBerlinTime(row.JourneyStartTime).TimeOfDay)
+                .Select(row => StatisticsMetricBuilderHelpers.ToRequestOffsetTime(row.JourneyStartTime, request).TimeOfDay)
                 .OrderBy(time => time)
                 .FirstOrDefault(),
             rows
-                .Select(row => StatisticsMetricBuilderHelpers.ToBerlinTime(row.JourneyEndTime).TimeOfDay)
+                .Select(row => StatisticsMetricBuilderHelpers.ToRequestOffsetTime(row.JourneyEndTime, request).TimeOfDay)
                 .OrderBy(time => time)
                 .LastOrDefault(),
             main is null ? null : ToStationReference(stations, main.Key.OriginEvaNumber),
@@ -167,7 +183,7 @@ public sealed class JourneyStatisticsMetricSeriesBuilder(
             {
                 row.StationEvaNumber,
                 row.ScheduleType,
-                PlannedTime = StatisticsMetricBuilderHelpers.ToBerlinTime(row.PlannedTime).TimeOfDay
+                PlannedTime = StatisticsMetricBuilderHelpers.ToRequestOffsetTime(row.PlannedTime, request).TimeOfDay
             })
             .OrderBy(group => group.Key.PlannedTime)
             .ThenBy(group => group.Key.StationEvaNumber)
@@ -292,12 +308,11 @@ public sealed class JourneyStatisticsMetricSeriesBuilder(
 
     private static StatisticsResponseMeta CreateMeta(JourneyStatisticsMetricRequest request) =>
         new(
-            "JOURNEY_NUMBER",
-            request.MetricType.ToString(),
+            StatisticsMetricBuilderHelpers.Scope(request),
+            StatisticsMetricBuilderHelpers.Metric(request),
             request.From,
             request.To,
-            request.Bucket,
-            StatisticsMetricBuilderHelpers.Timezone,
+            StatisticsMetricBuilderHelpers.Bucket(request),
             StatisticsMetricBuilderHelpers.CreateFilters(request)
                 .Concat(new[]
                 {

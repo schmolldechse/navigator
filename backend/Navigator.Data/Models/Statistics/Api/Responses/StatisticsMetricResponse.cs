@@ -17,27 +17,23 @@ public sealed record StatisticsMetricResponse(
 public sealed record StatisticsResponseMeta(
     [property: JsonPropertyName("scope")]
     [property: Description("Statistics topic that produced the metric.")]
-    string Scope,
+    StatisticsScope Scope,
 
     [property: JsonPropertyName("metric")]
     [property: Description("Metric name that was evaluated.")]
-    string Metric,
+    StatisticsMetricType Metric,
 
     [property: JsonPropertyName("from")]
-    [property: Description("First included local service day.")]
-    DateOnly From,
+    [property: Description("First included instant.")]
+    DateTimeOffset From,
 
     [property: JsonPropertyName("to")]
-    [property: Description("First excluded local service day.")]
-    DateOnly To,
+    [property: Description("First excluded instant.")]
+    DateTimeOffset To,
 
     [property: JsonPropertyName("bucket")]
     [property: Description("Aggregation bucket used for grouped results.")]
-    StatisticsBucket Bucket,
-
-    [property: JsonPropertyName("timezone")]
-    [property: Description("Timezone used to interpret service days and buckets.")]
-    string Timezone,
+    StatisticsBucket? Bucket,
 
     [property: JsonPropertyName("filters")]
     [property: Description("Effective filters applied to the metric.")]

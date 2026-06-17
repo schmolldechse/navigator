@@ -2,13 +2,14 @@ namespace Navigator.Data.Enums.Metric;
 
 public enum NetworkStatisticsMetricType
 {
-    EventKpis,
-    JourneyKpis,
+    EventSummary,
+    JourneySummary,
     EventTimeSeries,
     JourneyTimeSeries,
     WeekdayHourHeatmap,
     TransportTypeComparison,
     StationRanking,
     LineRanking,
-    MapHotspots
+    MapHotspots,
+    EventDelayDistribution
 }

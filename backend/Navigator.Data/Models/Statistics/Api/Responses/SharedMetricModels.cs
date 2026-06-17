@@ -164,7 +164,7 @@ public sealed record MetricPage(
 
 public sealed record EventTimeSeriesPoint(
     [property: JsonPropertyName("bucketStart")]
-    [property: Description("Start of the returned time bucket in Europe/Berlin.")]
+    [property: Description("Start of the returned time bucket using the request offset.")]
     DateTimeOffset BucketStart,
 
     [property: JsonPropertyName("eventMetrics")]
@@ -174,7 +174,7 @@ public sealed record EventTimeSeriesPoint(
 
 public sealed record JourneyTimeSeriesPoint(
     [property: JsonPropertyName("bucketStart")]
-    [property: Description("Start of the returned time bucket in Europe/Berlin.")]
+    [property: Description("Start of the returned time bucket using the request offset.")]
     DateTimeOffset BucketStart,
 
     [property: JsonPropertyName("journeyMetrics")]
@@ -184,7 +184,7 @@ public sealed record JourneyTimeSeriesPoint(
 
 public sealed record LineTimeSeriesPoint(
     [property: JsonPropertyName("bucketStart")]
-    [property: Description("Start of the returned time bucket in Europe/Berlin.")]
+    [property: Description("Start of the returned time bucket using the request offset.")]
     DateTimeOffset BucketStart,
 
     [property: JsonPropertyName("journeyMetrics")]
@@ -202,7 +202,7 @@ public sealed record EventHeatmapCell(
     int Weekday,
 
     [property: JsonPropertyName("hour")]
-    [property: Description("Hour of day in Europe/Berlin.")]
+    [property: Description("Hour of day using the request offset.")]
     int Hour,
 
     [property: JsonPropertyName("eventMetrics")]
@@ -216,7 +216,7 @@ public sealed record JourneyHeatmapCell(
     int Weekday,
 
     [property: JsonPropertyName("hour")]
-    [property: Description("Hour of day in Europe/Berlin.")]
+    [property: Description("Hour of day using the request offset.")]
     int Hour,
 
     [property: JsonPropertyName("journeyMetrics")]

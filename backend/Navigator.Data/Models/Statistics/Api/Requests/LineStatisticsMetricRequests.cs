@@ -7,36 +7,35 @@ using Navigator.Data.Infrastructure;
 
 namespace Navigator.Data.Models.Statistics.Api;
 
-#pragma warning disable CS0108
-
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(LineSummaryRequest), "SUMMARY")]
-[JsonDerivedType(typeof(LineJourneyKpisRequest), "JOURNEY_KPIS")]
-[JsonDerivedType(typeof(LineEventKpisRequest), "EVENT_KPIS")]
+[JsonDerivedType(typeof(LineProfileRequest), "PROFILE")]
+[JsonDerivedType(typeof(LineJourneySummaryRequest), "JOURNEY_SUMMARY")]
+[JsonDerivedType(typeof(LineEventSummaryRequest), "EVENT_SUMMARY")]
 [JsonDerivedType(typeof(LineTimeSeriesRequest), "TIME_SERIES")]
 [JsonDerivedType(typeof(LineRouteVariantsRequest), "ROUTE_VARIANTS")]
 [JsonDerivedType(typeof(LineStationPerformanceRequest), "STATION_PERFORMANCE")]
 [JsonDerivedType(typeof(LineJourneyNumberRankingRequest), "JOURNEY_NUMBER_RANKING")]
 [JsonDerivedType(typeof(LineWeekdayHourHeatmapRequest), "WEEKDAY_HOUR_HEATMAP")]
 [JsonDerivedType(typeof(LineProblemStationsRequest), "PROBLEM_STATIONS")]
-public abstract class LineStatisticsMetricRequest : StatisticsMetricRequest
+public abstract class LineStatisticsMetricRequest : StatisticsMetricRequest, IHasLineName
 {
+    [JsonIgnore]
+    public abstract LineStatisticsMetricType MetricType { get; }
+
     [JsonPropertyName("lineName")]
     [Required]
     [Regex(@"^[\p{L}\p{N}\s_\-/]+$", Exception = "LineName may only contain letters, digits, spaces, underscores, dashes and slashes.", MaxLength = 64, ValidateRegexSyntax = false)]
     [Description("Line or journey description to evaluate.")]
     public required string LineName { get; init; }
-
-    [JsonIgnore]
-    public abstract LineStatisticsMetricType MetricType { get; }
-
-    [JsonIgnore]
-    public override string MetricName => MetricType.ToString();
-
-    public override string? GetLineNameFilter() => LineName;
 }
 
-public abstract class LineJourneyFilterRequest : LineStatisticsMetricRequest
+public abstract class LineJourneyFilterRequest : LineStatisticsMetricRequest,
+    IHasTransportTypes,
+    IHasAdministrationIds,
+    IHasOptionalJourneyNumber,
+    IHasOriginEvaNumber,
+    IHasDestinationEvaNumber,
+    IHasReplacementFilter
 {
     [JsonPropertyName("transportTypes")]
     [Description("Optional transport types to include. Empty means all transport types.")]
@@ -61,74 +60,59 @@ public abstract class LineJourneyFilterRequest : LineStatisticsMetricRequest
     [JsonPropertyName("includeReplacement")]
     [Description("Whether replacement transport should be included.")]
     public bool IncludeReplacement { get; init; } = true;
-
-    public override TransportType[] GetTransportTypes() => TransportTypes;
-
-    public override string[] GetAdministrationIds() => AdministrationIds;
-
-    public override int? GetJourneyNumberFilter() => JourneyNumber;
-
-    public override int? GetOriginEvaNumber() => OriginEvaNumber;
-
-    public override int? GetDestinationEvaNumber() => DestinationEvaNumber;
-
-    public override bool GetIncludeReplacement() => IncludeReplacement;
 }
 
-public abstract class LineEventFilterRequest : LineJourneyFilterRequest
+public abstract class LineEventFilterRequest : LineJourneyFilterRequest, IHasScheduleType
 {
     [JsonPropertyName("scheduleType")]
     [Description("Optional filter for arrival or departure stop events.")]
     public ScheduleType? ScheduleType { get; init; }
-
-    public override ScheduleType? GetScheduleType() => ScheduleType;
 }
 
-public sealed class LineSummaryRequest : LineJourneyFilterRequest
+public sealed class LineProfileRequest : LineJourneyFilterRequest
 {
     [JsonIgnore]
-    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.Summary;
+    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.Profile;
 }
 
-public sealed class LineJourneyKpisRequest : LineJourneyFilterRequest
+public sealed class LineJourneySummaryRequest : LineJourneyFilterRequest
 {
     [JsonIgnore]
-    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.JourneyKpis;
+    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.JourneySummary;
 }
 
-public sealed class LineEventKpisRequest : LineEventFilterRequest
+public sealed class LineEventSummaryRequest : LineEventFilterRequest
 {
     [JsonIgnore]
-    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.EventKpis;
+    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.EventSummary;
 }
 
-public sealed class LineTimeSeriesRequest : LineEventFilterRequest
+public sealed class LineTimeSeriesRequest : LineEventFilterRequest, IHasBucket
 {
-    [JsonPropertyName("bucket")]
-    [Description("Aggregation bucket used for returned time series.")]
-    public StatisticsBucket Bucket { get; init; } = StatisticsBucket.Day;
-
     [JsonIgnore]
     public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.TimeSeries;
 
-    public override StatisticsBucket GetBucket() => Bucket;
+    [JsonPropertyName("bucket")]
+    [Description("Aggregation bucket used for returned time series.")]
+    public StatisticsBucket Bucket { get; init; } = StatisticsBucket.Day;
 }
 
-public sealed class LineRouteVariantsRequest : LineJourneyFilterRequest
+public sealed class LineRouteVariantsRequest : LineJourneyFilterRequest, IHasMinimumVolume
 {
+    [JsonIgnore]
+    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.RouteVariants;
+
     [JsonPropertyName("minVolume")]
     [Range(0, int.MaxValue)]
     [Description("Minimum planned journey count required for a route variant to be included.")]
     public int MinVolume { get; init; } = 0;
-
-    [JsonIgnore]
-    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.RouteVariants;
-
-    public override int GetMinVolume() => MinVolume;
 }
 
-public class LineStationPerformanceRequest : LineEventFilterRequest
+public class LineStationPerformanceRequest : LineEventFilterRequest, IHasMinimumVolume, IHasPagination
 {
+    [JsonIgnore]
+    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.StationPerformance;
+
     [JsonPropertyName("minVolume")]
     [Range(0, int.MaxValue)]
     [Description("Minimum planned event count required for a station to be included.")]
@@ -143,19 +127,13 @@ public class LineStationPerformanceRequest : LineEventFilterRequest
     [Range(0, int.MaxValue)]
     [Description("Number of stations to skip.")]
     public int Offset { get; init; } = 0;
-
-    [JsonIgnore]
-    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.StationPerformance;
-
-    public override int GetMinVolume() => MinVolume;
-
-    public override int GetLimit() => Limit;
-
-    public override int GetOffset() => Offset;
 }
 
-public sealed class LineJourneyNumberRankingRequest : LineJourneyFilterRequest
+public sealed class LineJourneyNumberRankingRequest : LineJourneyFilterRequest, IHasMinimumVolume, IHasPagination
 {
+    [JsonIgnore]
+    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.JourneyNumberRanking;
+
     [JsonPropertyName("minVolume")]
     [Range(0, int.MaxValue)]
     [Description("Minimum planned journey count required for a journey number to be included.")]
@@ -170,15 +148,6 @@ public sealed class LineJourneyNumberRankingRequest : LineJourneyFilterRequest
     [Range(0, int.MaxValue)]
     [Description("Number of journey numbers to skip.")]
     public int Offset { get; init; } = 0;
-
-    [JsonIgnore]
-    public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.JourneyNumberRanking;
-
-    public override int GetMinVolume() => MinVolume;
-
-    public override int GetLimit() => Limit;
-
-    public override int GetOffset() => Offset;
 }
 
 public sealed class LineWeekdayHourHeatmapRequest : LineJourneyFilterRequest
@@ -192,5 +161,3 @@ public sealed class LineProblemStationsRequest : LineStationPerformanceRequest
     [JsonIgnore]
     public override LineStatisticsMetricType MetricType => LineStatisticsMetricType.ProblemStations;
 }
-
-#pragma warning restore CS0108

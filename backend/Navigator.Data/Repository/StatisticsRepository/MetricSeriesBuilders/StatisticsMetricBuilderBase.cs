@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Navigator.Data.Entities.Views;
 using Navigator.Data.Enums.Metric;
 using Navigator.Data.Models.Statistics.Api;
+using StatisticsBucket = Navigator.Data.Enums.Metric.StatisticsBucket;
 
 namespace Navigator.Data.Repository.StatisticsRepository.MetricSeriesBuilders;
 
@@ -42,19 +43,19 @@ public abstract class StatisticsMetricBuilder<TRequest> : IStatisticsMetricBuild
 
 internal static class StatisticsMetricBuilderHelpers
 {
-    public const string Timezone = "Europe/Berlin";
+    public static DateTime UtcFrom(StatisticsMetricRequest request) => request.From.UtcDateTime;
 
-    private static readonly TimeZoneInfo BerlinTimeZone = ResolveBerlinTimeZone();
+    public static DateTime UtcTo(StatisticsMetricRequest request) => request.To.UtcDateTime;
 
-    public static DateTimeOffset ToBerlinTime(DateTime utc)
+    public static DateTimeOffset ToRequestOffsetTime(DateTime utc, StatisticsMetricRequest request)
     {
         var utcOffset = new DateTimeOffset(DateTime.SpecifyKind(utc, DateTimeKind.Utc));
-        return TimeZoneInfo.ConvertTime(utcOffset, BerlinTimeZone);
+        return utcOffset.ToOffset(request.From.Offset);
     }
 
-    public static DateTimeOffset BucketStart(DateTime utc, StatisticsBucket bucket)
+    public static DateTimeOffset BucketStart(DateTime utc, StatisticsMetricRequest request, StatisticsBucket bucket)
     {
-        var local = ToBerlinTime(utc);
+        var local = ToRequestOffsetTime(utc, request);
         var dateTime = local.DateTime;
 
         var bucketLocal = bucket switch
@@ -66,35 +67,156 @@ internal static class StatisticsMetricBuilderHelpers
             _ => dateTime.Date
         };
 
-        return new DateTimeOffset(bucketLocal, BerlinTimeZone.GetUtcOffset(bucketLocal));
+        return new DateTimeOffset(bucketLocal, request.From.Offset);
     }
 
-    public static DateTime ConvertLocalDateToUtc(DateOnly date)
-    {
-        var local = date.ToDateTime(TimeOnly.MinValue, DateTimeKind.Unspecified);
-        return TimeZoneInfo.ConvertTimeToUtc(local, BerlinTimeZone);
-    }
+    public static StatisticsBucket? Bucket(StatisticsMetricRequest request) =>
+        request is IHasBucket bucketed ? bucketed.Bucket : null;
 
-    public static DateTime FromUtc(StatisticsMetricRequest request) => ConvertLocalDateToUtc(request.FromDate);
+    public static Navigator.Data.Enums.ScheduleType? ScheduleType(StatisticsMetricRequest request) =>
+        request is IHasScheduleType filter ? filter.ScheduleType : null;
 
-    public static DateTime ToUtc(StatisticsMetricRequest request) => ConvertLocalDateToUtc(request.ToDate);
+    public static Navigator.Data.Enums.TransportType[] TransportTypes(StatisticsMetricRequest request) =>
+        request is IHasTransportTypes filter ? filter.TransportTypes : [];
+
+    public static string[] AdministrationIds(StatisticsMetricRequest request) =>
+        request is IHasAdministrationIds filter ? filter.AdministrationIds : [];
+
+    public static int? OriginEvaNumber(StatisticsMetricRequest request) =>
+        request is IHasOriginEvaNumber filter ? filter.OriginEvaNumber : null;
+
+    public static int? DestinationEvaNumber(StatisticsMetricRequest request) =>
+        request is IHasDestinationEvaNumber filter ? filter.DestinationEvaNumber : null;
+
+    public static int? DirectionEvaNumber(StatisticsMetricRequest request) =>
+        request is IHasDirectionEvaNumber filter ? filter.DirectionEvaNumber : null;
+
+    public static int? JourneyNumber(StatisticsMetricRequest request) =>
+        request switch
+        {
+            IHasJourneyNumber required => required.JourneyNumber,
+            IHasOptionalJourneyNumber optional => optional.JourneyNumber,
+            _ => null
+        };
+
+    public static string? LineName(StatisticsMetricRequest request) =>
+        request is IHasLineName filter ? filter.LineName : null;
+
+    public static bool IncludeReplacement(StatisticsMetricRequest request) =>
+        request is not IHasReplacementFilter filter || filter.IncludeReplacement;
+
+    public static int MinVolume(StatisticsMetricRequest request) =>
+        request is IHasMinimumVolume filter ? filter.MinVolume : 0;
+
+    public static int Limit(StatisticsMetricRequest request) =>
+        request switch
+        {
+            IHasPagination paged => paged.Limit,
+            IHasLimit limited => limited.Limit,
+            _ => int.MaxValue
+        };
+
+    public static int Offset(StatisticsMetricRequest request) =>
+        request is IHasPagination paged ? paged.Offset : 0;
+
+    public static StatisticsScope Scope(StatisticsMetricRequest request) =>
+        request switch
+        {
+            NetworkStatisticsMetricRequest => StatisticsScope.Network,
+            StationStatisticsMetricRequest => StatisticsScope.Station,
+            LineStatisticsMetricRequest => StatisticsScope.Line,
+            JourneyStatisticsMetricRequest => StatisticsScope.JourneyNumber,
+            _ => throw new NotSupportedException($"Unsupported statistics request scope: {request.GetType().Name}")
+        };
+
+    public static StatisticsMetricType Metric(StatisticsMetricRequest request) =>
+        request switch
+        {
+            NetworkStatisticsMetricRequest network => Metric(network.MetricType),
+            StationStatisticsMetricRequest station => Metric(station.MetricType),
+            LineStatisticsMetricRequest line => Metric(line.MetricType),
+            JourneyStatisticsMetricRequest journey => Metric(journey.MetricType),
+            _ => throw new NotSupportedException($"Unsupported statistics metric request: {request.GetType().Name}")
+        };
+
+    private static StatisticsMetricType Metric(NetworkStatisticsMetricType metricType) =>
+        metricType switch
+        {
+            NetworkStatisticsMetricType.EventSummary => StatisticsMetricType.EventSummary,
+            NetworkStatisticsMetricType.JourneySummary => StatisticsMetricType.JourneySummary,
+            NetworkStatisticsMetricType.EventTimeSeries => StatisticsMetricType.EventTimeSeries,
+            NetworkStatisticsMetricType.JourneyTimeSeries => StatisticsMetricType.JourneyTimeSeries,
+            NetworkStatisticsMetricType.WeekdayHourHeatmap => StatisticsMetricType.WeekdayHourHeatmap,
+            NetworkStatisticsMetricType.TransportTypeComparison => StatisticsMetricType.TransportTypeComparison,
+            NetworkStatisticsMetricType.StationRanking => StatisticsMetricType.StationRanking,
+            NetworkStatisticsMetricType.LineRanking => StatisticsMetricType.LineRanking,
+            NetworkStatisticsMetricType.MapHotspots => StatisticsMetricType.MapHotspots,
+            NetworkStatisticsMetricType.EventDelayDistribution => StatisticsMetricType.EventDelayDistribution,
+            _ => throw new NotSupportedException($"Unsupported network statistics metric type: {metricType}")
+        };
+
+    private static StatisticsMetricType Metric(StationStatisticsMetricType metricType) =>
+        metricType switch
+        {
+            StationStatisticsMetricType.EventSummary => StatisticsMetricType.EventSummary,
+            StationStatisticsMetricType.Benchmark => StatisticsMetricType.Benchmark,
+            StationStatisticsMetricType.TimeSeries => StatisticsMetricType.TimeSeries,
+            StationStatisticsMetricType.ArrivalDepartureComparison => StatisticsMetricType.ArrivalDepartureComparison,
+            StationStatisticsMetricType.WeekdayHourHeatmap => StatisticsMetricType.WeekdayHourHeatmap,
+            StationStatisticsMetricType.LineRanking => StatisticsMetricType.LineRanking,
+            StationStatisticsMetricType.Directions => StatisticsMetricType.Directions,
+            StationStatisticsMetricType.TransportTypeMix => StatisticsMetricType.TransportTypeMix,
+            StationStatisticsMetricType.LineHourMatrix => StatisticsMetricType.LineHourMatrix,
+            StationStatisticsMetricType.EventDetails => StatisticsMetricType.EventDetails,
+            _ => throw new NotSupportedException($"Unsupported station statistics metric type: {metricType}")
+        };
+
+    private static StatisticsMetricType Metric(LineStatisticsMetricType metricType) =>
+        metricType switch
+        {
+            LineStatisticsMetricType.Profile => StatisticsMetricType.LineProfile,
+            LineStatisticsMetricType.JourneySummary => StatisticsMetricType.JourneySummary,
+            LineStatisticsMetricType.EventSummary => StatisticsMetricType.EventSummary,
+            LineStatisticsMetricType.TimeSeries => StatisticsMetricType.TimeSeries,
+            LineStatisticsMetricType.RouteVariants => StatisticsMetricType.RouteVariants,
+            LineStatisticsMetricType.StationPerformance => StatisticsMetricType.StationPerformance,
+            LineStatisticsMetricType.JourneyNumberRanking => StatisticsMetricType.JourneyNumberRanking,
+            LineStatisticsMetricType.WeekdayHourHeatmap => StatisticsMetricType.WeekdayHourHeatmap,
+            LineStatisticsMetricType.ProblemStations => StatisticsMetricType.ProblemStations,
+            _ => throw new NotSupportedException($"Unsupported line statistics metric type: {metricType}")
+        };
+
+    private static StatisticsMetricType Metric(JourneyStatisticsMetricType metricType) =>
+        metricType switch
+        {
+            JourneyStatisticsMetricType.Pattern => StatisticsMetricType.Pattern,
+            JourneyStatisticsMetricType.JourneySummary => StatisticsMetricType.JourneySummary,
+            JourneyStatisticsMetricType.DailyOutcomes => StatisticsMetricType.DailyOutcomes,
+            JourneyStatisticsMetricType.StopProfile => StatisticsMetricType.StopProfile,
+            JourneyStatisticsMetricType.DelayBuildUp => StatisticsMetricType.DelayBuildUp,
+            JourneyStatisticsMetricType.Calendar => StatisticsMetricType.Calendar,
+            _ => throw new NotSupportedException($"Unsupported journey statistics metric type: {metricType}")
+        };
 
     public static IReadOnlyDictionary<string, object?> CreateFilters(StatisticsMetricRequest request)
     {
         var filters = new Dictionary<string, object?>();
 
-        if (request.GetScheduleType() is { } scheduleType) filters["scheduleType"] = scheduleType;
-        if (request.GetTransportTypes().Length > 0) filters["transportTypes"] = request.GetTransportTypes();
-        if (request.GetAdministrationIds().Length > 0) filters["administrationIds"] = request.GetAdministrationIds();
-        if (request.GetLineNameFilter() is { } lineName) filters["lineName"] = lineName;
-        if (request.GetOriginEvaNumber() is { } originEvaNumber) filters["originEvaNumber"] = originEvaNumber;
-        if (request.GetDestinationEvaNumber() is { } destinationEvaNumber) filters["destinationEvaNumber"] = destinationEvaNumber;
-        if (request.GetDirectionEvaNumber() is { } directionEvaNumber) filters["directionEvaNumber"] = directionEvaNumber;
-        if (request.GetJourneyNumberFilter() is { } journeyNumber) filters["journeyNumber"] = journeyNumber;
-        if (!request.GetIncludeReplacement()) filters["includeReplacement"] = false;
-        if (request.GetMinVolume() > 0) filters["minVolume"] = request.GetMinVolume();
-        if (request.GetLimit() != 100) filters["limit"] = request.GetLimit();
-        if (request.GetOffset() > 0) filters["offset"] = request.GetOffset();
+        var transportTypes = TransportTypes(request);
+        var administrationIds = AdministrationIds(request);
+
+        if (ScheduleType(request) is { } scheduleType) filters["scheduleType"] = scheduleType;
+        if (transportTypes.Length > 0) filters["transportTypes"] = transportTypes;
+        if (administrationIds.Length > 0) filters["administrationIds"] = administrationIds;
+        if (LineName(request) is { } lineName) filters["lineName"] = lineName;
+        if (OriginEvaNumber(request) is { } originEvaNumber) filters["originEvaNumber"] = originEvaNumber;
+        if (DestinationEvaNumber(request) is { } destinationEvaNumber) filters["destinationEvaNumber"] = destinationEvaNumber;
+        if (DirectionEvaNumber(request) is { } directionEvaNumber) filters["directionEvaNumber"] = directionEvaNumber;
+        if (JourneyNumber(request) is { } journeyNumber) filters["journeyNumber"] = journeyNumber;
+        if (!IncludeReplacement(request)) filters["includeReplacement"] = false;
+        if (MinVolume(request) > 0) filters["minVolume"] = MinVolume(request);
+        if (Limit(request) != 100) filters["limit"] = Limit(request);
+        if (Offset(request) > 0) filters["offset"] = Offset(request);
 
         return filters;
     }
@@ -184,7 +306,7 @@ internal static class StatisticsMetricBuilderHelpers
         CancellationToken cancellationToken
     )
     {
-        var administrationIds = request.GetAdministrationIds();
+        var administrationIds = AdministrationIds(request);
         if (administrationIds.Length == 0) return [];
 
         return await dataContext.Administrations
@@ -200,17 +322,21 @@ internal static class StatisticsMetricBuilderHelpers
     public static decimal? Average(long numerator, long denominator) =>
         denominator == 0 ? null : (decimal)numerator / denominator;
 
-    private static TimeZoneInfo ResolveBerlinTimeZone()
+    public static decimal? Percentile(IReadOnlyList<int> orderedValues, double percentile)
     {
-        try
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById("Europe/Berlin");
-        }
-        catch (TimeZoneNotFoundException)
-        {
-            return TimeZoneInfo.FindSystemTimeZoneById("W. Europe Standard Time");
-        }
+        if (orderedValues.Count == 0) return null;
+        if (orderedValues.Count == 1) return orderedValues[0];
+
+        var position = (orderedValues.Count - 1) * percentile;
+        var lowerIndex = (int)Math.Floor(position);
+        var upperIndex = (int)Math.Ceiling(position);
+
+        if (lowerIndex == upperIndex) return orderedValues[lowerIndex];
+
+        var weight = (decimal)(position - lowerIndex);
+        return orderedValues[lowerIndex] + (orderedValues[upperIndex] - orderedValues[lowerIndex]) * weight;
     }
+
 }
 
 internal sealed class EventAggregate

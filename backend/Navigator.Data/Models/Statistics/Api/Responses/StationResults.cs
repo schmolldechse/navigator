@@ -106,7 +106,7 @@ public sealed record LineHourMatrixItem(
     TransportType TransportType,
 
     [property: JsonPropertyName("hour")]
-    [property: Description("Hour of day in Europe/Berlin.")]
+    [property: Description("Hour of day using the request offset.")]
     int Hour,
 
     [property: JsonPropertyName("eventMetrics")]

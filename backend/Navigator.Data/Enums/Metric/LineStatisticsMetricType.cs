@@ -2,9 +2,9 @@ namespace Navigator.Data.Enums.Metric;
 
 public enum LineStatisticsMetricType
 {
-    Summary,
-    JourneyKpis,
-    EventKpis,
+    Profile,
+    JourneySummary,
+    EventSummary,
     TimeSeries,
     RouteVariants,
     StationPerformance,

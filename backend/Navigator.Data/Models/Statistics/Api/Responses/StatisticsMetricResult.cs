@@ -3,8 +3,8 @@ using System.Text.Json.Serialization;
 namespace Navigator.Data.Models.Statistics.Api;
 
 [JsonPolymorphic(TypeDiscriminatorPropertyName = "type")]
-[JsonDerivedType(typeof(EventKpisResult), "EVENT_KPIS")]
-[JsonDerivedType(typeof(JourneyKpisResult), "JOURNEY_KPIS")]
+[JsonDerivedType(typeof(EventSummaryResult), "EVENT_SUMMARY")]
+[JsonDerivedType(typeof(JourneySummaryResult), "JOURNEY_SUMMARY")]
 [JsonDerivedType(typeof(NetworkEventTimeSeriesResult), "NETWORK_EVENT_TIME_SERIES")]
 [JsonDerivedType(typeof(NetworkJourneyTimeSeriesResult), "NETWORK_JOURNEY_TIME_SERIES")]
 [JsonDerivedType(typeof(EventWeekdayHourHeatmapResult), "EVENT_WEEKDAY_HOUR_HEATMAP")]
@@ -13,6 +13,7 @@ namespace Navigator.Data.Models.Statistics.Api;
 [JsonDerivedType(typeof(NetworkStationRankingResult), "NETWORK_STATION_RANKING")]
 [JsonDerivedType(typeof(NetworkLineRankingResult), "NETWORK_LINE_RANKING")]
 [JsonDerivedType(typeof(NetworkMapHotspotsResult), "NETWORK_MAP_HOTSPOTS")]
+[JsonDerivedType(typeof(EventDelayDistributionResult), "EVENT_DELAY_DISTRIBUTION")]
 [JsonDerivedType(typeof(StationBenchmarkResult), "STATION_BENCHMARK")]
 [JsonDerivedType(typeof(StationTimeSeriesResult), "STATION_TIME_SERIES")]
 [JsonDerivedType(typeof(ArrivalDepartureComparisonResult), "ARRIVAL_DEPARTURE_COMPARISON")]
@@ -21,7 +22,7 @@ namespace Navigator.Data.Models.Statistics.Api;
 [JsonDerivedType(typeof(TransportTypeMixResult), "TRANSPORT_TYPE_MIX")]
 [JsonDerivedType(typeof(LineHourMatrixResult), "LINE_HOUR_MATRIX")]
 [JsonDerivedType(typeof(StationEventDetailsResult), "STATION_EVENT_DETAILS")]
-[JsonDerivedType(typeof(LineSummaryResult), "LINE_SUMMARY")]
+[JsonDerivedType(typeof(LineProfileResult), "LINE_PROFILE")]
 [JsonDerivedType(typeof(LineTimeSeriesResult), "LINE_TIME_SERIES")]
 [JsonDerivedType(typeof(LineRouteVariantsResult), "LINE_ROUTE_VARIANTS")]
 [JsonDerivedType(typeof(LineStationPerformanceResult), "LINE_STATION_PERFORMANCE")]

@@ -4,7 +4,7 @@ using Navigator.Data.Enums;
 
 namespace Navigator.Data.Models.Statistics.Api;
 
-public sealed record LineSummaryResult(
+public sealed record LineProfileResult(
     [property: JsonPropertyName("lineName")]
     [property: Description("Line or journey description.")]
     string LineName,
