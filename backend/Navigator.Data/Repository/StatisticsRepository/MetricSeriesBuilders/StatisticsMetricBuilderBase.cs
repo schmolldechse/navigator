@@ -281,7 +281,8 @@ internal static class StatisticsMetricBuilderHelpers
 
     public static JourneyMetrics ToJourneyMetrics(JourneyAggregate aggregate)
     {
-        var completed = aggregate.JourneyCount - aggregate.FullyCancelledCount - aggregate.DestinationNotReachedCount;
+        // Fully cancelled journeys are already included in DestinationNotReachedCount.
+        var completed = aggregate.JourneyCount - aggregate.DestinationNotReachedCount;
         var delaySamples = aggregate.JourneyCount - aggregate.DestinationNotReachedCount;
 
         return new JourneyMetrics(

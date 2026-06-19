@@ -12,23 +12,22 @@
 	import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
 	import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
 	import { DateTime } from "luxon";
-	import { getStatisticsDashboardContext } from "./statistics-context.svelte";
+	import { getStationStatisticsContext, type StationFilterDraft } from "./station-context.svelte";
 	import {
 		asLocalDate,
 		createRangeLabel,
 		scheduleTypeOptions,
 		transportTypeOptions,
-		type ScheduleTypeOption,
-		type StatisticsFilterDraft
-	} from "./statistics-dashboard";
+		type ScheduleTypeOption
+	} from "../shared/statistics-dashboard";
 
-	const statistics = getStatisticsDashboardContext();
+	const statistics = getStationStatisticsContext();
 
 	let expanded = $state(false);
 	let datePickerOpen = $state(false);
-	let draft = $state<StatisticsFilterDraft>(statistics.filterDraft);
+	let draft = $state<StationFilterDraft>(statistics.filterDraft);
 
-	const assignDraft = (next: StatisticsFilterDraft) => {
+	const assignDraft = (next: StationFilterDraft) => {
 		draft.from = next.from;
 		draft.to = next.to;
 		draft.scheduleType = next.scheduleType;

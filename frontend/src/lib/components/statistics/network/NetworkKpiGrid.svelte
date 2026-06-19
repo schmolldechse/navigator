@@ -1,10 +1,11 @@
 <script lang="ts">
 	import type {
+		NetworkStatisticsMetricRequest,
 		StatisticsMetricResponse,
 		StatisticsMetricResultEventSummaryResult,
 		StatisticsMetricResultJourneySummaryResult
 	} from "@lib/api";
-	import type { RemoteQuery } from "@sveltejs/kit";
+	import { loadNetworkMetric } from "@lib/remote/statistics.remote";
 	import Kpi from "@lib/components/ui/Kpi.svelte";
 	import Activity from "@lucide/svelte/icons/activity";
 	import Ban from "@lucide/svelte/icons/ban";
@@ -21,13 +22,17 @@
 	} from "../shared/statistics-dashboard";
 
 	type Props = {
-		eventPromise: RemoteQuery<StatisticsMetricResponse>;
-		journeyPromise: RemoteQuery<StatisticsMetricResponse>;
-		previousEventPromise?: RemoteQuery<StatisticsMetricResponse>;
-		previousJourneyPromise?: RemoteQuery<StatisticsMetricResponse>;
+		eventRequest: NetworkStatisticsMetricRequest;
+		journeyRequest: NetworkStatisticsMetricRequest;
+		previousEventRequest: NetworkStatisticsMetricRequest;
+		previousJourneyRequest: NetworkStatisticsMetricRequest;
 	};
 
-	let { eventPromise, journeyPromise, previousEventPromise, previousJourneyPromise }: Props = $props();
+	let { eventRequest, journeyRequest, previousEventRequest, previousJourneyRequest }: Props = $props();
+	const eventPromise = $derived(loadNetworkMetric({ request: eventRequest }));
+	const journeyPromise = $derived(loadNetworkMetric({ request: journeyRequest }));
+	const previousEventPromise = $derived(loadNetworkMetric({ request: previousEventRequest }));
+	const previousJourneyPromise = $derived(loadNetworkMetric({ request: previousJourneyRequest }));
 
 	const countTrend = (current: number | string | null | undefined, previous: number | string | null | undefined) => {
 		const currentValue = toNumber(current);
@@ -77,26 +82,31 @@
 			tone: delta < 0 ? ("positive" as const) : delta > 0 ? ("negative" as const) : ("neutral" as const)
 		};
 	};
+
+	const errorMessage = (error: unknown): string => (error instanceof Error ? error.message : "Unable to load network KPIs.");
 </script>
 
-{#if eventPromise.loading || journeyPromise.loading}
-	<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+{#snippet loadingKpis()}
+	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		<Kpi title="Planned stops" loading icon={Activity} />
-		<Kpi title="Cancelled stops" loading icon={Ban} />
 		<Kpi title="Cancellation rate" loading icon={Ban} />
 		<Kpi title="Reliable < 6 min" loading icon={ShieldCheck} />
+		<Kpi title="Reliable < 15 min" loading icon={ShieldCheck} />
+		<Kpi title="Avg delay" loading icon={Clock} />
+		<Kpi title="Journey completion" loading icon={CircleCheck} />
 	</div>
-{:else if eventPromise.error || journeyPromise.error}
+{/snippet}
+
+{#snippet errorKpis(error: unknown)}
 	<div class="border-destructive/30 bg-destructive/10 text-destructive rounded-xl border p-4 text-sm font-semibold">
-		{eventPromise.error?.message ?? journeyPromise.error?.message}
+		{errorMessage(error)}
 	</div>
-{:else if eventPromise.current && journeyPromise.current}
-	{@const eventMetrics = expectMetricResult<StatisticsMetricResultEventSummaryResult>(
-		eventPromise.current,
-		"EVENT_SUMMARY"
-	).metrics}
+{/snippet}
+
+{#snippet loadedKpis(eventResponse: StatisticsMetricResponse, journeyResponse: StatisticsMetricResponse)}
+	{@const eventMetrics = expectMetricResult<StatisticsMetricResultEventSummaryResult>(eventResponse, "EVENT_SUMMARY").metrics}
 	{@const journeyMetrics = expectMetricResult<StatisticsMetricResultJourneySummaryResult>(
-		journeyPromise.current,
+		journeyResponse,
 		"JOURNEY_SUMMARY"
 	).metrics}
 	{@const previousEventMetrics =
@@ -108,7 +118,7 @@
 			? expectMetricResult<StatisticsMetricResultJourneySummaryResult>(previousJourneyPromise.current, "JOURNEY_SUMMARY")
 					.metrics
 			: null}
-	<div class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+	<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
 		<Kpi
 			title="Planned stops"
 			metric={{ value: formatCount(eventMetrics.plannedEvents, true) }}
@@ -117,18 +127,6 @@
 		>
 			{#snippet footer()}
 				<p class="text-foreground/60 text-sm font-semibold">{formatCount(eventMetrics.servedEvents, true)} served</p>
-			{/snippet}
-		</Kpi>
-		<Kpi
-			title="Cancelled stops"
-			metric={{ value: formatCount(eventMetrics.cancelledEvents, true) }}
-			trend={countTrend(eventMetrics.cancelledEvents, previousEventMetrics?.cancelledEvents)}
-			icon={Ban}
-		>
-			{#snippet footer()}
-				<p class="text-foreground/60 text-sm font-semibold">
-					{formatMetric(eventMetrics.cancellationRate, "rate")} of planned stops
-				</p>
 			{/snippet}
 		</Kpi>
 		<Kpi
@@ -191,4 +189,14 @@
 			{/snippet}
 		</Kpi>
 	</div>
+{/snippet}
+
+{#if eventPromise.loading || journeyPromise.loading}
+	{@render loadingKpis()}
+{:else if eventPromise.error || journeyPromise.error}
+	{@render errorKpis(eventPromise.error ?? journeyPromise.error)}
+{:else if eventPromise.current && journeyPromise.current}
+	{@render loadedKpis(eventPromise.current, journeyPromise.current)}
+{:else}
+	{@render loadingKpis()}
 {/if}

@@ -1,59 +1,83 @@
 <script lang="ts">
 	import type { EventTimeSeriesPoint, JourneyTimeSeriesPoint } from "@lib/api";
+	import * as Accordion from "@lib/components/ui/accordion";
 	import NetworkDelayDistributionChart from "@lib/components/statistics/network/NetworkDelayDistributionChart.svelte";
 	import NetworkFilterPanel from "@lib/components/statistics/network/NetworkFilterPanel.svelte";
 	import NetworkHeatmap from "@lib/components/statistics/network/NetworkHeatmap.svelte";
 	import NetworkHotspotMap from "@lib/components/statistics/network/NetworkHotspotMap.svelte";
 	import NetworkKpiGrid from "@lib/components/statistics/network/NetworkKpiGrid.svelte";
-	import NetworkRankingList from "@lib/components/statistics/network/NetworkRankingList.svelte";
 	import NetworkTransportComparisonChart from "@lib/components/statistics/network/NetworkTransportComparisonChart.svelte";
-	import NetworkTrendChart, { type TrendMetricDefinition } from "@lib/components/statistics/network/NetworkTrendChart.svelte";
-	import { getStatisticsDashboardContext } from "@lib/components/statistics/shared/statistics-context.svelte";
-	import MetricBucketControl from "@lib/components/statistics/shared/MetricBucketControl.svelte";
+	import NetworkTrendChart, {
+		type TrendMetricDefinition,
+		type TrendPanelDefinition
+	} from "@lib/components/statistics/network/NetworkTrendChart.svelte";
+	import {
+		NetworkStatisticsContext,
+		setNetworkStatisticsContext
+	} from "@lib/components/statistics/network/network-context.svelte";
 	import {
 		createNetworkEventDelayDistributionRequest,
 		createNetworkEventSummaryRequest,
 		createNetworkEventTimeSeriesRequest,
 		createNetworkJourneySummaryRequest,
 		createNetworkJourneyTimeSeriesRequest,
-		createNetworkLineRankingRequest,
 		createNetworkMapHotspotsRequest,
-		createNetworkStationRankingRequest,
 		createNetworkTransportTypeComparisonRequest,
-		createNetworkWeekdayHourHeatmapRequest,
+		createNetworkWeekdayHourHeatmapRequest
+	} from "@lib/components/statistics/network/network-statistics";
+	import MetricBucketControl from "@lib/components/statistics/shared/options/MetricBucketControl.svelte";
+	import MetricPerspectiveControl from "@lib/components/statistics/shared/options/MetricPerspectiveControl.svelte";
+	import Separator from "@lib/components/ui/Separator.svelte";
+	import {
 		createPreviousGlobalScope,
-		createRangeLabel,
 		getStatisticsBucketOptions,
-		rateToPercent,
-		transportTypeShortLabel
+		rateToPercent
 	} from "@lib/components/statistics/shared/statistics-dashboard";
 	import { loadNetworkMapHotspots, loadNetworkMetric } from "@lib/remote/statistics.remote";
 
-	const statistics = getStatisticsDashboardContext();
-	const rangeLabel = $derived(createRangeLabel(statistics.global));
+	const statistics = new NetworkStatisticsContext();
+	setNetworkStatisticsContext(statistics);
+
+	let faqValues: string[] = $state([]);
+	const faqItems = [
+		{
+			value: "coverage",
+			title: "What do these network statistics cover?",
+			answer:
+				"Navigator is a growing measurement system, not an official or complete national timetable archive. The results describe the records collected for the enabled stations and transport types in the selected period and should not be read as official nationwide figures."
+		},
+		{
+			value: "reliability",
+			title: "What is the difference between customer reliability and operative punctuality?",
+			answer:
+				"Customer reliability uses all planned stops as its denominator, so cancellations reduce the result. Operative punctuality only evaluates stops that actually ran. Both views are useful, but the customer measure reflects that a cancelled stop is not a neutral outcome."
+		},
+		{
+			value: "percentages",
+			title: "Why can 100% be misleading?",
+			answer:
+				"Percentages are only as strong as their denominator. A transport type with one punctual observed stop can show 100%, while a result based on thousands of planned stops is usually the stronger signal. Read rates together with the planned-stop volume, selected period and active filters shown in the dashboard."
+		},
+		{
+			value: "schedule-type",
+			title: "Why are arrivals and departures evaluated separately?",
+			answer:
+				"Arrivals and departures answer different questions. Arrival quality is closer to whether passengers reach a station on time, while departure quality shows how reliably services leave. The schedule filter applies this distinction to stop-event metrics so two operational moments with different delays and cancellations are not mixed."
+		},
+		{
+			value: "replacement-services",
+			title: "How are replacement services handled?",
+			answer:
+				"Replacement services are included by default so the dashboard reflects the full recorded service offer. The filters can exclude them when you want to focus on regular services. A service is treated as replacement transport when the recorded journey or transport information marks it that way."
+		}
+	];
+
 	const previousGlobal = $derived(createPreviousGlobalScope(statistics.global));
 	const bucketOptions = $derived(getStatisticsBucketOptions(statistics.global));
-	const activeFilterChips = $derived.by(() => {
-		const chips = [rangeLabel];
-		if (statistics.global.transportTypes.length > 0) {
-			chips.push(...statistics.global.transportTypes.map((transportType) => transportTypeShortLabel(transportType)));
-		} else {
-			chips.push("All rail services");
-		}
-		if (statistics.event.scheduleType) chips.push(statistics.event.scheduleType === "ARRIVAL" ? "Arrivals" : "Departures");
-		if (!statistics.global.includeReplacement) chips.push("No replacement services");
-
-		return chips;
-	});
-
-	const eventSummary = $derived(
-		loadNetworkMetric({ request: createNetworkEventSummaryRequest(statistics.global, statistics.event) })
-	);
-	const journeySummary = $derived(loadNetworkMetric({ request: createNetworkJourneySummaryRequest(statistics.global) }));
-	const previousEventSummary = $derived(
-		loadNetworkMetric({ request: createNetworkEventSummaryRequest(previousGlobal, statistics.event) })
-	);
-	const previousJourneySummary = $derived(loadNetworkMetric({ request: createNetworkJourneySummaryRequest(previousGlobal) }));
+	const eventSummaryRequest = $derived(createNetworkEventSummaryRequest(statistics.global, statistics.event));
+	const journeySummaryRequest = $derived(createNetworkJourneySummaryRequest(statistics.global));
+	const previousEventSummaryRequest = $derived(createNetworkEventSummaryRequest(previousGlobal, statistics.event));
+	const previousJourneySummaryRequest = $derived(createNetworkJourneySummaryRequest(previousGlobal));
 	const eventTimeSeries = $derived(
 		loadNetworkMetric({
 			request: createNetworkEventTimeSeriesRequest(statistics.global, statistics.event, statistics.network.eventTimeSeries)
@@ -70,68 +94,120 @@
 	const transportTypeComparison = $derived(
 		loadNetworkMetric({ request: createNetworkTransportTypeComparisonRequest(statistics.global, statistics.event) })
 	);
-	const stationRanking = $derived(
-		loadNetworkMetric({
-			request: createNetworkStationRankingRequest(statistics.global, statistics.event, statistics.network.stationRanking)
-		})
-	);
-	const lineRanking = $derived(
-		loadNetworkMetric({ request: createNetworkLineRankingRequest(statistics.global, statistics.network.lineRanking) })
-	);
 	const mapHotspots = $derived(
 		loadNetworkMapHotspots({
-			request: createNetworkMapHotspotsRequest(statistics.global, statistics.event, statistics.network.mapHotspots)
+			request: createNetworkMapHotspotsRequest(statistics.global, statistics.event)
 		})
 	);
 	const delayDistribution = $derived(
 		loadNetworkMetric({ request: createNetworkEventDelayDistributionRequest(statistics.global, statistics.event) })
 	);
 
-	const eventTrendMetrics: TrendMetricDefinition[] = [
-		{
-			key: "customerReliability5Rate",
-			label: "Reliable < 6 min",
-			color: "var(--color-accent)",
-			format: "percent",
-			value: (item) => rateToPercent((item as EventTimeSeriesPoint).eventMetrics.customerReliability5Rate)
-		},
-		{
-			key: "customerReliability15Rate",
-			label: "Reliable < 15 min",
-			color: "var(--color-foreground)",
-			format: "percent",
-			value: (item) => rateToPercent((item as EventTimeSeriesPoint).eventMetrics.customerReliability15Rate)
-		},
-		{
-			key: "cancellationRate",
-			label: "Cancelled",
-			color: "#dc2626",
-			format: "percent",
-			value: (item) => rateToPercent((item as EventTimeSeriesPoint).eventMetrics.cancellationRate)
-		}
-	];
+	const eventTrendMetrics = $derived.by<TrendMetricDefinition[]>(() => {
+		const operative = statistics.network.eventTimeSeries.perspective === "operative";
 
-	const journeyTrendMetrics: TrendMetricDefinition[] = [
+		return [
+			{
+				key: operative ? "operativePunctuality5Rate" : "customerReliability5Rate",
+				label: operative ? "Operative punctual < 6 min" : "Customer reliable < 6 min",
+				color: "var(--color-accent)",
+				format: "percent",
+				value: (item) =>
+					rateToPercent(
+						operative
+							? (item as EventTimeSeriesPoint).eventMetrics.operativePunctuality5Rate
+							: (item as EventTimeSeriesPoint).eventMetrics.customerReliability5Rate
+					)
+			},
+			{
+				key: operative ? "operativePunctuality15Rate" : "customerReliability15Rate",
+				label: operative ? "Operative punctual < 15 min" : "Customer reliable < 15 min",
+				color: "var(--color-foreground)",
+				format: "percent",
+				value: (item) =>
+					rateToPercent(
+						operative
+							? (item as EventTimeSeriesPoint).eventMetrics.operativePunctuality15Rate
+							: (item as EventTimeSeriesPoint).eventMetrics.customerReliability15Rate
+					)
+			},
+			{
+				key: "cancellationRate",
+				label: "Cancelled planned stops",
+				color: "#dc2626",
+				format: "percent",
+				value: (item) => rateToPercent((item as EventTimeSeriesPoint).eventMetrics.cancellationRate)
+			}
+		];
+	});
+
+	const eventTrendDescription = $derived(
+		statistics.network.eventTimeSeries.perspective === "operative"
+			? "Punctuality among served stops; cancellations remain a separate share of planned stops."
+			: "Stops served under each delay threshold as a share of all planned stops, with cancellations shown separately."
+	);
+
+	const eventTrendPanels = $derived<TrendPanelDefinition[]>([
+		{
+			key: `event-${statistics.network.eventTimeSeries.perspective}`,
+			metrics: eventTrendMetrics,
+			yDomain: [0, 100],
+			height: 310
+		}
+	]);
+
+	const journeyCompletionMetrics: TrendMetricDefinition[] = [
 		{
 			key: "journeyCompletionRate",
-			label: "Completed",
+			label: "Reached destination",
 			color: "var(--color-accent)",
 			format: "percent",
 			value: (item) => rateToPercent((item as JourneyTimeSeriesPoint).journeyMetrics.journeyCompletionRate)
-		},
-		{
-			key: "destinationPunctuality5Rate",
-			label: "Destination < 6 min",
-			color: "var(--color-foreground)",
-			format: "percent",
-			value: (item) => rateToPercent((item as JourneyTimeSeriesPoint).journeyMetrics.destinationPunctuality5Rate)
-		},
+		}
+	];
+
+	const journeyDisruptionMetrics: TrendMetricDefinition[] = [
 		{
 			key: "fullCancellationRate",
 			label: "Fully cancelled",
 			color: "#dc2626",
 			format: "percent",
 			value: (item) => rateToPercent((item as JourneyTimeSeriesPoint).journeyMetrics.fullCancellationRate)
+		},
+		{
+			key: "partialCancellationRate",
+			label: "Partially cancelled",
+			color: "#ca8a04",
+			format: "percent",
+			value: (item) => rateToPercent((item as JourneyTimeSeriesPoint).journeyMetrics.partialCancellationRate)
+		},
+		{
+			key: "destinationNotReachedRate",
+			label: "Destination not reached",
+			color: "#64748b",
+			format: "percent",
+			value: (item) => rateToPercent((item as JourneyTimeSeriesPoint).journeyMetrics.destinationNotReachedRate)
+		}
+	];
+
+	const journeyTrendPanels: TrendPanelDefinition[] = [
+		{
+			key: "journey-completion",
+			label: "Reached destination",
+			description: "Share of all planned journeys that reached their destination.",
+			metrics: journeyCompletionMetrics,
+			yDomain: [0, 100],
+			height: 180,
+			showXAxis: false,
+			showLegend: false
+		},
+		{
+			key: "journey-disruptions",
+			label: "Disruption signals",
+			description: "Separate shares of planned journeys; these signals overlap and must not be added together.",
+			metrics: journeyDisruptionMetrics,
+			yDomain: [0, null],
+			height: 260
 		}
 	];
 </script>
@@ -140,107 +216,108 @@
 	<title>Network Statistics - Navigator</title>
 </svelte:head>
 
-<main class="container mx-auto flex flex-col gap-y-8 p-4 sm:py-8">
-	<section class="border-border bg-secondary/10 rounded-xl border-2 p-5">
-		<div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-			<div class="min-w-0">
-				<p class="text-accent text-xs font-bold tracking-wider uppercase">Network overview</p>
-				<h1 class="text-foreground mt-1 text-3xl font-bold text-balance sm:text-4xl">Network statistics</h1>
-				<p class="text-foreground/60 mt-2 max-w-3xl text-sm leading-relaxed font-semibold">
-					Operational quality across German rail services, grouped by stops, journeys, time, transport families and high-impact
-					hotspots.
-				</p>
-			</div>
-
-			<div class="flex flex-wrap gap-2 lg:justify-end">
-				{#each activeFilterChips as chip (chip)}
-					<span class="border-border bg-background rounded-lg border px-2.5 py-1 text-xs font-semibold">
-						{chip}
-					</span>
-				{/each}
-			</div>
+<main class="container mx-auto flex flex-col gap-y-6 p-3 sm:p-4 sm:py-8 lg:gap-y-8">
+	<section class="border-border bg-secondary/10 rounded-xl border-2 p-4 sm:p-5">
+		<div class="min-w-0">
+			<p class="text-accent text-xs font-bold tracking-wider uppercase">Network overview</p>
+			<h1 class="text-foreground mt-1 text-3xl font-bold text-balance sm:text-4xl">Network statistics</h1>
+			<p class="text-foreground/60 mt-2 max-w-3xl text-sm leading-relaxed font-semibold">
+				Operational quality across German rail services, grouped by stops, journeys, time, transport families and high-impact
+				hotspots.
+			</p>
 		</div>
 	</section>
 
 	<NetworkFilterPanel />
 
-	<NetworkKpiGrid
-		eventPromise={eventSummary}
-		journeyPromise={journeySummary}
-		previousEventPromise={previousEventSummary}
-		previousJourneyPromise={previousJourneySummary}
-	/>
-
-	<section class="grid gap-4 xl:grid-cols-[minmax(0,1.45fr)_minmax(22rem,0.55fr)]">
-		<NetworkHotspotMap promise={mapHotspots} />
-		<NetworkTransportComparisonChart
-			promise={transportTypeComparison}
-			metric={statistics.network.transportTypeComparison.metric}
-			onmetricchange={statistics.setNetworkComparisonMetric}
+	{#key eventSummaryRequest}
+		<NetworkKpiGrid
+			eventRequest={eventSummaryRequest}
+			journeyRequest={journeySummaryRequest}
+			previousEventRequest={previousEventSummaryRequest}
+			previousJourneyRequest={previousJourneySummaryRequest}
 		/>
-	</section>
+	{/key}
 
-	<section class="grid gap-4 xl:grid-cols-2">
+	<section class="grid gap-4">
 		<NetworkTrendChart
-			title="Stop-event reliability"
-			description="Reliability, broader punctuality and cancellations over time."
+			title="Stop reliability and punctuality"
+			description={eventTrendDescription}
 			promise={eventTimeSeries}
-			metrics={eventTrendMetrics}
-			yDomain={[0, 100]}
+			panels={eventTrendPanels}
+			bucket={statistics.network.eventTimeSeries.bucket}
 		>
 			{#snippet actions()}
+				<MetricPerspectiveControl
+					value={statistics.network.eventTimeSeries.perspective}
+					onchange={statistics.setEventPerspective}
+				/>
+				<Separator orientation="vertical" />
 				<MetricBucketControl
 					value={statistics.network.eventTimeSeries.bucket}
 					options={bucketOptions}
-					onchange={statistics.setNetworkEventBucket}
+					onchange={statistics.setEventBucket}
 				/>
 			{/snippet}
 		</NetworkTrendChart>
 
 		<NetworkTrendChart
-			title="Journey outcomes"
-			description="Completed journeys and destination quality over time."
+			title="Journey completion and disruptions"
+			description="Destination completion and non-additive disruption rates over time. Full cancellations are included in destination-not-reached, and partial cancellations can overlap."
 			promise={journeyTimeSeries}
-			metrics={journeyTrendMetrics}
-			yDomain={[0, 100]}
+			panels={journeyTrendPanels}
+			bucket={statistics.network.journeyTimeSeries.bucket}
 		>
 			{#snippet actions()}
 				<MetricBucketControl
 					value={statistics.network.journeyTimeSeries.bucket}
 					options={bucketOptions}
-					onchange={statistics.setNetworkJourneyBucket}
+					onchange={statistics.setJourneyBucket}
 				/>
 			{/snippet}
 		</NetworkTrendChart>
 	</section>
 
-	<section class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(22rem,0.8fr)]">
+	<section class="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
 		<NetworkHeatmap
 			promise={weekdayHourHeatmap}
 			metric={statistics.network.weekdayHourHeatmap.metric}
-			onmetricchange={statistics.setNetworkHeatmapMetric}
-		/>
-		<NetworkRankingList
-			title="Station delay pressure"
-			description="Stations ranked by accumulated positive delay minutes."
-			promise={stationRanking}
-			mode="stations"
-			onpagechange={statistics.setNetworkStationRankingOffset}
-		/>
-	</section>
-
-	<section class="grid gap-4 xl:grid-cols-2">
-		<NetworkRankingList
-			title="Line delay pressure"
-			description="Lines ranked by accumulated destination delay minutes."
-			promise={lineRanking}
-			mode="lines"
-			onpagechange={statistics.setNetworkLineRankingOffset}
+			onmetricchange={statistics.setHeatmapMetric}
 		/>
 		<NetworkDelayDistributionChart
 			promise={delayDistribution}
 			mode={statistics.network.delayDistribution.mode}
-			onmodechange={statistics.setNetworkDistributionMode}
+			onmodechange={statistics.setDistributionMode}
 		/>
+	</section>
+
+	<NetworkTransportComparisonChart promise={transportTypeComparison} />
+
+	<section>
+		<NetworkHotspotMap
+			promise={mapHotspots}
+			metric={statistics.network.mapHotspots.metric}
+			onmetricchange={statistics.setMapMetric}
+		/>
+	</section>
+
+	<section class="flex flex-col gap-y-4">
+		<div class="flex flex-col gap-y-1">
+			<h2 class="text-2xl font-medium">FAQ</h2>
+			<p class="text-foreground/60 max-w-3xl text-sm sm:text-base">
+				How to interpret the network statistics, filters and underlying sample.
+			</p>
+		</div>
+
+		<Accordion.Root type="multiple" bind:value={faqValues}>
+			{#each faqItems as item (item.value)}
+				<Accordion.Item value={item.value}>
+					<Accordion.Trigger>{item.title}</Accordion.Trigger>
+					<Accordion.Content>
+						<p class="leading-relaxed text-pretty">{item.answer}</p>
+					</Accordion.Content>
+				</Accordion.Item>
+			{/each}
+		</Accordion.Root>
 	</section>
 </main>

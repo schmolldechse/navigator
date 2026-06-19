@@ -1,14 +1,16 @@
 <script lang="ts">
 	import type { StatisticsMetricResponse } from "@lib/api";
+	import PointTooltip, { type PointTooltipItem } from "@lib/components/layerchart/tooltips/PointTooltip.svelte";
 	import Skeleton from "@lib/components/ui/Skeleton.svelte";
-	import ToggleGroup from "@lib/components/ui/toggle-group/ToggleGroup.svelte";
-	import ToggleGroupItem from "@lib/components/ui/toggle-group/ToggleGroupItem.svelte";
 	import type { RemoteQuery } from "@sveltejs/kit";
 	import BarChartIcon from "@lucide/svelte/icons/chart-column";
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
-	import { BarChart, LineChart } from "layerchart";
+	import { curveMonotoneX } from "d3-shape";
+	import { BarChart, LineChart, type ChartState } from "layerchart";
 	import DashboardPanel from "../shared/DashboardPanel.svelte";
-	import { formatCount, formatMetric, toNumber, type NetworkDistributionMode } from "../shared/statistics-dashboard";
+	import type { NetworkDistributionMode } from "./network-context.svelte";
+	import DistributionModeControl from "./options/DistributionModeControl.svelte";
+	import { formatCount, formatMetric, toNumber } from "../shared/statistics-dashboard";
 
 	type Props = {
 		promise: RemoteQuery<StatisticsMetricResponse>;
@@ -39,22 +41,13 @@
 		label: string;
 		upperMinutes: number;
 		count: number;
+		sharePercent: number;
 		cumulativeShare: number;
 		cumulativePercent: number;
-	};
-
-	type DistributionModeOption = {
-		value: NetworkDistributionMode;
-		label: string;
+		cumulativeLabel: string;
 	};
 
 	let { promise, mode, onmodechange }: Props = $props();
-
-	const modeOptions: DistributionModeOption[] = [
-		{ value: "histogram", label: "Histogram" },
-		{ value: "cdf", label: "Cumulative" }
-	];
-	const selectedMode = $derived(modeOptions.find((option) => option.value === mode) ?? modeOptions[0]);
 
 	const getResult = (response: StatisticsMetricResponse): DistributionResult | null =>
 		"summary" in response.result && "bins" in response.result ? (response.result as unknown as DistributionResult) : null;
@@ -68,15 +61,21 @@
 	};
 
 	const formatBin = (lower: number, upper: number): string => {
+		if (lower <= -2_147_483_648) return `< ${formatBound(upper)}`;
 		if (upper >= 2_147_483_647) return `>= ${formatBound(lower)}`;
 		return `${formatBound(lower)} to ${formatBound(upper)}`;
 	};
 
-	const createRows = (result: DistributionResult): DistributionRow[] =>
-		result.bins
+	const createRows = (result: DistributionResult): DistributionRow[] => {
+		const binTotal = result.bins.reduce((total, bin) => total + (toNumber(bin.count) ?? 0), 0);
+		const sampleCount = toNumber(result.summary.sampleCount) ?? binTotal;
+
+		return result.bins
 			.map((bin) => {
 				const lower = toNumber(bin.lowerBoundSeconds) ?? 0;
 				const upper = toNumber(bin.upperBoundSeconds) ?? 0;
+				const count = toNumber(bin.count) ?? 0;
+				const isOpenEnded = upper >= 2_147_483_647;
 				const upperForChart = upper >= 2_147_483_647 ? lower : upper;
 				const cumulativeShare = toNumber(bin.cumulativeShare) ?? 0;
 
@@ -84,37 +83,63 @@
 					id: `${lower}-${upper}`,
 					label: formatBin(lower, upper),
 					upperMinutes: upperForChart / 60,
-					count: toNumber(bin.count) ?? 0,
+					count,
+					sharePercent: sampleCount > 0 ? (count / sampleCount) * 100 : 0,
 					cumulativeShare,
-					cumulativePercent: cumulativeShare * 100
+					cumulativePercent: cumulativeShare * 100,
+					cumulativeLabel: isOpenEnded ? `${formatBound(lower)} or more · final share` : `At or below ${formatBound(upper)}`
 				};
 			})
-			.filter((row) => row.count > 0 || row.cumulativeShare > 0);
+			.filter((row) => row.count > 0 || row.cumulativeShare > 0)
+			.sort((left, right) => left.upperMinutes - right.upperMinutes);
+	};
+
+	const formatPercent = (value: number): string => `${value.toFixed(value < 1 ? 2 : 1)}%`;
+	const formatMinuteTick = (value: unknown): string => `${Number(value).toLocaleString()} min`;
+
+	const histogramTooltipItems: PointTooltipItem<DistributionRow>[] = [
+		{
+			key: "sharePercent",
+			label: "Share of served stops",
+			value: (row) => formatPercent(row.sharePercent),
+			color: "var(--color-accent)"
+		},
+		{
+			key: "count",
+			label: "Served stops",
+			value: (row) => formatCount(row.count, true),
+			color: "var(--color-foreground)"
+		}
+	];
+
+	const cumulativeTooltipItems: PointTooltipItem<DistributionRow>[] = [
+		{
+			key: "cumulativePercent",
+			label: "Served by threshold",
+			value: (row) => formatPercent(row.cumulativePercent),
+			color: "var(--color-accent)"
+		},
+		{
+			key: "sharePercent",
+			label: "Share in interval",
+			value: (row) => formatPercent(row.sharePercent),
+			color: "var(--color-foreground)"
+		},
+		{
+			key: "count",
+			label: "Stops in interval",
+			value: (row) => formatCount(row.count, true)
+		}
+	];
 </script>
 
 <DashboardPanel
 	title="Delay distribution"
-	description="Served stop-event delay spread for the selected network scope."
+	description="Delay severity when a planned stop is served; cancellations are excluded here and remain reflected in customer reliability."
 	icon={BarChartIcon}
 >
 	{#snippet actions()}
-		<ToggleGroup
-			mode="single"
-			allowEmpty={false}
-			selected={selectedMode}
-			keyFn={(option: DistributionModeOption) => option.value}
-			onselect={(option: DistributionModeOption | undefined) => onmodechange(option?.value ?? "histogram")}
-			class="gap-1"
-		>
-			{#each modeOptions as option (option.value)}
-				<ToggleGroupItem
-					item={option}
-					class="data-active:border-accent data-active:bg-accent data-active:text-accent-foreground px-2.5 py-1.5 text-xs font-semibold"
-				>
-					{option.label}
-				</ToggleGroupItem>
-			{/each}
-		</ToggleGroup>
+		<DistributionModeControl value={mode} onchange={onmodechange} />
 	{/snippet}
 	{#if promise.loading}
 		<div class="flex min-h-80 flex-col gap-y-3">
@@ -143,52 +168,54 @@
 			{:else}
 				<div class="grid gap-3">
 					<div class="text-foreground/60 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">
-						<span>{formatCount(result.summary.sampleCount, true)} samples</span>
+						<span>{formatCount(result.summary.sampleCount, true)} served stops</span>
 						<span>Median {formatMetric(result.summary.medianDelaySeconds, "seconds")}</span>
 						<span>P95 {formatMetric(result.summary.p95DelaySeconds, "seconds")}</span>
 					</div>
 
-					<div class="bg-secondary/20 min-h-72 overflow-x-auto rounded-lg p-2">
-						<div class="min-w-[44rem]">
+					<div class="bg-secondary/20 min-h-64 rounded-lg p-1 sm:min-h-72 sm:p-2">
+						<div class="min-w-0">
 							{#if mode === "histogram"}
+								{#snippet histogramTooltip({ context }: { context: ChartState<DistributionRow> })}
+									<PointTooltip {context} items={histogramTooltipItems} header={(row) => row.label} />
+								{/snippet}
+
 								<BarChart
 									data={rows}
 									x="label"
-									y="count"
-									height={300}
-									padding={{ top: 14, right: 18, bottom: 76, left: 56 }}
+									y="sharePercent"
+									yDomain={[0, null]}
+									height={310}
+									padding={{ top: 14, right: 10, bottom: 90, left: 46 }}
 									tooltipContext={{ mode: "band" }}
-									series={[{ key: "count", label: "Samples", color: "var(--color-accent)" }]}
-									legend={{ placement: "bottom", classes: { root: "justify-center pt-2", item: "text-xs font-semibold" } }}
+									tooltip={histogramTooltip}
+									series={[{ key: "sharePercent", label: "Share of served stops", color: "var(--color-accent)" }]}
+									legend={false}
 									props={{
-										tooltip: {
-											root: { class: "bg-background border-border rounded-lg border-2 px-2 py-1 shadow-xl" },
-											item: { class: "text-xs font-semibold" },
-											header: { class: "text-xs font-bold" },
-											hideTotal: true
-										},
-										xAxis: { tickLabelProps: { rotate: -35, textAnchor: "end" } }
+										xAxis: { tickLabelProps: { rotate: -45, textAnchor: "end", class: "text-[10px]" } },
+										yAxis: { format: (value: unknown) => `${Number(value).toFixed(0)}%` }
 									}}
 								/>
 							{:else}
+								{#snippet cumulativeTooltip({ context }: { context: ChartState<DistributionRow> })}
+									<PointTooltip {context} items={cumulativeTooltipItems} header={(row) => row.cumulativeLabel} />
+								{/snippet}
+
 								<LineChart
 									data={rows}
 									x="upperMinutes"
 									y="cumulativePercent"
 									yDomain={[0, 100]}
 									height={300}
-									padding={{ top: 14, right: 18, bottom: 42, left: 56 }}
+									padding={{ top: 14, right: 10, bottom: 34, left: 46 }}
 									tooltipContext={{ mode: "bisect-x" }}
+									tooltip={cumulativeTooltip}
 									series={[{ key: "cumulativePercent", label: "Cumulative share", color: "var(--color-accent)" }]}
-									legend={{ placement: "bottom", classes: { root: "justify-center pt-2", item: "text-xs font-semibold" } }}
+									legend={false}
 									props={{
-										spline: { strokeWidth: 3 },
-										tooltip: {
-											root: { class: "bg-background border-border rounded-lg border-2 px-2 py-1 shadow-xl" },
-											item: { class: "text-xs font-semibold" },
-											header: { class: "text-xs font-bold" },
-											hideTotal: true
-										}
+										spline: { strokeWidth: 3, curve: curveMonotoneX },
+										xAxis: { format: formatMinuteTick },
+										yAxis: { format: (value: unknown) => `${Number(value).toFixed(0)}%` }
 									}}
 								/>
 							{/if}

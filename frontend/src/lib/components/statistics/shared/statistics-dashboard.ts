@@ -4,11 +4,7 @@ import {
 	TransportType,
 	type EventMetrics,
 	type JourneyMetrics,
-	type LineStatisticsMetricRequest,
-	type MetricPage,
-	type NetworkMapHotspotsRequest,
-	type NetworkStatisticsMetricRequest,
-	type StationStatisticsMetricRequest
+	type MetricPage
 } from "@lib/api";
 import { DateTime } from "luxon";
 
@@ -23,53 +19,16 @@ type StatisticsEventScope = {
 	scheduleType: ScheduleType | null;
 };
 
-type PagedMetricScope = {
-	limit: number;
-	offset: number;
-	minVolume: number;
-};
-
 type BucketMetricScope = {
 	bucket: StatisticsBucket;
 };
 
-type NetworkHeatmapMetric = "reliability5" | "reliability15" | "cancellation" | "plannedStops";
-type NetworkComparisonMetric = "plannedStops" | "cancellationRate" | "reliability5" | "reliability15" | "journeyCompletion";
-type NetworkDistributionMode = "histogram" | "cdf";
-
-type NetworkMetricScope = {
-	eventTimeSeries: BucketMetricScope;
-	journeyTimeSeries: BucketMetricScope;
-	weekdayHourHeatmap: {
-		metric: NetworkHeatmapMetric;
-	};
-	transportTypeComparison: {
-		metric: NetworkComparisonMetric;
-	};
-	stationRanking: PagedMetricScope;
-	lineRanking: PagedMetricScope;
-	mapHotspots: {
-		minVolume: number;
-		limit: number;
-	};
-	delayDistribution: {
-		mode: NetworkDistributionMode;
-	};
-};
-
-type StationMetricScope = {
-	timeSeries: BucketMetricScope;
-	lineRanking: PagedMetricScope;
-	eventDetails: Pick<PagedMetricScope, "limit" | "offset">;
-};
-
-type StatisticsFilterDraft = {
+type BaseStatisticsFilterDraft = {
 	from: string;
 	to: string;
 	scheduleType: ScheduleType | null;
 	transportTypes: TransportType[];
 	includeReplacement: boolean;
-	minVolume: number;
 };
 
 type TransportTypeOption = {
@@ -90,11 +49,6 @@ type ScheduleTypeOption = {
 };
 
 const DEFAULT_RANGE_DAYS = 30;
-const DEFAULT_MIN_VOLUME = 50;
-const DEFAULT_MAP_MIN_VOLUME = 1000;
-const DEFAULT_MAP_LIMIT = 250;
-const DEFAULT_PAGE_LIMIT = 10;
-const DEFAULT_EVENT_DETAIL_LIMIT = 30;
 const SMALL_RANGE_MAX_DAYS = 7;
 
 const transportTypeOptions: TransportTypeOption[] = [
@@ -134,7 +88,15 @@ const statisticsBucketOptions: StatisticsBucketOption[] = [
 	{ value: StatisticsBucket.MONTH, label: "Month" }
 ];
 
+const smallRangeBucketOptions: StatisticsBucketOption[] = statisticsBucketOptions.filter(
+	(option) => option.value !== StatisticsBucket.MONTH
+);
+
 const defaultStatisticsBucketOptions: StatisticsBucketOption[] = statisticsBucketOptions.filter(
+	(option) => option.value === StatisticsBucket.DAY || option.value === StatisticsBucket.WEEK
+);
+
+const longRangeBucketOptions: StatisticsBucketOption[] = statisticsBucketOptions.filter(
 	(option) => option.value !== StatisticsBucket.HOUR
 );
 
@@ -174,36 +136,6 @@ const defaultEventScope = (): StatisticsEventScope => ({
 	scheduleType: null
 });
 
-const defaultNetworkMetricScope = (): NetworkMetricScope => ({
-	eventTimeSeries: { bucket: StatisticsBucket.DAY },
-	journeyTimeSeries: { bucket: StatisticsBucket.DAY },
-	weekdayHourHeatmap: { metric: "reliability5" },
-	transportTypeComparison: { metric: "reliability5" },
-	stationRanking: { limit: DEFAULT_PAGE_LIMIT, offset: 0, minVolume: DEFAULT_MIN_VOLUME },
-	lineRanking: { limit: DEFAULT_PAGE_LIMIT, offset: 0, minVolume: Math.max(5, Math.floor(DEFAULT_MIN_VOLUME / 4)) },
-	mapHotspots: { minVolume: DEFAULT_MAP_MIN_VOLUME, limit: DEFAULT_MAP_LIMIT },
-	delayDistribution: { mode: "histogram" }
-});
-
-const defaultStationMetricScope = (): StationMetricScope => ({
-	timeSeries: { bucket: StatisticsBucket.DAY },
-	lineRanking: { limit: DEFAULT_PAGE_LIMIT, offset: 0, minVolume: Math.max(5, Math.floor(DEFAULT_MIN_VOLUME / 4)) },
-	eventDetails: { limit: DEFAULT_EVENT_DETAIL_LIMIT, offset: 0 }
-});
-
-const createFilterDraft = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	networkScope: NetworkMetricScope
-): StatisticsFilterDraft => ({
-	from: globalScope.from,
-	to: globalScope.to,
-	scheduleType: eventScope.scheduleType,
-	transportTypes: [...globalScope.transportTypes],
-	includeReplacement: globalScope.includeReplacement,
-	minVolume: networkScope.stationRanking.minVolume
-});
-
 const normalizeDateRange = (from: string, to: string): Pick<StatisticsGlobalScope, "from" | "to"> => {
 	const fromDate = DateTime.fromISO(from, { setZone: true });
 	const toDate = DateTime.fromISO(to, { setZone: true });
@@ -225,13 +157,27 @@ const getRangeDays = ({ from, to }: Pick<StatisticsGlobalScope, "from" | "to">):
 const isSmallRange = (scope: Pick<StatisticsGlobalScope, "from" | "to">): boolean =>
 	getRangeDays(scope) <= SMALL_RANGE_MAX_DAYS;
 
-const getStatisticsBucketOptions = (scope: Pick<StatisticsGlobalScope, "from" | "to">): StatisticsBucketOption[] =>
-	isSmallRange(scope) ? statisticsBucketOptions : defaultStatisticsBucketOptions;
+const isLongRange = (scope: Pick<StatisticsGlobalScope, "from" | "to">): boolean => {
+	const fromDate = DateTime.fromISO(scope.from, { setZone: true });
+	const toDate = DateTime.fromISO(scope.to, { setZone: true });
+	if (!fromDate.isValid || !toDate.isValid || toDate <= fromDate) return false;
+
+	return toDate > fromDate.plus({ months: 2 });
+};
+
+const getStatisticsBucketOptions = (scope: Pick<StatisticsGlobalScope, "from" | "to">): StatisticsBucketOption[] => {
+	if (isSmallRange(scope)) return smallRangeBucketOptions;
+	if (isLongRange(scope)) return longRangeBucketOptions;
+	return defaultStatisticsBucketOptions;
+};
 
 const normalizeBucketForRange = (
 	bucket: StatisticsBucket,
 	scope: Pick<StatisticsGlobalScope, "from" | "to">
-): StatisticsBucket => (bucket === StatisticsBucket.HOUR && !isSmallRange(scope) ? StatisticsBucket.DAY : bucket);
+): StatisticsBucket => {
+	const options = getStatisticsBucketOptions(scope);
+	return options.some((option) => option.value === bucket) ? bucket : StatisticsBucket.DAY;
+};
 
 const createPreviousGlobalScope = (scope: StatisticsGlobalScope): StatisticsGlobalScope => {
 	const range = normalizeDateRange(scope.from, scope.to);
@@ -260,225 +206,6 @@ const journeyRequestBase = (globalScope: StatisticsGlobalScope) => ({
 	transportTypes: globalScope.transportTypes.length > 0 ? [...globalScope.transportTypes] : undefined,
 	includeReplacement: globalScope.includeReplacement
 });
-
-const createNetworkEventSummaryRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope
-): NetworkStatisticsMetricRequest =>
-	({
-		...eventRequestBase(globalScope, eventScope),
-		type: "EVENT_SUMMARY"
-	}) as NetworkStatisticsMetricRequest;
-
-const createNetworkJourneySummaryRequest = (globalScope: StatisticsGlobalScope): NetworkStatisticsMetricRequest =>
-	({
-		...journeyRequestBase(globalScope),
-		type: "JOURNEY_SUMMARY"
-	}) as NetworkStatisticsMetricRequest;
-
-const createNetworkEventTimeSeriesRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	scope: BucketMetricScope
-): NetworkStatisticsMetricRequest =>
-	({
-		...eventRequestBase(globalScope, eventScope),
-		type: "EVENT_TIME_SERIES",
-		bucket: scope.bucket
-	}) as NetworkStatisticsMetricRequest;
-
-const createNetworkJourneyTimeSeriesRequest = (
-	globalScope: StatisticsGlobalScope,
-	scope: BucketMetricScope
-): NetworkStatisticsMetricRequest =>
-	({
-		...journeyRequestBase(globalScope),
-		type: "JOURNEY_TIME_SERIES",
-		bucket: scope.bucket
-	}) as NetworkStatisticsMetricRequest;
-
-const createNetworkWeekdayHourHeatmapRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope
-): NetworkStatisticsMetricRequest =>
-	({
-		...eventRequestBase(globalScope, eventScope),
-		type: "WEEKDAY_HOUR_HEATMAP"
-	}) as NetworkStatisticsMetricRequest;
-
-const createNetworkEventDelayDistributionRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope
-): NetworkStatisticsMetricRequest =>
-	({
-		...eventRequestBase(globalScope, eventScope),
-		type: "EVENT_DELAY_DISTRIBUTION"
-	}) as NetworkStatisticsMetricRequest;
-
-const createNetworkTransportTypeComparisonRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope
-): NetworkStatisticsMetricRequest =>
-	({
-		...eventRequestBase(globalScope, eventScope),
-		type: "TRANSPORT_TYPE_COMPARISON"
-	}) as NetworkStatisticsMetricRequest;
-
-const createNetworkStationRankingRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	scope: PagedMetricScope
-): NetworkStatisticsMetricRequest =>
-	({
-		...eventRequestBase(globalScope, eventScope),
-		type: "STATION_RANKING",
-		limit: scope.limit,
-		offset: scope.offset,
-		minVolume: scope.minVolume
-	}) as NetworkStatisticsMetricRequest;
-
-const createNetworkLineRankingRequest = (
-	globalScope: StatisticsGlobalScope,
-	scope: PagedMetricScope
-): NetworkStatisticsMetricRequest =>
-	({
-		...journeyRequestBase(globalScope),
-		type: "LINE_RANKING",
-		limit: scope.limit,
-		offset: scope.offset,
-		minVolume: scope.minVolume
-	}) as NetworkStatisticsMetricRequest;
-
-const createNetworkMapHotspotsRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	scope: NetworkMetricScope["mapHotspots"]
-): NetworkMapHotspotsRequest =>
-	({
-		...eventRequestBase(globalScope, eventScope),
-		minVolume: scope.minVolume,
-		limit: scope.limit
-	}) as NetworkMapHotspotsRequest;
-
-const createStationEventBase = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number
-) => ({
-	...eventRequestBase(globalScope, eventScope),
-	stationEvaNumber
-});
-
-const createStationEventSummaryRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "EVENT_SUMMARY"
-	}) as StationStatisticsMetricRequest;
-
-const createStationBenchmarkRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "BENCHMARK"
-	}) as StationStatisticsMetricRequest;
-
-const createStationTimeSeriesRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number,
-	scope: BucketMetricScope
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "TIME_SERIES",
-		bucket: scope.bucket
-	}) as StationStatisticsMetricRequest;
-
-const createStationArrivalDepartureComparisonRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "ARRIVAL_DEPARTURE_COMPARISON"
-	}) as StationStatisticsMetricRequest;
-
-const createStationWeekdayHourHeatmapRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "WEEKDAY_HOUR_HEATMAP"
-	}) as StationStatisticsMetricRequest;
-
-const createStationLineRankingRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number,
-	scope: PagedMetricScope
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "LINE_RANKING",
-		limit: scope.limit,
-		offset: scope.offset,
-		minVolume: scope.minVolume
-	}) as StationStatisticsMetricRequest;
-
-const createStationDirectionsRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "DIRECTIONS"
-	}) as StationStatisticsMetricRequest;
-
-const createStationTransportTypeMixRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "TRANSPORT_TYPE_MIX"
-	}) as StationStatisticsMetricRequest;
-
-const createStationLineHourMatrixRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "LINE_HOUR_MATRIX"
-	}) as StationStatisticsMetricRequest;
-
-const createStationEventDetailsRequest = (
-	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope,
-	stationEvaNumber: number,
-	scope: StationMetricScope["eventDetails"]
-): StationStatisticsMetricRequest =>
-	({
-		...createStationEventBase(globalScope, eventScope, stationEvaNumber),
-		type: "EVENT_DETAILS",
-		limit: scope.limit,
-		offset: scope.offset
-	}) as StationStatisticsMetricRequest;
-
-const createLineMinVolume = (minVolume: number): number => Math.max(5, Math.floor(minVolume / 4));
 
 const expectMetricResult = <TResult = unknown>(response: { result: { type?: string } }, type: string): TResult => {
 	if (response.result.type && response.result.type !== type) {
@@ -597,6 +324,27 @@ const formatDate = (value: Date | string | null | undefined): string => {
 	return parsed.toFormat("dd LLL yyyy");
 };
 
+const formatStatisticsBucketLabel = (value: Date | string | null | undefined, bucket: StatisticsBucket): string => {
+	if (!value) return "-";
+	const parsed = value instanceof Date ? DateTime.fromJSDate(value) : DateTime.fromISO(value, { setZone: true });
+	if (!parsed.isValid) return String(value);
+
+	switch (bucket) {
+		case StatisticsBucket.HOUR:
+			return parsed.toFormat("dd LLL yyyy, HH:mm");
+		case StatisticsBucket.WEEK: {
+			const end = parsed.plus({ days: 6 });
+			const startLabel = parsed.year === end.year ? parsed.toFormat("dd LLL") : parsed.toFormat("dd LLL yyyy");
+			return `CW ${parsed.weekNumber}/${parsed.weekYear} · ${startLabel} - ${end.toFormat("dd LLL yyyy")}`;
+		}
+		case StatisticsBucket.MONTH:
+			return parsed.toFormat("LLLL yyyy");
+		case StatisticsBucket.DAY:
+		default:
+			return parsed.toFormat("dd LLL yyyy");
+	}
+};
+
 const createRangeLabel = ({ from, to }: Pick<StatisticsGlobalScope, "from" | "to">): string => {
 	const fromDate = DateTime.fromISO(from, { setZone: true });
 	const toDate = DateTime.fromISO(to, { setZone: true }).minus({ days: 1 });
@@ -610,10 +358,6 @@ const eventCancellationRate = (metrics: EventMetrics): number | null => toNumber
 const journeyCompletionRate = (metrics: JourneyMetrics): number | null => toNumber(metrics.journeyCompletionRate);
 
 export {
-	DEFAULT_MAP_LIMIT,
-	DEFAULT_MAP_MIN_VOLUME,
-	DEFAULT_MIN_VOLUME,
-	DEFAULT_PAGE_LIMIT,
 	SMALL_RANGE_MAX_DAYS,
 	defaultStatisticsBucketOptions,
 	networkTransportTypeOptions,
@@ -621,34 +365,11 @@ export {
 	statisticsBucketOptions,
 	transportTypeOptions,
 	asLocalDate,
-	createFilterDraft,
-	createLineMinVolume,
-	createNetworkEventDelayDistributionRequest,
-	createNetworkEventSummaryRequest,
-	createNetworkEventTimeSeriesRequest,
-	createNetworkJourneySummaryRequest,
-	createNetworkJourneyTimeSeriesRequest,
-	createNetworkLineRankingRequest,
-	createNetworkMapHotspotsRequest,
-	createNetworkStationRankingRequest,
-	createNetworkTransportTypeComparisonRequest,
-	createNetworkWeekdayHourHeatmapRequest,
 	createPreviousGlobalScope,
 	createRangeLabel,
-	createStationArrivalDepartureComparisonRequest,
-	createStationBenchmarkRequest,
-	createStationDirectionsRequest,
-	createStationEventDetailsRequest,
-	createStationEventSummaryRequest,
-	createStationLineHourMatrixRequest,
-	createStationLineRankingRequest,
-	createStationTimeSeriesRequest,
-	createStationTransportTypeMixRequest,
-	createStationWeekdayHourHeatmapRequest,
 	defaultEventScope,
 	defaultGlobalScope,
-	defaultNetworkMetricScope,
-	defaultStationMetricScope,
+	eventRequestBase,
 	eventCancellationRate,
 	eventReliability,
 	expectMetricResult,
@@ -660,9 +381,11 @@ export {
 	formatRate,
 	formatRateDelta,
 	formatSeconds,
+	formatStatisticsBucketLabel,
 	getRangeDays,
 	getStatisticsBucketOptions,
 	isSmallRange,
+	journeyRequestBase,
 	journeyCompletionRate,
 	normalizeBucketForRange,
 	normalizeDateRange,
@@ -674,16 +397,10 @@ export {
 	transportTypeLabel,
 	transportTypeShortLabel,
 	type BucketMetricScope,
-	type NetworkComparisonMetric,
-	type NetworkDistributionMode,
-	type NetworkHeatmapMetric,
-	type NetworkMetricScope,
-	type PagedMetricScope,
+	type BaseStatisticsFilterDraft,
 	type ScheduleTypeOption,
 	type StatisticsBucketOption,
 	type StatisticsEventScope,
-	type StatisticsFilterDraft,
 	type StatisticsGlobalScope,
-	type StationMetricScope,
 	type TransportTypeOption
 };

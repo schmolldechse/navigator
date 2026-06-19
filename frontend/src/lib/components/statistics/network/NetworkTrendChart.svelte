@@ -9,17 +9,30 @@
 		format: "percent" | "seconds" | "count" | "minutes";
 	};
 
-	export type { TrendMetricDefinition };
+	type TrendPanelDefinition = {
+		key: string;
+		label?: string;
+		description?: string;
+		metrics: TrendMetricDefinition[];
+		yDomain?: [number, number | null];
+		height?: number;
+		showXAxis?: boolean;
+		showLegend?: boolean;
+	};
+
+	export type { TrendMetricDefinition, TrendPanelDefinition };
 </script>
 
 <script lang="ts">
+	import type { StatisticsBucket } from "@lib/api";
 	import Skeleton from "@lib/components/ui/Skeleton.svelte";
 	import type { RemoteQuery } from "@sveltejs/kit";
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
 	import LineChartIcon from "@lucide/svelte/icons/chart-no-axes-combined";
-	import { LineChart } from "layerchart";
+	import { defaultChartPadding, LineChart, type ChartState } from "layerchart";
+	import SeriesTooltip, { type SeriesTooltipItem } from "@lib/components/layerchart/tooltips/SeriesTooltip.svelte";
 	import DashboardPanel from "../shared/DashboardPanel.svelte";
-	import { formatDate } from "../shared/statistics-dashboard";
+	import { formatCount, formatMetric, formatStatisticsBucketLabel } from "../shared/statistics-dashboard";
 
 	type TrendRow = {
 		date: Date;
@@ -30,12 +43,15 @@
 		title: string;
 		description?: string;
 		promise: RemoteQuery<StatisticsMetricResponse>;
-		metrics: TrendMetricDefinition[];
-		yDomain?: [number, number | null];
+		panels: TrendPanelDefinition[];
+		bucket: StatisticsBucket;
 		actions?: import("svelte").Snippet;
 	};
 
-	let { title, description, promise, metrics, yDomain = [0, null], actions }: Props = $props();
+	let { title, description, promise, panels, bucket, actions }: Props = $props();
+
+	let chartWidth = $state(0);
+	const metrics = $derived(panels.flatMap((panel) => panel.metrics));
 
 	const createRows = (response: StatisticsMetricResponse): TrendRow[] => {
 		const items = "items" in response.result ? response.result.items : [];
@@ -52,6 +68,41 @@
 			})
 			.filter((row): row is TrendRow => row !== null)
 			.sort((left, right) => left.date.getTime() - right.date.getTime());
+	};
+
+	const formatTrendValue = (value: unknown, kind: TrendMetricDefinition["format"]): string => {
+		if (typeof value !== "number" || !Number.isFinite(value)) return "-";
+		if (kind === "percent") return `${value.toFixed(1)}%`;
+		if (kind === "count") return formatCount(value, true);
+
+		return formatMetric(value, kind);
+	};
+
+	const createTooltipItems = (panelMetrics: TrendMetricDefinition[]): SeriesTooltipItem<TrendRow>[] =>
+		panelMetrics.map((metric) => ({
+			key: metric.key,
+			label: metric.label,
+			color: metric.color,
+			formatValue: (value) => formatTrendValue(value, metric.format)
+		}));
+
+	const showPanelLegend = (panel: TrendPanelDefinition): boolean => panel.showLegend ?? panel.metrics.length > 1;
+
+	const panelPadding = (panel: TrendPanelDefinition) => {
+		const showLegend = showPanelLegend(panel);
+		const seriesPerRow = chartWidth > 0 && chartWidth < 520 ? 2 : 3;
+		const legendRows = showLegend ? Math.max(1, Math.ceil(panel.metrics.length / seriesPerRow)) : 0;
+		const extraLegendPadding = Math.max(0, legendRows - 1) * 24;
+		const showXAxis = panel.showXAxis ?? true;
+
+		return defaultChartPadding({
+			axis: showXAxis ? true : "y",
+			legend: showLegend,
+			top: 16,
+			right: 18,
+			bottom: (showXAxis ? 24 : 8) + extraLegendPadding,
+			left: 46
+		});
 	};
 </script>
 
@@ -75,35 +126,58 @@
 				<p class="text-foreground/60 text-sm font-semibold">No metric points available.</p>
 			</div>
 		{:else}
-			<div class="flex flex-col gap-3">
-				<div class="bg-secondary/20 min-h-80 overflow-hidden rounded-lg p-2">
-					<LineChart
-						data={rows}
-						x="date"
-						series={metrics.map((metric) => ({
-							key: metric.key,
-							label: metric.label,
-							color: metric.color
-						}))}
-						{yDomain}
-						height={310}
-						padding={{ top: 16, right: 18, bottom: 34, left: 46 }}
-						tooltipContext={{ mode: "bisect-x" }}
-						legend={{ placement: "bottom", classes: { root: "justify-center pt-2", item: "text-xs font-semibold" } }}
-						props={{
-							spline: { strokeWidth: 3 },
-							tooltip: {
-								root: { class: "bg-background border-border rounded-lg border-2 px-2 py-1 shadow-xl" },
-								item: { class: "text-xs font-semibold" },
-								header: { class: "text-xs font-bold" },
-								hideTotal: true
-							}
-						}}
-					/>
-				</div>
-				<p class="text-foreground/45 text-center text-xs font-semibold">
-					{formatDate(rows[0]?.date)} - {formatDate(rows.at(-1)?.date)}
-				</p>
+			<div bind:clientWidth={chartWidth} class="flex flex-col gap-4">
+				{#each panels as panel (panel.key)}
+					{@const tooltipItems = createTooltipItems(panel.metrics)}
+					{@const showLegend = showPanelLegend(panel)}
+					{@const showXAxis = panel.showXAxis ?? true}
+
+					{#snippet trendTooltip({ context }: { context: ChartState<TrendRow> })}
+						<SeriesTooltip {context} items={tooltipItems} header={(data) => formatStatisticsBucketLabel(data.date, bucket)} />
+					{/snippet}
+
+					<div class="bg-secondary/20 overflow-hidden rounded-lg p-2">
+						{#if panel.label || panel.description}
+							<div class="px-2 pt-1">
+								{#if panel.label}
+									<p class="text-foreground text-sm font-bold">{panel.label}</p>
+								{/if}
+								{#if panel.description}
+									<p class="text-foreground/55 mt-0.5 text-xs font-semibold">{panel.description}</p>
+								{/if}
+							</div>
+						{/if}
+
+						<LineChart
+							data={rows}
+							x="date"
+							series={panel.metrics.map((metric) => ({
+								key: metric.key,
+								label: metric.label,
+								color: metric.color
+							}))}
+							yDomain={panel.yDomain ?? [0, null]}
+							height={panel.height ?? 310}
+							axis={showXAxis ? true : "y"}
+							padding={panelPadding(panel)}
+							tooltipContext={{ mode: "bisect-x" }}
+							tooltip={trendTooltip}
+							legend={showLegend
+								? {
+										placement: "bottom",
+										classes: {
+											root: "w-full px-2 pb-1",
+											items: "flex-wrap justify-center gap-x-4 gap-y-1",
+											item: "text-xs font-semibold"
+										}
+									}
+								: false}
+							props={{
+								spline: { strokeWidth: 3 }
+							}}
+						/>
+					</div>
+				{/each}
 			</div>
 		{/if}
 	{/if}

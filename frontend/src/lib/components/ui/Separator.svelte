@@ -9,6 +9,7 @@
 </script>
 
 <div
+	aria-hidden="true"
 	role="separator"
 	aria-orientation={orientation}
 	class={[

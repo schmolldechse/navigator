@@ -355,7 +355,7 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
 
         var binEdges = new[]
         {
-            int.MinValue, -3600, -1800, -900, -300, 0, 300, 600, 900, 1800, 3600, 7200, 14400, int.MaxValue
+            int.MinValue, -300, 0, 300, 600, 900, 1800, 3600, 7200, int.MaxValue
         };
 
         var bins = new List<EventDelayDistributionBin>(binEdges.Length - 1);

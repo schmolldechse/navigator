@@ -17,7 +17,7 @@
 </script>
 
 <Card class={["gap-y-4", className]}>
-	<div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+	<div class="flex flex-col gap-3">
 		<div class="min-w-0">
 			<div class="flex items-center gap-2">
 				{#if Icon}
@@ -30,7 +30,11 @@
 			{/if}
 		</div>
 
-		{@render actions?.()}
+		{#if actions}
+			<div class="flex flex-wrap items-stretch gap-x-3 gap-y-3">
+				{@render actions()}
+			</div>
+		{/if}
 	</div>
 
 	{@render children()}

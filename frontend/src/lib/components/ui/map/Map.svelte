@@ -82,7 +82,7 @@
 <script lang="ts" generics="TData = unknown">
 	import { mount, onMount, unmount, type Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
-	import maplibregl, { type GeoJSONSource, type Map as MapLibreMap } from "maplibre-gl";
+	import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type MapLayerMouseEvent } from "maplibre-gl";
 	import "maplibre-gl/dist/maplibre-gl.css";
 	import MapMarkerRenderer from "./MapMarkerRenderer.svelte";
 
@@ -108,6 +108,7 @@
 		class?: ClassValue;
 		onmoveend?: (viewport: MapViewportChange) => void;
 		onmarkerselect?: (marker: MapMarker<TMarkerData>) => void;
+		onvaluepointselect?: (point: MapValuePoint) => void;
 	};
 
 	const DEFAULT_STYLE: MapStyle = {
@@ -156,7 +157,8 @@
 		ariaLabel = "Interactive map",
 		class: className,
 		onmoveend,
-		onmarkerselect
+		onmarkerselect,
+		onvaluepointselect
 	}: Props<TData> = $props();
 
 	let mapContainer: HTMLDivElement | undefined = $state(undefined);
@@ -667,6 +669,20 @@
 		scheduleVisibleHeatmapScaleUpdate();
 	};
 
+	const handleValuePointSelect = (event: MapLayerMouseEvent) => {
+		const id = event.features?.[0]?.properties?.id;
+		const point = valuePoints.find((item) => String(item.id) === String(id));
+		if (point) onvaluepointselect?.(point);
+	};
+
+	const showValuePointCursor = () => {
+		if (map && onvaluepointselect) map.getCanvas().style.cursor = "pointer";
+	};
+
+	const resetValuePointCursor = () => {
+		if (map) map.getCanvas().style.cursor = "";
+	};
+
 	onMount(() => {
 		if (!mapContainer) return;
 
@@ -724,6 +740,9 @@
 			nextMap.on("zoom", handleHeatmapViewportChange);
 			nextMap.on("resize", handleCustomMarkerViewportChange);
 			nextMap.on("resize", handleHeatmapViewportChange);
+			nextMap.on("click", VALUE_POINTS_LAYER_ID, handleValuePointSelect);
+			nextMap.on("mouseenter", VALUE_POINTS_LAYER_ID, showValuePointCursor);
+			nextMap.on("mouseleave", VALUE_POINTS_LAYER_ID, resetValuePointCursor);
 
 			styleLoaded = true;
 			if (mapContainer) {
@@ -780,6 +799,9 @@
 			nextMap.off("zoom", handleHeatmapViewportChange);
 			nextMap.off("resize", handleCustomMarkerViewportChange);
 			nextMap.off("resize", handleHeatmapViewportChange);
+			nextMap.off("click", VALUE_POINTS_LAYER_ID, handleValuePointSelect);
+			nextMap.off("mouseenter", VALUE_POINTS_LAYER_ID, showValuePointCursor);
+			nextMap.off("mouseleave", VALUE_POINTS_LAYER_ID, resetValuePointCursor);
 			resizeObserver?.disconnect();
 			resizeObserver = undefined;
 			clearCustomMarkers();

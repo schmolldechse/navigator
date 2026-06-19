@@ -1,10 +1,12 @@
 <script lang="ts">
 	import type { EventTimeSeriesPoint } from "@lib/api";
-	import { getStatisticsDashboardContext } from "@lib/components/statistics/shared/statistics-context.svelte";
-	import MetricBucketControl from "@lib/components/statistics/shared/MetricBucketControl.svelte";
-	import StatisticsFilterPanel from "@lib/components/statistics/shared/StatisticsFilterPanel.svelte";
+	import MetricBucketControl from "@lib/components/statistics/shared/options/MetricBucketControl.svelte";
 	import {
 		createRangeLabel,
+		rateToPercent,
+		transportTypeShortLabel
+	} from "@lib/components/statistics/shared/statistics-dashboard";
+	import {
 		createStationArrivalDepartureComparisonRequest,
 		createStationBenchmarkRequest,
 		createStationDirectionsRequest,
@@ -14,17 +16,20 @@
 		createStationLineRankingRequest,
 		createStationTimeSeriesRequest,
 		createStationTransportTypeMixRequest,
-		createStationWeekdayHourHeatmapRequest,
-		rateToPercent,
-		transportTypeShortLabel
-	} from "@lib/components/statistics/shared/statistics-dashboard";
+		createStationWeekdayHourHeatmapRequest
+	} from "@lib/components/statistics/station/station-statistics";
 	import StationComparisonChart from "@lib/components/statistics/station/StationComparisonChart.svelte";
 	import StationEventDetailsTable from "@lib/components/statistics/station/StationEventDetailsTable.svelte";
+	import StationFilterPanel from "@lib/components/statistics/station/StationFilterPanel.svelte";
 	import StationHeatmap from "@lib/components/statistics/station/StationHeatmap.svelte";
 	import StationKpiGrid from "@lib/components/statistics/station/StationKpiGrid.svelte";
 	import StationLineHourMatrix from "@lib/components/statistics/station/StationLineHourMatrix.svelte";
 	import StationRankingList from "@lib/components/statistics/station/StationRankingList.svelte";
 	import StationTrendChart, { type TrendMetricDefinition } from "@lib/components/statistics/station/StationTrendChart.svelte";
+	import {
+		setStationStatisticsContext,
+		StationStatisticsContext
+	} from "@lib/components/statistics/station/station-context.svelte";
 	import Button from "@lib/components/ui/Button.svelte";
 	import { loadStationMetric } from "@lib/remote/statistics.remote";
 	import ArrowLeft from "@lucide/svelte/icons/arrow-left";
@@ -32,7 +37,8 @@
 	import type { PageProps } from "./$types";
 
 	let { data }: PageProps = $props();
-	const statistics = getStatisticsDashboardContext();
+	const statistics = new StationStatisticsContext();
+	setStationStatisticsContext(statistics);
 	const rangeLabel = $derived(createRangeLabel(statistics.global));
 
 	const eventSummary = $derived(
@@ -171,7 +177,7 @@
 		</div>
 	</section>
 
-	<StatisticsFilterPanel />
+	<StationFilterPanel />
 
 	<StationKpiGrid eventPromise={eventSummary} benchmarkPromise={benchmark} />
 
@@ -184,7 +190,7 @@
 			yDomain={[0, 100]}
 		>
 			{#snippet actions()}
-				<MetricBucketControl value={statistics.station.timeSeries.bucket} onchange={statistics.setStationTimeSeriesBucket} />
+				<MetricBucketControl value={statistics.station.timeSeries.bucket} onchange={statistics.setTimeSeriesBucket} />
 			{/snippet}
 		</StationTrendChart>
 
@@ -212,7 +218,7 @@
 			description="Lines at this station ranked by accumulated delay minutes."
 			promise={lineRanking}
 			mode="lines"
-			onpagechange={statistics.setStationLineRankingOffset}
+			onpagechange={statistics.setLineRankingOffset}
 		/>
 		<StationRankingList
 			title="Directions"
@@ -224,5 +230,5 @@
 
 	<StationLineHourMatrix promise={lineHourMatrix} />
 
-	<StationEventDetailsTable promise={eventDetails} onpagechange={statistics.setStationEventDetailsOffset} />
+	<StationEventDetailsTable promise={eventDetails} onpagechange={statistics.setEventDetailsOffset} />
 </main>

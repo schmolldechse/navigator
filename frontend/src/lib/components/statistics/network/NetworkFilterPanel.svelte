@@ -4,7 +4,6 @@
 	import Badge from "@lib/components/ui/Badge.svelte";
 	import Button from "@lib/components/ui/Button.svelte";
 	import Checkbox from "@lib/components/ui/Checkbox.svelte";
-	import Input from "@lib/components/ui/Input.svelte";
 	import TimePickerDialog from "@lib/components/ui/timepicker/TimePickerDialog.svelte";
 	import type { TimePickerRange, TimePickerValue } from "@lib/components/ui/timepicker/TimePicker.svelte";
 	import ToggleGroup from "@lib/components/ui/toggle-group/ToggleGroup.svelte";
@@ -14,36 +13,42 @@
 	import RotateCcw from "@lucide/svelte/icons/rotate-ccw";
 	import SlidersHorizontal from "@lucide/svelte/icons/sliders-horizontal";
 	import { DateTime } from "luxon";
-	import { getStatisticsDashboardContext } from "../shared/statistics-context.svelte";
+	import { getNetworkStatisticsContext, type NetworkFilterDraft } from "./network-context.svelte";
 	import {
 		asLocalDate,
 		createRangeLabel,
 		networkTransportTypeOptions,
 		scheduleTypeOptions,
-		type ScheduleTypeOption,
-		type StatisticsFilterDraft
+		type ScheduleTypeOption
 	} from "../shared/statistics-dashboard";
 
-	const statistics = getStatisticsDashboardContext();
+	const statistics = getNetworkStatisticsContext();
 	const filterPanelValue = "filters";
 
 	let expandedValue = $state<string | undefined>(undefined);
 	let datePickerOpen = $state(false);
 	let rangeAnchor: HTMLDivElement | undefined = $state(undefined);
 	let timePickerStyle = $state("");
-	let draft = $state<StatisticsFilterDraft>(statistics.filterDraft);
+	const createDraft = (): NetworkFilterDraft => ({
+		from: statistics.filterDraft.from,
+		to: statistics.filterDraft.to,
+		scheduleType: statistics.filterDraft.scheduleType,
+		transportTypes: [...statistics.filterDraft.transportTypes],
+		includeReplacement: statistics.filterDraft.includeReplacement
+	});
+
+	let draft = $state<NetworkFilterDraft>(createDraft());
 
 	const isExpanded = $derived(expandedValue === filterPanelValue);
 
 	const networkTransportTypes = $derived(networkTransportTypeOptions.map((option) => option.value));
 
-	const assignDraft = (next: StatisticsFilterDraft) => {
+	const assignDraft = (next: NetworkFilterDraft) => {
 		draft.from = next.from;
 		draft.to = next.to;
 		draft.scheduleType = next.scheduleType;
 		draft.transportTypes = next.transportTypes.filter((type) => networkTransportTypes.includes(type));
 		draft.includeReplacement = next.includeReplacement;
-		draft.minVolume = next.minVolume;
 	};
 
 	const selectedRange = $derived.by<TimePickerRange | undefined>(() => {
@@ -99,20 +104,19 @@
 	const apply = () => {
 		statistics.applyFilters({
 			...draft,
-			transportTypes: [...draft.transportTypes],
-			minVolume: Math.max(0, Number(draft.minVolume) || 0)
+			transportTypes: [...draft.transportTypes]
 		});
 		expandedValue = undefined;
 	};
 
 	const reset = () => {
 		statistics.resetFilters();
-		assignDraft(statistics.filterDraft);
+		assignDraft(createDraft());
 		expandedValue = undefined;
 	};
 
 	const toggleExpanded = () => {
-		if (!isExpanded) assignDraft(statistics.filterDraft);
+		if (!isExpanded) assignDraft(createDraft());
 		expandedValue = isExpanded ? undefined : filterPanelValue;
 	};
 
@@ -153,9 +157,14 @@
 		</div>
 	</div>
 
-	<Accordion.Root type="single" value={expandedValue} onchange={(value) => (expandedValue = value)}>
-		<Accordion.Item value={filterPanelValue} class="border-border/70 border-t">
-			<Accordion.Content class="px-4 pt-4 pb-0">
+	<Accordion.Root
+		type="single"
+		value={expandedValue}
+		onchange={(value) => (expandedValue = value)}
+		class="[&>[role=separator]]:hidden"
+	>
+		<Accordion.Item value={filterPanelValue}>
+			<Accordion.Content class="border-border/70 border-t px-4 pt-4 pb-0">
 				<div class="grid gap-5">
 					<div class="grid gap-4 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)] lg:items-end">
 						<div class="grid gap-1.5 text-sm font-semibold">
@@ -208,7 +217,7 @@
 						</div>
 					</div>
 
-					<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto_auto] xl:items-start">
+					<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
 						<div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
 							{#each networkTransportTypeOptions as option (option.value)}
 								<label
@@ -229,23 +238,18 @@
 							{/each}
 						</div>
 
-						<label
-							class="border-border bg-background inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-semibold"
-						>
-							<Checkbox checked={draft.includeReplacement} onchecked={(checked) => (draft.includeReplacement = checked)} />
-							<span>Replacement services</span>
-						</label>
-
-						<label class="flex items-center gap-2 text-sm font-semibold">
-							<span class="text-foreground/60">Ranking min volume</span>
-							<Input
-								type="number"
-								value={draft.minVolume}
-								min={0}
-								debounceTime={0}
-								onchange={(value) => (draft.minVolume = Number(value) || 0)}
-								class="bg-background w-24"
+						<label class="border-border bg-background flex max-w-sm items-start gap-2 rounded-lg border p-3 text-sm">
+							<Checkbox
+								checked={draft.includeReplacement}
+								onchecked={(checked) => (draft.includeReplacement = checked)}
+								class="mt-0.5"
 							/>
+							<span class="grid gap-0.5">
+								<span class="font-semibold">Replacement services</span>
+								<span class="text-foreground/55 text-xs leading-4">
+									Include services marked as replacement transport in all network metrics. Enabled by default.
+								</span>
+							</span>
 						</label>
 					</div>
 				</div>
