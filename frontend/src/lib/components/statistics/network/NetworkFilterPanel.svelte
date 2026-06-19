@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { ScheduleType, type TransportType } from "@lib/api";
 	import * as Accordion from "@lib/components/ui/accordion";
+	import Badge from "@lib/components/ui/Badge.svelte";
 	import Button from "@lib/components/ui/Button.svelte";
 	import Checkbox from "@lib/components/ui/Checkbox.svelte";
 	import Input from "@lib/components/ui/Input.svelte";
@@ -131,9 +132,7 @@
 			</div>
 			<div class="mt-2 flex flex-wrap gap-2">
 				{#each appliedSummaryItems as item (item)}
-					<span class="border-border bg-background rounded-lg border px-2.5 py-1 text-xs font-semibold">
-						{item}
-					</span>
+					<Badge>{item}</Badge>
 				{/each}
 			</div>
 		</div>
