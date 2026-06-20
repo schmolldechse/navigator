@@ -1,7 +1,13 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
 	import type { GeoJsonFeature, GeoJsonFeatureCollection } from "@lib/api";
-	import Map, { type MapMarker, type MapMarkerRenderContext, type MapValuePoint } from "@lib/components/ui/map/Map.svelte";
+	import Map, {
+		type MapHeatmapGradientStop,
+		type MapHeatmapPoint,
+		type MapMarker,
+		type MapMarkerRenderContext,
+		type MapValuePoint
+	} from "@lib/components/ui/map/Map.svelte";
 	import Skeleton from "@lib/components/ui/Skeleton.svelte";
 	import type { RemoteQuery } from "@sveltejs/kit";
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
@@ -51,6 +57,11 @@
 		color: string;
 	};
 
+	type MetricRanges = {
+		observed: [number, number];
+		color: [number, number];
+	};
+
 	let { promise, metric, onmetricchange }: Props = $props();
 
 	const metricOptions: MapMetricOption[] = [
@@ -89,16 +100,26 @@
 		{
 			value: "plannedStops",
 			label: "Planned stops",
-			description: "Planned stop volume by station for context; this is not a quality score.",
+			description: "Spatial concentration of planned station stops; this is service volume, not a quality score.",
 			direction: "neutral",
 			rangeLabels: ["Fewer stops", "More stops"],
 			getValue: (data) => data.plannedEvents
 		}
 	];
 	const selectedMetric = $derived(metricOptions.find((option) => option.value === metric) ?? metricOptions[0]);
+	const plannedStopsSelected = $derived(selectedMetric.value === "plannedStops");
 	const QUALITY_COLORS: [string, string, string] = ["#be4b5f", "#d4a72c", "#2a9d8f"];
-	const VOLUME_COLORS: [string, string, string] = ["#334155", "#2563eb", "#38bdf8"];
+	const VOLUME_COLORS: [string, string, string] = ["#33301e", "#8f7810", "#ffda0a"];
 	const NO_DATA_COLOR = "#94a3b8";
+	const PLANNED_STOPS_HEATMAP_GRADIENT: MapHeatmapGradientStop[] = [
+		{ density: 0, color: "rgba(255, 218, 10, 0)" },
+		{ density: 0.015, color: "rgba(255, 218, 10, 0.28)" },
+		{ density: 0.06, color: "rgba(255, 218, 10, 0.48)" },
+		{ density: 0.18, color: "rgba(255, 218, 10, 0.68)" },
+		{ density: 0.38, color: "rgba(255, 218, 10, 0.84)" },
+		{ density: 0.65, color: "rgba(255, 218, 10, 0.95)" },
+		{ density: 1, color: "#ffda0a" }
+	];
 	const qualityColorScale = scaleLinear<string>().domain([0, 0.5, 1]).range(QUALITY_COLORS).clamp(true);
 	const volumeColorScale = scaleLinear<string>().domain([0, 0.5, 1]).range(VOLUME_COLORS).clamp(true);
 
@@ -167,15 +188,17 @@
 			})
 			.filter((point): point is HotspotPoint => point !== null);
 
-	const createScale = (points: HotspotPoint[], option: MapMetricOption): [number, number] => {
+	const createRanges = (points: HotspotPoint[], option: MapMetricOption): MetricRanges => {
 		const values = points
 			.map((point) => option.getValue(point.data))
 			.filter((value): value is number => value !== null)
 			.sort((left, right) => left - right);
-		if (values.length === 0) return [0, 1];
-		if (values.length === 1) return [values[0], values[0]];
+		if (values.length === 0) return { observed: [0, 1], color: [0, 1] };
+		if (values.length === 1) return { observed: [values[0], values[0]], color: [values[0], values[0]] };
 
-		return [quantileSorted(values, 0.05) ?? values[0], quantileSorted(values, 0.95) ?? values.at(-1) ?? values[0]];
+		const observed: [number, number] = [values[0], values.at(-1) ?? values[0]];
+		const color: [number, number] = [quantileSorted(values, 0.05) ?? observed[0], quantileSorted(values, 0.95) ?? observed[1]];
+		return { observed, color };
 	};
 
 	const createValuePoints = (points: HotspotPoint[], option: MapMetricOption, range: [number, number]): MapValuePoint[] =>
@@ -189,6 +212,16 @@
 				color: metricColor(value, option, range)
 			};
 		});
+
+	const createHeatmapPoints = (points: HotspotPoint[]): MapHeatmapPoint[] =>
+		points
+			.filter((point) => point.data.plannedEvents !== null)
+			.map((point) => ({
+				id: point.id,
+				longitude: point.longitude,
+				latitude: point.latitude,
+				value: point.data.plannedEvents ?? 0
+			}));
 
 	const createMarkers = (
 		points: HotspotPoint[],
@@ -216,8 +249,23 @@
 		return option.direction === "higher" ? QUALITY_COLORS : [QUALITY_COLORS[2], QUALITY_COLORS[1], QUALITY_COLORS[0]];
 	};
 
-	const legendGradient = (colors: [string, string, string]): string =>
-		`linear-gradient(to right, ${colors[0]}, ${colors[1]}, ${colors[2]})`;
+	const rangePosition = (value: number, range: [number, number]): number => {
+		const [min, max] = range;
+		if (min === max) return 50;
+		return Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100));
+	};
+
+	const legendGradient = (colors: [string, string, string], ranges: MetricRanges): string => {
+		const [colorMin, colorMax] = ranges.color;
+		if (ranges.observed[0] === ranges.observed[1] || colorMin === colorMax) return colors[1];
+
+		const lowerStop = rangePosition(colorMin, ranges.observed);
+		const middleStop = rangePosition((colorMin + colorMax) / 2, ranges.observed);
+		const upperStop = rangePosition(colorMax, ranges.observed);
+		return `linear-gradient(to right, ${colors[0]} 0%, ${colors[0]} ${lowerStop}%, ${colors[1]} ${middleStop}%, ${colors[2]} ${upperStop}%, ${colors[2]} 100%)`;
+	};
+
+	const heatmapLegendGradient = `linear-gradient(to right, rgba(255, 218, 10, 0.08), rgba(255, 218, 10, 0.58), #ffda0a)`;
 
 	const openStation = async (point: MapValuePoint) => {
 		await goto(`/statistics/${point.id}`);
@@ -264,9 +312,10 @@
 		</div>
 	{:else if promise.current}
 		{@const points = createPoints(promise.current.features)}
-		{@const scale = createScale(points, selectedMetric)}
-		{@const valuePoints = createValuePoints(points, selectedMetric, scale)}
-		{@const markers = createMarkers(points, selectedMetric, scale)}
+		{@const ranges = createRanges(points, selectedMetric)}
+		{@const valuePoints = createValuePoints(points, selectedMetric, ranges.color)}
+		{@const heatmapPoints = createHeatmapPoints(points)}
+		{@const markers = createMarkers(points, selectedMetric, ranges.color)}
 		{@const colors = legendColors(selectedMetric)}
 		{#if points.length === 0}
 			<div
@@ -276,9 +325,14 @@
 			</div>
 		{:else}
 			<Map
-				{scale}
+				scale={ranges.color}
 				{valuePoints}
-				valuePointLayer
+				valuePointLayer={!plannedStopsSelected}
+				heatmap={plannedStopsSelected}
+				heatmapPoints={plannedStopsSelected ? heatmapPoints : []}
+				heatmapGradient={PLANNED_STOPS_HEATMAP_GRADIENT}
+				heatmapIntensityMultiplier={2.25}
+				heatmapRadiusMultiplier={1.6}
 				{markers}
 				marker={stationMarker}
 				markerMinZoom={12.5}
@@ -293,22 +347,35 @@
 				ariaLabel={`Station performance map showing ${selectedMetric.label}`}
 			/>
 			<div class="mt-3 grid gap-1.5" aria-label={`${selectedMetric.label} color scale`}>
-				<div class="h-1.5 rounded-full" style:background={legendGradient(colors)} aria-hidden="true"></div>
-				<div class="text-foreground/55 flex items-start justify-between gap-3 text-xs font-semibold">
-					<span class="min-w-0">
-						<span class="text-foreground block font-bold">{selectedMetric.rangeLabels[0]}</span>
-						{formatMapValue(scale[0], selectedMetric, true)}
-					</span>
-					<span class="text-center">All stations · {selectedMetric.label}</span>
-					<span class="min-w-0 text-right">
-						<span class="text-foreground block font-bold">{selectedMetric.rangeLabels[1]}</span>
-						{formatMapValue(scale[1], selectedMetric, true)}
-					</span>
-				</div>
-				<p class="text-foreground/45 text-center text-[0.65rem] font-semibold">
-					Colors compare stations within the current selection; values outside the central 90% are clamped. Zoom in closely to
-					show station names and values.
-				</p>
+				{#if plannedStopsSelected}
+					<div class="h-1.5 rounded-full" style:background={heatmapLegendGradient} aria-hidden="true"></div>
+					<div class="text-foreground/55 flex items-start justify-between gap-3 text-xs font-semibold">
+						<span class="text-foreground font-bold">Lower service concentration</span>
+						<span class="text-center">Planned stops · spatial density</span>
+						<span class="text-foreground text-right font-bold">Higher service concentration</span>
+					</div>
+					<p class="text-foreground/45 text-center text-[0.65rem] font-semibold">
+						Heat intensity combines nearby stations and their planned stop volume. Zoom in closely to show individual station
+						values.
+					</p>
+				{:else}
+					<div class="h-1.5 rounded-full" style:background={legendGradient(colors, ranges)} aria-hidden="true"></div>
+					<div class="text-foreground/55 flex items-start justify-between gap-3 text-xs font-semibold">
+						<span class="min-w-0">
+							<span class="text-foreground block font-bold">{selectedMetric.rangeLabels[0]}</span>
+							{formatMapValue(ranges.observed[0], selectedMetric, true)}
+						</span>
+						<span class="text-center">All stations · {selectedMetric.label}</span>
+						<span class="min-w-0 text-right">
+							<span class="text-foreground block font-bold">{selectedMetric.rangeLabels[1]}</span>
+							{formatMapValue(ranges.observed[1], selectedMetric, true)}
+						</span>
+					</div>
+					<p class="text-foreground/45 text-center text-[0.65rem] font-semibold">
+						Legend values show the observed minimum and maximum; colors clamp the outer 5% at each end. Zoom in closely to show
+						station names and values.
+					</p>
+				{/if}
 			</div>
 		{/if}
 	{/if}

@@ -82,7 +82,12 @@
 <script lang="ts" generics="TData = unknown">
 	import { mount, onMount, unmount, type Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
-	import maplibregl, { type GeoJSONSource, type Map as MapLibreMap, type MapLayerMouseEvent } from "maplibre-gl";
+	import maplibregl, {
+		type ExpressionSpecification,
+		type GeoJSONSource,
+		type Map as MapLibreMap,
+		type MapLayerMouseEvent
+	} from "maplibre-gl";
 	import "maplibre-gl/dist/maplibre-gl.css";
 	import MapMarkerRenderer from "./MapMarkerRenderer.svelte";
 
@@ -99,6 +104,8 @@
 		heatmap?: boolean;
 		heatmapPoints?: MapHeatmapPoint[];
 		heatmapGradient?: MapHeatmapGradient;
+		heatmapIntensityMultiplier?: number;
+		heatmapRadiusMultiplier?: number;
 		valuePoints?: MapValuePoint[];
 		valuePointLayer?: boolean;
 		scale?: [number, number];
@@ -149,6 +156,8 @@
 		heatmap = false,
 		heatmapPoints = [],
 		heatmapGradient = DEFAULT_HEATMAP_GRADIENT,
+		heatmapIntensityMultiplier = 1,
+		heatmapRadiusMultiplier = 1,
 		valuePoints = [],
 		valuePointLayer = false,
 		scale = $bindable([0, 100] as [number, number]),
@@ -309,6 +318,46 @@
 		] as unknown as Parameters<MapLibreMap["setPaintProperty"]>[2];
 
 	const getGeoJsonSource = (sourceId: string) => map?.getSource(sourceId) as GeoJSONSource | undefined;
+	const getHeatmapIntensityMultiplier = () =>
+		Number.isFinite(heatmapIntensityMultiplier) ? Math.max(0, heatmapIntensityMultiplier) : 1;
+	const getHeatmapRadiusMultiplier = () =>
+		Number.isFinite(heatmapRadiusMultiplier) ? Math.max(0, heatmapRadiusMultiplier) : 1;
+	const createHeatmapIntensityExpression = (): ExpressionSpecification => {
+		const multiplier = getHeatmapIntensityMultiplier();
+		return [
+			"interpolate",
+			["linear"],
+			["zoom"],
+			4,
+			0.34 * multiplier,
+			7,
+			0.58 * multiplier,
+			10,
+			multiplier,
+			13,
+			1.48 * multiplier,
+			15,
+			1.85 * multiplier
+		];
+	};
+	const createHeatmapRadiusExpression = (): ExpressionSpecification => {
+		const multiplier = getHeatmapRadiusMultiplier();
+		return [
+			"interpolate",
+			["linear"],
+			["zoom"],
+			4,
+			9 * multiplier,
+			7,
+			16 * multiplier,
+			10,
+			27 * multiplier,
+			13,
+			46 * multiplier,
+			15,
+			64 * multiplier
+		];
+	};
 
 	const getMarkerRenderPadding = () => (Number.isFinite(markerRenderPadding) ? Math.max(0, markerRenderPadding) : 128);
 	const getMarkerMinZoom = () => (Number.isFinite(markerMinZoom) ? Math.max(0, markerMinZoom) : 0);
@@ -519,9 +568,9 @@
 			},
 			paint: {
 				"heatmap-weight": ["interpolate", ["linear"], ["get", "value"], 0, 0.04, 100, 0.82],
-				"heatmap-intensity": ["interpolate", ["linear"], ["zoom"], 4, 0.34, 7, 0.58, 10, 1, 13, 1.48, 15, 1.85],
+				"heatmap-intensity": createHeatmapIntensityExpression(),
 				"heatmap-color": createHeatmapColorExpression(heatmapGradient),
-				"heatmap-radius": ["interpolate", ["linear"], ["zoom"], 4, 9, 7, 16, 10, 27, 13, 46, 15, 64],
+				"heatmap-radius": createHeatmapRadiusExpression(),
 				"heatmap-opacity": ["interpolate", ["linear"], ["zoom"], 4, 0.64, 8, 0.72, 12, 0.78, 15, 0.84]
 			}
 		});
@@ -863,6 +912,13 @@
 		if (!map || !styleLoaded || !map.getLayer(HEATMAP_LAYER_ID)) return;
 
 		map.setPaintProperty(HEATMAP_LAYER_ID, "heatmap-color", createHeatmapColorExpression(heatmapGradient));
+	});
+
+	$effect(() => {
+		if (!map || !styleLoaded || !map.getLayer(HEATMAP_LAYER_ID)) return;
+
+		map.setPaintProperty(HEATMAP_LAYER_ID, "heatmap-intensity", createHeatmapIntensityExpression());
+		map.setPaintProperty(HEATMAP_LAYER_ID, "heatmap-radius", createHeatmapRadiusExpression());
 	});
 
 	$effect(() => {
