@@ -48,6 +48,13 @@ type ScheduleTypeOption = {
 	label: string;
 };
 
+type ReliabilityOutcomeShares = {
+	reliableUnder6: number;
+	late6To15: number;
+	late15OrMore: number;
+	cancelled: number;
+};
+
 const DEFAULT_RANGE_DAYS = 30;
 const SMALL_RANGE_MAX_DAYS = 7;
 
@@ -222,6 +229,28 @@ const toNumber = (value: number | string | null | undefined): number | null => {
 	return Number.isFinite(numberValue) ? numberValue : null;
 };
 
+const createReliabilityOutcomeShares = (metrics: EventMetrics): ReliabilityOutcomeShares | null => {
+	const reliability5 = toNumber(metrics.customerReliability5Rate);
+	const reliability15 = toNumber(metrics.customerReliability15Rate);
+	const cancellationRate = toNumber(metrics.cancellationRate);
+	if (reliability5 === null || reliability15 === null || cancellationRate === null) return null;
+
+	const clampRate = (value: number): number => Math.min(1, Math.max(0, value));
+	const reliableUnder6 = clampRate(reliability5);
+	const late6To15 = Math.max(0, clampRate(reliability15) - reliableUnder6);
+	const cancelled = clampRate(cancellationRate);
+	const late15OrMore = Math.max(0, 1 - reliableUnder6 - late6To15 - cancelled);
+	const total = reliableUnder6 + late6To15 + late15OrMore + cancelled;
+	if (total <= 0) return null;
+
+	return {
+		reliableUnder6: reliableUnder6 / total,
+		late6To15: late6To15 / total,
+		late15OrMore: late15OrMore / total,
+		cancelled: cancelled / total
+	};
+};
+
 const pageValue = (value: number | string): number => Number(value) || 0;
 
 const pageTotalPages = (page: MetricPage): number => {
@@ -367,6 +396,7 @@ export {
 	asLocalDate,
 	createPreviousGlobalScope,
 	createRangeLabel,
+	createReliabilityOutcomeShares,
 	defaultEventScope,
 	defaultGlobalScope,
 	eventRequestBase,
@@ -399,6 +429,7 @@ export {
 	type BucketMetricScope,
 	type BaseStatisticsFilterDraft,
 	type ScheduleTypeOption,
+	type ReliabilityOutcomeShares,
 	type StatisticsBucketOption,
 	type StatisticsEventScope,
 	type StatisticsGlobalScope,

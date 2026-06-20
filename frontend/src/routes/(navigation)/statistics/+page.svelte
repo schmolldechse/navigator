@@ -6,6 +6,7 @@
 	import NetworkHeatmap from "@lib/components/statistics/network/NetworkHeatmap.svelte";
 	import NetworkHotspotMap from "@lib/components/statistics/network/NetworkHotspotMap.svelte";
 	import NetworkKpiGrid from "@lib/components/statistics/network/NetworkKpiGrid.svelte";
+	import NetworkReliabilityBalanceChart from "@lib/components/statistics/network/NetworkReliabilityBalanceChart.svelte";
 	import NetworkTransportComparisonChart from "@lib/components/statistics/network/NetworkTransportComparisonChart.svelte";
 	import NetworkTrendChart, {
 		type TrendMetricDefinition,
@@ -78,6 +79,7 @@
 	const journeySummaryRequest = $derived(createNetworkJourneySummaryRequest(statistics.global));
 	const previousEventSummaryRequest = $derived(createNetworkEventSummaryRequest(previousGlobal, statistics.event));
 	const previousJourneySummaryRequest = $derived(createNetworkJourneySummaryRequest(previousGlobal));
+	const eventSummary = $derived(loadNetworkMetric({ request: eventSummaryRequest }));
 	const eventTimeSeries = $derived(
 		loadNetworkMetric({
 			request: createNetworkEventTimeSeriesRequest(statistics.global, statistics.event, statistics.network.eventTimeSeries)
@@ -238,6 +240,8 @@
 			previousJourneyRequest={previousJourneySummaryRequest}
 		/>
 	{/key}
+
+	<NetworkReliabilityBalanceChart promise={eventSummary} />
 
 	<section class="grid gap-4">
 		<NetworkTrendChart

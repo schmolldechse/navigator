@@ -292,23 +292,23 @@ Geeignet sind Dumbbell-Chart plus Volumenpunkt oder Small-Multiple-Balken. Ein R
 
 ## Priorisierte Umsetzung
 
-| Priorität | Graph | Begründung | API-Aufwand |
-| - | - | - | - |
-| P0 | Verlässlichkeitsbilanz je 100 Stopps | Stärkste direkte Antwort auf die Leitfrage | Niedrig |
-| P0 | Pünktlichkeitslücke operativ vs. Kundensicht | Erklärt die zwei Pünktlichkeitsbegriffe unmittelbar | Niedrig für vorhandene Gruppierungen |
-| P0 | Schwellenkurve aus Kundensicht | Nutzt vorhandenen CDF weiter und behandelt Ausfälle korrekt | Niedrig |
-| P0 | Tageszeitprofil mit Volumenband | Ergänzt die Heatmap um eine leicht lesbare Spitzenzeitenansicht | Niedrig bis mittel |
-| P1 | Journey-Kalender | Vorhandene Daten, hoher Nutzen auf Fahrtnummernebene | Niedrig |
-| P1 | Disjunkte Journey-Outcomes über die Zeit | Macht vollständige und teilweise Nichterbringung sichtbar | Mittel |
-| P1 | Verspätungsschwere über die Zeit | Unterscheidet normale Abweichung und schwere Störung | Mittel |
-| P1 | Linienverlaufsprofil | Sehr konkrete Diagnose nach Linie und Station | Niedrig bis mittel |
-| P1 | Delay-Debt-Pareto | Priorisiert betriebliche Hotspots nach Gesamtwirkung | Niedrig bis mittel |
-| P1 | Betreibervergleich | Hoher fachlicher Wert und gute Vergleichbarkeit | Mittel |
-| P2 | Stabilitätsband | Ergänzt Niveau um Vorhersagbarkeit | Mittel |
-| P2 | Rangveränderung | Zeigt Entwicklung statt nur Zustand | Niedrig bis mittel |
-| P2 | Verspätungsaufbau Ankunft vs. Abfahrt | Erklärt Mechanismen entlang einer Fahrt | Mittel bis hoch |
-| P2 | Origin-Destination-Matrix | Starke Korridoranalyse, aber hohe Kardinalität | Mittel bis hoch |
-| Querschnitt | Datenabdeckung und Stichprobe | Verhindert überzogene Aussagen aus dünnen Daten | Mittel |
+| Priorität | Graph | Umgesetzt | Passt thematisch rein | Begründung | API-Aufwand |
+| - | - | - | - | - | - |
+| P0 | Verlässlichkeitsbilanz je 100 Stopps | **Vollständig** – Gesamtbilanz und Verkehrstypvergleich vorhanden | **Ja** | Stärkste direkte Antwort auf die Leitfrage | Niedrig |
+| P0 | Pünktlichkeitslücke operativ vs. Kundensicht | **Teilweise** – Kennzahlen in KPIs, Zeitreihe, Karte und Verkehrstyp-Tooltip, aber kein Dumbbell-Chart | **Ja** | Erklärt die zwei Pünktlichkeitsbegriffe unmittelbar | Niedrig für vorhandene Gruppierungen |
+| P0 | Schwellenkurve aus Kundensicht | **Teilweise** – operative CDF vorhanden, Kundensicht-Kurve fehlt | **Ja** | Nutzt vorhandenen CDF weiter und behandelt Ausfälle korrekt | Niedrig |
+| P0 | Tageszeitprofil mit Volumenband | **Teilweise** – Wochentag-Stunden-Heatmap und Volumenansicht vorhanden, aber kein Stundenprofil | **Ja** | Ergänzt die Heatmap um eine leicht lesbare Spitzenzeitenansicht | Niedrig bis mittel |
+| P1 | Journey-Kalender | **Nein** – API-Vertrag vorhanden, keine Visualisierung | **Bedingt** – eher Fahrtnummernansicht | Vorhandene Daten, hoher Nutzen auf Fahrtnummernebene | Niedrig |
+| P1 | Disjunkte Journey-Outcomes über die Zeit | **Teilweise** – überlappende Journey-Signale als Zeitreihe, aber kein disjunkter Stack | **Ja** | Macht vollständige und teilweise Nichterbringung sichtbar | Mittel |
+| P1 | Verspätungsschwere über die Zeit | **Teilweise** – Schwellenzeitreihe und Gesamtverteilung vorhanden, aber keine Schwereklassen über die Zeit | **Ja** | Unterscheidet normale Abweichung und schwere Störung | Mittel |
+| P1 | Linienverlaufsprofil | **Nein** – API-Verträge vorhanden, keine Visualisierung | **Bedingt** – benötigt Linie und Routenvariante | Sehr konkrete Diagnose nach Linie und Station | Niedrig bis mittel |
+| P1 | Delay-Debt-Pareto | **Teilweise** – Delay Debt als Kennzahl vorhanden, aber kein Pareto | **Ja** | Priorisiert betriebliche Hotspots nach Gesamtwirkung | Niedrig bis mittel |
+| P1 | Betreibervergleich | **Nein** | **Bedingt** – fachlich relevant, aber nicht explizit Teil der Leitfrage | Hoher fachlicher Wert und gute Vergleichbarkeit | Mittel |
+| P2 | Stabilitätsband | **Nein** | **Ja** | Ergänzt Niveau um Vorhersagbarkeit | Mittel |
+| P2 | Rangveränderung | **Teilweise** – Vorperiodenvergleich nur in den Gesamt-KPIs | **Ja** | Zeigt Entwicklung statt nur Zustand | Niedrig bis mittel |
+| P2 | Verspätungsaufbau Ankunft vs. Abfahrt | **Nein** – Journey-Profildaten vorhanden, aber keine gepaarte Visualisierung | **Bedingt** – eher Linien- oder Journey-Detail | Erklärt Mechanismen entlang einer Fahrt | Mittel bis hoch |
+| P2 | Origin-Destination-Matrix | **Nein** | **Bedingt** – benötigt Linie oder begrenzten Korridor | Starke Korridoranalyse, aber hohe Kardinalität | Mittel bis hoch |
+| Querschnitt | Datenabdeckung und Stichprobe | **Teilweise** – Volumen, Delay-Samples und Abdeckungshinweise vorhanden, aber kein eigener Chart | **Ja** | Verhindert überzogene Aussagen aus dünnen Daten | Mittel |
 
 ## Empfohlene erste Kombination für das Netzwerk-Dashboard
 

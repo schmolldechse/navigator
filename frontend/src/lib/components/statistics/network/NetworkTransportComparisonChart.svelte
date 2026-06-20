@@ -7,7 +7,13 @@
 	import GitCompare from "@lucide/svelte/icons/git-compare";
 	import { BarChart, type ChartState } from "layerchart";
 	import DashboardPanel from "../shared/DashboardPanel.svelte";
-	import { formatCount, formatMetric, toNumber, transportTypeLabel } from "../shared/statistics-dashboard";
+	import {
+		createReliabilityOutcomeShares,
+		formatCount,
+		formatMetric,
+		toNumber,
+		transportTypeLabel
+	} from "../shared/statistics-dashboard";
 
 	type Props = {
 		promise: RemoteQuery<StatisticsMetricResponse>;
@@ -92,32 +98,16 @@
 
 	let { promise }: Props = $props();
 
-	const clampRate = (value: number): number => Math.min(1, Math.max(0, value));
-
 	const createRows = (response: StatisticsMetricResponse): ComparisonRow[] => {
 		if (!("items" in response.result)) return [];
 
 		return (response.result.items as TransportTypeComparisonItem[])
 			.map((item): ComparisonRow | null => {
 				const plannedStops = toNumber(item.eventMetrics.plannedEvents) ?? 0;
-				const reliability5 = toNumber(item.eventMetrics.customerReliability5Rate);
-				const reliability15 = toNumber(item.eventMetrics.customerReliability15Rate);
 				const operativePunctuality5 = toNumber(item.eventMetrics.operativePunctuality5Rate);
-				const cancellationRate = toNumber(item.eventMetrics.cancellationRate);
-				if (
-					plannedStops <= 0 ||
-					reliability5 === null ||
-					reliability15 === null ||
-					operativePunctuality5 === null ||
-					cancellationRate === null
-				)
-					return null;
+				const outcomes = createReliabilityOutcomeShares(item.eventMetrics);
+				if (plannedStops <= 0 || operativePunctuality5 === null || !outcomes) return null;
 
-				const reliableUnder6 = clampRate(reliability5);
-				const late6To15 = Math.max(0, clampRate(reliability15) - reliableUnder6);
-				const cancelled = clampRate(cancellationRate);
-				const late15OrMore = Math.max(0, 1 - reliableUnder6 - late6To15 - cancelled);
-				const total = reliableUnder6 + late6To15 + late15OrMore + cancelled;
 				const name = transportTypeLabel(item.transportType);
 
 				return {
@@ -125,11 +115,8 @@
 					name,
 					label: name,
 					plannedStops,
-					reliableUnder6: reliableUnder6 / total,
-					operativePunctualityUnder6: clampRate(operativePunctuality5),
-					late6To15: late6To15 / total,
-					late15OrMore: late15OrMore / total,
-					cancelled: cancelled / total
+					...outcomes,
+					operativePunctualityUnder6: Math.min(1, Math.max(0, operativePunctuality5))
 				};
 			})
 			.filter((row): row is ComparisonRow => row !== null)
