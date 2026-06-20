@@ -295,7 +295,7 @@ Geeignet sind Dumbbell-Chart plus Volumenpunkt oder Small-Multiple-Balken. Ein R
 | Priorität | Graph | Umgesetzt | Passt thematisch rein | Begründung | API-Aufwand |
 | - | - | - | - | - | - |
 | P0 | Verlässlichkeitsbilanz je 100 Stopps | **Vollständig** – Gesamtbilanz und Verkehrstypvergleich vorhanden | **Ja** | Stärkste direkte Antwort auf die Leitfrage | Niedrig |
-| P0 | Pünktlichkeitslücke operativ vs. Kundensicht | **Teilweise** – Kennzahlen in KPIs, Zeitreihe, Karte und Verkehrstyp-Tooltip, aber kein Dumbbell-Chart | **Ja** | Erklärt die zwei Pünktlichkeitsbegriffe unmittelbar | Niedrig für vorhandene Gruppierungen |
+| P0 | Pünktlichkeitslücke operativ vs. Kundensicht | **Vollständig** – Dumbbell-Chart nach Verkehrstyp vorhanden; Outcome-Bilanz weiterhin umschaltbar | **Ja** | Erklärt die zwei Pünktlichkeitsbegriffe unmittelbar | Niedrig für vorhandene Gruppierungen |
 | P0 | Schwellenkurve aus Kundensicht | **Teilweise** – operative CDF vorhanden, Kundensicht-Kurve fehlt | **Ja** | Nutzt vorhandenen CDF weiter und behandelt Ausfälle korrekt | Niedrig |
 | P0 | Tageszeitprofil mit Volumenband | **Teilweise** – Wochentag-Stunden-Heatmap und Volumenansicht vorhanden, aber kein Stundenprofil | **Ja** | Ergänzt die Heatmap um eine leicht lesbare Spitzenzeitenansicht | Niedrig bis mittel |
 | P1 | Journey-Kalender | **Nein** – API-Vertrag vorhanden, keine Visualisierung | **Bedingt** – eher Fahrtnummernansicht | Vorhandene Daten, hoher Nutzen auf Fahrtnummernebene | Niedrig |

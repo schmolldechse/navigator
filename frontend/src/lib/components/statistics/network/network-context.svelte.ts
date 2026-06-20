@@ -14,6 +14,7 @@ type NetworkHeatmapMetric = "reliability5" | "reliability15" | "cancellation" | 
 type NetworkDistributionMode = "histogram" | "cdf";
 type NetworkMapMetric = "reliability5" | "operative5" | "cancellation" | "averagePositiveDelay" | "plannedStops";
 type NetworkPunctualityPerspective = "customer" | "operative";
+type NetworkTransportComparisonMode = "gap" | "outcomes";
 
 type NetworkMetricScope = {
 	eventTimeSeries: { bucket: StatisticsBucket; perspective: NetworkPunctualityPerspective };
@@ -21,6 +22,7 @@ type NetworkMetricScope = {
 	weekdayHourHeatmap: { metric: NetworkHeatmapMetric };
 	mapHotspots: { metric: NetworkMapMetric };
 	delayDistribution: { mode: NetworkDistributionMode };
+	transportTypeComparison: { mode: NetworkTransportComparisonMode };
 };
 
 type NetworkFilterDraft = BaseStatisticsFilterDraft;
@@ -30,7 +32,8 @@ const defaultNetworkMetricScope = (): NetworkMetricScope => ({
 	journeyTimeSeries: { bucket: StatisticsBucket.DAY },
 	weekdayHourHeatmap: { metric: "reliability5" },
 	mapHotspots: { metric: "reliability5" },
-	delayDistribution: { mode: "histogram" }
+	delayDistribution: { mode: "histogram" },
+	transportTypeComparison: { mode: "gap" }
 });
 
 const createNetworkFilterDraft = (
@@ -94,6 +97,10 @@ class NetworkStatisticsContext {
 	setDistributionMode = (mode: NetworkDistributionMode) => {
 		this.network.delayDistribution.mode = mode;
 	};
+
+	setTransportComparisonMode = (mode: NetworkTransportComparisonMode) => {
+		this.network.transportTypeComparison.mode = mode;
+	};
 }
 
 const [getNetworkStatisticsContext, setNetworkStatisticsContext] = createContext<NetworkStatisticsContext>();
@@ -106,5 +113,6 @@ export {
 	type NetworkFilterDraft,
 	type NetworkHeatmapMetric,
 	type NetworkMapMetric,
-	type NetworkPunctualityPerspective
+	type NetworkPunctualityPerspective,
+	type NetworkTransportComparisonMode
 };

@@ -295,7 +295,11 @@
 		/>
 	</section>
 
-	<NetworkTransportComparisonChart promise={transportTypeComparison} />
+	<NetworkTransportComparisonChart
+		promise={transportTypeComparison}
+		mode={statistics.network.transportTypeComparison.mode}
+		onmodechange={statistics.setTransportComparisonMode}
+	/>
 
 	<section>
 		<NetworkHotspotMap
