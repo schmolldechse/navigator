@@ -312,8 +312,12 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
                 ["stationEvaNumber"] = row.Station.StationEvaNumber,
                 ["stationName"] = row.Station.StationName,
                 ["plannedEvents"] = row.EventMetrics.PlannedEvents,
+                ["servedEvents"] = row.EventMetrics.ServedEvents,
                 ["cancellationRate"] = row.EventMetrics.CancellationRate,
+                ["operativePunctuality5Rate"] = row.EventMetrics.OperativePunctuality5Rate,
                 ["customerReliability5Rate"] = row.EventMetrics.CustomerReliability5Rate,
+                ["operativePunctuality15Rate"] = row.EventMetrics.OperativePunctuality15Rate,
+                ["customerReliability15Rate"] = row.EventMetrics.CustomerReliability15Rate,
                 ["delayDebtMinutes"] = row.EventMetrics.DelayDebtMinutes,
                 ["score"] = row.EventMetrics.CustomerReliability5Rate
             }))

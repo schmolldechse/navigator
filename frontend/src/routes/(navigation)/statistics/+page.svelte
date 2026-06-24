@@ -297,8 +297,8 @@
 
 	<NetworkTransportComparisonChart
 		promise={transportTypeComparison}
-		mode={statistics.network.transportTypeComparison.mode}
-		onmodechange={statistics.setTransportComparisonMode}
+		threshold={statistics.network.transportTypeComparison.threshold}
+		onthresholdchange={statistics.setTransportComparisonThreshold}
 	/>
 
 	<section>

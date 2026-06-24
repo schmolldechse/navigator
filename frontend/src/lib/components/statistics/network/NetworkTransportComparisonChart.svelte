@@ -1,14 +1,15 @@
 <script lang="ts">
-	import type { StatisticsMetricResponse, TransportTypeComparisonItem } from "@lib/api";
+	import type { EventMetrics, StatisticsMetricResponse, TransportTypeComparisonItem } from "@lib/api";
 	import PointTooltip, { type PointTooltipItem } from "@lib/components/layerchart/tooltips/PointTooltip.svelte";
 	import Skeleton from "@lib/components/ui/Skeleton.svelte";
+	import * as Accordion from "@lib/components/ui/accordion";
 	import type { RemoteQuery } from "@sveltejs/kit";
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
 	import GitCompare from "@lucide/svelte/icons/git-compare";
-	import { BarChart, Points, Rule, type ChartState } from "layerchart";
+	import { BarChart, Labels, Points, Rule, type ChartState } from "layerchart";
 	import DashboardPanel from "../shared/DashboardPanel.svelte";
-	import type { NetworkTransportComparisonMode } from "./network-context.svelte";
-	import TransportComparisonModeControl from "./options/TransportComparisonModeControl.svelte";
+	import type { NetworkTransportComparisonThreshold } from "./network-context.svelte";
+	import TransportComparisonThresholdControl from "./options/TransportComparisonThresholdControl.svelte";
 	import {
 		createReliabilityOutcomeShares,
 		formatCount,
@@ -19,8 +20,17 @@
 
 	type Props = {
 		promise: RemoteQuery<StatisticsMetricResponse>;
-		mode: NetworkTransportComparisonMode;
-		onmodechange: (mode: NetworkTransportComparisonMode) => void;
+		threshold: NetworkTransportComparisonThreshold;
+		onthresholdchange: (threshold: NetworkTransportComparisonThreshold) => void;
+	};
+
+	type ThresholdDefinition = {
+		value: NetworkTransportComparisonThreshold;
+		label: string;
+		customerLabel: string;
+		operativeLabel: string;
+		getCustomerReliability: (metrics: EventMetrics) => number | null;
+		getOperativePunctuality: (metrics: EventMetrics) => number | null;
 	};
 
 	type ComparisonRow = {
@@ -29,36 +39,61 @@
 		label: string;
 		plannedStops: number;
 		servedStops: number;
-		reliableUnder6: number;
-		operativePunctualityUnder6: number;
+		customerReliability: number;
+		operativePunctuality: number;
 		punctualityGap: number;
+		reliableUnder6: number;
 		late6To15: number;
 		late15OrMore: number;
 		cancelled: number;
 	};
 
+	const clampRate = (value: number): number => Math.min(1, Math.max(0, value));
+
+	const thresholdDefinitions: ThresholdDefinition[] = [
+		{
+			value: "under6",
+			label: "< 6 min",
+			customerLabel: "Customer reliability < 6 min",
+			operativeLabel: "Operative punctuality < 6 min",
+			getCustomerReliability: (metrics) => toNumber(metrics.customerReliability5Rate),
+			getOperativePunctuality: (metrics) => toNumber(metrics.operativePunctuality5Rate)
+		},
+		{
+			value: "under15",
+			label: "< 15 min",
+			customerLabel: "Customer reliability < 15 min",
+			operativeLabel: "Operative punctuality < 15 min",
+			getCustomerReliability: (metrics) => toNumber(metrics.customerReliability15Rate),
+			getOperativePunctuality: (metrics) => toNumber(metrics.operativePunctuality15Rate)
+		}
+	];
+
+	const getThresholdDefinition = (value: NetworkTransportComparisonThreshold): ThresholdDefinition =>
+		thresholdDefinitions.find((definition) => definition.value === value) ?? thresholdDefinitions[0];
+
 	const outcomeSeries = [
 		{
 			key: "reliableUnder6",
-			label: "Customer reliable < 6 min",
+			label: "Under 6 min",
 			value: "reliableUnder6",
 			color: "var(--color-accent)"
 		},
 		{
 			key: "late6To15",
-			label: "6–15 min late",
+			label: "6 to < 15 min",
 			value: "late6To15",
 			color: "#ca8a04"
 		},
 		{
 			key: "late15OrMore",
-			label: "15+ min late",
+			label: "15 min or more",
 			value: "late15OrMore",
 			color: "#64748b"
 		},
 		{
 			key: "cancelled",
-			label: "Cancelled planned stops",
+			label: "Cancelled",
 			value: "cancelled",
 			color: "#dc2626"
 		}
@@ -71,26 +106,20 @@
 			value: (row) => formatCount(row.plannedStops)
 		},
 		{
-			key: "customerReliability",
-			label: "Customer reliability < 6 min",
+			key: "under6",
+			label: "Under 6 min",
 			value: (row) => formatMetric(row.reliableUnder6, "rate"),
 			color: "var(--color-accent)"
 		},
 		{
-			key: "operativePunctuality",
-			label: "Operative punctuality < 6 min",
-			value: (row) => formatMetric(row.operativePunctualityUnder6, "rate"),
-			color: "var(--color-foreground)"
-		},
-		{
 			key: "late6To15",
-			label: "6-15 min late",
+			label: "6 to < 15 min",
 			value: (row) => formatMetric(row.late6To15, "rate"),
 			color: "#ca8a04"
 		},
 		{
 			key: "late15OrMore",
-			label: "15+ min late",
+			label: "15 min or more",
 			value: (row) => formatMetric(row.late15OrMore, "rate"),
 			color: "#64748b"
 		},
@@ -102,23 +131,31 @@
 		}
 	];
 
-	const gapTooltipItems: PointTooltipItem<ComparisonRow>[] = [
+	let { promise, threshold, onthresholdchange }: Props = $props();
+	let outcomeMixValue = $state<string | undefined>(undefined);
+
+	const selectedThreshold = $derived(getThresholdDefinition(threshold));
+	const outcomeMixAccordionValue = "planned-stop-outcome-mix";
+
+	const formatGapLabel = (gap: number): string => (gap <= 0 ? "0.0 pp" : `-${(gap * 100).toFixed(1)} pp`);
+
+	const gapTooltipItems = $derived.by<PointTooltipItem<ComparisonRow>[]>(() => [
 		{
 			key: "customerReliability",
-			label: "Customer reliability < 6 min",
-			value: (row) => formatMetric(row.reliableUnder6, "rate"),
+			label: selectedThreshold.customerLabel,
+			value: (row) => formatMetric(row.customerReliability, "rate"),
 			color: "var(--color-accent)"
 		},
 		{
 			key: "operativePunctuality",
-			label: "Operative punctuality < 6 min",
-			value: (row) => formatMetric(row.operativePunctualityUnder6, "rate"),
+			label: selectedThreshold.operativeLabel,
+			value: (row) => formatMetric(row.operativePunctuality, "rate"),
 			color: "var(--color-foreground)"
 		},
 		{
 			key: "punctualityGap",
-			label: "Cancellation penalty",
-			value: (row) => `${(row.punctualityGap * 100).toFixed(1)} pp`,
+			label: "Customer-view gap",
+			value: (row) => formatGapLabel(row.punctualityGap),
 			color: "#dc2626"
 		},
 		{
@@ -137,23 +174,23 @@
 			label: "Served stops",
 			value: (row) => formatCount(row.servedStops)
 		}
-	];
+	]);
 
-	let { promise, mode, onmodechange }: Props = $props();
-
-	const createRows = (response: StatisticsMetricResponse): ComparisonRow[] => {
+	const createRows = (response: StatisticsMetricResponse, thresholdDefinition: ThresholdDefinition): ComparisonRow[] => {
 		if (!("items" in response.result)) return [];
 
 		return (response.result.items as TransportTypeComparisonItem[])
 			.map((item): ComparisonRow | null => {
 				const plannedStops = toNumber(item.eventMetrics.plannedEvents) ?? 0;
 				const servedStops = toNumber(item.eventMetrics.servedEvents) ?? 0;
-				const operativePunctuality5 = toNumber(item.eventMetrics.operativePunctuality5Rate);
+				const customerReliability = thresholdDefinition.getCustomerReliability(item.eventMetrics);
+				const operativePunctuality = thresholdDefinition.getOperativePunctuality(item.eventMetrics);
 				const outcomes = createReliabilityOutcomeShares(item.eventMetrics);
-				if (plannedStops <= 0 || operativePunctuality5 === null || !outcomes) return null;
+				if (plannedStops <= 0 || customerReliability === null || operativePunctuality === null || !outcomes) return null;
 
 				const name = transportTypeLabel(item.transportType);
-				const operativePunctualityUnder6 = Math.min(1, Math.max(0, operativePunctuality5));
+				const customerRate = clampRate(customerReliability);
+				const operativeRate = clampRate(operativePunctuality);
 
 				return {
 					id: item.transportType,
@@ -161,84 +198,76 @@
 					label: name,
 					plannedStops,
 					servedStops,
-					...outcomes,
-					operativePunctualityUnder6,
-					punctualityGap: Math.max(0, operativePunctualityUnder6 - outcomes.reliableUnder6)
+					customerReliability: customerRate,
+					operativePunctuality: operativeRate,
+					punctualityGap: Math.max(0, operativeRate - customerRate),
+					...outcomes
 				};
 			})
 			.filter((row): row is ComparisonRow => row !== null)
-			.sort((left, right) => right.reliableUnder6 - left.reliableUnder6 || left.name.localeCompare(right.name));
+			.sort((left, right) => right.customerReliability - left.customerReliability || left.name.localeCompare(right.name));
 	};
 </script>
 
 <DashboardPanel
 	title="Transport type comparison"
-	description="Compare the punctuality gap and planned-stop outcomes across transport types in the selected period."
+	description="Compare customer-view reliability and operative punctuality across transport types."
 	icon={GitCompare}
 >
 	{#snippet actions()}
-		<TransportComparisonModeControl value={mode} onchange={onmodechange} />
+		<TransportComparisonThresholdControl value={threshold} onchange={onthresholdchange} />
 	{/snippet}
 	{#if promise.loading}
-		<div class="flex min-h-96 flex-col gap-y-3">
-			<Skeleton class="h-80 w-full" />
+		<div class="flex min-h-80 flex-col gap-y-3">
+			<Skeleton class="h-64 w-full" />
 			<Skeleton class="h-5 w-2/3" />
 		</div>
 	{:else if promise.error}
 		<div
-			class="border-destructive/30 bg-destructive/10 flex min-h-96 flex-col items-center justify-center gap-2 rounded-lg border text-center"
+			class="border-destructive/30 bg-destructive/10 flex min-h-80 flex-col items-center justify-center gap-2 rounded-lg border text-center"
 		>
 			<CircleAlert size={32} class="text-destructive" />
 			<p class="text-destructive text-sm font-semibold">{promise.error.message}</p>
 		</div>
 	{:else if promise.current}
-		{@const rows = createRows(promise.current)}
+		{@const rows = createRows(promise.current, selectedThreshold)}
 		{#if rows.length === 0}
-			<div class="border-border bg-secondary/25 flex min-h-96 items-center justify-center rounded-lg border text-center">
+			<div class="border-border bg-secondary/25 flex min-h-80 items-center justify-center rounded-lg border text-center">
 				<p class="text-foreground/60 text-sm font-semibold">No comparison rows available.</p>
 			</div>
 		{:else}
-			{@const mostReliable = rows[0]}
-			{@const mostOperativelyPunctual = rows.reduce((highest, row) =>
-				row.operativePunctualityUnder6 > highest.operativePunctualityUnder6 ? row : highest
-			)}
-			{@const mostCancelled = rows.reduce((highest, row) => (row.cancelled > highest.cancelled ? row : highest))}
 			{@const gapRows = [...rows].sort(
 				(left, right) => right.punctualityGap - left.punctualityGap || left.name.localeCompare(right.name)
 			)}
 
-			{#snippet insightCard(label: string, row: ComparisonRow, value: number, toneClass = "text-foreground")}
-				<div class="border-border bg-secondary/20 rounded-lg border p-3">
-					<p class="text-foreground/50 text-[0.65rem] font-bold tracking-wider uppercase">{label}</p>
-					<p class="mt-1 text-sm font-bold">{row.name}</p>
-					<p class={["mt-0.5 text-xl font-bold tabular-nums", toneClass]}>{formatMetric(value, "rate")}</p>
-					<p class="text-foreground/50 mt-1 text-xs font-semibold">
-						{formatCount(row.plannedStops, true)} planned stops in selected period
-					</p>
-				</div>
+			{#snippet gapTooltip({ context }: { context: ChartState<ComparisonRow> })}
+				<PointTooltip {context} items={gapTooltipItems} header={(row) => row.name} />
 			{/snippet}
 
 			{#snippet comparisonTooltip({ context }: { context: ChartState<ComparisonRow> })}
 				<PointTooltip {context} items={comparisonTooltipItems} header={(row) => row.name} />
 			{/snippet}
 
-			{#if mode === "gap"}
-				{#snippet gapTooltip({ context }: { context: ChartState<ComparisonRow> })}
-					<PointTooltip {context} items={gapTooltipItems} header={(row) => row.name} />
-				{/snippet}
+			<div class="grid gap-4">
+				<section class="grid gap-3" aria-label={`Punctuality gap by transport type for ${selectedThreshold.label}`}>
+					<div class="flex flex-col gap-1">
+						<p class="text-foreground/50 text-[0.65rem] font-bold tracking-wider uppercase">Punctuality gap</p>
+						<p class="text-foreground/60 text-sm font-semibold">
+							Red labels show the percentage-point distance between operative punctuality and customer reliability.
+						</p>
+					</div>
 
-				<div class="grid gap-3">
-					<div class="bg-secondary/20 min-h-80 overflow-hidden rounded-lg p-2">
+					<div class="bg-secondary/20 min-h-72 overflow-hidden rounded-lg p-2">
 						<BarChart
 							data={gapRows}
-							x={["reliableUnder6", "operativePunctualityUnder6"]}
+							x={["customerReliability", "operativePunctuality"]}
 							y="label"
 							orientation="horizontal"
 							xDomain={[0, 1]}
 							yDomain={gapRows.map((row) => row.label)}
 							yReverse={true}
-							height={Math.max(320, gapRows.length * 50 + 80)}
-							padding={{ top: 16, right: 20, bottom: 44, left: 124 }}
+							height={Math.max(300, gapRows.length * 42 + 76)}
+							padding={{ top: 28, right: 86, bottom: 44, left: 124 }}
 							bandPadding={0.32}
 							tooltipContext={{ mode: "band" }}
 							tooltip={gapTooltip}
@@ -250,10 +279,10 @@
 							}}
 						>
 							{#snippet marks()}
-								<Rule stroke="#dc2626" strokeWidth={3} opacity={0.7} />
+								<Rule stroke="#dc2626" strokeWidth={5} opacity={0.82} style="stroke: #dc2626;" />
 								<Points
 									data={gapRows}
-									x="reliableUnder6"
+									x="customerReliability"
 									y="label"
 									r={6}
 									fill="var(--color-accent)"
@@ -262,12 +291,22 @@
 								/>
 								<Points
 									data={gapRows}
-									x="operativePunctualityUnder6"
+									x="operativePunctuality"
 									y="label"
 									r={6}
 									fill="var(--color-foreground)"
 									stroke="var(--color-background)"
 									strokeWidth={2}
+								/>
+								<Labels
+									x="operativePunctuality"
+									y="label"
+									value={(row: ComparisonRow) => formatGapLabel(row.punctualityGap)}
+									fill="#dc2626"
+									fontSize={12}
+									dx={8}
+									textAnchor="start"
+									verticalAnchor="middle"
 								/>
 							{/snippet}
 						</BarChart>
@@ -282,54 +321,61 @@
 							Operative punctuality · served stops only
 						</span>
 						<span class="inline-flex items-center gap-2">
-							<span class="h-0.5 w-4 bg-red-600"></span>
-							Cancellation penalty · percentage-point gap
+							<span class="h-1 w-5 rounded-full bg-red-600"></span>
+							Customer-view gap · percentage points
 						</span>
 					</div>
-				</div>
-			{:else}
-				<div class="grid gap-4">
-					<div class="grid gap-2 sm:grid-cols-3">
-						{#if rows.length === 1}
-							{@render insightCard("Customer reliability < 6 min", rows[0], rows[0].reliableUnder6, "text-accent")}
-							{@render insightCard("Operative punctuality < 6 min", rows[0], rows[0].operativePunctualityUnder6)}
-							{@render insightCard("Cancellation rate", rows[0], rows[0].cancelled, "text-red-600")}
-						{:else}
-							{@render insightCard("Highest customer reliability", mostReliable, mostReliable.reliableUnder6, "text-accent")}
-							{@render insightCard(
-								"Highest operative punctuality",
-								mostOperativelyPunctual,
-								mostOperativelyPunctual.operativePunctualityUnder6
-							)}
-							{@render insightCard("Highest cancellation rate", mostCancelled, mostCancelled.cancelled, "text-red-600")}
-						{/if}
-					</div>
+				</section>
 
-					<div class="bg-secondary/20 min-h-80 overflow-hidden rounded-lg p-2">
-						<BarChart
-							data={rows}
-							x="reliableUnder6"
-							y="label"
-							orientation="horizontal"
-							series={outcomeSeries}
-							seriesLayout="stack"
-							xDomain={[0, 1]}
-							yDomain={rows.map((row) => row.label)}
-							height={Math.max(340, rows.length * 48 + 100)}
-							padding={{ top: 16, right: 20, bottom: 44, left: 124 }}
-							bandPadding={0.28}
-							tooltipContext={{ mode: "band" }}
-							tooltip={comparisonTooltip}
-							legend={{ placement: "bottom", classes: { root: "justify-center pt-2", item: "text-xs font-semibold" } }}
-							props={{ xAxis: { format: "percentRound" } }}
-						/>
-					</div>
-					<p class="text-foreground/50 text-center text-xs font-semibold">
-						Bars use all planned stops (customer view). Operative punctuality uses only served stops and is shown separately in
-						the tooltip and summary.
-					</p>
-				</div>
-			{/if}
+				<Accordion.Root
+					type="single"
+					value={outcomeMixValue}
+					onchange={(value) => (outcomeMixValue = value)}
+					class="border-border/70 bg-secondary/10 overflow-hidden rounded-lg border [&>[role=separator]]:hidden"
+				>
+					<Accordion.Item value={outcomeMixAccordionValue}>
+						<Accordion.Trigger>
+							<span class="flex min-w-0 flex-col gap-0.5">
+								<span class="text-foreground text-sm font-semibold"> Planned-stop outcome mix by transport type </span>
+								<span class="text-foreground/55 text-xs leading-5">
+									Detail view: every planned stop is classified as reliable, delayed or cancelled.
+								</span>
+							</span>
+						</Accordion.Trigger>
+						<Accordion.Content class="border-border/70 border-t px-3 pt-3 pb-0">
+							<section class="grid gap-3" aria-label="Planned stop outcome mix by transport type">
+								<div class="flex flex-col gap-1">
+									<p class="text-foreground/50 text-[0.65rem] font-bold tracking-wider uppercase">Planned stop outcome mix</p>
+									<p class="text-foreground/60 max-w-3xl text-sm font-semibold">
+										Every planned stop is counted once as under 6 minutes, 6 to under 15 minutes, 15 minutes or more, or
+										cancelled.
+									</p>
+								</div>
+
+								<div class="bg-secondary/20 min-h-72 overflow-hidden rounded-lg p-2">
+									<BarChart
+										data={rows}
+										x="reliableUnder6"
+										y="label"
+										orientation="horizontal"
+										series={outcomeSeries}
+										seriesLayout="stack"
+										xDomain={[0, 1]}
+										yDomain={rows.map((row) => row.label)}
+										height={Math.max(300, rows.length * 44 + 88)}
+										padding={{ top: 16, right: 20, bottom: 44, left: 124 }}
+										bandPadding={0.28}
+										tooltipContext={{ mode: "band" }}
+										tooltip={comparisonTooltip}
+										legend={{ placement: "bottom", classes: { root: "justify-center pt-2", item: "text-xs font-semibold" } }}
+										props={{ xAxis: { format: "percentRound" } }}
+									/>
+								</div>
+							</section>
+						</Accordion.Content>
+					</Accordion.Item>
+				</Accordion.Root>
+			</div>
 		{/if}
 	{/if}
 </DashboardPanel>

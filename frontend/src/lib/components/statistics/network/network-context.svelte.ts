@@ -10,11 +10,18 @@ import {
 	type StatisticsGlobalScope
 } from "../shared/statistics-dashboard";
 
-type NetworkHeatmapMetric = "reliability5" | "reliability15" | "cancellation" | "plannedStops";
+type NetworkHeatmapMetric = "reliability5" | "reliability15" | "operative5" | "operative15" | "cancellation" | "plannedStops";
 type NetworkDistributionMode = "histogram" | "cdf";
-type NetworkMapMetric = "reliability5" | "operative5" | "cancellation" | "averagePositiveDelay" | "plannedStops";
+type NetworkMapMetric =
+	| "reliability5"
+	| "reliability15"
+	| "operative5"
+	| "operative15"
+	| "cancellation"
+	| "averagePositiveDelay"
+	| "plannedStops";
 type NetworkPunctualityPerspective = "customer" | "operative";
-type NetworkTransportComparisonMode = "gap" | "outcomes";
+type NetworkTransportComparisonThreshold = "under6" | "under15";
 
 type NetworkMetricScope = {
 	eventTimeSeries: { bucket: StatisticsBucket; perspective: NetworkPunctualityPerspective };
@@ -22,7 +29,7 @@ type NetworkMetricScope = {
 	weekdayHourHeatmap: { metric: NetworkHeatmapMetric };
 	mapHotspots: { metric: NetworkMapMetric };
 	delayDistribution: { mode: NetworkDistributionMode };
-	transportTypeComparison: { mode: NetworkTransportComparisonMode };
+	transportTypeComparison: { threshold: NetworkTransportComparisonThreshold };
 };
 
 type NetworkFilterDraft = BaseStatisticsFilterDraft;
@@ -33,7 +40,7 @@ const defaultNetworkMetricScope = (): NetworkMetricScope => ({
 	weekdayHourHeatmap: { metric: "reliability5" },
 	mapHotspots: { metric: "reliability5" },
 	delayDistribution: { mode: "histogram" },
-	transportTypeComparison: { mode: "gap" }
+	transportTypeComparison: { threshold: "under6" }
 });
 
 const createNetworkFilterDraft = (
@@ -98,8 +105,8 @@ class NetworkStatisticsContext {
 		this.network.delayDistribution.mode = mode;
 	};
 
-	setTransportComparisonMode = (mode: NetworkTransportComparisonMode) => {
-		this.network.transportTypeComparison.mode = mode;
+	setTransportComparisonThreshold = (threshold: NetworkTransportComparisonThreshold) => {
+		this.network.transportTypeComparison.threshold = threshold;
 	};
 }
 
@@ -114,5 +121,5 @@ export {
 	type NetworkHeatmapMetric,
 	type NetworkMapMetric,
 	type NetworkPunctualityPerspective,
-	type NetworkTransportComparisonMode
+	type NetworkTransportComparisonThreshold
 };

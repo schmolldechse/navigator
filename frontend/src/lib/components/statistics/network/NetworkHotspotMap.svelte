@@ -23,8 +23,11 @@
 		stationEvaNumber: number;
 		stationName: string;
 		plannedEvents: number | null;
+		servedEvents: number | null;
 		customerReliability5Rate: number | null;
+		customerReliability15Rate: number | null;
 		operativePunctuality5Rate: number | null;
+		operativePunctuality15Rate: number | null;
 		cancellationRate: number | null;
 		averagePositiveDelayMinutes: number | null;
 	};
@@ -74,12 +77,28 @@
 			getValue: (data) => data.customerReliability5Rate
 		},
 		{
+			value: "reliability15",
+			label: "Customer < 15 min",
+			description: "Share of all planned station stops that were served with less than fifteen minutes delay.",
+			direction: "higher",
+			rangeLabels: ["Lower reliability", "Higher reliability"],
+			getValue: (data) => data.customerReliability15Rate
+		},
+		{
 			value: "operative5",
 			label: "Operative < 6 min",
 			description: "Share of served station stops with less than six minutes delay; cancellations are excluded.",
 			direction: "higher",
 			rangeLabels: ["Lower punctuality", "Higher punctuality"],
 			getValue: (data) => data.operativePunctuality5Rate
+		},
+		{
+			value: "operative15",
+			label: "Operative < 15 min",
+			description: "Share of served station stops with less than fifteen minutes delay; cancellations are excluded.",
+			direction: "higher",
+			rangeLabels: ["Lower punctuality", "Higher punctuality"],
+			getValue: (data) => data.operativePunctuality15Rate
 		},
 		{
 			value: "cancellation",
@@ -125,31 +144,54 @@
 
 	const getProperty = (feature: GeoJsonFeature, key: string): unknown => feature.properties?.[key];
 	const clampRate = (value: number): number => Math.min(1, Math.max(0, value));
+	const deriveOperativeRate = (
+		operativeRate: number | null,
+		customerRate: number | null,
+		servedShare: number | null
+	): number | null => {
+		if (operativeRate !== null) return clampRate(operativeRate);
+		if (customerRate === null || servedShare === null || servedShare <= 0) return null;
+
+		return clampRate(customerRate / servedShare);
+	};
 
 	const createHotspotData = (feature: GeoJsonFeature): HotspotData | null => {
 		const stationEvaNumber = toNumber(getProperty(feature, "stationEvaNumber") as number | string | null | undefined);
 		if (stationEvaNumber === null) return null;
 		const plannedEvents = toNumber(getProperty(feature, "plannedEvents") as number | string | null | undefined);
+		const servedEvents = toNumber(getProperty(feature, "servedEvents") as number | string | null | undefined);
 		const customerReliability5Rate = toNumber(
 			getProperty(feature, "customerReliability5Rate") as number | string | null | undefined
+		);
+		const customerReliability15Rate = toNumber(
+			getProperty(feature, "customerReliability15Rate") as number | string | null | undefined
+		);
+		const operativePunctuality5Rate = toNumber(
+			getProperty(feature, "operativePunctuality5Rate") as number | string | null | undefined
+		);
+		const operativePunctuality15Rate = toNumber(
+			getProperty(feature, "operativePunctuality15Rate") as number | string | null | undefined
 		);
 		const cancellationRate = toNumber(getProperty(feature, "cancellationRate") as number | string | null | undefined);
 		const delayDebtMinutes = toNumber(getProperty(feature, "delayDebtMinutes") as number | string | null | undefined);
 		const servedShare = cancellationRate === null ? null : 1 - clampRate(cancellationRate);
-		const servedEvents = plannedEvents !== null && servedShare !== null ? plannedEvents * servedShare : null;
+		const resolvedServedEvents =
+			servedEvents ?? (plannedEvents !== null && servedShare !== null ? plannedEvents * servedShare : null);
 
 		return {
 			stationEvaNumber,
 			stationName: String(getProperty(feature, "stationName") ?? "Unnamed station"),
 			plannedEvents,
+			servedEvents: resolvedServedEvents,
 			customerReliability5Rate,
-			operativePunctuality5Rate:
-				customerReliability5Rate !== null && servedShare !== null && servedShare > 0
-					? clampRate(customerReliability5Rate / servedShare)
-					: null,
+			customerReliability15Rate,
+			operativePunctuality5Rate: deriveOperativeRate(operativePunctuality5Rate, customerReliability5Rate, servedShare),
+			operativePunctuality15Rate: deriveOperativeRate(operativePunctuality15Rate, customerReliability15Rate, servedShare),
 			cancellationRate,
 			averagePositiveDelayMinutes:
-				delayDebtMinutes !== null && servedEvents !== null && servedEvents > 0 ? delayDebtMinutes / servedEvents : null
+				delayDebtMinutes !== null && resolvedServedEvents !== null && resolvedServedEvents > 0
+					? delayDebtMinutes / resolvedServedEvents
+					: null
 		};
 	};
 
@@ -162,7 +204,13 @@
 	};
 
 	const formatMapValue = (value: number | null, option: MapMetricOption, compact = false): string => {
-		if (option.value === "reliability5" || option.value === "operative5" || option.value === "cancellation")
+		if (
+			option.value === "reliability5" ||
+			option.value === "reliability15" ||
+			option.value === "operative5" ||
+			option.value === "operative15" ||
+			option.value === "cancellation"
+		)
 			return formatMetric(value, "rate");
 		if (option.value === "averagePositiveDelay") return formatMetric(value, "minutes", compact);
 		return formatCount(value, compact);

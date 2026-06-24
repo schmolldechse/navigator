@@ -64,6 +64,18 @@
 			getValue: (cell) => toNumber(cell.eventMetrics.customerReliability15Rate)
 		},
 		{
+			value: "operative5",
+			label: "Operative < 6 min",
+			format: "rate",
+			getValue: (cell) => toNumber(cell.eventMetrics.operativePunctuality5Rate)
+		},
+		{
+			value: "operative15",
+			label: "Operative < 15 min",
+			format: "rate",
+			getValue: (cell) => toNumber(cell.eventMetrics.operativePunctuality15Rate)
+		},
+		{
 			value: "cancellation",
 			label: "Cancellation rate",
 			format: "rate",
@@ -101,7 +113,12 @@
 
 	const getColor = (value: number | null, option: HeatmapMetricOption, values: number[]): string => {
 		if (value === null) return "var(--color-secondary)";
-		if (option.value === "reliability5" || option.value === "reliability15") {
+		if (
+			option.value === "reliability5" ||
+			option.value === "reliability15" ||
+			option.value === "operative5" ||
+			option.value === "operative15"
+		) {
 			if (value >= 0.9) return reliabilityColors[3];
 			if (value >= 0.8) return reliabilityColors[2];
 			if (value >= 0.7) return reliabilityColors[1];
@@ -172,7 +189,7 @@
 
 <DashboardPanel
 	title="Weekday and hour"
-	description="Customer reliability, cancellations and planned stop volume by local weekday and hour."
+	description="Customer reliability, operative punctuality, cancellations and planned stop volume by local weekday and hour."
 	icon={CalendarDays}
 >
 	{#snippet actions()}
