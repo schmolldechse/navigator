@@ -290,6 +290,7 @@
 		/>
 		<NetworkDelayDistributionChart
 			promise={delayDistribution}
+			{eventSummary}
 			mode={statistics.network.delayDistribution.mode}
 			onmodechange={statistics.setDistributionMode}
 		/>

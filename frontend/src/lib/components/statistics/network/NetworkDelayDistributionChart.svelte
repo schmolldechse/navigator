@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StatisticsMetricResponse } from "@lib/api";
+	import type { EventMetrics, StatisticsMetricResponse, StatisticsMetricResultEventSummaryResult } from "@lib/api";
 	import PointTooltip, { type PointTooltipItem } from "@lib/components/layerchart/tooltips/PointTooltip.svelte";
 	import Skeleton from "@lib/components/ui/Skeleton.svelte";
 	import type { RemoteQuery } from "@sveltejs/kit";
@@ -14,6 +14,7 @@
 
 	type Props = {
 		promise: RemoteQuery<StatisticsMetricResponse>;
+		eventSummary: RemoteQuery<StatisticsMetricResponse>;
 		mode: NetworkDistributionMode;
 		onmodechange: (mode: NetworkDistributionMode) => void;
 	};
@@ -44,13 +45,30 @@
 		sharePercent: number;
 		cumulativeShare: number;
 		cumulativePercent: number;
+		customerCumulativePercent: number | null;
 		cumulativeLabel: string;
 	};
 
-	let { promise, mode, onmodechange }: Props = $props();
+	let { promise, eventSummary, mode, onmodechange }: Props = $props();
 
 	const getResult = (response: StatisticsMetricResponse): DistributionResult | null =>
 		"summary" in response.result && "bins" in response.result ? (response.result as unknown as DistributionResult) : null;
+
+	const getEventMetrics = (response: StatisticsMetricResponse | undefined): EventMetrics | null => {
+		if (!response || !("metrics" in response.result)) return null;
+
+		return (response.result as StatisticsMetricResultEventSummaryResult).metrics;
+	};
+
+	const clampRate = (value: number): number => Math.min(1, Math.max(0, value));
+
+	const getServedShare = (metrics: EventMetrics | null): number | null => {
+		const plannedEvents = toNumber(metrics?.plannedEvents);
+		const servedEvents = toNumber(metrics?.servedEvents);
+		if (plannedEvents === null || servedEvents === null || plannedEvents <= 0) return null;
+
+		return clampRate(servedEvents / plannedEvents);
+	};
 
 	const formatBound = (seconds: number): string => {
 		if (seconds === Number.MAX_SAFE_INTEGER || seconds >= 2_147_483_647) return "240 min+";
@@ -66,7 +84,7 @@
 		return `${formatBound(lower)} to ${formatBound(upper)}`;
 	};
 
-	const createRows = (result: DistributionResult): DistributionRow[] => {
+	const createRows = (result: DistributionResult, servedShare: number | null): DistributionRow[] => {
 		const binTotal = result.bins.reduce((total, bin) => total + (toNumber(bin.count) ?? 0), 0);
 		const sampleCount = toNumber(result.summary.sampleCount) ?? binTotal;
 
@@ -87,7 +105,8 @@
 					sharePercent: sampleCount > 0 ? (count / sampleCount) * 100 : 0,
 					cumulativeShare,
 					cumulativePercent: cumulativeShare * 100,
-					cumulativeLabel: isOpenEnded ? `${formatBound(lower)} or more · final share` : `At or below ${formatBound(upper)}`
+					customerCumulativePercent: servedShare === null ? null : cumulativeShare * servedShare * 100,
+					cumulativeLabel: isOpenEnded ? `${formatBound(lower)} or more · final share` : `Below ${formatBound(upper)}`
 				};
 			})
 			.filter((row) => row.count > 0 || row.cumulativeShare > 0)
@@ -112,18 +131,29 @@
 		}
 	];
 
-	const cumulativeTooltipItems: PointTooltipItem<DistributionRow>[] = [
+	const createCumulativeTooltipItems = (hasCustomerCurve: boolean): PointTooltipItem<DistributionRow>[] => [
+		...(hasCustomerCurve
+			? [
+					{
+						key: "customerCumulativePercent",
+						label: "Customer view · all planned stops",
+						value: (row: DistributionRow) =>
+							row.customerCumulativePercent === null ? "-" : formatPercent(row.customerCumulativePercent),
+						color: "var(--color-accent)"
+					}
+				]
+			: []),
 		{
 			key: "cumulativePercent",
-			label: "Served by threshold",
+			label: "Operative · served stops only",
 			value: (row) => formatPercent(row.cumulativePercent),
-			color: "var(--color-accent)"
+			color: "var(--color-foreground)"
 		},
 		{
 			key: "sharePercent",
-			label: "Share in interval",
+			label: "Interval share of served stops",
 			value: (row) => formatPercent(row.sharePercent),
-			color: "var(--color-foreground)"
+			color: "var(--color-muted-foreground)"
 		},
 		{
 			key: "count",
@@ -131,11 +161,27 @@
 			value: (row) => formatCount(row.count, true)
 		}
 	];
+
+	const createCumulativeSeries = (hasCustomerCurve: boolean) =>
+		hasCustomerCurve
+			? [
+					{
+						key: "customerCumulativePercent",
+						label: "Customer view · all planned stops",
+						color: "var(--color-accent)"
+					},
+					{
+						key: "cumulativePercent",
+						label: "Operative · served stops only",
+						color: "var(--color-foreground)"
+					}
+				]
+			: [{ key: "cumulativePercent", label: "Operative · served stops only", color: "var(--color-accent)" }];
 </script>
 
 <DashboardPanel
 	title="Delay distribution"
-	description="Delay severity when a planned stop is served; cancellations are excluded here and remain reflected in customer reliability."
+	description="Delay severity for served stops. In cumulative view, the customer-view curve scales this by the share of planned stops that actually ran."
 	icon={BarChartIcon}
 >
 	{#snippet actions()}
@@ -160,7 +206,9 @@
 				<p class="text-foreground/60 text-sm font-semibold">No distribution result available.</p>
 			</div>
 		{:else}
-			{@const rows = createRows(result)}
+			{@const eventMetrics = getEventMetrics(eventSummary.current)}
+			{@const servedShare = getServedShare(eventMetrics)}
+			{@const rows = createRows(result, servedShare)}
 			{#if rows.length === 0}
 				<div class="border-border bg-secondary/25 flex min-h-80 items-center justify-center rounded-lg border text-center">
 					<p class="text-foreground/60 text-sm font-semibold">No delay samples available.</p>
@@ -168,7 +216,11 @@
 			{:else}
 				<div class="grid gap-3">
 					<div class="text-foreground/60 flex flex-wrap gap-x-4 gap-y-1 text-xs font-semibold">
-						<span>{formatCount(result.summary.sampleCount, true)} served stops</span>
+						<span>{formatCount(result.summary.sampleCount, true)} delay samples</span>
+						{#if eventMetrics}
+							<span>{formatCount(eventMetrics.plannedEvents, true)} planned stops</span>
+							<span>{formatCount(eventMetrics.servedEvents, true)} served stops</span>
+						{/if}
 						<span>Median {formatMetric(result.summary.medianDelaySeconds, "seconds")}</span>
 						<span>P95 {formatMetric(result.summary.p95DelaySeconds, "seconds")}</span>
 					</div>
@@ -197,6 +249,10 @@
 									}}
 								/>
 							{:else}
+								{@const hasCustomerCurve = servedShare !== null}
+								{@const cumulativeTooltipItems = createCumulativeTooltipItems(hasCustomerCurve)}
+								{@const cumulativeSeries = createCumulativeSeries(hasCustomerCurve)}
+
 								{#snippet cumulativeTooltip({ context }: { context: ChartState<DistributionRow> })}
 									<PointTooltip {context} items={cumulativeTooltipItems} header={(row) => row.cumulativeLabel} />
 								{/snippet}
@@ -204,14 +260,20 @@
 								<LineChart
 									data={rows}
 									x="upperMinutes"
-									y="cumulativePercent"
+									series={cumulativeSeries}
 									yDomain={[0, 100]}
 									height={300}
 									padding={{ top: 14, right: 10, bottom: 34, left: 46 }}
 									tooltipContext={{ mode: "bisect-x" }}
 									tooltip={cumulativeTooltip}
-									series={[{ key: "cumulativePercent", label: "Cumulative share", color: "var(--color-accent)" }]}
-									legend={false}
+									legend={{
+										placement: "bottom",
+										classes: {
+											root: "w-full px-2 pb-1",
+											items: "flex-wrap justify-center gap-x-4 gap-y-1",
+											item: "text-xs font-semibold"
+										}
+									}}
 									props={{
 										spline: { strokeWidth: 3, curve: curveMonotoneX },
 										xAxis: { format: formatMinuteTick },
