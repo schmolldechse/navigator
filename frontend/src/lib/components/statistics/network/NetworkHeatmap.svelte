@@ -5,7 +5,7 @@
 	import type { RemoteQuery } from "@sveltejs/kit";
 	import CalendarDays from "@lucide/svelte/icons/calendar-days";
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
-	import { Axis, Cell, Chart, Layer, type ChartState } from "layerchart";
+	import { Axis, Cell, Chart, type ChartState } from "layerchart";
 	import DashboardPanel from "../shared/DashboardPanel.svelte";
 	import MetricOptionControl from "../shared/options/MetricOptionControl.svelte";
 	import type { NetworkHeatmapMetric } from "./network-context.svelte";
@@ -227,19 +227,26 @@
 					height={chartHeight}
 					padding={{ top: 12, right: 8, bottom: 32, left: 42 }}
 					tooltipContext={{ mode: "bounds" }}
+					grid={false}
+					rule={false}
+					highlight={false}
 				>
-					{#snippet children({ context }: { context: ChartState<HeatmapPoint> })}
-						<Layer type="svg">
-							<Axis placement="left" tickMarks={false} rule={false} tickLabelProps={{ class: "text-xs font-semibold" }} />
-							<Axis
-								placement="bottom"
-								ticks={hourTicks}
-								tickMarks={false}
-								rule={false}
-								tickLabelProps={{ class: "text-[10px] font-semibold" }}
-							/>
-							<Cell x="hour" y="weekday" fill={(point: HeatmapPoint) => point.color} insets={{ x: 1.5, y: 1.5 }} corners={4} />
-						</Layer>
+					{#snippet axis()}
+						<Axis placement="left" tickMarks={false} rule={false} tickLabelProps={{ class: "text-xs font-semibold" }} />
+						<Axis
+							placement="bottom"
+							ticks={hourTicks}
+							tickMarks={false}
+							rule={false}
+							tickLabelProps={{ class: "text-[10px] font-semibold" }}
+						/>
+					{/snippet}
+
+					{#snippet marks()}
+						<Cell x="hour" y="weekday" fill={(point: HeatmapPoint) => point.color} insets={{ x: 1.5, y: 1.5 }} corners={4} />
+					{/snippet}
+
+					{#snippet tooltip({ context }: { context: ChartState<HeatmapPoint> })}
 						<PointTooltip
 							{context}
 							items={tooltipItems}

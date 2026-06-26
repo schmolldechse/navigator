@@ -228,10 +228,6 @@
 					<div class="bg-secondary/20 min-h-64 rounded-lg p-1 sm:min-h-72 sm:p-2">
 						<div class="min-w-0">
 							{#if mode === "histogram"}
-								{#snippet histogramTooltip({ context }: { context: ChartState<DistributionRow> })}
-									<PointTooltip {context} items={histogramTooltipItems} header={(row) => row.label} />
-								{/snippet}
-
 								<BarChart
 									data={rows}
 									x="label"
@@ -240,22 +236,21 @@
 									height={310}
 									padding={{ top: 14, right: 10, bottom: 90, left: 46 }}
 									tooltipContext={{ mode: "band" }}
-									tooltip={histogramTooltip}
 									series={[{ key: "sharePercent", label: "Share of served stops", color: "var(--color-accent)" }]}
 									legend={false}
 									props={{
 										xAxis: { tickLabelProps: { rotate: -45, textAnchor: "end", class: "text-[10px]" } },
 										yAxis: { format: (value: unknown) => `${Number(value).toFixed(0)}%` }
 									}}
-								/>
+								>
+									{#snippet tooltip({ context }: { context: ChartState<DistributionRow> })}
+										<PointTooltip {context} items={histogramTooltipItems} header={(row) => row.label} />
+									{/snippet}
+								</BarChart>
 							{:else}
 								{@const hasCustomerCurve = servedShare !== null}
 								{@const cumulativeTooltipItems = createCumulativeTooltipItems(hasCustomerCurve)}
 								{@const cumulativeSeries = createCumulativeSeries(hasCustomerCurve)}
-
-								{#snippet cumulativeTooltip({ context }: { context: ChartState<DistributionRow> })}
-									<PointTooltip {context} items={cumulativeTooltipItems} header={(row) => row.cumulativeLabel} />
-								{/snippet}
 
 								<LineChart
 									data={rows}
@@ -265,7 +260,6 @@
 									height={300}
 									padding={{ top: 14, right: 10, bottom: 34, left: 46 }}
 									tooltipContext={{ mode: "bisect-x" }}
-									tooltip={cumulativeTooltip}
 									legend={{
 										placement: "bottom",
 										classes: {
@@ -279,7 +273,11 @@
 										xAxis: { format: formatMinuteTick },
 										yAxis: { format: (value: unknown) => `${Number(value).toFixed(0)}%` }
 									}}
-								/>
+								>
+									{#snippet tooltip({ context }: { context: ChartState<DistributionRow> })}
+										<PointTooltip {context} items={cumulativeTooltipItems} header={(row) => row.cumulativeLabel} />
+									{/snippet}
+								</LineChart>
 							{/if}
 						</div>
 					</div>

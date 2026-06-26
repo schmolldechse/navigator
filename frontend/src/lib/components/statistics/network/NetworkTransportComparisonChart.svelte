@@ -240,14 +240,6 @@
 				(left, right) => right.punctualityGap - left.punctualityGap || left.name.localeCompare(right.name)
 			)}
 
-			{#snippet gapTooltip({ context }: { context: ChartState<ComparisonRow> })}
-				<PointTooltip {context} items={gapTooltipItems} header={(row) => row.name} />
-			{/snippet}
-
-			{#snippet comparisonTooltip({ context }: { context: ChartState<ComparisonRow> })}
-				<PointTooltip {context} items={comparisonTooltipItems} header={(row) => row.name} />
-			{/snippet}
-
 			<div class="grid gap-4">
 				<section class="grid gap-3" aria-label={`Punctuality gap by transport type for ${selectedThreshold.label}`}>
 					<div class="flex flex-col gap-1">
@@ -270,7 +262,6 @@
 							padding={{ top: 28, right: 86, bottom: 44, left: 124 }}
 							bandPadding={0.32}
 							tooltipContext={{ mode: "band" }}
-							tooltip={gapTooltip}
 							grid={{ x: false, y: { opacity: 0.18 }, bandAlign: "between" }}
 							rule={false}
 							props={{
@@ -308,6 +299,10 @@
 									textAnchor="start"
 									verticalAnchor="middle"
 								/>
+							{/snippet}
+
+							{#snippet tooltip({ context }: { context: ChartState<ComparisonRow> })}
+								<PointTooltip {context} items={gapTooltipItems} header={(row) => row.name} />
 							{/snippet}
 						</BarChart>
 					</div>
@@ -366,10 +361,13 @@
 										padding={{ top: 16, right: 20, bottom: 44, left: 124 }}
 										bandPadding={0.28}
 										tooltipContext={{ mode: "band" }}
-										tooltip={comparisonTooltip}
 										legend={{ placement: "bottom", classes: { root: "justify-center pt-2", item: "text-xs font-semibold" } }}
 										props={{ xAxis: { format: "percentRound" } }}
-									/>
+									>
+										{#snippet tooltip({ context }: { context: ChartState<ComparisonRow> })}
+											<PointTooltip {context} items={comparisonTooltipItems} header={(row) => row.name} />
+										{/snippet}
+									</BarChart>
 								</div>
 							</section>
 						</Accordion.Content>

@@ -132,10 +132,6 @@
 					{@const showLegend = showPanelLegend(panel)}
 					{@const showXAxis = panel.showXAxis ?? true}
 
-					{#snippet trendTooltip({ context }: { context: ChartState<TrendRow> })}
-						<SeriesTooltip {context} items={tooltipItems} header={(data) => formatStatisticsBucketLabel(data.date, bucket)} />
-					{/snippet}
-
 					<div class="bg-secondary/20 overflow-hidden rounded-lg p-2">
 						{#if panel.label || panel.description}
 							<div class="px-2 pt-1">
@@ -161,7 +157,6 @@
 							axis={showXAxis ? true : "y"}
 							padding={panelPadding(panel)}
 							tooltipContext={{ mode: "bisect-x" }}
-							tooltip={trendTooltip}
 							legend={showLegend
 								? {
 										placement: "bottom",
@@ -175,7 +170,15 @@
 							props={{
 								spline: { strokeWidth: 3 }
 							}}
-						/>
+						>
+							{#snippet tooltip({ context }: { context: ChartState<TrendRow> })}
+								<SeriesTooltip
+									{context}
+									items={tooltipItems}
+									header={(data) => formatStatisticsBucketLabel(data.date, bucket)}
+								/>
+							{/snippet}
+						</LineChart>
 					</div>
 				{/each}
 			</div>
