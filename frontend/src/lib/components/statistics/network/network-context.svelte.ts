@@ -9,9 +9,12 @@ import {
 	type StatisticsEventScope,
 	type StatisticsGlobalScope
 } from "../shared/statistics-dashboard";
+import type { MetricPerspective } from "../shared/options/MetricPerspectiveControl.svelte";
+import type { MetricThreshold } from "../shared/options/MetricThresholdControl.svelte";
 
 type NetworkHeatmapMetric = "reliability5" | "reliability15" | "operative5" | "operative15" | "cancellation" | "plannedStops";
 type NetworkDistributionMode = "histogram" | "cdf";
+type NetworkHourlyProfileDayGroup = "all" | "weekday" | "weekend";
 type NetworkMapMetric =
 	| "reliability5"
 	| "reliability15"
@@ -20,13 +23,18 @@ type NetworkMapMetric =
 	| "cancellation"
 	| "averagePositiveDelay"
 	| "plannedStops";
-type NetworkPunctualityPerspective = "customer" | "operative";
-type NetworkTransportComparisonThreshold = "under6" | "under15";
+type NetworkPunctualityPerspective = MetricPerspective;
+type NetworkTransportComparisonThreshold = MetricThreshold;
 
 type NetworkMetricScope = {
 	eventTimeSeries: { bucket: StatisticsBucket; perspective: NetworkPunctualityPerspective };
 	journeyTimeSeries: { bucket: StatisticsBucket };
 	weekdayHourHeatmap: { metric: NetworkHeatmapMetric };
+	hourlyProfile: {
+		dayGroup: NetworkHourlyProfileDayGroup;
+		perspective: NetworkPunctualityPerspective;
+		threshold: NetworkTransportComparisonThreshold;
+	};
 	mapHotspots: { metric: NetworkMapMetric };
 	delayDistribution: { mode: NetworkDistributionMode };
 	transportTypeComparison: { threshold: NetworkTransportComparisonThreshold };
@@ -38,6 +46,7 @@ const defaultNetworkMetricScope = (): NetworkMetricScope => ({
 	eventTimeSeries: { bucket: StatisticsBucket.DAY, perspective: "customer" },
 	journeyTimeSeries: { bucket: StatisticsBucket.DAY },
 	weekdayHourHeatmap: { metric: "reliability5" },
+	hourlyProfile: { dayGroup: "all", perspective: "customer", threshold: "under6" },
 	mapHotspots: { metric: "reliability5" },
 	delayDistribution: { mode: "histogram" },
 	transportTypeComparison: { threshold: "under6" }
@@ -97,6 +106,18 @@ class NetworkStatisticsContext {
 		this.network.weekdayHourHeatmap.metric = metric;
 	};
 
+	setHourlyProfileDayGroup = (dayGroup: NetworkHourlyProfileDayGroup) => {
+		this.network.hourlyProfile.dayGroup = dayGroup;
+	};
+
+	setHourlyProfilePerspective = (perspective: NetworkPunctualityPerspective) => {
+		this.network.hourlyProfile.perspective = perspective;
+	};
+
+	setHourlyProfileThreshold = (threshold: NetworkTransportComparisonThreshold) => {
+		this.network.hourlyProfile.threshold = threshold;
+	};
+
 	setMapMetric = (metric: NetworkMapMetric) => {
 		this.network.mapHotspots.metric = metric;
 	};
@@ -119,6 +140,7 @@ export {
 	type NetworkDistributionMode,
 	type NetworkFilterDraft,
 	type NetworkHeatmapMetric,
+	type NetworkHourlyProfileDayGroup,
 	type NetworkMapMetric,
 	type NetworkPunctualityPerspective,
 	type NetworkTransportComparisonThreshold

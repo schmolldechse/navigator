@@ -8,8 +8,8 @@
 	import GitCompare from "@lucide/svelte/icons/git-compare";
 	import { BarChart, Labels, Points, Rule, type ChartState } from "layerchart";
 	import DashboardPanel from "../shared/DashboardPanel.svelte";
+	import MetricThresholdControl from "../shared/options/MetricThresholdControl.svelte";
 	import type { NetworkTransportComparisonThreshold } from "./network-context.svelte";
-	import TransportComparisonThresholdControl from "./options/TransportComparisonThresholdControl.svelte";
 	import {
 		createReliabilityOutcomeShares,
 		formatCount,
@@ -215,7 +215,7 @@
 	icon={GitCompare}
 >
 	{#snippet actions()}
-		<TransportComparisonThresholdControl value={threshold} onchange={onthresholdchange} />
+		<MetricThresholdControl title="Gap threshold" value={threshold} onchange={onthresholdchange} />
 	{/snippet}
 	{#if promise.loading}
 		<div class="flex min-h-80 flex-col gap-y-3">

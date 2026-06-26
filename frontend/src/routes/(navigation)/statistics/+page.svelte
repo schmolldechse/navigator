@@ -4,6 +4,7 @@
 	import NetworkDelayDistributionChart from "@lib/components/statistics/network/NetworkDelayDistributionChart.svelte";
 	import NetworkFilterPanel from "@lib/components/statistics/network/NetworkFilterPanel.svelte";
 	import NetworkHeatmap from "@lib/components/statistics/network/NetworkHeatmap.svelte";
+	import NetworkHourlyProfileChart from "@lib/components/statistics/network/NetworkHourlyProfileChart.svelte";
 	import NetworkHotspotMap from "@lib/components/statistics/network/NetworkHotspotMap.svelte";
 	import NetworkKpiGrid from "@lib/components/statistics/network/NetworkKpiGrid.svelte";
 	import NetworkReliabilityBalanceChart from "@lib/components/statistics/network/NetworkReliabilityBalanceChart.svelte";
@@ -295,6 +296,16 @@
 			onmodechange={statistics.setDistributionMode}
 		/>
 	</section>
+
+	<NetworkHourlyProfileChart
+		promise={weekdayHourHeatmap}
+		dayGroup={statistics.network.hourlyProfile.dayGroup}
+		ondaygroupchange={statistics.setHourlyProfileDayGroup}
+		perspective={statistics.network.hourlyProfile.perspective}
+		onperspectivechange={statistics.setHourlyProfilePerspective}
+		threshold={statistics.network.hourlyProfile.threshold}
+		onthresholdchange={statistics.setHourlyProfileThreshold}
+	/>
 
 	<NetworkTransportComparisonChart
 		promise={transportTypeComparison}
