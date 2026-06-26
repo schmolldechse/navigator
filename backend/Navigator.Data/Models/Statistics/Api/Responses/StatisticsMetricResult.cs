@@ -7,6 +7,7 @@ namespace Navigator.Data.Models.Statistics.Api;
 [JsonDerivedType(typeof(JourneySummaryResult), "JOURNEY_SUMMARY")]
 [JsonDerivedType(typeof(NetworkEventTimeSeriesResult), "NETWORK_EVENT_TIME_SERIES")]
 [JsonDerivedType(typeof(NetworkJourneyTimeSeriesResult), "NETWORK_JOURNEY_TIME_SERIES")]
+[JsonDerivedType(typeof(NetworkJourneyOutcomeTimeSeriesResult), "NETWORK_JOURNEY_OUTCOME_TIME_SERIES")]
 [JsonDerivedType(typeof(EventWeekdayHourHeatmapResult), "EVENT_WEEKDAY_HOUR_HEATMAP")]
 [JsonDerivedType(typeof(JourneyWeekdayHourHeatmapResult), "JOURNEY_WEEKDAY_HOUR_HEATMAP")]
 [JsonDerivedType(typeof(TransportTypeComparisonResult), "TRANSPORT_TYPE_COMPARISON")]

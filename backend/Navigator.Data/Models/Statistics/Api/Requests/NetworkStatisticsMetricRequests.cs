@@ -11,6 +11,7 @@ namespace Navigator.Data.Models.Statistics.Api;
 [JsonDerivedType(typeof(NetworkJourneySummaryRequest), "JOURNEY_SUMMARY")]
 [JsonDerivedType(typeof(NetworkEventTimeSeriesRequest), "EVENT_TIME_SERIES")]
 [JsonDerivedType(typeof(NetworkJourneyTimeSeriesRequest), "JOURNEY_TIME_SERIES")]
+[JsonDerivedType(typeof(NetworkJourneyOutcomeTimeSeriesRequest), "JOURNEY_OUTCOME_TIME_SERIES")]
 [JsonDerivedType(typeof(NetworkWeekdayHourHeatmapRequest), "WEEKDAY_HOUR_HEATMAP")]
 [JsonDerivedType(typeof(NetworkTransportTypeComparisonRequest), "TRANSPORT_TYPE_COMPARISON")]
 [JsonDerivedType(typeof(NetworkStationRankingRequest), "STATION_RANKING")]
@@ -92,6 +93,16 @@ public sealed class NetworkJourneyTimeSeriesRequest : NetworkJourneyFilterReques
 
     [JsonPropertyName("bucket")]
     [Description("Aggregation bucket used for returned time series.")]
+    public StatisticsBucket Bucket { get; init; } = StatisticsBucket.Day;
+}
+
+public sealed class NetworkJourneyOutcomeTimeSeriesRequest : NetworkJourneyFilterRequest, IHasBucket
+{
+    [JsonIgnore]
+    public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.JourneyOutcomeTimeSeries;
+
+    [JsonPropertyName("bucket")]
+    [Description("Aggregation bucket used for returned disjoint journey outcome time series.")]
     public StatisticsBucket Bucket { get; init; } = StatisticsBucket.Day;
 }
 

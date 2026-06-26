@@ -21,6 +21,8 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
                 StatisticsMetricBuilderHelpers.AggregateJourneyRows(await LoadJourneyRowsAsync(request, cancellationToken)))),
             NetworkEventTimeSeriesRequest => new NetworkEventTimeSeriesResult(BuildEventTimeSeries(await LoadEventRowsAsync(request, cancellationToken), request)),
             NetworkJourneyTimeSeriesRequest => new NetworkJourneyTimeSeriesResult(BuildJourneyTimeSeries(await LoadJourneyRowsAsync(request, cancellationToken), request)),
+            NetworkJourneyOutcomeTimeSeriesRequest journeyOutcomeTimeSeriesRequest =>
+                new NetworkJourneyOutcomeTimeSeriesResult(await BuildJourneyOutcomeTimeSeriesAsync(journeyOutcomeTimeSeriesRequest, cancellationToken)),
             NetworkWeekdayHourHeatmapRequest => new EventWeekdayHourHeatmapResult(BuildWeekdayHourHeatmap(await LoadEventRowsAsync(request, cancellationToken), request)),
             NetworkTransportTypeComparisonRequest => new TransportTypeComparisonResult(await BuildTransportTypeComparisonAsync(request, cancellationToken)),
             NetworkStationRankingRequest => await BuildStationRankingAsync(request, cancellationToken),
@@ -123,6 +125,56 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
             group.Key,
             StatisticsMetricBuilderHelpers.ToJourneyMetrics(StatisticsMetricBuilderHelpers.AggregateJourneyRows(group))))
         .ToList();
+
+    private async Task<IReadOnlyList<JourneyOutcomeTimeSeriesPoint>> BuildJourneyOutcomeTimeSeriesAsync(
+        NetworkJourneyOutcomeTimeSeriesRequest request,
+        CancellationToken cancellationToken
+    )
+    {
+        var administrationIds = await StatisticsMetricBuilderHelpers.ResolveAdministrationIdsAsync(dataContext, request, cancellationToken);
+        var transportTypes = StatisticsMetricBuilderHelpers.TransportTypes(request);
+        var fromUtc = StatisticsMetricBuilderHelpers.UtcFrom(request);
+        var toUtc = StatisticsMetricBuilderHelpers.UtcTo(request);
+        var includeReplacement = StatisticsMetricBuilderHelpers.IncludeReplacement(request);
+
+        var rows = await dataContext.JourneyQualityFacts
+            .AsNoTracking()
+            .Where(row => row.BucketHour >= fromUtc && row.BucketHour < toUtc)
+            .Where(row => transportTypes.Length == 0 || transportTypes.Contains(row.TransportType))
+            .Where(row => includeReplacement || !row.IsReplacement)
+            .Where(row => administrationIds.Length == 0 || administrationIds.Contains(row.AdministrationId))
+            .Select(row => new
+            {
+                row.BucketHour,
+                row.FullyCancelled,
+                row.DestinationNotReached,
+                row.PartiallyCancelled
+            })
+            .ToListAsync(cancellationToken);
+
+        return rows
+            .GroupBy(row => StatisticsMetricBuilderHelpers.BucketStart(row.BucketHour, request, request.Bucket))
+            .OrderBy(group => group.Key)
+            .Select(group =>
+            {
+                var planned = group.LongCount();
+                var fullyCancelled = group.LongCount(row => row.FullyCancelled);
+                var destinationNotReached = group.LongCount(row => !row.FullyCancelled && row.DestinationNotReached);
+                var partiallyCancelledDestinationReached = group.LongCount(row =>
+                    !row.FullyCancelled && !row.DestinationNotReached && row.PartiallyCancelled);
+                var completed = planned - fullyCancelled - destinationNotReached - partiallyCancelledDestinationReached;
+
+                return new JourneyOutcomeTimeSeriesPoint(
+                    group.Key,
+                    new JourneyOutcomeMetrics(
+                        planned,
+                        completed,
+                        partiallyCancelledDestinationReached,
+                        destinationNotReached,
+                        fullyCancelled));
+            })
+            .ToList();
+    }
 
     private static IReadOnlyList<EventHeatmapCell> BuildWeekdayHourHeatmap(
         IReadOnlyCollection<IEventQualityHourly> rows,

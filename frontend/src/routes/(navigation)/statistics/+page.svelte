@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { EventTimeSeriesPoint, JourneyTimeSeriesPoint } from "@lib/api";
+	import type { EventTimeSeriesPoint } from "@lib/api";
 	import * as Accordion from "@lib/components/ui/accordion";
 	import NetworkDelayDistributionChart from "@lib/components/statistics/network/NetworkDelayDistributionChart.svelte";
 	import NetworkFilterPanel from "@lib/components/statistics/network/NetworkFilterPanel.svelte";
@@ -7,6 +7,7 @@
 	import NetworkHourlyProfileChart from "@lib/components/statistics/network/NetworkHourlyProfileChart.svelte";
 	import NetworkHotspotMap from "@lib/components/statistics/network/NetworkHotspotMap.svelte";
 	import NetworkKpiGrid from "@lib/components/statistics/network/NetworkKpiGrid.svelte";
+	import NetworkJourneyOutcomeTimelineChart from "@lib/components/statistics/network/NetworkJourneyOutcomeTimelineChart.svelte";
 	import NetworkReliabilityBalanceChart from "@lib/components/statistics/network/NetworkReliabilityBalanceChart.svelte";
 	import NetworkTransportComparisonChart from "@lib/components/statistics/network/NetworkTransportComparisonChart.svelte";
 	import NetworkTrendChart, {
@@ -21,8 +22,8 @@
 		createNetworkEventDelayDistributionRequest,
 		createNetworkEventSummaryRequest,
 		createNetworkEventTimeSeriesRequest,
+		createNetworkJourneyOutcomeTimeSeriesRequest,
 		createNetworkJourneySummaryRequest,
-		createNetworkJourneyTimeSeriesRequest,
 		createNetworkMapHotspotsRequest,
 		createNetworkTransportTypeComparisonRequest,
 		createNetworkWeekdayHourHeatmapRequest
@@ -86,9 +87,9 @@
 			request: createNetworkEventTimeSeriesRequest(statistics.global, statistics.event, statistics.network.eventTimeSeries)
 		})
 	);
-	const journeyTimeSeries = $derived(
+	const journeyOutcomeTimeSeries = $derived(
 		loadNetworkMetric({
-			request: createNetworkJourneyTimeSeriesRequest(statistics.global, statistics.network.journeyTimeSeries)
+			request: createNetworkJourneyOutcomeTimeSeriesRequest(statistics.global, statistics.network.journeyTimeSeries)
 		})
 	);
 	const weekdayHourHeatmap = $derived(
@@ -158,61 +159,6 @@
 			height: 310
 		}
 	]);
-
-	const journeyCompletionMetrics: TrendMetricDefinition[] = [
-		{
-			key: "journeyCompletionRate",
-			label: "Reached destination",
-			color: "var(--color-accent)",
-			format: "percent",
-			value: (item) => rateToPercent((item as JourneyTimeSeriesPoint).journeyMetrics.journeyCompletionRate)
-		}
-	];
-
-	const journeyDisruptionMetrics: TrendMetricDefinition[] = [
-		{
-			key: "fullCancellationRate",
-			label: "Fully cancelled",
-			color: "#dc2626",
-			format: "percent",
-			value: (item) => rateToPercent((item as JourneyTimeSeriesPoint).journeyMetrics.fullCancellationRate)
-		},
-		{
-			key: "partialCancellationRate",
-			label: "Partially cancelled",
-			color: "#ca8a04",
-			format: "percent",
-			value: (item) => rateToPercent((item as JourneyTimeSeriesPoint).journeyMetrics.partialCancellationRate)
-		},
-		{
-			key: "destinationNotReachedRate",
-			label: "Destination not reached",
-			color: "#64748b",
-			format: "percent",
-			value: (item) => rateToPercent((item as JourneyTimeSeriesPoint).journeyMetrics.destinationNotReachedRate)
-		}
-	];
-
-	const journeyTrendPanels: TrendPanelDefinition[] = [
-		{
-			key: "journey-completion",
-			label: "Reached destination",
-			description: "Share of all planned journeys that reached their destination.",
-			metrics: journeyCompletionMetrics,
-			yDomain: [0, 100],
-			height: 180,
-			showXAxis: false,
-			showLegend: false
-		},
-		{
-			key: "journey-disruptions",
-			label: "Disruption signals",
-			description: "Separate shares of planned journeys; these signals overlap and must not be added together.",
-			metrics: journeyDisruptionMetrics,
-			yDomain: [0, null],
-			height: 260
-		}
-	];
 </script>
 
 <svelte:head>
@@ -266,21 +212,12 @@
 			{/snippet}
 		</NetworkTrendChart>
 
-		<NetworkTrendChart
-			title="Journey completion and disruptions"
-			description="Destination completion and non-additive disruption rates over time. Full cancellations are included in destination-not-reached, and partial cancellations can overlap."
-			promise={journeyTimeSeries}
-			panels={journeyTrendPanels}
+		<NetworkJourneyOutcomeTimelineChart
+			promise={journeyOutcomeTimeSeries}
 			bucket={statistics.network.journeyTimeSeries.bucket}
-		>
-			{#snippet actions()}
-				<MetricBucketControl
-					value={statistics.network.journeyTimeSeries.bucket}
-					options={bucketOptions}
-					onchange={statistics.setJourneyBucket}
-				/>
-			{/snippet}
-		</NetworkTrendChart>
+			{bucketOptions}
+			onbucketchange={statistics.setJourneyBucket}
+		/>
 	</section>
 
 	<section class="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">

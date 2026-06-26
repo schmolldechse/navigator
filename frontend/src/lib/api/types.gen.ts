@@ -405,6 +405,40 @@ export type JourneyNumberRankingItem = {
 	journeyMetrics: JourneyMetrics;
 };
 
+export type JourneyOutcomeMetrics = {
+	/**
+	 * Number of planned journeys.
+	 */
+	plannedJourneys: number | string;
+	/**
+	 * Number of journeys that were completed without partial cancellation or destination failure.
+	 */
+	completedJourneys: number | string;
+	/**
+	 * Number of partially cancelled journeys that still reached their destination.
+	 */
+	partiallyCancelledDestinationReachedJourneys: number | string;
+	/**
+	 * Number of not fully cancelled journeys whose destination stop was not reached.
+	 */
+	destinationNotReachedJourneys: number | string;
+	/**
+	 * Number of journeys where all stop events were cancelled.
+	 */
+	fullyCancelledJourneys: number | string;
+};
+
+export type JourneyOutcomeTimeSeriesPoint = {
+	/**
+	 * Start of the returned time bucket using the request offset.
+	 */
+	bucketStart: string;
+	/**
+	 * Disjoint journey outcome metrics for the bucket.
+	 */
+	journeyOutcomeMetrics: JourneyOutcomeMetrics;
+};
+
 export type JourneyRichStopPlace = {
 	cancelled: boolean;
 	name: string;
@@ -1352,6 +1386,9 @@ export type NetworkStatisticsMetricRequest =
 			type?: "JOURNEY_TIME_SERIES";
 	  } & NetworkStatisticsMetricRequestNetworkJourneyTimeSeriesRequest)
 	| ({
+			type?: "JOURNEY_OUTCOME_TIME_SERIES";
+	  } & NetworkStatisticsMetricRequestNetworkJourneyOutcomeTimeSeriesRequest)
+	| ({
 			type?: "WEEKDAY_HOUR_HEATMAP";
 	  } & NetworkStatisticsMetricRequestNetworkWeekdayHourHeatmapRequest)
 	| ({
@@ -1446,6 +1483,34 @@ export type NetworkStatisticsMetricRequestNetworkEventTimeSeriesRequest = {
 	to: string;
 };
 
+export type NetworkStatisticsMetricRequestNetworkJourneyOutcomeTimeSeriesRequest = {
+	type?: TypeEnum22;
+	/**
+	 * Aggregation bucket used for returned disjoint journey outcome time series.
+	 */
+	bucket?: StatisticsBucket;
+	/**
+	 * Optional transport types to include. Empty means all transport types.
+	 */
+	transportTypes?: Array<TransportType>;
+	/**
+	 * Optional external administration identifiers to include.
+	 */
+	administrationIds?: Array<string>;
+	/**
+	 * Whether replacement transport should be included.
+	 */
+	includeReplacement?: boolean;
+	/**
+	 * First included instant.
+	 */
+	from: string;
+	/**
+	 * First excluded instant.
+	 */
+	to: string;
+};
+
 export type NetworkStatisticsMetricRequestNetworkJourneySummaryRequest = {
 	type?: TypeEnum11;
 	/**
@@ -1471,7 +1536,7 @@ export type NetworkStatisticsMetricRequestNetworkJourneySummaryRequest = {
 };
 
 export type NetworkStatisticsMetricRequestNetworkJourneyTimeSeriesRequest = {
-	type?: TypeEnum22;
+	type?: TypeEnum23;
 	/**
 	 * Aggregation bucket used for returned time series.
 	 */
@@ -1499,7 +1564,7 @@ export type NetworkStatisticsMetricRequestNetworkJourneyTimeSeriesRequest = {
 };
 
 export type NetworkStatisticsMetricRequestNetworkLineRankingRequest = {
-	type?: TypeEnum23;
+	type?: TypeEnum24;
 	/**
 	 * Optional transport types to include. Empty means all transport types.
 	 */
@@ -1543,7 +1608,7 @@ export type NetworkStatisticsMetricRequestNetworkLineRankingRequest = {
 };
 
 export type NetworkStatisticsMetricRequestNetworkStationRankingRequest = {
-	type?: TypeEnum24;
+	type?: TypeEnum25;
 	scheduleType?: null | ScheduleType;
 	/**
 	 * Optional transport types to include. Empty means all transport types.
@@ -1576,7 +1641,7 @@ export type NetworkStatisticsMetricRequestNetworkStationRankingRequest = {
 };
 
 export type NetworkStatisticsMetricRequestNetworkTransportTypeComparisonRequest = {
-	type?: TypeEnum25;
+	type?: TypeEnum26;
 	scheduleType?: null | ScheduleType;
 	/**
 	 * Optional transport types to include. Empty means all transport types.
@@ -1877,35 +1942,6 @@ export type StationStatisticsMetricRequest =
 	  } & StationStatisticsMetricRequestStationEventDetailsRequest);
 
 export type StationStatisticsMetricRequestStationArrivalDepartureComparisonRequest = {
-	type?: TypeEnum26;
-	scheduleType?: null | ScheduleType;
-	/**
-	 * Optional transport types to include. Empty means all transport types.
-	 */
-	transportTypes?: Array<TransportType>;
-	/**
-	 * Optional external administration identifiers to include.
-	 */
-	administrationIds?: Array<string>;
-	/**
-	 * Whether replacement transport should be included.
-	 */
-	includeReplacement?: boolean;
-	/**
-	 * Station EVA number to evaluate.
-	 */
-	stationEvaNumber: number | string;
-	/**
-	 * First included instant.
-	 */
-	from: string;
-	/**
-	 * First excluded instant.
-	 */
-	to: string;
-};
-
-export type StationStatisticsMetricRequestStationBenchmarkRequest = {
 	type?: TypeEnum27;
 	scheduleType?: null | ScheduleType;
 	/**
@@ -1934,8 +1970,37 @@ export type StationStatisticsMetricRequestStationBenchmarkRequest = {
 	to: string;
 };
 
-export type StationStatisticsMetricRequestStationDirectionsRequest = {
+export type StationStatisticsMetricRequestStationBenchmarkRequest = {
 	type?: TypeEnum28;
+	scheduleType?: null | ScheduleType;
+	/**
+	 * Optional transport types to include. Empty means all transport types.
+	 */
+	transportTypes?: Array<TransportType>;
+	/**
+	 * Optional external administration identifiers to include.
+	 */
+	administrationIds?: Array<string>;
+	/**
+	 * Whether replacement transport should be included.
+	 */
+	includeReplacement?: boolean;
+	/**
+	 * Station EVA number to evaluate.
+	 */
+	stationEvaNumber: number | string;
+	/**
+	 * First included instant.
+	 */
+	from: string;
+	/**
+	 * First excluded instant.
+	 */
+	to: string;
+};
+
+export type StationStatisticsMetricRequestStationDirectionsRequest = {
+	type?: TypeEnum29;
 	/**
 	 * Optional connected station EVA number filter.
 	 */
@@ -1968,7 +2033,7 @@ export type StationStatisticsMetricRequestStationDirectionsRequest = {
 };
 
 export type StationStatisticsMetricRequestStationEventDetailsRequest = {
-	type?: TypeEnum29;
+	type?: TypeEnum30;
 	scheduleType?: null | ScheduleType;
 	/**
 	 * Optional transport types to include. Empty means all transport types.
@@ -2042,7 +2107,7 @@ export type StationStatisticsMetricRequestStationEventSummaryRequest = {
 };
 
 export type StationStatisticsMetricRequestStationLineHourMatrixRequest = {
-	type?: TypeEnum30;
+	type?: TypeEnum31;
 	/**
 	 * Optional origin station EVA number filter.
 	 */
@@ -2083,7 +2148,7 @@ export type StationStatisticsMetricRequestStationLineHourMatrixRequest = {
 };
 
 export type StationStatisticsMetricRequestStationLineRankingRequest = {
-	type?: TypeEnum23;
+	type?: TypeEnum24;
 	/**
 	 * Optional origin station EVA number filter.
 	 */
@@ -2169,7 +2234,7 @@ export type StationStatisticsMetricRequestStationTimeSeriesRequest = {
 };
 
 export type StationStatisticsMetricRequestStationTransportTypeMixRequest = {
-	type?: TypeEnum31;
+	type?: TypeEnum32;
 	scheduleType?: null | ScheduleType;
 	/**
 	 * Optional transport types to include. Empty means all transport types.
@@ -2258,6 +2323,9 @@ export type StatisticsMetricResult =
 			type?: "NETWORK_JOURNEY_TIME_SERIES";
 	  } & StatisticsMetricResultNetworkJourneyTimeSeriesResult)
 	| ({
+			type?: "NETWORK_JOURNEY_OUTCOME_TIME_SERIES";
+	  } & StatisticsMetricResultNetworkJourneyOutcomeTimeSeriesResult)
+	| ({
 			type?: "EVENT_WEEKDAY_HOUR_HEATMAP";
 	  } & StatisticsMetricResultEventWeekdayHourHeatmapResult)
 	| ({
@@ -2337,7 +2405,7 @@ export type StatisticsMetricResult =
 	  } & StatisticsMetricResultJourneyCalendarResult);
 
 export type StatisticsMetricResultArrivalDepartureComparisonResult = {
-	type?: TypeEnum26;
+	type?: TypeEnum27;
 	/**
 	 * Event metrics grouped by arrival and departure schedule type.
 	 */
@@ -2365,7 +2433,7 @@ export type StatisticsMetricResultEventSummaryResult = {
 };
 
 export type StatisticsMetricResultEventWeekdayHourHeatmapResult = {
-	type?: TypeEnum32;
+	type?: TypeEnum33;
 	/**
 	 * Event metric cells grouped by weekday and hour.
 	 */
@@ -2373,7 +2441,7 @@ export type StatisticsMetricResultEventWeekdayHourHeatmapResult = {
 };
 
 export type StatisticsMetricResultJourneyCalendarResult = {
-	type?: TypeEnum33;
+	type?: TypeEnum34;
 	/**
 	 * Calendar rows for the journey number.
 	 */
@@ -2381,7 +2449,7 @@ export type StatisticsMetricResultJourneyCalendarResult = {
 };
 
 export type StatisticsMetricResultJourneyDailyOutcomesResult = {
-	type?: TypeEnum34;
+	type?: TypeEnum35;
 	/**
 	 * Daily outcomes for the journey number.
 	 */
@@ -2389,7 +2457,7 @@ export type StatisticsMetricResultJourneyDailyOutcomesResult = {
 };
 
 export type StatisticsMetricResultJourneyDelayBuildUpResult = {
-	type?: TypeEnum35;
+	type?: TypeEnum36;
 	/**
 	 * Delay distribution along the journey stops.
 	 */
@@ -2397,7 +2465,7 @@ export type StatisticsMetricResultJourneyDelayBuildUpResult = {
 };
 
 export type StatisticsMetricResultJourneyPatternResult = {
-	type?: TypeEnum36;
+	type?: TypeEnum37;
 	/**
 	 * Journey number represented by the pattern.
 	 */
@@ -2428,7 +2496,7 @@ export type StatisticsMetricResultJourneyPatternResult = {
 };
 
 export type StatisticsMetricResultJourneyStopProfileResult = {
-	type?: TypeEnum37;
+	type?: TypeEnum38;
 	/**
 	 * Stop profile rows for the journey number.
 	 */
@@ -2444,7 +2512,7 @@ export type StatisticsMetricResultJourneySummaryResult = {
 };
 
 export type StatisticsMetricResultJourneyWeekdayHourHeatmapResult = {
-	type?: TypeEnum38;
+	type?: TypeEnum39;
 	/**
 	 * Journey metric cells grouped by weekday and hour.
 	 */
@@ -2452,7 +2520,7 @@ export type StatisticsMetricResultJourneyWeekdayHourHeatmapResult = {
 };
 
 export type StatisticsMetricResultLineHourMatrixResult = {
-	type?: TypeEnum30;
+	type?: TypeEnum31;
 	/**
 	 * Station-line event metrics grouped by hour.
 	 */
@@ -2460,7 +2528,7 @@ export type StatisticsMetricResultLineHourMatrixResult = {
 };
 
 export type StatisticsMetricResultLineJourneyNumberRankingResult = {
-	type?: TypeEnum39;
+	type?: TypeEnum40;
 	/**
 	 * Journey numbers ranked within the line.
 	 */
@@ -2472,7 +2540,7 @@ export type StatisticsMetricResultLineJourneyNumberRankingResult = {
 };
 
 export type StatisticsMetricResultLineProblemStationsResult = {
-	type?: TypeEnum40;
+	type?: TypeEnum41;
 	/**
 	 * Stations with the highest delay impact for the line.
 	 */
@@ -2484,7 +2552,7 @@ export type StatisticsMetricResultLineProblemStationsResult = {
 };
 
 export type StatisticsMetricResultLineProfileResult = {
-	type?: TypeEnum41;
+	type?: TypeEnum42;
 	/**
 	 * Line or journey description.
 	 */
@@ -2503,7 +2571,7 @@ export type StatisticsMetricResultLineProfileResult = {
 };
 
 export type StatisticsMetricResultLineRouteVariantsResult = {
-	type?: TypeEnum42;
+	type?: TypeEnum43;
 	/**
 	 * Observed origin-destination variants for the line.
 	 */
@@ -2511,7 +2579,7 @@ export type StatisticsMetricResultLineRouteVariantsResult = {
 };
 
 export type StatisticsMetricResultLineStationPerformanceResult = {
-	type?: TypeEnum43;
+	type?: TypeEnum44;
 	/**
 	 * Station performance rows for the line.
 	 */
@@ -2523,7 +2591,7 @@ export type StatisticsMetricResultLineStationPerformanceResult = {
 };
 
 export type StatisticsMetricResultLineTimeSeriesResult = {
-	type?: TypeEnum44;
+	type?: TypeEnum45;
 	/**
 	 * Line metric points grouped by the requested bucket.
 	 */
@@ -2531,15 +2599,23 @@ export type StatisticsMetricResultLineTimeSeriesResult = {
 };
 
 export type StatisticsMetricResultNetworkEventTimeSeriesResult = {
-	type?: TypeEnum45;
+	type?: TypeEnum46;
 	/**
 	 * Event metric points grouped by the requested bucket.
 	 */
 	items: Array<EventTimeSeriesPoint>;
 };
 
+export type StatisticsMetricResultNetworkJourneyOutcomeTimeSeriesResult = {
+	type?: TypeEnum47;
+	/**
+	 * Disjoint journey outcome metric points grouped by the requested bucket.
+	 */
+	items: Array<JourneyOutcomeTimeSeriesPoint>;
+};
+
 export type StatisticsMetricResultNetworkJourneyTimeSeriesResult = {
-	type?: TypeEnum46;
+	type?: TypeEnum48;
 	/**
 	 * Journey metric points grouped by the requested bucket.
 	 */
@@ -2547,7 +2623,7 @@ export type StatisticsMetricResultNetworkJourneyTimeSeriesResult = {
 };
 
 export type StatisticsMetricResultNetworkLineRankingResult = {
-	type?: TypeEnum47;
+	type?: TypeEnum49;
 	/**
 	 * Ranked lines.
 	 */
@@ -2559,7 +2635,7 @@ export type StatisticsMetricResultNetworkLineRankingResult = {
 };
 
 export type StatisticsMetricResultNetworkMapHotspotsResult = {
-	type?: TypeEnum48;
+	type?: TypeEnum50;
 	/**
 	 * GeoJSON feature collection for station hotspots.
 	 */
@@ -2567,7 +2643,7 @@ export type StatisticsMetricResultNetworkMapHotspotsResult = {
 };
 
 export type StatisticsMetricResultNetworkStationRankingResult = {
-	type?: TypeEnum49;
+	type?: TypeEnum51;
 	/**
 	 * Ranked stations.
 	 */
@@ -2579,7 +2655,7 @@ export type StatisticsMetricResultNetworkStationRankingResult = {
 };
 
 export type StatisticsMetricResultStationBenchmarkResult = {
-	type?: TypeEnum50;
+	type?: TypeEnum52;
 	/**
 	 * Event metrics for the requested station.
 	 */
@@ -2595,7 +2671,7 @@ export type StatisticsMetricResultStationBenchmarkResult = {
 };
 
 export type StatisticsMetricResultStationDirectionsResult = {
-	type?: TypeEnum51;
+	type?: TypeEnum53;
 	/**
 	 * Connected origin and destination directions for the station.
 	 */
@@ -2603,7 +2679,7 @@ export type StatisticsMetricResultStationDirectionsResult = {
 };
 
 export type StatisticsMetricResultStationEventDetailsResult = {
-	type?: TypeEnum52;
+	type?: TypeEnum54;
 	/**
 	 * Detailed stop events at the station.
 	 */
@@ -2615,7 +2691,7 @@ export type StatisticsMetricResultStationEventDetailsResult = {
 };
 
 export type StatisticsMetricResultStationLineRankingResult = {
-	type?: TypeEnum53;
+	type?: TypeEnum55;
 	/**
 	 * Ranked lines observed at the station.
 	 */
@@ -2627,7 +2703,7 @@ export type StatisticsMetricResultStationLineRankingResult = {
 };
 
 export type StatisticsMetricResultStationTimeSeriesResult = {
-	type?: TypeEnum54;
+	type?: TypeEnum56;
 	/**
 	 * Station event metric points grouped by the requested bucket.
 	 */
@@ -2635,7 +2711,7 @@ export type StatisticsMetricResultStationTimeSeriesResult = {
 };
 
 export type StatisticsMetricResultTransportTypeComparisonResult = {
-	type?: TypeEnum25;
+	type?: TypeEnum26;
 	/**
 	 * Event and journey metrics grouped by transport type.
 	 */
@@ -2643,7 +2719,7 @@ export type StatisticsMetricResultTransportTypeComparisonResult = {
 };
 
 export type StatisticsMetricResultTransportTypeMixResult = {
-	type?: TypeEnum31;
+	type?: TypeEnum32;
 	/**
 	 * Station event metrics grouped by transport type.
 	 */
@@ -2655,6 +2731,7 @@ export enum StatisticsMetricType {
 	JOURNEY_SUMMARY = "JOURNEY_SUMMARY",
 	EVENT_TIME_SERIES = "EVENT_TIME_SERIES",
 	JOURNEY_TIME_SERIES = "JOURNEY_TIME_SERIES",
+	JOURNEY_OUTCOME_TIME_SERIES = "JOURNEY_OUTCOME_TIME_SERIES",
 	WEEKDAY_HOUR_HEATMAP = "WEEKDAY_HOUR_HEATMAP",
 	TRANSPORT_TYPE_COMPARISON = "TRANSPORT_TYPE_COMPARISON",
 	STATION_RANKING = "STATION_RANKING",
@@ -2954,134 +3031,142 @@ export enum TypeEnum21 {
 }
 
 export enum TypeEnum22 {
-	JOURNEY_TIME_SERIES = "JOURNEY_TIME_SERIES"
+	JOURNEY_OUTCOME_TIME_SERIES = "JOURNEY_OUTCOME_TIME_SERIES"
 }
 
 export enum TypeEnum23 {
-	LINE_RANKING = "LINE_RANKING"
+	JOURNEY_TIME_SERIES = "JOURNEY_TIME_SERIES"
 }
 
 export enum TypeEnum24 {
-	STATION_RANKING = "STATION_RANKING"
+	LINE_RANKING = "LINE_RANKING"
 }
 
 export enum TypeEnum25 {
-	TRANSPORT_TYPE_COMPARISON = "TRANSPORT_TYPE_COMPARISON"
+	STATION_RANKING = "STATION_RANKING"
 }
 
 export enum TypeEnum26 {
-	ARRIVAL_DEPARTURE_COMPARISON = "ARRIVAL_DEPARTURE_COMPARISON"
+	TRANSPORT_TYPE_COMPARISON = "TRANSPORT_TYPE_COMPARISON"
 }
 
 export enum TypeEnum27 {
-	BENCHMARK = "BENCHMARK"
+	ARRIVAL_DEPARTURE_COMPARISON = "ARRIVAL_DEPARTURE_COMPARISON"
 }
 
 export enum TypeEnum28 {
-	DIRECTIONS = "DIRECTIONS"
+	BENCHMARK = "BENCHMARK"
 }
 
 export enum TypeEnum29 {
-	EVENT_DETAILS = "EVENT_DETAILS"
+	DIRECTIONS = "DIRECTIONS"
 }
 
 export enum TypeEnum30 {
-	LINE_HOUR_MATRIX = "LINE_HOUR_MATRIX"
+	EVENT_DETAILS = "EVENT_DETAILS"
 }
 
 export enum TypeEnum31 {
-	TRANSPORT_TYPE_MIX = "TRANSPORT_TYPE_MIX"
+	LINE_HOUR_MATRIX = "LINE_HOUR_MATRIX"
 }
 
 export enum TypeEnum32 {
-	EVENT_WEEKDAY_HOUR_HEATMAP = "EVENT_WEEKDAY_HOUR_HEATMAP"
+	TRANSPORT_TYPE_MIX = "TRANSPORT_TYPE_MIX"
 }
 
 export enum TypeEnum33 {
-	JOURNEY_CALENDAR = "JOURNEY_CALENDAR"
+	EVENT_WEEKDAY_HOUR_HEATMAP = "EVENT_WEEKDAY_HOUR_HEATMAP"
 }
 
 export enum TypeEnum34 {
-	JOURNEY_DAILY_OUTCOMES = "JOURNEY_DAILY_OUTCOMES"
+	JOURNEY_CALENDAR = "JOURNEY_CALENDAR"
 }
 
 export enum TypeEnum35 {
-	JOURNEY_DELAY_BUILD_UP = "JOURNEY_DELAY_BUILD_UP"
+	JOURNEY_DAILY_OUTCOMES = "JOURNEY_DAILY_OUTCOMES"
 }
 
 export enum TypeEnum36 {
-	JOURNEY_PATTERN = "JOURNEY_PATTERN"
+	JOURNEY_DELAY_BUILD_UP = "JOURNEY_DELAY_BUILD_UP"
 }
 
 export enum TypeEnum37 {
-	JOURNEY_STOP_PROFILE = "JOURNEY_STOP_PROFILE"
+	JOURNEY_PATTERN = "JOURNEY_PATTERN"
 }
 
 export enum TypeEnum38 {
-	JOURNEY_WEEKDAY_HOUR_HEATMAP = "JOURNEY_WEEKDAY_HOUR_HEATMAP"
+	JOURNEY_STOP_PROFILE = "JOURNEY_STOP_PROFILE"
 }
 
 export enum TypeEnum39 {
-	LINE_JOURNEY_NUMBER_RANKING = "LINE_JOURNEY_NUMBER_RANKING"
+	JOURNEY_WEEKDAY_HOUR_HEATMAP = "JOURNEY_WEEKDAY_HOUR_HEATMAP"
 }
 
 export enum TypeEnum40 {
-	LINE_PROBLEM_STATIONS = "LINE_PROBLEM_STATIONS"
+	LINE_JOURNEY_NUMBER_RANKING = "LINE_JOURNEY_NUMBER_RANKING"
 }
 
 export enum TypeEnum41 {
-	LINE_PROFILE = "LINE_PROFILE"
+	LINE_PROBLEM_STATIONS = "LINE_PROBLEM_STATIONS"
 }
 
 export enum TypeEnum42 {
-	LINE_ROUTE_VARIANTS = "LINE_ROUTE_VARIANTS"
+	LINE_PROFILE = "LINE_PROFILE"
 }
 
 export enum TypeEnum43 {
-	LINE_STATION_PERFORMANCE = "LINE_STATION_PERFORMANCE"
+	LINE_ROUTE_VARIANTS = "LINE_ROUTE_VARIANTS"
 }
 
 export enum TypeEnum44 {
-	LINE_TIME_SERIES = "LINE_TIME_SERIES"
+	LINE_STATION_PERFORMANCE = "LINE_STATION_PERFORMANCE"
 }
 
 export enum TypeEnum45 {
-	NETWORK_EVENT_TIME_SERIES = "NETWORK_EVENT_TIME_SERIES"
+	LINE_TIME_SERIES = "LINE_TIME_SERIES"
 }
 
 export enum TypeEnum46 {
-	NETWORK_JOURNEY_TIME_SERIES = "NETWORK_JOURNEY_TIME_SERIES"
+	NETWORK_EVENT_TIME_SERIES = "NETWORK_EVENT_TIME_SERIES"
 }
 
 export enum TypeEnum47 {
-	NETWORK_LINE_RANKING = "NETWORK_LINE_RANKING"
+	NETWORK_JOURNEY_OUTCOME_TIME_SERIES = "NETWORK_JOURNEY_OUTCOME_TIME_SERIES"
 }
 
 export enum TypeEnum48 {
-	NETWORK_MAP_HOTSPOTS = "NETWORK_MAP_HOTSPOTS"
+	NETWORK_JOURNEY_TIME_SERIES = "NETWORK_JOURNEY_TIME_SERIES"
 }
 
 export enum TypeEnum49 {
-	NETWORK_STATION_RANKING = "NETWORK_STATION_RANKING"
+	NETWORK_LINE_RANKING = "NETWORK_LINE_RANKING"
 }
 
 export enum TypeEnum50 {
-	STATION_BENCHMARK = "STATION_BENCHMARK"
+	NETWORK_MAP_HOTSPOTS = "NETWORK_MAP_HOTSPOTS"
 }
 
 export enum TypeEnum51 {
-	STATION_DIRECTIONS = "STATION_DIRECTIONS"
+	NETWORK_STATION_RANKING = "NETWORK_STATION_RANKING"
 }
 
 export enum TypeEnum52 {
-	STATION_EVENT_DETAILS = "STATION_EVENT_DETAILS"
+	STATION_BENCHMARK = "STATION_BENCHMARK"
 }
 
 export enum TypeEnum53 {
-	STATION_LINE_RANKING = "STATION_LINE_RANKING"
+	STATION_DIRECTIONS = "STATION_DIRECTIONS"
 }
 
 export enum TypeEnum54 {
+	STATION_EVENT_DETAILS = "STATION_EVENT_DETAILS"
+}
+
+export enum TypeEnum55 {
+	STATION_LINE_RANKING = "STATION_LINE_RANKING"
+}
+
+export enum TypeEnum56 {
 	STATION_TIME_SERIES = "STATION_TIME_SERIES"
 }
 

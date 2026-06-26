@@ -108,6 +108,28 @@ public sealed record JourneyMetrics(
     decimal DestinationDelayDebtMinutes
 );
 
+public sealed record JourneyOutcomeMetrics(
+    [property: JsonPropertyName("plannedJourneys")]
+    [property: Description("Number of planned journeys.")]
+    long PlannedJourneys,
+
+    [property: JsonPropertyName("completedJourneys")]
+    [property: Description("Number of journeys that were completed without partial cancellation or destination failure.")]
+    long CompletedJourneys,
+
+    [property: JsonPropertyName("partiallyCancelledDestinationReachedJourneys")]
+    [property: Description("Number of partially cancelled journeys that still reached their destination.")]
+    long PartiallyCancelledDestinationReachedJourneys,
+
+    [property: JsonPropertyName("destinationNotReachedJourneys")]
+    [property: Description("Number of not fully cancelled journeys whose destination stop was not reached.")]
+    long DestinationNotReachedJourneys,
+
+    [property: JsonPropertyName("fullyCancelledJourneys")]
+    [property: Description("Number of journeys where all stop events were cancelled.")]
+    long FullyCancelledJourneys
+);
+
 public sealed record StationReference(
     [property: JsonPropertyName("stationEvaNumber")]
     [property: Description("Station EVA number.")]
@@ -180,6 +202,16 @@ public sealed record JourneyTimeSeriesPoint(
     [property: JsonPropertyName("journeyMetrics")]
     [property: Description("Aggregated journey metrics for the bucket.")]
     JourneyMetrics JourneyMetrics
+);
+
+public sealed record JourneyOutcomeTimeSeriesPoint(
+    [property: JsonPropertyName("bucketStart")]
+    [property: Description("Start of the returned time bucket using the request offset.")]
+    DateTimeOffset BucketStart,
+
+    [property: JsonPropertyName("journeyOutcomeMetrics")]
+    [property: Description("Disjoint journey outcome metrics for the bucket.")]
+    JourneyOutcomeMetrics JourneyOutcomeMetrics
 );
 
 public sealed record LineTimeSeriesPoint(

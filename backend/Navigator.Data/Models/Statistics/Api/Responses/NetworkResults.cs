@@ -16,6 +16,12 @@ public sealed record NetworkJourneyTimeSeriesResult(
     IReadOnlyList<JourneyTimeSeriesPoint> Items
 ) : StatisticsMetricResult;
 
+public sealed record NetworkJourneyOutcomeTimeSeriesResult(
+    [property: JsonPropertyName("items")]
+    [property: Description("Disjoint journey outcome metric points grouped by the requested bucket.")]
+    IReadOnlyList<JourneyOutcomeTimeSeriesPoint> Items
+) : StatisticsMetricResult;
+
 public sealed record EventWeekdayHourHeatmapResult(
     [property: JsonPropertyName("items")]
     [property: Description("Event metric cells grouped by weekday and hour.")]

@@ -43,6 +43,16 @@ const createNetworkJourneyTimeSeriesRequest = (
 		bucket: scope.bucket
 	}) as NetworkStatisticsMetricRequest;
 
+const createNetworkJourneyOutcomeTimeSeriesRequest = (
+	globalScope: StatisticsGlobalScope,
+	scope: BucketMetricScope
+): NetworkStatisticsMetricRequest =>
+	({
+		...journeyRequestBase(globalScope),
+		type: "JOURNEY_OUTCOME_TIME_SERIES",
+		bucket: scope.bucket
+	}) as NetworkStatisticsMetricRequest;
+
 const createNetworkWeekdayHourHeatmapRequest = (
 	globalScope: StatisticsGlobalScope,
 	eventScope: StatisticsEventScope
@@ -83,6 +93,7 @@ export {
 	createNetworkEventDelayDistributionRequest,
 	createNetworkEventSummaryRequest,
 	createNetworkEventTimeSeriesRequest,
+	createNetworkJourneyOutcomeTimeSeriesRequest,
 	createNetworkJourneySummaryRequest,
 	createNetworkJourneyTimeSeriesRequest,
 	createNetworkMapHotspotsRequest,

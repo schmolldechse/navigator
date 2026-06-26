@@ -6,6 +6,7 @@ public enum StatisticsMetricType
     JourneySummary,
     EventTimeSeries,
     JourneyTimeSeries,
+    JourneyOutcomeTimeSeries,
     WeekdayHourHeatmap,
     TransportTypeComparison,
     StationRanking,

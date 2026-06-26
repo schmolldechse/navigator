@@ -146,6 +146,7 @@ internal static class StatisticsMetricBuilderHelpers
             NetworkStatisticsMetricType.JourneySummary => StatisticsMetricType.JourneySummary,
             NetworkStatisticsMetricType.EventTimeSeries => StatisticsMetricType.EventTimeSeries,
             NetworkStatisticsMetricType.JourneyTimeSeries => StatisticsMetricType.JourneyTimeSeries,
+            NetworkStatisticsMetricType.JourneyOutcomeTimeSeries => StatisticsMetricType.JourneyOutcomeTimeSeries,
             NetworkStatisticsMetricType.WeekdayHourHeatmap => StatisticsMetricType.WeekdayHourHeatmap,
             NetworkStatisticsMetricType.TransportTypeComparison => StatisticsMetricType.TransportTypeComparison,
             NetworkStatisticsMetricType.StationRanking => StatisticsMetricType.StationRanking,

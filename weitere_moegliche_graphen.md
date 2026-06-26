@@ -56,6 +56,7 @@ Bei der Priorisierung sollten bestehende Ansichten nicht unnötig dupliziert wer
 ### Netzwerk
 
 - Zeitreihen für Stop-Verlässlichkeit und Journey-Ergebnisse
+- Disjunkte Journey-Outcome-Zeitreihe
 - Wochentag-Stunden-Heatmap
 - Tageszeitprofil mit Volumenband
 - Verspätungshistogramm und kumulative Verteilung
@@ -300,7 +301,7 @@ Geeignet sind Dumbbell-Chart plus Volumenpunkt oder Small-Multiple-Balken. Ein R
 | P0 | Schwellenkurve aus Kundensicht | **Vollständig** – operative und Kundensicht-CDF im Delay-Distribution-Panel vorhanden | **Ja** | Nutzt vorhandenen CDF weiter und behandelt Ausfälle korrekt | Niedrig |
 | P0 | Tageszeitprofil mit Volumenband | **Vollständig** – Stundenprofil mit Kundensicht-Zuverlässigkeit, Ausfallquote und geplantem Stop-Volumen vorhanden | **Ja** | Ergänzt die Heatmap um eine leicht lesbare Spitzenzeitenansicht | Niedrig bis mittel |
 | P1 | Journey-Kalender | **Nein** – API-Vertrag vorhanden, keine Visualisierung | **Bedingt** – eher Fahrtnummernansicht | Vorhandene Daten, hoher Nutzen auf Fahrtnummernebene | Niedrig |
-| P1 | Disjunkte Journey-Outcomes über die Zeit | **Teilweise** – überlappende Journey-Signale als Zeitreihe, aber kein disjunkter Stack | **Ja** | Macht vollständige und teilweise Nichterbringung sichtbar | Mittel |
+| P1 | Disjunkte Journey-Outcomes über die Zeit | **Vollständig** – disjunkte Journey-Outcome-Zeitreihe im Netzwerk-Dashboard vorhanden | **Ja** | Macht vollständige und teilweise Nichterbringung sichtbar | Mittel |
 | P1 | Verspätungsschwere über die Zeit | **Teilweise** – Schwellenzeitreihe und Gesamtverteilung vorhanden, aber keine Schwereklassen über die Zeit | **Ja** | Unterscheidet normale Abweichung und schwere Störung | Mittel |
 | P1 | Linienverlaufsprofil | **Nein** – API-Verträge vorhanden, keine Visualisierung | **Bedingt** – benötigt Linie und Routenvariante | Sehr konkrete Diagnose nach Linie und Station | Niedrig bis mittel |
 | P1 | Delay-Debt-Pareto | **Teilweise** – Delay Debt als Kennzahl vorhanden, aber kein Pareto | **Ja** | Priorisiert betriebliche Hotspots nach Gesamtwirkung | Niedrig bis mittel |

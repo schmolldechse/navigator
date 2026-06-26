@@ -303,6 +303,84 @@ export const vJourneyHeatmapCell = v.object({
 	journeyMetrics: vJourneyMetrics
 });
 
+export const vJourneyOutcomeMetrics = v.object({
+	plannedJourneys: v.union([
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		),
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		)
+	]),
+	completedJourneys: v.union([
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		),
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		)
+	]),
+	partiallyCancelledDestinationReachedJourneys: v.union([
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		),
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		)
+	]),
+	destinationNotReachedJourneys: v.union([
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		),
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		)
+	]),
+	fullyCancelledJourneys: v.union([
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		),
+		v.pipe(
+			v.union([v.number(), v.string(), v.bigint()]),
+			v.transform((x) => BigInt(x)),
+			v.minValue(BigInt("-9223372036854775808"), "Invalid value: Expected int64 to be >= -9223372036854775808"),
+			v.maxValue(BigInt("9223372036854775807"), "Invalid value: Expected int64 to be <= 9223372036854775807")
+		)
+	])
+});
+
+export const vJourneyOutcomeTimeSeriesPoint = v.object({
+	bucketStart: v.pipe(v.string(), v.isoTimestamp()),
+	journeyOutcomeMetrics: vJourneyOutcomeMetrics
+});
+
 export const vJourneyRichStopPlace = v.object({
 	cancelled: v.boolean(),
 	name: v.string(),
@@ -565,6 +643,7 @@ export const vStatisticsMetricType = v.picklist([
 	"JOURNEY_SUMMARY",
 	"EVENT_TIME_SERIES",
 	"JOURNEY_TIME_SERIES",
+	"JOURNEY_OUTCOME_TIME_SERIES",
 	"WEEKDAY_HOUR_HEATMAP",
 	"TRANSPORT_TYPE_COMPARISON",
 	"STATION_RANKING",
@@ -2044,9 +2123,9 @@ export const vNetworkStatisticsMetricRequestNetworkEventTimeSeriesRequest = v.ob
 	to: v.pipe(v.string(), v.isoTimestamp())
 });
 
-export const vTypeEnum22 = v.picklist(["JOURNEY_TIME_SERIES"]);
+export const vTypeEnum22 = v.picklist(["JOURNEY_OUTCOME_TIME_SERIES"]);
 
-export const vNetworkStatisticsMetricRequestNetworkJourneyTimeSeriesRequest = v.object({
+export const vNetworkStatisticsMetricRequestNetworkJourneyOutcomeTimeSeriesRequest = v.object({
 	type: v.optional(vTypeEnum22),
 	bucket: v.optional(vStatisticsBucket),
 	transportTypes: v.optional(v.array(vTransportType)),
@@ -2056,10 +2135,22 @@ export const vNetworkStatisticsMetricRequestNetworkJourneyTimeSeriesRequest = v.
 	to: v.pipe(v.string(), v.isoTimestamp())
 });
 
-export const vTypeEnum23 = v.picklist(["LINE_RANKING"]);
+export const vTypeEnum23 = v.picklist(["JOURNEY_TIME_SERIES"]);
+
+export const vNetworkStatisticsMetricRequestNetworkJourneyTimeSeriesRequest = v.object({
+	type: v.optional(vTypeEnum23),
+	bucket: v.optional(vStatisticsBucket),
+	transportTypes: v.optional(v.array(vTransportType)),
+	administrationIds: v.optional(v.array(v.string())),
+	includeReplacement: v.optional(v.boolean()),
+	from: v.pipe(v.string(), v.isoTimestamp()),
+	to: v.pipe(v.string(), v.isoTimestamp())
+});
+
+export const vTypeEnum24 = v.picklist(["LINE_RANKING"]);
 
 export const vNetworkStatisticsMetricRequestNetworkLineRankingRequest = v.object({
-	type: v.optional(vTypeEnum23),
+	type: v.optional(vTypeEnum24),
 	transportTypes: v.optional(v.array(vTransportType)),
 	administrationIds: v.optional(v.array(v.string())),
 	originEvaNumber: v.nullish(
@@ -2108,7 +2199,7 @@ export const vNetworkStatisticsMetricRequestNetworkLineRankingRequest = v.object
 });
 
 export const vStationStatisticsMetricRequestStationLineRankingRequest = v.object({
-	type: v.optional(vTypeEnum23),
+	type: v.optional(vTypeEnum24),
 	originEvaNumber: v.nullish(
 		v.union([
 			v.pipe(
@@ -2172,10 +2263,10 @@ export const vStationStatisticsMetricRequestStationLineRankingRequest = v.object
 	to: v.pipe(v.string(), v.isoTimestamp())
 });
 
-export const vTypeEnum24 = v.picklist(["STATION_RANKING"]);
+export const vTypeEnum25 = v.picklist(["STATION_RANKING"]);
 
 export const vNetworkStatisticsMetricRequestNetworkStationRankingRequest = v.object({
-	type: v.optional(vTypeEnum24),
+	type: v.optional(vTypeEnum25),
 	scheduleType: v.nullish(vScheduleType),
 	transportTypes: v.optional(v.array(vTransportType)),
 	includeReplacement: v.optional(v.boolean()),
@@ -2201,10 +2292,10 @@ export const vNetworkStatisticsMetricRequestNetworkStationRankingRequest = v.obj
 	to: v.pipe(v.string(), v.isoTimestamp())
 });
 
-export const vTypeEnum25 = v.picklist(["TRANSPORT_TYPE_COMPARISON"]);
+export const vTypeEnum26 = v.picklist(["TRANSPORT_TYPE_COMPARISON"]);
 
 export const vNetworkStatisticsMetricRequestNetworkTransportTypeComparisonRequest = v.object({
-	type: v.optional(vTypeEnum25),
+	type: v.optional(vTypeEnum26),
 	scheduleType: v.nullish(vScheduleType),
 	transportTypes: v.optional(v.array(vTransportType)),
 	administrationIds: v.optional(v.array(v.string())),
@@ -2240,6 +2331,12 @@ export const vNetworkStatisticsMetricRequest = v.union([
 	]),
 	v.intersect([
 		v.object({
+			type: v.optional(v.literal("JOURNEY_OUTCOME_TIME_SERIES"))
+		}),
+		vNetworkStatisticsMetricRequestNetworkJourneyOutcomeTimeSeriesRequest
+	]),
+	v.intersect([
+		v.object({
 			type: v.optional(v.literal("WEEKDAY_HOUR_HEATMAP"))
 		}),
 		vNetworkStatisticsMetricRequestNetworkWeekdayHourHeatmapRequest
@@ -2271,34 +2368,13 @@ export const vNetworkStatisticsMetricRequest = v.union([
 ]);
 
 export const vStatisticsMetricResultTransportTypeComparisonResult = v.object({
-	type: v.optional(vTypeEnum25),
+	type: v.optional(vTypeEnum26),
 	items: v.array(vTransportTypeComparisonItem)
 });
 
-export const vTypeEnum26 = v.picklist(["ARRIVAL_DEPARTURE_COMPARISON"]);
+export const vTypeEnum27 = v.picklist(["ARRIVAL_DEPARTURE_COMPARISON"]);
 
 export const vStationStatisticsMetricRequestStationArrivalDepartureComparisonRequest = v.object({
-	type: v.optional(vTypeEnum26),
-	scheduleType: v.nullish(vScheduleType),
-	transportTypes: v.optional(v.array(vTransportType)),
-	administrationIds: v.optional(v.array(v.string())),
-	includeReplacement: v.optional(v.boolean()),
-	stationEvaNumber: v.union([
-		v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(2147483647)),
-		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
-	]),
-	from: v.pipe(v.string(), v.isoTimestamp()),
-	to: v.pipe(v.string(), v.isoTimestamp())
-});
-
-export const vStatisticsMetricResultArrivalDepartureComparisonResult = v.object({
-	type: v.optional(vTypeEnum26),
-	items: v.array(vArrivalDepartureComparisonItem)
-});
-
-export const vTypeEnum27 = v.picklist(["BENCHMARK"]);
-
-export const vStationStatisticsMetricRequestStationBenchmarkRequest = v.object({
 	type: v.optional(vTypeEnum27),
 	scheduleType: v.nullish(vScheduleType),
 	transportTypes: v.optional(v.array(vTransportType)),
@@ -2312,10 +2388,31 @@ export const vStationStatisticsMetricRequestStationBenchmarkRequest = v.object({
 	to: v.pipe(v.string(), v.isoTimestamp())
 });
 
-export const vTypeEnum28 = v.picklist(["DIRECTIONS"]);
+export const vStatisticsMetricResultArrivalDepartureComparisonResult = v.object({
+	type: v.optional(vTypeEnum27),
+	items: v.array(vArrivalDepartureComparisonItem)
+});
+
+export const vTypeEnum28 = v.picklist(["BENCHMARK"]);
+
+export const vStationStatisticsMetricRequestStationBenchmarkRequest = v.object({
+	type: v.optional(vTypeEnum28),
+	scheduleType: v.nullish(vScheduleType),
+	transportTypes: v.optional(v.array(vTransportType)),
+	administrationIds: v.optional(v.array(v.string())),
+	includeReplacement: v.optional(v.boolean()),
+	stationEvaNumber: v.union([
+		v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(2147483647)),
+		v.pipe(v.string(), v.regex(/^-?(?:0|[1-9]\d*)$/))
+	]),
+	from: v.pipe(v.string(), v.isoTimestamp()),
+	to: v.pipe(v.string(), v.isoTimestamp())
+});
+
+export const vTypeEnum29 = v.picklist(["DIRECTIONS"]);
 
 export const vStationStatisticsMetricRequestStationDirectionsRequest = v.object({
-	type: v.optional(vTypeEnum28),
+	type: v.optional(vTypeEnum29),
 	directionEvaNumber: v.nullish(
 		v.union([
 			v.pipe(
@@ -2339,10 +2436,10 @@ export const vStationStatisticsMetricRequestStationDirectionsRequest = v.object(
 	to: v.pipe(v.string(), v.isoTimestamp())
 });
 
-export const vTypeEnum29 = v.picklist(["EVENT_DETAILS"]);
+export const vTypeEnum30 = v.picklist(["EVENT_DETAILS"]);
 
 export const vStationStatisticsMetricRequestStationEventDetailsRequest = v.object({
-	type: v.optional(vTypeEnum29),
+	type: v.optional(vTypeEnum30),
 	scheduleType: v.nullish(vScheduleType),
 	transportTypes: v.optional(v.array(vTransportType)),
 	journeyNumber: v.nullish(
@@ -2399,10 +2496,10 @@ export const vStationStatisticsMetricRequestStationEventDetailsRequest = v.objec
 	to: v.pipe(v.string(), v.isoTimestamp())
 });
 
-export const vTypeEnum30 = v.picklist(["LINE_HOUR_MATRIX"]);
+export const vTypeEnum31 = v.picklist(["LINE_HOUR_MATRIX"]);
 
 export const vStationStatisticsMetricRequestStationLineHourMatrixRequest = v.object({
-	type: v.optional(vTypeEnum30),
+	type: v.optional(vTypeEnum31),
 	originEvaNumber: v.nullish(
 		v.union([
 			v.pipe(
@@ -2449,14 +2546,14 @@ export const vStationStatisticsMetricRequestStationLineHourMatrixRequest = v.obj
 });
 
 export const vStatisticsMetricResultLineHourMatrixResult = v.object({
-	type: v.optional(vTypeEnum30),
+	type: v.optional(vTypeEnum31),
 	items: v.array(vLineHourMatrixItem)
 });
 
-export const vTypeEnum31 = v.picklist(["TRANSPORT_TYPE_MIX"]);
+export const vTypeEnum32 = v.picklist(["TRANSPORT_TYPE_MIX"]);
 
 export const vStationStatisticsMetricRequestStationTransportTypeMixRequest = v.object({
-	type: v.optional(vTypeEnum31),
+	type: v.optional(vTypeEnum32),
 	scheduleType: v.nullish(vScheduleType),
 	transportTypes: v.optional(v.array(vTransportType)),
 	administrationIds: v.optional(v.array(v.string())),
@@ -2533,42 +2630,42 @@ export const vStationStatisticsMetricRequest = v.union([
 ]);
 
 export const vStatisticsMetricResultTransportTypeMixResult = v.object({
-	type: v.optional(vTypeEnum31),
+	type: v.optional(vTypeEnum32),
 	items: v.array(vTransportTypeMixItem)
 });
 
-export const vTypeEnum32 = v.picklist(["EVENT_WEEKDAY_HOUR_HEATMAP"]);
+export const vTypeEnum33 = v.picklist(["EVENT_WEEKDAY_HOUR_HEATMAP"]);
 
 export const vStatisticsMetricResultEventWeekdayHourHeatmapResult = v.object({
-	type: v.optional(vTypeEnum32),
+	type: v.optional(vTypeEnum33),
 	items: v.array(vEventHeatmapCell)
 });
 
-export const vTypeEnum33 = v.picklist(["JOURNEY_CALENDAR"]);
+export const vTypeEnum34 = v.picklist(["JOURNEY_CALENDAR"]);
 
 export const vStatisticsMetricResultJourneyCalendarResult = v.object({
-	type: v.optional(vTypeEnum33),
+	type: v.optional(vTypeEnum34),
 	items: v.array(vJourneyCalendarItem)
 });
 
-export const vTypeEnum34 = v.picklist(["JOURNEY_DAILY_OUTCOMES"]);
+export const vTypeEnum35 = v.picklist(["JOURNEY_DAILY_OUTCOMES"]);
 
 export const vStatisticsMetricResultJourneyDailyOutcomesResult = v.object({
-	type: v.optional(vTypeEnum34),
+	type: v.optional(vTypeEnum35),
 	items: v.array(vJourneyDailyOutcomeItem)
 });
 
-export const vTypeEnum35 = v.picklist(["JOURNEY_DELAY_BUILD_UP"]);
+export const vTypeEnum36 = v.picklist(["JOURNEY_DELAY_BUILD_UP"]);
 
 export const vStatisticsMetricResultJourneyDelayBuildUpResult = v.object({
-	type: v.optional(vTypeEnum35),
+	type: v.optional(vTypeEnum36),
 	items: v.array(vJourneyDelayBuildUpItem)
 });
 
-export const vTypeEnum36 = v.picklist(["JOURNEY_PATTERN"]);
+export const vTypeEnum37 = v.picklist(["JOURNEY_PATTERN"]);
 
 export const vStatisticsMetricResultJourneyPatternResult = v.object({
-	type: v.optional(vTypeEnum36),
+	type: v.optional(vTypeEnum37),
 	journeyNumber: v.union([
 		v.pipe(
 			v.number(),
@@ -2604,40 +2701,40 @@ export const vStatisticsMetricResultJourneyPatternResult = v.object({
 	])
 });
 
-export const vTypeEnum37 = v.picklist(["JOURNEY_STOP_PROFILE"]);
+export const vTypeEnum38 = v.picklist(["JOURNEY_STOP_PROFILE"]);
 
 export const vStatisticsMetricResultJourneyStopProfileResult = v.object({
-	type: v.optional(vTypeEnum37),
+	type: v.optional(vTypeEnum38),
 	items: v.array(vJourneyStopProfileItem)
 });
 
-export const vTypeEnum38 = v.picklist(["JOURNEY_WEEKDAY_HOUR_HEATMAP"]);
+export const vTypeEnum39 = v.picklist(["JOURNEY_WEEKDAY_HOUR_HEATMAP"]);
 
 export const vStatisticsMetricResultJourneyWeekdayHourHeatmapResult = v.object({
-	type: v.optional(vTypeEnum38),
+	type: v.optional(vTypeEnum39),
 	items: v.array(vJourneyHeatmapCell)
 });
 
-export const vTypeEnum39 = v.picklist(["LINE_JOURNEY_NUMBER_RANKING"]);
+export const vTypeEnum40 = v.picklist(["LINE_JOURNEY_NUMBER_RANKING"]);
 
 export const vStatisticsMetricResultLineJourneyNumberRankingResult = v.object({
-	type: v.optional(vTypeEnum39),
+	type: v.optional(vTypeEnum40),
 	items: v.array(vJourneyNumberRankingItem),
 	page: vMetricPage
 });
 
-export const vTypeEnum40 = v.picklist(["LINE_PROBLEM_STATIONS"]);
+export const vTypeEnum41 = v.picklist(["LINE_PROBLEM_STATIONS"]);
 
 export const vStatisticsMetricResultLineProblemStationsResult = v.object({
-	type: v.optional(vTypeEnum40),
+	type: v.optional(vTypeEnum41),
 	items: v.array(vLineStationPerformanceItem),
 	page: vMetricPage
 });
 
-export const vTypeEnum41 = v.picklist(["LINE_PROFILE"]);
+export const vTypeEnum42 = v.picklist(["LINE_PROFILE"]);
 
 export const vStatisticsMetricResultLineProfileResult = v.object({
-	type: v.optional(vTypeEnum41),
+	type: v.optional(vTypeEnum42),
 	lineName: v.string(),
 	transportType: v.nullable(vTransportType),
 	representativeJourneyNumbers: v.array(
@@ -2664,101 +2761,108 @@ export const vStatisticsMetricResultLineProfileResult = v.object({
 	mainDestination: v.nullable(vStationReference)
 });
 
-export const vTypeEnum42 = v.picklist(["LINE_ROUTE_VARIANTS"]);
+export const vTypeEnum43 = v.picklist(["LINE_ROUTE_VARIANTS"]);
 
 export const vStatisticsMetricResultLineRouteVariantsResult = v.object({
-	type: v.optional(vTypeEnum42),
+	type: v.optional(vTypeEnum43),
 	items: v.array(vRouteVariantItem)
 });
 
-export const vTypeEnum43 = v.picklist(["LINE_STATION_PERFORMANCE"]);
+export const vTypeEnum44 = v.picklist(["LINE_STATION_PERFORMANCE"]);
 
 export const vStatisticsMetricResultLineStationPerformanceResult = v.object({
-	type: v.optional(vTypeEnum43),
+	type: v.optional(vTypeEnum44),
 	items: v.array(vLineStationPerformanceItem),
 	page: vMetricPage
 });
 
-export const vTypeEnum44 = v.picklist(["LINE_TIME_SERIES"]);
+export const vTypeEnum45 = v.picklist(["LINE_TIME_SERIES"]);
 
 export const vStatisticsMetricResultLineTimeSeriesResult = v.object({
-	type: v.optional(vTypeEnum44),
+	type: v.optional(vTypeEnum45),
 	items: v.array(vLineTimeSeriesPoint)
 });
 
-export const vTypeEnum45 = v.picklist(["NETWORK_EVENT_TIME_SERIES"]);
+export const vTypeEnum46 = v.picklist(["NETWORK_EVENT_TIME_SERIES"]);
 
 export const vStatisticsMetricResultNetworkEventTimeSeriesResult = v.object({
-	type: v.optional(vTypeEnum45),
+	type: v.optional(vTypeEnum46),
 	items: v.array(vEventTimeSeriesPoint)
 });
 
-export const vTypeEnum46 = v.picklist(["NETWORK_JOURNEY_TIME_SERIES"]);
+export const vTypeEnum47 = v.picklist(["NETWORK_JOURNEY_OUTCOME_TIME_SERIES"]);
+
+export const vStatisticsMetricResultNetworkJourneyOutcomeTimeSeriesResult = v.object({
+	type: v.optional(vTypeEnum47),
+	items: v.array(vJourneyOutcomeTimeSeriesPoint)
+});
+
+export const vTypeEnum48 = v.picklist(["NETWORK_JOURNEY_TIME_SERIES"]);
 
 export const vStatisticsMetricResultNetworkJourneyTimeSeriesResult = v.object({
-	type: v.optional(vTypeEnum46),
+	type: v.optional(vTypeEnum48),
 	items: v.array(vJourneyTimeSeriesPoint)
 });
 
-export const vTypeEnum47 = v.picklist(["NETWORK_LINE_RANKING"]);
+export const vTypeEnum49 = v.picklist(["NETWORK_LINE_RANKING"]);
 
 export const vStatisticsMetricResultNetworkLineRankingResult = v.object({
-	type: v.optional(vTypeEnum47),
+	type: v.optional(vTypeEnum49),
 	items: v.array(vLineJourneyRankingItem),
 	page: vMetricPage
 });
 
-export const vTypeEnum48 = v.picklist(["NETWORK_MAP_HOTSPOTS"]);
+export const vTypeEnum50 = v.picklist(["NETWORK_MAP_HOTSPOTS"]);
 
 export const vStatisticsMetricResultNetworkMapHotspotsResult = v.object({
-	type: v.optional(vTypeEnum48),
+	type: v.optional(vTypeEnum50),
 	featureCollection: vGeoJsonFeatureCollection
 });
 
-export const vTypeEnum49 = v.picklist(["NETWORK_STATION_RANKING"]);
+export const vTypeEnum51 = v.picklist(["NETWORK_STATION_RANKING"]);
 
 export const vStatisticsMetricResultNetworkStationRankingResult = v.object({
-	type: v.optional(vTypeEnum49),
+	type: v.optional(vTypeEnum51),
 	items: v.array(vStationEventRankingItem),
 	page: vMetricPage
 });
 
-export const vTypeEnum50 = v.picklist(["STATION_BENCHMARK"]);
+export const vTypeEnum52 = v.picklist(["STATION_BENCHMARK"]);
 
 export const vStatisticsMetricResultStationBenchmarkResult = v.object({
-	type: v.optional(vTypeEnum50),
+	type: v.optional(vTypeEnum52),
 	station: vEventMetrics,
 	network: vEventMetrics,
 	similarStations: v.nullable(v.array(vStationEventRankingItem))
 });
 
-export const vTypeEnum51 = v.picklist(["STATION_DIRECTIONS"]);
+export const vTypeEnum53 = v.picklist(["STATION_DIRECTIONS"]);
 
 export const vStatisticsMetricResultStationDirectionsResult = v.object({
-	type: v.optional(vTypeEnum51),
+	type: v.optional(vTypeEnum53),
 	items: v.array(vStationDirectionItem)
 });
 
-export const vTypeEnum52 = v.picklist(["STATION_EVENT_DETAILS"]);
+export const vTypeEnum54 = v.picklist(["STATION_EVENT_DETAILS"]);
 
 export const vStatisticsMetricResultStationEventDetailsResult = v.object({
-	type: v.optional(vTypeEnum52),
+	type: v.optional(vTypeEnum54),
 	items: v.array(vStationEventDetailItem),
 	page: vMetricPage
 });
 
-export const vTypeEnum53 = v.picklist(["STATION_LINE_RANKING"]);
+export const vTypeEnum55 = v.picklist(["STATION_LINE_RANKING"]);
 
 export const vStatisticsMetricResultStationLineRankingResult = v.object({
-	type: v.optional(vTypeEnum53),
+	type: v.optional(vTypeEnum55),
 	items: v.array(vStationLineRankingItem),
 	page: vMetricPage
 });
 
-export const vTypeEnum54 = v.picklist(["STATION_TIME_SERIES"]);
+export const vTypeEnum56 = v.picklist(["STATION_TIME_SERIES"]);
 
 export const vStatisticsMetricResultStationTimeSeriesResult = v.object({
-	type: v.optional(vTypeEnum54),
+	type: v.optional(vTypeEnum56),
 	items: v.array(vEventTimeSeriesPoint)
 });
 
@@ -2786,6 +2890,12 @@ export const vStatisticsMetricResult = v.union([
 			type: v.optional(v.literal("NETWORK_JOURNEY_TIME_SERIES"))
 		}),
 		vStatisticsMetricResultNetworkJourneyTimeSeriesResult
+	]),
+	v.intersect([
+		v.object({
+			type: v.optional(v.literal("NETWORK_JOURNEY_OUTCOME_TIME_SERIES"))
+		}),
+		vStatisticsMetricResultNetworkJourneyOutcomeTimeSeriesResult
 	]),
 	v.intersect([
 		v.object({
