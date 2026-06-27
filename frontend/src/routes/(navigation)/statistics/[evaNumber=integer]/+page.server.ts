@@ -1,24 +1,16 @@
 import { error } from "@sveltejs/kit";
 import type { PageServerLoad } from "./$types";
-import { getStationByEvaNumber, getStationGatheringInfo } from "@lib/remote/station.remote";
+import { getStationByEvaNumber } from "@lib/remote/station.remote";
 
-export const load: PageServerLoad = async ({ getClientAddress, params }) => {
+export const load: PageServerLoad = async ({ params, getClientAddress }) => {
 	const evaNumber = Number(params.evaNumber);
-	if (!Number.isInteger(evaNumber) || evaNumber <= 0) error(404, "Station not found");
 
-	const userIp = getClientAddress();
-
-	let station;
-	try {
-		station = await getStationByEvaNumber({ evaNumber, userIp });
-	} catch (stationError) {
-		if (stationError instanceof Error && stationError.message.includes("404")) error(404, "Station not found");
-		throw stationError;
+	if (!Number.isInteger(evaNumber) || evaNumber <= 0) {
+		error(400, "The selected station route is invalid.");
 	}
 
-	return {
-		evaNumber,
-		station,
-		gatheringPromise: getStationGatheringInfo({ evaNumber })
-	};
+	const station = await getStationByEvaNumber({ evaNumber, userIp: getClientAddress() });
+	if (!station) error(404, "The selected station could not be found.");
+
+	return { station };
 };

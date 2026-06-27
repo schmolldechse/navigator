@@ -9,7 +9,7 @@
 	import type { ClassValue, HTMLInputAttributes } from "svelte/elements";
 
 	type Props = {
-		type: "text" | "number";
+		type: "text" | "number" | "search";
 		value: InputValue;
 		debounceTime?: number;
 		onchange?: (value: InputValue) => void;
@@ -39,7 +39,7 @@
 	};
 
 	const getInputValue = (target: HTMLInputElement): InputValue => {
-		if (type === "text") return target.value;
+		if (type === "text" || type === "search") return target.value;
 		if (target.value === "") return "";
 
 		const numberValue = target.valueAsNumber;
@@ -77,3 +77,10 @@
 		classNames
 	]}
 />
+
+<style>
+	input[type="search"]::-webkit-search-cancel-button,
+	input[type="search"]::-webkit-search-decoration {
+		appearance: none;
+	}
+</style>

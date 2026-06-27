@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { EventTimeSeriesPoint } from "@lib/api";
+	import { goto } from "$app/navigation";
+	import type { EventTimeSeriesPoint, Station } from "@lib/api";
 	import * as Accordion from "@lib/components/ui/accordion";
 	import NetworkDelayDistributionChart from "@lib/components/statistics/network/NetworkDelayDistributionChart.svelte";
 	import NetworkDelaySeverityTimelineChart from "@lib/components/statistics/network/NetworkDelaySeverityTimelineChart.svelte";
@@ -29,6 +30,7 @@
 		createNetworkTransportTypeComparisonRequest,
 		createNetworkWeekdayHourHeatmapRequest
 	} from "@lib/components/statistics/network/network-statistics";
+	import StationSearch from "@lib/components/stations/StationSearch.svelte";
 	import MetricBucketControl from "@lib/components/statistics/shared/options/MetricBucketControl.svelte";
 	import MetricPerspectiveControl from "@lib/components/statistics/shared/options/MetricPerspectiveControl.svelte";
 	import Separator from "@lib/components/ui/Separator.svelte";
@@ -160,6 +162,13 @@
 			height: 310
 		}
 	]);
+
+	const openStation = async (station: Station) => {
+		const evaNumber = Number(station.evaNumber);
+		if (!Number.isInteger(evaNumber) || evaNumber <= 0) return;
+
+		await goto(`/statistics/${evaNumber}`);
+	};
 </script>
 
 <svelte:head>
@@ -175,6 +184,23 @@
 				Operational quality across German rail services, grouped by stops, journeys, time, transport families and high-impact
 				hotspots.
 			</p>
+		</div>
+	</section>
+
+	<section id="station-statistics" class="border-border bg-secondary/10 shrink-0 rounded-xl border-2 p-4 sm:p-5">
+		<div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,30rem)] lg:items-center lg:gap-6">
+			<div class="min-w-0">
+				<p class="text-accent text-xs font-bold tracking-wider uppercase">Station statistics</p>
+				<h2 class="text-foreground mt-1 text-2xl font-bold text-balance sm:text-3xl">Explore one station in detail</h2>
+				<p class="text-foreground/60 mt-2 max-w-3xl text-sm leading-relaxed font-semibold">
+					Jump from the network view to a station-specific dashboard and inspect reliability, punctuality and recorded service
+					patterns for the selected stop.
+				</p>
+			</div>
+
+			<div class="border-border bg-background/75 w-full rounded-lg border p-3 shadow-2xl shadow-black/10 lg:justify-self-end">
+				<StationSearch onselect={openStation} />
+			</div>
 		</div>
 	</section>
 

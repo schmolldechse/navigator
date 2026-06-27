@@ -194,7 +194,7 @@
 						<ChevronDown size={16} />
 					</DropdownMenu.Trigger>
 
-					<DropdownMenu.Content class="w-64">
+					<DropdownMenu.Content class="navigator-scrollbar w-64">
 						{#each scrollItems as item (item)}
 							<DropdownMenu.Item onselect={() => select(item)}>{item}</DropdownMenu.Item>
 						{/each}
