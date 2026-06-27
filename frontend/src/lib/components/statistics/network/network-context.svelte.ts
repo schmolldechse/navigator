@@ -17,13 +17,7 @@ type NetworkDistributionMode = "histogram" | "cdf";
 type NetworkDelaySeverityView = "delayed" | "all";
 type NetworkHourlyProfileDayGroup = "all" | "weekday" | "weekend";
 type NetworkMapMetric =
-	| "reliability5"
-	| "reliability15"
-	| "operative5"
-	| "operative15"
-	| "cancellation"
-	| "averagePositiveDelay"
-	| "plannedStops";
+	"reliability5" | "reliability15" | "operative5" | "operative15" | "cancellation" | "averagePositiveDelay" | "plannedStops";
 type NetworkPunctualityPerspective = MetricPerspective;
 type NetworkTransportComparisonThreshold = MetricThreshold;
 

@@ -17,15 +17,7 @@
 	};
 
 	type MapMarkerAnchor =
-		| "center"
-		| "top"
-		| "bottom"
-		| "left"
-		| "right"
-		| "top-left"
-		| "top-right"
-		| "bottom-left"
-		| "bottom-right";
+		"center" | "top" | "bottom" | "left" | "right" | "top-left" | "top-right" | "bottom-left" | "bottom-right";
 
 	type MapMarkerOffset = [number, number];
 

@@ -31,20 +31,10 @@
 	};
 
 	type SeverityShareKey =
-		| "reliableUnder6Share"
-		| "late6To15Share"
-		| "late15To30Share"
-		| "late30To60Share"
-		| "late60PlusShare"
-		| "cancelledShare";
+		"reliableUnder6Share" | "late6To15Share" | "late15To30Share" | "late30To60Share" | "late60PlusShare" | "cancelledShare";
 
 	type SeverityCountKey =
-		| "reliableUnder6Stops"
-		| "late6To15Stops"
-		| "late15To30Stops"
-		| "late30To60Stops"
-		| "late60PlusStops"
-		| "cancelledStops";
+		"reliableUnder6Stops" | "late6To15Stops" | "late15To30Stops" | "late30To60Stops" | "late60PlusStops" | "cancelledStops";
 
 	type SeverityDefinition = {
 		shareKey: SeverityShareKey;
