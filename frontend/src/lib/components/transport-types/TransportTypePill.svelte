@@ -19,5 +19,5 @@
 	title={group.label}
 >
 	<Icon type="rounded-corners" class="size-4 shrink-0" />
-	<span class="whitespace-normal break-words">{group.shortLabel}</span>
+	<span class="break-words whitespace-normal">{group.shortLabel}</span>
 </span>

@@ -85,16 +85,7 @@ const transportTypeIconGroups: Partial<Record<TransportType, TransportTypeIconGr
 	}
 };
 
-const transportTypeGroupOrder = [
-	"long-distance",
-	"regional",
-	"suburban",
-	"subway",
-	"tram",
-	"bus",
-	"ferry",
-	"taxi"
-];
+const transportTypeGroupOrder = ["long-distance", "regional", "suburban", "subway", "tram", "bus", "ferry", "taxi"];
 
 const toTransportType = (transportType: TransportType | string): TransportType | undefined =>
 	Object.values(TransportType).includes(transportType as TransportType) ? (transportType as TransportType) : undefined;

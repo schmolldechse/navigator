@@ -215,10 +215,10 @@
 							onselect={() => selectStation(station)}
 							class="items-start whitespace-normal"
 						>
-							<span class="min-w-0 max-w-full">
-								<span class="block whitespace-normal break-words">{station.name}</span>
+							<span class="max-w-full min-w-0">
+								<span class="block break-words whitespace-normal">{station.name}</span>
 								{#if station.ril100?.length}
-									<span class="text-foreground/50 mt-0.5 block whitespace-normal break-words text-xs">
+									<span class="text-foreground/50 mt-0.5 block text-xs break-words whitespace-normal">
 										{station.ril100.join(", ")}
 									</span>
 								{/if}
