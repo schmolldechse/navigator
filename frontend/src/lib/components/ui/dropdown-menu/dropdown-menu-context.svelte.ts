@@ -272,10 +272,4 @@ const getDropdownMenuContext = () => {
 	return context;
 };
 
-export {
-	DropdownMenuContext,
-	getDropdownMenuContext,
-	setDropdownMenuContext,
-	type DropdownMenuAlign,
-	type DropdownMenuState
-};
+export { DropdownMenuContext, getDropdownMenuContext, setDropdownMenuContext, type DropdownMenuAlign, type DropdownMenuState };

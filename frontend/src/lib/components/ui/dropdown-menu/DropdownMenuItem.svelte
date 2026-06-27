@@ -87,7 +87,7 @@
 		if (!isDisabled) menu.setActiveItem(itemId);
 	}}
 	class={[
-		"text-foreground flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm font-semibold outline-none transition-colors",
+		"text-foreground flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm font-semibold transition-colors outline-none",
 		"enabled:cursor-pointer disabled:cursor-not-allowed disabled:opacity-50",
 		"enabled:hover:bg-accent/15 enabled:hover:text-accent",
 		"data-active:bg-accent/15 data-active:text-accent",

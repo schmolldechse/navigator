@@ -21,13 +21,13 @@ builder.Services.AddHostedService<JourneyFactProjectionBacklogListener>();
 // quartz
 builder.Services.AddQuartz(options =>
 {
-    //options.AddQuartzJobs<GatheringRisIdsJob>(builder.Configuration);
-    //options.AddQuartzJobs<GatheringJourneysJob>(builder.Configuration);
-    //options.AddQuartzJobs<DatabaseSizeEstimationJob>(builder.Configuration);
-    //options.AddQuartzJobs<RisIdSnapshotJob>(builder.Configuration);
-    //options.AddQuartzJobs<JourneySnapshotJob>(builder.Configuration);
+    options.AddQuartzJobs<GatheringRisIdsJob>(builder.Configuration);
+    options.AddQuartzJobs<GatheringJourneysJob>(builder.Configuration);
+    options.AddQuartzJobs<DatabaseSizeEstimationJob>(builder.Configuration);
+    options.AddQuartzJobs<RisIdSnapshotJob>(builder.Configuration);
+    options.AddQuartzJobs<JourneySnapshotJob>(builder.Configuration);
     options.AddQuartzJobs<JourneyFactProjectionJob>(builder.Configuration);
-    //options.AddQuartzJobs<StaleRisIdDeactivationJob>(builder.Configuration);
+    options.AddQuartzJobs<StaleRisIdDeactivationJob>(builder.Configuration);
 });
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 

@@ -34,7 +34,7 @@
 		bind:value={customQuery}
 		placeholder="Focus or click for suggestions"
 		class={[
-			"border-border bg-background w-full rounded-lg border-2 px-3 py-2 text-sm font-semibold outline-none transition-colors",
+			"border-border bg-background w-full rounded-lg border-2 px-3 py-2 text-sm font-semibold transition-colors outline-none",
 			"focus:border-accent/70 disabled:cursor-not-allowed disabled:opacity-50"
 		]}
 	/>
@@ -170,12 +170,7 @@
 					</p>
 				</div>
 
-				<DropdownMenu.Root
-					bind:open={customOpen}
-					{disabled}
-					closeOnInteractOutside={closeOnOutside}
-					class="w-full max-w-md"
-				>
+				<DropdownMenu.Root bind:open={customOpen} {disabled} closeOnInteractOutside={closeOnOutside} class="w-full max-w-md">
 					<DropdownMenu.Trigger child={customTrigger} openOnFocus clickBehavior="open" class="w-full" />
 
 					<DropdownMenu.Content matchTriggerWidth>

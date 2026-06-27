@@ -28,9 +28,7 @@
 	const widthStyle = $derived(
 		matchTriggerWidth ? `width: ${menu.triggerWidth > 0 ? `${menu.triggerWidth}px` : "100%"}` : undefined
 	);
-	const contentStyle = $derived(
-		[`top: calc(100% + ${sideOffset}px)`, widthStyle, style].filter(Boolean).join("; ")
-	);
+	const contentStyle = $derived([`top: calc(100% + ${sideOffset}px)`, widthStyle, style].filter(Boolean).join("; "));
 
 	$effect(() => {
 		if (!contentElement) return;

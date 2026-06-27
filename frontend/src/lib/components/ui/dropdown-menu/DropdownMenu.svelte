@@ -1,10 +1,7 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
 	import type { ClassValue, HTMLAttributes } from "svelte/elements";
-	import {
-		DropdownMenuContext,
-		setDropdownMenuContext
-	} from "./dropdown-menu-context.svelte";
+	import { DropdownMenuContext, setDropdownMenuContext } from "./dropdown-menu-context.svelte";
 
 	type AttributeValue = string | number | boolean | null | undefined;
 	type Props = {
