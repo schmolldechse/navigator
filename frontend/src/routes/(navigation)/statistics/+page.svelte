@@ -2,6 +2,7 @@
 	import type { EventTimeSeriesPoint } from "@lib/api";
 	import * as Accordion from "@lib/components/ui/accordion";
 	import NetworkDelayDistributionChart from "@lib/components/statistics/network/NetworkDelayDistributionChart.svelte";
+	import NetworkDelaySeverityTimelineChart from "@lib/components/statistics/network/NetworkDelaySeverityTimelineChart.svelte";
 	import NetworkFilterPanel from "@lib/components/statistics/network/NetworkFilterPanel.svelte";
 	import NetworkHeatmap from "@lib/components/statistics/network/NetworkHeatmap.svelte";
 	import NetworkHourlyProfileChart from "@lib/components/statistics/network/NetworkHourlyProfileChart.svelte";
@@ -211,6 +212,13 @@
 				/>
 			{/snippet}
 		</NetworkTrendChart>
+
+		<NetworkDelaySeverityTimelineChart
+			promise={eventTimeSeries}
+			bucket={statistics.network.eventTimeSeries.bucket}
+			view={statistics.network.delaySeverity.view}
+			onviewchange={statistics.setDelaySeverityView}
+		/>
 
 		<NetworkJourneyOutcomeTimelineChart
 			promise={journeyOutcomeTimeSeries}

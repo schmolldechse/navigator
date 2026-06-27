@@ -14,6 +14,7 @@ import type { MetricThreshold } from "../shared/options/MetricThresholdControl.s
 
 type NetworkHeatmapMetric = "reliability5" | "reliability15" | "operative5" | "operative15" | "cancellation" | "plannedStops";
 type NetworkDistributionMode = "histogram" | "cdf";
+type NetworkDelaySeverityView = "delayed" | "all";
 type NetworkHourlyProfileDayGroup = "all" | "weekday" | "weekend";
 type NetworkMapMetric =
 	| "reliability5"
@@ -30,6 +31,7 @@ type NetworkMetricScope = {
 	eventTimeSeries: { bucket: StatisticsBucket; perspective: NetworkPunctualityPerspective };
 	journeyTimeSeries: { bucket: StatisticsBucket };
 	weekdayHourHeatmap: { metric: NetworkHeatmapMetric };
+	delaySeverity: { view: NetworkDelaySeverityView };
 	hourlyProfile: {
 		dayGroup: NetworkHourlyProfileDayGroup;
 		perspective: NetworkPunctualityPerspective;
@@ -46,6 +48,7 @@ const defaultNetworkMetricScope = (): NetworkMetricScope => ({
 	eventTimeSeries: { bucket: StatisticsBucket.DAY, perspective: "customer" },
 	journeyTimeSeries: { bucket: StatisticsBucket.DAY },
 	weekdayHourHeatmap: { metric: "reliability5" },
+	delaySeverity: { view: "delayed" },
 	hourlyProfile: { dayGroup: "all", perspective: "customer", threshold: "under6" },
 	mapHotspots: { metric: "reliability5" },
 	delayDistribution: { mode: "histogram" },
@@ -106,6 +109,10 @@ class NetworkStatisticsContext {
 		this.network.weekdayHourHeatmap.metric = metric;
 	};
 
+	setDelaySeverityView = (view: NetworkDelaySeverityView) => {
+		this.network.delaySeverity.view = view;
+	};
+
 	setHourlyProfileDayGroup = (dayGroup: NetworkHourlyProfileDayGroup) => {
 		this.network.hourlyProfile.dayGroup = dayGroup;
 	};
@@ -138,6 +145,7 @@ export {
 	getNetworkStatisticsContext,
 	setNetworkStatisticsContext,
 	type NetworkDistributionMode,
+	type NetworkDelaySeverityView,
 	type NetworkFilterDraft,
 	type NetworkHeatmapMetric,
 	type NetworkHourlyProfileDayGroup,
