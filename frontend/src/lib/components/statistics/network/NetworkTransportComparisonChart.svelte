@@ -133,9 +133,23 @@
 
 	let { promise, threshold, onthresholdchange }: Props = $props();
 	let outcomeMixValue = $state<string | undefined>(undefined);
+	let chartWidth = $state(0);
 
 	const selectedThreshold = $derived(getThresholdDefinition(threshold));
 	const outcomeMixAccordionValue = "planned-stop-outcome-mix";
+	const compactChart = $derived(chartWidth > 0 && chartWidth < 560);
+	const gapChartPadding = $derived({
+		top: 28,
+		right: compactChart ? 58 : 86,
+		bottom: 44,
+		left: compactChart ? 84 : 116
+	});
+	const outcomeChartPadding = $derived({
+		top: 16,
+		right: compactChart ? 12 : 20,
+		bottom: 44,
+		left: compactChart ? 84 : 116
+	});
 
 	const formatGapLabel = (gap: number): string => (gap <= 0 ? "0.0 pp" : `-${(gap * 100).toFixed(1)} pp`);
 
@@ -240,7 +254,7 @@
 				(left, right) => right.punctualityGap - left.punctualityGap || left.name.localeCompare(right.name)
 			)}
 
-			<div class="grid gap-4">
+			<div bind:clientWidth={chartWidth} class="grid gap-4">
 				<section class="grid gap-3" aria-label={`Punctuality gap by transport type for ${selectedThreshold.label}`}>
 					<div class="flex flex-col gap-1">
 						<p class="text-foreground/50 text-[0.65rem] font-bold tracking-wider uppercase">Punctuality gap</p>
@@ -259,7 +273,7 @@
 							yDomain={gapRows.map((row) => row.label)}
 							yReverse={true}
 							height={Math.max(300, gapRows.length * 42 + 76)}
-							padding={{ top: 28, right: 86, bottom: 44, left: 124 }}
+							padding={gapChartPadding}
 							bandPadding={0.32}
 							tooltipContext={{ mode: "band" }}
 							grid={{ x: false, y: { opacity: 0.18 }, bandAlign: "between" }}
@@ -358,7 +372,7 @@
 										xDomain={[0, 1]}
 										yDomain={rows.map((row) => row.label)}
 										height={Math.max(300, rows.length * 44 + 88)}
-										padding={{ top: 16, right: 20, bottom: 44, left: 124 }}
+										padding={outcomeChartPadding}
 										bandPadding={0.28}
 										tooltipContext={{ mode: "band" }}
 										legend={{ placement: "bottom", classes: { root: "justify-center pt-2", item: "text-xs font-semibold" } }}

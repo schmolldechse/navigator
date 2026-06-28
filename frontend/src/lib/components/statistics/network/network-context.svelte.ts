@@ -25,7 +25,7 @@ type NetworkMetricScope = {
 	eventTimeSeries: { bucket: StatisticsBucket; perspective: NetworkPunctualityPerspective };
 	journeyTimeSeries: { bucket: StatisticsBucket };
 	weekdayHourHeatmap: { metric: NetworkHeatmapMetric };
-	delaySeverity: { view: NetworkDelaySeverityView };
+	delaySeverity: { view: NetworkDelaySeverityView; bucket: StatisticsBucket };
 	hourlyProfile: {
 		dayGroup: NetworkHourlyProfileDayGroup;
 		perspective: NetworkPunctualityPerspective;
@@ -42,7 +42,7 @@ const defaultNetworkMetricScope = (): NetworkMetricScope => ({
 	eventTimeSeries: { bucket: StatisticsBucket.DAY, perspective: "customer" },
 	journeyTimeSeries: { bucket: StatisticsBucket.DAY },
 	weekdayHourHeatmap: { metric: "reliability5" },
-	delaySeverity: { view: "delayed" },
+	delaySeverity: { view: "delayed", bucket: StatisticsBucket.DAY },
 	hourlyProfile: { dayGroup: "all", perspective: "customer", threshold: "under6" },
 	mapHotspots: { metric: "reliability5" },
 	delayDistribution: { mode: "histogram" },
@@ -78,6 +78,7 @@ class NetworkStatisticsContext {
 		this.global.includeReplacement = draft.includeReplacement;
 		this.event.scheduleType = draft.scheduleType;
 		this.network.eventTimeSeries.bucket = normalizeBucketForRange(this.network.eventTimeSeries.bucket, this.global);
+		this.network.delaySeverity.bucket = normalizeBucketForRange(this.network.delaySeverity.bucket, this.global);
 		this.network.journeyTimeSeries.bucket = normalizeBucketForRange(this.network.journeyTimeSeries.bucket, this.global);
 	};
 
@@ -105,6 +106,10 @@ class NetworkStatisticsContext {
 
 	setDelaySeverityView = (view: NetworkDelaySeverityView) => {
 		this.network.delaySeverity.view = view;
+	};
+
+	setDelaySeverityBucket = (bucket: StatisticsBucket) => {
+		this.network.delaySeverity.bucket = normalizeBucketForRange(bucket, this.global);
 	};
 
 	setHourlyProfileDayGroup = (dayGroup: NetworkHourlyProfileDayGroup) => {

@@ -13,28 +13,42 @@
 	import CircleAlert from "@lucide/svelte/icons/circle-alert";
 	import { AreaChart, type ChartState } from "layerchart";
 	import DashboardPanel from "../shared/DashboardPanel.svelte";
+	import MetricBucketControl from "../shared/options/MetricBucketControl.svelte";
 	import MetricOptionControl, { type MetricOption } from "../shared/options/MetricOptionControl.svelte";
 	import {
 		expectMetricResult,
 		formatCount,
 		formatMetric,
 		formatStatisticsBucketLabel,
-		toNumber
+		toNumber,
+		type StatisticsBucketOption
 	} from "../shared/statistics-dashboard";
 	import type { NetworkDelaySeverityView } from "./network-context.svelte";
 
 	type Props = {
 		promise: RemoteQuery<StatisticsMetricResponse>;
 		bucket: StatisticsBucket;
+		bucketOptions: StatisticsBucketOption[];
+		onbucketchange: (bucket: StatisticsBucket) => void;
 		view: NetworkDelaySeverityView;
 		onviewchange: (view: NetworkDelaySeverityView) => void;
 	};
 
 	type SeverityShareKey =
-		"reliableUnder6Share" | "late6To15Share" | "late15To30Share" | "late30To60Share" | "late60PlusShare" | "cancelledShare";
+		| "reliableUnder6Share"
+		| "late6To15Share"
+		| "late15To30Share"
+		| "late30To60Share"
+		| "late60PlusShare"
+		| "cancelledShare";
 
 	type SeverityCountKey =
-		"reliableUnder6Stops" | "late6To15Stops" | "late15To30Stops" | "late30To60Stops" | "late60PlusStops" | "cancelledStops";
+		| "reliableUnder6Stops"
+		| "late6To15Stops"
+		| "late15To30Stops"
+		| "late30To60Stops"
+		| "late60PlusStops"
+		| "cancelledStops";
 
 	type SeverityDefinition = {
 		shareKey: SeverityShareKey;
@@ -43,6 +57,13 @@
 		shortLabel: string;
 		color: string;
 		includeInDelayedView: boolean;
+	};
+
+	type SeveritySeriesItem = {
+		key: SeverityShareKey;
+		label: string;
+		value: SeverityShareKey;
+		color: string;
 	};
 
 	type DelaySeverityRow = {
@@ -62,7 +83,7 @@
 		cancelledStops: number;
 	};
 
-	let { promise, bucket, view, onviewchange }: Props = $props();
+	let { promise, bucket, bucketOptions, onbucketchange, view, onviewchange }: Props = $props();
 
 	const viewOptions: MetricOption<NetworkDelaySeverityView>[] = [
 		{ value: "delayed", label: "Delayed stops" },
@@ -128,7 +149,7 @@
 	};
 	const countValue = (value: number | string | null | undefined): number => Math.max(0, toNumber(value) ?? 0);
 	const shareOfPlanned = (count: number, plannedStops: number): number =>
-		plannedStops > 0 ? clampRate(count / plannedStops) : 0;
+		plannedStops > 0 ? Math.max(0, count / plannedStops) : 0;
 
 	const createSeverityRow = (item: EventTimeSeriesPoint): DelaySeverityRow | null => {
 		const date = new Date(item.bucketStart);
@@ -140,16 +161,16 @@
 		const cancelledStops = clampCount(countValue(metrics.cancelledEvents), plannedStops);
 		if (plannedStops <= 0) return null;
 
-		const operativeUnder6Rate = servedStops > 0 ? metricRate(metrics.operativePunctuality5Rate) : 0;
-		const operativeUnder15Rate = servedStops > 0 ? metricRate(metrics.operativePunctuality15Rate) : 0;
+		const under6Rate = metricRate(metrics.customerReliability5Rate);
+		const under15Rate = metricRate(metrics.customerReliability15Rate);
 		const late30PlusShare = metricRate(metrics.late30Rate);
 		const late60PlusShare = metricRate(metrics.late60Rate);
-		if (operativeUnder6Rate === null || operativeUnder15Rate === null || late30PlusShare === null || late60PlusShare === null) {
+		if (under6Rate === null || under15Rate === null || late30PlusShare === null || late60PlusShare === null) {
 			return null;
 		}
 
-		const reliableUnder6Stops = clampCount(operativeUnder6Rate * servedStops, servedStops);
-		const reliableUnder15Stops = clampCount(Math.max(operativeUnder15Rate * servedStops, reliableUnder6Stops), servedStops);
+		const reliableUnder6Stops = clampCount(under6Rate * plannedStops, servedStops);
+		const reliableUnder15Stops = clampCount(Math.max(under15Rate * plannedStops, reliableUnder6Stops), servedStops);
 		const late30PlusStops = clampCount(late30PlusShare * plannedStops, servedStops);
 		const late60PlusStops = clampCount(late60PlusShare * plannedStops, late30PlusStops);
 		const late6To15Stops = Math.max(0, reliableUnder15Stops - reliableUnder6Stops);
@@ -224,7 +245,7 @@
 		row.late6To15Stops + row.late15To30Stops + row.late30To60Stops + row.late60PlusStops;
 	const severe30Stops = (row: Omit<DelaySeverityRow, "date">): number => row.late30To60Stops + row.late60PlusStops;
 
-	const createSeries = (selectedView: NetworkDelaySeverityView) =>
+	const createSeries = (selectedView: NetworkDelaySeverityView): SeveritySeriesItem[] =>
 		severityDefinitions
 			.filter((severity) => selectedView === "all" || severity.includeInDelayedView)
 			.map((severity) => ({
@@ -233,6 +254,17 @@
 				value: severity.shareKey,
 				color: severity.color
 			}));
+
+	const createYDomain = (
+		rows: DelaySeverityRow[],
+		series: SeveritySeriesItem[],
+		selectedView: NetworkDelaySeverityView
+	): [number, number] => {
+		const maxStack = Math.max(0, ...rows.map((row) => series.reduce((sum, item) => sum + row[item.key], 0)));
+		const paddedMax = maxStack <= 0 ? 0.1 : Math.ceil(maxStack * 1.08 * 20) / 20;
+
+		return [0, selectedView === "all" ? Math.max(1, paddedMax) : Math.max(0.1, paddedMax)];
+	};
 
 	const createTooltipItems = (selectedView: NetworkDelaySeverityView): PointTooltipItem<DelaySeverityRow>[] => [
 		{
@@ -258,6 +290,7 @@
 	icon={ChartArea}
 >
 	{#snippet actions()}
+		<MetricBucketControl value={bucket} options={bucketOptions} onchange={onbucketchange} />
 		<MetricOptionControl title="View" value={view} options={viewOptions} onchange={onviewchange} />
 	{/snippet}
 	{#if promise.loading}
@@ -282,6 +315,7 @@
 			{@const totals = createTotals(rows)}
 			{@const severitySeries = createSeries(view)}
 			{@const tooltipItems = createTooltipItems(view)}
+			{@const yDomain = createYDomain(rows, severitySeries, view)}
 			{@const delayedTotal = delayedStops(totals)}
 			{@const severe30Total = severe30Stops(totals)}
 
@@ -298,7 +332,7 @@
 						x="date"
 						series={severitySeries}
 						seriesLayout="stack"
-						yDomain={view === "all" ? [0, 1] : [0, null]}
+						{yDomain}
 						height={330}
 						padding={{ top: 18, right: 18, bottom: 56, left: 46 }}
 						highlight={{ lines: true, points: true, axis: "x" }}
