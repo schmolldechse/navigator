@@ -90,11 +90,16 @@ const transportTypeGroupOrder = ["long-distance", "regional", "suburban", "subwa
 const toTransportType = (transportType: TransportType | string): TransportType | undefined =>
 	Object.values(TransportType).includes(transportType as TransportType) ? (transportType as TransportType) : undefined;
 
+const getTransportTypeIconGroup = (transportType: TransportType | string): TransportTypeIconGroup | undefined => {
+	const normalizedTransportType = toTransportType(transportType);
+	return normalizedTransportType ? transportTypeIconGroups[normalizedTransportType] : undefined;
+};
+
 const getTransportTypeIconGroups = (transportTypes: Array<TransportType | string>): TransportTypeIconGroup[] => {
 	const groups = new Map<string, TransportTypeIconGroup>();
 
 	for (const transportType of transportTypes) {
-		const group = transportTypeIconGroups[toTransportType(transportType) ?? TransportType.UNKNOWN];
+		const group = getTransportTypeIconGroup(transportType);
 		if (!group || groups.has(group.key)) continue;
 
 		groups.set(group.key, group);
@@ -105,4 +110,4 @@ const getTransportTypeIconGroups = (transportTypes: Array<TransportType | string
 	);
 };
 
-export { getTransportTypeIconGroups, type TransportTypeIconGroup };
+export { getTransportTypeIconGroup, getTransportTypeIconGroups, type TransportTypeIconGroup };

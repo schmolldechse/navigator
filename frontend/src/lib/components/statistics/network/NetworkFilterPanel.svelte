@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { ScheduleType, type TransportType } from "@lib/api";
+	import { getTransportTypeIconGroup } from "@lib/components/transport-types/transport-type-icons";
 	import * as Accordion from "@lib/components/ui/accordion";
 	import Badge from "@lib/components/ui/Badge.svelte";
 	import Button from "@lib/components/ui/Button.svelte";
@@ -19,7 +20,8 @@
 		createRangeLabel,
 		networkTransportTypeOptions,
 		scheduleTypeOptions,
-		type ScheduleTypeOption
+		type ScheduleTypeOption,
+		type TransportTypeOption
 	} from "../shared/statistics-dashboard";
 
 	const statistics = getNetworkStatisticsContext();
@@ -42,6 +44,21 @@
 	const isExpanded = $derived(expandedValue === filterPanelValue);
 
 	const networkTransportTypes = $derived(networkTransportTypeOptions.map((option) => option.value));
+	const selectedTransportTypeOptions = $derived(
+		networkTransportTypeOptions.filter((option) => draft.transportTypes.includes(option.value))
+	);
+	const transportTypeKey = (transportTypes: TransportType[]): string => [...transportTypes].sort().join("|");
+	const hasFilterChanges = $derived.by(() => {
+		const applied = statistics.filterDraft;
+
+		return (
+			draft.from !== applied.from ||
+			draft.to !== applied.to ||
+			draft.scheduleType !== applied.scheduleType ||
+			draft.includeReplacement !== applied.includeReplacement ||
+			transportTypeKey(draft.transportTypes) !== transportTypeKey(applied.transportTypes)
+		);
+	});
 
 	const assignDraft = (next: NetworkFilterDraft) => {
 		draft.from = next.from;
@@ -76,10 +93,18 @@
 		if (!rangeAnchor) return;
 
 		const rect = rangeAnchor.getBoundingClientRect();
+		const minWidth = Math.max(320, rect.width);
+		const viewportPadding = 16;
+		const left = Math.min(
+			Math.max(viewportPadding, rect.left),
+			Math.max(viewportPadding, window.innerWidth - minWidth - viewportPadding)
+		);
+
 		timePickerStyle = [
-			`--time-picker-left: ${Math.max(16, rect.left)}px`,
+			`--time-picker-left: ${left}px`,
 			`--time-picker-top: ${rect.bottom + 8}px`,
-			`--time-picker-min-width: ${Math.max(320, rect.width)}px`
+			`--time-picker-min-width: ${minWidth}px`,
+			`--time-picker-max-width: calc(100dvw - ${viewportPadding * 2}px)`
 		].join(";");
 	};
 
@@ -95,10 +120,8 @@
 		draft.to = asLocalDate(value.end.plus({ days: 1 }));
 	};
 
-	const toggleTransportType = (transportType: TransportType, checked: boolean) => {
-		draft.transportTypes = checked
-			? [...new Set([...draft.transportTypes, transportType])]
-			: draft.transportTypes.filter((item) => item !== transportType);
+	const updateTransportTypes = (selectedOptions: TransportTypeOption[]) => {
+		draft.transportTypes = selectedOptions.map((option) => option.value).filter((type) => networkTransportTypes.includes(type));
 	};
 
 	const apply = () => {
@@ -128,12 +151,13 @@
 <svelte:window onresize={updateTimePickerAnchor} onscroll={updateTimePickerAnchor} />
 
 <section class="border-border bg-secondary/10 rounded-xl border-2">
-	<div class="flex flex-col gap-3 p-4 lg:flex-row lg:items-center lg:justify-between">
+	<div class="grid gap-4 p-4 sm:p-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
 		<div class="min-w-0">
 			<div class="flex items-center gap-2">
 				<SlidersHorizontal size={18} class="text-accent shrink-0" />
 				<h2 class="text-foreground text-base font-semibold">Filters</h2>
 			</div>
+
 			<div class="mt-2 flex flex-wrap gap-2">
 				{#each appliedSummaryItems as item (item)}
 					<Badge>{item}</Badge>
@@ -141,16 +165,32 @@
 			</div>
 		</div>
 
-		<div class="flex flex-wrap gap-2">
-			<Button mode="secondary" onclick={reset} class="inline-flex items-center gap-2 text-sm">
+		<div class="grid grid-cols-3 gap-2 sm:flex sm:flex-wrap sm:justify-end">
+			<Button
+				mode="secondary"
+				onclick={reset}
+				class="inline-flex h-9 w-full items-center justify-center gap-2 text-sm sm:w-auto"
+			>
 				<RotateCcw size={16} />
 				Reset
 			</Button>
-			<Button mode="secondary" onclick={toggleExpanded} class="inline-flex items-center gap-2 text-sm">
+
+			<Button
+				mode="secondary"
+				onclick={toggleExpanded}
+				aria-expanded={isExpanded}
+				class="inline-flex h-9 w-full items-center justify-center gap-2 text-sm sm:w-auto"
+			>
 				<SlidersHorizontal size={16} />
 				Edit
 			</Button>
-			<Button mode="primary" onclick={apply} class="inline-flex items-center gap-2 text-sm">
+
+			<Button
+				mode="primary"
+				onclick={apply}
+				disabled={!hasFilterChanges}
+				class="inline-flex h-9 w-full items-center justify-center gap-2 text-sm sm:w-auto"
+			>
 				<Check size={16} />
 				Apply
 			</Button>
@@ -164,93 +204,105 @@
 		class="[&>[role=separator]]:hidden"
 	>
 		<Accordion.Item value={filterPanelValue}>
-			<Accordion.Content class="border-border/70 border-t px-4 pt-4 pb-0">
-				<div class="grid gap-5">
-					<div class="grid gap-4 lg:grid-cols-[minmax(16rem,20rem)_minmax(0,1fr)] lg:items-end">
-						<div class="grid gap-1.5 text-sm font-semibold">
-							<span class="text-foreground/60">Range</span>
-							<div bind:this={rangeAnchor}>
-								<Button
-									mode="secondary"
-									onclick={openDatePicker}
-									aria-label="Open date range picker"
-									class="inline-flex w-full items-center justify-between gap-3"
-								>
-									<span>{createRangeLabel(draft)}</span>
-									<CalendarDays size={16} class="shrink-0" />
-								</Button>
-							</div>
-							<TimePickerDialog
-								bind:isVisible={datePickerOpen}
-								isRange
-								value={selectedRange}
-								onchange={updateRange}
-								closeOnSelect
-								style={timePickerStyle}
-								class={[
-									"fixed! inset-x-0! top-auto! bottom-0! m-0! w-[100dvw]! max-w-none! rounded-t-xl! rounded-b-none! border-x-0! border-b-0! p-4! shadow-2xl!",
-									"max-h-[75dvh]! overflow-y-auto!",
-									"sm:inset-auto! sm:top-[var(--time-picker-top)]! sm:bottom-auto! sm:left-[var(--time-picker-left)]! sm:max-h-[calc(100dvh-var(--time-picker-top)-1rem)]! sm:w-max! sm:min-w-[var(--time-picker-min-width)]! sm:rounded-xl! sm:border-2!"
-								]}
-							/>
+			<Accordion.Content class="border-border/70 border-t px-4 pt-4 pb-4 sm:px-5 sm:pb-5">
+				<div class="grid gap-5 lg:grid-cols-12 lg:gap-x-6 xl:gap-x-8">
+					<div class="flex min-w-0 flex-col items-start gap-1.5 lg:col-span-3">
+						<span class="text-foreground/60 text-[0.65rem] font-bold tracking-wider uppercase">Range</span>
+
+						<div bind:this={rangeAnchor} class="w-full">
+							<Button
+								mode="secondary"
+								onclick={openDatePicker}
+								aria-label="Open date range picker"
+								class="inline-flex h-9 w-full items-center justify-between gap-3 px-3"
+							>
+								<span class="truncate">{createRangeLabel(draft)}</span>
+								<CalendarDays size={16} class="shrink-0" />
+							</Button>
 						</div>
 
-						<div class="flex flex-col gap-1">
-							<span class="text-foreground/60 text-sm font-semibold">Schedule</span>
-							<ToggleGroup
-								mode="single"
-								allowEmpty={false}
-								selected={scheduleTypeOptions.find((option) => option.value === draft.scheduleType) ?? scheduleTypeOptions[0]}
-								keyFn={(option: ScheduleTypeOption) => option.value ?? "ALL"}
-								onselect={(option: ScheduleTypeOption | undefined) => (draft.scheduleType = option?.value ?? null)}
-								class="gap-1"
-							>
-								{#each scheduleTypeOptions as option (option.value ?? "ALL")}
-									<ToggleGroupItem
-										item={option}
-										class="data-active:border-accent data-active:bg-accent data-active:text-accent-foreground px-2.5 py-1.5 text-xs font-semibold"
-									>
-										{option.label}
-									</ToggleGroupItem>
-								{/each}
-							</ToggleGroup>
-						</div>
+						<TimePickerDialog
+							bind:isVisible={datePickerOpen}
+							isRange
+							value={selectedRange}
+							onchange={updateRange}
+							closeOnSelect
+							style={timePickerStyle}
+							class={[
+								"fixed! inset-x-0! top-auto! bottom-0! m-0! w-[100dvw]! max-w-none! rounded-t-xl! rounded-b-none! border-x-0! border-b-0! p-4! shadow-2xl!",
+								"max-h-[75dvh]! overflow-y-auto!",
+								"sm:inset-auto! sm:top-[var(--time-picker-top)]! sm:bottom-auto! sm:left-[var(--time-picker-left)]! sm:max-h-[calc(100dvh-var(--time-picker-top)-1rem)]! sm:w-max! sm:max-w-[var(--time-picker-max-width)]! sm:min-w-[var(--time-picker-min-width)]! sm:rounded-xl! sm:border-2!"
+							]}
+						/>
 					</div>
 
-					<div class="grid gap-4 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-start">
-						<div class="grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
-							{#each networkTransportTypeOptions as option (option.value)}
-								<label
-									class={[
-										"border-border bg-background flex min-h-20 items-start gap-2 rounded-lg border p-3 text-sm transition-colors",
-										draft.transportTypes.includes(option.value) && "border-accent/60 bg-accent/10 text-accent"
-									]}
-								>
-									<Checkbox
-										checked={draft.transportTypes.includes(option.value)}
-										onchecked={(checked) => toggleTransportType(option.value, checked)}
-									/>
-									<span class="grid gap-0.5">
-										<span class="font-semibold">{option.label}</span>
-										<span class="text-foreground/55 text-xs leading-4">{option.description ?? option.shortLabel}</span>
-									</span>
-								</label>
-							{/each}
-						</div>
+					<div class="flex min-w-0 flex-col items-start gap-1.5 lg:col-span-4">
+						<span class="text-foreground/60 text-[0.65rem] font-bold tracking-wider uppercase">Schedule</span>
 
-						<label class="border-border bg-background flex max-w-sm items-start gap-2 rounded-lg border p-3 text-sm">
+						<ToggleGroup
+							mode="single"
+							allowEmpty={false}
+							selected={scheduleTypeOptions.find((option) => option.value === draft.scheduleType) ?? scheduleTypeOptions[0]}
+							keyFn={(option: ScheduleTypeOption) => option.value ?? "ALL"}
+							onselect={(option: ScheduleTypeOption | undefined) => (draft.scheduleType = option?.value ?? null)}
+							class="flex flex-wrap gap-2"
+						>
+							{#each scheduleTypeOptions as option (option.value ?? "ALL")}
+								<ToggleGroupItem
+									item={option}
+									class="data-active:border-accent data-active:bg-accent data-active:text-accent-foreground min-h-9 px-3 py-1.5 text-xs font-semibold"
+								>
+									{option.label}
+								</ToggleGroupItem>
+							{/each}
+						</ToggleGroup>
+					</div>
+
+					<div class="flex min-w-0 flex-col items-start gap-1.5 lg:col-span-5">
+						<span class="text-foreground/60 text-[0.65rem] font-bold tracking-wider uppercase">Replacement</span>
+
+						<label
+							class="border-border bg-background hover:border-accent/60 hover:bg-secondary/40 inline-flex w-full items-start gap-2 rounded-md border px-3 py-2 text-sm transition-colors"
+						>
 							<Checkbox
 								checked={draft.includeReplacement}
 								onchecked={(checked) => (draft.includeReplacement = checked)}
-								class="mt-0.5"
+								class="mt-0.5 shrink-0"
 							/>
-							<span class="grid gap-0.5">
-								<span class="font-semibold">Replacement services</span>
-								<span class="text-foreground/55 text-xs leading-4">
+							<span class="grid min-w-0 gap-0.5">
+								<span class="text-xs font-semibold">Include replacement</span>
+								<span class="text-foreground/60 text-xs leading-4">
 									Include services marked as replacement transport in all network metrics. Enabled by default.
 								</span>
 							</span>
 						</label>
+					</div>
+
+					<div class="flex min-w-0 flex-col items-start gap-1.5 lg:col-span-12">
+						<span class="text-foreground/60 text-[0.65rem] font-bold tracking-wider uppercase">Transport types</span>
+
+						<ToggleGroup
+							mode="multiple"
+							selected={selectedTransportTypeOptions}
+							keyFn={(option: TransportTypeOption) => option.value}
+							onselect={updateTransportTypes}
+							class="grid w-full grid-cols-2 gap-2 sm:flex sm:flex-wrap"
+						>
+							{#each networkTransportTypeOptions as option (option.value)}
+								{@const iconGroup = getTransportTypeIconGroup(option.value)}
+								<ToggleGroupItem
+									item={option}
+									aria-label={`Toggle ${option.label} transport filter`}
+									class="data-active:border-accent data-active:bg-accent data-active:text-accent-foreground min-h-9 justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold sm:justify-start"
+								>
+									{#if iconGroup}
+										{@const Icon = iconGroup.Icon}
+										<Icon type="rounded-corners" class="size-4 shrink-0" />
+									{/if}
+									<span class="truncate">{option.label}</span>
+								</ToggleGroupItem>
+							{/each}
+						</ToggleGroup>
 					</div>
 				</div>
 			</Accordion.Content>
