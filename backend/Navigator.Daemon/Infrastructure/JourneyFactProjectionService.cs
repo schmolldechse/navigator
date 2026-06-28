@@ -1,7 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Navigator.Data;
+using Npgsql;
+using NpgsqlTypes;
 using System.Data;
 using System.Data.Common;
 
@@ -9,16 +12,23 @@ namespace Navigator.Daemon.Infrastructure;
 
 public sealed class JourneyFactProjectionService(
     ILogger<JourneyFactProjectionService> logger,
+    IConfiguration configuration,
     DataContext dataContext
 )
 {
-    private const int BatchSize = 10_000;
+    private const int DefaultBatchSize = 10_000;
+    private const int DefaultCommandTimeoutSeconds = 900;
     private const int MaxAttempts = 10;
+
     private static readonly TimeSpan _lockDuration = TimeSpan.FromMinutes(30);
+
+    private readonly int _batchSize = ReadPositiveInt(configuration, "JobConfigs:JourneyFactProjectionJob:BatchSize", DefaultBatchSize);
+    private readonly int _commandTimeoutSeconds = ReadPositiveInt(configuration, "JobConfigs:JourneyFactProjectionJob:CommandTimeoutSeconds", DefaultCommandTimeoutSeconds);
 
     public async Task<JourneyFactProjectionRunResult> ProjectAvailableAsync(CancellationToken cancellationToken = default)
     {
         var workerId = Environment.MachineName + ":" + Guid.NewGuid().ToString("N");
+
         var claimed = await ClaimBacklogEntriesAsync(workerId, cancellationToken);
         if (!claimed.Any()) return JourneyFactProjectionRunResult.Empty;
 
@@ -32,7 +42,6 @@ public sealed class JourneyFactProjectionService(
             result.FailedCount,
             result.EventFactCount,
             result.JourneyFactCount);
-
         return result;
     }
 
@@ -89,8 +98,14 @@ public sealed class JourneyFactProjectionService(
         await using var transaction = await dataContext.Database.BeginTransactionAsync(cancellationToken);
 
         var result = await ProjectFactsInDatabaseAsync(entries, cancellationToken);
-
         await transaction.CommitAsync(cancellationToken);
+
+        logger.LogInformation(
+            "Projected journey fact batch. Entries: {EntryCount}, Projected: {ProjectedCount}, EventFacts: {EventFactCount}, JourneyFacts: {JourneyFactCount}",
+            entries.Count,
+            result.ProjectedCount,
+            result.EventFactCount,
+            result.JourneyFactCount);
 
         return new JourneyFactProjectionRunResult(
             ClaimedCount: entries.Count,
@@ -107,19 +122,26 @@ public sealed class JourneyFactProjectionService(
     )
     {
         await using var command = CreateCommand();
-        command.CommandTimeout = 900;
+        command.CommandTimeout = _commandTimeoutSeconds;
 
-        var rows = new List<string>(entries.Count);
-        foreach (var entry in entries)
-        {
-            var journeyId = AddParameter(command, entry.JourneyId);
-            var date = AddParameter(command, entry.Date);
-            rows.Add($"({journeyId}, {date})");
-        }
+        AddNamedParameter(
+            command,
+            "journey_ids",
+            entries.Select(entry => entry.JourneyId).ToArray(),
+            NpgsqlDbType.Array | NpgsqlDbType.Varchar);
+        AddNamedParameter(
+            command,
+            "dates",
+            entries.Select(entry => entry.Date).ToArray(),
+            NpgsqlDbType.Array | NpgsqlDbType.Date);
 
-        command.CommandText = $$"""
+        command.CommandText = """
             WITH claimed(journey_id, date) AS (
-                VALUES {{string.Join(", ", rows)}}
+                SELECT journey_id, date
+                FROM unnest(
+                    CAST(@journey_ids AS character varying(82)[]),
+                    CAST(@dates AS date[])
+                ) AS entries(journey_id, date)
             ),
             journeys_with_transport AS (
                 SELECT
@@ -408,7 +430,7 @@ public sealed class JourneyFactProjectionService(
             AddNamedParameter(command, "now", now);
             AddNamedParameter(command, "lock_until", lockUntil);
             AddNamedParameter(command, "worker_id", workerId);
-            AddNamedParameter(command, "batch_size", BatchSize);
+            AddNamedParameter(command, "batch_size", _batchSize);
 
             var entries = new List<ClaimedJourneyFactProjection>();
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -464,22 +486,22 @@ public sealed class JourneyFactProjectionService(
         return command;
     }
 
-    private static string AddParameter(DbCommand command, object? value)
-    {
-        var parameterName = "@p" + command.Parameters.Count;
-        var parameter = command.CreateParameter();
-        parameter.ParameterName = parameterName;
-        parameter.Value = value ?? DBNull.Value;
-        command.Parameters.Add(parameter);
-        return parameterName;
-    }
-
-    private static void AddNamedParameter(DbCommand command, string name, object value)
+    private static void AddNamedParameter(DbCommand command, string name, object value, NpgsqlDbType? npgsqlDbType = null)
     {
         var parameter = command.CreateParameter();
         parameter.ParameterName = name;
         parameter.Value = value;
+        if (npgsqlDbType is not null && parameter is NpgsqlParameter npgsqlParameter)
+        {
+            npgsqlParameter.NpgsqlDbType = npgsqlDbType.Value;
+        }
         command.Parameters.Add(parameter);
+    }
+
+    private static int ReadPositiveInt(IConfiguration configuration, string key, int defaultValue)
+    {
+        var configuredValue = configuration.GetValue<int?>(key);
+        return configuredValue is > 0 ? configuredValue.Value : defaultValue;
     }
 
     private sealed class ClaimedJourneyFactProjection

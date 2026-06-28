@@ -51,52 +51,30 @@ namespace Navigator.Data.Migrations
             migrationBuilder.Sql(@"SELECT create_hypertable('statistics.journey_event_quality_facts', 'bucket_hour', chunk_time_interval => INTERVAL '14 days', if_not_exists => TRUE);");
 
             migrationBuilder.Sql(@"
-                CREATE UNIQUE INDEX IX_journey_event_quality_facts_unique_event
+                CREATE INDEX IX_journey_event_quality_facts_station_detail
                     ON statistics.journey_event_quality_facts (
-                        journey_id,
-                        journey_date,
+                        station_eva_number,
                         planned_time,
                         schedule_type,
-                        station_eva_number,
-                        bucket_hour
-                    );
-            ");
-
-            migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_event_quality_facts_station_window
-                    ON statistics.journey_event_quality_facts (
-                        station_eva_number,
-                        bucket_hour,
-                        schedule_type,
                         transport_type,
-                        is_replacement
+                        is_replacement,
+                        journey_number,
+                        origin_eva_number,
+                        destination_eva_number
                     );
             ");
 
             migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_event_quality_facts_line_window
+                CREATE INDEX IX_journey_event_quality_facts_journey_detail
                     ON statistics.journey_event_quality_facts (
-                        journey_description,
-                        bucket_hour,
+                        journey_number,
+                        planned_time,
                         schedule_type,
                         transport_type,
                         is_replacement,
                         origin_eva_number,
                         destination_eva_number,
-                        administration_id
-                    );
-            ");
-
-            migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_event_quality_facts_journey_number_window
-                    ON statistics.journey_event_quality_facts (
-                        journey_number,
-                        journey_description,
-                        bucket_hour,
-                        transport_type,
-                        is_replacement,
-                        origin_eva_number,
-                        destination_eva_number
+                        journey_description
                     );
             ");
 
@@ -125,47 +103,16 @@ namespace Navigator.Data.Migrations
             migrationBuilder.Sql(@"SELECT create_hypertable('statistics.journey_quality_facts', 'bucket_hour', chunk_time_interval => INTERVAL '14 days', if_not_exists => TRUE);");
 
             migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_quality_facts_window
+                CREATE INDEX IX_journey_quality_facts_journey_detail
                     ON statistics.journey_quality_facts (
-                        bucket_hour,
-                        transport_type,
-                        is_replacement
-                    );
-            ");
-
-            migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_quality_facts_administration_window
-                    ON statistics.journey_quality_facts (
-                        administration_id,
-                        bucket_hour,
-                        transport_type,
-                        is_replacement
-                    );
-            ");
-
-            migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_quality_facts_line_window
-                    ON statistics.journey_quality_facts (
-                        journey_description,
-                        bucket_hour,
+                        journey_number,
+                        journey_start_time,
                         transport_type,
                         is_replacement,
                         origin_eva_number,
                         destination_eva_number,
-                        administration_id
-                    );
-            ");
-
-            migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_quality_facts_journey_number_window
-                    ON statistics.journey_quality_facts (
-                        journey_number,
-                        journey_description,
-                        bucket_hour,
-                        transport_type,
-                        is_replacement,
-                        origin_eva_number,
-                        destination_eva_number
+                        administration_id,
+                        journey_description
                     );
             ");
             #endregion
@@ -291,6 +238,13 @@ namespace Navigator.Data.Migrations
                     dead_lettered_at timestamp with time zone,
                     CONSTRAINT PK_journey_fact_projection_backlog PRIMARY KEY (journey_id, date)
                 );
+            ");
+
+            migrationBuilder.Sql(@"
+                CREATE INDEX IX_journey_fact_projection_backlog_claimable
+                    ON statistics.journey_fact_projection_backlog (available_at, created_at)
+                    INCLUDE (locked_until, attempts)
+                    WHERE dead_lettered_at IS NULL;
             ");
 
             migrationBuilder.Sql(@"

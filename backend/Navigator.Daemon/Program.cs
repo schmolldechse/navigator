@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Navigator.Daemon;
 using Navigator.Daemon.Infrastructure;
 using Navigator.Daemon.Mapping;
@@ -15,6 +16,8 @@ builder.AddNavigatorObservability("Navigator.Daemon");
 
 // mappers
 builder.Services.AddSingleton<JourneyMapper>();
+
+// journey fact rebuild
 builder.Services.AddScoped<JourneyFactProjectionService>();
 builder.Services.AddHostedService<JourneyFactProjectionBacklogListener>();
 
@@ -34,4 +37,4 @@ builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete
 builder.Services.Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(2));
 
 var host = builder.Build();
-host.Run();
+await host.RunAsync();
