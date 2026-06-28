@@ -14,12 +14,17 @@
 		debounceTime?: number;
 		onchange?: (value: InputValue) => void;
 		class?: ClassValue;
-	} & Omit<HTMLInputAttributes, "type" | "value" | "oninput" | "onchange">;
-
+	} & Omit<HTMLInputAttributes, "type" | "value" | "onchange">;
 	let { type = "text", value = $bindable(), debounceTime = 0, onchange, class: classNames, ...rest }: Props = $props();
 
-	let input: HTMLInputElement | undefined = $state(undefined);
 	let debounceTimer: ReturnType<typeof setTimeout> | undefined = $state(undefined);
+
+	const clearDebounce = () => {
+		if (!debounceTimer) return;
+
+		clearTimeout(debounceTimer);
+		debounceTimer = undefined;
+	};
 
 	const toNumber = (value: unknown): number | undefined => {
 		if (value == null || value === "") return undefined;
@@ -48,25 +53,32 @@
 		return clamp(numberValue);
 	};
 
-	const applyValue = (newValue: InputValue) => {
-		onchange?.(newValue);
+	const scheduleChange = () => {
+		clearDebounce();
+
+		if (debounceTime > 0) {
+			debounceTimer = setTimeout(() => {
+				debounceTimer = undefined;
+				onchange?.(value);
+			}, debounceTime);
+			return;
+		}
+
+		onchange?.(value);
 	};
 
 	const handleInput = (event: Event) => {
 		const target = event.target as HTMLInputElement;
 		const newValue = getInputValue(target);
 
-		if (debounceTimer) clearTimeout(debounceTimer);
-
-		if (debounceTime > 0) debounceTimer = setTimeout(() => applyValue(newValue), debounceTime);
-		else applyValue(newValue);
+		value = newValue;
+		scheduleChange();
 	};
 
-	onDestroy(() => debounceTimer && clearTimeout(debounceTimer));
+	onDestroy(clearDebounce);
 </script>
 
 <input
-	bind:this={input}
 	{...rest}
 	{type}
 	{value}

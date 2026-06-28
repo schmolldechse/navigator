@@ -9,8 +9,8 @@
 	import LoaderCircle from "@lucide/svelte/icons/loader-circle";
 	import Search from "@lucide/svelte/icons/search";
 	import X from "@lucide/svelte/icons/x";
-	import { onDestroy } from "svelte";
 	import type { ClassValue } from "svelte/elements";
+	import type { RemoteQuery } from "@sveltejs/kit";
 
 	const searchId = $props.id();
 
@@ -22,26 +22,31 @@
 		onselect?: (station: Station) => void;
 		class?: ClassValue;
 	};
-
 	let {
 		value = $bindable(""),
-		label = "Find station statistics",
+		label = "Find station",
 		placeholder = "Search station by name",
 		maxResults = 10,
 		onselect,
 		class: className
 	}: Props = $props();
 
-	let open = $state(false);
+	let open: boolean = $state(false);
+	let hasSearched: boolean = $state(false);
+
 	let results: Station[] = $state([]);
-	let loading = $state(false);
+	let promise: RemoteQuery<Station[]> | undefined = $state(undefined);
+
+	const loading: boolean = $derived.by(() => {
+		if (!promise) return false;
+		return "loading" in promise && (promise as RemoteQuery<Station[]>).loading;
+	});
+
 	let errorMessage: string | undefined = $state(undefined);
-	let hasSearched = $state(false);
-	let debounceTimer: ReturnType<typeof setTimeout> | undefined = $state(undefined);
-	let requestSequence = 0;
 
 	const trimmedValue = $derived(value.trim());
 	const canSearch = $derived(trimmedValue.length >= 2);
+
 	const statusMessage = $derived.by(() => {
 		if (!trimmedValue) return "Type a station name to see suggestions.";
 		if (!canSearch) return "Enter at least 2 characters.";
@@ -55,61 +60,43 @@
 		results = [];
 		hasSearched = false;
 		errorMessage = undefined;
-		loading = false;
-	};
-
-	const clearDebounce = () => {
-		if (!debounceTimer) return;
-
-		clearTimeout(debounceTimer);
-		debounceTimer = undefined;
 	};
 
 	const runSearch = async (searchTerm: string) => {
-		const currentRequest = ++requestSequence;
-		loading = true;
+		promise = searchStations({
+			request: {
+				searchTerm,
+				maxResults,
+				locationTypes: ["ALL"]
+			}
+		});
+
 		errorMessage = undefined;
 		hasSearched = true;
 
-		try {
-			const stations = await searchStations({
-				request: {
-					searchTerm,
-					maxResults,
-					locationTypes: ["ALL"]
-				}
-			}).run();
-
-			if (currentRequest !== requestSequence) return;
-
-			results = stations;
-			open = true;
-		} catch (error) {
-			if (currentRequest !== requestSequence) return;
-
-			results = [];
-			errorMessage = error instanceof Error ? error.message : "Station search failed.";
-		} finally {
-			if (currentRequest === requestSequence) loading = false;
-		}
+		await promise
+			.then((stations: Station[]) => {
+				results = stations;
+				open = true;
+			})
+			.catch((error) => {
+				results = [];
+				errorMessage = error instanceof Error ? error.message : "Station search failed.";
+			})
+			.finally(() => (promise = undefined));
 	};
 
-	const scheduleSearch = (query = value) => {
+	const updateSearch = (query = value) => {
 		const searchTerm = query.trim();
-		clearDebounce();
 
 		if (searchTerm.length < 2) {
-			requestSequence += 1;
 			resetSearchState();
 			open = Boolean(searchTerm);
 			return;
 		}
 
 		open = true;
-		debounceTimer = setTimeout(() => {
-			debounceTimer = undefined;
-			void runSearch(searchTerm);
-		}, 250);
+		void runSearch(searchTerm);
 	};
 
 	const reopenSuggestions = () => {
@@ -121,7 +108,7 @@
 
 	const handleInputChange = (nextValue: InputValue) => {
 		value = String(nextValue);
-		scheduleSearch(value);
+		updateSearch(value);
 	};
 
 	const selectStation = (station: Station) => {
@@ -133,14 +120,10 @@
 	const clear = () => {
 		value = "";
 		open = false;
-		requestSequence += 1;
 		resetSearchState();
-		clearDebounce();
 	};
 
 	const getStationTransportGroups = (station: Station) => getTransportTypeIconGroups(station.transports);
-
-	onDestroy(clearDebounce);
 </script>
 
 {#snippet stationSearchTrigger({ props }: DropdownMenuTriggerChildProps)}
@@ -151,6 +134,7 @@
 			type="search"
 			{value}
 			{placeholder}
+			debounceTime={250}
 			autocomplete="off"
 			spellcheck="false"
 			onchange={handleInputChange}
