@@ -30,10 +30,7 @@
 	};
 
 	type OutcomeShareKey =
-		| "completedShare"
-		| "partiallyCancelledDestinationReachedShare"
-		| "destinationNotReachedShare"
-		| "fullyCancelledShare";
+		"completedShare" | "partiallyCancelledDestinationReachedShare" | "destinationNotReachedShare" | "fullyCancelledShare";
 	type OutcomeCountKey =
 		| "completedJourneys"
 		| "partiallyCancelledDestinationReachedJourneys"
