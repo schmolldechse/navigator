@@ -390,7 +390,7 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
         var toUtc = StatisticsMetricBuilderHelpers.UtcTo(request);
         var includeReplacement = StatisticsMetricBuilderHelpers.IncludeReplacement(request);
 
-        var delays = await dataContext.JourneyEventQualityFacts
+        var delayQuery = dataContext.JourneyEventQualityFacts
             .AsNoTracking()
             .Where(row => row.BucketHour >= fromUtc && row.BucketHour < toUtc)
             .Where(row => !row.StopCancelled)
@@ -398,41 +398,95 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
             .Where(row => transportTypes.Length == 0 || transportTypes.Contains(row.TransportType))
             .Where(row => includeReplacement || !row.IsReplacement)
             .Where(row => administrationIds.Length == 0 || administrationIds.Contains(row.AdministrationId))
-            .Select(row => row.EventDelaySeconds)
-            .OrderBy(delay => delay)
-            .ToArrayAsync(cancellationToken);
+            .Select(row => row.EventDelaySeconds);
+
+        var sampleCount = await delayQuery.LongCountAsync(cancellationToken);
 
         var summary = new EventDelayDistributionSummary(
-            delays.LongLength,
-            StatisticsMetricBuilderHelpers.Percentile(delays, 0.5),
-            StatisticsMetricBuilderHelpers.Percentile(delays, 0.95));
+            sampleCount,
+            await PercentileContAsync(delayQuery, sampleCount, 0.5, cancellationToken),
+            await PercentileContAsync(delayQuery, sampleCount, 0.95, cancellationToken));
 
-        if (delays.Length == 0) return new EventDelayDistributionResult(summary, []);
+        if (sampleCount == 0) return new EventDelayDistributionResult(summary, []);
+
+        var counts = await delayQuery
+            .GroupBy(_ => 1)
+            .Select(group => new EventDelayDistributionBinCounts
+            {
+                EarlierThanMinus5Minutes = group.LongCount(delay => delay < -300),
+                Minus5To0Minutes = group.LongCount(delay => delay >= -300 && delay < 0),
+                ZeroTo5Minutes = group.LongCount(delay => delay >= 0 && delay < 300),
+                FiveTo10Minutes = group.LongCount(delay => delay >= 300 && delay < 600),
+                TenTo15Minutes = group.LongCount(delay => delay >= 600 && delay < 900),
+                FifteenTo30Minutes = group.LongCount(delay => delay >= 900 && delay < 1800),
+                ThirtyTo60Minutes = group.LongCount(delay => delay >= 1800 && delay < 3600),
+                SixtyTo120Minutes = group.LongCount(delay => delay >= 3600 && delay < 7200),
+                LaterThan120Minutes = group.LongCount(delay => delay >= 7200)
+            })
+            .SingleAsync(cancellationToken);
 
         var binEdges = new[]
         {
             int.MinValue, -300, 0, 300, 600, 900, 1800, 3600, 7200, int.MaxValue
         };
+        var binCounts = new[]
+        {
+            counts.EarlierThanMinus5Minutes,
+            counts.Minus5To0Minutes,
+            counts.ZeroTo5Minutes,
+            counts.FiveTo10Minutes,
+            counts.TenTo15Minutes,
+            counts.FifteenTo30Minutes,
+            counts.ThirtyTo60Minutes,
+            counts.SixtyTo120Minutes,
+            counts.LaterThan120Minutes
+        };
 
         var bins = new List<EventDelayDistributionBin>(binEdges.Length - 1);
         long cumulativeCount = 0;
-        var sampleCount = (decimal)delays.LongLength;
+        var decimalSampleCount = (decimal)sampleCount;
 
         for (var index = 0; index < binEdges.Length - 1; index++)
         {
             var lower = binEdges[index];
             var upper = binEdges[index + 1];
-            var count = delays.LongCount(delay => delay >= lower && delay < upper);
+            var count = binCounts[index];
             cumulativeCount += count;
 
             bins.Add(new EventDelayDistributionBin(
                 lower,
                 upper,
                 count,
-                cumulativeCount / sampleCount));
+                cumulativeCount / decimalSampleCount));
         }
 
         return new EventDelayDistributionResult(summary, bins);
+    }
+
+    private static async Task<decimal?> PercentileContAsync(
+        IQueryable<int> delayQuery,
+        long sampleCount,
+        double percentile,
+        CancellationToken cancellationToken
+    )
+    {
+        if (sampleCount == 0) return null;
+        if (sampleCount > int.MaxValue) throw new InvalidOperationException("Delay distribution percentile offsets exceed supported query size.");
+
+        var position = (sampleCount - 1) * percentile;
+        var lowerIndex = (int)Math.Floor(position);
+        var upperIndex = (int)Math.Ceiling(position);
+        var values = await delayQuery
+            .OrderBy(delay => delay)
+            .Skip(lowerIndex)
+            .Take(upperIndex - lowerIndex + 1)
+            .ToArrayAsync(cancellationToken);
+
+        if (values.Length == 0) return null;
+        if (lowerIndex == upperIndex || values.Length == 1) return values[0];
+
+        var weight = (decimal)(position - lowerIndex);
+        return values[0] + (values[^1] - values[0]) * weight;
     }
 
     private async Task<Dictionary<int, StationReference>> LoadStationsAsync(
@@ -469,6 +523,19 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
             request.To,
             StatisticsMetricBuilderHelpers.Bucket(request),
             StatisticsMetricBuilderHelpers.CreateFilters(request));
+
+    private sealed class EventDelayDistributionBinCounts
+    {
+        public long EarlierThanMinus5Minutes { get; init; }
+        public long Minus5To0Minutes { get; init; }
+        public long ZeroTo5Minutes { get; init; }
+        public long FiveTo10Minutes { get; init; }
+        public long TenTo15Minutes { get; init; }
+        public long FifteenTo30Minutes { get; init; }
+        public long ThirtyTo60Minutes { get; init; }
+        public long SixtyTo120Minutes { get; init; }
+        public long LaterThan120Minutes { get; init; }
+    }
 
     private sealed class StationRankingRow
     {

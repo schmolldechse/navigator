@@ -89,6 +89,11 @@
 			request: createNetworkEventTimeSeriesRequest(statistics.global, statistics.event, statistics.network.eventTimeSeries)
 		})
 	);
+	const delaySeverityTimeSeries = $derived(
+		loadNetworkMetric({
+			request: createNetworkEventTimeSeriesRequest(statistics.global, statistics.event, statistics.network.delaySeverity)
+		})
+	);
 	const journeyOutcomeTimeSeries = $derived(
 		loadNetworkMetric({
 			request: createNetworkJourneyOutcomeTimeSeriesRequest(statistics.global, statistics.network.journeyTimeSeries)
@@ -238,8 +243,10 @@
 		</NetworkTrendChart>
 
 		<NetworkDelaySeverityTimelineChart
-			promise={eventTimeSeries}
-			bucket={statistics.network.eventTimeSeries.bucket}
+			promise={delaySeverityTimeSeries}
+			bucket={statistics.network.delaySeverity.bucket}
+			{bucketOptions}
+			onbucketchange={statistics.setDelaySeverityBucket}
 			view={statistics.network.delaySeverity.view}
 			onviewchange={statistics.setDelaySeverityView}
 		/>
