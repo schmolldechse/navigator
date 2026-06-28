@@ -33,7 +33,6 @@
 	import StationSearch from "@lib/components/stations/StationSearch.svelte";
 	import MetricBucketControl from "@lib/components/statistics/shared/options/MetricBucketControl.svelte";
 	import MetricPerspectiveControl from "@lib/components/statistics/shared/options/MetricPerspectiveControl.svelte";
-	import Separator from "@lib/components/ui/Separator.svelte";
 	import {
 		createPreviousGlobalScope,
 		getStatisticsBucketOptions,
@@ -230,7 +229,6 @@
 					value={statistics.network.eventTimeSeries.perspective}
 					onchange={statistics.setEventPerspective}
 				/>
-				<Separator orientation="vertical" />
 				<MetricBucketControl
 					value={statistics.network.eventTimeSeries.bucket}
 					options={bucketOptions}
