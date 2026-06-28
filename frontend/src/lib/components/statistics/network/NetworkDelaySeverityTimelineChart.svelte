@@ -301,6 +301,8 @@
 						yDomain={view === "all" ? [0, 1] : [0, null]}
 						height={330}
 						padding={{ top: 18, right: 18, bottom: 56, left: 46 }}
+						highlight={{ lines: true, points: true, axis: "x" }}
+						brush={{ zoomOnBrush: true, clickToReset: true, handleSize: 6, axis: "x" }}
 						tooltipContext={{ mode: "bisect-x" }}
 						legend={{
 							placement: "bottom",

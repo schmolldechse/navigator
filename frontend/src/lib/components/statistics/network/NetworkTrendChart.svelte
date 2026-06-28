@@ -156,6 +156,8 @@
 							height={panel.height ?? 310}
 							axis={showXAxis ? true : "y"}
 							padding={panelPadding(panel)}
+							highlight={{ lines: true, points: true, axis: "x" }}
+							brush={{ zoomOnBrush: true, clickToReset: true, handleSize: 6, axis: "x" }}
 							tooltipContext={{ mode: "bisect-x" }}
 							legend={showLegend
 								? {
