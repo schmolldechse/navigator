@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "Navigator.Preflight": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "STATIONS_CLIENT_ID": "",
+        "STATIONS_API_KEY": ""
+      }
+    }
+  }
+}

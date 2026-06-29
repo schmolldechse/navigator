@@ -1,0 +1,4 @@
+interface:
+  display_name: "Reusable UI Components"
+  short_description: "Create consistent reusable Svelte UI components"
+  default_prompt: "Use $reusable-ui-components to create a reusable Svelte UI component in frontend/src/lib/components/ui."

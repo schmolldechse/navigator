@@ -1,0 +1,24 @@
+services:
+  navigator_database:
+    image: timescale/timescaledb:2.27.1-pg18
+    shm_size: ${POSTGRES_SHM_SIZE:-4gb}
+    container_name: navigator_database
+    volumes:
+      - navigator_database-data:/var/lib/postgresql/18/docker
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-navigator}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-navigator}
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U $${POSTGRES_USER:-navigator} -d $${POSTGRES_DB:-navigator}",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  navigator_database-data:

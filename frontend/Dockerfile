@@ -1,14 +1,27 @@
-FROM node:alpine
-
+FROM oven/bun:latest AS base
 WORKDIR /app
 
+# install dependencies
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lock /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
+
+# install production dependencies (without devDependencies)
+RUN mkdir -p /temp/prod
+COPY package.json bun.lock /temp/prod/
+RUN cd /temp/prod && bun install --production --frozen-lockfile
+
+FROM base AS prerelease
+COPY --from=install /temp/dev/node_modules ./node_modules
 COPY . .
-RUN npm install
 
-RUN npm run build
-RUN npm prune --production # Remove dev dependencies
+RUN bun --bun run build
 
-EXPOSE 3000
-ENV HOST=0.0.0.0
+FROM base AS release
+COPY --from=install /temp/prod/node_modules node_modules
+COPY --from=prerelease /app/build .
 
-CMD ["node", "build/index.js"]
+USER bun
+EXPOSE 3000/tcp
+ENTRYPOINT [ "bun", "--bun", "run", "index.js" ]

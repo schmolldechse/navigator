@@ -1,0 +1,143 @@
+name: Build Projects
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - "backend/**"
+      - "frontend/**"
+  pull_request:
+    paths:
+      - "backend/**"
+      - "frontend/**"
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ${{ github.repository_owner }}
+
+jobs:
+  check-backend-formatting:
+    name: Check Code Formatting for Backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Install dotnet-format
+        run: dotnet tool install -g dotnet-format
+
+      - name: Run dotnet-format
+        run: dotnet format backend.slnx --verify-no-changes
+        working-directory: backend
+
+  check-frontend-formatting:
+    name: Check Code Formatting for Frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install Dependencies
+        run: bun install --dev
+        working-directory: frontend
+
+      - name: Run prettier lint
+        run: bun run lint
+        working-directory: frontend
+
+  build-backend-images:
+    name: Build Backend Docker Images
+    runs-on: ubuntu-latest
+    needs: [check-backend-formatting]
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - project: Navigator.Api
+            image: navigator-api
+            dockerfile: backend/Navigator.Api/Dockerfile
+          - project: Navigator.Daemon
+            image: navigator-daemon
+            dockerfile: backend/Navigator.Daemon/Dockerfile
+          - project: Navigator.Preflight
+            image: navigator-preflight
+            dockerfile: backend/Navigator.Preflight/Dockerfile
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extracting metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ matrix.image }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=raw,value=nightly,enable=${{ github.event_name == 'pull_request' && github.base_ref == 'master' }}
+            type=sha,format=short
+
+      - name: Build and push Backend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  build-frontend-image:
+    name: Build Frontend Docker Image
+    runs-on: ubuntu-latest
+    needs: [check-frontend-formatting]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extracting metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/navigator-frontend
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=raw,value=nightly,enable=${{ github.event_name == 'pull_request' && github.base_ref == 'master' }}
+            type=sha,format=short
+
+      - name: Build and push Frontend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

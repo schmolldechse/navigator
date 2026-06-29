@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "Navigator.Daemon": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "DOTNET_ENVIRONMENT": "Development",
+        "BOARDS_CLIENT_ID": "",
+        "BOARDS_API_KEY": "",
+        "JOURNEYS_CLIENT_ID": "",
+        "JOURNEYS_API_KEY": ""
+      }
+    }
+  }
+}

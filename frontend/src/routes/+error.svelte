@@ -1,35 +1,27 @@
 <script lang="ts">
 	import { page } from "$app/state";
-	import { MetaTags } from "svelte-meta-tags";
+	import Button from "@lib/components/ui/Button.svelte";
+
+	const errorMessage = $derived(page.error?.message ?? "An unknown error occurred while loading the page.");
 </script>
 
-<MetaTags
-	title={`Error ${page.status}`}
-	description={page.error?.message}
-	openGraph={{
-		url: "https://navigator.voldechse.wtf/",
-		title: "Navigator",
-		siteName: "Navigator",
-		description: "The Navigator for your train journeys.",
-		images: [
-			{
-				url: "https://navigator.voldechse.wtf/logo.png",
-				width: 1024,
-				height: 1024,
-				alt: "Navigator Logo"
-			}
-		]
-	}}
-/>
+<svelte:head>
+	<title>Page Error</title>
+</svelte:head>
 
-<div class="flex min-h-screen items-center justify-center">
-	<div class="flex flex-col items-center justify-center text-center md:flex-row md:gap-x-4 md:text-left">
-		<span class="text-text/85 font-[JetBrains_Mono] text-[8rem] font-extrabold">
+<main class="grid h-full place-items-center overflow-y-auto px-4 py-8 text-center">
+	<div
+		class="grid w-full max-w-3xl justify-items-center gap-y-6 md:w-fit md:grid-cols-[auto_minmax(0,1fr)] md:items-center md:justify-items-start md:gap-x-8 md:text-left"
+	>
+		<span class="text-accent/85 text-7xl font-extrabold sm:text-8xl">
 			{page.status}
 		</span>
-		<div class="flex flex-col md:gap-y-2">
-			<span class="text-lg font-semibold md:text-2xl">Something went wrong</span>
-			<span class="text-text/65">{page.error?.message}</span>
+
+		<div class="grid max-w-xl gap-2">
+			<h1 class="text-2xl font-semibold sm:text-3xl">Page Error</h1>
+			<p class="text-foreground/60 text-sm leading-relaxed sm:text-base">{errorMessage}</p>
 		</div>
+
+		<Button href="/" mode="primary" class="md:col-start-2">Back to Home</Button>
 	</div>
-</div>
+</main>
