@@ -12,6 +12,17 @@
 - Add request logging and correlation IDs for `Navigator.Api`.
 - Add job activity and logging scopes for Quartz jobs in `Navigator.Daemon` and bootstrap work in `Navigator.Preflight`.
 
+## Custom metrics
+
+The shared `Navigator` meter emits low-cardinality job metrics for Prometheus-compatible backends:
+
+```text
+navigator_job_duration_seconds
+navigator_job_failures_total
+```
+
+Both metrics use `job_name` and `job_outcome` tags. `FireInstanceId`, correlation IDs, trace IDs, and other per-run values are intentionally excluded from metric tags.
+
 ## Configuration
 
 OTLP export can be configured through application settings:
