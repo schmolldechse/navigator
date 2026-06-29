@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -20,7 +21,20 @@ namespace Navigator.Observability;
 public static class NavigatorLogging
 {
     private const string ActivitySourceName = "Navigator";
+
+    private const string JobOutcomeSuccess = "success";
+    private const string JobOutcomeFailure = "failure";
+
     private static readonly ActivitySource ActivitySource = new(ActivitySourceName);
+
+    private static readonly Meter Meter = new(ActivitySourceName);
+    private static readonly Histogram<double> JobDurationSeconds = Meter.CreateHistogram<double>(
+        "navigator_job_duration_seconds",
+        "s",
+        "Duration of Navigator background jobs.");
+    private static readonly Counter<long> JobFailuresTotal = Meter.CreateCounter<long>(
+        "navigator_job_failures_total",
+        description: "Total number of failed Navigator background jobs.");
 
     public static IHostApplicationBuilder AddNavigatorObservability(
         this IHostApplicationBuilder builder,
@@ -62,6 +76,7 @@ public static class NavigatorLogging
                 metrics
                     .AddRuntimeInstrumentation()
                     .AddNpgsqlInstrumentation()
+                    .AddMeter(ActivitySourceName)
                     .AddMeter("Microsoft.AspNetCore.Hosting")
                     .AddMeter("Microsoft.AspNetCore.Server.Kestrel")
                     .AddMeter("System.Net.Http");
@@ -140,21 +155,39 @@ public static class NavigatorLogging
         try
         {
             await executeAsync();
+            var elapsed = Stopwatch.GetElapsedTime(startedAt);
+            RecordJobMetrics(jobName, JobOutcomeSuccess, elapsed);
             logger.LogInformation(
                 "Completed job {JobName} in {ElapsedMilliseconds}ms.",
                 jobName,
-                Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds);
+                elapsed.TotalMilliseconds);
         }
         catch (Exception exception)
         {
+            var elapsed = Stopwatch.GetElapsedTime(startedAt);
+            RecordJobMetrics(jobName, JobOutcomeFailure, elapsed);
+            var tags = CreateJobMetricTags(jobName, JobOutcomeFailure);
+            JobFailuresTotal.Add(1, tags);
             logger.LogError(
                 exception,
                 "Failed job {JobName} after {ElapsedMilliseconds}ms.",
                 jobName,
-                Stopwatch.GetElapsedTime(startedAt).TotalMilliseconds);
+                elapsed.TotalMilliseconds);
             throw;
         }
     }
+
+    private static void RecordJobMetrics(string jobName, string outcome, TimeSpan elapsed)
+    {
+        var tags = CreateJobMetricTags(jobName, outcome);
+        JobDurationSeconds.Record(elapsed.TotalSeconds, tags);
+    }
+
+    private static TagList CreateJobMetricTags(string jobName, string outcome) => new()
+    {
+        { "job_name", jobName },
+        { "job_outcome", outcome }
+    };
 
     private sealed class ActivityTraceEnricher : ILogEventEnricher
     {
