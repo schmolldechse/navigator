@@ -77,6 +77,7 @@ Detail queries read slim views over the fact tables:
 Metric queries read API-specific continuous aggregates:
 
 - `statistics.network_event_quality_hourly`
+- `statistics.network_event_delay_distribution_hourly`
 - `statistics.network_journey_quality_hourly`
 - `statistics.station_event_quality_hourly`
 - `statistics.station_administration_quality_hourly`

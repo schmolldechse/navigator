@@ -88,6 +88,9 @@ internal static class StatisticsMetricBuilderHelpers
     public static int? DestinationEvaNumber(StatisticsMetricRequest request) =>
         request is IHasDestinationEvaNumber filter ? filter.DestinationEvaNumber : null;
 
+    public static int? StationEvaNumber(StatisticsMetricRequest request) =>
+        request is IHasStationEvaNumber filter ? filter.StationEvaNumber : null;
+
     public static int? DirectionEvaNumber(StatisticsMetricRequest request) =>
         request is IHasDirectionEvaNumber filter ? filter.DirectionEvaNumber : null;
 
@@ -210,6 +213,7 @@ internal static class StatisticsMetricBuilderHelpers
         if (transportTypes.Length > 0) filters["transportTypes"] = transportTypes;
         if (administrationIds.Length > 0) filters["administrationIds"] = administrationIds;
         if (LineName(request) is { } lineName) filters["lineName"] = lineName;
+        if (StationEvaNumber(request) is { } stationEvaNumber) filters["stationEvaNumber"] = stationEvaNumber;
         if (OriginEvaNumber(request) is { } originEvaNumber) filters["originEvaNumber"] = originEvaNumber;
         if (DestinationEvaNumber(request) is { } destinationEvaNumber) filters["destinationEvaNumber"] = destinationEvaNumber;
         if (DirectionEvaNumber(request) is { } directionEvaNumber) filters["directionEvaNumber"] = directionEvaNumber;

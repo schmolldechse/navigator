@@ -235,8 +235,29 @@ public sealed class NetworkMapHotspotsRequest : NetworkStatisticsMetricRequest,
     public int MinVolume { get; init; } = 0;
 }
 
-public sealed class NetworkEventDelayDistributionRequest : NetworkEventFilterRequest
+public sealed class NetworkEventDelayDistributionRequest : NetworkStatisticsMetricRequest,
+    IHasScheduleType,
+    IHasTransportTypes,
+    IHasStationEvaNumber,
+    IHasReplacementFilter
 {
     [JsonIgnore]
     public override NetworkStatisticsMetricType MetricType => NetworkStatisticsMetricType.EventDelayDistribution;
+
+    [JsonPropertyName("scheduleType")]
+    [Description("Optional filter for arrival or departure stop events.")]
+    public ScheduleType? ScheduleType { get; init; }
+
+    [JsonPropertyName("transportTypes")]
+    [Description("Optional transport types to include. Empty means all transport types.")]
+    public TransportType[] TransportTypes { get; init; } = [];
+
+    [JsonPropertyName("includeReplacement")]
+    [Description("Whether replacement transport should be included.")]
+    public bool IncludeReplacement { get; init; } = true;
+
+    [JsonPropertyName("stationEvaNumber")]
+    [Range(1, int.MaxValue)]
+    [Description("Optional station EVA number to restrict the delay distribution to one station.")]
+    public int? StationEvaNumber { get; init; }
 }

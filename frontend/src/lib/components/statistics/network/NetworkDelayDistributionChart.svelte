@@ -10,7 +10,7 @@
 	import DashboardPanel from "../shared/DashboardPanel.svelte";
 	import type { NetworkDistributionMode } from "./network-context.svelte";
 	import DistributionModeControl from "./options/DistributionModeControl.svelte";
-	import { formatCount, formatMetric, toNumber } from "../shared/statistics-dashboard";
+	import { formatCount, toNumber } from "../shared/statistics-dashboard";
 
 	type Props = {
 		promise: RemoteQuery<StatisticsMetricResponse>;
@@ -21,8 +21,6 @@
 
 	type DistributionSummary = {
 		sampleCount: number | string;
-		medianDelaySeconds: number | string | null;
-		p95DelaySeconds: number | string | null;
 	};
 
 	type DistributionBin = {
@@ -181,7 +179,7 @@
 
 <DashboardPanel
 	title="Delay distribution"
-	description="Delay severity for served stops. In cumulative view, the customer-view curve scales this by the share of planned stops that actually ran."
+	description="Delay severity buckets for served stops. In cumulative view, the customer-view curve scales this by the share of planned stops that actually ran."
 	icon={BarChartIcon}
 >
 	{#snippet actions()}
@@ -221,8 +219,6 @@
 							<span>{formatCount(eventMetrics.plannedEvents, true)} planned stops</span>
 							<span>{formatCount(eventMetrics.servedEvents, true)} served stops</span>
 						{/if}
-						<span>Median {formatMetric(result.summary.medianDelaySeconds, "seconds")}</span>
-						<span>P95 {formatMetric(result.summary.p95DelaySeconds, "seconds")}</span>
 					</div>
 
 					<div class="bg-secondary/20 min-h-64 rounded-lg p-1 sm:min-h-72 sm:p-2">

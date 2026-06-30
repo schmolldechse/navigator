@@ -28,7 +28,7 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
             NetworkStationRankingRequest => await BuildStationRankingAsync(request, cancellationToken),
             NetworkLineRankingRequest => await BuildLineRankingAsync(request, cancellationToken),
             NetworkMapHotspotsRequest => new NetworkMapHotspotsResult(await BuildMapHotspotsAsync(request, cancellationToken)),
-            NetworkEventDelayDistributionRequest => await BuildEventDelayDistributionAsync(request, cancellationToken),
+            NetworkEventDelayDistributionRequest eventDelayDistributionRequest => await BuildEventDelayDistributionAsync(eventDelayDistributionRequest, cancellationToken),
             _ => throw new NotSupportedException($"Unsupported network statistics metric: {request.GetType().Name}")
         };
 
@@ -379,69 +379,67 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
     }
 
     private async Task<EventDelayDistributionResult> BuildEventDelayDistributionAsync(
-        NetworkStatisticsMetricRequest request,
+        NetworkEventDelayDistributionRequest request,
         CancellationToken cancellationToken
     )
     {
-        var administrationIds = await StatisticsMetricBuilderHelpers.ResolveAdministrationIdsAsync(dataContext, request, cancellationToken);
         var transportTypes = StatisticsMetricBuilderHelpers.TransportTypes(request);
         var scheduleType = StatisticsMetricBuilderHelpers.ScheduleType(request);
         var fromUtc = StatisticsMetricBuilderHelpers.UtcFrom(request);
         var toUtc = StatisticsMetricBuilderHelpers.UtcTo(request);
         var includeReplacement = StatisticsMetricBuilderHelpers.IncludeReplacement(request);
+        var stationEvaNumber = request.StationEvaNumber;
 
-        var delayQuery = dataContext.JourneyEventQualityFacts
+        var aggregate = await dataContext.NetworkEventDelayDistributions
             .AsNoTracking()
             .Where(row => row.BucketHour >= fromUtc && row.BucketHour < toUtc)
-            .Where(row => !row.StopCancelled)
             .Where(row => scheduleType == null || row.ScheduleType == scheduleType)
             .Where(row => transportTypes.Length == 0 || transportTypes.Contains(row.TransportType))
             .Where(row => includeReplacement || !row.IsReplacement)
-            .Where(row => administrationIds.Length == 0 || administrationIds.Contains(row.AdministrationId))
-            .Select(row => row.EventDelaySeconds);
+            .Where(row => stationEvaNumber == null || row.StationEvaNumber == stationEvaNumber)
+            .GroupBy(_ => 1)
+            .Select(group => new EventDelayDistributionAggregate
+            {
+                SampleCount = group.Sum(row => row.SampleCount),
+                DelayLtMinus5Count = group.Sum(row => row.DelayLtMinus5Count),
+                DelayLt0Count = group.Sum(row => row.DelayLt0Count),
+                DelayLt5Count = group.Sum(row => row.DelayLt5Count),
+                DelayLt10Count = group.Sum(row => row.DelayLt10Count),
+                DelayLt15Count = group.Sum(row => row.DelayLt15Count),
+                DelayLt30Count = group.Sum(row => row.DelayLt30Count),
+                DelayLt60Count = group.Sum(row => row.DelayLt60Count),
+                DelayLt120Count = group.Sum(row => row.DelayLt120Count)
+            })
+            .SingleOrDefaultAsync(cancellationToken) ?? new EventDelayDistributionAggregate();
 
-        var sampleCount = await delayQuery.LongCountAsync(cancellationToken);
-
-        var summary = new EventDelayDistributionSummary(
-            sampleCount,
-            await PercentileContAsync(delayQuery, sampleCount, 0.5, cancellationToken),
-            await PercentileContAsync(delayQuery, sampleCount, 0.95, cancellationToken));
+        var sampleCount = Math.Max(0, aggregate.SampleCount);
+        var summary = new EventDelayDistributionSummary(sampleCount, null, null);
 
         if (sampleCount == 0) return new EventDelayDistributionResult(summary, []);
 
-        var counts = await delayQuery
-            .GroupBy(_ => 1)
-            .Select(group => new EventDelayDistributionBinCounts
-            {
-                EarlierThanMinus5Minutes = group.LongCount(delay => delay < -300),
-                Minus5To0Minutes = group.LongCount(delay => delay >= -300 && delay < 0),
-                ZeroTo5Minutes = group.LongCount(delay => delay >= 0 && delay < 300),
-                FiveTo10Minutes = group.LongCount(delay => delay >= 300 && delay < 600),
-                TenTo15Minutes = group.LongCount(delay => delay >= 600 && delay < 900),
-                FifteenTo30Minutes = group.LongCount(delay => delay >= 900 && delay < 1800),
-                ThirtyTo60Minutes = group.LongCount(delay => delay >= 1800 && delay < 3600),
-                SixtyTo120Minutes = group.LongCount(delay => delay >= 3600 && delay < 7200),
-                LaterThan120Minutes = group.LongCount(delay => delay >= 7200)
-            })
-            .SingleAsync(cancellationToken);
+        var bins = CreateDelayDistributionBins(aggregate, sampleCount);
 
-        var binEdges = new[]
-        {
-            int.MinValue, -300, 0, 300, 600, 900, 1800, 3600, 7200, int.MaxValue
-        };
-        var binCounts = new[]
-        {
-            counts.EarlierThanMinus5Minutes,
-            counts.Minus5To0Minutes,
-            counts.ZeroTo5Minutes,
-            counts.FiveTo10Minutes,
-            counts.TenTo15Minutes,
-            counts.FifteenTo30Minutes,
-            counts.ThirtyTo60Minutes,
-            counts.SixtyTo120Minutes,
-            counts.LaterThan120Minutes
-        };
+        return new EventDelayDistributionResult(summary, bins);
+    }
 
+    private static IReadOnlyList<EventDelayDistributionBin> CreateDelayDistributionBins(
+        EventDelayDistributionAggregate aggregate,
+        long sampleCount
+    )
+    {
+        var binEdges = new[] { int.MinValue, -300, 0, 300, 600, 900, 1800, 3600, 7200, int.MaxValue };
+        var binCounts = NormalizeBinCounts(sampleCount,
+        [
+            aggregate.DelayLtMinus5Count,
+            aggregate.DelayLt0Count - aggregate.DelayLtMinus5Count,
+            aggregate.DelayLt5Count - aggregate.DelayLt0Count,
+            aggregate.DelayLt10Count - aggregate.DelayLt5Count,
+            aggregate.DelayLt15Count - aggregate.DelayLt10Count,
+            aggregate.DelayLt30Count - aggregate.DelayLt15Count,
+            aggregate.DelayLt60Count - aggregate.DelayLt30Count,
+            aggregate.DelayLt120Count - aggregate.DelayLt60Count,
+            sampleCount - aggregate.DelayLt120Count
+        ]);
         var bins = new List<EventDelayDistributionBin>(binEdges.Length - 1);
         long cumulativeCount = 0;
         var decimalSampleCount = (decimal)sampleCount;
@@ -460,33 +458,37 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
                 cumulativeCount / decimalSampleCount));
         }
 
-        return new EventDelayDistributionResult(summary, bins);
+        return bins;
     }
 
-    private static async Task<decimal?> PercentileContAsync(
-        IQueryable<int> delayQuery,
-        long sampleCount,
-        double percentile,
-        CancellationToken cancellationToken
-    )
+    private static long[] NormalizeBinCounts(long sampleCount, long[] counts)
     {
-        if (sampleCount == 0) return null;
-        if (sampleCount > int.MaxValue) throw new InvalidOperationException("Delay distribution percentile offsets exceed supported query size.");
+        var normalized = new long[counts.Length];
+        long total = 0;
 
-        var position = (sampleCount - 1) * percentile;
-        var lowerIndex = (int)Math.Floor(position);
-        var upperIndex = (int)Math.Ceiling(position);
-        var values = await delayQuery
-            .OrderBy(delay => delay)
-            .Skip(lowerIndex)
-            .Take(upperIndex - lowerIndex + 1)
-            .ToArrayAsync(cancellationToken);
+        for (var index = 0; index < counts.Length; index++)
+        {
+            var count = Math.Max(0, counts[index]);
+            normalized[index] = count;
+            total += count;
+        }
 
-        if (values.Length == 0) return null;
-        if (lowerIndex == upperIndex || values.Length == 1) return values[0];
+        if (total > sampleCount)
+        {
+            var overflow = total - sampleCount;
+            for (var index = normalized.Length - 1; index >= 0 && overflow > 0; index--)
+            {
+                var reduction = Math.Min(normalized[index], overflow);
+                normalized[index] -= reduction;
+                overflow -= reduction;
+            }
+        }
+        else if (total < sampleCount)
+        {
+            normalized[^1] += sampleCount - total;
+        }
 
-        var weight = (decimal)(position - lowerIndex);
-        return values[0] + (values[^1] - values[0]) * weight;
+        return normalized;
     }
 
     private async Task<Dictionary<int, StationReference>> LoadStationsAsync(
@@ -524,17 +526,17 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
             StatisticsMetricBuilderHelpers.Bucket(request),
             StatisticsMetricBuilderHelpers.CreateFilters(request));
 
-    private sealed class EventDelayDistributionBinCounts
+    private sealed class EventDelayDistributionAggregate
     {
-        public long EarlierThanMinus5Minutes { get; init; }
-        public long Minus5To0Minutes { get; init; }
-        public long ZeroTo5Minutes { get; init; }
-        public long FiveTo10Minutes { get; init; }
-        public long TenTo15Minutes { get; init; }
-        public long FifteenTo30Minutes { get; init; }
-        public long ThirtyTo60Minutes { get; init; }
-        public long SixtyTo120Minutes { get; init; }
-        public long LaterThan120Minutes { get; init; }
+        public long SampleCount { get; init; }
+        public long DelayLtMinus5Count { get; init; }
+        public long DelayLt0Count { get; init; }
+        public long DelayLt5Count { get; init; }
+        public long DelayLt10Count { get; init; }
+        public long DelayLt15Count { get; init; }
+        public long DelayLt30Count { get; init; }
+        public long DelayLt60Count { get; init; }
+        public long DelayLt120Count { get; init; }
     }
 
     private sealed class StationRankingRow

@@ -10,6 +10,12 @@ internal class NetworkEventQualityHourlyConfiguration : IEntityTypeConfiguration
         builder.ConfigureKeylessView("network_event_quality_hourly");
 }
 
+internal class NetworkEventDelayDistributionHourlyConfiguration : IEntityTypeConfiguration<NetworkEventDelayDistributionHourly>
+{
+    public void Configure(EntityTypeBuilder<NetworkEventDelayDistributionHourly> builder) =>
+        builder.ConfigureKeylessView("network_event_delay_distribution_hourly");
+}
+
 internal class NetworkJourneyQualityHourlyConfiguration : IEntityTypeConfiguration<NetworkJourneyQualityHourly>
 {
     public void Configure(EntityTypeBuilder<NetworkJourneyQualityHourly> builder) =>

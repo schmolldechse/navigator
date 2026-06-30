@@ -76,6 +76,11 @@ public interface IHasDestinationEvaNumber
     int? DestinationEvaNumber { get; }
 }
 
+public interface IHasStationEvaNumber
+{
+    int? StationEvaNumber { get; }
+}
+
 public interface IHasDirectionEvaNumber
 {
     int? DirectionEvaNumber { get; }

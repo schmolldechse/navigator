@@ -64,11 +64,13 @@ const createNetworkWeekdayHourHeatmapRequest = (
 
 const createNetworkEventDelayDistributionRequest = (
 	globalScope: StatisticsGlobalScope,
-	eventScope: StatisticsEventScope
+	eventScope: StatisticsEventScope,
+	stationEvaNumber?: number
 ): NetworkStatisticsMetricRequest =>
 	({
 		...eventRequestBase(globalScope, eventScope),
-		type: "EVENT_DELAY_DISTRIBUTION"
+		type: "EVENT_DELAY_DISTRIBUTION",
+		stationEvaNumber
 	}) as NetworkStatisticsMetricRequest;
 
 const createNetworkTransportTypeComparisonRequest = (

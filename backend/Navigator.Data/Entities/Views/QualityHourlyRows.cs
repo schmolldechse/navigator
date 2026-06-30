@@ -41,6 +41,51 @@ public class NetworkEventQualityHourly : EventQualityHourlyBase
     public required ScheduleType ScheduleType { get; set; }
 }
 
+public class NetworkEventDelayDistributionHourly
+{
+    [Column("bucket_hour")]
+    public required DateTime BucketHour { get; set; }
+
+    [Column("station_eva_number")]
+    public required int StationEvaNumber { get; set; }
+
+    [Column("schedule_type")]
+    public required ScheduleType ScheduleType { get; set; }
+
+    [Column("transport_type")]
+    public required TransportType TransportType { get; set; }
+
+    [Column("is_replacement")]
+    public required bool IsReplacement { get; set; }
+
+    [Column("sample_count")]
+    public required long SampleCount { get; set; }
+
+    [Column("delay_lt_minus_5_count")]
+    public required long DelayLtMinus5Count { get; set; }
+
+    [Column("delay_lt_0_count")]
+    public required long DelayLt0Count { get; set; }
+
+    [Column("delay_lt_5_count")]
+    public required long DelayLt5Count { get; set; }
+
+    [Column("delay_lt_10_count")]
+    public required long DelayLt10Count { get; set; }
+
+    [Column("delay_lt_15_count")]
+    public required long DelayLt15Count { get; set; }
+
+    [Column("delay_lt_30_count")]
+    public required long DelayLt30Count { get; set; }
+
+    [Column("delay_lt_60_count")]
+    public required long DelayLt60Count { get; set; }
+
+    [Column("delay_lt_120_count")]
+    public required long DelayLt120Count { get; set; }
+}
+
 public class StationEventQualityHourly : EventQualityHourlyBase
 {
     [Column("station_eva_number")]

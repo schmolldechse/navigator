@@ -25,6 +25,7 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<StationJourneyEventDetail> StationJourneyEventDetails { get; set; }
     public DbSet<JourneyQualityDetail> JourneyQualityDetails { get; set; }
     public DbSet<NetworkEventQualityHourly> NetworkEventQualities { get; set; }
+    public DbSet<NetworkEventDelayDistributionHourly> NetworkEventDelayDistributions { get; set; }
     public DbSet<NetworkJourneyQualityHourly> NetworkJourneyQualities { get; set; }
     public DbSet<StationEventQualityHourly> StationEventQualities { get; set; }
     public DbSet<StationAdministrationQualityHourly> StationAdministrationQualities { get; set; }

@@ -669,6 +669,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
+                    b.Property<long>("DestinationDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_delay_sum_seconds");
+
                     b.Property<long>("DestinationLate30Count")
                         .HasColumnType("bigint")
                         .HasColumnName("destination_late_30_count");
@@ -676,10 +680,6 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("DestinationLate60Count")
                         .HasColumnType("bigint")
                         .HasColumnName("destination_late_60_count");
-
-                    b.Property<long>("DestinationDelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("destination_delay_sum_seconds");
 
                     b.Property<long>("DestinationNotReachedCount")
                         .HasColumnType("bigint")
@@ -735,14 +735,6 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
-                    b.Property<long>("DestinationLate30Count")
-                        .HasColumnType("bigint")
-                        .HasColumnName("destination_late_30_count");
-
-                    b.Property<long>("DestinationLate60Count")
-                        .HasColumnType("bigint")
-                        .HasColumnName("destination_late_60_count");
-
                     b.Property<long>("DestinationDelaySumSeconds")
                         .HasColumnType("bigint")
                         .HasColumnName("destination_delay_sum_seconds");
@@ -750,6 +742,14 @@ namespace Navigator.Data.Migrations
                     b.Property<int>("DestinationEvaNumber")
                         .HasColumnType("integer")
                         .HasColumnName("destination_eva_number");
+
+                    b.Property<long>("DestinationLate30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_late_30_count");
+
+                    b.Property<long>("DestinationLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_late_60_count");
 
                     b.Property<long>("DestinationNotReachedCount")
                         .HasColumnType("bigint")
@@ -897,9 +897,17 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
+                    b.Property<int>("DestinationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_eva_number");
+
                     b.Property<long>("EventCount")
                         .HasColumnType("bigint")
                         .HasColumnName("event_count");
+
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
 
                     b.Property<long>("EventLate30Count")
                         .HasColumnType("bigint")
@@ -908,10 +916,6 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("EventLate60Count")
                         .HasColumnType("bigint")
                         .HasColumnName("event_late_60_count");
-
-                    b.Property<long>("EventDelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("event_delay_sum_seconds");
 
                     b.Property<long>("EventPositiveDelaySumSeconds")
                         .HasColumnType("bigint")
@@ -934,6 +938,10 @@ namespace Navigator.Data.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("journey_description");
+
+                    b.Property<int>("OriginEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("origin_eva_number");
 
                     b.Property<ScheduleType>("ScheduleType")
                         .HasColumnType("core.schedule_type")
@@ -965,6 +973,14 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
+                    b.Property<long>("DestinationDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_delay_sum_seconds");
+
+                    b.Property<int>("DestinationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_eva_number");
+
                     b.Property<long>("DestinationLate30Count")
                         .HasColumnType("bigint")
                         .HasColumnName("destination_late_30_count");
@@ -972,10 +988,6 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("DestinationLate60Count")
                         .HasColumnType("bigint")
                         .HasColumnName("destination_late_60_count");
-
-                    b.Property<long>("DestinationDelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("destination_delay_sum_seconds");
 
                     b.Property<long>("DestinationNotReachedCount")
                         .HasColumnType("bigint")
@@ -1011,6 +1023,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("character varying(64)")
                         .HasColumnName("journey_description");
 
+                    b.Property<int>("OriginEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("origin_eva_number");
+
                     b.Property<long>("PartiallyCancelledCount")
                         .HasColumnType("bigint")
                         .HasColumnName("partially_cancelled_count");
@@ -1027,6 +1043,72 @@ namespace Navigator.Data.Migrations
                     b.ToView("line_journey_quality_hourly", "statistics");
                 });
 
+            modelBuilder.Entity("Navigator.Data.Entities.Views.NetworkEventDelayDistributionHourly", b =>
+                {
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<long>("DelayLt0Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_lt_0_count");
+
+                    b.Property<long>("DelayLt10Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_lt_10_count");
+
+                    b.Property<long>("DelayLt120Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_lt_120_count");
+
+                    b.Property<long>("DelayLt15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_lt_15_count");
+
+                    b.Property<long>("DelayLt30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_lt_30_count");
+
+                    b.Property<long>("DelayLt5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_lt_5_count");
+
+                    b.Property<long>("DelayLt60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_lt_60_count");
+
+                    b.Property<long>("DelayLtMinus5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_lt_minus_5_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<long>("SampleCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("sample_count");
+
+                    b.Property<ScheduleType>("ScheduleType")
+                        .HasColumnType("core.schedule_type")
+                        .HasColumnName("schedule_type");
+
+                    b.Property<int>("StationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("station_eva_number");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("network_event_delay_distribution_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("network_event_delay_distribution_hourly", "statistics");
+                });
+
             modelBuilder.Entity("Navigator.Data.Entities.Views.NetworkEventQualityHourly", b =>
                 {
                     b.Property<DateTime>("BucketHour")
@@ -1037,6 +1119,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("event_count");
 
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
+
                     b.Property<long>("EventLate30Count")
                         .HasColumnType("bigint")
                         .HasColumnName("event_late_30_count");
@@ -1044,10 +1130,6 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("EventLate60Count")
                         .HasColumnType("bigint")
                         .HasColumnName("event_late_60_count");
-
-                    b.Property<long>("EventDelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("event_delay_sum_seconds");
 
                     b.Property<long>("EventPositiveDelaySumSeconds")
                         .HasColumnType("bigint")
@@ -1091,6 +1173,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
+                    b.Property<long>("DestinationDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_delay_sum_seconds");
+
                     b.Property<long>("DestinationLate30Count")
                         .HasColumnType("bigint")
                         .HasColumnName("destination_late_30_count");
@@ -1098,10 +1184,6 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("DestinationLate60Count")
                         .HasColumnType("bigint")
                         .HasColumnName("destination_late_60_count");
-
-                    b.Property<long>("DestinationDelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("destination_delay_sum_seconds");
 
                     b.Property<long>("DestinationNotReachedCount")
                         .HasColumnType("bigint")
@@ -1161,6 +1243,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("event_count");
 
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
+
                     b.Property<long>("EventLate30Count")
                         .HasColumnType("bigint")
                         .HasColumnName("event_late_30_count");
@@ -1168,10 +1254,6 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("EventLate60Count")
                         .HasColumnType("bigint")
                         .HasColumnName("event_late_60_count");
-
-                    b.Property<long>("EventDelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("event_delay_sum_seconds");
 
                     b.Property<long>("EventPositiveDelaySumSeconds")
                         .HasColumnType("bigint")
@@ -1223,6 +1305,10 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("event_count");
 
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
+
                     b.Property<long>("EventLate30Count")
                         .HasColumnType("bigint")
                         .HasColumnName("event_late_30_count");
@@ -1230,10 +1316,6 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("EventLate60Count")
                         .HasColumnType("bigint")
                         .HasColumnName("event_late_60_count");
-
-                    b.Property<long>("EventDelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("event_delay_sum_seconds");
 
                     b.Property<long>("EventPositiveDelaySumSeconds")
                         .HasColumnType("bigint")
@@ -1371,9 +1453,17 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
+                    b.Property<int>("DestinationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_eva_number");
+
                     b.Property<long>("EventCount")
                         .HasColumnType("bigint")
                         .HasColumnName("event_count");
+
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
 
                     b.Property<long>("EventLate30Count")
                         .HasColumnType("bigint")
@@ -1382,10 +1472,6 @@ namespace Navigator.Data.Migrations
                     b.Property<long>("EventLate60Count")
                         .HasColumnType("bigint")
                         .HasColumnName("event_late_60_count");
-
-                    b.Property<long>("EventDelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("event_delay_sum_seconds");
 
                     b.Property<long>("EventPositiveDelaySumSeconds")
                         .HasColumnType("bigint")
@@ -1408,6 +1494,10 @@ namespace Navigator.Data.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
                         .HasColumnName("journey_description");
+
+                    b.Property<int>("OriginEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("origin_eva_number");
 
                     b.Property<ScheduleType>("ScheduleType")
                         .HasColumnType("core.schedule_type")

@@ -10,6 +10,7 @@ namespace Navigator.Data.Migrations
         private static readonly string[] ContinuousAggregates =
         [
             "network_event_quality_hourly",
+            "network_event_delay_distribution_hourly",
             "network_journey_quality_hourly",
             "station_event_quality_hourly",
             "station_administration_quality_hourly",
@@ -170,6 +171,10 @@ namespace Navigator.Data.Migrations
                 migrationBuilder,
                 "network_event_quality_hourly",
                 "schedule_type, transport_type, is_replacement");
+
+            CreateEventDelayDistributionAggregate(
+                migrationBuilder,
+                "network_event_delay_distribution_hourly");
 
             CreateEventAggregate(
                 migrationBuilder,
@@ -448,6 +453,58 @@ namespace Navigator.Data.Migrations
             ");
 
             migrationBuilder.Sql($@"CREATE INDEX IX_{name}_window ON statistics.{name} ({dimensions}, bucket_hour);");
+        }
+
+        private static void CreateEventDelayDistributionAggregate(MigrationBuilder migrationBuilder, string name)
+        {
+            migrationBuilder.Sql($@"
+                CREATE MATERIALIZED VIEW statistics.{name}
+                WITH (timescaledb.continuous) AS
+                SELECT
+                    time_bucket(INTERVAL '1 hour', bucket_hour) AS bucket_hour,
+                    station_eva_number,
+                    schedule_type,
+                    transport_type,
+                    is_replacement,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE)::bigint AS sample_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < -300)::bigint AS delay_lt_minus_5_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 0)::bigint AS delay_lt_0_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 300)::bigint AS delay_lt_5_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 600)::bigint AS delay_lt_10_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 900)::bigint AS delay_lt_15_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 1800)::bigint AS delay_lt_30_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 3600)::bigint AS delay_lt_60_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 7200)::bigint AS delay_lt_120_count
+                FROM statistics.journey_event_quality_facts
+                GROUP BY
+                    time_bucket(INTERVAL '1 hour', bucket_hour),
+                    station_eva_number,
+                    schedule_type,
+                    transport_type,
+                    is_replacement
+                WITH NO DATA;
+            ");
+
+            migrationBuilder.Sql($@"
+                CREATE INDEX IX_{name}_window
+                    ON statistics.{name} (
+                        schedule_type,
+                        transport_type,
+                        is_replacement,
+                        bucket_hour
+                    );
+            ");
+
+            migrationBuilder.Sql($@"
+                CREATE INDEX IX_{name}_station_window
+                    ON statistics.{name} (
+                        station_eva_number,
+                        schedule_type,
+                        transport_type,
+                        is_replacement,
+                        bucket_hour
+                    );
+            ");
         }
 
         private static void CreateJourneyAggregate(MigrationBuilder migrationBuilder, string name, string dimensions)

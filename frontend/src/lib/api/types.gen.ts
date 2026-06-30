@@ -1412,13 +1412,13 @@ export type NetworkStatisticsMetricRequestNetworkEventDelayDistributionRequest =
 	 */
 	transportTypes?: Array<TransportType>;
 	/**
-	 * Optional external administration identifiers to include.
-	 */
-	administrationIds?: Array<string>;
-	/**
 	 * Whether replacement transport should be included.
 	 */
 	includeReplacement?: boolean;
+	/**
+	 * Optional station EVA number to restrict the delay distribution to one station.
+	 */
+	stationEvaNumber?: null | number;
 	/**
 	 * First included instant.
 	 */

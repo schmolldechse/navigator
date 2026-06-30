@@ -2098,8 +2098,8 @@ export const vNetworkStatisticsMetricRequestNetworkEventDelayDistributionRequest
 	type: v.optional(vTypeEnum20),
 	scheduleType: v.nullish(vScheduleType),
 	transportTypes: v.optional(v.array(vTransportType)),
-	administrationIds: v.optional(v.array(v.string())),
 	includeReplacement: v.optional(v.boolean()),
+	stationEvaNumber: v.nullish(v.number()),
 	from: v.pipe(v.string(), v.isoTimestamp()),
 	to: v.pipe(v.string(), v.isoTimestamp())
 });
