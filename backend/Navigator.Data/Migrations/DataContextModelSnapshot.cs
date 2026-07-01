@@ -1049,33 +1049,37 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
-                    b.Property<long>("DelayLt0Count")
+                    b.Property<long>("DelayGte0Lt5Count")
                         .HasColumnType("bigint")
-                        .HasColumnName("delay_lt_0_count");
+                        .HasColumnName("delay_gte_0_lt_5_count");
 
-                    b.Property<long>("DelayLt10Count")
+                    b.Property<long>("DelayGte10Lt15Count")
                         .HasColumnType("bigint")
-                        .HasColumnName("delay_lt_10_count");
+                        .HasColumnName("delay_gte_10_lt_15_count");
 
-                    b.Property<long>("DelayLt120Count")
+                    b.Property<long>("DelayGte120Count")
                         .HasColumnType("bigint")
-                        .HasColumnName("delay_lt_120_count");
+                        .HasColumnName("delay_gte_120_count");
 
-                    b.Property<long>("DelayLt15Count")
+                    b.Property<long>("DelayGte15Lt30Count")
                         .HasColumnType("bigint")
-                        .HasColumnName("delay_lt_15_count");
+                        .HasColumnName("delay_gte_15_lt_30_count");
 
-                    b.Property<long>("DelayLt30Count")
+                    b.Property<long>("DelayGte30Lt60Count")
                         .HasColumnType("bigint")
-                        .HasColumnName("delay_lt_30_count");
+                        .HasColumnName("delay_gte_30_lt_60_count");
 
-                    b.Property<long>("DelayLt5Count")
+                    b.Property<long>("DelayGte5Lt10Count")
                         .HasColumnType("bigint")
-                        .HasColumnName("delay_lt_5_count");
+                        .HasColumnName("delay_gte_5_lt_10_count");
 
-                    b.Property<long>("DelayLt60Count")
+                    b.Property<long>("DelayGte60Lt120Count")
                         .HasColumnType("bigint")
-                        .HasColumnName("delay_lt_60_count");
+                        .HasColumnName("delay_gte_60_lt_120_count");
+
+                    b.Property<long>("DelayGteMinus5Lt0Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_gte_minus_5_lt_0_count");
 
                     b.Property<long>("DelayLtMinus5Count")
                         .HasColumnType("bigint")
@@ -1084,10 +1088,6 @@ namespace Navigator.Data.Migrations
                     b.Property<bool>("IsReplacement")
                         .HasColumnType("boolean")
                         .HasColumnName("is_replacement");
-
-                    b.Property<long>("SampleCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("sample_count");
 
                     b.Property<ScheduleType>("ScheduleType")
                         .HasColumnType("core.schedule_type")

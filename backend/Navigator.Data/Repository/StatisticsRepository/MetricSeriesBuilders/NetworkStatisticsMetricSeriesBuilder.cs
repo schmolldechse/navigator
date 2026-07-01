@@ -8,6 +8,19 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
     DataContext dataContext
 ) : StatisticsMetricBuilder<NetworkStatisticsMetricRequest>
 {
+    private static readonly EventDelayDistributionBinDefinition[] DelayDistributionBinDefinitions =
+    [
+        new(int.MinValue, -300, aggregate => aggregate.DelayLtMinus5Count),
+        new(-300, 0, aggregate => aggregate.DelayGteMinus5Lt0Count),
+        new(0, 300, aggregate => aggregate.DelayGte0Lt5Count),
+        new(300, 600, aggregate => aggregate.DelayGte5Lt10Count),
+        new(600, 900, aggregate => aggregate.DelayGte10Lt15Count),
+        new(900, 1800, aggregate => aggregate.DelayGte15Lt30Count),
+        new(1800, 3600, aggregate => aggregate.DelayGte30Lt60Count),
+        new(3600, 7200, aggregate => aggregate.DelayGte60Lt120Count),
+        new(7200, int.MaxValue, aggregate => aggregate.DelayGte120Count)
+    ];
+
     protected override async Task<StatisticsMetricResponse> BuildAsync(
         NetworkStatisticsMetricRequest request,
         CancellationToken cancellationToken
@@ -400,19 +413,19 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
             .GroupBy(_ => 1)
             .Select(group => new EventDelayDistributionAggregate
             {
-                SampleCount = group.Sum(row => row.SampleCount),
                 DelayLtMinus5Count = group.Sum(row => row.DelayLtMinus5Count),
-                DelayLt0Count = group.Sum(row => row.DelayLt0Count),
-                DelayLt5Count = group.Sum(row => row.DelayLt5Count),
-                DelayLt10Count = group.Sum(row => row.DelayLt10Count),
-                DelayLt15Count = group.Sum(row => row.DelayLt15Count),
-                DelayLt30Count = group.Sum(row => row.DelayLt30Count),
-                DelayLt60Count = group.Sum(row => row.DelayLt60Count),
-                DelayLt120Count = group.Sum(row => row.DelayLt120Count)
+                DelayGteMinus5Lt0Count = group.Sum(row => row.DelayGteMinus5Lt0Count),
+                DelayGte0Lt5Count = group.Sum(row => row.DelayGte0Lt5Count),
+                DelayGte5Lt10Count = group.Sum(row => row.DelayGte5Lt10Count),
+                DelayGte10Lt15Count = group.Sum(row => row.DelayGte10Lt15Count),
+                DelayGte15Lt30Count = group.Sum(row => row.DelayGte15Lt30Count),
+                DelayGte30Lt60Count = group.Sum(row => row.DelayGte30Lt60Count),
+                DelayGte60Lt120Count = group.Sum(row => row.DelayGte60Lt120Count),
+                DelayGte120Count = group.Sum(row => row.DelayGte120Count)
             })
             .SingleOrDefaultAsync(cancellationToken) ?? new EventDelayDistributionAggregate();
 
-        var sampleCount = Math.Max(0, aggregate.SampleCount);
+        var sampleCount = GetDelayDistributionSampleCount(aggregate);
         var summary = new EventDelayDistributionSummary(sampleCount, null, null);
 
         if (sampleCount == 0) return new EventDelayDistributionResult(summary, []);
@@ -422,38 +435,26 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
         return new EventDelayDistributionResult(summary, bins);
     }
 
+    private static long GetDelayDistributionSampleCount(EventDelayDistributionAggregate aggregate) =>
+        DelayDistributionBinDefinitions.Sum(definition => GetDelayDistributionCount(definition, aggregate));
+
     private static IReadOnlyList<EventDelayDistributionBin> CreateDelayDistributionBins(
         EventDelayDistributionAggregate aggregate,
         long sampleCount
     )
     {
-        var binEdges = new[] { int.MinValue, -300, 0, 300, 600, 900, 1800, 3600, 7200, int.MaxValue };
-        var binCounts = NormalizeBinCounts(sampleCount,
-        [
-            aggregate.DelayLtMinus5Count,
-            aggregate.DelayLt0Count - aggregate.DelayLtMinus5Count,
-            aggregate.DelayLt5Count - aggregate.DelayLt0Count,
-            aggregate.DelayLt10Count - aggregate.DelayLt5Count,
-            aggregate.DelayLt15Count - aggregate.DelayLt10Count,
-            aggregate.DelayLt30Count - aggregate.DelayLt15Count,
-            aggregate.DelayLt60Count - aggregate.DelayLt30Count,
-            aggregate.DelayLt120Count - aggregate.DelayLt60Count,
-            sampleCount - aggregate.DelayLt120Count
-        ]);
-        var bins = new List<EventDelayDistributionBin>(binEdges.Length - 1);
+        var bins = new List<EventDelayDistributionBin>(DelayDistributionBinDefinitions.Length);
         long cumulativeCount = 0;
         var decimalSampleCount = (decimal)sampleCount;
 
-        for (var index = 0; index < binEdges.Length - 1; index++)
+        foreach (var definition in DelayDistributionBinDefinitions)
         {
-            var lower = binEdges[index];
-            var upper = binEdges[index + 1];
-            var count = binCounts[index];
+            var count = GetDelayDistributionCount(definition, aggregate);
             cumulativeCount += count;
 
             bins.Add(new EventDelayDistributionBin(
-                lower,
-                upper,
+                definition.LowerBoundSeconds,
+                definition.UpperBoundSeconds,
                 count,
                 cumulativeCount / decimalSampleCount));
         }
@@ -461,35 +462,10 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
         return bins;
     }
 
-    private static long[] NormalizeBinCounts(long sampleCount, long[] counts)
-    {
-        var normalized = new long[counts.Length];
-        long total = 0;
-
-        for (var index = 0; index < counts.Length; index++)
-        {
-            var count = Math.Max(0, counts[index]);
-            normalized[index] = count;
-            total += count;
-        }
-
-        if (total > sampleCount)
-        {
-            var overflow = total - sampleCount;
-            for (var index = normalized.Length - 1; index >= 0 && overflow > 0; index--)
-            {
-                var reduction = Math.Min(normalized[index], overflow);
-                normalized[index] -= reduction;
-                overflow -= reduction;
-            }
-        }
-        else if (total < sampleCount)
-        {
-            normalized[^1] += sampleCount - total;
-        }
-
-        return normalized;
-    }
+    private static long GetDelayDistributionCount(
+        EventDelayDistributionBinDefinition definition,
+        EventDelayDistributionAggregate aggregate
+    ) => Math.Max(0, definition.CountSelector(aggregate));
 
     private async Task<Dictionary<int, StationReference>> LoadStationsAsync(
         IEnumerable<int> evaNumbers,
@@ -528,16 +504,21 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
 
     private sealed class EventDelayDistributionAggregate
     {
-        public long SampleCount { get; init; }
         public long DelayLtMinus5Count { get; init; }
-        public long DelayLt0Count { get; init; }
-        public long DelayLt5Count { get; init; }
-        public long DelayLt10Count { get; init; }
-        public long DelayLt15Count { get; init; }
-        public long DelayLt30Count { get; init; }
-        public long DelayLt60Count { get; init; }
-        public long DelayLt120Count { get; init; }
+        public long DelayGteMinus5Lt0Count { get; init; }
+        public long DelayGte0Lt5Count { get; init; }
+        public long DelayGte5Lt10Count { get; init; }
+        public long DelayGte10Lt15Count { get; init; }
+        public long DelayGte15Lt30Count { get; init; }
+        public long DelayGte30Lt60Count { get; init; }
+        public long DelayGte60Lt120Count { get; init; }
+        public long DelayGte120Count { get; init; }
     }
+
+    private sealed record EventDelayDistributionBinDefinition(
+        int LowerBoundSeconds,
+        int UpperBoundSeconds,
+        Func<EventDelayDistributionAggregate, long> CountSelector);
 
     private sealed class StationRankingRow
     {

@@ -58,32 +58,32 @@ public class NetworkEventDelayDistributionHourly
     [Column("is_replacement")]
     public required bool IsReplacement { get; set; }
 
-    [Column("sample_count")]
-    public required long SampleCount { get; set; }
-
     [Column("delay_lt_minus_5_count")]
     public required long DelayLtMinus5Count { get; set; }
 
-    [Column("delay_lt_0_count")]
-    public required long DelayLt0Count { get; set; }
+    [Column("delay_gte_minus_5_lt_0_count")]
+    public required long DelayGteMinus5Lt0Count { get; set; }
 
-    [Column("delay_lt_5_count")]
-    public required long DelayLt5Count { get; set; }
+    [Column("delay_gte_0_lt_5_count")]
+    public required long DelayGte0Lt5Count { get; set; }
 
-    [Column("delay_lt_10_count")]
-    public required long DelayLt10Count { get; set; }
+    [Column("delay_gte_5_lt_10_count")]
+    public required long DelayGte5Lt10Count { get; set; }
 
-    [Column("delay_lt_15_count")]
-    public required long DelayLt15Count { get; set; }
+    [Column("delay_gte_10_lt_15_count")]
+    public required long DelayGte10Lt15Count { get; set; }
 
-    [Column("delay_lt_30_count")]
-    public required long DelayLt30Count { get; set; }
+    [Column("delay_gte_15_lt_30_count")]
+    public required long DelayGte15Lt30Count { get; set; }
 
-    [Column("delay_lt_60_count")]
-    public required long DelayLt60Count { get; set; }
+    [Column("delay_gte_30_lt_60_count")]
+    public required long DelayGte30Lt60Count { get; set; }
 
-    [Column("delay_lt_120_count")]
-    public required long DelayLt120Count { get; set; }
+    [Column("delay_gte_60_lt_120_count")]
+    public required long DelayGte60Lt120Count { get; set; }
+
+    [Column("delay_gte_120_count")]
+    public required long DelayGte120Count { get; set; }
 }
 
 public class StationEventQualityHourly : EventQualityHourlyBase

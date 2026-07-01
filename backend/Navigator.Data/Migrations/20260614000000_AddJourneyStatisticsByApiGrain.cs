@@ -466,15 +466,15 @@ namespace Navigator.Data.Migrations
                     schedule_type,
                     transport_type,
                     is_replacement,
-                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE)::bigint AS sample_count,
                     count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < -300)::bigint AS delay_lt_minus_5_count,
-                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 0)::bigint AS delay_lt_0_count,
-                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 300)::bigint AS delay_lt_5_count,
-                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 600)::bigint AS delay_lt_10_count,
-                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 900)::bigint AS delay_lt_15_count,
-                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 1800)::bigint AS delay_lt_30_count,
-                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 3600)::bigint AS delay_lt_60_count,
-                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds < 7200)::bigint AS delay_lt_120_count
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds >= -300 AND event_delay_seconds < 0)::bigint AS delay_gte_minus_5_lt_0_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds >= 0 AND event_delay_seconds < 300)::bigint AS delay_gte_0_lt_5_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds >= 300 AND event_delay_seconds < 600)::bigint AS delay_gte_5_lt_10_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds >= 600 AND event_delay_seconds < 900)::bigint AS delay_gte_10_lt_15_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds >= 900 AND event_delay_seconds < 1800)::bigint AS delay_gte_15_lt_30_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds >= 1800 AND event_delay_seconds < 3600)::bigint AS delay_gte_30_lt_60_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds >= 3600 AND event_delay_seconds < 7200)::bigint AS delay_gte_60_lt_120_count,
+                    count(*) FILTER (WHERE stop_cancelled IS NOT TRUE AND event_delay_seconds >= 7200)::bigint AS delay_gte_120_count
                 FROM statistics.journey_event_quality_facts
                 GROUP BY
                     time_bucket(INTERVAL '1 hour', bucket_hour),
