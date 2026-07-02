@@ -26,7 +26,7 @@ namespace Navigator.Data.Migrations
         {
             #region Fact tables
             migrationBuilder.Sql(@"
-                CREATE TABLE statistics.journey_event_quality_facts (
+                CREATE TABLE IF NOT EXISTS statistics.journey_event_quality_facts (
                     bucket_hour timestamp with time zone NOT NULL,
                     stop_place_id uuid NOT NULL,
                     journey_id character varying(82) NOT NULL,
@@ -52,7 +52,7 @@ namespace Navigator.Data.Migrations
             migrationBuilder.Sql(@"SELECT create_hypertable('statistics.journey_event_quality_facts', 'bucket_hour', chunk_time_interval => INTERVAL '14 days', if_not_exists => TRUE);");
 
             migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_event_quality_facts_station_detail
+                CREATE INDEX IF NOT EXISTS IX_journey_event_quality_facts_station_detail
                     ON statistics.journey_event_quality_facts (
                         station_eva_number,
                         planned_time,
@@ -66,7 +66,7 @@ namespace Navigator.Data.Migrations
             ");
 
             migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_event_quality_facts_journey_detail
+                CREATE INDEX IF NOT EXISTS IX_journey_event_quality_facts_journey_detail
                     ON statistics.journey_event_quality_facts (
                         journey_number,
                         planned_time,
@@ -80,7 +80,12 @@ namespace Navigator.Data.Migrations
             ");
 
             migrationBuilder.Sql(@"
-                CREATE TABLE statistics.journey_quality_facts (
+                CREATE INDEX IF NOT EXISTS IX_journey_event_quality_facts_projection_lookup
+                    ON statistics.journey_event_quality_facts (journey_id, journey_date);
+            ");
+
+            migrationBuilder.Sql(@"
+                CREATE TABLE IF NOT EXISTS statistics.journey_quality_facts (
                     bucket_hour timestamp with time zone NOT NULL,
                     journey_id character varying(82) NOT NULL,
                     journey_date date NOT NULL,
@@ -104,7 +109,7 @@ namespace Navigator.Data.Migrations
             migrationBuilder.Sql(@"SELECT create_hypertable('statistics.journey_quality_facts', 'bucket_hour', chunk_time_interval => INTERVAL '14 days', if_not_exists => TRUE);");
 
             migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_quality_facts_journey_detail
+                CREATE INDEX IF NOT EXISTS IX_journey_quality_facts_journey_detail
                     ON statistics.journey_quality_facts (
                         journey_number,
                         journey_start_time,
@@ -120,7 +125,7 @@ namespace Navigator.Data.Migrations
 
             #region Detail views
             migrationBuilder.Sql(@"
-                CREATE VIEW statistics.station_journey_event_details AS
+                CREATE VIEW IF NOT EXISTS statistics.station_journey_event_details AS
                 SELECT
                     bucket_hour,
                     stop_place_id,
@@ -144,7 +149,7 @@ namespace Navigator.Data.Migrations
             ");
 
             migrationBuilder.Sql(@"
-                CREATE VIEW statistics.journey_quality_details AS
+                CREATE VIEW IF NOT EXISTS statistics.journey_quality_details AS
                 SELECT
                     bucket_hour,
                     journey_id,
@@ -230,7 +235,7 @@ namespace Navigator.Data.Migrations
 
             #region Projection backlog
             migrationBuilder.Sql(@"
-                CREATE TABLE statistics.journey_fact_projection_backlog (
+                CREATE TABLE IF NOT EXISTS statistics.journey_fact_projection_backlog (
                     journey_id character varying(82) NOT NULL,
                     date date NOT NULL,
                     created_at timestamp with time zone NOT NULL,
@@ -246,7 +251,7 @@ namespace Navigator.Data.Migrations
             ");
 
             migrationBuilder.Sql(@"
-                CREATE INDEX IX_journey_fact_projection_backlog_claimable
+                CREATE INDEX IF NOT EXISTS IX_journey_fact_projection_backlog_claimable
                     ON statistics.journey_fact_projection_backlog (available_at, created_at)
                     INCLUDE (locked_until, attempts)
                     WHERE dead_lettered_at IS NULL;

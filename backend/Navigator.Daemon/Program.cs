@@ -19,6 +19,7 @@ builder.Services.AddSingleton<JourneyMapper>();
 
 // journey fact rebuild
 builder.Services.AddScoped<JourneyFactProjectionService>();
+builder.Services.AddSingleton<JourneyFactProjectionCoordinator>();
 builder.Services.AddHostedService<JourneyFactProjectionBacklogListener>();
 
 // quartz

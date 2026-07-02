@@ -9,7 +9,8 @@ namespace Navigator.Daemon.Infrastructure;
 public sealed class JourneyFactProjectionBacklogListener(
     ILogger<JourneyFactProjectionBacklogListener> logger,
     IConfiguration configuration,
-    IServiceScopeFactory scopeFactory
+    IServiceScopeFactory scopeFactory,
+    JourneyFactProjectionCoordinator coordinator
 ) : BackgroundService
 {
     private const string ChannelName = "journey_fact_projection_backlog";
@@ -61,9 +62,15 @@ public sealed class JourneyFactProjectionBacklogListener(
     {
         while (!cancellationToken.IsCancellationRequested)
         {
-            using var scope = scopeFactory.CreateScope();
-            var projectionService = scope.ServiceProvider.GetRequiredService<JourneyFactProjectionService>();
-            var result = await projectionService.ProjectAvailableAsync(cancellationToken);
+            var result = await coordinator.RunExclusiveAsync(
+                async token =>
+                {
+                    using var scope = scopeFactory.CreateScope();
+                    var projectionService = scope.ServiceProvider.GetRequiredService<JourneyFactProjectionService>();
+                    return await projectionService.ProjectAvailableAsync(token);
+                },
+                cancellationToken);
+
             if (result.ClaimedCount == 0) return;
         }
     }

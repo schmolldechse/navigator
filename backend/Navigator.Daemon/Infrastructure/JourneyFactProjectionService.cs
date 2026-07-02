@@ -54,7 +54,7 @@ public sealed class JourneyFactProjectionService(
         {
             return await ProjectBatchAsync(entries, cancellationToken);
         }
-        catch (Exception) when (entries.Count > 1)
+        catch (Exception exception) when (entries.Count > 1 && ShouldSplitBatch(exception))
         {
             dataContext.ChangeTracker.Clear();
             var midpoint = entries.Count / 2;
@@ -62,6 +62,30 @@ public sealed class JourneyFactProjectionService(
             var secondHalf = await ProjectClaimedAsync(entries.Skip(midpoint).ToList(), cancellationToken);
 
             return firstHalf.Add(secondHalf);
+        }
+        catch (Exception exception) when (entries.Count > 1)
+        {
+            dataContext.ChangeTracker.Clear();
+
+            foreach (var entry in entries)
+            {
+                await ReleaseBacklogEntryAsync(entry, exception, cancellationToken);
+            }
+
+            logger.LogWarning(
+                exception,
+                "Failed to project journey quality fact batch. Entries: {EntryCount}, AttemptsMin: {AttemptsMin}, AttemptsMax: {AttemptsMax}",
+                entries.Count,
+                entries.Min(entry => entry.Attempts),
+                entries.Max(entry => entry.Attempts));
+
+            return new JourneyFactProjectionRunResult(
+                ClaimedCount: entries.Count,
+                ProjectedCount: 0,
+                SkippedCount: 0,
+                FailedCount: entries.Count,
+                EventFactCount: 0,
+                JourneyFactCount: 0);
         }
         catch (Exception exception)
         {
@@ -101,11 +125,20 @@ public sealed class JourneyFactProjectionService(
         await transaction.CommitAsync(cancellationToken);
 
         logger.LogInformation(
-            "Projected journey fact batch. Entries: {EntryCount}, Projected: {ProjectedCount}, EventFacts: {EventFactCount}, JourneyFacts: {JourneyFactCount}",
+            "Projected journey fact batch. Entries: {EntryCount}, Projected: {ProjectedCount}, EventFacts: {EventFactCount}, JourneyFacts: {JourneyFactCount}, DeletedBacklogEntries: {DeletedBacklogEntryCount}",
             entries.Count,
             result.ProjectedCount,
             result.EventFactCount,
-            result.JourneyFactCount);
+            result.JourneyFactCount,
+            result.DeletedBacklogEntryCount);
+
+        if (result.DeletedBacklogEntryCount != entries.Count)
+        {
+            logger.LogWarning(
+                "Projected journey fact batch deleted an unexpected number of backlog entries. Entries: {EntryCount}, DeletedBacklogEntries: {DeletedBacklogEntryCount}",
+                entries.Count,
+                result.DeletedBacklogEntryCount);
+        }
 
         return new JourneyFactProjectionRunResult(
             ClaimedCount: entries.Count,
@@ -379,13 +412,14 @@ public sealed class JourneyFactProjectionService(
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
         {
-            return new ProjectFactsResult(0, 0, 0);
+            return new ProjectFactsResult(0, 0, 0, 0);
         }
 
         return new ProjectFactsResult(
             ProjectedCount: reader.GetInt32(0),
             EventFactCount: reader.GetInt32(1),
-            JourneyFactCount: reader.GetInt32(2));
+            JourneyFactCount: reader.GetInt32(2),
+            DeletedBacklogEntryCount: reader.GetInt32(5));
     }
 
     private async Task<List<ClaimedJourneyFactProjection>> ClaimBacklogEntriesAsync(
@@ -479,6 +513,11 @@ public sealed class JourneyFactProjectionService(
             """, cancellationToken);
     }
 
+    private static bool ShouldSplitBatch(Exception exception)
+    {
+        return exception is not NpgsqlException { IsTransient: true };
+    }
+
     private DbCommand CreateCommand()
     {
         var command = dataContext.Database.GetDbConnection().CreateCommand();
@@ -516,7 +555,8 @@ public sealed class JourneyFactProjectionService(
     private sealed record ProjectFactsResult(
         int ProjectedCount,
         int EventFactCount,
-        int JourneyFactCount
+        int JourneyFactCount,
+        int DeletedBacklogEntryCount
     );
 }
 
