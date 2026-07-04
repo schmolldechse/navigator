@@ -4,4 +4,5 @@
   <Project Path="Navigator.Data/Navigator.Data.csproj" />
   <Project Path="Navigator.Observability/Navigator.Observability.csproj" />
   <Project Path="Navigator.Preflight/Navigator.Preflight.csproj" />
+  <Project Path="Navigator.StatisticsRecovery/Navigator.StatisticsRecovery.csproj" />
 </Solution>

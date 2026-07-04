@@ -12,6 +12,7 @@ using Navigator.Data.Repository.StationTransportRepository;
 using Navigator.Data.Repository.StatisticsRepository;
 using Navigator.Data.Repository.StatisticsRepository.MetricSeriesBuilders;
 using Navigator.Data.Repository.TimetableRepository;
+using Navigator.Data.StatisticsRefresh;
 
 namespace Navigator.Data;
 
@@ -36,6 +37,10 @@ public static class Injection
         services.AddSingleton<ProxyHttpClientFactory>();
 
         services.AddScoped<Estimator>();
+        services.Configure<StatisticsRefreshOptions>(
+            configuration.GetSection(StatisticsRefreshOptions.SectionName));
+        services.AddScoped<IStatisticsRollupRefreshService, StatisticsRollupRefreshService>();
+        services.AddScoped<IStatisticsRefreshWindowPlanner, StatisticsRefreshWindowPlanner>();
 
         services.AddTransient<IStatisticsMetricBuilder, NetworkStatisticsMetricSeriesBuilder>()
             .AddTransient<IStatisticsMetricBuilder, StationStatisticsMetricSeriesBuilder>()

@@ -17,11 +17,6 @@ builder.AddNavigatorObservability("Navigator.Daemon");
 // mappers
 builder.Services.AddSingleton<JourneyMapper>();
 
-// journey fact rebuild
-builder.Services.AddScoped<JourneyFactProjectionService>();
-builder.Services.AddSingleton<JourneyFactProjectionCoordinator>();
-builder.Services.AddHostedService<JourneyFactProjectionBacklogListener>();
-
 // quartz
 builder.Services.AddQuartz(options =>
 {
@@ -30,8 +25,8 @@ builder.Services.AddQuartz(options =>
     options.AddQuartzJobs<DatabaseSizeEstimationJob>(builder.Configuration);
     options.AddQuartzJobs<RisIdSnapshotJob>(builder.Configuration);
     options.AddQuartzJobs<JourneySnapshotJob>(builder.Configuration);
-    options.AddQuartzJobs<JourneyFactProjectionJob>(builder.Configuration);
-    options.AddQuartzJobs<StaleRisIdDeactivationJob>(builder.Configuration);
+    // options.AddQuartzJobs<StatisticsAggregateRefreshJob>(builder.Configuration);
+    // options.AddQuartzJobs<StaleRisIdDeactivationJob>(builder.Configuration);
 });
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
 

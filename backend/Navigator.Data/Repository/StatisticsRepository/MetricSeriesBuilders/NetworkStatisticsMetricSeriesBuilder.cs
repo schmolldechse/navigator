@@ -150,7 +150,7 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
         var toUtc = StatisticsMetricBuilderHelpers.UtcTo(request);
         var includeReplacement = StatisticsMetricBuilderHelpers.IncludeReplacement(request);
 
-        var rows = await dataContext.JourneyQualityFacts
+        var rows = await dataContext.NetworkJourneyOutcomes
             .AsNoTracking()
             .Where(row => row.BucketHour >= fromUtc && row.BucketHour < toUtc)
             .Where(row => transportTypes.Length == 0 || transportTypes.Contains(row.TransportType))
@@ -159,9 +159,11 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
             .Select(row => new
             {
                 row.BucketHour,
-                row.FullyCancelled,
-                row.DestinationNotReached,
-                row.PartiallyCancelled
+                row.JourneyCount,
+                row.CompletedCount,
+                row.PartiallyCancelledDestinationReachedCount,
+                row.DestinationNotReachedWithoutFullCancelCount,
+                row.FullyCancelledCount
             })
             .ToListAsync(cancellationToken);
 
@@ -170,12 +172,11 @@ public sealed class NetworkStatisticsMetricSeriesBuilder(
             .OrderBy(group => group.Key)
             .Select(group =>
             {
-                var planned = group.LongCount();
-                var fullyCancelled = group.LongCount(row => row.FullyCancelled);
-                var destinationNotReached = group.LongCount(row => !row.FullyCancelled && row.DestinationNotReached);
-                var partiallyCancelledDestinationReached = group.LongCount(row =>
-                    !row.FullyCancelled && !row.DestinationNotReached && row.PartiallyCancelled);
-                var completed = planned - fullyCancelled - destinationNotReached - partiallyCancelledDestinationReached;
+                var planned = group.Sum(row => row.JourneyCount);
+                var completed = group.Sum(row => row.CompletedCount);
+                var partiallyCancelledDestinationReached = group.Sum(row => row.PartiallyCancelledDestinationReachedCount);
+                var destinationNotReached = group.Sum(row => row.DestinationNotReachedWithoutFullCancelCount);
+                var fullyCancelled = group.Sum(row => row.FullyCancelledCount);
 
                 return new JourneyOutcomeTimeSeriesPoint(
                     group.Key,

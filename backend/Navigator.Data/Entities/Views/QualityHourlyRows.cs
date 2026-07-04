@@ -150,6 +150,36 @@ public class NetworkJourneyQualityHourly : JourneyQualityHourlyBase
 {
 }
 
+public class NetworkJourneyOutcomeHourly
+{
+    [Column("bucket_hour")]
+    public required DateTime BucketHour { get; set; }
+
+    [Column("administration_id")]
+    public required Guid AdministrationId { get; set; }
+
+    [Column("transport_type")]
+    public required TransportType TransportType { get; set; }
+
+    [Column("is_replacement")]
+    public required bool IsReplacement { get; set; }
+
+    [Column("journey_count")]
+    public required long JourneyCount { get; set; }
+
+    [Column("completed_count")]
+    public required long CompletedCount { get; set; }
+
+    [Column("partially_cancelled_destination_reached_count")]
+    public required long PartiallyCancelledDestinationReachedCount { get; set; }
+
+    [Column("destination_not_reached_without_full_cancel_count")]
+    public required long DestinationNotReachedWithoutFullCancelCount { get; set; }
+
+    [Column("fully_cancelled_count")]
+    public required long FullyCancelledCount { get; set; }
+}
+
 public class JourneyAdministrationQualityHourly : JourneyQualityHourlyBase
 {
     [Column("administration_id")]

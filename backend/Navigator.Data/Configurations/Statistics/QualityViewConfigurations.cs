@@ -22,6 +22,12 @@ internal class NetworkJourneyQualityHourlyConfiguration : IEntityTypeConfigurati
         builder.ConfigureKeylessView("network_journey_quality_hourly");
 }
 
+internal class NetworkJourneyOutcomeHourlyConfiguration : IEntityTypeConfiguration<NetworkJourneyOutcomeHourly>
+{
+    public void Configure(EntityTypeBuilder<NetworkJourneyOutcomeHourly> builder) =>
+        builder.ConfigureKeylessView("network_journey_outcome_hourly");
+}
+
 internal class StationEventQualityHourlyConfiguration : IEntityTypeConfiguration<StationEventQualityHourly>
 {
     public void Configure(EntityTypeBuilder<StationEventQualityHourly> builder) =>

@@ -1,6 +1,6 @@
 # Navigator.Daemon
 
-`Navigator.Daemon` is the background worker host for Navigator. It uses Quartz jobs to discover RIS IDs, import completed journeys, write project snapshots, deactivate stale IDs, and project journey analytics facts.
+`Navigator.Daemon` is the background worker host for Navigator. It uses Quartz jobs to discover RIS IDs, import completed journeys, write project snapshots, deactivate stale IDs, and refresh journey statistics aggregates.
 
 ## Responsibilities
 
@@ -8,8 +8,16 @@
 - Fetch completed operating days from `RIS::Journeys`.
 - Store raw journeys through `Navigator.Data`.
 - Write database-size, RIS-ID, and journey-count snapshots.
-- Project raw journey data into analytics fact tables for TimescaleDB continuous aggregates.
+- Refresh bounded journey statistics aggregate windows and dependent TimescaleDB continuous aggregates.
 - Re-check and deactivate RIS IDs that no longer appear after a stale window.
+
+## Statistics Refresh
+
+`StatisticsAggregateRefreshJob` is the continuous target-system updater. It does not use a journey backlog and does not copy row-level facts. Every run plans a bounded set of UTC windows, recomputes those windows from `core`, writes aggregate rollups, then explicitly refreshes every dependent statistics CAGG for the coalesced recomputed ranges.
+
+The job uses the same unified recompute path as `Navigator.StatisticsRecovery`: `statistics.recompute_quality_hourly_rollups` materializes one temporary window workset and derives both event and journey rollups from it. The daemon only applies this to bounded recent or catch-up windows selected by `StatisticsRefreshWindowPlanner`; it does not run the historical recovery range and it does not call the legacy journey fact projection path.
+
+`StatisticsRefresh:HotLookbackHours` controls the recent windows refreshed each run. `StatisticsRefresh:CatchupLookbackHours` controls the horizon for failed and rotating late-data windows, but the job never recomputes the whole catch-up horizon in one scheduled execution. `StatisticsRefresh:MaxWindowsPerRun` caps work per trigger. The 1-hour end offset avoids refreshing the currently moving hour.
 
 ## Timetable Change Window
 
