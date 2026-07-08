@@ -18,6 +18,8 @@ public class DataContextFactory : IDesignTimeDbContextFactory<DataContext>
             npgsqlOptions.MapEnum<TransportType>("transport_type", "core");
             npgsqlOptions.MapEnum<TimeType>("time_type", "core");
             npgsqlOptions.MapEnum<JourneyType>("journey_type", "core");
+            npgsqlOptions.MapEnum<StatisticsRefreshQueueStatus>("statistics_refresh_queue_status", "statistics");
+            npgsqlOptions.MapEnum<StatisticsRefreshQueueSource>("statistics_refresh_queue_source", "statistics");
         });
         return new DataContext(optionsBuilder.Options);
     }

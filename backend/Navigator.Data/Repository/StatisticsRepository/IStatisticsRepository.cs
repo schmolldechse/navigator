@@ -1,5 +1,5 @@
 using Navigator.Data.Entities.Statistics;
-using Navigator.Data.Models.Statistics;
+using Navigator.Data.Models.Statistics.Api;
 
 namespace Navigator.Data.Repository.StatisticsRepository;
 
@@ -9,7 +9,10 @@ public interface IStatisticsRepository
     Task<(int Active, int Inactive)?> EstimateCurrentRisIdsAsync();
     Task<int?> EstimateCurrentJourneysAsync();
 
-    Task<MetricSeries> GetMetricAsync(BaseMetricRequest request);
+    Task<StatisticsMetricResponse> GetNetworkMetricAsync(NetworkStatisticsMetricRequest request, CancellationToken cancellationToken = default);
+    Task<StatisticsMetricResponse> GetStationMetricAsync(StationStatisticsMetricRequest request, CancellationToken cancellationToken = default);
+    Task<StatisticsMetricResponse> GetLineMetricAsync(LineStatisticsMetricRequest request, CancellationToken cancellationToken = default);
+    Task<StatisticsMetricResponse> GetJourneyMetricAsync(JourneyStatisticsMetricRequest request, CancellationToken cancellationToken = default);
 
     Task SaveDatabaseSizeAsync(DatabaseSizeSnapshot snapshot);
     Task SaveRisIdSnapshotAsync(RisIdSnapshot snapshot);

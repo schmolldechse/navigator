@@ -1,91 +1,51 @@
 <script lang="ts">
+	import TransportTypePill from "@lib/components/transport-types/TransportTypePill.svelte";
+	import { getTransportTypeIconGroups } from "@lib/components/transport-types/transport-type-icons";
+	import Button from "@lib/components/ui/Button.svelte";
+	import ArrowLeft from "@lucide/svelte/icons/arrow-left";
 	import type { PageProps } from "./$types";
-	import AdministrationRanking from "@lib/components/statistics/global/administration-ranking/AdministrationRanking.svelte";
-	import LineRanking from "@lib/components/statistics/global/line-ranking/LineRanking.svelte";
-	import NetworkKpiStrip from "@lib/components/statistics/global/network-kpis/NetworkKpiStrip.svelte";
-	import NetworkQualityTimeSeries from "@lib/components/statistics/global/network-time-series/NetworkQualityTimeSeries.svelte";
-	import NetworkTransportBreakdown from "@lib/components/statistics/global/transport-breakdown/NetworkTransportBreakdown.svelte";
-	import StatisticsScopeControls from "@lib/components/statistics/global/StatisticsScopeControls.svelte";
-	import {
-		setStatisticsScopeContext,
-		StatisticsScopeContext
-	} from "@lib/components/statistics/global/statistics-scope-context.svelte";
-	import {
-		NetworkQualityContext,
-		setNetworkQualityContext
-	} from "@lib/components/statistics/global/network-quality-context.svelte";
-	import StationStatisticsHeader from "@lib/components/statistics/station/StationStatisticsHeader.svelte";
 
 	let { data }: PageProps = $props();
 
-	// svelte-ignore state_referenced_locally
-	const scopeContext = new StatisticsScopeContext(data.scope);
-	setStatisticsScopeContext(scopeContext);
-	// svelte-ignore state_referenced_locally
-	const networkQualityContext = new NetworkQualityContext(data.networkQuality.promises, data.evaNumber);
-	setNetworkQualityContext(networkQualityContext);
-
-	let networkKpiStripLoading: boolean = $state(true);
-	let stationQualityLoading: boolean = $state(true);
-	let stationTransportBreakdownLoading: boolean = $state(true);
-	let administrationRankingLoading: boolean = $state(true);
-	let lineRankingLoading: boolean = $state(true);
-	const metricLoading = $derived(
-		networkKpiStripLoading ||
-			stationQualityLoading ||
-			stationTransportBreakdownLoading ||
-			administrationRankingLoading ||
-			lineRankingLoading
-	);
-
-	let networkInitialized = false;
-	$effect(() => {
-		const scope = scopeContext.current;
-		if (!scope) return;
-
-		if (!networkInitialized) {
-			networkInitialized = true;
-			return;
-		}
-
-		networkQualityContext.update(scope);
-	});
+	const station = $derived(data.station);
+	const pageTitle = $derived(`${station.name} Statistics - Navigator`);
+	const transportGroups = $derived(getTransportTypeIconGroups(station?.transports ?? []));
+	const ril100 = $derived(station?.ril100?.filter(Boolean) ?? []);
 </script>
 
 <svelte:head>
-	<title>{data.station.name} Statistics - Navigator</title>
+	<title>{pageTitle}</title>
 </svelte:head>
 
-<main class="container mx-auto flex flex-col gap-y-8 p-4 sm:py-8">
-	<StationStatisticsHeader station={data.station} gatheringPromise={data.gatheringPromise} />
+<main class="container mx-auto flex min-h-full flex-col gap-y-6 p-3 sm:p-4 sm:py-8">
+	<section class="border-border bg-secondary/10 rounded-xl border-2 p-4 sm:p-5">
+		<Button href="/statistics" mode="primary" class="mb-5 inline-flex w-full items-center justify-center gap-2 sm:w-fit">
+			<ArrowLeft size={16} />
+			Back
+		</Button>
 
-	<StatisticsScopeControls isUpdating={metricLoading} />
+		<div class="min-w-0">
+			<p class="text-accent text-xs font-bold tracking-wider uppercase">Station statistics</p>
+			<h1 class="text-foreground mt-1 text-3xl font-bold text-balance sm:text-4xl">{station.name}</h1>
+			<p class="text-foreground/60 mt-2 max-w-3xl text-sm leading-relaxed font-semibold">
+				Inspect reliability, punctuality and recorded service patterns for this station.
+			</p>
 
-	<NetworkKpiStrip bind:isLoading={networkKpiStripLoading} />
+			{#if transportGroups.length || ril100.length}
+				<div class="mt-4 flex max-w-3xl flex-wrap gap-1.5">
+					{#each transportGroups as group (group.key)}
+						<TransportTypePill {group} />
+					{/each}
 
-	<NetworkQualityTimeSeries
-		bind:isLoading={stationQualityLoading}
-		title="Station Quality Trends"
-		description="Read this station as separate signals: daily event rhythm, punctuality thresholds, cancellations, and average delay."
-	/>
-
-	<NetworkTransportBreakdown
-		bind:isLoading={stationTransportBreakdownLoading}
-		title="Station Transport Mix & Quality"
-		description="Compare how recorded transport families contribute to this station's activity and quality."
-	/>
-
-	<AdministrationRanking
-		bind:isLoading={administrationRankingLoading}
-		settings={data.administrationRanking.settings}
-		promise={data.administrationRanking.promise}
-		evaNumber={data.evaNumber}
-	/>
-
-	<LineRanking
-		bind:isLoading={lineRankingLoading}
-		settings={data.lineRanking.settings}
-		promise={data.lineRanking.promise}
-		evaNumber={data.evaNumber}
-	/>
+					{#each ril100 as code (code)}
+						<span
+							class="border-border/80 bg-background/70 text-foreground/65 inline-flex items-center rounded-md border px-1.5 py-0.5 text-[0.65rem] leading-none font-bold"
+						>
+							RIL100 {code}
+						</span>
+					{/each}
+				</div>
+			{/if}
+		</div>
+	</section>
 </main>

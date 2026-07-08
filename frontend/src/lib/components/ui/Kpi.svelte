@@ -20,6 +20,7 @@
 	import Minus from "@lucide/svelte/icons/minus";
 	import type { Snippet } from "svelte";
 	import type { ClassValue } from "svelte/elements";
+	import Badge, { type BadgeTone } from "./Badge.svelte";
 	import Card from "./card/Card.svelte";
 	import Skeleton from "./Skeleton.svelte";
 	import type { LucideIcon } from "@lucide/svelte";
@@ -37,7 +38,7 @@
 
 	let { title, metric, trend, loading = false, class: className, icon: Icon, actions, footer }: Props = $props();
 
-	const getTrendTone = (trend: KpiTrend): "positive" | "negative" | "neutral" => {
+	const getTrendTone = (trend: KpiTrend): BadgeTone => {
 		if (trend.tone) return trend.tone;
 		if (trend.direction === "up") return "positive";
 		if (trend.direction === "down") return "negative";
@@ -82,13 +83,9 @@
 
 		{#if trend}
 			{@const tone = getTrendTone(trend)}
-			<div
-				class={[
-					"flex w-fit items-center gap-x-1.5 rounded-full border px-2 py-0.5 text-xs font-semibold",
-					tone === "positive" && "border-emerald-400/30 bg-emerald-500/10 text-emerald-500",
-					tone === "negative" && "border-rose-400/30 bg-rose-500/10 text-rose-500",
-					tone === "neutral" && "border-border bg-secondary text-secondary-foreground"
-				]}
+			<Badge
+				{tone}
+				class={["w-fit rounded-full! px-2! py-0.5!", tone === "neutral" && "bg-secondary! text-secondary-foreground!"]}
 			>
 				{#if trend.direction === "up"}
 					<TrendingUp size={14} />
@@ -103,7 +100,7 @@
 				{#if trend.label}
 					<span class="opacity-80">{trend.label}</span>
 				{/if}
-			</div>
+			</Badge>
 		{/if}
 
 		{@render footer?.()}

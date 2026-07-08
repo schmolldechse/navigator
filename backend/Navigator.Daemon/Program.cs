@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Navigator.Daemon;
 using Navigator.Daemon.Infrastructure;
 using Navigator.Daemon.Mapping;
@@ -15,8 +16,6 @@ builder.AddNavigatorObservability("Navigator.Daemon");
 
 // mappers
 builder.Services.AddSingleton<JourneyMapper>();
-builder.Services.AddScoped<JourneyFactProjectionService>();
-builder.Services.AddHostedService<JourneyFactProjectionBacklogListener>();
 
 // quartz
 builder.Services.AddQuartz(options =>
@@ -26,7 +25,7 @@ builder.Services.AddQuartz(options =>
     options.AddQuartzJobs<DatabaseSizeEstimationJob>(builder.Configuration);
     options.AddQuartzJobs<RisIdSnapshotJob>(builder.Configuration);
     options.AddQuartzJobs<JourneySnapshotJob>(builder.Configuration);
-    options.AddQuartzJobs<JourneyFactProjectionJob>(builder.Configuration);
+    options.AddQuartzJobs<StatisticsAggregateRefreshJob>(builder.Configuration);
     options.AddQuartzJobs<StaleRisIdDeactivationJob>(builder.Configuration);
 });
 builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete = true);
@@ -34,4 +33,4 @@ builder.Services.AddQuartzHostedService(options => options.WaitForJobsToComplete
 builder.Services.Configure<HostOptions>(options => options.ShutdownTimeout = TimeSpan.FromMinutes(2));
 
 var host = builder.Build();
-host.Run();
+await host.RunAsync();

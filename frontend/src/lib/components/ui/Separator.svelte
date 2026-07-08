@@ -1,20 +1,22 @@
 <script lang="ts">
-	import type { ClassValue } from "svelte/elements";
+	import type { ClassValue, HTMLAttributes } from "svelte/elements";
 
 	type Props = {
 		orientation?: "horizontal" | "vertical";
 		class?: ClassValue;
-	};
-	let { orientation = "horizontal", class: classNames }: Props = $props();
+	} & Omit<HTMLAttributes<HTMLDivElement>, "role" | "aria-orientation">;
+	let { orientation = "horizontal", class: classNames, ...rest }: Props = $props();
 </script>
 
 <div
+	{...rest}
+	aria-hidden="true"
 	role="separator"
 	aria-orientation={orientation}
 	class={[
 		"bg-border shrink-0",
-		{ "h-0.5 w-full": orientation === "horizontal" },
-		{ "h-full w-0.5": orientation === "vertical" },
+		orientation === "horizontal" && "h-0.5 w-full",
+		orientation === "vertical" && "h-full w-0.5",
 		classNames
 	]}
 ></div>

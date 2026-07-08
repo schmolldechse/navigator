@@ -13,7 +13,6 @@ public class LocalDateTimeOffsetConverter : JsonConverter<DateTimeOffset>
 
     public override void Write(Utf8JsonWriter writer, DateTimeOffset value, JsonSerializerOptions options)
     {
-        var localOffset = value.ToLocalTime();
-        writer.WriteStringValue(localOffset);
+        writer.WriteStringValue(value);
     }
 }

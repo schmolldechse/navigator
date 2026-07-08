@@ -1,182 +1,319 @@
 <script lang="ts">
 	import { goto } from "$app/navigation";
-	import { page } from "$app/state";
-	import type { PageProps } from "./$types";
-	import type { Station } from "@lib/api";
-	import StationMetricMap from "@lib/components/statistics/global/station-metric-map/StationMetricMap.svelte";
-	import AdministrationRanking from "@lib/components/statistics/global/administration-ranking/AdministrationRanking.svelte";
-	import NetworkQualityTimeSeries from "@lib/components/statistics/global/network-time-series/NetworkQualityTimeSeries.svelte";
-	import NetworkKpiStrip from "@lib/components/statistics/global/network-kpis/NetworkKpiStrip.svelte";
-	import NetworkTransportBreakdown from "@lib/components/statistics/global/transport-breakdown/NetworkTransportBreakdown.svelte";
-	import LineRanking from "@lib/components/statistics/global/line-ranking/LineRanking.svelte";
-	import StationSearch from "@lib/components/station/StationSearch.svelte";
+	import type { EventTimeSeriesPoint, Station } from "@lib/api";
 	import * as Accordion from "@lib/components/ui/accordion";
-	import StatisticsScopeControls from "@lib/components/statistics/global/StatisticsScopeControls.svelte";
+	import NetworkDelayDistributionChart from "@lib/components/statistics/network/NetworkDelayDistributionChart.svelte";
+	import NetworkDelaySeverityTimelineChart from "@lib/components/statistics/network/NetworkDelaySeverityTimelineChart.svelte";
+	import NetworkFilterPanel from "@lib/components/statistics/network/NetworkFilterPanel.svelte";
+	import NetworkHeatmap from "@lib/components/statistics/network/NetworkHeatmap.svelte";
+	import NetworkHourlyProfileChart from "@lib/components/statistics/network/NetworkHourlyProfileChart.svelte";
+	import NetworkHotspotMap from "@lib/components/statistics/network/NetworkHotspotMap.svelte";
+	import NetworkKpiGrid from "@lib/components/statistics/network/NetworkKpiGrid.svelte";
+	import NetworkJourneyOutcomeTimelineChart from "@lib/components/statistics/network/NetworkJourneyOutcomeTimelineChart.svelte";
+	import NetworkReliabilityBalanceChart from "@lib/components/statistics/network/NetworkReliabilityBalanceChart.svelte";
+	import NetworkTransportComparisonChart from "@lib/components/statistics/network/NetworkTransportComparisonChart.svelte";
+	import NetworkTrendChart, {
+		type TrendMetricDefinition,
+		type TrendPanelDefinition
+	} from "@lib/components/statistics/network/NetworkTrendChart.svelte";
 	import {
-		setStatisticsScopeContext,
-		StatisticsScopeContext
-	} from "@lib/components/statistics/global/statistics-scope-context.svelte";
+		NetworkStatisticsContext,
+		setNetworkStatisticsContext
+	} from "@lib/components/statistics/network/network-context.svelte";
 	import {
-		NetworkQualityContext,
-		setNetworkQualityContext
-	} from "@lib/components/statistics/global/network-quality-context.svelte";
+		createNetworkEventDelayDistributionRequest,
+		createNetworkEventSummaryRequest,
+		createNetworkEventTimeSeriesRequest,
+		createNetworkJourneyOutcomeTimeSeriesRequest,
+		createNetworkJourneySummaryRequest,
+		createNetworkMapHotspotsRequest,
+		createNetworkTransportTypeComparisonRequest,
+		createNetworkWeekdayHourHeatmapRequest
+	} from "@lib/components/statistics/network/network-statistics";
+	import StationSearch from "@lib/components/stations/StationSearch.svelte";
+	import MetricBucketControl from "@lib/components/statistics/shared/options/MetricBucketControl.svelte";
+	import MetricPerspectiveControl from "@lib/components/statistics/shared/options/MetricPerspectiveControl.svelte";
+	import {
+		createPreviousGlobalScope,
+		getStatisticsBucketOptions,
+		rateToPercent
+	} from "@lib/components/statistics/shared/statistics-dashboard";
+	import { loadNetworkMapHotspots, loadNetworkMetric } from "@lib/remote/statistics.remote";
 
-	let { data }: PageProps = $props();
+	const statistics = new NetworkStatisticsContext();
+	setNetworkStatisticsContext(statistics);
 
 	let faqValues: string[] = $state([]);
+	const faqItems = [
+		{
+			value: "coverage",
+			title: "What do these network statistics cover?",
+			answer:
+				"Navigator is a growing measurement system, not an official or complete national timetable archive. The results describe the records collected for the enabled stations and transport types in the selected period and should not be read as official nationwide figures."
+		},
+		{
+			value: "reliability",
+			title: "What is the difference between customer reliability and operative punctuality?",
+			answer:
+				"Customer reliability uses all planned stops as its denominator, so cancellations reduce the result. Operative punctuality only evaluates stops that actually ran. Both views are useful, but the customer measure reflects that a cancelled stop is not a neutral outcome."
+		},
+		{
+			value: "percentages",
+			title: "Why can 100% be misleading?",
+			answer:
+				"Percentages are only as strong as their denominator. A transport type with one punctual observed stop can show 100%, while a result based on thousands of planned stops is usually the stronger signal. Read rates together with the planned-stop volume, selected period and active filters shown in the dashboard."
+		},
+		{
+			value: "schedule-type",
+			title: "Why are arrivals and departures evaluated separately?",
+			answer:
+				"Arrivals and departures answer different questions. Arrival quality is closer to whether passengers reach a station on time, while departure quality shows how reliably services leave. The schedule filter applies this distinction to stop-event metrics so two operational moments with different delays and cancellations are not mixed."
+		},
+		{
+			value: "replacement-services",
+			title: "How are replacement services handled?",
+			answer:
+				"Replacement services are included by default so the dashboard reflects the full recorded service offer. The filters can exclude them when you want to focus on regular services. A service is treated as replacement transport when the recorded journey or transport information marks it that way."
+		}
+	];
 
-	// svelte-ignore state_referenced_locally
-	const scopeContext = new StatisticsScopeContext(data.scope);
-	setStatisticsScopeContext(scopeContext);
-	// svelte-ignore state_referenced_locally
-	const networkQualityContext = new NetworkQualityContext(data.networkQuality.promises);
-	setNetworkQualityContext(networkQualityContext);
-
-	let stationMetricMapLoading: boolean = $state(true);
-	let networkKpiStripLoading: boolean = $state(true);
-	let networkQualityLoading: boolean = $state(true);
-	let networkTransportBreakdownLoading: boolean = $state(true);
-	let administrationRankingLoading: boolean = $state(true);
-	let lineRankingLoading: boolean = $state(true);
-	const metricLoading = $derived(
-		stationMetricMapLoading ||
-			networkKpiStripLoading ||
-			networkQualityLoading ||
-			networkTransportBreakdownLoading ||
-			administrationRankingLoading ||
-			lineRankingLoading
+	const previousGlobal = $derived(createPreviousGlobalScope(statistics.global));
+	const bucketOptions = $derived(getStatisticsBucketOptions(statistics.global));
+	const eventSummaryRequest = $derived(createNetworkEventSummaryRequest(statistics.global, statistics.event));
+	const journeySummaryRequest = $derived(createNetworkJourneySummaryRequest(statistics.global));
+	const previousEventSummaryRequest = $derived(createNetworkEventSummaryRequest(previousGlobal, statistics.event));
+	const previousJourneySummaryRequest = $derived(createNetworkJourneySummaryRequest(previousGlobal));
+	const eventSummary = $derived(loadNetworkMetric({ request: eventSummaryRequest }));
+	const eventTimeSeries = $derived(
+		loadNetworkMetric({
+			request: createNetworkEventTimeSeriesRequest(statistics.global, statistics.event, statistics.network.eventTimeSeries)
+		})
+	);
+	const delaySeverityTimeSeries = $derived(
+		loadNetworkMetric({
+			request: createNetworkEventTimeSeriesRequest(statistics.global, statistics.event, statistics.network.delaySeverity)
+		})
+	);
+	const journeyOutcomeTimeSeries = $derived(
+		loadNetworkMetric({
+			request: createNetworkJourneyOutcomeTimeSeriesRequest(statistics.global, statistics.network.journeyTimeSeries)
+		})
+	);
+	const weekdayHourHeatmap = $derived(
+		loadNetworkMetric({ request: createNetworkWeekdayHourHeatmapRequest(statistics.global, statistics.event) })
+	);
+	const transportTypeComparison = $derived(
+		loadNetworkMetric({ request: createNetworkTransportTypeComparisonRequest(statistics.global, statistics.event) })
+	);
+	const mapHotspots = $derived(
+		loadNetworkMapHotspots({
+			request: createNetworkMapHotspotsRequest(statistics.global, statistics.event)
+		})
+	);
+	const delayDistribution = $derived(
+		loadNetworkMetric({ request: createNetworkEventDelayDistributionRequest(statistics.global, statistics.event) })
 	);
 
-	let networkInitialized = false;
-	$effect(() => {
-		const scope = scopeContext.current;
-		if (!scope) return;
+	const eventTrendMetrics = $derived.by<TrendMetricDefinition[]>(() => {
+		const operative = statistics.network.eventTimeSeries.perspective === "operative";
 
-		if (!networkInitialized) {
-			networkInitialized = true;
-			return;
-		}
-
-		networkQualityContext.update(scope);
+		return [
+			{
+				key: operative ? "operativePunctuality5Rate" : "customerReliability5Rate",
+				label: operative ? "Operative punctual < 6 min" : "Customer reliable < 6 min",
+				color: "var(--color-accent)",
+				format: "percent",
+				value: (item) =>
+					rateToPercent(
+						operative
+							? (item as EventTimeSeriesPoint).eventMetrics.operativePunctuality5Rate
+							: (item as EventTimeSeriesPoint).eventMetrics.customerReliability5Rate
+					)
+			},
+			{
+				key: operative ? "operativePunctuality15Rate" : "customerReliability15Rate",
+				label: operative ? "Operative punctual < 15 min" : "Customer reliable < 15 min",
+				color: "var(--color-foreground)",
+				format: "percent",
+				value: (item) =>
+					rateToPercent(
+						operative
+							? (item as EventTimeSeriesPoint).eventMetrics.operativePunctuality15Rate
+							: (item as EventTimeSeriesPoint).eventMetrics.customerReliability15Rate
+					)
+			},
+			{
+				key: "cancellationRate",
+				label: "Cancelled planned stops",
+				color: "#dc2626",
+				format: "percent",
+				value: (item) => rateToPercent((item as EventTimeSeriesPoint).eventMetrics.cancellationRate)
+			}
+		];
 	});
 
-	const selectStation = async (station: Station) => {
+	const eventTrendDescription = $derived(
+		statistics.network.eventTimeSeries.perspective === "operative"
+			? "Punctuality among served stops; cancellations remain a separate share of planned stops."
+			: "Stops served under each delay threshold as a share of all planned stops, with cancellations shown separately."
+	);
+
+	const eventTrendPanels = $derived<TrendPanelDefinition[]>([
+		{
+			key: `event-${statistics.network.eventTimeSeries.perspective}`,
+			metrics: eventTrendMetrics,
+			yDomain: [0, 100],
+			height: 310
+		}
+	]);
+
+	const openStation = async (station: Station) => {
 		const evaNumber = Number(station.evaNumber);
-		const search = page.url.searchParams.toString();
-		await goto(`/statistics/${evaNumber}${search ? `?${search}` : ""}`);
+		if (!Number.isInteger(evaNumber) || evaNumber <= 0) return;
+
+		await goto(`/statistics/${evaNumber}`);
 	};
 </script>
 
 <svelte:head>
-	<title>Statistics - Navigator</title>
+	<title>Network Statistics - Navigator</title>
 </svelte:head>
 
-<main class="container mx-auto flex flex-col gap-y-12 p-4 sm:py-8">
-	<section class="relative">
-		<div class="bg-accent absolute top-1 bottom-1 w-0.5 sm:-left-4 sm:w-1"></div>
-
-		<div class="flex flex-col gap-y-2 pl-4 sm:pl-8">
-			<h1 class="text-3xl font-bold text-balance sm:text-4xl">Statistics</h1>
-			<p class="text-foreground/60 max-w-3xl text-sm leading-relaxed sm:text-base">
-				Compare activity and quality across the selected network slice.
+<main class="container mx-auto flex flex-col gap-y-6 p-3 sm:p-4 sm:py-8 lg:gap-y-8">
+	<section class="border-border bg-secondary/10 rounded-xl border-2 p-4 sm:p-5">
+		<div class="min-w-0">
+			<p class="text-accent text-xs font-bold tracking-wider uppercase">Network overview</p>
+			<h1 class="text-foreground mt-1 text-3xl font-bold text-balance sm:text-4xl">Network statistics</h1>
+			<p class="text-foreground/60 mt-2 max-w-3xl text-sm leading-relaxed font-semibold">
+				Operational quality across German rail services, grouped by stops, journeys, time, transport families and high-impact
+				hotspots.
 			</p>
 		</div>
 	</section>
 
-	<section class="border-border bg-secondary/10 -mx-4 border-y px-4 py-8 sm:-mx-6 sm:px-6">
-		<div class="flex flex-col gap-y-5">
-			<div class="flex max-w-3xl flex-col gap-y-2">
-				<h2 class="text-2xl font-medium">Station metrics</h2>
-				<p class="text-foreground/60 max-w-3xl text-sm leading-relaxed sm:text-base">
-					Search a station to open station-specific punctuality, delay, cancellation, operator, and line statistics.
+	<section id="station-statistics" class="border-border bg-secondary/10 shrink-0 rounded-xl border-2 p-4 sm:p-5">
+		<div class="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(22rem,30rem)] lg:items-center lg:gap-6">
+			<div class="min-w-0">
+				<p class="text-accent text-xs font-bold tracking-wider uppercase">Station statistics</p>
+				<h2 class="text-foreground mt-1 text-2xl font-bold text-balance sm:text-3xl">Explore one station in detail</h2>
+				<p class="text-foreground/60 mt-2 max-w-3xl text-sm leading-relaxed font-semibold">
+					Jump from the network view to a station-specific dashboard and inspect reliability, punctuality and recorded service
+					patterns for the selected stop.
 				</p>
 			</div>
 
-			<StationSearch class="w-full max-w-3xl" onselect={selectStation} />
+			<div class="border-border bg-background/75 w-full rounded-lg border p-3 shadow-2xl shadow-black/10 lg:justify-self-end">
+				<StationSearch onselect={openStation} />
+			</div>
 		</div>
 	</section>
 
-	<section class="flex flex-col gap-y-8">
-		<div class="flex flex-col gap-y-2">
-			<h2 class="text-2xl font-medium">Global metrics</h2>
-			<p class="text-foreground/60 max-w-3xl text-sm leading-relaxed sm:text-base">
-				Filter the collected network data and compare quality signals across stations, transport families, operators, and lines.
+	<NetworkFilterPanel />
+
+	{#key eventSummaryRequest}
+		<NetworkKpiGrid
+			eventRequest={eventSummaryRequest}
+			journeyRequest={journeySummaryRequest}
+			previousEventRequest={previousEventSummaryRequest}
+			previousJourneyRequest={previousJourneySummaryRequest}
+		/>
+	{/key}
+
+	<NetworkReliabilityBalanceChart promise={eventSummary} />
+
+	<section class="grid gap-4">
+		<NetworkTrendChart
+			title="Stop reliability and punctuality"
+			description={eventTrendDescription}
+			promise={eventTimeSeries}
+			panels={eventTrendPanels}
+			bucket={statistics.network.eventTimeSeries.bucket}
+		>
+			{#snippet actions()}
+				<MetricPerspectiveControl
+					value={statistics.network.eventTimeSeries.perspective}
+					onchange={statistics.setEventPerspective}
+				/>
+				<MetricBucketControl
+					value={statistics.network.eventTimeSeries.bucket}
+					options={bucketOptions}
+					onchange={statistics.setEventBucket}
+				/>
+			{/snippet}
+		</NetworkTrendChart>
+
+		<NetworkDelaySeverityTimelineChart
+			promise={delaySeverityTimeSeries}
+			bucket={statistics.network.delaySeverity.bucket}
+			{bucketOptions}
+			onbucketchange={statistics.setDelaySeverityBucket}
+			view={statistics.network.delaySeverity.view}
+			onviewchange={statistics.setDelaySeverityView}
+		/>
+
+		<NetworkJourneyOutcomeTimelineChart
+			promise={journeyOutcomeTimeSeries}
+			bucket={statistics.network.journeyTimeSeries.bucket}
+			{bucketOptions}
+			onbucketchange={statistics.setJourneyBucket}
+		/>
+	</section>
+
+	<section class="grid gap-4 lg:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
+		<NetworkHeatmap
+			promise={weekdayHourHeatmap}
+			metric={statistics.network.weekdayHourHeatmap.metric}
+			onmetricchange={statistics.setHeatmapMetric}
+		/>
+		<NetworkDelayDistributionChart
+			promise={delayDistribution}
+			{eventSummary}
+			mode={statistics.network.delayDistribution.mode}
+			onmodechange={statistics.setDistributionMode}
+		/>
+	</section>
+
+	<NetworkHourlyProfileChart
+		promise={weekdayHourHeatmap}
+		dayGroup={statistics.network.hourlyProfile.dayGroup}
+		ondaygroupchange={statistics.setHourlyProfileDayGroup}
+		perspective={statistics.network.hourlyProfile.perspective}
+		onperspectivechange={statistics.setHourlyProfilePerspective}
+		threshold={statistics.network.hourlyProfile.threshold}
+		onthresholdchange={statistics.setHourlyProfileThreshold}
+	/>
+
+	<NetworkTransportComparisonChart
+		promise={transportTypeComparison}
+		threshold={statistics.network.transportTypeComparison.threshold}
+		onthresholdchange={statistics.setTransportComparisonThreshold}
+	/>
+
+	<section>
+		<NetworkHotspotMap
+			promise={mapHotspots}
+			metric={statistics.network.mapHotspots.metric}
+			onmetricchange={statistics.setMapMetric}
+		/>
+	</section>
+
+	<section class="flex flex-col gap-y-4">
+		<div class="flex flex-col gap-y-1">
+			<h2 class="text-2xl font-medium">FAQ</h2>
+			<p class="text-foreground/60 max-w-3xl text-sm sm:text-base">
+				How to interpret the network statistics, filters and underlying sample.
 			</p>
 		</div>
 
-		<StatisticsScopeControls isUpdating={metricLoading} />
-
-		<NetworkKpiStrip bind:isLoading={networkKpiStripLoading} />
-
-		<StationMetricMap
-			bind:isLoading={stationMetricMapLoading}
-			settings={data.stationMetricMap.settings}
-			promise={data.stationMetricMap.promise}
-		/>
-
-		<NetworkQualityTimeSeries bind:isLoading={networkQualityLoading} />
-
-		<NetworkTransportBreakdown bind:isLoading={networkTransportBreakdownLoading} />
-
-		<AdministrationRanking
-			bind:isLoading={administrationRankingLoading}
-			settings={data.administrationRanking.settings}
-			promise={data.administrationRanking.promise}
-		/>
-
-		<LineRanking bind:isLoading={lineRankingLoading} settings={data.lineRanking.settings} promise={data.lineRanking.promise} />
-	</section>
-
-	<section class="space-y-4">
-		<div class="flex flex-col gap-y-1">
-			<h2 class="text-2xl font-medium">Statistics FAQ</h2>
-			<p class="text-foreground/60 max-w-3xl text-sm sm:text-base">Short answers to the terms and choices that matter most.</p>
-		</div>
-
 		<Accordion.Root type="multiple" bind:value={faqValues}>
-			<Accordion.Item value="misleading-100">
-				<Accordion.Trigger>Why can 100% be misleading?</Accordion.Trigger>
-				<Accordion.Content>
-					<p class="leading-relaxed text-pretty">
-						Percent values are only as strong as their denominator. A line with one punctual measured journey can show 100
-						percent punctuality, while another line with thousands of journeys and 99 percent punctuality is usually the more
-						reliable signal. Tooltips and ranking samples expose numerator and denominator so small samples stay visible.
-					</p>
-				</Accordion.Content>
-			</Accordion.Item>
-
-			<Accordion.Item value="journey-description">
-				<Accordion.Trigger>What is a journey description?</Accordion.Trigger>
-				<Accordion.Content>
-					<p class="leading-relaxed text-pretty">
-						A journey description is the public-facing service description recorded for a journey, for example a category or
-						route label such as RE, S, or ICE. In line rankings it helps group and filter services together with the numeric
-						journey or line number.
-					</p>
-				</Accordion.Content>
-			</Accordion.Item>
-
-			<Accordion.Item value="arrivals-departures">
-				<Accordion.Trigger>Why are arrivals and departures evaluated separately?</Accordion.Trigger>
-				<Accordion.Content>
-					<p class="leading-relaxed text-pretty">
-						Arrivals and departures answer different questions. Arrival quality is closer to whether passengers reach a station
-						on time, while departure quality shows how reliably services leave a station. Keeping them separate avoids mixing
-						two operational moments that can have different delays, cancellations, and passenger impact.
-					</p>
-				</Accordion.Content>
-			</Accordion.Item>
-
-			<Accordion.Item value="replacement-services">
-				<Accordion.Trigger>How are replacement services handled?</Accordion.Trigger>
-				<Accordion.Content>
-					<p class="leading-relaxed text-pretty">
-						Replacement services are included by default so the dashboard reflects the full recorded service offer. The Scope
-						settings can exclude them when you want to focus on regular services only. A service is treated as replacement
-						transport when the recorded journey or its transport information marks it that way.
-					</p>
-				</Accordion.Content>
-			</Accordion.Item>
+			{#each faqItems as item (item.value)}
+				<Accordion.Item value={item.value}>
+					<Accordion.Trigger>{item.title}</Accordion.Trigger>
+					<Accordion.Content>
+						<p class="leading-relaxed text-pretty">{item.answer}</p>
+					</Accordion.Content>
+				</Accordion.Item>
+			{/each}
 		</Accordion.Root>
 	</section>
 </main>

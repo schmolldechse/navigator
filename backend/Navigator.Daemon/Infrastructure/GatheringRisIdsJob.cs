@@ -4,6 +4,7 @@ using Navigator.Data.Entities.Station;
 using Navigator.Data.Enums;
 using Navigator.Data.Models.Ris;
 using Navigator.Data.Models.Station;
+using Navigator.Data.RisIds;
 using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Data.Repository.StationRepository;
 using Navigator.Data.Repository.TimetableRepository;
@@ -17,7 +18,8 @@ public class GatheringRisIdsJob(
     ILogger<GatheringRisIdsJob> logger,
     IStationRepository stationRepository,
     ITimetableRepository timetableRepository,
-    IRisIdRepository risIdRepository
+    IRisIdRepository risIdRepository,
+    IRisIdReactivationHoldService reactivationHoldService
 ) : IJob
 {
     public async Task Execute(IJobExecutionContext context) => await logger.RunJobAsync(nameof(GatheringRisIdsJob), context.FireInstanceId, ExecuteCoreAsync);
@@ -117,10 +119,19 @@ public class GatheringRisIdsJob(
 
         if (existingRisIds.Any())
         {
+            var reactivatedRisIds = existingRisIds
+                .Where(existingRisId => !existingRisId.Active)
+                .ToList();
+
             foreach (var existingRisId in existingRisIds)
             {
                 existingRisId.Active = true;
             }
+
+            await reactivationHoldService.MarkReactivatedAsync(
+                reactivatedRisIds,
+                CancellationToken.None);
+
             await risIdRepository.SaveRisIdsBatchAsync(existingRisIds);
         }
 

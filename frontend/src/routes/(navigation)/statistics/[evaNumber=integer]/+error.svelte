@@ -2,11 +2,11 @@
 	import { page } from "$app/state";
 	import Button from "@lib/components/ui/Button.svelte";
 
-	const errorMessage = $derived(page.error?.message ?? "An unknown error occurred while loading the station statistics.");
+	const message = $derived(page.error?.message ?? "Station details could not be loaded.");
 </script>
 
 <svelte:head>
-	<title>Station statistics unavailable</title>
+	<title>Station unavailable - Navigator</title>
 </svelte:head>
 
 <main class="grid h-full place-items-center overflow-y-auto px-4 py-8 text-center">
@@ -18,10 +18,10 @@
 		</span>
 
 		<div class="grid max-w-xl gap-2">
-			<h1 class="text-2xl font-semibold sm:text-3xl">Station statistics unavailable</h1>
-			<p class="text-foreground/60 text-sm leading-relaxed sm:text-base">{errorMessage}</p>
+			<h1 class="text-2xl font-semibold sm:text-3xl">Station unavailable</h1>
+			<p class="text-foreground/60 text-sm leading-relaxed sm:text-base">{message}</p>
 		</div>
 
-		<Button href="/statistics" mode="primary" class="md:col-start-2">Back to statistics</Button>
+		<Button href="/statistics" mode="primary" class="md:col-start-2">Back to Statistics</Button>
 	</div>
 </main>

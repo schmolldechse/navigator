@@ -5,38 +5,12 @@
 	import Network from "@lucide/svelte/icons/network";
 	import Radar from "@lucide/svelte/icons/radar";
 	import Search from "@lucide/svelte/icons/search";
-	import type { Component } from "svelte";
-	import type { PageProps } from "./$types";
-	import DatabaseSizeKpi from "@lib/components/statistics/projectdimensions/DatabaseSizeKpi.svelte";
-	import RecordedRisIds from "@lib/components/statistics/projectdimensions/RecordedRisIds.svelte";
-	import RecordedJourneys from "@lib/components/statistics/projectdimensions/RecordedJourneys.svelte";
 	import Button from "@lib/components/ui/Button.svelte";
 	import Card from "@lib/components/ui/card/Card.svelte";
 	import * as Accordion from "@lib/components/ui/accordion";
 	import type { LucideIcon } from "@lucide/svelte";
 
-	let { data }: PageProps = $props();
 	let faqValues: string[] = $state([]);
-
-	type MetricCardData = {
-		metricComponent: Component<any>;
-		promise: Promise<unknown>;
-	};
-
-	let metricCards: MetricCardData[] = $derived([
-		{
-			metricComponent: DatabaseSizeKpi,
-			promise: data.databaseSize
-		},
-		{
-			metricComponent: RecordedRisIds,
-			promise: data.risIdDistribution
-		},
-		{
-			metricComponent: RecordedJourneys,
-			promise: data.recordedJourneys
-		}
-	]);
 
 	type DataFlowStep = {
 		title: string;
@@ -59,6 +33,24 @@
 			title: "Compare quality",
 			description: "Global metrics turn the raw history into punctuality, delay, and ranking views.",
 			icon: Network
+		}
+	];
+
+	const projectFocusCards: DataFlowStep[] = [
+		{
+			title: "Raw journey archive",
+			description: "Collected journeys keep stops, transport, delay and cancellation facts inspectable.",
+			icon: Database
+		},
+		{
+			title: "API-grained statistics",
+			description: "Network and station views read specific CAGGs and detail views for each question.",
+			icon: Network
+		},
+		{
+			title: "Dashboard drilldown",
+			description: "Maps, rankings, time series and station details share one consistent filter model.",
+			icon: Radar
 		}
 	];
 </script>
@@ -99,14 +91,22 @@
 		<div class="flex flex-col gap-y-1">
 			<h2 class="text-2xl font-medium">Project Dimensions</h2>
 			<p class="text-foreground/60 max-w-3xl text-sm sm:text-base">
-				Live operational counters from the collected dataset and snapshot jobs.
+				The current statistics surface is organized around stored raw journeys, fact tables, and API-specific aggregates.
 			</p>
 		</div>
 
 		<div class="grid grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3">
-			{#each metricCards as metricCard, index (index)}
-				{@const MetricComponent = metricCard.metricComponent}
-				<MetricComponent promise={metricCard.promise} class="break-inside-avoid" />
+			{#each projectFocusCards as card (card.title)}
+				{@const Icon = card.icon}
+				<Card class="bg-secondary/10 gap-y-3">
+					<div class="border-border bg-background flex size-10 items-center justify-center rounded-lg border">
+						<Icon size={19} class="text-accent" />
+					</div>
+					<div>
+						<p class="text-foreground font-semibold">{card.title}</p>
+						<p class="text-foreground/60 mt-1 text-sm leading-relaxed">{card.description}</p>
+					</div>
+				</Card>
 			{/each}
 		</div>
 	</section>

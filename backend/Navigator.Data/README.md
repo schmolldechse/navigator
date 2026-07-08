@@ -27,7 +27,7 @@ External API credentials are read from environment variables by the repositories
 Navigator uses two main schemas:
 
 - `core`: source-of-truth entities such as stations, RIS IDs, journeys, journey transports, stop places, and messages.
-- `statistics`: snapshots, derived journey fact tables, projection backlog, and TimescaleDB continuous aggregates.
+- `statistics`: snapshots, rebuildable aggregate rollups, detail views, refresh progress, and TimescaleDB continuous aggregates.
 
 Journey data is stored in two layers:
 
@@ -35,22 +35,27 @@ Journey data is stored in two layers:
    - `core.journeys`
    - `core.journey_transports`
    - `core.journey_stop_places`
-2. Analytics fact tables in the `statistics` schema keep pre-shaped rows for TimescaleDB continuous aggregates:
-   - `statistics.journey_event_quality_facts`
-   - `statistics.journey_route_quality_facts`
+2. Rebuildable aggregate rollup tables in the `statistics` schema keep hourly aggregate rows for TimescaleDB continuous aggregates:
+   - `statistics.event_quality_hourly_rollups`
+   - `statistics.journey_quality_hourly_rollups`
 
-The fact tables are intentionally derived data. They do not replace the raw journey tables and must not be treated as the source of truth.
+The rollup tables are intentionally derived data. They do not replace the raw journey tables and must not be treated as the source of truth.
 
 ## Journey Analytics Storage
 
-TimescaleDB continuous aggregates work best when the aggregate query is a straightforward `time_bucket(...)` plus `GROUP BY` over a single fact source. Historical journey quality needs more shaping than that:
+TimescaleDB continuous aggregates work best when the aggregate query is a straightforward `time_bucket(...)` plus `GROUP BY` over a bounded aggregate source. Historical journey quality needs more shaping than that:
 
 - joins between journeys, transports, and stop places
 - origin and destination station resolution
-- terminal delay selection per journey
+- exact stop-event time and delay selection
+- destination delay and journey outcome selection
 - replacement transport detection
 
-That shaping is done once when journeys are imported or backfilled. Continuous aggregates then count and sum already-prepared facts.
+That shaping is recomputed from `core` into hourly rollups by `StatisticsAggregateRefreshJob`. Newly imported journeys, including old journeys discovered through reactivated RIS IDs, mark exact hourly windows in `statistics.statistics_refresh_queue`.
+
+The daemon calls `statistics.recompute_quality_hourly_rollups`, which builds one shared temporary workset for the requested window and writes event and journey aggregate rows from that workset. Continuous aggregates then sum those hourly rollups.
+
+The unified recompute path still writes only rebuildable aggregates. It does not create durable per-event facts, durable per-journey facts, or a projection backlog.
 
 Current flow:
 
@@ -58,29 +63,73 @@ Current flow:
 RIS::Journeys
   -> EF journey graph
   -> core raw journey hypertables
-  -> statistics fact hypertables
+  -> statistics hourly aggregate rollups
+  -> statistics detail views backed by core
   -> TimescaleDB continuous aggregates
   -> API metric builders
 ```
 
-`statistics.journey_event_quality_facts` contains one row per stop-place event and powers:
+`statistics.event_quality_hourly_rollups` contains hourly aggregate rows by station, schedule type, administration, transport, line, route, and replacement dimensions. It powers station, network, administration, station-line, and delay distribution continuous aggregates.
 
-- `statistics.station_line_route_quality_hourly`
+`statistics.journey_quality_hourly_rollups` contains hourly aggregate rows by administration, transport, line, route, journey number, and replacement dimensions. It powers network, administration, line, journey-number, and journey-outcome continuous aggregates.
 
-`statistics.journey_route_quality_facts` contains one row per journey and powers:
+Detail queries read views derived from `core`:
 
-- `statistics.journey_route_quality_hourly`
+- `statistics.station_journey_event_details`
+- `statistics.journey_quality_details`
+
+Metric queries read API-specific continuous aggregates:
+
+- `statistics.network_event_quality_hourly`
+- `statistics.network_event_delay_distribution_hourly`
+- `statistics.network_journey_quality_hourly`
+- `statistics.station_event_quality_hourly`
+- `statistics.station_administration_quality_hourly`
+- `statistics.line_event_quality_hourly`
+- `statistics.station_line_quality_hourly`
+- `statistics.journey_administration_quality_hourly`
+- `statistics.line_journey_quality_hourly`
+- `statistics.journey_number_quality_hourly`
+- `statistics.network_journey_outcome_hourly`
 
 The API reads from the hourly statistics views. Raw journey tables remain available for audits, reprocessing, and future analytics.
 
 ## Refresh And Compression Windows
 
-Journey imports can write data several months in the past because RIS IDs may be discovered late in a timetable period or continued across operating dates. TimescaleDB policies therefore keep the active refresh window wider than a half-year timetable period:
+Journey imports can write data in the past because RIS IDs may be discovered late in a timetable period or continued across operating dates. The target system handles this with explicit bounded recompute windows plus CAGG refreshes:
 
-- continuous aggregate refresh window: `210 days`
-- compression policy for raw journey and fact hypertables: `240 days`
+- `StatisticsAggregateRefreshJob` refreshes hot windows continuously and rotates through a catch-up horizon for late data.
+- Newly imported journeys mark exact old windows in `statistics.statistics_refresh_queue`; queued windows are consumed by `StatisticsAggregateRefreshJob` even when they are older than the catch-up horizon.
+- Continuous aggregate policies refresh the last 7 days as a safety net.
 
-This keeps the current timetable period plus buffer uncompressed and refreshable. Compression starts only after the data is expected to be historically stable.
+The `core` schema remains the source of truth. Statistics refresh code must not mutate `core` tables.
+
+## Statistics Refresh Queue Checks
+
+Pending or failed queued windows:
+
+```sql
+SELECT status, count(*)
+FROM statistics.statistics_refresh_queue
+GROUP BY status
+ORDER BY status;
+
+SELECT *
+FROM statistics.statistics_refresh_queue
+WHERE status IN ('PENDING', 'FAILED')
+ORDER BY window_start
+LIMIT 50;
+```
+
+Recently protected reactivated RIS IDs:
+
+```sql
+SELECT *
+FROM statistics.ris_id_reactivation_holds
+WHERE protect_until > now()
+ORDER BY protect_until DESC
+LIMIT 50;
+```
 
 ## Model Generation
 

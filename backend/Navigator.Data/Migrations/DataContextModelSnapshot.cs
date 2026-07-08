@@ -25,6 +25,8 @@ namespace Navigator.Data.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "schedule_type", new[] { "ARRIVAL", "DEPARTURE" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "time_type", new[] { "PREVIEW", "REAL", "SCHEDULE" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "transport_type", new[] { "BIKE", "BUS", "CAR", "CITY_TRAIN", "FERRY", "FLIGHT", "HIGH_SPEED_TRAIN", "INTERCITY_TRAIN", "INTER_REGIONAL_TRAIN", "REGIONAL_TRAIN", "SCOOTER", "SHUTTLE", "SUBWAY", "TAXI", "TRAM", "UNKNOWN", "WALK" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "statistics", "statistics_refresh_queue_source", new[] { "JOURNEY_IMPORT", "MANUAL" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "statistics", "statistics_refresh_queue_status", new[] { "FAILED", "PENDING", "RUNNING", "SUCCESS" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "cube");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "earthdistance");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "timescaledb");
@@ -392,6 +394,196 @@ namespace Navigator.Data.Migrations
                     b.ToTable("database_size_snapshots", "statistics");
                 });
 
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.EventQualityHourlyRollup", b =>
+                {
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<int>("StationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("station_eva_number");
+
+                    b.Property<ScheduleType>("ScheduleType")
+                        .HasColumnType("core.schedule_type")
+                        .HasColumnName("schedule_type");
+
+                    b.Property<Guid>("AdministrationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("administration_id");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.Property<string>("JourneyDescription")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("journey_description");
+
+                    b.Property<int>("JourneyNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("journey_number");
+
+                    b.Property<int>("OriginEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("origin_eva_number");
+
+                    b.Property<int>("DestinationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_eva_number");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<long>("CancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("cancelled_count");
+
+                    b.Property<long>("Delay10To15MinutesCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_10_to_15_minutes_count");
+
+                    b.Property<long>("Delay15To30MinutesCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_15_to_30_minutes_count");
+
+                    b.Property<long>("Delay30To60MinutesCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_30_to_60_minutes_count");
+
+                    b.Property<long>("Delay5To10MinutesCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_5_to_10_minutes_count");
+
+                    b.Property<long>("DelayLessThan5MinutesCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_less_than_5_minutes_count");
+
+                    b.Property<long>("DelayMoreThan60MinutesCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_more_than_60_minutes_count");
+
+                    b.Property<long>("DelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_sum_seconds");
+
+                    b.Property<long>("DelayedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delayed_count");
+
+                    b.Property<long>("EventCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_count");
+
+                    b.Property<long>("PunctualCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("punctual_count");
+
+                    b.Property<DateTime>("RefreshedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("refreshed_at");
+
+                    b.HasKey("BucketHour", "StationEvaNumber", "ScheduleType", "AdministrationId", "TransportType", "JourneyDescription", "JourneyNumber", "OriginEvaNumber", "DestinationEvaNumber", "IsReplacement");
+
+                    b.ToTable("event_quality_hourly_rollups", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.JourneyQualityHourlyRollup", b =>
+                {
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<Guid>("AdministrationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("administration_id");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.Property<string>("JourneyDescription")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("journey_description");
+
+                    b.Property<int>("JourneyNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("journey_number");
+
+                    b.Property<int>("OriginEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("origin_eva_number");
+
+                    b.Property<int>("DestinationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_eva_number");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<long>("CompletedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("completed_count");
+
+                    b.Property<long>("DestinationDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_delay_sum_seconds");
+
+                    b.Property<long>("DestinationDelayedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_delayed_count");
+
+                    b.Property<long>("DestinationNotReachedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_not_reached_count");
+
+                    b.Property<long>("DestinationNotReachedWithoutFullCancelCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_not_reached_without_full_cancel_count");
+
+                    b.Property<long>("DestinationPunctualCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_punctual_count");
+
+                    b.Property<long>("DestinationReachedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_reached_count");
+
+                    b.Property<long>("FullyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fully_cancelled_count");
+
+                    b.Property<long>("JourneyCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("journey_count");
+
+                    b.Property<long>("PartiallyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("partially_cancelled_count");
+
+                    b.Property<long>("PartiallyCancelledDestinationReachedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("partially_cancelled_destination_reached_count");
+
+                    b.Property<DateTime>("RefreshedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("refreshed_at");
+
+                    b.HasKey("BucketHour", "AdministrationId", "TransportType", "JourneyDescription", "JourneyNumber", "OriginEvaNumber", "DestinationEvaNumber", "IsReplacement");
+
+                    b.ToTable("journey_quality_hourly_rollups", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
             modelBuilder.Entity("Navigator.Data.Entities.Statistics.JourneySnapshot", b =>
                 {
                     b.Property<Guid>("Id")
@@ -412,6 +604,43 @@ namespace Navigator.Data.Migrations
                     b.HasIndex("MeasuredAt");
 
                     b.ToTable("journey_snapshots", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.RisIdReactivationHold", b =>
+                {
+                    b.Property<string>("RisId")
+                        .HasMaxLength(73)
+                        .HasColumnType("character varying(73)")
+                        .HasColumnName("ris_id");
+
+                    b.Property<int>("ActivationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("activation_count");
+
+                    b.Property<DateTime?>("LastInsertedAtReactivation")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_inserted_at_reactivation");
+
+                    b.Property<DateTime?>("LastSeenAtReactivation")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_seen_at_reactivation");
+
+                    b.Property<DateTime>("ProtectUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("protect_until");
+
+                    b.Property<DateTime>("ReactivatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reactivated_at");
+
+                    b.HasKey("RisId");
+
+                    b.HasIndex("ProtectUntil");
+
+                    b.ToTable("ris_id_reactivation_holds", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Statistics.RisIdSnapshot", b =>
@@ -440,154 +669,124 @@ namespace Navigator.Data.Migrations
                     b.ToTable("risid_snapshots", "statistics");
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.Statistics.JourneyEventQualityFact", b =>
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.StatisticsRefreshProgress", b =>
                 {
-                    b.Property<Guid>("StopPlaceId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("stop_place_id");
-
-                    b.Property<DateTime>("PlannedTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("planned_time");
-
-                    b.Property<Guid>("AdministrationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("administration_id");
-
-                    b.Property<bool>("Cancelled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("cancelled");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date")
-                        .HasColumnName("date");
-
-                    b.Property<int>("Delay")
-                        .HasColumnType("integer")
-                        .HasColumnName("delay");
-
-                    b.Property<int>("DestinationEvaNumber")
-                        .HasColumnType("integer")
-                        .HasColumnName("destination_eva_number");
-
-                    b.Property<bool>("IsReplacementTransport")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_replacement_transport");
-
-                    b.Property<string>("JourneyDescription")
-                        .IsRequired()
+                    b.Property<string>("Operation")
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)")
-                        .HasColumnName("journey_description");
+                        .HasColumnName("operation");
 
-                    b.Property<string>("JourneyId")
+                    b.Property<DateTime>("WindowStart")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_start");
+
+                    b.Property<DateTime>("WindowEnd")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_end");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt");
+
+                    b.Property<int>("CaggRefreshCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("cagg_refresh_count");
+
+                    b.Property<string>("ErrorKind")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("error_kind");
+
+                    b.Property<long>("EventRowsAffected")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_rows_affected");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("finished_at");
+
+                    b.Property<long>("JourneyRowsAffected")
+                        .HasColumnType("bigint")
+                        .HasColumnName("journey_rows_affected");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<string>("Status")
                         .IsRequired()
-                        .HasMaxLength(82)
-                        .HasColumnType("character varying(82)")
-                        .HasColumnName("journey_id");
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("status");
 
-                    b.Property<DateTime>("JourneyStartTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("journey_start_time");
+                    b.HasKey("Operation", "WindowStart", "WindowEnd");
 
-                    b.Property<DateTime>("JourneyEndTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("journey_end_time");
-
-                    b.Property<int>("Number")
-                        .HasColumnType("integer")
-                        .HasColumnName("number");
-
-                    b.Property<int>("OriginEvaNumber")
-                        .HasColumnType("integer")
-                        .HasColumnName("origin_eva_number");
-
-                    b.Property<ScheduleType>("ScheduleType")
-                        .HasColumnType("core.schedule_type")
-                        .HasColumnName("schedule_type");
-
-                    b.Property<int>("StationEvaNumber")
-                        .HasColumnType("integer")
-                        .HasColumnName("station_eva_number");
-
-                    b.Property<TransportType>("TransportType")
-                        .HasColumnType("core.transport_type")
-                        .HasColumnName("transport_type");
-
-                    b.HasKey("StopPlaceId", "PlannedTime");
-
-                    b.ToTable("journey_event_quality_facts", "statistics", t =>
+                    b.ToTable("statistics_refresh_progress", "statistics", t =>
                         {
                             t.ExcludeFromMigrations();
                         });
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.Statistics.JourneyRouteQualityFact", b =>
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.StatisticsRefreshQueueItem", b =>
                 {
-                    b.Property<string>("JourneyId")
-                        .HasMaxLength(82)
-                        .HasColumnType("character varying(82)")
-                        .HasColumnName("journey_id");
-
-                    b.Property<DateOnly>("Date")
-                        .HasColumnType("date")
-                        .HasColumnName("date");
-
-                    b.Property<DateTime>("JourneyStartTime")
+                    b.Property<DateTime>("WindowStart")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("journey_start_time");
+                        .HasColumnName("window_start");
 
-                    b.Property<DateTime>("JourneyEndTime")
+                    b.Property<DateTime>("WindowEnd")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("journey_end_time");
+                        .HasColumnName("window_end");
 
-                    b.Property<Guid>("AdministrationId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("administration_id");
-
-                    b.Property<int>("DestinationEvaNumber")
+                    b.Property<int>("Attempt")
                         .HasColumnType("integer")
-                        .HasColumnName("destination_eva_number");
+                        .HasColumnName("attempt");
 
-                    b.Property<bool>("IsReplacementTransport")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_replacement_transport");
+                    b.Property<string>("ErrorKind")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("error_kind");
 
-                    b.Property<bool>("JourneyCancelled")
-                        .HasColumnType("boolean")
-                        .HasColumnName("journey_cancelled");
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("finished_at");
 
-                    b.Property<string>("JourneyDescription")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)")
-                        .HasColumnName("journey_description");
+                    b.Property<DateTime>("FirstMarkedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_marked_at");
 
-                    b.Property<int>("Number")
+                    b.Property<DateTime>("LastMarkedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_marked_at");
+
+                    b.Property<int>("MarkCount")
                         .HasColumnType("integer")
-                        .HasColumnName("number");
+                        .HasColumnName("mark_count");
 
-                    b.Property<int>("OriginEvaNumber")
-                        .HasColumnType("integer")
-                        .HasColumnName("origin_eva_number");
+                    b.Property<StatisticsRefreshQueueSource>("Source")
+                        .HasColumnType("statistics.statistics_refresh_queue_source")
+                        .HasColumnName("source");
 
-                    b.Property<int?>("TerminalDelaySeconds")
-                        .HasColumnType("integer")
-                        .HasColumnName("terminal_delay_seconds");
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
 
-                    b.Property<TransportType>("TransportType")
-                        .HasColumnType("core.transport_type")
-                        .HasColumnName("transport_type");
+                    b.Property<StatisticsRefreshQueueStatus>("Status")
+                        .HasColumnType("statistics.statistics_refresh_queue_status")
+                        .HasColumnName("status");
 
-                    b.HasKey("JourneyId", "Date", "JourneyStartTime");
+                    b.HasKey("WindowStart", "WindowEnd");
 
-                    b.ToTable("journey_route_quality_facts", "statistics", t =>
+                    b.HasIndex("LastMarkedAt");
+
+                    b.HasIndex("Status", "WindowStart", "WindowEnd");
+
+                    b.ToTable("statistics_refresh_queue", "statistics", t =>
                         {
                             t.ExcludeFromMigrations();
                         });
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.Views.JourneyRouteQualityHourly", b =>
+            modelBuilder.Entity("Navigator.Data.Entities.Views.JourneyAdministrationQualityHourly", b =>
                 {
                     b.Property<Guid>("AdministrationId")
                         .HasColumnType("uuid")
@@ -597,29 +796,111 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
-                    b.Property<DateTime>("FirstPlannedTime")
+                    b.Property<long>("DestinationDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_delay_sum_seconds");
+
+                    b.Property<long>("DestinationLate30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_late_30_count");
+
+                    b.Property<long>("DestinationLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_late_60_count");
+
+                    b.Property<long>("DestinationNotReachedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_not_reached_count");
+
+                    b.Property<long>("DestinationPositiveDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_positive_delay_sum_seconds");
+
+                    b.Property<long>("DestinationPunctual15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_punctual_15_count");
+
+                    b.Property<long>("DestinationPunctual5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_punctual_5_count");
+
+                    b.Property<long>("FullyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fully_cancelled_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<long>("JourneyCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("journey_count");
+
+                    b.Property<long>("PartiallyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("partially_cancelled_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("journey_administration_quality_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("journey_administration_quality_hourly", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.JourneyNumberQualityHourly", b =>
+                {
+                    b.Property<Guid>("AdministrationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("administration_id");
+
+                    b.Property<DateTime>("BucketHour")
                         .HasColumnType("timestamp with time zone")
-                        .HasColumnName("first_planned_time");
+                        .HasColumnName("bucket_hour");
 
-                    b.Property<long>("DelaySampleCount")
+                    b.Property<long>("DestinationDelaySumSeconds")
                         .HasColumnType("bigint")
-                        .HasColumnName("delay_sample_count");
-
-                    b.Property<long>("DelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("delay_sum_seconds");
+                        .HasColumnName("destination_delay_sum_seconds");
 
                     b.Property<int>("DestinationEvaNumber")
                         .HasColumnType("integer")
                         .HasColumnName("destination_eva_number");
 
-                    b.Property<long>("JourneyCancelledCount")
+                    b.Property<long>("DestinationLate30Count")
                         .HasColumnType("bigint")
-                        .HasColumnName("journey_cancelled_count");
+                        .HasColumnName("destination_late_30_count");
 
-                    b.Property<DateTime>("LastPlannedTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_planned_time");
+                    b.Property<long>("DestinationLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_late_60_count");
+
+                    b.Property<long>("DestinationNotReachedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_not_reached_count");
+
+                    b.Property<long>("DestinationPositiveDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_positive_delay_sum_seconds");
+
+                    b.Property<long>("DestinationPunctual15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_punctual_15_count");
+
+                    b.Property<long>("DestinationPunctual5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_punctual_5_count");
+
+                    b.Property<long>("FullyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fully_cancelled_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
 
                     b.Property<long>("JourneyCount")
                         .HasColumnType("bigint")
@@ -627,42 +908,35 @@ namespace Navigator.Data.Migrations
 
                     b.Property<string>("JourneyDescription")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
                         .HasColumnName("journey_description");
 
-                    b.Property<bool>("IsReplacementTransport")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_replacement_transport");
-
-                    b.Property<int>("Number")
+                    b.Property<int>("JourneyNumber")
                         .HasColumnType("integer")
-                        .HasColumnName("number");
+                        .HasColumnName("journey_number");
 
                     b.Property<int>("OriginEvaNumber")
                         .HasColumnType("integer")
                         .HasColumnName("origin_eva_number");
 
-                    b.Property<long>("Punctual15Count")
+                    b.Property<long>("PartiallyCancelledCount")
                         .HasColumnType("bigint")
-                        .HasColumnName("punctual_15_count");
-
-                    b.Property<long>("Punctual5Count")
-                        .HasColumnType("bigint")
-                        .HasColumnName("punctual_5_count");
+                        .HasColumnName("partially_cancelled_count");
 
                     b.Property<TransportType>("TransportType")
                         .HasColumnType("core.transport_type")
                         .HasColumnName("transport_type");
 
-                    b.ToTable("journey_route_quality_hourly", "statistics", t =>
+                    b.ToTable("journey_number_quality_hourly", "statistics", t =>
                         {
                             t.ExcludeFromMigrations();
                         });
 
-                    b.ToView("journey_route_quality_hourly", "statistics");
+                    b.ToView("journey_number_quality_hourly", "statistics");
                 });
 
-            modelBuilder.Entity("Navigator.Data.Entities.Views.StationLineRouteQualityHourly", b =>
+            modelBuilder.Entity("Navigator.Data.Entities.Views.JourneyQualityDetail", b =>
                 {
                     b.Property<Guid>("AdministrationId")
                         .HasColumnType("uuid")
@@ -672,17 +946,83 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("bucket_hour");
 
-                    b.Property<long>("CancelledCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("cancelled_count");
+                    b.Property<int?>("DestinationDelaySeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_delay_seconds");
 
-                    b.Property<long>("DelaySampleCount")
-                        .HasColumnType("bigint")
-                        .HasColumnName("delay_sample_count");
+                    b.Property<int>("DestinationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_eva_number");
 
-                    b.Property<long>("DelaySumSeconds")
-                        .HasColumnType("bigint")
-                        .HasColumnName("delay_sum_seconds");
+                    b.Property<bool>("DestinationNotReached")
+                        .HasColumnType("boolean")
+                        .HasColumnName("destination_not_reached");
+
+                    b.Property<bool>("FullyCancelled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("fully_cancelled");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<DateOnly>("JourneyDate")
+                        .HasColumnType("date")
+                        .HasColumnName("journey_date");
+
+                    b.Property<string>("JourneyDescription")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("journey_description");
+
+                    b.Property<DateTime>("JourneyEndTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("journey_end_time");
+
+                    b.Property<string>("JourneyId")
+                        .IsRequired()
+                        .HasMaxLength(82)
+                        .HasColumnType("character varying(82)")
+                        .HasColumnName("journey_id");
+
+                    b.Property<int>("JourneyNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("journey_number");
+
+                    b.Property<DateTime>("JourneyStartTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("journey_start_time");
+
+                    b.Property<int>("OriginEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("origin_eva_number");
+
+                    b.Property<bool>("PartiallyCancelled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("partially_cancelled");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("journey_quality_details", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("journey_quality_details", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.LineEventQualityHourly", b =>
+                {
+                    b.Property<Guid>("AdministrationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("administration_id");
+
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
 
                     b.Property<int>("DestinationEvaNumber")
                         .HasColumnType("integer")
@@ -692,57 +1032,668 @@ namespace Navigator.Data.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("event_count");
 
-                    b.Property<DateTime>("FirstPlannedTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("first_planned_time");
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
 
-                    b.Property<bool>("IsReplacementTransport")
+                    b.Property<long>("EventLate30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_30_count");
+
+                    b.Property<long>("EventLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_60_count");
+
+                    b.Property<long>("EventPositiveDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_positive_delay_sum_seconds");
+
+                    b.Property<long>("EventPunctual15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_15_count");
+
+                    b.Property<long>("EventPunctual5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_5_count");
+
+                    b.Property<bool>("IsReplacement")
                         .HasColumnType("boolean")
-                        .HasColumnName("is_replacement_transport");
+                        .HasColumnName("is_replacement");
 
                     b.Property<string>("JourneyDescription")
                         .IsRequired()
-                        .HasColumnType("text")
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
                         .HasColumnName("journey_description");
-
-                    b.Property<DateTime>("LastPlannedTime")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("last_planned_time");
-
-                    b.Property<int>("Number")
-                        .HasColumnType("integer")
-                        .HasColumnName("number");
 
                     b.Property<int>("OriginEvaNumber")
                         .HasColumnType("integer")
                         .HasColumnName("origin_eva_number");
 
-                    b.Property<long>("Punctual15Count")
-                        .HasColumnType("bigint")
-                        .HasColumnName("punctual_15_count");
-
-                    b.Property<long>("Punctual5Count")
-                        .HasColumnType("bigint")
-                        .HasColumnName("punctual_5_count");
-
-                    b.Property<int>("StationEvaNumber")
-                        .HasColumnType("integer")
-                        .HasColumnName("station_eva_number");
-
                     b.Property<ScheduleType>("ScheduleType")
                         .HasColumnType("core.schedule_type")
                         .HasColumnName("schedule_type");
+
+                    b.Property<long>("StopCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("stop_cancelled_count");
 
                     b.Property<TransportType>("TransportType")
                         .HasColumnType("core.transport_type")
                         .HasColumnName("transport_type");
 
-                    b.ToTable("station_line_route_quality_hourly", "statistics", t =>
+                    b.ToTable("line_event_quality_hourly", "statistics", t =>
                         {
                             t.ExcludeFromMigrations();
                         });
 
-                    b.ToView("station_line_route_quality_hourly", "statistics");
+                    b.ToView("line_event_quality_hourly", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.LineJourneyQualityHourly", b =>
+                {
+                    b.Property<Guid>("AdministrationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("administration_id");
+
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<long>("DestinationDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_delay_sum_seconds");
+
+                    b.Property<int>("DestinationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_eva_number");
+
+                    b.Property<long>("DestinationLate30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_late_30_count");
+
+                    b.Property<long>("DestinationLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_late_60_count");
+
+                    b.Property<long>("DestinationNotReachedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_not_reached_count");
+
+                    b.Property<long>("DestinationPositiveDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_positive_delay_sum_seconds");
+
+                    b.Property<long>("DestinationPunctual15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_punctual_15_count");
+
+                    b.Property<long>("DestinationPunctual5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_punctual_5_count");
+
+                    b.Property<long>("FullyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fully_cancelled_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<long>("JourneyCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("journey_count");
+
+                    b.Property<string>("JourneyDescription")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("journey_description");
+
+                    b.Property<int>("OriginEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("origin_eva_number");
+
+                    b.Property<long>("PartiallyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("partially_cancelled_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("line_journey_quality_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("line_journey_quality_hourly", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.NetworkEventDelayDistributionHourly", b =>
+                {
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<long>("DelayGte0Lt5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_gte_0_lt_5_count");
+
+                    b.Property<long>("DelayGte10Lt15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_gte_10_lt_15_count");
+
+                    b.Property<long>("DelayGte120Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_gte_120_count");
+
+                    b.Property<long>("DelayGte15Lt30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_gte_15_lt_30_count");
+
+                    b.Property<long>("DelayGte30Lt60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_gte_30_lt_60_count");
+
+                    b.Property<long>("DelayGte5Lt10Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_gte_5_lt_10_count");
+
+                    b.Property<long>("DelayGte60Lt120Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_gte_60_lt_120_count");
+
+                    b.Property<long>("DelayGteMinus5Lt0Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_gte_minus_5_lt_0_count");
+
+                    b.Property<long>("DelayLtMinus5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("delay_lt_minus_5_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<ScheduleType>("ScheduleType")
+                        .HasColumnType("core.schedule_type")
+                        .HasColumnName("schedule_type");
+
+                    b.Property<int>("StationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("station_eva_number");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("network_event_delay_distribution_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("network_event_delay_distribution_hourly", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.NetworkEventQualityHourly", b =>
+                {
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<long>("EventCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_count");
+
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
+
+                    b.Property<long>("EventLate30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_30_count");
+
+                    b.Property<long>("EventLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_60_count");
+
+                    b.Property<long>("EventPositiveDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_positive_delay_sum_seconds");
+
+                    b.Property<long>("EventPunctual15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_15_count");
+
+                    b.Property<long>("EventPunctual5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_5_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<ScheduleType>("ScheduleType")
+                        .HasColumnType("core.schedule_type")
+                        .HasColumnName("schedule_type");
+
+                    b.Property<long>("StopCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("stop_cancelled_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("network_event_quality_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("network_event_quality_hourly", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.NetworkJourneyOutcomeHourly", b =>
+                {
+                    b.Property<Guid>("AdministrationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("administration_id");
+
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<long>("CompletedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("completed_count");
+
+                    b.Property<long>("DestinationNotReachedWithoutFullCancelCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_not_reached_without_full_cancel_count");
+
+                    b.Property<long>("FullyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fully_cancelled_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<long>("JourneyCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("journey_count");
+
+                    b.Property<long>("PartiallyCancelledDestinationReachedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("partially_cancelled_destination_reached_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("network_journey_outcome_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("network_journey_outcome_hourly", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.NetworkJourneyQualityHourly", b =>
+                {
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<long>("DestinationDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_delay_sum_seconds");
+
+                    b.Property<long>("DestinationLate30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_late_30_count");
+
+                    b.Property<long>("DestinationLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_late_60_count");
+
+                    b.Property<long>("DestinationNotReachedCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_not_reached_count");
+
+                    b.Property<long>("DestinationPositiveDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_positive_delay_sum_seconds");
+
+                    b.Property<long>("DestinationPunctual15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_punctual_15_count");
+
+                    b.Property<long>("DestinationPunctual5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("destination_punctual_5_count");
+
+                    b.Property<long>("FullyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("fully_cancelled_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<long>("JourneyCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("journey_count");
+
+                    b.Property<long>("PartiallyCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("partially_cancelled_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("network_journey_quality_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("network_journey_quality_hourly", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.StationAdministrationQualityHourly", b =>
+                {
+                    b.Property<Guid>("AdministrationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("administration_id");
+
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<long>("EventCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_count");
+
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
+
+                    b.Property<long>("EventLate30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_30_count");
+
+                    b.Property<long>("EventLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_60_count");
+
+                    b.Property<long>("EventPositiveDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_positive_delay_sum_seconds");
+
+                    b.Property<long>("EventPunctual15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_15_count");
+
+                    b.Property<long>("EventPunctual5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_5_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<ScheduleType>("ScheduleType")
+                        .HasColumnType("core.schedule_type")
+                        .HasColumnName("schedule_type");
+
+                    b.Property<int>("StationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("station_eva_number");
+
+                    b.Property<long>("StopCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("stop_cancelled_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("station_administration_quality_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("station_administration_quality_hourly", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.StationEventQualityHourly", b =>
+                {
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<long>("EventCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_count");
+
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
+
+                    b.Property<long>("EventLate30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_30_count");
+
+                    b.Property<long>("EventLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_60_count");
+
+                    b.Property<long>("EventPositiveDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_positive_delay_sum_seconds");
+
+                    b.Property<long>("EventPunctual15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_15_count");
+
+                    b.Property<long>("EventPunctual5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_5_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<ScheduleType>("ScheduleType")
+                        .HasColumnType("core.schedule_type")
+                        .HasColumnName("schedule_type");
+
+                    b.Property<int>("StationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("station_eva_number");
+
+                    b.Property<long>("StopCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("stop_cancelled_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("station_event_quality_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("station_event_quality_hourly", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.StationJourneyEventDetail", b =>
+                {
+                    b.Property<Guid>("AdministrationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("administration_id");
+
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<int>("DestinationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_eva_number");
+
+                    b.Property<int>("EventDelaySeconds")
+                        .HasColumnType("integer")
+                        .HasColumnName("event_delay_seconds");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<DateOnly>("JourneyDate")
+                        .HasColumnType("date")
+                        .HasColumnName("journey_date");
+
+                    b.Property<string>("JourneyDescription")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("journey_description");
+
+                    b.Property<DateTime>("JourneyEndTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("journey_end_time");
+
+                    b.Property<string>("JourneyId")
+                        .IsRequired()
+                        .HasMaxLength(82)
+                        .HasColumnType("character varying(82)")
+                        .HasColumnName("journey_id");
+
+                    b.Property<int>("JourneyNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("journey_number");
+
+                    b.Property<DateTime>("JourneyStartTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("journey_start_time");
+
+                    b.Property<int>("OriginEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("origin_eva_number");
+
+                    b.Property<DateTime>("PlannedTime")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("planned_time");
+
+                    b.Property<ScheduleType>("ScheduleType")
+                        .HasColumnType("core.schedule_type")
+                        .HasColumnName("schedule_type");
+
+                    b.Property<int>("StationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("station_eva_number");
+
+                    b.Property<bool>("StopCancelled")
+                        .HasColumnType("boolean")
+                        .HasColumnName("stop_cancelled");
+
+                    b.Property<Guid>("StopPlaceId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("stop_place_id");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("station_journey_event_details", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("station_journey_event_details", "statistics");
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Views.StationLineQualityHourly", b =>
+                {
+                    b.Property<Guid>("AdministrationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("administration_id");
+
+                    b.Property<DateTime>("BucketHour")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("bucket_hour");
+
+                    b.Property<int>("DestinationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("destination_eva_number");
+
+                    b.Property<long>("EventCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_count");
+
+                    b.Property<long>("EventDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_delay_sum_seconds");
+
+                    b.Property<long>("EventLate30Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_30_count");
+
+                    b.Property<long>("EventLate60Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_late_60_count");
+
+                    b.Property<long>("EventPositiveDelaySumSeconds")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_positive_delay_sum_seconds");
+
+                    b.Property<long>("EventPunctual15Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_15_count");
+
+                    b.Property<long>("EventPunctual5Count")
+                        .HasColumnType("bigint")
+                        .HasColumnName("event_punctual_5_count");
+
+                    b.Property<bool>("IsReplacement")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_replacement");
+
+                    b.Property<string>("JourneyDescription")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)")
+                        .HasColumnName("journey_description");
+
+                    b.Property<int>("OriginEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("origin_eva_number");
+
+                    b.Property<ScheduleType>("ScheduleType")
+                        .HasColumnType("core.schedule_type")
+                        .HasColumnName("schedule_type");
+
+                    b.Property<int>("StationEvaNumber")
+                        .HasColumnType("integer")
+                        .HasColumnName("station_eva_number");
+
+                    b.Property<long>("StopCancelledCount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("stop_cancelled_count");
+
+                    b.Property<TransportType>("TransportType")
+                        .HasColumnType("core.transport_type")
+                        .HasColumnName("transport_type");
+
+                    b.ToTable("station_line_quality_hourly", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+
+                    b.ToView("station_line_quality_hourly", "statistics");
                 });
 
             modelBuilder.Entity("Navigator.Data.Entities.Journey.Journey", b =>

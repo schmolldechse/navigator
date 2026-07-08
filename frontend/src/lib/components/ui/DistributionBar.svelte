@@ -41,12 +41,10 @@
 
 	const total = $derived(items.reduce((sum: number, item: DistributionBarItem) => sum + item.value, 0));
 	const itemViews = $derived(
-		items.map(
-			(item: DistributionBarItem): DistributionBarItemView => ({
-				...item,
-				percentage: total === 0 ? 0 : (item.value / total) * 100
-			})
-		)
+		items.map((item: DistributionBarItem): DistributionBarItemView => ({
+			...item,
+			percentage: total === 0 ? 0 : (item.value / total) * 100
+		}))
 	);
 </script>
 

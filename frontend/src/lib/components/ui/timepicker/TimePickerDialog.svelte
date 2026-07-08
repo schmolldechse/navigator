@@ -7,11 +7,13 @@
 	type Props = {
 		closeOnSelect?: boolean;
 		class?: ClassValue;
+		style?: string;
 	} & Pick<ComponentProps<typeof Dialog>, "isVisible" | "isModal" | "clickOutsideToClose"> &
 		Pick<ComponentProps<typeof TimePicker>, "isRange" | "min" | "max" | "value" | "onchange">;
 	let {
 		closeOnSelect = true,
 		class: classNames,
+		style,
 		isVisible = $bindable(false),
 		isModal = true,
 		clickOutsideToClose = true,
@@ -29,6 +31,7 @@
 	{clickOutsideToClose}
 	showHeader={false}
 	showActions={false}
+	{style}
 	class={["w-[calc(100vw-2rem)] max-w-sm sm:w-max sm:min-w-96", classNames]}
 >
 	<TimePicker

@@ -52,3 +52,29 @@
 		--color-surface-content: var(--color-foreground);
 	}
 }
+
+@utility navigator-scrollbar {
+	scrollbar-width: thin;
+	scrollbar-color: color-mix(in oklch, var(--color-foreground), var(--color-background) 62%) transparent;
+
+	&::-webkit-scrollbar {
+		width: 0.55rem;
+		height: 0.55rem;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		border-radius: 999px;
+		background: color-mix(in oklch, var(--color-foreground), var(--color-background) 68%);
+		border: 2px solid transparent;
+		background-clip: content-box;
+	}
+
+	&::-webkit-scrollbar-thumb:hover {
+		background: color-mix(in oklch, var(--color-accent), var(--color-background) 42%);
+		background-clip: content-box;
+	}
+}
