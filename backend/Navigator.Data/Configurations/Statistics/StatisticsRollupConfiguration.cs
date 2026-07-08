@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Navigator.Data.Entities.Statistics;
+using Navigator.Data.Enums;
 
 namespace Navigator.Data.Configurations.Statistics;
 
@@ -62,5 +63,30 @@ internal sealed class StatisticsRefreshProgressConfiguration : IEntityTypeConfig
         builder.Property(row => row.Operation).HasMaxLength(64);
         builder.Property(row => row.Status).HasMaxLength(32);
         builder.Property(row => row.ErrorKind).HasMaxLength(128);
+    }
+}
+
+internal sealed class StatisticsRefreshQueueItemConfiguration : IEntityTypeConfiguration<StatisticsRefreshQueueItem>
+{
+    public void Configure(EntityTypeBuilder<StatisticsRefreshQueueItem> builder)
+    {
+        builder.ToTable("statistics_refresh_queue", "statistics", table => table.ExcludeFromMigrations());
+        builder.HasKey(row => new { row.WindowStart, row.WindowEnd });
+        builder.Property(row => row.Status).HasColumnType("statistics.statistics_refresh_queue_status");
+        builder.Property(row => row.Source).HasColumnType("statistics.statistics_refresh_queue_source");
+        builder.Property(row => row.ErrorKind).HasMaxLength(128);
+        builder.HasIndex(row => new { row.Status, row.WindowStart, row.WindowEnd });
+        builder.HasIndex(row => row.LastMarkedAt);
+    }
+}
+
+internal sealed class RisIdReactivationHoldConfiguration : IEntityTypeConfiguration<RisIdReactivationHold>
+{
+    public void Configure(EntityTypeBuilder<RisIdReactivationHold> builder)
+    {
+        builder.ToTable("ris_id_reactivation_holds", "statistics", table => table.ExcludeFromMigrations());
+        builder.HasKey(row => row.RisId);
+        builder.Property(row => row.RisId).HasMaxLength(73);
+        builder.HasIndex(row => row.ProtectUntil);
     }
 }

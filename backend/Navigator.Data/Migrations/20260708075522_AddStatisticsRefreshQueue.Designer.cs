@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Navigator.Data.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20260704000000_CreateJourneyStatisticsTargetModel")]
-    partial class CreateJourneyStatisticsTargetModel
+    [Migration("20260708075522_AddStatisticsRefreshQueue")]
+    partial class AddStatisticsRefreshQueue
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -28,6 +28,8 @@ namespace Navigator.Data.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "schedule_type", new[] { "ARRIVAL", "DEPARTURE" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "time_type", new[] { "PREVIEW", "REAL", "SCHEDULE" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "core", "transport_type", new[] { "BIKE", "BUS", "CAR", "CITY_TRAIN", "FERRY", "FLIGHT", "HIGH_SPEED_TRAIN", "INTERCITY_TRAIN", "INTER_REGIONAL_TRAIN", "REGIONAL_TRAIN", "SCOOTER", "SHUTTLE", "SUBWAY", "TAXI", "TRAM", "UNKNOWN", "WALK" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "statistics", "statistics_refresh_queue_source", new[] { "JOURNEY_IMPORT", "MANUAL" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "statistics", "statistics_refresh_queue_status", new[] { "FAILED", "PENDING", "RUNNING", "SUCCESS" });
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "cube");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "earthdistance");
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "timescaledb");
@@ -607,6 +609,43 @@ namespace Navigator.Data.Migrations
                     b.ToTable("journey_snapshots", "statistics");
                 });
 
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.RisIdReactivationHold", b =>
+                {
+                    b.Property<string>("RisId")
+                        .HasMaxLength(73)
+                        .HasColumnType("character varying(73)")
+                        .HasColumnName("ris_id");
+
+                    b.Property<int>("ActivationCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("activation_count");
+
+                    b.Property<DateTime?>("LastInsertedAtReactivation")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_inserted_at_reactivation");
+
+                    b.Property<DateTime?>("LastSeenAtReactivation")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_seen_at_reactivation");
+
+                    b.Property<DateTime>("ProtectUntil")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("protect_until");
+
+                    b.Property<DateTime>("ReactivatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reactivated_at");
+
+                    b.HasKey("RisId");
+
+                    b.HasIndex("ProtectUntil");
+
+                    b.ToTable("ris_id_reactivation_holds", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
             modelBuilder.Entity("Navigator.Data.Entities.Statistics.RisIdSnapshot", b =>
                 {
                     b.Property<Guid>("Id")
@@ -686,6 +725,65 @@ namespace Navigator.Data.Migrations
                     b.HasKey("Operation", "WindowStart", "WindowEnd");
 
                     b.ToTable("statistics_refresh_progress", "statistics", t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
+            modelBuilder.Entity("Navigator.Data.Entities.Statistics.StatisticsRefreshQueueItem", b =>
+                {
+                    b.Property<DateTime>("WindowStart")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_start");
+
+                    b.Property<DateTime>("WindowEnd")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("window_end");
+
+                    b.Property<int>("Attempt")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempt");
+
+                    b.Property<string>("ErrorKind")
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)")
+                        .HasColumnName("error_kind");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("finished_at");
+
+                    b.Property<DateTime>("FirstMarkedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("first_marked_at");
+
+                    b.Property<DateTime>("LastMarkedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_marked_at");
+
+                    b.Property<int>("MarkCount")
+                        .HasColumnType("integer")
+                        .HasColumnName("mark_count");
+
+                    b.Property<StatisticsRefreshQueueSource>("Source")
+                        .HasColumnType("statistics.statistics_refresh_queue_source")
+                        .HasColumnName("source");
+
+                    b.Property<DateTime?>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<StatisticsRefreshQueueStatus>("Status")
+                        .HasColumnType("statistics.statistics_refresh_queue_status")
+                        .HasColumnName("status");
+
+                    b.HasKey("WindowStart", "WindowEnd");
+
+                    b.HasIndex("LastMarkedAt");
+
+                    b.HasIndex("Status", "WindowStart", "WindowEnd");
+
+                    b.ToTable("statistics_refresh_queue", "statistics", t =>
                         {
                             t.ExcludeFromMigrations();
                         });

@@ -31,6 +31,8 @@ public static class Injection
                 npgsqlOptions.MapEnum<TransportType>("transport_type", "core");
                 npgsqlOptions.MapEnum<TimeType>("time_type", "core");
                 npgsqlOptions.MapEnum<JourneyType>("journey_type", "core");
+                npgsqlOptions.MapEnum<StatisticsRefreshQueueStatus>("statistics_refresh_queue_status", "statistics");
+                npgsqlOptions.MapEnum<StatisticsRefreshQueueSource>("statistics_refresh_queue_source", "statistics");
             }));
 
         services.AddHttpClient();

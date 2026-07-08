@@ -22,6 +22,8 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
     public DbSet<EventQualityHourlyRollup> EventQualityHourlyRollups { get; set; }
     public DbSet<JourneyQualityHourlyRollup> JourneyQualityHourlyRollups { get; set; }
     public DbSet<StatisticsRefreshProgress> StatisticsRefreshProgress { get; set; }
+    public DbSet<StatisticsRefreshQueueItem> StatisticsRefreshQueue { get; set; }
+    public DbSet<RisIdReactivationHold> RisIdReactivationHolds { get; set; }
     public DbSet<StationJourneyEventDetail> StationJourneyEventDetails { get; set; }
     public DbSet<JourneyQualityDetail> JourneyQualityDetails { get; set; }
     public DbSet<NetworkEventQualityHourly> NetworkEventQualities { get; set; }
