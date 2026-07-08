@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Navigator.Data.Enums;
 using Navigator.Data.Infrastructure;
+using Navigator.Data.RisIds;
 using Navigator.Data.Repository;
 using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
@@ -41,8 +42,12 @@ public static class Injection
         services.AddScoped<Estimator>();
         services.Configure<StatisticsRefreshOptions>(
             configuration.GetSection(StatisticsRefreshOptions.SectionName));
+        services.Configure<RisIdLifecycleOptions>(
+            configuration.GetSection(RisIdLifecycleOptions.SectionName));
         services.AddScoped<IStatisticsRollupRefreshService, StatisticsRollupRefreshService>();
+        services.AddScoped<IStatisticsRefreshQueueService, StatisticsRefreshQueueService>();
         services.AddScoped<IStatisticsRefreshWindowPlanner, StatisticsRefreshWindowPlanner>();
+        services.AddScoped<IRisIdReactivationHoldService, RisIdReactivationHoldService>();
 
         services.AddTransient<IStatisticsMetricBuilder, NetworkStatisticsMetricSeriesBuilder>()
             .AddTransient<IStatisticsMetricBuilder, StationStatisticsMetricSeriesBuilder>()

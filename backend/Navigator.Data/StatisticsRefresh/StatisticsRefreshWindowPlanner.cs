@@ -5,7 +5,8 @@ namespace Navigator.Data.StatisticsRefresh;
 
 public sealed class StatisticsRefreshWindowPlanner(
     DataContext dataContext,
-    IOptions<StatisticsRefreshOptions> options) : IStatisticsRefreshWindowPlanner
+    IOptions<StatisticsRefreshOptions> options,
+    IStatisticsRefreshQueueService queueService) : IStatisticsRefreshWindowPlanner
 {
     public async Task<StatisticsRefreshWindowPlan> PlanDaemonWindowsAsync(
         DateTime endExclusiveUtc,
@@ -18,11 +19,28 @@ public sealed class StatisticsRefreshWindowPlanner(
 
         var selected = EnumerateWindows(hotStart, alignedEnd, refreshOptions.WindowHours).ToList();
         var remaining = refreshOptions.MaxWindowsPerRun - selected.Count;
+        var selectedSet = selected.Distinct().ToHashSet();
+        var queuedWindows = Array.Empty<StatisticsRefreshWindow>();
+
+        if (remaining > 0)
+        {
+            var queueLimit = Math.Min(remaining, refreshOptions.QueuedWindowMaxPerRun);
+            queuedWindows = (await queueService.LoadQueuedWindowsAsync(
+                queueLimit,
+                alignedEnd,
+                selectedSet,
+                cancellationToken)).ToArray();
+
+            selected.AddRange(queuedWindows);
+            selectedSet = selected.Distinct().ToHashSet();
+            remaining = refreshOptions.MaxWindowsPerRun - selectedSet.Count;
+        }
 
         if (remaining > 0)
         {
             selected.AddRange(await LoadFailedWindowsAsync(catchupStart, hotStart, remaining, cancellationToken));
-            remaining = refreshOptions.MaxWindowsPerRun - selected.Distinct().Count();
+            selectedSet = selected.Distinct().ToHashSet();
+            remaining = refreshOptions.MaxWindowsPerRun - selectedSet.Count;
         }
 
         if (remaining > 0)
@@ -37,7 +55,10 @@ public sealed class StatisticsRefreshWindowPlanner(
             .Take(refreshOptions.MaxWindowsPerRun)
             .ToArray();
 
-        return new StatisticsRefreshWindowPlan(alignedEnd, windows);
+        return new StatisticsRefreshWindowPlan(
+            alignedEnd,
+            windows,
+            queuedWindows.ToHashSet());
     }
 
     private async Task<IReadOnlyList<StatisticsRefreshWindow>> LoadFailedWindowsAsync(

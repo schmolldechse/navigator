@@ -11,7 +11,8 @@ public sealed class StatisticsAggregateRefreshJob(
     ILogger<StatisticsAggregateRefreshJob> logger,
     IOptions<StatisticsRefreshOptions> options,
     IStatisticsRefreshWindowPlanner windowPlanner,
-    IStatisticsRollupRefreshService refreshService) : IJob
+    IStatisticsRollupRefreshService refreshService,
+    IStatisticsRefreshQueueService queueService) : IJob
 {
     public async Task Execute(IJobExecutionContext context) =>
         await logger.RunJobAsync(
@@ -26,20 +27,46 @@ public sealed class StatisticsAggregateRefreshJob(
         var plan = await windowPlanner.PlanDaemonWindowsAsync(end, cancellationToken);
 
         logger.LogInformation(
-            "Statistics aggregate refresh planned. EndExclusiveUtc={EndExclusiveUtc} WindowCount={WindowCount} HotLookbackHours={HotLookbackHours} CatchupLookbackHours={CatchupLookbackHours} MaxWindowsPerRun={MaxWindowsPerRun}",
+            "Statistics aggregate refresh planned. EndExclusiveUtc={EndExclusiveUtc} WindowCount={WindowCount} QueuedWindowCount={QueuedWindowCount} HotLookbackHours={HotLookbackHours} CatchupLookbackHours={CatchupLookbackHours} MaxWindowsPerRun={MaxWindowsPerRun}",
             plan.EndExclusiveUtc,
             plan.Windows.Count,
+            plan.QueuedWindows.Count,
             refreshOptions.HotLookbackHours,
             refreshOptions.CatchupLookbackHours,
             refreshOptions.MaxWindowsPerRun);
 
         foreach (var window in plan.Windows)
         {
-            await refreshService.RefreshWindowAsync(
-                window,
-                "daemon",
-                false,
-                cancellationToken);
+            var isQueuedWindow = plan.QueuedWindows.Contains(window);
+
+            if (isQueuedWindow)
+            {
+                logger.LogInformation(
+                    "Processing queued statistics refresh window. WindowStart={WindowStart} WindowEnd={WindowEnd}",
+                    window.Start,
+                    window.End);
+
+                await queueService.MarkWindowRunningAsync(window, cancellationToken);
+            }
+
+            try
+            {
+                await refreshService.RefreshWindowAsync(
+                    window,
+                    "daemon",
+                    false,
+                    cancellationToken);
+
+                if (isQueuedWindow)
+                {
+                    await queueService.MarkWindowSucceededAsync(window, cancellationToken);
+                }
+            }
+            catch (Exception exception) when (isQueuedWindow)
+            {
+                await queueService.MarkWindowFailedAsync(window, exception, CancellationToken.None);
+                throw;
+            }
         }
 
         var caggRefreshWindows = CoalesceContiguousWindows(plan.Windows);

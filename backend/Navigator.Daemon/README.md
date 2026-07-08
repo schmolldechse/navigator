@@ -15,9 +15,22 @@
 
 `StatisticsAggregateRefreshJob` is the continuous target-system updater. It does not use a journey backlog and does not copy row-level facts. Every run plans a bounded set of UTC windows, recomputes those windows from `core`, writes aggregate rollups, then explicitly refreshes every dependent statistics CAGG for the coalesced recomputed ranges.
 
-The job uses the same unified recompute path as `Navigator.StatisticsRecovery`: `statistics.recompute_quality_hourly_rollups` materializes one temporary window workset and derives both event and journey rollups from it. The daemon only applies this to bounded recent or catch-up windows selected by `StatisticsRefreshWindowPlanner`; it does not run the historical recovery range and it does not call the legacy journey fact projection path.
+The job uses the unified recompute function `statistics.recompute_quality_hourly_rollups`, which materializes one temporary window workset and derives both event and journey rollups from it. The daemon applies this to bounded recent, catch-up, and queued dirty windows selected by `StatisticsRefreshWindowPlanner`; it does not call the legacy journey fact projection path.
 
-`StatisticsRefresh:HotLookbackHours` controls the recent windows refreshed each run. `StatisticsRefresh:CatchupLookbackHours` controls the horizon for failed and rotating late-data windows, but the job never recomputes the whole catch-up horizon in one scheduled execution. `StatisticsRefresh:MaxWindowsPerRun` caps work per trigger. The 1-hour end offset avoids refreshing the currently moving hour.
+`StatisticsRefresh:HotLookbackHours` controls the recent windows refreshed each run. `StatisticsRefresh:CatchupLookbackHours` controls the horizon for failed and rotating late-data windows, but the job never recomputes the whole catch-up horizon in one scheduled execution. `StatisticsRefresh:MaxWindowsPerRun` caps work per trigger. `StatisticsRefresh:QueuedWindowMaxPerRun` reserves part of that capacity for exact queued old windows. The 1-hour end offset avoids refreshing the currently moving hour.
+
+## Queued Statistics Refresh
+
+Old journeys imported through reactivated RIS IDs are marked in `statistics.statistics_refresh_queue`.
+`StatisticsAggregateRefreshJob` refreshes hot windows first and then consumes queued old windows.
+
+Useful Loki queries:
+
+```logql
+{service_name="Navigator.Daemon"} |= "Marked statistics refresh windows"
+{service_name="Navigator.Daemon"} |= "Processing queued statistics refresh window"
+{service_name="Navigator.Daemon"} |= "Skipping" |= "recently reactivated RIS IDs"
+```
 
 ## Timetable Change Window
 

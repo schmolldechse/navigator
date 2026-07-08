@@ -51,7 +51,9 @@ TimescaleDB continuous aggregates work best when the aggregate query is a straig
 - destination delay and journey outcome selection
 - replacement transport detection
 
-That shaping is recomputed from `core` into hourly rollups by `Navigator.StatisticsRecovery` for historical recovery and by `StatisticsAggregateRefreshJob` for continuous updates. Both paths call `statistics.recompute_quality_hourly_rollups`, which builds one shared temporary workset for the requested window and writes event and journey aggregate rows from that workset. Continuous aggregates then sum those hourly rollups.
+That shaping is recomputed from `core` into hourly rollups by `StatisticsAggregateRefreshJob`. Newly imported journeys, including old journeys discovered through reactivated RIS IDs, mark exact hourly windows in `statistics.statistics_refresh_queue`.
+
+The daemon calls `statistics.recompute_quality_hourly_rollups`, which builds one shared temporary workset for the requested window and writes event and journey aggregate rows from that workset. Continuous aggregates then sum those hourly rollups.
 
 The unified recompute path still writes only rebuildable aggregates. It does not create durable per-event facts, durable per-journey facts, or a projection backlog.
 
@@ -96,11 +98,38 @@ The API reads from the hourly statistics views. Raw journey tables remain availa
 
 Journey imports can write data in the past because RIS IDs may be discovered late in a timetable period or continued across operating dates. The target system handles this with explicit bounded recompute windows plus CAGG refreshes:
 
-- `Navigator.StatisticsRecovery` performs one-time historical rebuilds with resumable windows and batched CAGG refreshes by default.
 - `StatisticsAggregateRefreshJob` refreshes hot windows continuously and rotates through a catch-up horizon for late data.
+- Newly imported journeys mark exact old windows in `statistics.statistics_refresh_queue`; queued windows are consumed by `StatisticsAggregateRefreshJob` even when they are older than the catch-up horizon.
 - Continuous aggregate policies refresh the last 7 days as a safety net.
 
 The `core` schema remains the source of truth. Statistics refresh code must not mutate `core` tables.
+
+## Statistics Refresh Queue Checks
+
+Pending or failed queued windows:
+
+```sql
+SELECT status, count(*)
+FROM statistics.statistics_refresh_queue
+GROUP BY status
+ORDER BY status;
+
+SELECT *
+FROM statistics.statistics_refresh_queue
+WHERE status IN ('PENDING', 'FAILED')
+ORDER BY window_start
+LIMIT 50;
+```
+
+Recently protected reactivated RIS IDs:
+
+```sql
+SELECT *
+FROM statistics.ris_id_reactivation_holds
+WHERE protect_until > now()
+ORDER BY protect_until DESC
+LIMIT 50;
+```
 
 ## Model Generation
 

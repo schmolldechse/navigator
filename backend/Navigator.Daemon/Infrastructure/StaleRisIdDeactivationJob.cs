@@ -2,6 +2,7 @@
 using Navigator.Data.Enums;
 using Navigator.Data.Models.Journey;
 using Navigator.Data.Models.RisId;
+using Navigator.Data.RisIds;
 using Navigator.Data.Repository.JourneyRepository;
 using Navigator.Data.Repository.RisIdRepository;
 using Navigator.Observability;
@@ -13,6 +14,7 @@ namespace Navigator.Daemon.Infrastructure;
 public class StaleRisIdDeactivationJob(
     IRisIdRepository risIdRepository,
     IJourneyRepository journeyRepository,
+    IRisIdReactivationHoldService reactivationHoldService,
     ILogger<StaleRisIdDeactivationJob> logger
 ) : IJob
 {
@@ -34,6 +36,24 @@ public class StaleRisIdDeactivationJob(
         })).ToList();
         if (!risIds.Any()) return;
         logger.LogInformation("Fetched {StaleRisIdCount} stale RisIds for deactivation check.", risIds.Count);
+
+        var protectedRisIds = await reactivationHoldService.GetProtectedRisIdsAsync(
+            risIds.Select(risId => risId.Id).ToArray(),
+            DateTime.UtcNow,
+            CancellationToken.None);
+
+        if (protectedRisIds.Count > 0)
+        {
+            logger.LogInformation(
+                "Skipping {ProtectedRisIdCount} recently reactivated RIS IDs during stale deactivation.",
+                protectedRisIds.Count);
+        }
+
+        risIds = risIds
+            .Where(risId => !protectedRisIds.Contains(risId.Id))
+            .ToList();
+
+        if (!risIds.Any()) return;
 
         // 2. check Journey occurences for each RisId
         var occuredJourneyIds = new HashSet<string>();

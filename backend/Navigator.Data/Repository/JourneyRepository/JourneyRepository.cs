@@ -1,9 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Navigator.Data.Entities.Journey;
+using Navigator.Data.Enums;
 using Navigator.Data.Infrastructure;
 using Navigator.Data.Models.Journey;
 using Navigator.Data.Models.Ris;
+using Navigator.Data.StatisticsRefresh;
 using System.Net;
 using System.Text;
 using System.Text.Json;
@@ -13,7 +15,8 @@ namespace Navigator.Data.Repository.JourneyRepository;
 public class JourneyRepository(
     ILogger<JourneyRepository> logger,
     ProxyHttpClientFactory proxyHttpClientFactory,
-    DataContext dataContext
+    DataContext dataContext,
+    IStatisticsRefreshQueueService statisticsRefreshQueueService
 ) : IJourneyRepository
 {
     private const string _risJourneysBatchMatchUrl = "https://apis.deutschebahn.com/db/apis/ris-journeys/v2/batch";
@@ -194,6 +197,11 @@ public class JourneyRepository(
 
             dataContext.AddRange(toInsert);
             await dataContext.SaveChangesAsync();
+
+            await statisticsRefreshQueueService.MarkWindowsForJourneysAsync(
+                toInsert,
+                StatisticsRefreshQueueSource.JourneyImport,
+                CancellationToken.None);
         }
 
         await transaction.CommitAsync();

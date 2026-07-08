@@ -9,6 +9,8 @@ public sealed class StatisticsRefreshOptions
     public int EndOffsetHours { get; init; } = 1;
     public int WindowHours { get; init; } = 1;
     public int MaxWindowsPerRun { get; init; } = 8;
+    public int QueuedWindowMaxPerRun { get; init; } = 2;
+    public int QueueRetryDelayMinutes { get; init; } = 15;
     public int CommandTimeoutSeconds { get; init; } = 900;
     public string AdvisoryLockName { get; init; } = "navigator.statistics.refresh";
 }
